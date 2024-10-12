@@ -3,6 +3,8 @@
 #include"FrameResource.h"
 #include"DescriptorHeaps.h"
 #include"RenderTargetGroup.h"
+#include"Texture.h"
+
 
 class CDX12Manager
 {
@@ -61,7 +63,7 @@ private:
 	void SetSwapChain(HWND hWnd);
 	void SetCommandQueueAndList();
 	void SetDescriptorHeaps();
-	void SetRenderTargetViews();
+	void SetRenderTargets();
 	void SetDepthStencilView();
 	std::vector<CD3DX12_STATIC_SAMPLER_DESC> SetStaticSamplers();
 	void SetRootSignature();
@@ -72,7 +74,7 @@ public:
 	
 	void ChangeSwapChainState();
 
-	void CreateFrameResources(UINT passNum, UINT objectNum);
+	void CreateFrameResources();
 	void MoveToNextFrameResource();
 	void WaitForGpu();
 

@@ -21,7 +21,7 @@ public: //Ææ½º
 
 public:
 	CFrameResource() {};
-	CFrameResource(UINT passCnt, UINT objectCnt, UINT matCnt);
+	CFrameResource();
 	~CFrameResource() {};
 
 public:

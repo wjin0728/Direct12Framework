@@ -19,9 +19,6 @@
     <Filter Include="Lights">
       <UniqueIdentifier>{32833698-8c46-480c-a7eb-0850a6dbe196}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Material">
-      <UniqueIdentifier>{98625792-7af3-41da-9586-08e12d50a1bf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resources\Texture">
       <UniqueIdentifier>{ae7b9f15-a483-4fba-8774-2607f60bbbcc}</UniqueIdentifier>
     </Filter>
@@ -46,6 +43,9 @@
     </Filter>
     <Filter Include="Engine">
       <UniqueIdentifier>{da038969-891a-42c2-875c-8d2646fa17fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Material">
+      <UniqueIdentifier>{98625792-7af3-41da-9586-08e12d50a1bf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -74,7 +74,7 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
-      <Filter>Material</Filter>
+      <Filter>Resources\Material</Filter>
     </ClInclude>
     <ClInclude Include="Terrain.h">
       <Filter>GameObject</Filter>
@@ -163,7 +163,7 @@
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Material.cpp">
-      <Filter>Material</Filter>
+      <Filter>Resources\Material</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>Lights</Filter>

@@ -21,13 +21,18 @@ protected:
 	ComPtr<ID3D12Resource> uploadBuffer = nullptr;
 
 	TEXTURE_TYPE texType{};
-	UINT srvIdx;
+	UINT srvIdx{};
 
 public:
 	virtual void LoadFromFile(std::wstring_view _fileName) override;
+
+	void Create2DTexture(DXGI_FORMAT format, UINT width, UINT height,
+		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags,
+		D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = XMFLOAT4());
+	void CreateFromResource(ComPtr<ID3D12Resource> resource);
+
 	void ReleaseUploadBuffer();
 
-	void CreateSRV();
 
 	ComPtr<ID3D12Resource> GetResource() const;
 	UINT GetSrvIndex() const { return srvIdx; }
@@ -35,4 +40,6 @@ public:
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc();
 
 	void SetSrvIndex(UINT idx) { srvIdx = idx; }
+
+	void CreateSRV();
 };

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "ResourceManager.h"
 #include"DX12Manager.h"
-#include"Texture.h"
 #include"Mesh.h"
 
 
@@ -11,6 +10,23 @@ void CResourceManager::Initialize()
 	LoadDefaultTexture();
 	LoadDefaultMaterials();
 	LoadDefaultShaders();
+}
+
+std::shared_ptr<CTexture> CResourceManager::Create2DTexture(const std::wstring& name, DXGI_FORMAT format, UINT width, UINT height,
+	const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor)
+{
+	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(RESOURCE_TYPE::TEXTURE)];
+
+	auto itr = keyObjMap.find(name);
+	if (itr != keyObjMap.end())
+		return std::static_pointer_cast<CTexture>(itr->second);
+
+	std::shared_ptr<CTexture> m = std::make_shared<CTexture>();
+	m->Create2DTexture(format, width, height, heapProperty, heapFlags, resFlags, clearColor);
+
+	keyObjMap[name] = m;
+
+	return m;
 }
 
 void CResourceManager::LoadDefaultMeshes()

@@ -21,20 +21,17 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 		return false;
 	}
 
-	//directx 매니저 초기화
-	auto& DX12Mgr = INSTANCE(CDX12Manager);
-	DX12Mgr.Initialize(m_hWnd);
-
-	//그 외 매니저 초기화
+	//매니저 초기화
+	INSTANCE(CDX12Manager).Initialize(m_hWnd);
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CGameTimer).Initilaize();
 
-
+	
 	//메인 씬 초기화
-	DX12Mgr.OpenCommandList();
+	INSTANCE(CDX12Manager).OpenCommandList();
 	sceneStateMachine.AddScene(SCENE_TYPE::MENU);
 	sceneStateMachine.InitCurrentScene();
-	DX12Mgr.CloseCommandList();
+	INSTANCE(CDX12Manager).CloseCommandList();
 
 	sceneStateMachine.ReleaseConstBuffer();
 

@@ -16,18 +16,15 @@ void CTexture::LoadFromFile(std::wstring_view _fileName)
 	DDS_ALPHA_MODE ddsAlphaMode = DDS_ALPHA_MODE_UNKNOWN;
 	bool bIsCubeMap = false;
 
-	auto device = INSTANCE(CDX12Manager).GetDevice();
-	auto cmdList = INSTANCE(CDX12Manager).GetCommandList();
-
 
 	if (extension == L".dds" || extension == L".DDS") {
-		ThrowIfFailed(DirectX::LoadDDSTextureFromFileEx(device, _fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT,
+		ThrowIfFailed(DirectX::LoadDDSTextureFromFileEx(DEVICE, _fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT,
 			texResource.GetAddressOf(), ddsData, vSubresources, &ddsAlphaMode, &bIsCubeMap));
 	}
 	else {
 		vSubresources.push_back(D3D12_SUBRESOURCE_DATA());
 
-		ThrowIfFailed(DirectX::LoadWICTextureFromFileEx(device, _fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, WIC_LOADER_DEFAULT,
+		ThrowIfFailed(DirectX::LoadWICTextureFromFileEx(DEVICE, _fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, WIC_LOADER_DEFAULT,
 			texResource.GetAddressOf(), ddsData, vSubresources[0]));
 	}
 	
@@ -38,16 +35,69 @@ void CTexture::LoadFromFile(std::wstring_view _fileName)
 	D3D12_HEAP_PROPERTIES heapProperty = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(nBytes);
 
-	ThrowIfFailed(device->CreateCommittedResource(&heapProperty,
+	ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperty,
 		D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 		IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
 
-	UpdateSubresources(cmdList, texResource.Get(), uploadBuffer.Get(), 0, 0, nSubResources, vSubresources.data());
+	UpdateSubresources(CMDLIST, texResource.Get(), uploadBuffer.Get(), 0, 0, nSubResources, vSubresources.data());
 
 	D3D12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(texResource.Get(), 
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	
-	cmdList->ResourceBarrier(1, &resourceBarrier);
+	CMDLIST->ResourceBarrier(1, &resourceBarrier);
+}
+
+void CTexture::Create2DTexture(DXGI_FORMAT format, UINT width, UINT height, 
+	const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor)
+{
+	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Tex2D(format, width, height);
+	desc.Flags = resFlags;
+
+	D3D12_CLEAR_VALUE optimizedClearValue = {};
+	D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+
+	if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)
+	{
+		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		optimizedClearValue = CD3DX12_CLEAR_VALUE(format, 1.0f, 0);
+	}
+	else if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
+	{
+		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+		float arrFloat[4] = { clearColor.x, clearColor.y, clearColor.z, clearColor.w };
+		optimizedClearValue = CD3DX12_CLEAR_VALUE(format, arrFloat);
+	}
+
+	DEVICE->CreateCommittedResource(&heapProperty,heapFlags, &desc, resourceStates, &optimizedClearValue, IID_PPV_ARGS(&texResource));
+
+	switch (desc.Dimension)
+	{
+	case D3D12_RESOURCE_DIMENSION_TEXTURE2D:
+		texType = TEXTURE_TYPE::TEXTURE2D;
+		break;
+	case D3D12_RESOURCE_DIMENSION_BUFFER:
+		texType = TEXTURE_TYPE::BUFFER;
+		break;
+	default:
+		break;
+	}
+}
+
+void CTexture::CreateFromResource(ComPtr<ID3D12Resource> resource)
+{
+	texResource = resource;
+
+	switch (texResource->GetDesc().Dimension)
+	{
+	case D3D12_RESOURCE_DIMENSION_TEXTURE2D:
+		texType = TEXTURE_TYPE::TEXTURE2D;
+		break;
+	case D3D12_RESOURCE_DIMENSION_BUFFER:
+		texType = TEXTURE_TYPE::BUFFER;
+		break;
+	default:
+		break;
+	}
 }
 
 

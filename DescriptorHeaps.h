@@ -25,8 +25,9 @@ private:
 	ComPtr<ID3D12DescriptorHeap> srvHeap{};
 	UINT cbvSrvDescriptorSize{};
 
-	DescriptorHandle srvDescriptorHandle{};
-	DescriptorHandle uavDescriptorHandle{};
+	DescriptorHandle dsvStartHandle{};
+	DescriptorHandle srvStartHandle{};
+	DescriptorHandle uavStartHandle{};
 
 public:
 	void Initialize();
@@ -35,9 +36,12 @@ public:
 	void InitSrvDescriptorHeap();
 
 public:
+	void CreateDSV(ComPtr<ID3D12Resource> resource);
 	void CreateSRV(ComPtr<ID3D12Resource> resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, UINT idx) const;
 	void CreateUAV(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12Resource> counterResource, 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC desc, UINT idx) const;
 
+	DescriptorHandle GetDSVStartHandle() const { return dsvStartHandle; }
+	DescriptorHandle GetSRVStartHandle() const { return srvStartHandle; }
 };
 

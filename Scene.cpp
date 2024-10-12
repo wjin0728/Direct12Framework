@@ -124,7 +124,7 @@ void CMenuScene::Update()
 	passData.totalTime = INSTANCE(CGameTimer).GetTotalTime();
 	passData.renderTargetSize = DX12Mgr.GetRenderTargetSize();
 
-	auto passBuffer = DX12Mgr.GetConstBuffer(CONSTANT_BUFFER_TYPE::PASS);
+	auto passBuffer = CONSTBUFFER(CONSTANT_BUFFER_TYPE::PASS);
 	passBuffer->UpdateData(&passData);
 
 	for (auto& [shader, objectList] : objects) {

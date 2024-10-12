@@ -136,6 +136,7 @@ public:							\
 
 #define DEVICE INSTANCE(CDX12Manager).GetDevice()
 #define CMDLIST INSTANCE(CDX12Manager).GetCommandList()
+#define CONSTBUFFER(T) INSTANCE(CDX12Manager).GetConstBuffer(T)
 
 
 namespace BinaryReader

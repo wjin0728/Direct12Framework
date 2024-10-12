@@ -4,9 +4,17 @@
 #include<memory>
 #include<string>
 #include"CResource.h"
+#include"Texture.h"
+
+
+enum
+{
+	TEXTURE_COUNT = 100,
+	METERIAL_COUNT = 100,
+	MESH_COUNT = 100
+};
 
 class CMesh;
-class CTexture;
 class CMaterial;
 class CShader;
 
@@ -15,17 +23,16 @@ class CResourceManager
 	MAKE_SINGLETON(CResourceManager)
 
 private:
-	std::vector<std::shared_ptr<CMesh>> meshes{};
-	std::vector<std::shared_ptr<CTexture>> textures{};
-
 	using KeyObjMap = std::unordered_map<std::wstring, std::shared_ptr<CResource>>;
 	std::array<KeyObjMap, RESOURCE_TYPE_COUNT> resources;
+
+	std::priority_queue<UINT, std::greater<UINT>> srvIdxQueue;
 
 public:
 	void Initialize();
 
 	template<typename T>
-	std::shared_ptr<T> Load(const std::wstring& key, std::wstring_view fileName);
+	std::shared_ptr<T> Load(const std::wstring& name, std::wstring_view fileName);
 
 	template<typename T>
 	bool Add(std::shared_ptr<T> resource);
@@ -36,28 +43,34 @@ public:
 	template<typename T>
 	RESOURCE_TYPE GetResourceType();
 
+public:
+	std::shared_ptr<CTexture> Create2DTexture(const std::wstring& name, DXGI_FORMAT format, UINT width, UINT height,
+		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = XMFLOAT4());
+
 private:
 	void LoadDefaultMeshes();
 	void LoadDefaultTexture();
 	void LoadDefaultMaterials();
 	void LoadDefaultShaders();
-
-public:
 };
 
 template<typename T>
-inline std::shared_ptr<T> CResourceManager::Load(const std::wstring& key, std::wstring_view fileName)
+inline std::shared_ptr<T> CResourceManager::Load(const std::wstring& name, std::wstring_view fileName)
 {
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
 	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(resourceType)];
 
-	auto itr = keyObjMap.find(key);
+	auto itr = keyObjMap.find(name);
 	if (itr != keyObjMap.end())
 		return std::static_pointer_cast<T>(itr->second);
 
 	std::shared_ptr<T> resource = std::make_shared<T>();
 	resource->LoadFromFile(fileName);
-	keyObjMap[key] = resource;
+	keyObjMap[name] = resource;
+
+	if (resourceType == RESOURCE_TYPE::TEXTURE) {
+
+	}
 
 	return resource;
 }
