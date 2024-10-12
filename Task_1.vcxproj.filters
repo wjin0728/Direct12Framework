@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{92483d11-2dc8-471d-83f6-01dfbfbb1bf9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{cdb2e2fa-db9d-47d0-bf5e-3dd10ffbeb1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Player">
+      <UniqueIdentifier>{6407e1c2-3e27-4ad4-8000-2f6980a6670c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject">
+      <UniqueIdentifier>{12e3745a-9b29-4c33-a3e7-80039a40a2fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{2fcdeebc-d9d6-416c-9650-402322505ae2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lights">
+      <UniqueIdentifier>{32833698-8c46-480c-a7eb-0850a6dbe196}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Material">
+      <UniqueIdentifier>{98625792-7af3-41da-9586-08e12d50a1bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Texture">
+      <UniqueIdentifier>{ae7b9f15-a483-4fba-8774-2607f60bbbcc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managers">
+      <UniqueIdentifier>{7c7e8791-10f2-4e48-906e-f19205796dc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{b2849f63-09e9-40c4-a6ae-da674d83c608}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shader">
+      <UniqueIdentifier>{01e31069-8e84-4ba4-9b46-05a01e96efc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ShaderCode">
+      <UniqueIdentifier>{fc3644b5-f6b2-4f79-85e1-5eb335e5bd0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Mesh">
+      <UniqueIdentifier>{5123e277-965a-42a0-b3e4-3b9000aa507f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{da038969-891a-42c2-875c-8d2646fa17fc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="GridMesh.h">
+      <Filter>Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Resources\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="DX12Manager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="LightManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader12.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DXMathHelper.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader12.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Resources\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMapImage.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="CResource.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorHeaps.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameResource.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPool.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTargetGroup.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="GameApplication.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneStateMachine.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="UploadBuffer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Client.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="GridMesh.cpp">
+      <Filter>Resources\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="DX12Manager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="LightManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DXMathHelper.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapImage.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Resources\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="DescriptorHeaps.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameResource.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectPool.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTargetGroup.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="GameApplication.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneStateMachine.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="UploadBuffer.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+    <None Include="Shaders\LightingPS.hlsl">
+      <Filter>ShaderCode</Filter>
+    </None>
+    <None Include="Shaders\LightingVS.hlsl">
+      <Filter>ShaderCode</Filter>
+    </None>
+    <None Include="Shaders\OutLinePS.hlsl">
+      <Filter>ShaderCode</Filter>
+    </None>
+    <None Include="Shaders\OutLineVS.hlsl">
+      <Filter>ShaderCode</Filter>
+    </None>
+    <None Include="Paramiters.hlsl">
+      <Filter>ShaderCode</Filter>
+    </None>
+    <None Include="Shaders\TerrainPS.hlsl">
+      <Filter>ShaderCode</Filter>
+    </None>
+    <None Include="Shaders\TerrainVS.hlsl">
+      <Filter>ShaderCode</Filter>
+    </None>
+  </ItemGroup>
+</Project>
