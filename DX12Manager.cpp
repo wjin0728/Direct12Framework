@@ -389,7 +389,7 @@ void CDX12Manager::BeforeRender()
 	ThrowIfFailed(cmdList->Reset(curFrameCmdAlloc.Get(), NULL));
 
 	cmdList->SetGraphicsRootSignature(mRootSignature.Get());
-
+	descriptorHeaps->SetSRVDescriptorHeap();
 
 	auto& swapChainBuffers = renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)];
 	swapChainBuffers->ChangeResourceToTarget(curBackBuffIdx);

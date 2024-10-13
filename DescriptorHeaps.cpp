@@ -67,5 +67,12 @@ void CDescriptorHeaps::CreateUAV(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12R
 
 void CDescriptorHeaps::SetSRVDescriptorHeap()
 {
-	CMDLIST->SetDescriptorHeaps(1, &srvHeap);
+	ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get() };
+	CMDLIST->SetDescriptorHeaps(1, descriptorHeaps);
+	CMDLIST->SetGraphicsRootDescriptorTable(4, srvStartHandle.gpuHandle);
+}
+
+void CDescriptorHeaps::SetRootSignitureDescriptorTable()
+{
+	CMDLIST->SetGraphicsRootDescriptorTable(4, srvStartHandle.gpuHandle);
 }

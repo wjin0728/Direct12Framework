@@ -55,7 +55,7 @@ int CGameApplication::Run()
 		}
 		else
 		{
-			timer.Tick(60.0f);
+			timer.Tick(120.0f);
 
 			ProcessInput();
 			Update();

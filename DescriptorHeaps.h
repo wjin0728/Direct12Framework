@@ -36,6 +36,7 @@ public:
 		D3D12_UNORDERED_ACCESS_VIEW_DESC desc, UINT idx) const;
 
 	void SetSRVDescriptorHeap();
+	void SetRootSignitureDescriptorTable();
 
 	DescriptorHandle GetDSVStartHandle() const { return dsvStartHandle; }
 	DescriptorHandle GetSRVStartHandle() const { return srvStartHandle; }

@@ -26,6 +26,14 @@ protected:
 public:
 	CComponent(COMPONENT_TYPE type);
 	virtual ~CComponent();
+
+	virtual void Awake() {}; 
+	virtual void Start() {}; 
+
+	virtual void Update() {}; 
+	virtual void LateUpdate() {};
+	virtual void FixedUpdate() {}; 
+
 public:
 	COMPONENT_TYPE GetType() const { return type; }
 };

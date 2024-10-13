@@ -145,6 +145,7 @@
     <ClInclude Include="Component.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
+    <ClInclude Include="MonoBehaviour.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -239,6 +240,9 @@
     </ClCompile>
     <ClCompile Include="Component.cpp">
       <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="MonoBehaviour.cpp">
+      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
