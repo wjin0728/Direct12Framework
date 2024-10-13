@@ -26,7 +26,7 @@ private:
 	using KeyObjMap = std::unordered_map<std::wstring, std::shared_ptr<CResource>>;
 	std::array<KeyObjMap, RESOURCE_TYPE_COUNT> resources;
 
-	std::priority_queue<UINT, std::greater<UINT>> srvIdxQueue;
+	std::priority_queue<UINT, std::vector<UINT>, std::greater<UINT>> srvIdxQueue;
 
 public:
 	void Initialize();

@@ -7,6 +7,8 @@
 #define SPOT_LIGHT 10
 #define MAX_MATERIAL 10
 
+#define TEXTURE_COUNT 100
+
 static const float a0 = 1.f;
 static const float a1 = 0.01f;
 static const float a2 = 0.0001f;
@@ -14,10 +16,11 @@ static const float a2 = 0.0001f;
 
 struct Material
 {
-    float4 ambient;
-    float4 diffuse;
+    float4 albedo;
     float4 specular;
     float4 emissive;
+    float3 fresnelR0;
+    int diffuseMapIdx;
 };
 
 
@@ -54,6 +57,12 @@ struct SpotLight
     float spotPower;
 };
 
+struct LightColor
+{
+    float4 diffuse;
+    float4 specular;
+};
+
 cbuffer CBPassData : register(b0)
 {
     matrix viewMat;
@@ -69,7 +78,7 @@ cbuffer CBPassData : register(b0)
 cbuffer CBObjectData : register(b1)
 {
     matrix worldMat : packoffset(c0);
-    uint materialIdx;
+    int materialIdx;
     float3 objectPadding;
 };
 
@@ -83,5 +92,15 @@ cbuffer CBLightsData : register(b2)
 };
 
 
+Texture2D diffuseMap[TEXTURE_COUNT] : register(t0);
+
+StructuredBuffer<Material> materials : register(t0, space1);
+
+SamplerState pointWrap : register(s0);
+SamplerState pointClamp : register(s1);
+SamplerState linearWrap : register(s2);
+SamplerState linearClamp : register(s3);
+SamplerState anisoWrap : register(s4);
+SamplerState anisoClamp : register(s5);
 
 #endif

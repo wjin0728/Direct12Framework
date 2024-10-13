@@ -29,7 +29,7 @@ private:
 
 	//스왑체인
 	ComPtr<IDXGISwapChain3> mSwapChain{};
-	UINT swapChainBufferIndex{};
+	UINT curBackBuffIdx{};
 	bool msaa4xEnable = true;
 	UINT msaa4xQualityLevels{};
 
@@ -42,7 +42,7 @@ private:
 	std::array<std::shared_ptr<CRenderTargetGroup>, RENDER_TARGET_GROUP_TYPE_COUNT> renderTargetGroups;
 
 	//DSV, SRV 디스크립터 힙
-	std::shared_ptr<CDescriptorHeaps> descriptorHeaps = std::make_shared<CDescriptorHeaps>();
+	std::shared_ptr<CDescriptorHeaps> descriptorHeaps;
 
 	//프레임 리소스
 	std::array<std::unique_ptr<CFrameResource>, FRAME_RESOURCE_COUNT> mFrameResources{};
@@ -54,19 +54,20 @@ private:
 	HANDLE fenceEvent{};
 
 	//루트 시그니처
-	ComPtr<ID3D12RootSignature> d3dRootSignature{};
+	ComPtr<ID3D12RootSignature> mRootSignature{};
 	
 	XMFLOAT2 renderTargetSize{};
 
 private:
-	void SetDevice();
-	void SetSwapChain(HWND hWnd);
-	void SetCommandQueueAndList();
-	void SetDescriptorHeaps();
-	void SetRenderTargets();
-	void SetDepthStencilView();
-	std::vector<CD3DX12_STATIC_SAMPLER_DESC> SetStaticSamplers();
-	void SetRootSignature();
+	void InitDevice();
+	void InitCommandQueueAndList();
+	void InitSwapChain(HWND hWnd);
+	void InitDescriptorHeaps();
+	void InitDepthStencilView();
+	void InitRenderTargetGroups();
+	std::vector<CD3DX12_STATIC_SAMPLER_DESC> InitStaticSamplers();
+	void InitRootSignature();
+	void CreateFrameResources();
 
 public:
 	void Initialize(HWND hWnd);
@@ -74,7 +75,6 @@ public:
 	
 	void ChangeSwapChainState();
 
-	void CreateFrameResources();
 	void MoveToNextFrameResource();
 	void WaitForGpu();
 
@@ -87,7 +87,7 @@ public:
 public:
 	ID3D12GraphicsCommandList* GetCommandList() const { return cmdList.Get(); }
 	ID3D12Device* GetDevice() const { return mDevice.Get(); }
-	ID3D12RootSignature* GetRootSignature() const {	return d3dRootSignature.Get(); }
+	ID3D12RootSignature* GetRootSignature() const {	return mRootSignature.Get(); }
 	CFrameResource* GetCurFrameResource() const { return mCurFrameResource; }
 	std::shared_ptr<CUploadBuffer> GetConstBuffer(CONSTANT_BUFFER_TYPE type);
 	std::shared_ptr<CDescriptorHeaps> GetDescriptorHeaps() const { return descriptorHeaps; };

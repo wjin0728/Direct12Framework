@@ -34,7 +34,7 @@ public:
 	void ReleaseUploadBuffer();
 
 
-	ComPtr<ID3D12Resource> GetResource() const;
+	ComPtr<ID3D12Resource>& GetResource();
 	UINT GetSrvIndex() const { return srvIdx; }
 	TEXTURE_TYPE GetTextureType() const { return texType; }
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc();

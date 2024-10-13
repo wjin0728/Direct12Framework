@@ -31,9 +31,6 @@
     <Filter Include="Resources\Shader">
       <UniqueIdentifier>{01e31069-8e84-4ba4-9b46-05a01e96efc3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ShaderCode">
-      <UniqueIdentifier>{fc3644b5-f6b2-4f79-85e1-5eb335e5bd0f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resources\Mesh">
       <UniqueIdentifier>{5123e277-965a-42a0-b3e4-3b9000aa507f}</UniqueIdentifier>
     </Filter>
@@ -46,6 +43,9 @@
     </Filter>
     <Filter Include="Resources\Material">
       <UniqueIdentifier>{98625792-7af3-41da-9586-08e12d50a1bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{fc3644b5-f6b2-4f79-85e1-5eb335e5bd0f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +136,9 @@
     <ClInclude Include="UploadBuffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -225,29 +228,32 @@
     <ClCompile Include="UploadBuffer.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
-    <None Include="Shaders\LightingPS.hlsl">
-      <Filter>ShaderCode</Filter>
-    </None>
-    <None Include="Shaders\LightingVS.hlsl">
-      <Filter>ShaderCode</Filter>
+    <None Include="Shaders\Lighting.hlsl">
+      <Filter>HLSL</Filter>
     </None>
     <None Include="Shaders\OutLinePS.hlsl">
-      <Filter>ShaderCode</Filter>
+      <Filter>HLSL</Filter>
     </None>
     <None Include="Shaders\OutLineVS.hlsl">
-      <Filter>ShaderCode</Filter>
+      <Filter>HLSL</Filter>
     </None>
-    <None Include="Paramiters.hlsl">
-      <Filter>ShaderCode</Filter>
+    <None Include="Shaders\Paramiters.hlsl">
+      <Filter>HLSL</Filter>
     </None>
-    <None Include="Shaders\TerrainPS.hlsl">
-      <Filter>ShaderCode</Filter>
+    <None Include="Shaders\Terrain.hlsl">
+      <Filter>HLSL</Filter>
     </None>
-    <None Include="Shaders\TerrainVS.hlsl">
-      <Filter>ShaderCode</Filter>
+    <None Include="Shaders\Tex2D.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="Shaders\Utility.hlsl">
+      <Filter>HLSL</Filter>
     </None>
   </ItemGroup>
 </Project>

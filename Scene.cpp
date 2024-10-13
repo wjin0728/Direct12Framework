@@ -12,9 +12,9 @@
 #include"Timer.h"
 
 
-CScene::CScene(CSceneStateMachine& sceneStateMachine) : sceneStateMachine(sceneStateMachine) {}
+CScene::CScene(CSceneManager& sceneStateMachine) : sceneStateMachine(sceneStateMachine) {}
 
-CMenuScene::CMenuScene(CSceneStateMachine& sceneStateMachine) : CScene(sceneStateMachine) {}
+CMenuScene::CMenuScene(CSceneManager& sceneStateMachine) : CScene(sceneStateMachine) {}
 
 void CMenuScene::Initialize()
 {
@@ -185,7 +185,7 @@ void CMenuScene::ChangeViewport(int width, int height)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-CPlayScene::CPlayScene(CSceneStateMachine& sceneStateMachine) : CScene(sceneStateMachine)
+CPlayScene::CPlayScene(CSceneManager& sceneStateMachine) : CScene(sceneStateMachine)
 {
 	
 }

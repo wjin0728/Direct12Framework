@@ -117,7 +117,7 @@ void CTexture::CreateSRV()
 	descriptorHeap->CreateSRV(texResource, desc, srvIdx);
 }
 
-ComPtr<ID3D12Resource> CTexture::GetResource() const
+ComPtr<ID3D12Resource>& CTexture::GetResource()
 {
 	return texResource;
 }

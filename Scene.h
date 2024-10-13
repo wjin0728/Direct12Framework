@@ -10,19 +10,19 @@ class CGameObject;
 class CTerrain;
 class CPlayer;
 
-class CSceneStateMachine;
+class CSceneManager;
 
 class CScene
 {
 protected:
 	using ObjectList = std::vector<std::shared_ptr<CGameObject>>;
 
-	CSceneStateMachine& sceneStateMachine;
+	CSceneManager& sceneStateMachine;
 
 	std::unique_ptr<CLightManager> lightManager{};
 
 public:
-	CScene(CSceneStateMachine& sceneStateMachine);
+	CScene(CSceneManager& sceneStateMachine);
 	virtual ~CScene() = default;
 
 	virtual void Initialize() = 0;
@@ -47,7 +47,7 @@ public:
 class CMenuScene : public CScene
 {
 public:
-	CMenuScene(CSceneStateMachine& sceneStateMachine);
+	CMenuScene(CSceneManager& sceneStateMachine);
 	virtual ~CMenuScene() = default;
 
 private:
@@ -80,7 +80,7 @@ public:
 class CPlayScene : public CScene
 {
 public:
-	CPlayScene(CSceneStateMachine& sceneStateMachine);
+	CPlayScene(CSceneManager& sceneStateMachine);
 	virtual ~CPlayScene() = default;
 
 private:

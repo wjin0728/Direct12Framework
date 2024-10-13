@@ -3,7 +3,7 @@
 #include"ResourceManager.h"
 
 
-void CDX12Manager::SetDevice()
+void CDX12Manager::InitDevice()
 {
 	HRESULT hResult;
 	UINT dXGIFactoryFlags = 0;
@@ -53,7 +53,7 @@ void CDX12Manager::SetDevice()
 	fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 }
 
-void CDX12Manager::SetSwapChain(HWND hWnd)
+void CDX12Manager::InitSwapChain(HWND hWnd)
 {
 	RECT rcClient;
 	GetClientRect(hWnd, &rcClient);
@@ -68,7 +68,7 @@ void CDX12Manager::SetSwapChain(HWND hWnd)
 	dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 	dxgiSwapChainDesc.SampleDesc.Count = (msaa4xEnable) ? 4 : 1;
 	dxgiSwapChainDesc.SampleDesc.Quality = (msaa4xEnable) ? (msaa4xQualityLevels - 1) : 0;
-	dxgiSwapChainDesc.BufferCount = swapChainBufferNum;
+	dxgiSwapChainDesc.BufferCount = SWAP_CHAIN_COUNT;
 	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	dxgiSwapChainDesc.OutputWindow = hWnd;
 	dxgiSwapChainDesc.Windowed = TRUE;
@@ -80,12 +80,12 @@ void CDX12Manager::SetSwapChain(HWND hWnd)
 		&dxgiSwapChainDesc, &swapChain));
 	swapChain.As(&mSwapChain);
 
-	swapChainBufferIndex = mSwapChain->GetCurrentBackBufferIndex();
+	curBackBuffIdx = mSwapChain->GetCurrentBackBufferIndex();
 	ThrowIfFailed(mFactory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER));
 
 }
 
-void CDX12Manager::SetCommandQueueAndList()
+void CDX12Manager::InitCommandQueueAndList()
 {
 	D3D12_COMMAND_QUEUE_DESC cmdQueueDesc{};
 	cmdQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
@@ -116,51 +116,53 @@ void CDX12Manager::ChangeSwapChainState()
 	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 
-	/*ThrowIfFailed(mSwapChain->ResizeTarget(&dxgiTargetParameters));
-	for (int i = 0; i < swapChainBufferNum; i++)
-		if (d3dRenderTargetBuffers[i]) {
-			d3dRenderTargetBuffers[i].Reset();
-		}*/
+	ThrowIfFailed(mSwapChain->ResizeTarget(&dxgiTargetParameters));
+
+
+	for (int i = 0; i < SWAP_CHAIN_COUNT; i++) {
+		auto target = INSTANCE(CResourceManager).Get<CTexture>(L"SwapChainTarget_" + std::to_wstring(i));
+	}
 
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc{};
 	ThrowIfFailed(mSwapChain->GetDesc(&dxgiSwapChainDesc));
 	ThrowIfFailed(mSwapChain->ResizeBuffers(swapChainBufferNum, renderTargetSize.y,
 		renderTargetSize.y, dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags));
-	swapChainBufferIndex = mSwapChain->GetCurrentBackBufferIndex();
+	curBackBuffIdx = mSwapChain->GetCurrentBackBufferIndex();
 
-	SetRenderTargetViews();
 	//d3dDepthStencilBuffer.Reset();
-	SetDepthStencilView();
+	InitDepthStencilView();
 }
 
-void CDX12Manager::SetDescriptorHeaps()
+void CDX12Manager::InitDescriptorHeaps()
 {
-	descriptorHeaps->Initialize();
+	descriptorHeaps = std::make_shared<CDescriptorHeaps>();
+	descriptorHeaps->Initialize(0, TEXTURE_COUNT, 0);
 }
 
-void CDX12Manager::SetRenderTargets()
+void CDX12Manager::InitRenderTargetGroups()
 {
 	auto dsvHeapHandle = descriptorHeaps->GetDSVStartHandle();
 
+#pragma region swapchain targets
 	{
 		std::vector<RenderTarget> renderTargets(SWAP_CHAIN_COUNT);
 
-		//체인스왑 버퍼
 		for (UINT i = 0; i < renderTargets.size(); i++)
 		{
+			renderTargets[i].rt = std::make_shared<CTexture>();
 			renderTargets[i].rt->SetName(L"SwapChainTarget_" + std::to_wstring(i));
-			auto targetResource = renderTargets[i].rt->GetResource();
 
-			mSwapChain->GetBuffer(i, IID_PPV_ARGS(&targetResource));
+			mSwapChain->GetBuffer(i, IID_PPV_ARGS(&renderTargets[i].rt->GetResource()));
 			INSTANCE(CResourceManager).Add(renderTargets[i].rt);
 		}
 
-		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)] = std::unique_ptr<CRenderTargetGroup>();
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)] = std::make_shared<CRenderTargetGroup>();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)]->Initialize(renderTargets, dsvHeapHandle.cpuHandle);
 	}
+	
 }
 
-void CDX12Manager::SetDepthStencilView()
+void CDX12Manager::InitDepthStencilView()
 {
 	auto dsBuffer = INSTANCE(CResourceManager).Create2DTexture
 	(
@@ -175,7 +177,7 @@ void CDX12Manager::SetDepthStencilView()
 	descriptorHeaps->CreateDSV(dsBuffer->GetResource().Get());
 }
 
-std::vector<CD3DX12_STATIC_SAMPLER_DESC> CDX12Manager::SetStaticSamplers()
+std::vector<CD3DX12_STATIC_SAMPLER_DESC> CDX12Manager::InitStaticSamplers()
 {
 	CD3DX12_STATIC_SAMPLER_DESC pointWrap(
 		0,
@@ -233,22 +235,22 @@ std::vector<CD3DX12_STATIC_SAMPLER_DESC> CDX12Manager::SetStaticSamplers()
 		pointWrap, pointClamp, linearWrap, linearClamp, anisotropicalWrap, anisotropicalClamp};
 }
 
-void CDX12Manager::SetRootSignature()
+void CDX12Manager::InitRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE textureTable;
 	textureTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	textureTable.NumDescriptors = texNum;
+	textureTable.NumDescriptors = TEXTURE_COUNT;
 	textureTable.BaseShaderRegister = 0; //t0: gtxtTexture
 	textureTable.RegisterSpace = 0;
 	textureTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[4];
-	//오브젝트 정보
+	D3D12_ROOT_PARAMETER pd3dRootParameters[5];
+	//렌더 패스 정보
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0;
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	//렌더 패스 정보
+	//오브젝트 정보
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[1].Descriptor.ShaderRegister = 1;
 	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
@@ -258,11 +260,16 @@ void CDX12Manager::SetRootSignature()
 	pd3dRootParameters[2].Descriptor.ShaderRegister = 2;
 	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	//재질 정보
+	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	pd3dRootParameters[3].Descriptor.ShaderRegister = 0;
+	pd3dRootParameters[3].Descriptor.RegisterSpace = 1;
+	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//텍스쳐 정보
-	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[3].DescriptorTable.pDescriptorRanges = &textureTable;
-	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[4].DescriptorTable.pDescriptorRanges = &textureTable;
+	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
@@ -271,7 +278,7 @@ void CDX12Manager::SetRootSignature()
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
 
-	auto samplers = SetStaticSamplers();
+	auto samplers = InitStaticSamplers();
 
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc{};
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
@@ -292,17 +299,17 @@ void CDX12Manager::SetRootSignature()
 	ThrowIfFailed(hr);
 
 	ThrowIfFailed(mDevice->CreateRootSignature(0, d3dSignatureBlob->GetBufferPointer(),
-		d3dSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&d3dRootSignature)));
+		d3dSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)));
 }
 
 void CDX12Manager::Initialize(HWND hWnd)
 {
-	SetDevice();
-	SetCommandQueueAndList();
-	SetDescriptorHeaps();
-	SetSwapChain(hWnd);
-	SetDepthStencilView();
-
+	InitDevice();
+	InitCommandQueueAndList();
+	InitSwapChain(hWnd);
+	InitDescriptorHeaps();
+	InitDepthStencilView();
+	InitRenderTargetGroups();
 	CreateFrameResources();
 }
 
@@ -380,10 +387,20 @@ void CDX12Manager::BeforeRender()
 
 	ThrowIfFailed(curFrameCmdAlloc->Reset());
 	ThrowIfFailed(cmdList->Reset(curFrameCmdAlloc.Get(), NULL));
+
+	cmdList->SetGraphicsRootSignature(mRootSignature.Get());
+
+
+	auto& swapChainBuffers = renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)];
+	swapChainBuffers->ChangeResourceToTarget(curBackBuffIdx);
+	swapChainBuffers->ClearRenderTarget(curBackBuffIdx);
+	swapChainBuffers->ClearDepthStencil();
 }
 
 void CDX12Manager::AfterRender()
 {
+	auto& swapChainBuffers = renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)];
+	swapChainBuffers->ChangeTargetToResource(curBackBuffIdx);
 
 	ThrowIfFailed(cmdList->Close());
 
@@ -391,7 +408,7 @@ void CDX12Manager::AfterRender()
 	cmdQueue->ExecuteCommandLists(_countof(pcmdLists), pcmdLists);
 
 	ThrowIfFailed(mSwapChain->Present(0, 0));
-	swapChainBufferIndex = mSwapChain->GetCurrentBackBufferIndex();
+	curBackBuffIdx = mSwapChain->GetCurrentBackBufferIndex();
 
 	mCurFrameResource->fence = ++mainFence;
 

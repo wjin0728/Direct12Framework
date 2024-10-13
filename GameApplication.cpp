@@ -3,16 +3,13 @@
 #include"Timer.h"
 #include"DX12Manager.h"
 #include"ResourceManager.h"
+#include"SceneStateMachine.h"
 
 
-CGameApplication::~CGameApplication()
-{
-	INSTANCE(CDX12Manager).Destroy();
-}
 
 bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdShow)
 {
-	m_hInstance = hInstance;
+	mHInstance = hInstance;
 	clientWidth = FRAMEBUFFER_WIDTH;
 	clientHeight = FRAMEBUFFER_HEIGHT;
 	
@@ -22,18 +19,19 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	}
 
 	//매니저 초기화
-	INSTANCE(CDX12Manager).Initialize(m_hWnd);
+	INSTANCE(CDX12Manager).Initialize(mHwnd);
+
+	INSTANCE(CDX12Manager).OpenCommandList();
+
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CGameTimer).Initilaize();
 
-	
 	//메인 씬 초기화
-	INSTANCE(CDX12Manager).OpenCommandList();
-	sceneStateMachine.AddScene(SCENE_TYPE::MENU);
-	sceneStateMachine.InitCurrentScene();
+	INSTANCE(CSceneManager).AddScene(SCENE_TYPE::MENU);
+	INSTANCE(CSceneManager).InitCurrentScene();
 	INSTANCE(CDX12Manager).CloseCommandList();
 
-	sceneStateMachine.ReleaseConstBuffer();
+	INSTANCE(CSceneManager).ReleaseConstBuffer();
 
 	INSTANCE(CGameTimer).Reset();
 
@@ -47,7 +45,7 @@ int CGameApplication::Run()
 	auto& timer = INSTANCE(CGameTimer);
 	timer.Reset();
 
-	while (1)
+	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -67,7 +65,7 @@ int CGameApplication::Run()
 		}
 	}
 
-	INSTANCE(CDX12Manager).Destroy();
+	//INSTANCE(CDX12Manager).Destroy();
 
 	return (int)msg.wParam;
 }
@@ -75,27 +73,27 @@ int CGameApplication::Run()
 
 void CGameApplication::ProcessInput()
 {
-	sceneStateMachine.ProcessInput(m_hWnd);
+	INSTANCE(CSceneManager).ProcessInput(mHwnd);
 }
 
 void CGameApplication::Update()
 {
 	INSTANCE(CDX12Manager).MoveToNextFrameResource();
 
-	sceneStateMachine.Update();
+	INSTANCE(CSceneManager).Update();
 }
 
 void CGameApplication::Render()
 {
 	INSTANCE(CDX12Manager).BeforeRender();
-	sceneStateMachine.Render();
+	//sceneStateMachine.Render();
 	INSTANCE(CDX12Manager).AfterRender();
 }
 
 void CGameApplication::ShowFPS()
 {
 	auto frameRate = appName + INSTANCE(CGameTimer).GetFrameRate();
-	SetWindowText(m_hWnd, frameRate.c_str());
+	SetWindowText(mHwnd, frameRate.c_str());
 }
 
 
@@ -118,14 +116,14 @@ void CGameApplication::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 		break;
 	}
 
-	if (sceneStateMachine.OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam)) {
+	if (INSTANCE(CSceneManager).OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam)) {
 		INSTANCE(CDX12Manager).OpenCommandList();
 
-		sceneStateMachine.InitCurrentScene();
+		INSTANCE(CSceneManager).InitCurrentScene();
 
 		INSTANCE(CDX12Manager).CloseCommandList();
 
-		sceneStateMachine.ReleaseConstBuffer();
+		INSTANCE(CSceneManager).ReleaseConstBuffer();
 
 		INSTANCE(CGameTimer).Reset();
 	}
@@ -149,7 +147,7 @@ void CGameApplication::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 			break;
 		case VK_F9:
 			INSTANCE(CDX12Manager).ChangeSwapChainState();
-			sceneStateMachine.ChangeSceneViewport(clientWidth, clientHeight);
+			INSTANCE(CSceneManager).ChangeSceneViewport(clientWidth, clientHeight);
 			return;
 			break;
 		default:
@@ -160,14 +158,14 @@ void CGameApplication::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 		break;
 	}
 
-	if (sceneStateMachine.OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam)) {
+	if (INSTANCE(CSceneManager).OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam)) {
 		INSTANCE(CDX12Manager).OpenCommandList();
 
-		sceneStateMachine.InitCurrentScene();
+		INSTANCE(CSceneManager).InitCurrentScene();
 
 		INSTANCE(CDX12Manager).CloseCommandList();
 
-		sceneStateMachine.ReleaseConstBuffer();
+		INSTANCE(CSceneManager).ReleaseConstBuffer();
 
 		INSTANCE(CGameTimer).Reset();
 	}
@@ -220,8 +218,8 @@ bool CGameApplication::InitWindow(WNDPROC wndProc, int cmdShow)
 	wcex.lpfnWndProc = (WNDPROC)wndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = m_hInstance;
-	wcex.hIcon = LoadIcon(m_hInstance, IDI_APPLICATION);
+	wcex.hInstance = mHInstance;
+	wcex.hIcon = LoadIcon(mHInstance, IDI_APPLICATION);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
@@ -239,17 +237,17 @@ bool CGameApplication::InitWindow(WNDPROC wndProc, int cmdShow)
 
 	AdjustWindowRect(&rc, dwStyle, false);
 
-	HWND hMainWnd = CreateWindow(L"MainWindow", appName.c_str(), dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, 
-		rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, m_hInstance, nullptr);
+	mHwnd = CreateWindow(L"MainWindow", appName.c_str(), dwStyle, CW_USEDEFAULT, CW_USEDEFAULT,
+		rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, mHInstance, nullptr);
 
-	if (!hMainWnd)
+	if (!mHwnd)
 	{
 		MessageBox(0, L"CreateWindow Failed.", 0, 0);
 		return false;
 	}
 
-	ShowWindow(hMainWnd, cmdShow);
-	UpdateWindow(hMainWnd);
+	ShowWindow(mHwnd, cmdShow);
+	UpdateWindow(mHwnd);
 
 	return true;
 }

@@ -3,17 +3,16 @@
 #include "Player.h"
 #include "Scene.h"
 #include "Timer.h"
-#include"SceneStateMachine.h"
 
 class CGameApplication
 {
 public:
 	CGameApplication() = default;
-	~CGameApplication();
+	~CGameApplication() {};
 
 private:
-	HINSTANCE m_hInstance = nullptr;
-	HWND m_hWnd = nullptr;
+	HINSTANCE mHInstance = nullptr;
+	HWND mHwnd = nullptr;
 
 	std::wstring appName = L"¿ìÁö´Ï²¨ (";
 
@@ -22,7 +21,6 @@ private:
 	int clientWidth;
 	int clientHeight;
 
-	CSceneStateMachine sceneStateMachine;
 
 public:
 	bool Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdShow);
@@ -40,5 +38,8 @@ public:
 
 private:
 	bool InitWindow(WNDPROC wndProc, int cmdShow);
+
+public:
+	HWND GetHWnd() const { return mHwnd; }
 };
 

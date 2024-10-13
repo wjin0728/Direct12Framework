@@ -6,6 +6,9 @@
 
 void CResourceManager::Initialize()
 {
+	for (UINT i = 0; i < TEXTURE_COUNT; i++) {
+		srvIdxQueue.push(i);
+	}
 	LoadDefaultMeshes();
 	LoadDefaultTexture();
 	LoadDefaultMaterials();
@@ -79,9 +82,7 @@ void CResourceManager::LoadDefaultTexture()
 {
 	auto& textures = resources[static_cast<UINT>(RESOURCE_TYPE::TEXTURE)];
 	
-	for (auto& texture : textures) {
-		static_pointer_cast<CTexture>(texture.second)->CreateSRV();
-	}
+	
 }
 
 void CResourceManager::LoadDefaultMaterials()

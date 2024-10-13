@@ -1,18 +1,19 @@
 #include "stdafx.h"
 #include "DescriptorHeaps.h"
 #include"DX12Manager.h"
+#include"ResourceManager.h"
 
-void CDescriptorHeaps::Initialize()
+void CDescriptorHeaps::Initialize(UINT cbvNum, UINT srvNum, UINT uavNum)
 {
+	InitSrvDescriptorHeap(cbvNum, srvNum, uavNum);
 	InitDsvDescriptorHeap();
-	InitSrvDescriptorHeap();
 }
 
 
 void CDescriptorHeaps::InitDsvDescriptorHeap()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
-	dsvHeapDesc.NumDescriptors = SWAP_CHAIN_COUNT;
+	dsvHeapDesc.NumDescriptors = 1;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0;
@@ -22,13 +23,12 @@ void CDescriptorHeaps::InitDsvDescriptorHeap()
 	dsvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 	dsvStartHandle.cpuHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
-	dsvStartHandle.gpuHandle = dsvHeap->GetGPUDescriptorHandleForHeapStart();
 }
 
-void CDescriptorHeaps::InitSrvDescriptorHeap()
+void CDescriptorHeaps::InitSrvDescriptorHeap(UINT cbvNum, UINT srvNum, UINT uavNum)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
-	srvHeapDesc.NumDescriptors = SRV_COUNT + UAV_COUNT;
+	srvHeapDesc.NumDescriptors = cbvNum + srvNum + uavNum;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
@@ -39,8 +39,8 @@ void CDescriptorHeaps::InitSrvDescriptorHeap()
 	srvStartHandle.cpuHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
 	srvStartHandle.gpuHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
 
-	uavStartHandle.cpuHandle.ptr = (srvStartHandle.cpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<UINT>(SRV_COUNT));
-	uavStartHandle.gpuHandle.ptr = (srvStartHandle.gpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<UINT>(SRV_COUNT));
+	uavStartHandle.cpuHandle.ptr = (srvStartHandle.cpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<unsigned long long>(srvNum));
+	uavStartHandle.gpuHandle.ptr = (srvStartHandle.gpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<unsigned long long>(srvNum));
 }
 
 void CDescriptorHeaps::CreateDSV(ComPtr<ID3D12Resource> resource)
@@ -62,5 +62,10 @@ void CDescriptorHeaps::CreateUAV(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12R
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = uavStartHandle.cpuHandle;
 	handle.ptr += (cbvSrvDescriptorSize * idx);
 
-	INSTANCE(CDX12Manager).GetDevice()->CreateUnorderedAccessView(resource.Get(), counterResource.Get(), & desc, handle);
+	DEVICE->CreateUnorderedAccessView(resource.Get(), counterResource.Get(), & desc, handle);
+}
+
+void CDescriptorHeaps::SetSRVDescriptorHeap()
+{
+	CMDLIST->SetDescriptorHeaps(1, &srvHeap);
 }

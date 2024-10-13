@@ -11,7 +11,7 @@ enum {
 class CFrameResource
 {
 public: //명령 할당자
-	ComPtr<ID3D12CommandAllocator> cmdAllocator{};
+	ComPtr<ID3D12CommandAllocator> cmdAllocator = ComPtr<ID3D12CommandAllocator>();
 
 private: //상수 버퍼
 	std::array<std::shared_ptr<CUploadBuffer>, CONSTANT_BUFFER_TYPE_COUNT> constBuffers{};
@@ -20,7 +20,6 @@ public: //펜스
 	UINT64 fence{};
 
 public:
-	CFrameResource() {};
 	CFrameResource();
 	~CFrameResource() {};
 
