@@ -3,6 +3,7 @@
 
 #include"Paramiters.hlsl"
 
+
 LightColor ComputeDirectionalLight(DirectionalLight light, float3 normal, float3 camDir, Material material)
 {
     float3 lightDir = -light.direction;
@@ -25,8 +26,11 @@ LightColor ComputeDirectionalLight(DirectionalLight light, float3 normal, float3
         {
             float m = shininess * 256.f;
             float3 halfV = normalize(camDir + lightDir);
+            float viewHalfDot = dot(halfV, camDir);
+            float3 fresnelFactor = material.fresnelR0 + (1.0 - material.fresnelR0) * pow(1.0 - viewHalfDot, 5);
             
-            specularFactor = ((m + 8.f) * pow(max(dot(halfV, normal), 0.f), m)) / 8.f;
+            specularFactor = ((m + 8.f) * pow(max(viewHalfDot, 0.f), m)) / 8.f;
+            specularFactor *= fresnelFactor;
             
             specularColor = specularFactor * (light.color * material.specular).rgb;
         }
@@ -74,8 +78,11 @@ LightColor ComputePointLight(PointLight light, float3 position, float3 normal, f
         {
             float m = shininess * 256.f;
             float3 halfV = normalize(camDir + lightDir);
+            float viewHalfDot = dot(halfV, camDir);
+            float3 fresnelFactor = material.fresnelR0 + (1.0 - material.fresnelR0) * pow(1.0 - viewHalfDot, 5);
             
-            specularFactor = ((m + 8.f) * pow(max(dot(halfV, normal), 0.f), m)) / 8.f;
+            specularFactor = ((m + 8.f) * pow(max(viewHalfDot, 0.f), m)) / 8.f;
+            specularFactor *= fresnelFactor;
             
             specularColor = specularFactor * (light.color * material.specular).rgb;
         }
@@ -128,8 +135,11 @@ LightColor ComputeSpotLight(SpotLight light, float3 position, float3 normal, flo
         {
             float m = shininess * 256.f;
             float3 halfV = normalize(camDir + lightDir);
+            float viewHalfDot = dot(halfV, camDir);
+            float3 fresnelFactor = material.fresnelR0 + (1.0 - material.fresnelR0) * pow(1.0 - viewHalfDot, 5);
             
-            specularFactor = ((m + 8.f) * pow(max(dot(halfV, normal), 0.f), m)) / 8.f;
+            specularFactor = ((m + 8.f) * pow(max(viewHalfDot, 0.f), m)) / 8.f;
+            specularFactor *= fresnelFactor;
             
             specularColor = specularFactor * (light.color * material.specular).rgb;
         }

@@ -19,22 +19,23 @@ struct VS_OUTPUT
 };
 
 
-
-//Á¤Á¡ ¼ÎÀÌ´õ¸¦ Á¤ÀÇÇÑ´Ù.
-VS_OUTPUT main(VS_INPUT input)
+//Á¤Á¡ ¼ÎÀÌ´õ
+VS_OUTPUT VS_Main(VS_INPUT input)
 {
     VS_OUTPUT output;
     
     
     output.worldPos = mul(float4(input.position, 1.0f), worldMat);
     output.position = mul(output.worldPos, viewProjMat);
-    output.worldNormal = input.normal;
+    output.worldNormal = mul((input.normal), (float3x3) worldMat);
     output.uv = input.uv;
     
     return output;
 }
 
+
 #define TRANSPARENT_CLIP
+
 
 //ÇÈ¼¿ ¼ÎÀÌ´õ
 float4 PS_Main(VS_OUTPUT input) : SV_TARGET
@@ -46,13 +47,13 @@ float4 PS_Main(VS_OUTPUT input) : SV_TARGET
     
     int idx = materials[materialIdx].diffuseMapIdx;
     if (idx == -1)
-        return color;
+        return materials[materialIdx].albedo;
     
     Material mat = materials[materialIdx];
     color = diffuseMap[mat.diffuseMapIdx].Sample(pointClamp, input.uv);
-#ifdef TRANSPARENT_CLIP
+    #ifdef TRANSPARENT_CLIP
     clip(color.a - 0.1);
-#endif
+    #endif
     
     float3 normal = normalize(input.worldNormal);
     float3 camDir = normalize(camPos - input.worldPos.xyz);

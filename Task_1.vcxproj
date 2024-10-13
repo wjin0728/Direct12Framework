@@ -229,27 +229,14 @@
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Lighting.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Shaders\OutLinePS.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Shaders\OutLineVS.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Shaders\Paramiters.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Shaders\Terrain.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Shaders\Tex2D.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="Shaders\Utility.hlsl">
-      <FileType>Document</FileType>
-    </None>
+    <FxCompile Include="Resources\Shaders\Lighting.hlsl" />
+    <FxCompile Include="Resources\Shaders\LightingPS.hlsl" />
+    <FxCompile Include="Resources\Shaders\OutLinePS.hlsl" />
+    <FxCompile Include="Resources\Shaders\OutLineVS.hlsl" />
+    <FxCompile Include="Resources\Shaders\Paramiters.hlsl" />
+    <FxCompile Include="Resources\Shaders\Terrain.hlsl" />
+    <FxCompile Include="Resources\Shaders\Tex2D.hlsl" />
+    <FxCompile Include="Resources\Shaders\Utility.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

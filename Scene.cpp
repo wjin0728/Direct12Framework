@@ -58,6 +58,8 @@ void CMenuScene::BuildObjects()
 	float width = 6.f;
 	float xOffset = 10.f;
 
+	CRotatingObject* alphabet = new CRotatingObject();
+
 	/*CRotatingObject* alphabet = new CRotatingObject();
 	alphabet->SetMesh(s);
 	alphabet->SetPosition(-xOffset * 2.f, 0.0f, 0.0f);

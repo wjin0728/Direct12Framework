@@ -2,6 +2,8 @@
 #include "ResourceManager.h"
 #include"DX12Manager.h"
 #include"Mesh.h"
+#include"Material.h"
+#include"Shader.h"
 
 
 void CResourceManager::Initialize()
@@ -87,10 +89,22 @@ void CResourceManager::LoadDefaultTexture()
 
 void CResourceManager::LoadDefaultMaterials()
 {
+	std::shared_ptr<CMaterial> mat = std::make_shared<CMaterial>();
 }
 
 void CResourceManager::LoadDefaultShaders()
 {
+	{
+		ShaderInfo info;
+		info.shaderType = SHADER_TYPE::FORWARD;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		shader->Initialize(info, L"..\\Resources\\Shaders\\skybox.fx")
+	}
 }
 
 

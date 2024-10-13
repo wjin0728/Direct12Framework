@@ -7,7 +7,7 @@
 class CGameApplication
 {
 public:
-	CGameApplication() = default;
+	CGameApplication() {};
 	~CGameApplication() {};
 
 private:
@@ -21,6 +21,11 @@ private:
 	int clientWidth;
 	int clientHeight;
 
+private:
+	//게임 매니저들
+	/*class CDX12Manager& DX12Mgr;
+	class CGameTimer& Timer;
+	class CSceneManager& sceneMgr;*/
 
 public:
 	bool Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdShow);

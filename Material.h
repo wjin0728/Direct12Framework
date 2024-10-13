@@ -4,10 +4,10 @@
 class CMaterial
 {
 public:
-	XMFLOAT4 albedoColor{};
-	XMFLOAT4 specularColor{};
-	XMFLOAT4 emissiveColor{};
-	XMFLOAT3 fresnelR0{};
+	XMFLOAT4 albedoColor = XMFLOAT4(1.f,1.f,1.f,1.f);
+	XMFLOAT4 specularColor = XMFLOAT4(1.f, 1.f, 1.f, 1.f);
+	XMFLOAT4 emissiveColor = XMFLOAT4(0.f, 0.f, 0.f, 1.f);
+	XMFLOAT3 fresnelR0 = XMFLOAT3(0.04, 0.04, 0.04);
 
 	int diffuseMapIdx = -1;
 	int normalMapIdx = -1;
