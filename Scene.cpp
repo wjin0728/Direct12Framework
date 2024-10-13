@@ -57,18 +57,17 @@ void CMenuScene::BuildObjects()
 
 	float width = 6.f;
 	float xOffset = 10.f;
+	auto cubeMesh = INSTANCE(CResourceManager).Get<CMesh>(L"Cube");
 
-	CRotatingObject* alphabet = new CRotatingObject();
-
-	/*CRotatingObject* alphabet = new CRotatingObject();
-	alphabet->SetMesh(s);
+	std::shared_ptr<CRotatingObject> alphabet = std::make_shared<CRotatingObject>();
+	alphabet->SetMesh(cubeMesh);
 	alphabet->SetPosition(-xOffset * 2.f, 0.0f, 0.0f);
 	alphabet->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
 	alphabet->SetRotationSpeed(50.0f);
 	alphabet->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	alphabet->SetMovingSpeed(0.0f);
 	alphabet->SetRandomMAterial();
-	
+	/*
 	alphabet = new CRotatingObject();
 	alphabet->SetMesh(t);
 	alphabet->SetPosition(-xOffset, 0.0f, 0.0f);

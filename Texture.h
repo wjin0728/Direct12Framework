@@ -13,15 +13,16 @@ enum TEXTURE_TYPE {
 class CTexture : public CResource
 {
 public:
-	CTexture(TEXTURE_TYPE texType = TEXTURE2D) : texType(texType) {};
-	~CTexture() {};
+	CTexture(bool isSR = true, TEXTURE_TYPE texType = TEXTURE2D) : isSR(isSR), texType(texType) {};
+	~CTexture();
 
 protected:
 	ComPtr<ID3D12Resource> texResource = nullptr;
 	ComPtr<ID3D12Resource> uploadBuffer = nullptr;
 
+	bool isSR{};
 	TEXTURE_TYPE texType{};
-	UINT srvIdx{};
+	INT srvIdx = -1;
 
 public:
 	virtual void LoadFromFile(std::wstring_view _fileName) override;

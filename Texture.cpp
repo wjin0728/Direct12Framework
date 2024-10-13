@@ -1,7 +1,15 @@
 #include "stdafx.h"
 #include "Texture.h"
 #include"DX12Manager.h"
+#include"ResourceManager.h"
 
+
+CTexture::~CTexture()
+{
+	if (srvIdx != -1) {
+		INSTANCE(CResourceManager).ReturnSRVIndex(srvIdx);
+	}
+}
 
 void CTexture::LoadFromFile(std::wstring_view _fileName)
 {
@@ -60,12 +68,14 @@ void CTexture::Create2DTexture(DXGI_FORMAT format, UINT width, UINT height,
 	{
 		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
 		optimizedClearValue = CD3DX12_CLEAR_VALUE(format, 1.0f, 0);
+		isSR = false;
 	}
 	else if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
 	{
 		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
 		float arrFloat[4] = { clearColor.x, clearColor.y, clearColor.z, clearColor.w };
 		optimizedClearValue = CD3DX12_CLEAR_VALUE(format, arrFloat);
+		isSR = true;
 	}
 
 	DEVICE->CreateCommittedResource(&heapProperty,heapFlags, &desc, resourceStates, &optimizedClearValue, IID_PPV_ARGS(&texResource));
@@ -111,10 +121,14 @@ void CTexture::ReleaseUploadBuffer()
 
 void CTexture::CreateSRV()
 {
-	auto descriptorHeap = INSTANCE(CDX12Manager).GetDescriptorHeaps();
-	D3D12_SHADER_RESOURCE_VIEW_DESC desc = GetShaderResourceViewDesc();
+	if(isSR) {
+		srvIdx = INSTANCE(CResourceManager).GetTopSRVIndex();
 
-	descriptorHeap->CreateSRV(texResource, desc, srvIdx);
+		auto descriptorHeap = INSTANCE(CDX12Manager).GetDescriptorHeaps();
+		D3D12_SHADER_RESOURCE_VIEW_DESC desc = GetShaderResourceViewDesc();
+
+		descriptorHeap->CreateSRV(texResource, desc, srvIdx);
+	}
 }
 
 ComPtr<ID3D12Resource>& CTexture::GetResource()

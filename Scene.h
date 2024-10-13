@@ -51,8 +51,7 @@ public:
 	virtual ~CMenuScene() = default;
 
 private:
-	std::unordered_map<SHADER_TYPE, ObjectList> objects;
-	std::unordered_map<SHADER_TYPE, std::shared_ptr<CShader>> shaders;
+	std::unordered_map<std::wstring, ObjectList> objects;
 
 	std::shared_ptr<CCamera> camera;
 
@@ -84,8 +83,7 @@ public:
 	virtual ~CPlayScene() = default;
 
 private:
-	std::unordered_map<SHADER_TYPE, ObjectList> objects;
-	std::unordered_map<SHADER_TYPE, std::shared_ptr<CShader>> shaders;
+	std::unordered_map<std::wstring, ObjectList> objects;
 
 	std::shared_ptr<CCamera> camera;
 

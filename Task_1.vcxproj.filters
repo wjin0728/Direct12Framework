@@ -47,6 +47,9 @@
     <Filter Include="HLSL">
       <UniqueIdentifier>{fc3644b5-f6b2-4f79-85e1-5eb335e5bd0f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameObject\Component">
+      <UniqueIdentifier>{dc1b8f67-20b7-4203-8591-dca6283ce85e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Scene.h">
@@ -138,6 +141,9 @@
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>GameObject\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -231,15 +237,18 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\Shaders\Lighting.hlsl">
+    <FxCompile Include="Resources\Shaders\Utility.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\LightingPS.hlsl">
+    <FxCompile Include="Resources\Shaders\Lighting.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\OutLinePS.hlsl">
@@ -255,9 +264,6 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\Tex2D.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Utility.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

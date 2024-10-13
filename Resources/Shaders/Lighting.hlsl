@@ -1,3 +1,4 @@
+
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
@@ -5,8 +6,8 @@
 struct VS_INPUT
 {
     float3 position : POSITION;
-    float3 normal : NORMAL;
     float2 uv : TEXCOORD;
+    float3 normal : NORMAL;
     float3 tangent : TANGENT;
 };
 
@@ -18,11 +19,10 @@ struct VS_OUTPUT
     float2 uv : TEXCOORD;
 };
 
-
 //¡§¡° ºŒ¿Ã¥ı
 VS_OUTPUT VS_Main(VS_INPUT input)
 {
-    VS_OUTPUT output;
+    VS_OUTPUT output = (VS_OUTPUT)0;
     
     
     output.worldPos = mul(float4(input.position, 1.0f), worldMat);

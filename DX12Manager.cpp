@@ -296,7 +296,6 @@ void CDX12Manager::InitRootSignature()
 	if (d3dErrorBlob != nullptr) {
 		OutputDebugStringA((char*)d3dErrorBlob->GetBufferPointer());
 	}
-	ThrowIfFailed(hr);
 
 	ThrowIfFailed(mDevice->CreateRootSignature(0, d3dSignatureBlob->GetBufferPointer(),
 		d3dSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)));
@@ -309,6 +308,7 @@ void CDX12Manager::Initialize(HWND hWnd)
 	InitSwapChain(hWnd);
 	InitDescriptorHeaps();
 	InitDepthStencilView();
+	InitRootSignature();
 	InitRenderTargetGroups();
 	CreateFrameResources();
 }

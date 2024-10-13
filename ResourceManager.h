@@ -9,9 +9,11 @@
 
 enum
 {
-	TEXTURE_COUNT = 100,
-	METERIAL_COUNT = 100,
-	MESH_COUNT = 100
+	TEXTURE_COUNT = 10,
+	MATERIAL_COUNT = 10,
+	MESH_COUNT = 10,
+	PASS_COUNT = 1,
+	OBJECT_COUNT = 20
 };
 
 class CMesh;
@@ -52,6 +54,11 @@ private:
 	void LoadDefaultTexture();
 	void LoadDefaultMaterials();
 	void LoadDefaultShaders();
+
+public:
+	UINT GetTopSRVIndex();
+
+	void ReturnSRVIndex(UINT idx) { srvIdxQueue.push(idx); }
 };
 
 template<typename T>

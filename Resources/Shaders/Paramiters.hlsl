@@ -7,7 +7,7 @@
 #define SPOT_LIGHT 10
 #define MAX_MATERIAL 10
 
-#define TEXTURE_COUNT 100
+#define TEXTURE_COUNT 10
 
 static const float a0 = 1.f;
 static const float a1 = 0.01f;
@@ -77,7 +77,7 @@ cbuffer CBPassData : register(b0)
 
 cbuffer CBObjectData : register(b1)
 {
-    matrix worldMat : packoffset(c0);
+    matrix worldMat;
     int materialIdx;
     float3 objectPadding;
 };

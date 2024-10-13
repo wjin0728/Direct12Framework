@@ -4,17 +4,15 @@
 
 D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 {
-	std::vector<D3D12_INPUT_ELEMENT_DESC> inputElementDescs
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-	};
+	D3D12_INPUT_ELEMENT_DESC* desc = new D3D12_INPUT_ELEMENT_DESC[4];
+	desc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	desc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	desc[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	desc[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
-	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-	d3dInputLayoutDesc.pInputElementDescs = inputElementDescs.data();
-	d3dInputLayoutDesc.NumElements = inputElementDescs.size();
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc{};
+	d3dInputLayoutDesc.pInputElementDescs = desc;
+	d3dInputLayoutDesc.NumElements = 4;
 
 	return d3dInputLayoutDesc;
 }
@@ -130,21 +128,30 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 	return d3dDepthStencilDesc;
 }
 
-D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, std::wstring_view fileName, std::string_view name, std::string_view version)
+D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::wstring& fileName, const std::string& name, const std::string& version)
 {
 	UINT32 compileFlag = 0;
 #ifdef _DEBUG
 	compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-	ComPtr<ID3DBlob> errBlob;
+	ComPtr<ID3DBlob> errBlob{};
 
-	ThrowIfFailed(D3DCompileFromFile(fileName.data(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE
-		, name.data(), version.data(), compileFlag, 0, &blob, &errBlob))
+	HRESULT hr = D3DCompileFromFile(fileName.c_str(), NULL,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE, name.c_str(), version.c_str(), compileFlag, 0, &blob, &errBlob);
 
-	return  D3D12_SHADER_BYTECODE{ blob->GetBufferPointer(), blob->GetBufferSize() };
+	if (FAILED(hr)) {
+		OutputDebugStringA((char*)errBlob->GetBufferPointer());
+		//MessageBoxA(nullptr, "Shader Create Failed !", nullptr, MB_OK);
+		ThrowIfFailed(hr);
+	}
+	D3D12_SHADER_BYTECODE bytecode{};
+	bytecode.pShaderBytecode = blob->GetBufferPointer();
+	bytecode.BytecodeLength = blob->GetBufferSize();
+
+	return bytecode;
 }
 
-void CShader::Initialize(const ShaderInfo& info, std::wstring_view fileName)
+void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 {
 	ComPtr<ID3DBlob> vsBlob, psBlob;
 
@@ -153,7 +160,7 @@ void CShader::Initialize(const ShaderInfo& info, std::wstring_view fileName)
 	pipelineStateDesc.pRootSignature = INSTANCE(CDX12Manager).GetRootSignature();
 
 	pipelineStateDesc.VS = CreateShader(vsBlob, fileName, "VS_Main", "vs_5_1");
-	pipelineStateDesc.PS = CreateShader(vsBlob, fileName, "PS_Main", "ps_5_1");
+	pipelineStateDesc.PS = CreateShader(psBlob, fileName, "PS_Main", "ps_5_1");
 
 	pipelineStateDesc.RasterizerState = InitRasterizerState();
 	pipelineStateDesc.BlendState = InitBlendState();

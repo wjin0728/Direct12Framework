@@ -30,20 +30,18 @@ LightColor ComputeDirectionalLight(DirectionalLight light, float3 normal, float3
             float3 fresnelFactor = material.fresnelR0 + (1.0 - material.fresnelR0) * pow(1.0 - viewHalfDot, 5);
             
             specularFactor = ((m + 8.f) * pow(max(viewHalfDot, 0.f), m)) / 8.f;
-            specularFactor *= fresnelFactor;
-            
-            specularColor = specularFactor * (light.color * material.specular).rgb;
+            specularColor = specularFactor * (light.color * material.specular).rgb * fresnelFactor;
         }
     }
     
-    LightColor color = (LightColor) 0.f;
+    LightColor lightColor;
     
     float4 strength = float4(light.strength, 1.f);
     
-    color.diffuse = float4(diffuseColor, 1.f) * strength;
-    color.specular = float4(specularColor, 1.f) * strength;
+    lightColor.diffuse = float4(diffuseColor, 1.f) * strength;
+    lightColor.specular = float4(specularColor, 1.f) * strength;
     
-    return color;
+    return lightColor;
 }
 
 
@@ -55,10 +53,14 @@ LightColor ComputePointLight(PointLight light, float3 position, float3 normal, f
     float3 specularColor = float3(0.f, 0.f, 0.f);
     
     float distance = length(lightDir);
+    
+    LightColor lightColor;
+    lightColor.diffuse = float4(0.f, 0.f, 0.f, 1.f);
+    lightColor.specular = float4(0.f, 0.f, 0.f, 1.f);
 	
     //거리가 Range 안에 있어야 빛을 받음
     if (distance > light.range)
-        return float3(0.f, 0.f, 0.f);
+        return lightColor;
     
     lightDir = normalize(lightDir);
  
@@ -82,9 +84,7 @@ LightColor ComputePointLight(PointLight light, float3 position, float3 normal, f
             float3 fresnelFactor = material.fresnelR0 + (1.0 - material.fresnelR0) * pow(1.0 - viewHalfDot, 5);
             
             specularFactor = ((m + 8.f) * pow(max(viewHalfDot, 0.f), m)) / 8.f;
-            specularFactor *= fresnelFactor;
-            
-            specularColor = specularFactor * (light.color * material.specular).rgb;
+            specularColor = specularFactor * (light.color * material.specular).rgb * fresnelFactor;
         }
     }
     
@@ -93,14 +93,12 @@ LightColor ComputePointLight(PointLight light, float3 position, float3 normal, f
     diffuseColor *= att;
     specularColor *= att;
     
-    LightColor color = (LightColor) 0.f;
-    
     float4 strength = float4(light.strength, 1.f);
     
-    color.diffuse = float4(diffuseColor, 1.f) * strength;
-    color.specular = float4(specularColor, 1.f) * strength;
+    lightColor.diffuse = float4(diffuseColor, 1.f) * strength;
+    lightColor.specular = float4(specularColor, 1.f) * strength;
     
-    return color;
+    return lightColor;
 }
 
 
@@ -112,10 +110,14 @@ LightColor ComputeSpotLight(SpotLight light, float3 position, float3 normal, flo
     float3 specularColor = float3(0.f, 0.f, 0.f);
     
     float distance = length(lightDir);
+    
+    LightColor lightColor;
+    lightColor.diffuse = float4(0.f, 0.f, 0.f, 1.f);
+    lightColor.specular = float4(0.f, 0.f, 0.f, 1.f);
 	
     //거리가 Range 안에 있어야 빛을 받음
     if (distance > light.range)
-        return float3(0.f, 0.f, 0.f);
+        return lightColor;
     
     lightDir = normalize(lightDir);
  
@@ -139,9 +141,7 @@ LightColor ComputeSpotLight(SpotLight light, float3 position, float3 normal, flo
             float3 fresnelFactor = material.fresnelR0 + (1.0 - material.fresnelR0) * pow(1.0 - viewHalfDot, 5);
             
             specularFactor = ((m + 8.f) * pow(max(viewHalfDot, 0.f), m)) / 8.f;
-            specularFactor *= fresnelFactor;
-            
-            specularColor = specularFactor * (light.color * material.specular).rgb;
+            specularColor = specularFactor * (light.color * material.specular).rgb * fresnelFactor;
         }
     }
     
@@ -162,20 +162,20 @@ LightColor ComputeSpotLight(SpotLight light, float3 position, float3 normal, flo
     diffuseColor *= att;
     specularColor *= att;
     
-    LightColor color = (LightColor) 0.f;
-    
     float4 strength = float4(light.strength, 1.f);
     
-    color.diffuse = float4(diffuseColor, 1.f) * strength;
-    color.specular = float4(specularColor, 1.f) * strength;
+    lightColor.diffuse = float4(diffuseColor, 1.f) * strength;
+    lightColor.specular = float4(specularColor, 1.f) * strength;
     
-    return color;
+    return lightColor;
 }
 
 
 LightColor CalculatePhongLight(float3 position, float3 normal, float3 camDir, Material material)
 {
-    LightColor finalColor = (LightColor) 0.f;
+    LightColor finalColor;
+    finalColor.diffuse = float4(0.f, 0.f, 0.f, 1.f);
+    finalColor.specular = float4(0.f, 0.f, 0.f, 1.f);
     
     [unroll(DIRECTIONAL_LIGHT)]
     for (uint i = 0; i < lightNum.x; i++)

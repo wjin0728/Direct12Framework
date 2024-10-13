@@ -84,7 +84,9 @@ void CResourceManager::LoadDefaultTexture()
 {
 	auto& textures = resources[static_cast<UINT>(RESOURCE_TYPE::TEXTURE)];
 	
-	
+	for (auto& [name, texture] : textures) {
+		static_pointer_cast<CTexture>(texture)->CreateSRV();
+	}
 }
 
 void CResourceManager::LoadDefaultMaterials()
@@ -103,8 +105,19 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, L"..\\Resources\\Shaders\\skybox.fx")
+		shader->Initialize(info, L"Resources\\Shaders\\Lighting.hlsl");
+		shader->SetName(L"Forward");
+
+		Add(shader);
 	}
+}
+
+UINT CResourceManager::GetTopSRVIndex()
+{
+	UINT idx = srvIdxQueue.top();
+	srvIdxQueue.pop();
+
+	return idx;
 }
 
 

@@ -51,7 +51,7 @@ void CDescriptorHeaps::CreateDSV(ComPtr<ID3D12Resource> resource)
 void CDescriptorHeaps::CreateSRV(ComPtr<ID3D12Resource> resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, UINT idx) const
 {
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = srvStartHandle.cpuHandle;
-	handle.ptr += (cbvSrvDescriptorSize * idx);
+	handle.ptr += (cbvSrvDescriptorSize * static_cast<unsigned long long>(idx));
 
 	DEVICE->CreateShaderResourceView(resource.Get(), &desc, handle);
 }

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include"DX12Manager.h"
 #include "FrameResource.h"
+#include"ResourceManager.h"
 #include"Material.h"
 
 CFrameResource::CFrameResource()

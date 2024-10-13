@@ -60,7 +60,7 @@ class CShader : public CResource
 {
 protected:
 	ShaderInfo info;
-	ComPtr<ID3D12PipelineState> d3dPiplineState;
+	ComPtr<ID3D12PipelineState> d3dPiplineState = ComPtr<ID3D12PipelineState>();
 
 private:
 
@@ -75,10 +75,10 @@ protected:
 	virtual D3D12_DEPTH_STENCIL_DESC InitDepthStencilState();
 
 	D3D12_SHADER_BYTECODE CreateShader(ComPtr<ID3DBlob>& blob, 
-		std::wstring_view fileName, std::string_view name, std::string_view version);
+		const std::wstring& fileName, const std::string& name, const std::string& version);
 
 public:
-	virtual void Initialize(const ShaderInfo& info, std::wstring_view fileName);
+	virtual void Initialize(const ShaderInfo& info, const std::wstring& fileName);
 	
 public:
 	void SetPipelineState(ID3D12GraphicsCommandList* cmdList) { cmdList->SetPipelineState(d3dPiplineState.Get()); }
