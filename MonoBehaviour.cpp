@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MonoBehaviour.h"
 
-CMonoBehaviour::CMonoBehaviour()
+CMonoBehaviour::CMonoBehaviour() : CComponent(COMPONENT_TYPE::SCRIPT)
 {
 }
 

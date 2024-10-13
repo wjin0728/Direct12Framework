@@ -145,7 +145,12 @@
     <ClInclude Include="Component.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="MonoBehaviour.h" />
+    <ClInclude Include="MonoBehaviour.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -242,7 +247,10 @@
       <Filter>GameObject\Component</Filter>
     </ClCompile>
     <ClCompile Include="MonoBehaviour.cpp">
-      <Filter>Client</Filter>
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>GameObject\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
