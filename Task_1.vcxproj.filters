@@ -97,9 +97,6 @@
     <ClInclude Include="DDSTextureLoader12.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="DXMathHelper.h">
-      <Filter>Utility</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Utility</Filter>
     </ClInclude>
@@ -111,9 +108,6 @@
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>Resources\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="HeightMapImage.h">
-      <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="CResource.h">
       <Filter>Resources</Filter>
@@ -150,6 +144,12 @@
     </ClInclude>
     <ClInclude Include="Transform.h">
       <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleMath.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMapImage.h">
+      <Filter>Resources\Texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -201,9 +201,6 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
-    <ClCompile Include="DXMathHelper.cpp">
-      <Filter>Utility</Filter>
-    </ClCompile>
     <ClCompile Include="DDSTextureLoader12.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
@@ -211,9 +208,6 @@
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="WICTextureLoader12.cpp">
-      <Filter>Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="HeightMapImage.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
@@ -252,9 +246,18 @@
     <ClCompile Include="Transform.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
+    <ClCompile Include="SimpleMath.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapImage.cpp">
+      <Filter>Resources\Texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+    <None Include="SimpleMath.inl">
+      <Filter>Utility</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Utility.hlsl">

@@ -15,6 +15,9 @@ private:
 	XMFLOAT4X4 mWorldMat = Matrix4x4::Identity();
 	XMFLOAT4X4 mLocalMat = Matrix4x4::Identity();
 
+private:
+	int dirtyFramesNum{};
+
 public:
 	CTransform();
 	~CTransform();
@@ -30,10 +33,14 @@ public:
 	void MoveStrafe(float distance = 1.0f);
 	void MoveUp(float distance = 1.0f);
 	void MoveForward(float distance = 1.0f);
-	void Move(const XMFLOAT3& direction, float speed = 1.f);
+	void Move(const XMFLOAT3& direction, float distance = 1.f);
 
 	void LookTo(const XMFLOAT3& lookDir, const XMFLOAT3& up = { 0.f,1.f,0.f });
+	void LookTo(const CTransform& target, const XMFLOAT3& up = { 0.f,1.f,0.f });
+
 	void LookAt(const XMFLOAT3& lookPos, const XMFLOAT3& up = { 0.f,1.f,0.f });
+	void LookAt(const CTransform& target, const XMFLOAT3& up = { 0.f,1.f,0.f });
+
 
 	void Rotate(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
 	void Rotate(const XMFLOAT3& rotation);

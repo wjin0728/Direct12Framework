@@ -7,15 +7,6 @@
 #include"Texture.h"
 
 
-enum
-{
-	TEXTURE_COUNT = 10,
-	MATERIAL_COUNT = 10,
-	MESH_COUNT = 10,
-	PASS_COUNT = 1,
-	OBJECT_COUNT = 20
-};
-
 class CMesh;
 class CMaterial;
 class CShader;

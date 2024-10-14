@@ -3,6 +3,7 @@
 #define WIN32_LEAN_AND_MEAN		
 #include <windows.h>
 #include <stdlib.h>
+#include <iostream>
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
@@ -19,33 +20,33 @@
 #include<map>
 
 #include <Mmsystem.h>
-#pragma comment(lib, "winmm.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "dxgi.lib")
 
-#pragma comment(lib, "dxguid.lib")
-
+#include <d3d12.h>
+#include"SimpleMath.h"
+#include <dxgi1_4.h>
 #include <wrl.h>
 #include <shellapi.h>
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
-#include <d3d12.h>
-#include <dxgi1_4.h>
 #include <D3Dcompiler.h>
 #include <DXGIDebug.h>
 #include <comdef.h>
-#include <iostream>
 #include"d3dx12.h"
 #include"DDSTextureLoader12.h"
 #include"WICTextureLoader12.h"
-#include"DXMathHelper.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
+
+#pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+
+#pragma comment(lib, "dxguid.lib")
 
 
 #define _DEBUG
@@ -64,8 +65,11 @@ using Microsoft::WRL::ComPtr;
 
 #define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
 
-#define FRAMERESOURCE_NUM 3
 
+using Vec2 = DirectX::SimpleMath::Vector2;
+using Vec3 = DirectX::SimpleMath::Vector3;
+using Vec4 = DirectX::SimpleMath::Vector4;
+using Matrix = DirectX::SimpleMath::Matrix;
 
 
 inline XMFLOAT4 GetRandomColor() {
@@ -111,14 +115,14 @@ public:
 
 
 
-#define ThrowIfFailed(x)                                              \
-{                                                                     \
-    HRESULT hr__ = (x);                                               \
-    std::wstring wfn = AnsiToWString(__FILE__);                       \
-    if(FAILED(hr__)) {												  \
-		PostQuitMessage(0);															  \
-		throw DxException(hr__, L#x, wfn, __LINE__); }			      \
-}
+#define ThrowIfFailed(x)															\
+{																					\
+    HRESULT hr__ = (x);																\
+    std::wstring wfn = AnsiToWString(__FILE__);										\
+    if(FAILED(hr__)) {																\
+		throw DxException(hr__, L#x, wfn, __LINE__); 								\
+	}																				\
+}																					
 
 
 #define MAKE_SINGLETON(T)		\

@@ -16,7 +16,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 	try 
 	{
 		if (!gameApp.Initialize(hInstance, WndProc, showCmd)) {
-			PostQuitMessage(0);
 			return 0;
 		}
 		return gameApp.Run();
@@ -24,9 +23,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 	catch (DxException& e)
 	{
 		MessageBox(NULL, e.ToString().c_str(), L"HR Failed", MB_OK);
-
+		return 0;
 	}
-	return 0;
+	
 }
 
 

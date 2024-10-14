@@ -118,7 +118,6 @@ void CDX12Manager::ChangeSwapChainState()
 
 	ThrowIfFailed(mSwapChain->ResizeTarget(&dxgiTargetParameters));
 
-
 	for (int i = 0; i < SWAP_CHAIN_COUNT; i++) {
 		auto target = INSTANCE(CResourceManager).Get<CTexture>(L"SwapChainTarget_" + std::to_wstring(i));
 	}
@@ -354,7 +353,6 @@ void CDX12Manager::WaitForGpu()
 
 void CDX12Manager::OpenCommandList()
 {
-	ThrowIfFailed(cmdAlloc->Reset());
 	ThrowIfFailed(cmdList->Reset(cmdAlloc.Get(), NULL));
 }
 
@@ -365,6 +363,7 @@ void CDX12Manager::CloseCommandList()
 	cmdQueue->ExecuteCommandLists(_countof(pcmdLists), pcmdLists);
 
 	WaitForGpu();
+	ThrowIfFailed(cmdAlloc->Reset());
 }
 
 void CDX12Manager::MoveToNextFrameResource()

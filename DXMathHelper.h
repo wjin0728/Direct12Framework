@@ -5,7 +5,7 @@
 
 #define DegreeToRadian(x)		float((x)*3.141592654f/180.0f)
 
-#define EPSILON					1.0e-6f
+
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -14,19 +14,19 @@ float RandF(float fMin, float fMax);
 
 XMVECTOR RandomUnitVectorOnSphere();
 
-static bool IsZero(float fValue) {
+inline bool IsZero(float fValue) {
 	return((fabsf(fValue) < EPSILON));
 }
 
-static bool IsEqual(float fA, float fB) {
+inline bool IsEqual(float fA, float fB) {
 	return(::IsZero(fA - fB));
 }
 
-static float InverseSqrt(float fValue) {
+inline float InverseSqrt(float fValue) {
 	return 1.0f / sqrtf(fValue);
 }
 
-static float Flerp(float a, float b, float t) {
+inline float Flerp(float a, float b, float t) {
 	return ((1.f - t) * a + t * b);
 }
 
@@ -168,14 +168,14 @@ namespace Vector3
 
 namespace Vector4
 {
-	static XMFLOAT4 Multiply(float fScalar, XMFLOAT4& xmf4Vector)
+	inline XMFLOAT4 Multiply(float fScalar, XMFLOAT4& xmf4Vector)
 	{
 		XMFLOAT4 xmf4Result;
 		XMStoreFloat4(&xmf4Result, fScalar * XMLoadFloat4(&xmf4Vector));
 		return(xmf4Result);
 	}
 
-	static XMFLOAT4 Add(const XMFLOAT4& xmf4Vector1, const XMFLOAT4& xmf4Vector2)
+	inline XMFLOAT4 Add(const XMFLOAT4& xmf4Vector1, const XMFLOAT4& xmf4Vector2)
 	{
 		XMFLOAT4 xmf4Result;
 		XMStoreFloat4(&xmf4Result, XMLoadFloat4(&xmf4Vector1) + XMLoadFloat4(&xmf4Vector2));
@@ -291,7 +291,7 @@ namespace Matrix4x4
 
 namespace Triangle
 {
-	static bool Intersect(const XMFLOAT3& xmf3RayPosition, const XMFLOAT3& xmf3RayDirection,
+	inline bool Intersect(const XMFLOAT3& xmf3RayPosition, const XMFLOAT3& xmf3RayDirection,
 		const XMFLOAT3& v0, const XMFLOAT3& v1, const XMFLOAT3& v2, float& fHitDistance)
 	{
 		return(TriangleTests::Intersects(XMLoadFloat3(&xmf3RayPosition), XMLoadFloat3(&xmf3RayDirection),
@@ -301,7 +301,7 @@ namespace Triangle
 
 namespace Plane
 {
-	static XMFLOAT4 Normalize(const XMFLOAT4& xmf4Plane)
+	inline XMFLOAT4 Normalize(const XMFLOAT4& xmf4Plane)
 	{
 		XMFLOAT4 xmf4Result;
 		XMStoreFloat4(&xmf4Result, XMPlaneNormalize(XMLoadFloat4(&xmf4Plane)));
@@ -315,6 +315,8 @@ inline XMFLOAT3 operator+(const XMFLOAT3& xmf3Vector1, const XMFLOAT3& xmf3Vecto
 	XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector1) + XMLoadFloat3(&xmf3Vector2));
 	return(xmf3Result);
 }
+
+
 
 inline XMFLOAT3 operator*(float scalar, const XMFLOAT3& xmf3Vector)
 {

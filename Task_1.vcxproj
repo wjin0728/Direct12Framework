@@ -163,7 +163,6 @@
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="DescriptorHeaps.h" />
     <ClInclude Include="DX12Manager.h" />
-    <ClInclude Include="DXMathHelper.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="LightManager.h" />
@@ -172,6 +171,7 @@
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="RenderTargetGroup.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="SimpleMath.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Transform.h" />
@@ -197,7 +197,6 @@
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="DescriptorHeaps.cpp" />
     <ClCompile Include="DX12Manager.cpp" />
-    <ClCompile Include="DXMathHelper.cpp" />
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -208,6 +207,7 @@
     <ClCompile Include="RenderTargetGroup.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="SimpleMath.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -233,6 +233,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+    <None Include="SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\Lighting.hlsl">

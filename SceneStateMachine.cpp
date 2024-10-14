@@ -68,10 +68,16 @@ void CSceneManager::ChangeSceneViewport(int width, int height)
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	return curScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	if (curScene)
+		return curScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	else
+		return false;
 }
 
 bool CSceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-	return curScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	if (curScene)
+		return curScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	else
+		return false;
 }
