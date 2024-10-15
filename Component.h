@@ -21,7 +21,7 @@ class CComponent
 {
 protected:
 	COMPONENT_TYPE type;
-	std::weak_ptr<class GameObject> owner;
+	std::weak_ptr<class CGameObject> owner;
 
 public:
 	CComponent(COMPONENT_TYPE type);

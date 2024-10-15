@@ -263,6 +263,7 @@ namespace DirectX
 
             void Normalize() noexcept;
             void Normalize(Vector3& result) const noexcept;
+            Vector3 GetNormalized() const noexcept;
 
             void Clamp(const Vector3& vmin, const Vector3& vmax) noexcept;
             void Clamp(const Vector3& vmin, const Vector3& vmax, Vector3& result) const noexcept;
@@ -311,6 +312,8 @@ namespace DirectX
             static void TransformNormal(const Vector3& v, const Matrix& m, Vector3& result) noexcept;
             static Vector3 TransformNormal(const Vector3& v, const Matrix& m) noexcept;
             static void TransformNormal(_In_reads_(count) const Vector3* varray, size_t count, const Matrix& m, _Out_writes_(count) Vector3* resultArray) noexcept;
+
+            static Vector3 GetAngleToQuaternion(const Quaternion& quat) noexcept;
 
             // Constants
             static const Vector3 Zero;
@@ -712,6 +715,7 @@ namespace DirectX
             // Static functions
             static Quaternion CreateFromAxisAngle(const Vector3& axis, float angle) noexcept;
             static Quaternion CreateFromYawPitchRoll(float yaw, float pitch, float roll) noexcept;
+            static Quaternion CreateFromYawPitchRoll(const Vector3& angles) noexcept;
             static Quaternion CreateFromRotationMatrix(const Matrix& M) noexcept;
 
             static void Lerp(const Quaternion& q1, const Quaternion& q2, float t, Quaternion& result) noexcept;
@@ -728,12 +732,12 @@ namespace DirectX
         };
 
         // Binary operators
-        Quaternion operator+ (const Quaternion& Q1, const Quaternion& Q2) noexcept;
-        Quaternion operator- (const Quaternion& Q1, const Quaternion& Q2) noexcept;
-        Quaternion operator* (const Quaternion& Q1, const Quaternion& Q2) noexcept;
-        Quaternion operator* (const Quaternion& Q, float S) noexcept;
-        Quaternion operator/ (const Quaternion& Q1, const Quaternion& Q2) noexcept;
-        Quaternion operator* (float S, const Quaternion& Q) noexcept;
+        SimpleMath::Quaternion SimpleMath::operator+ (const Quaternion& Q1, const Quaternion& Q2) noexcept;
+        SimpleMath::Quaternion SimpleMath::operator- (const Quaternion& Q1, const Quaternion& Q2) noexcept;
+        SimpleMath::Quaternion SimpleMath::operator* (const Quaternion& Q1, const Quaternion& Q2) noexcept;
+        SimpleMath::Quaternion SimpleMath::operator* (const Quaternion& Q, float S) noexcept;
+        SimpleMath::Quaternion SimpleMath::operator/ (const Quaternion& Q1, const Quaternion& Q2) noexcept;
+        SimpleMath::Quaternion SimpleMath::operator* (float S, const Quaternion& Q) noexcept;
 
         //------------------------------------------------------------------------------
         // Color
@@ -857,6 +861,7 @@ namespace DirectX
             // Ray operations
             bool Intersects(const BoundingSphere& sphere, _Out_ float& Dist) const noexcept;
             bool Intersects(const BoundingBox& box, _Out_ float& Dist) const noexcept;
+            bool Intersects(const BoundingOrientedBox& box, float& Dist) const noexcept;
             bool Intersects(const Vector3& tri0, const Vector3& tri1, const Vector3& tri2, _Out_ float& Dist) const noexcept;
             bool Intersects(const Plane& plane, _Out_ float& Dist) const noexcept;
         };
@@ -944,7 +949,7 @@ namespace DirectX
         }
 
         inline bool IsEqual(float fA, float fB) {
-            return(::IsZero(fA - fB));
+            return(IsZero(fA - fB));
         }
 
         inline float InverseSqrt(float fValue) {
@@ -954,6 +959,8 @@ namespace DirectX
         inline float Flerp(float a, float b, float t) {
             return ((1.f - t) * a + t * b);
         }
+
+        
 
 #include "SimpleMath.inl"
 

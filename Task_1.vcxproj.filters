@@ -151,6 +151,9 @@
     <ClInclude Include="HeightMapImage.h">
       <Filter>Resources\Texture</Filter>
     </ClInclude>
+    <ClInclude Include="MeshRenderer.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -251,6 +254,9 @@
     </ClCompile>
     <ClCompile Include="HeightMapImage.cpp">
       <Filter>Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshRenderer.cpp">
+      <Filter>GameObject\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

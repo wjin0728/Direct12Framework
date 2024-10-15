@@ -59,50 +59,7 @@ void CMenuScene::BuildObjects()
 	float xOffset = 10.f;
 	auto cubeMesh = INSTANCE(CResourceManager).Get<CMesh>(L"Cube");
 
-	std::shared_ptr<CRotatingObject> alphabet = std::make_shared<CRotatingObject>();
-	alphabet->SetMesh(cubeMesh);
-	alphabet->SetPosition(-xOffset * 2.f, 0.0f, 0.0f);
-	alphabet->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	alphabet->SetRotationSpeed(50.0f);
-	alphabet->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	alphabet->SetMovingSpeed(0.0f);
-	alphabet->SetRandomMAterial();
-	/*
-	alphabet = new CRotatingObject();
-	alphabet->SetMesh(t);
-	alphabet->SetPosition(-xOffset, 0.0f, 0.0f);
-	alphabet->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	alphabet->SetRotationSpeed(50.0f);
-	alphabet->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	alphabet->SetMovingSpeed(0.0f);
-	alphabet->SetRandomMAterial();
-
-	alphabet = new CRotatingObject();
-	alphabet->SetMesh(a);
-	alphabet->SetPosition(0.0f, 0.0f, 0.0f);
-	alphabet->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	alphabet->SetRotationSpeed(50.0f);
-	alphabet->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	alphabet->SetMovingSpeed(0.0f);
-	alphabet->SetRandomMAterial();
-
-	alphabet = new CRotatingObject();
-	alphabet->SetMesh(r);
-	alphabet->SetPosition(xOffset, 0.0f, 0.0f);
-	alphabet->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	alphabet->SetRotationSpeed(50.0f);
-	alphabet->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	alphabet->SetMovingSpeed(0.0f);
-	alphabet->SetRandomMAterial();
-
-	alphabet = new CRotatingObject();
-	alphabet->SetMesh(t);
-	alphabet->SetPosition(xOffset*2.f, 0.0f, 0.0f);
-	alphabet->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	alphabet->SetRotationSpeed(50.0f);
-	alphabet->SetMovingDirection(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	alphabet->SetMovingSpeed(0.0f);
-	alphabet->SetRandomMAterial();*/
+	
 }
 
 void CMenuScene::ReleaseObjects()
@@ -219,96 +176,7 @@ void CPlayScene::InitLights()
 
 void CPlayScene::BuildObjects()
 {
-	//shaders[SHADER_TYPE::LIGHT_SHADER] = std::make_shared<CLightingShader>();
-	//shaders[SHADER_TYPE::LIGHT_SHADER]->InitShader(device, d3dRootSignature.Get());
-
-	//shaders[SHADER_TYPE::WIREFRAME_SHADER] = std::make_shared<CWireframeShader>();
-	//shaders[SHADER_TYPE::WIREFRAME_SHADER]->InitShader(device, d3dRootSignature.Get());
-
-	//shaders[SHADER_TYPE::OUTLINE_SHADER] = std::make_shared<COutLineShader>();
-	//shaders[SHADER_TYPE::OUTLINE_SHADER]->InitShader(device, d3dRootSignature.Get());
-
-	//shaders[SHADER_TYPE::TERRAIN_SHADER] = std::make_shared<CTerrainShader>();
-	//shaders[SHADER_TYPE::TERRAIN_SHADER]->InitShader(device, d3dRootSignature.Get());
-
-	//camera = std::make_shared<CCamera>();
-	//camera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-	//camera->SetScissorRect(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-	//camera->GeneratePerspectiveProjectionMatrix(1.01f, 1000.0f, 60.0f);
-	//camera->SetFOVAngle(60.0f);
-
-	//camera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-	//camera->CreateShaderVariables(device);
-
-	////敲饭捞绢 按眉 积己
-	////std::shared_ptr<CMesh> spaceShipMesh = std::make_shared<CMesh>(device, cmdList, "./Obj/spaceship.obj");
-	////std::shared_ptr<CMesh> enemyMesh = std::make_shared<CMesh>(device, cmdList, "./Obj/enemy.obj", XMFLOAT3{ 0.065,0.065,0.065 });
-	////std::shared_ptr<CMesh> enemyMesh = std::make_shared<CCubeMesh>(device, cmdList, XMFLOAT3{ 10.f,10.f,10.f });
-	//InitLights(device);
-
-	//std::shared_ptr<CGameObject> apache = CGameObject::CreateObjectFromFile(device, cmdList, "./Obj/Apache.bin");
-
-	//m_pPlayer = std::make_shared<CAirplanePlayer>(device, cmdList);
-	//m_pPlayer->AddChild(apache);
-	//m_pPlayer->SetCamera(camera);
-	//m_pPlayer->SetPosition(0.0f, 600.0f, 0.0f);
-	//m_pPlayer->SetScale(1.f, 1.f, 1.f);
-	//m_pPlayer->SetCameraOffset(XMFLOAT3(0.0f, 30.0f, -150.0f));
-	//m_pPlayer->InitPlayer();
-
-	//float size = m_pPlayer->GetSize();
-	//std::shared_ptr<CMesh> shield = std::make_shared<CMesh>(device, cmdList, "./Obj/sphere.obj", XMFLOAT3{ size ,size ,size });
-
-	//((CAirplanePlayer*)m_pPlayer.get())->SetShield(shield, shaders[SHADER_TYPE::WIREFRAME_SHADER]);
-
-	//std::shared_ptr<CSpotLight> playerLight = std::make_shared<CSpotLight>(
-	//	XMFLOAT4(1.f, 1.f, 1.f,1.f),
-	//	XMFLOAT3(1.f, 1.f, 1.f),
-	//	XMFLOAT3(0.f, 0.f, 1.f),
-	//	XMFLOAT3(0.f, 0.f, 0.f),
-	//	500.f,
-	//	20.f,
-	//	35.f,
-	//	10.f
-	//);
-	//lightManager->AddSpotLight(playerLight);
-
-	//((CAirplanePlayer*)m_pPlayer.get())->SetPlayerLight(playerLight);
-	//
-	//float fHalfWidth = 180.0f, fHalfHeight = 120.0f, fHalfDepth = 400.0f;
-
-
-	////利 按眉 积惑
-
-	//CExplosiveObject::PrepareExplosion(device, cmdList);
-	//CEnemy::SetTargetPlayer(m_pPlayer);
-
-	//std::random_device rd;
-	//std::default_random_engine dre(rd());
-	//std::uniform_real_distribution<float> randTime(0.f, 2.f);
-	//std::uniform_real_distribution<float> randX(0.f, fHalfWidth);
-	//std::uniform_real_distribution<float> randY(0.f, fHalfHeight);
-	//std::uniform_real_distribution<float> randZ(0.f, fHalfDepth);
-
-	//CEnemy* enemy = nullptr;
-
-	//for (int i = 0; i < 5;i++) {
-	//	float xPos = randX(dre) * 2.f - fHalfWidth;
-	//	float yPos = randY(dre) * 2.f - fHalfHeight;
-	//	float zPos = randZ(dre) * 2.f - fHalfDepth;
-
-	//	enemy = new CEnemy(device, cmdList);
-	//	enemy->SetFirstFireTime(randTime(dre));
-	//	//enemy->AddChild(apache);
-	//	enemy->SetScale(0.1f, 0.1f, 0.1f);
-	//	enemy->SetPosition(xPos, yPos, zPos);
-	//	//enemy->SetRandomMAterial();
-
-	//	objects[SHADER_TYPE::LIGHT_SHADER].emplace_back(enemy);
-	//}
-
-	//terrain = std::make_shared<CTerrain>(device, cmdList, L"HeightMap.raw", 513, 513, 513, 513,
-	//	XMFLOAT3(10.0f, 8.f, 10.0f), XMFLOAT4(0.0f, 0.7f, 0.0f, 1.f));
+	
 
 }
 
@@ -369,31 +237,6 @@ void CPlayScene::CheckObjectByObjectCollisions()
 			}
 		}
 	}
-
-	/*for (int i = 0; i < m_nObjects; i++)
-	{
-		if (m_ppObjects[i]->collidedObject) continue;
-		for (int j = (i + 1); j < m_nObjects; j++)
-		{
-			float distance = Vector3::Distance(m_ppObjects[j]->GetPosition(), m_ppObjects[i]->GetPosition());
-			if (!m_ppObjects[j]->collidedObject && distance <= 40.f)
-			{
-				XMFLOAT3 dir = Vector3::Subtract(m_ppObjects[i]->GetPosition(), m_ppObjects[j]->GetPosition());
-				m_ppObjects[i]->movingDirection = Vector3::Normalize(dir);
-			}
-		}
-	}
-
-	for (int i = 0; i < m_nObjects; i++)
-	{
-		if (m_ppObjects[i]->collidedObject) continue;
-		float distance = Vector3::Distance(m_pPlayer->GetPosition(), m_ppObjects[i]->GetPosition());
-		if ( distance <= 40.f)
-		{
-			XMFLOAT3 dir = Vector3::Subtract(m_ppObjects[i]->GetPosition(), m_pPlayer->GetPosition());
-			m_ppObjects[i]->movingDirection = Vector3::Normalize(dir);
-		}
-	}*/
 }
 
 void CPlayScene::CheckObjectByWallCollisions()
@@ -451,12 +294,6 @@ void CPlayScene::CheckObjectByWallCollisions()
 
 void CPlayScene::CheckPlayerByWallCollision()
 {
-	/*BoundingOrientedBox xmOOBBPlayerMoveCheck;
-	m_pWallsObject->oobbPlayerMoveCheck.Transform(xmOOBBPlayerMoveCheck, XMLoadFloat4x4(&m_pWallsObject->worldMat));
-	XMStoreFloat4(&xmOOBBPlayerMoveCheck.Orientation, XMQuaternionNormalize(XMLoadFloat4(&xmOOBBPlayerMoveCheck.Orientation)));
-
-	if (!xmOOBBPlayerMoveCheck.Intersects(m_pPlayer->oobb))
-		m_pWallsObject->SetPosition(m_pPlayer->GetPosition());*/
 }
 
 

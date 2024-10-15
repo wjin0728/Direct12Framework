@@ -167,6 +167,7 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="LightManager.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="MonoBehaviour.h" />
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="RenderTargetGroup.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MeshRenderer.cpp" />
     <ClCompile Include="MonoBehaviour.cpp" />
     <ClCompile Include="ObjectPool.cpp" />
     <ClCompile Include="RenderTargetGroup.cpp" />

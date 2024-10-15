@@ -4,7 +4,7 @@
 #include"DX12Manager.h"
 
 
-CVertex::CVertex(const XMFLOAT3& pos, const XMFLOAT3& nor) : normal(nor)
+CVertex::CVertex(const Vec3& pos, const Vec3& nor) : normal(nor)
 {
 	position = pos;
 }
@@ -33,7 +33,7 @@ CMesh::CMesh(std::ifstream& inFile)
 
 		if (token == "<Bounds>:")
 		{
-			XMFLOAT3 boundingCenter, boundingExtent;
+			Vec3 boundingCenter, boundingExtent;
 
 			BinaryReader::ReadDateFromFile(inFile, boundingCenter);
 			BinaryReader::ReadDateFromFile(inFile, boundingExtent);
@@ -133,7 +133,7 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 
 		if (token == "<Bounds>:")
 		{
-			XMFLOAT3 boundingCenter, boundingExtent;
+			Vec3 boundingCenter, boundingExtent;
 
 			BinaryReader::ReadDateFromFile(inFile, boundingCenter);
 			BinaryReader::ReadDateFromFile(inFile, boundingExtent);
@@ -202,7 +202,7 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 	return m;
 }
 
-std::shared_ptr<CMesh> CMesh::CreateCubeMesh(XMFLOAT3 scale)
+std::shared_ptr<CMesh> CMesh::CreateCubeMesh(Vec3 scale)
 {
 	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
 
@@ -212,35 +212,35 @@ std::shared_ptr<CMesh> CMesh::CreateCubeMesh(XMFLOAT3 scale)
 	float fx = scale.x * 0.5f, fy = scale.y * 0.5f, fz = scale.z * 0.5f;
 
 	//¾Õ¸é
-	m->vertices[0] = CVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
-	m->vertices[1] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
-	m->vertices[2] = CVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
-	m->vertices[3] = CVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
+	m->vertices[0] = CVertex(Vec3(-fx, -fy, -fz), Vec2(0.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[1] = CVertex(Vec3(-fx, +fy, -fz), Vec2(0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[2] = CVertex(Vec3(+fx, +fy, -fz), Vec2(1.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[3] = CVertex(Vec3(+fx, -fy, -fz), Vec2(1.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
 	// µÞ¸é
-	m->vertices[4] = CVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f));
-	m->vertices[5] = CVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f));
-	m->vertices[6] = CVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f));
-	m->vertices[7] = CVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f));
+	m->vertices[4] = CVertex(Vec3(-fx, -fy, +fz), Vec2(1.0f, 1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1.0f, 0.0f, 0.0f));
+	m->vertices[5] = CVertex(Vec3(+fx, -fy, +fz), Vec2(0.0f, 1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1.0f, 0.0f, 0.0f));
+	m->vertices[6] = CVertex(Vec3(+fx, +fy, +fz), Vec2(0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1.0f, 0.0f, 0.0f));
+	m->vertices[7] = CVertex(Vec3(-fx, +fy, +fz), Vec2(1.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(-1.0f, 0.0f, 0.0f));
 	// À­¸é
-	m->vertices[8] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
-	m->vertices[9] = CVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
-	m->vertices[10] = CVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
-	m->vertices[11] = CVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
+	m->vertices[8] = CVertex(Vec3(-fx, +fy, -fz), Vec2(0.0f, 1.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[9] = CVertex(Vec3(-fx, +fy, +fz), Vec2(0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[10] = CVertex(Vec3(+fx, +fy, +fz), Vec2(1.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[11] = CVertex(Vec3(+fx, +fy, -fz), Vec2(1.0f, 1.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f));
 	// ¾Æ·§¸é			
-	m->vertices[12] = CVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f));
-	m->vertices[13] = CVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f));
-	m->vertices[14] = CVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f));
-	m->vertices[15] = CVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f));
+	m->vertices[12] = CVertex(Vec3(-fx, -fy, -fz), Vec2(1.0f, 1.0f), Vec3(0.0f, -1.0f, 0.0f), Vec3(-1.0f, 0.0f, 0.0f));
+	m->vertices[13] = CVertex(Vec3(+fx, -fy, -fz), Vec2(0.0f, 1.0f), Vec3(0.0f, -1.0f, 0.0f), Vec3(-1.0f, 0.0f, 0.0f));
+	m->vertices[14] = CVertex(Vec3(+fx, -fy, +fz), Vec2(0.0f, 0.0f), Vec3(0.0f, -1.0f, 0.0f), Vec3(-1.0f, 0.0f, 0.0f));
+	m->vertices[15] = CVertex(Vec3(-fx, -fy, +fz), Vec2(1.0f, 0.0f), Vec3(0.0f, -1.0f, 0.0f), Vec3(-1.0f, 0.0f, 0.0f));
 	// ¿ÞÂÊ¸é							
-	m->vertices[16] = CVertex(XMFLOAT3(-fx, -fy, +fz), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
-	m->vertices[17] = CVertex(XMFLOAT3(-fx, +fy, +fz), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
-	m->vertices[18] = CVertex(XMFLOAT3(-fx, +fy, -fz), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
-	m->vertices[19] = CVertex(XMFLOAT3(-fx, -fy, -fz), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	m->vertices[16] = CVertex(Vec3(-fx, -fy, +fz), Vec2(0.0f, 1.0f), Vec3(-1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));
+	m->vertices[17] = CVertex(Vec3(-fx, +fy, +fz), Vec2(0.0f, 0.0f), Vec3(-1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));
+	m->vertices[18] = CVertex(Vec3(-fx, +fy, -fz), Vec2(1.0f, 0.0f), Vec3(-1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));
+	m->vertices[19] = CVertex(Vec3(-fx, -fy, -fz), Vec2(1.0f, 1.0f), Vec3(-1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f));
 	// ¿À¸¥ÂÊ¸é		   					
-	m->vertices[20] = CVertex(XMFLOAT3(+fx, -fy, -fz), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f));
-	m->vertices[21] = CVertex(XMFLOAT3(+fx, +fy, -fz), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f));
-	m->vertices[22] = CVertex(XMFLOAT3(+fx, +fy, +fz), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f));
-	m->vertices[23] = CVertex(XMFLOAT3(+fx, -fy, +fz), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f));
+	m->vertices[20] = CVertex(Vec3(+fx, -fy, -fz), Vec2(0.0f, 1.0f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f));
+	m->vertices[21] = CVertex(Vec3(+fx, +fy, -fz), Vec2(0.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f));
+	m->vertices[22] = CVertex(Vec3(+fx, +fy, +fz), Vec2(1.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f));
+	m->vertices[23] = CVertex(Vec3(+fx, -fy, +fz), Vec2(1.0f, 1.0f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f));
 
 	m->indices.emplace_back(36);
 
@@ -268,349 +268,7 @@ std::shared_ptr<CMesh> CMesh::CreateCubeMesh(XMFLOAT3 scale)
 	return m;
 }
 
-std::shared_ptr<CMesh> CMesh::CreateAlphabetMesh(char type, XMFLOAT3 scale)
-{
-	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
-
-	float fx = scale.x * 0.5f, fy = scale.y * 0.5f, fz = scale.z * 0.5f;
-	int i = 0;
-
-	m->primitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	switch (type)
-	{
-	case 'S':
-	{
-		int nCube = 5;
-		m->vertices.reserve(8 * nCube);
-		m->indices.emplace_back(36 * nCube);
-
-		float offSet = fy * 0.2f;
-		float fHalfDepth = fz;
-
-		float right[5];
-		float top[5];
-		float left[5];
-		float bottom[5];
-
-		int idx = 0;
-
-		right[idx] = fx;
-		top[idx] = fy;
-		left[idx] = -fx;
-		bottom[idx] = fy - offSet;
-		idx++;
-
-		right[idx] = -fx + offSet;
-		top[idx] = fy;
-		left[idx] = -fx;
-		bottom[idx] = offSet * 0.5f;
-		idx++;
-
-		right[idx] = fx;
-		top[idx] = offSet * 0.5f;
-		left[idx] = -fx;
-		bottom[idx] = offSet * -0.5f;
-		idx++;
-
-		right[idx] = fx;
-		top[idx] = offSet * 0.5f;
-		left[idx] = fx - offSet;
-		bottom[idx] = -fy;
-		idx++;
-
-		right[idx] = fx;
-		top[idx] = -fy + offSet;
-		left[idx] = -fx;
-		bottom[idx] = -fy;
-		idx++;
-
-		for (int i = 0; i < nCube; ++i) {
-			m->vertices.emplace_back(XMFLOAT3(left[i], top[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, +1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], top[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, +1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], top[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, +1.f, +1.f)));
-			m->vertices.emplace_back(XMFLOAT3(left[i], top[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, +1.f, +1.f)));
-			m->vertices.emplace_back(XMFLOAT3(left[i], bottom[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, -1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], bottom[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, -1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], bottom[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, -1.f, +1.f)));
-			m->vertices.emplace_back(XMFLOAT3(left[i], bottom[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, -1.f, +1.f)));
-
-			int stride = i * 36;
-			int vStride = i * 8;
-
-			m->indices[0][0 + stride] = 3 + vStride; m->indices[0][1 + stride] = 1 + vStride; m->indices[0][2 + stride] = 0 + vStride;
-			m->indices[0][3 + stride] = 2 + vStride; m->indices[0][4 + stride] = 1 + vStride; m->indices[0][5 + stride] = 3 + vStride;
-			m->indices[0][6 + stride] = 0 + vStride; m->indices[0][7 + stride] = 5 + vStride; m->indices[0][8 + stride] = 4 + vStride;
-			m->indices[0][9 + stride] = 1 + vStride; m->indices[0][10 + stride] = 5 + vStride; m->indices[0][11 + stride] = 0 + vStride;
-			m->indices[0][12 + stride] = 3 + vStride; m->indices[0][13 + stride] = 4 + vStride; m->indices[0][14 + stride] = 7 + vStride;
-			m->indices[0][15 + stride] = 0 + vStride; m->indices[0][16 + stride] = 4 + vStride; m->indices[0][17 + stride] = 3 + vStride;
-			m->indices[0][18 + stride] = 1 + vStride; m->indices[0][19 + stride] = 6 + vStride; m->indices[0][20 + stride] = 5 + vStride;
-			m->indices[0][21 + stride] = 2 + vStride; m->indices[0][22 + stride] = 6 + vStride; m->indices[0][23 + stride] = 1 + vStride;
-			m->indices[0][24 + stride] = 2 + vStride; m->indices[0][25 + stride] = 7 + vStride; m->indices[0][26 + stride] = 6 + vStride;
-			m->indices[0][27 + stride] = 3 + vStride; m->indices[0][28 + stride] = 7 + vStride; m->indices[0][29 + stride] = 2 + vStride;
-			m->indices[0][30 + stride] = 6 + vStride; m->indices[0][31 + stride] = 4 + vStride; m->indices[0][32 + stride] = 5 + vStride;
-			m->indices[0][33 + stride] = 7 + vStride; m->indices[0][34 + stride] = 4 + vStride; m->indices[0][35 + stride] = 6 + vStride;
-		}
-
-		break;
-	}
-	case 'T':
-	{
-
-		float offSet = fy * 0.2f;
-		float fHalfDepth = fz;
-
-		int nCube = 2;
-		m->vertices.reserve(8 * nCube);
-		m->indices.emplace_back(36 * nCube);
-
-		float right[2];
-		float top[2];
-		float left[2];
-		float bottom[2];
-
-		int idx = 0;
-
-		right[idx] = fx;
-		top[idx] = fy;
-		left[idx] = -fx;
-		bottom[idx] = fy - offSet;
-		idx++;
-
-		right[idx] = offSet * 0.5f;
-		top[idx] = fy;
-		left[idx] = offSet * -0.5f;
-		bottom[idx] = -fy;
-		idx++;
-
-		for (int i = 0; i < nCube; ++i) {
-			m->vertices.emplace_back(XMFLOAT3(left[i], top[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, +1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], top[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, +1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], top[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, +1.f, +1.f)));
-			m->vertices.emplace_back(XMFLOAT3(left[i], top[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, +1.f, +1.f)));
-			m->vertices.emplace_back(XMFLOAT3(left[i], bottom[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, -1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], bottom[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, -1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], bottom[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, -1.f, +1.f)));
-			m->vertices.emplace_back(XMFLOAT3(left[i], bottom[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, -1.f, +1.f)));
-
-			int stride = i * 36;
-			int vStride = i * 8;
-
-			m->indices[0][0 + stride] = 3 + vStride; m->indices[0][1 + stride] = 1 + vStride; m->indices[0][2 + stride] = 0 + vStride;
-			m->indices[0][3 + stride] = 2 + vStride; m->indices[0][4 + stride] = 1 + vStride; m->indices[0][5 + stride] = 3 + vStride;
-			m->indices[0][6 + stride] = 0 + vStride; m->indices[0][7 + stride] = 5 + vStride; m->indices[0][8 + stride] = 4 + vStride;
-			m->indices[0][9 + stride] = 1 + vStride; m->indices[0][10 + stride] = 5 + vStride; m->indices[0][11 + stride] = 0 + vStride;
-			m->indices[0][12 + stride] = 3 + vStride; m->indices[0][13 + stride] = 4 + vStride; m->indices[0][14 + stride] = 7 + vStride;
-			m->indices[0][15 + stride] = 0 + vStride; m->indices[0][16 + stride] = 4 + vStride; m->indices[0][17 + stride] = 3 + vStride;
-			m->indices[0][18 + stride] = 1 + vStride; m->indices[0][19 + stride] = 6 + vStride; m->indices[0][20 + stride] = 5 + vStride;
-			m->indices[0][21 + stride] = 2 + vStride; m->indices[0][22 + stride] = 6 + vStride; m->indices[0][23 + stride] = 1 + vStride;
-			m->indices[0][24 + stride] = 2 + vStride; m->indices[0][25 + stride] = 7 + vStride; m->indices[0][26 + stride] = 6 + vStride;
-			m->indices[0][27 + stride] = 3 + vStride; m->indices[0][28 + stride] = 7 + vStride; m->indices[0][29 + stride] = 2 + vStride;
-			m->indices[0][30 + stride] = 6 + vStride; m->indices[0][31 + stride] = 4 + vStride; m->indices[0][32 + stride] = 5 + vStride;
-			m->indices[0][33 + stride] = 7 + vStride; m->indices[0][34 + stride] = 4 + vStride; m->indices[0][35 + stride] = 6 + vStride;
-		}
-		break;
-	}
-	case 'A':
-	{
-		float offSet = fy * 0.15f;
-		float fHalfDepth = fz;
-
-		int nCube = 3;
-		m->vertices.reserve(8 * nCube);
-		m->indices.emplace_back(36 * nCube);
-
-		XMFLOAT3 pos[3][8];
-
-		int idx = 0;
-
-		pos[idx][0] = { offSet * -0.5f, fy, -fHalfDepth };
-		pos[idx][1] = { offSet * 0.5f, fy, -fHalfDepth };
-		pos[idx][2] = { offSet * 0.5f, fy, +fHalfDepth };
-		pos[idx][3] = { offSet * -0.5f, fy, +fHalfDepth };
-		pos[idx][4] = { fx - offSet, -fy, -fHalfDepth };
-		pos[idx][5] = { fx, -fy, -fHalfDepth };
-		pos[idx][6] = { fx, -fy, +fHalfDepth };
-		pos[idx][7] = { fx - offSet, -fy, +fHalfDepth };
-		idx++;
-
-		pos[idx][0] = { offSet * -0.5f, fy, -fHalfDepth };
-		pos[idx][1] = { offSet * 0.5f, fy, -fHalfDepth };
-		pos[idx][2] = { offSet * 0.5f, fy, +fHalfDepth };
-		pos[idx][3] = { offSet * -0.5f, fy, +fHalfDepth };
-		pos[idx][4] = { -fx, -fy, -fHalfDepth };
-		pos[idx][5] = { -fx + offSet, -fy, -fHalfDepth };
-		pos[idx][6] = { -fx + offSet, -fy, +fHalfDepth };
-		pos[idx][7] = { -fx, -fy, +fHalfDepth };
-		idx++;
-
-		XMFLOAT3 dir = Vector3::Subtract(XMFLOAT3(offSet * -0.5f, fy, -fHalfDepth), XMFLOAT3(fx - offSet, -fy, -fHalfDepth));
-		dir = Vector3::Normalize(dir);
-		XMFLOAT3 bottom = Vector3::VectorLerp(XMFLOAT3(offSet * -0.5f, fy, -fHalfDepth), XMFLOAT3(fx - offSet, -fy, -fHalfDepth), 0.6f);
-		XMFLOAT3 top = Vector3::Add(bottom, dir, offSet);
-
-		pos[idx][0] = { -top.x, top.y, -fHalfDepth };
-		pos[idx][1] = { +top.x, top.y, -fHalfDepth };
-		pos[idx][2] = { +top.x, top.y, +fHalfDepth };
-		pos[idx][3] = { -top.x, top.y, +fHalfDepth };
-		pos[idx][4] = { -bottom.x, bottom.y, -fHalfDepth };
-		pos[idx][5] = { +bottom.x, bottom.y, -fHalfDepth };
-		pos[idx][6] = { +bottom.x, bottom.y, +fHalfDepth };
-		pos[idx][7] = { -bottom.x, bottom.y, +fHalfDepth };
-		idx++;
-
-		for (int i = 0; i < nCube; ++i)
-		{
-			m->vertices.emplace_back(pos[i][0], Vector3::Normalize(XMFLOAT3(-1.f, +1.f, -1.f)));
-			m->vertices.emplace_back(pos[i][1], Vector3::Normalize(XMFLOAT3(+1.f, +1.f, -1.f)));
-			m->vertices.emplace_back(pos[i][2], Vector3::Normalize(XMFLOAT3(+1.f, +1.f, +1.f)));
-			m->vertices.emplace_back(pos[i][3], Vector3::Normalize(XMFLOAT3(-1.f, +1.f, +1.f)));
-			m->vertices.emplace_back(pos[i][4], Vector3::Normalize(XMFLOAT3(-1.f, -1.f, -1.f)));
-			m->vertices.emplace_back(pos[i][5], Vector3::Normalize(XMFLOAT3(+1.f, -1.f, -1.f)));
-			m->vertices.emplace_back(pos[i][6], Vector3::Normalize(XMFLOAT3(+1.f, -1.f, +1.f)));
-			m->vertices.emplace_back(pos[i][7], Vector3::Normalize(XMFLOAT3(-1.f, -1.f, +1.f)));
-
-			int stride = i * 36;
-			int vStride = i * 8;
-
-			m->indices[0][0 + stride] = 3 + vStride; m->indices[0][1 + stride] = 1 + vStride; m->indices[0][2 + stride] = 0 + vStride;
-			m->indices[0][3 + stride] = 2 + vStride; m->indices[0][4 + stride] = 1 + vStride; m->indices[0][5 + stride] = 3 + vStride;
-			m->indices[0][6 + stride] = 0 + vStride; m->indices[0][7 + stride] = 5 + vStride; m->indices[0][8 + stride] = 4 + vStride;
-			m->indices[0][9 + stride] = 1 + vStride; m->indices[0][10 + stride] = 5 + vStride; m->indices[0][11 + stride] = 0 + vStride;
-			m->indices[0][12 + stride] = 3 + vStride; m->indices[0][13 + stride] = 4 + vStride; m->indices[0][14 + stride] = 7 + vStride;
-			m->indices[0][15 + stride] = 0 + vStride; m->indices[0][16 + stride] = 4 + vStride; m->indices[0][17 + stride] = 3 + vStride;
-			m->indices[0][18 + stride] = 1 + vStride; m->indices[0][19 + stride] = 6 + vStride; m->indices[0][20 + stride] = 5 + vStride;
-			m->indices[0][21 + stride] = 2 + vStride; m->indices[0][22 + stride] = 6 + vStride; m->indices[0][23 + stride] = 1 + vStride;
-			m->indices[0][24 + stride] = 2 + vStride; m->indices[0][25 + stride] = 7 + vStride; m->indices[0][26 + stride] = 6 + vStride;
-			m->indices[0][27 + stride] = 3 + vStride; m->indices[0][28 + stride] = 7 + vStride; m->indices[0][29 + stride] = 2 + vStride;
-			m->indices[0][30 + stride] = 6 + vStride; m->indices[0][31 + stride] = 4 + vStride; m->indices[0][32 + stride] = 5 + vStride;
-			m->indices[0][33 + stride] = 7 + vStride; m->indices[0][34 + stride] = 4 + vStride; m->indices[0][35 + stride] = 6 + vStride;
-		}
-
-		break;
-	}
-	case 'R':
-	{
-
-		float offSet = fy * 0.2f;
-		float fHalfDepth = fz;
-
-		int nCube = 5;
-		m->vertices.reserve(8 * nCube);
-		m->indices.emplace_back(36 * nCube);
-
-		float right[5];
-		float top[5];
-		float left[5];
-		float bottom[5];
-
-		int idx = 0;
-
-		right[idx] = fx;
-		top[idx] = fy;
-		left[idx] = -fx;
-		bottom[idx] = fy - offSet;
-		idx++;
-
-		right[idx] = -fx + offSet;
-		top[idx] = fy;
-		left[idx] = -fx;
-		bottom[idx] = -fy;
-		idx++;
-
-		right[idx] = fx;
-		top[idx] = offSet * 0.5f;
-		left[idx] = -fx;
-		bottom[idx] = offSet * -0.5f;
-		idx++;
-
-		right[idx] = fx;
-		top[idx] = fy;
-		left[idx] = fx - offSet;
-		bottom[idx] = offSet * -0.5f;
-		idx++;
-
-		left[idx] = -fx + offSet;
-		right[idx] = left[idx - 1] + offSet;
-		top[idx] = offSet * -0.5f;
-		bottom[idx] = -fy;
-		idx++;
-
-		XMFLOAT3 pos[8];
-		pos[0] = { -fx + offSet, offSet * -0.5f, -fHalfDepth };
-		pos[1] = { -fx + offSet * 2, offSet * -0.5f, -fHalfDepth };
-		pos[2] = { -fx + offSet * 2, offSet * -0.5f, +fHalfDepth };
-		pos[3] = { -fx + offSet, offSet * -0.5f, +fHalfDepth };
-		pos[4] = { fx - offSet, -fy, -fHalfDepth };
-		pos[5] = { fx, -fy, -fHalfDepth };
-		pos[6] = { fx, -fy, +fHalfDepth };
-		pos[7] = { fx - offSet, -fy, +fHalfDepth };
-
-		for (int i = 0; i < nCube - 1; ++i) {
-			m->vertices.emplace_back(XMFLOAT3(left[i], top[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, +1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], top[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, +1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], top[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, +1.f, +1.f)));
-			m->vertices.emplace_back(XMFLOAT3(left[i], top[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, +1.f, +1.f)));
-			m->vertices.emplace_back(XMFLOAT3(left[i], bottom[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, -1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], bottom[i], -fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, -1.f, -1.f)));
-			m->vertices.emplace_back(XMFLOAT3(right[i], bottom[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(+1.f, -1.f, +1.f)));
-			m->vertices.emplace_back(XMFLOAT3(left[i], bottom[i], +fHalfDepth), Vector3::Normalize(XMFLOAT3(-1.f, -1.f, +1.f)));
-
-			int stride = i * 36;
-			int vStride = i * 8;
-
-			m->indices[0][0 + stride] = 3 + vStride; m->indices[0][1 + stride] = 1 + vStride; m->indices[0][2 + stride] = 0 + vStride;
-			m->indices[0][3 + stride] = 2 + vStride; m->indices[0][4 + stride] = 1 + vStride; m->indices[0][5 + stride] = 3 + vStride;
-			m->indices[0][6 + stride] = 0 + vStride; m->indices[0][7 + stride] = 5 + vStride; m->indices[0][8 + stride] = 4 + vStride;
-			m->indices[0][9 + stride] = 1 + vStride; m->indices[0][10 + stride] = 5 + vStride; m->indices[0][11 + stride] = 0 + vStride;
-			m->indices[0][12 + stride] = 3 + vStride; m->indices[0][13 + stride] = 4 + vStride; m->indices[0][14 + stride] = 7 + vStride;
-			m->indices[0][15 + stride] = 0 + vStride; m->indices[0][16 + stride] = 4 + vStride; m->indices[0][17 + stride] = 3 + vStride;
-			m->indices[0][18 + stride] = 1 + vStride; m->indices[0][19 + stride] = 6 + vStride; m->indices[0][20 + stride] = 5 + vStride;
-			m->indices[0][21 + stride] = 2 + vStride; m->indices[0][22 + stride] = 6 + vStride; m->indices[0][23 + stride] = 1 + vStride;
-			m->indices[0][24 + stride] = 2 + vStride; m->indices[0][25 + stride] = 7 + vStride; m->indices[0][26 + stride] = 6 + vStride;
-			m->indices[0][27 + stride] = 3 + vStride; m->indices[0][28 + stride] = 7 + vStride; m->indices[0][29 + stride] = 2 + vStride;
-			m->indices[0][30 + stride] = 6 + vStride; m->indices[0][31 + stride] = 4 + vStride; m->indices[0][32 + stride] = 5 + vStride;
-			m->indices[0][33 + stride] = 7 + vStride; m->indices[0][34 + stride] = 4 + vStride; m->indices[0][35 + stride] = 6 + vStride;
-		}
-
-		int stride = 4 * 36;
-		int vStride = 4 * 8;
-
-		m->vertices.emplace_back(pos[0], Vector3::Normalize(XMFLOAT3(-1.f, +1.f, -1.f)));
-		m->vertices.emplace_back(pos[1], Vector3::Normalize(XMFLOAT3(+1.f, +1.f, -1.f)));
-		m->vertices.emplace_back(pos[2], Vector3::Normalize(XMFLOAT3(+1.f, +1.f, +1.f)));
-		m->vertices.emplace_back(pos[3], Vector3::Normalize(XMFLOAT3(-1.f, +1.f, +1.f)));
-		m->vertices.emplace_back(pos[4], Vector3::Normalize(XMFLOAT3(-1.f, -1.f, -1.f)));
-		m->vertices.emplace_back(pos[5], Vector3::Normalize(XMFLOAT3(+1.f, -1.f, -1.f)));
-		m->vertices.emplace_back(pos[6], Vector3::Normalize(XMFLOAT3(+1.f, -1.f, +1.f)));
-		m->vertices.emplace_back(pos[7], Vector3::Normalize(XMFLOAT3(-1.f, -1.f, +1.f)));
-
-		m->indices[0][0 + stride] = 3 + vStride; m->indices[0][1 + stride] = 1 + vStride; m->indices[0][2 + stride] = 0 + vStride;
-		m->indices[0][3 + stride] = 2 + vStride; m->indices[0][4 + stride] = 1 + vStride; m->indices[0][5 + stride] = 3 + vStride;
-		m->indices[0][6 + stride] = 0 + vStride; m->indices[0][7 + stride] = 5 + vStride; m->indices[0][8 + stride] = 4 + vStride;
-		m->indices[0][9 + stride] = 1 + vStride; m->indices[0][10 + stride] = 5 + vStride; m->indices[0][11 + stride] = 0 + vStride;
-		m->indices[0][12 + stride] = 3 + vStride; m->indices[0][13 + stride] = 4 + vStride; m->indices[0][14 + stride] = 7 + vStride;
-		m->indices[0][15 + stride] = 0 + vStride; m->indices[0][16 + stride] = 4 + vStride; m->indices[0][17 + stride] = 3 + vStride;
-		m->indices[0][18 + stride] = 1 + vStride; m->indices[0][19 + stride] = 6 + vStride; m->indices[0][20 + stride] = 5 + vStride;
-		m->indices[0][21 + stride] = 2 + vStride; m->indices[0][22 + stride] = 6 + vStride; m->indices[0][23 + stride] = 1 + vStride;
-		m->indices[0][24 + stride] = 2 + vStride; m->indices[0][25 + stride] = 7 + vStride; m->indices[0][26 + stride] = 6 + vStride;
-		m->indices[0][27 + stride] = 3 + vStride; m->indices[0][28 + stride] = 7 + vStride; m->indices[0][29 + stride] = 2 + vStride;
-		m->indices[0][30 + stride] = 6 + vStride; m->indices[0][31 + stride] = 4 + vStride; m->indices[0][32 + stride] = 5 + vStride;
-		m->indices[0][33 + stride] = 7 + vStride; m->indices[0][34 + stride] = 4 + vStride; m->indices[0][35 + stride] = 6 + vStride;
-
-		break;
-	}
-	default:
-		break;
-	}
-
-	m->CalculateNormal();
-	m->CreateOOBBAndOOBS();
-
-	return m;
-}
-
-std::shared_ptr<CMesh> CMesh::CreateRectangleMesh(XMFLOAT2 scale)
+std::shared_ptr<CMesh> CMesh::CreateRectangleMesh(Vec2 scale)
 {
 	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
 
@@ -620,10 +278,10 @@ std::shared_ptr<CMesh> CMesh::CreateRectangleMesh(XMFLOAT2 scale)
 	m->vertices.resize(4);
 
 	// ¾Õ¸é
-	m->vertices[0] = CVertex(XMFLOAT3(-w2, -fy, 0), XMFLOAT2(0.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
-	m->vertices[1] = CVertex(XMFLOAT3(-w2, +fy, 0), XMFLOAT2(0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
-	m->vertices[2] = CVertex(XMFLOAT3(+w2, +fy, 0), XMFLOAT2(1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
-	m->vertices[3] = CVertex(XMFLOAT3(+w2, -fy, 0), XMFLOAT2(1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f));
+	m->vertices[0] = CVertex(Vec3(-w2, -fy, 0), Vec2(0.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[1] = CVertex(Vec3(-w2, +fy, 0), Vec2(0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[2] = CVertex(Vec3(+w2, +fy, 0), Vec2(1.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[3] = CVertex(Vec3(+w2, -fy, 0), Vec2(1.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
 
 	m->indices.emplace_back(6);
 
@@ -642,10 +300,10 @@ std::shared_ptr<CMesh> CMesh::CreateSphereMesh(float radius, UINT stackCnt, UINT
 
 	CVertex v;
 
-	v.position = XMFLOAT3(0.0f, radius, 0.0f);
-	v.texCoord = XMFLOAT2(0.5f, 0.0f);
-	v.normal = Vector3::Normalize(v.position);
-	v.tangent = XMFLOAT3(1.0f, 0.0f, 1.0f);
+	v.position = Vec3(0.0f, radius, 0.0f);
+	v.texCoord = Vec2(0.5f, 0.0f);
+	v.normal = v.position.GetNormalized();
+	v.tangent = Vec3(1.0f, 0.0f, 1.0f);
 
 	m->vertices.push_back(v);
 
@@ -667,23 +325,23 @@ std::shared_ptr<CMesh> CMesh::CreateSphereMesh(float radius, UINT stackCnt, UINT
 			v.position.y = radius * cosf(phi);
 			v.position.z = radius * sinf(phi) * sinf(theta);
 
-			v.texCoord = XMFLOAT2(deltaU * x, deltaV * y);
+			v.texCoord = Vec2(deltaU * x, deltaV * y);
 
-			v.normal = Vector3::Normalize(v.position);
+			v.normal = v.position.GetNormalized();
 
 			v.tangent.x = -radius * sinf(phi) * sinf(theta);
 			v.tangent.y = 0.0f;
 			v.tangent.z = radius * sinf(phi) * cosf(theta);
-			v.tangent = Vector3::Normalize(v.tangent);
+			v.tangent = v.tangent.GetNormalized();
 
 			m->vertices.push_back(v);
 		}
 	}
 
-	v.position = XMFLOAT3(0.0f, -radius, 0.0f);
-	v.texCoord = XMFLOAT2(0.5f, 1.0f);
-	v.normal = Vector3::Normalize(v.position);
-	v.tangent = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	v.position = Vec3(0.0f, -radius, 0.0f);
+	v.texCoord = Vec2(0.5f, 1.0f);
+	v.normal = v.position.GetNormalized();
+	v.tangent = Vec3(1.0f, 0.0f, 0.0f);
 
 	m->vertices.push_back(v);
 
@@ -752,14 +410,14 @@ void CMesh::CreateIndexBufferView(ID3D12Device* device, ID3D12GraphicsCommandLis
 
 void CMesh::CreateOOBBAndOOBS()
 {
-	BoundingOrientedBox::CreateFromPoints(oobb, vertices.size(), (XMFLOAT3*)vertices.data(), sizeof(CVertex));
-	BoundingSphere::CreateFromPoints(oobs, vertices.size(), (XMFLOAT3*)vertices.data(), sizeof(CVertex));
+	BoundingOrientedBox::CreateFromPoints(oobb, vertices.size(), (Vec3*)vertices.data(), sizeof(CVertex));
+	BoundingSphere::CreateFromPoints(oobs, vertices.size(), (Vec3*)vertices.data(), sizeof(CVertex));
 }
 
 void CMesh::CalculateNormal()
 {
 	for (auto& v : vertices) {
-		v.normal = XMFLOAT3(0.f, 0.f, 0.f);
+		v.normal = Vec3(0.f, 0.f, 0.f);
 	}
 	int nOffset = (primitiveTopology == D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST) ? 3 : 1;
 	UINT nVertices = vertices.size();
@@ -778,39 +436,40 @@ void CMesh::CalculateNormal()
 		UINT v1Idx = ((nIndices) ? (indices[curSubSet][(i * nOffset) + 1]) : ((i * nOffset) + 1));
 		UINT v2Idx = ((nIndices) ? (indices[curSubSet][(i * nOffset) + 2]) : ((i * nOffset) + 2));
 
-		XMFLOAT3 v0 = vertices[v0Idx].position;
-		XMFLOAT3 v1 = vertices[v1Idx].position;
-		XMFLOAT3 v2 = vertices[v2Idx].position;
+		Vec3 v0 = vertices[v0Idx].position;
+		Vec3 v1 = vertices[v1Idx].position;
+		Vec3 v2 = vertices[v2Idx].position;
 
-		XMFLOAT3 edge1 = v1 - v0;
-		XMFLOAT3 edge2 = v2 - v0;
+		Vec3 edge1 = v1 - v0;
+		Vec3 edge2 = v2 - v0;
 
-		XMFLOAT3 normal = Vector3::CrossProduct(edge1, edge2, true);
+		Vec3 normal = edge1.Cross(edge2).GetNormalized();
 
-		vertices[v0Idx].normal = Vector3::Normalize(vertices[v0Idx].normal + normal);
-		vertices[v1Idx].normal = Vector3::Normalize(vertices[v1Idx].normal + normal);
-		vertices[v2Idx].normal = Vector3::Normalize(vertices[v2Idx].normal + normal);
+		vertices[v0Idx].normal = (vertices[v0Idx].normal + normal).GetNormalized();
+		vertices[v1Idx].normal = (vertices[v1Idx].normal + normal).GetNormalized();
+		vertices[v2Idx].normal = (vertices[v2Idx].normal + normal).GetNormalized();
 	}
 }
 
 void CMesh::ReleaseUploadBuffers()
 {
-	vertexBuffer.Reset();
-	for(auto& idxBuffer : indexBuffer)
-		idxBuffer.Reset();
+	if(vertexUploadBuffer)
+		vertexUploadBuffer.Reset();
+	for (auto& idxUploadBuffer : indexUploadBuffer) {
+		idxUploadBuffer.Reset();
+	}
 }
 
-BOOL CMesh::RayIntersectionByTriangle(const XMFLOAT3& xmRayOrigin, const XMFLOAT3& xmRayDirection, 
-	const XMFLOAT3& v0, const XMFLOAT3& v1, const XMFLOAT3& v2, float* pfNearHitDistance)
+BOOL CMesh::RayIntersectionByTriangle(const Ray& ray, const Vec3& v0, const Vec3& v1, const Vec3& v2, float& nearHitDistance)
 {
-	float fHitDistance;
-	BOOL bIntersected = Triangle::Intersect(xmRayOrigin, xmRayDirection, v0, v1, v2, fHitDistance);
-	if (bIntersected && (fHitDistance < *pfNearHitDistance)) *pfNearHitDistance = fHitDistance;
+	float fHitDistance{};
+	BOOL intersected = ray.Intersects(v0, v1, v2, nearHitDistance);
+	if (intersected && (fHitDistance < nearHitDistance)) nearHitDistance = fHitDistance;
 
-	return(bIntersected);
+	return intersected;
 }
 
-int CMesh::CheckRayIntersection(const XMFLOAT3& xmvPickRayOrigin, const XMFLOAT3& xmvPickRayDirection, float* pfNearHitDistance)
+int CMesh::CheckRayIntersection(const Ray& ray, float& nearHitDistance)
 {
 	int nIntersections = 0;
 	int nOffset = (primitiveTopology == D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST) ? 3 : 1;
@@ -825,13 +484,9 @@ int CMesh::CheckRayIntersection(const XMFLOAT3& xmvPickRayOrigin, const XMFLOAT3
 	if (nIndices) nPrimitives = (primitiveTopology ==
 		D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST) ? (nIndices / 3) : (nIndices - 2);
 
-	XMVECTOR xmRayOrigin = XMLoadFloat3(&xmvPickRayOrigin);
-	XMVECTOR xmRayDirection = XMLoadFloat3(&xmvPickRayDirection);
+	bool intersected = ray.Intersects(oobb, nearHitDistance);
 
-	bool bIntersected = oobb.Intersects(xmRayOrigin, xmRayDirection,
-		*pfNearHitDistance);
-
-	if (bIntersected)
+	if (intersected)
 	{
 		float fNearHitDistance = FLT_MAX;
 
@@ -846,14 +501,13 @@ int CMesh::CheckRayIntersection(const XMFLOAT3& xmvPickRayOrigin, const XMFLOAT3
 			XMVECTOR v2 = XMLoadFloat3(&(vertices[v2Idx].position));
 
 			float fHitDistance;
-			BOOL bIntersected = TriangleTests::Intersects(xmRayOrigin, xmRayDirection, v0,
-				v1, v2, fHitDistance);
+			BOOL bIntersected = ray.Intersects(v0, v1, v2, fHitDistance);
 
 			if (bIntersected)
 			{
 				if (fHitDistance < fNearHitDistance)
 				{
-					*pfNearHitDistance = fNearHitDistance = fHitDistance;
+					nearHitDistance = fNearHitDistance = fHitDistance;
 				}
 				nIntersections++;
 			}

@@ -1,3 +1,4 @@
+#include "SimpleMath.h"
 //-------------------------------------------------------------------------------------
 // SimpleMath.inl -- Simplified C++ Math wrapper for DirectXMath
 //
@@ -962,6 +963,15 @@ inline void Vector3::Normalize(Vector3& result) const noexcept
     XMStoreFloat3(&result, X);
 }
 
+inline Vector3 Vector3::GetNormalized() const noexcept
+{
+    using namespace DirectX;
+    XMVECTOR v1 = XMLoadFloat3(this);
+    XMVECTOR X = XMVector3Normalize(v1);
+
+    return X;
+}
+
 inline void Vector3::Clamp(const Vector3& vmin, const Vector3& vmax) noexcept
 {
     using namespace DirectX;
@@ -1303,6 +1313,27 @@ inline void Vector3::TransformNormal(const Vector3* varray, size_t count, const 
     using namespace DirectX;
     XMMATRIX M = XMLoadFloat4x4(&m);
     XMVector3TransformNormalStream(resultArray, sizeof(XMFLOAT3), varray, sizeof(XMFLOAT3), count, M);
+}
+
+inline Vector3 DirectX::SimpleMath::Vector3::GetAngleToQuaternion(const Quaternion& quat) noexcept
+{
+    XMFLOAT3 eulerAngles;
+
+    XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(quat);
+
+    // Pitch (X축 회전)
+    eulerAngles.x = std::asin(-rotationMatrix.r[2].m128_f32[1]);
+
+    // Yaw (Y축 회전)
+    if (std::cos(eulerAngles.x) > 0.0001f) {  // 짐벌락 회피
+        eulerAngles.y = std::atan2(rotationMatrix.r[2].m128_f32[0], rotationMatrix.r[2].m128_f32[2]);
+        eulerAngles.z = std::atan2(rotationMatrix.r[0].m128_f32[1], rotationMatrix.r[1].m128_f32[1]);
+    }
+    else {
+        eulerAngles.y = std::atan2(-rotationMatrix.r[1].m128_f32[0], rotationMatrix.r[0].m128_f32[0]);
+        eulerAngles.z = 0.0f;
+    }
+    return eulerAngles;
 }
 
 
@@ -2990,7 +3021,7 @@ inline Quaternion operator- (const Quaternion& Q1, const Quaternion& Q2) noexcep
     return R;
 }
 
-inline Quaternion operator* (const Quaternion& Q1, const Quaternion& Q2) noexcept
+inline SimpleMath::Quaternion operator* (const Quaternion& Q1, const Quaternion& Q2) noexcept
 {
     using namespace DirectX;
     XMVECTOR q1 = XMLoadFloat4(&Q1);
@@ -3113,6 +3144,14 @@ inline Quaternion Quaternion::CreateFromYawPitchRoll(float yaw, float pitch, flo
     using namespace DirectX;
     Quaternion R;
     XMStoreFloat4(&R, XMQuaternionRotationRollPitchYaw(pitch, yaw, roll));
+    return R;
+}
+
+inline Quaternion Quaternion::CreateFromYawPitchRoll(const Vector3& angles) noexcept
+{
+    using namespace DirectX;
+    Quaternion R;
+    XMStoreFloat4(&R, XMQuaternionRotationRollPitchYaw(angles.x, angles.y, angles.z));
     return R;
 }
 
@@ -3579,6 +3618,11 @@ inline bool Ray::Intersects(const BoundingSphere& sphere, _Out_ float& Dist) con
 }
 
 inline bool Ray::Intersects(const BoundingBox& box, _Out_ float& Dist) const noexcept
+{
+    return box.Intersects(position, direction, Dist);
+}
+
+inline bool Ray::Intersects(const BoundingOrientedBox& box, _Out_ float& Dist) const noexcept
 {
     return box.Intersects(position, direction, Dist);
 }

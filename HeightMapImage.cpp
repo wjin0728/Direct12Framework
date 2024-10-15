@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "HeightMapImage.h"
 
-CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale)
+CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, Vec3 xmf3Scale)
 {
 	width = nWidth;
 	length = nLength;
@@ -68,42 +68,41 @@ float CHeightMapImage::GetHeight(float fx, float fz)
 			fBottomLeft = fTopLeft + (fBottomRight - fTopRight);
 	}
 
-	float fTopHeight = Flerp(fTopLeft, fTopRight, fxPercent);
-	float fBottomHeight = Flerp(fBottomLeft, fBottomRight, fxPercent);
-	float fHeight = Flerp(fBottomHeight, fTopHeight, fzPercent);
+	float fTopHeight = SimpleMath::Flerp(fTopLeft, fTopRight, fxPercent);
+	float fBottomHeight = SimpleMath::Flerp(fBottomLeft, fBottomRight, fxPercent);
+	float fHeight = SimpleMath::Flerp(fBottomHeight, fTopHeight, fzPercent);
 
 	return fHeight;
 }
 
-XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
+Vec3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 {
 	if ((x < 0.0f) || (z < 0.0f) || (x >= width) || (z >= length))
-		return(XMFLOAT3(0.0f, 1.0f, 0.0f));
+		return(Vec3(0.0f, 1.0f, 0.0f));
 
 	int nHeightMapIndex = x + (z * width);
 	int xHeightMapAdd = (x < (width - 1)) ? 1 : -1;
 	int zHeightMapAdd = (z < (length - 1)) ? width : -width;
 
-	XMFLOAT3 xmf3Edge1, xmf3Edge2;
+	Vec3 xmf3Edge1, xmf3Edge2;
 
 	if(z & 1) {
 		float y1 = (float)heightMapPixels[nHeightMapIndex] * scale.y;
 		float y2 = (float)heightMapPixels[nHeightMapIndex + xHeightMapAdd + zHeightMapAdd] * scale.y;
 		float y3 = (float)heightMapPixels[nHeightMapIndex + zHeightMapAdd] * scale.y;
 
-		xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, scale.z);
-		xmf3Edge2 = XMFLOAT3(scale.x, y2 - y1, scale.z);
+		xmf3Edge1 = Vec3(0.0f, y3 - y1, scale.z);
+		xmf3Edge2 = Vec3(scale.x, y2 - y1, scale.z);
 	}
 	else {
 		float y1 = (float)heightMapPixels[nHeightMapIndex] * scale.y;
 		float y2 = (float)heightMapPixels[nHeightMapIndex + xHeightMapAdd] * scale.y;
 		float y3 = (float)heightMapPixels[nHeightMapIndex + zHeightMapAdd] * scale.y;
 
-		xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, scale.z);
-		xmf3Edge2 = XMFLOAT3(scale.x, y2 - y1, 0.0f);
+		xmf3Edge1 = Vec3(0.0f, y3 - y1, scale.z);
+		xmf3Edge2 = Vec3(scale.x, y2 - y1, 0.0f);
 	}
-
-	XMFLOAT3 xmf3Normal = Vector3::CrossProduct(xmf3Edge1, xmf3Edge2, true);
+	Vec3 xmf3Normal = xmf3Edge1.Cross(xmf3Edge2).GetNormalized();
 
 	return(xmf3Normal);
 }

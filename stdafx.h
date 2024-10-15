@@ -65,12 +65,13 @@ using Microsoft::WRL::ComPtr;
 
 #define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
 
-
-using Vec2 = DirectX::SimpleMath::Vector2;
-using Vec3 = DirectX::SimpleMath::Vector3;
-using Vec4 = DirectX::SimpleMath::Vector4;
-using Matrix = DirectX::SimpleMath::Matrix;
-
+using Vec2 = SimpleMath::Vector2;
+using Vec3 = SimpleMath::Vector3;
+using Vec4 = SimpleMath::Vector4;
+using SimpleMath::Matrix;
+using SimpleMath::Quaternion;
+using SimpleMath::Plane;
+using SimpleMath::Ray;
 
 inline XMFLOAT4 GetRandomColor() {
 	std::random_device rd;
