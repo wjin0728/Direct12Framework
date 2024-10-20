@@ -154,6 +154,7 @@
     <ClInclude Include="MeshRenderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
+    <ClInclude Include="QuadTree.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -257,6 +258,9 @@
     </ClCompile>
     <ClCompile Include="MeshRenderer.cpp">
       <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="QuadTree.cpp">
+      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

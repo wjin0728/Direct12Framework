@@ -19,6 +19,7 @@ enum {
 	OBJECT_COUNT = 100
 };
 
+
 class CUploadBuffer
 {
 private:
@@ -39,8 +40,8 @@ public:
 	void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1);
 
 	void UpdateData(const void* _data, UINT idx = 0, UINT _dataNum = 1);
-
 	void UpdateConstantBuffer(UINT idx = 0);
+	void UpdateStructedBuffer(UINT idx = 0);
 
 private:
 	void CreateBuffer();

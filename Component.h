@@ -7,6 +7,7 @@ enum class COMPONENT_TYPE : UINT8
 	MESH_RENDERER,
 	CAMERA,
 	LIGHT,
+	TERRAIN,
 	// ...
 	SCRIPT,
 	END,
@@ -17,11 +18,13 @@ enum
 	FIXED_COMPONENT_COUNT = static_cast<UINT8>(COMPONENT_TYPE::END) - 1
 };
 
+class CGameObject;
+
 class CComponent
 {
 protected:
 	COMPONENT_TYPE type;
-	std::weak_ptr<class CGameObject> owner;
+	std::weak_ptr<CGameObject> owner;
 
 public:
 	CComponent(COMPONENT_TYPE type);
@@ -35,6 +38,7 @@ public:
 	virtual void FixedUpdate() {}; 
 
 public:
+	std::shared_ptr<CGameObject> GetOwner() { return owner.lock(); }
 	COMPONENT_TYPE GetType() const { return type; }
 };
 

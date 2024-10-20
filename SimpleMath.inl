@@ -2645,6 +2645,17 @@ inline Matrix Matrix::CreateLookAt(const Vector3& eye, const Vector3& target, co
     return R;
 }
 
+inline Matrix Matrix::CreateLookTo(const Vector3& eye, const Vector3& direction, const Vector3& up) noexcept
+{
+    using namespace DirectX;
+    Matrix R;
+    XMVECTOR eyev = XMLoadFloat3(&eye);
+    XMVECTOR directionv = XMLoadFloat3(&direction);
+    XMVECTOR upv = XMLoadFloat3(&up);
+    XMStoreFloat4x4(&R, XMMatrixLookToLH(eyev, directionv, upv));
+    return R;
+}
+
 inline Matrix Matrix::CreateWorld(const Vector3& position, const Vector3& forward, const Vector3& up) noexcept
 {
     using namespace DirectX;

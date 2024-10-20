@@ -18,7 +18,6 @@
 #include<array>
 #include<queue>
 #include<map>
-
 #include <Mmsystem.h>
 
 #include <d3d12.h>
@@ -45,7 +44,6 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
-
 #pragma comment(lib, "dxguid.lib")
 
 
@@ -144,7 +142,7 @@ public:							\
 #define DEVICE INSTANCE(CDX12Manager).GetDevice()
 #define CMDLIST INSTANCE(CDX12Manager).GetCommandList()
 #define CONSTBUFFER(T) INSTANCE(CDX12Manager).GetConstBuffer(T)
-
+#define RESOURCE INSTANCE(CResourceManager).
 
 namespace BinaryReader
 {

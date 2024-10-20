@@ -29,7 +29,6 @@ void CUploadBuffer::UpdateData(const void* _data, UINT idx, UINT _dataNum)
 
 void CUploadBuffer::CreateBuffer()
 {
-
 	byteSize = ((sizeof(dataSize) + 255) & ~255);
 
 	D3D12_HEAP_PROPERTIES d3dHeapPropertiesDesc{};
@@ -65,4 +64,12 @@ void CUploadBuffer::UpdateConstantBuffer(UINT idx)
 
 	auto cmdList = INSTANCE(CDX12Manager).GetCommandList();
 	cmdList->SetGraphicsRootConstantBufferView(rootParamIdx, bufferLocation);
+}
+
+void CUploadBuffer::UpdateStructedBuffer(UINT idx)
+{
+	D3D12_GPU_VIRTUAL_ADDRESS bufferLocation = buffer->GetGPUVirtualAddress() + (byteSize * static_cast<unsigned long long>(idx));
+
+	auto cmdList = INSTANCE(CDX12Manager).GetCommandList();
+	cmdList->SetGraphicsRootShaderResourceView(rootParamIdx, bufferLocation);
 }

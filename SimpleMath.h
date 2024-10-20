@@ -576,6 +576,7 @@ namespace DirectX
             static Matrix CreateOrthographicOffCenter(float left, float right, float bottom, float top, float zNearPlane, float zFarPlane) noexcept;
 
             static Matrix CreateLookAt(const Vector3& position, const Vector3& target, const Vector3& up) noexcept;
+            static Matrix CreateLookTo(const Vector3& eye, const Vector3& direction, const Vector3& up) noexcept;
             static Matrix CreateWorld(const Vector3& position, const Vector3& forward, const Vector3& up) noexcept;
 
             static Matrix CreateFromQuaternion(const Quaternion& quat) noexcept;
@@ -732,12 +733,12 @@ namespace DirectX
         };
 
         // Binary operators
-        SimpleMath::Quaternion SimpleMath::operator+ (const Quaternion& Q1, const Quaternion& Q2) noexcept;
-        SimpleMath::Quaternion SimpleMath::operator- (const Quaternion& Q1, const Quaternion& Q2) noexcept;
-        SimpleMath::Quaternion SimpleMath::operator* (const Quaternion& Q1, const Quaternion& Q2) noexcept;
-        SimpleMath::Quaternion SimpleMath::operator* (const Quaternion& Q, float S) noexcept;
-        SimpleMath::Quaternion SimpleMath::operator/ (const Quaternion& Q1, const Quaternion& Q2) noexcept;
-        SimpleMath::Quaternion SimpleMath::operator* (float S, const Quaternion& Q) noexcept;
+        SimpleMath::Quaternion operator+ (const Quaternion& Q1, const Quaternion& Q2) noexcept;
+        SimpleMath::Quaternion operator- (const Quaternion& Q1, const Quaternion& Q2) noexcept;
+        SimpleMath::Quaternion operator* (const Quaternion& Q1, const Quaternion& Q2) noexcept;
+        SimpleMath::Quaternion operator* (const Quaternion& Q, float S) noexcept;
+        SimpleMath::Quaternion operator/ (const Quaternion& Q1, const Quaternion& Q2) noexcept;
+        SimpleMath::Quaternion operator* (float S, const Quaternion& Q) noexcept;
 
         //------------------------------------------------------------------------------
         // Color

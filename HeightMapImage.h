@@ -1,7 +1,7 @@
 #pragma once
 #include"stdafx.h"
 
-class CHeightMapImage
+class CHeightMap
 {
 private:
 	BYTE* heightMapPixels;
@@ -10,8 +10,8 @@ private:
 	Vec3 scale;
 
 public:
-	CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, Vec3 xmf3Scale);
-	~CHeightMapImage(void);
+	CHeightMap(LPCTSTR pFileName, int nWidth, int nLength, Vec3 xmf3Scale);
+	~CHeightMap(void);
 
 	float GetHeight(float fx, float fz);
 	Vec3 GetHeightMapNormal(int x, int z);

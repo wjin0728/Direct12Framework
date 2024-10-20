@@ -16,6 +16,9 @@ private:
 	Matrix mLocalMat = Matrix::Identity;
 
 private:
+	friend CGameObject;
+	friend class CCamera;
+
 	bool isMoved{};
 	int dirtyFramesNum{};
 
@@ -45,7 +48,6 @@ public:
 	void LookAt(const Vec3& lookPos, const Vec3& up = { 0.f,1.f,0.f });
 	void LookAt(const CTransform& target, const Vec3& up = { 0.f,1.f,0.f });
 
-
 	void Rotate(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
 	void Rotate(const Vec3& rotation);
 	void Rotate(const Vec3& axis, float angle);
@@ -58,6 +60,7 @@ public:
 	void SetRight(const Vec3& right) { mRight = right; };
 
 	Vec3 GetPosition() const { return mPosition; };
+	Vec3 GetWorldPosition() const { return Vec3(mWorldMat._41, mWorldMat._42, mWorldMat._43); };
 	Vec3 GetRotation() const { return Vec3::GetAngleToQuaternion(mRotation); }
 	Vec3 GetScale() const { return mScale; };
 	Vec3 GetLook() const { return mLook; };
@@ -66,7 +69,12 @@ public:
 
 	std::wstring GetObjectName();
 
+	std::vector<std::shared_ptr<CTransform>>& GetChildren() { return mChildren; }
 	std::shared_ptr<CTransform> GetChild(UINT idx) { return mChildren[idx]; };
 	std::shared_ptr<CTransform> FindChild(const std::wstring& name);
+
+private:
+	void UpdateLocalMatrix();
+	void UpdateBaseLineVec();
 };
 

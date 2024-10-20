@@ -77,14 +77,15 @@ protected:
 public:
 	void ReleaseUploadBuffers();
 
-	BOOL RayIntersectionByTriangle(const Ray& ray, const Vec3& v0, const Vec3& v1, const Vec3& v2, float& nearHitDistance);
-
 	int CheckRayIntersection(const Ray& ray, float& nearHitDistance);
 public:
 	virtual void Render(ID3D12GraphicsCommandList* cmdList);
 	virtual void Render(ID3D12GraphicsCommandList* cmdList, int idx);
 	virtual void Render(ID3D12GraphicsCommandList* cmdList, UINT nInstances, const D3D12_VERTEX_BUFFER_VIEW& d3dInstancingBufferView);
 	virtual void Render(ID3D12GraphicsCommandList* cmdList, UINT nInstances);
+
+public:
+	const std::vector<CVertex>& GetVertices() const { return vertices; }
 };
 
 

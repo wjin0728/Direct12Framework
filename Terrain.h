@@ -2,14 +2,14 @@
 #include"stdafx.h"
 #include "GameObject.h"
 
-class CHeightMapImage;
+class CHeightMap;
 class CHeightMapGridMesh;
 
 class CTerrain :
     public CGameObject
 {
 private:
-    std::shared_ptr<CHeightMapImage> heightMap;
+    std::shared_ptr<CHeightMap> heightMap;
     std::vector<std::shared_ptr<CHeightMapGridMesh>> gridMeshes;
 
     int width;

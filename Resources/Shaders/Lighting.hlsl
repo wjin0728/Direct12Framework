@@ -1,4 +1,3 @@
-
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 

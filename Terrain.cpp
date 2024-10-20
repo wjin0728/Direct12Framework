@@ -10,7 +10,7 @@ CTerrain::CTerrain(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, LPC
 	int cxQuadsPerBlock = _blockWidth - 1;
 	int czQuadsPerBlock = _blockLength - 1;
 
-	heightMap = std::make_shared<CHeightMapImage>(fileName, width, height, scale);
+	heightMap = std::make_shared<CHeightMap>(fileName, width, height, scale);
 
 	long cxBlocks = (width - 1) / cxQuadsPerBlock;
 	long czBlocks = (height - 1) / czQuadsPerBlock;

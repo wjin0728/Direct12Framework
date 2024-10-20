@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "HeightMapImage.h"
 
-CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, Vec3 xmf3Scale)
+CHeightMap::CHeightMap(LPCTSTR pFileName, int nWidth, int nLength, Vec3 xmf3Scale)
 {
 	width = nWidth;
 	length = nLength;
@@ -28,13 +28,13 @@ CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, Vec
 	if (pHeightMapPixels) delete[] pHeightMapPixels;
 }
 
-CHeightMapImage::~CHeightMapImage(void)
+CHeightMap::~CHeightMap(void)
 {
 	if (heightMapPixels) delete heightMapPixels;
 	heightMapPixels = nullptr;
 }
 
-float CHeightMapImage::GetHeight(float fx, float fz)
+float CHeightMap::GetHeight(float fx, float fz)
 {
 	if ((fx < 0.0f) || (fz < 0.0f) || (fx >= width) || (fz >= length)) {
 		return 0.0f;
@@ -75,7 +75,7 @@ float CHeightMapImage::GetHeight(float fx, float fz)
 	return fHeight;
 }
 
-Vec3 CHeightMapImage::GetHeightMapNormal(int x, int z)
+Vec3 CHeightMap::GetHeightMapNormal(int x, int z)
 {
 	if ((x < 0.0f) || (z < 0.0f) || (x >= width) || (z >= length))
 		return(Vec3(0.0f, 1.0f, 0.0f));

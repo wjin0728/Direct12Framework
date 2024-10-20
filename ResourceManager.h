@@ -28,7 +28,7 @@ public:
 	std::shared_ptr<T> Load(const std::wstring& name, std::wstring_view fileName);
 
 	template<typename T>
-	bool Add(std::shared_ptr<T> resource);
+	bool Add(const std::shared_ptr<T>& resource);
 
 	template<typename T>
 	std::shared_ptr<T> Get(const std::wstring& key);
@@ -74,7 +74,7 @@ inline std::shared_ptr<T> CResourceManager::Load(const std::wstring& name, std::
 }
 
 template<typename T>
-inline bool CResourceManager::Add(std::shared_ptr<T> resource)
+inline bool CResourceManager::Add(const std::shared_ptr<T>& resource)
 {
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
 	KeyObjMap& keyObjMap = resources[static_cast<UINT>(resourceType)];

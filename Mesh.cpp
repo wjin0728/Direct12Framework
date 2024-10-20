@@ -460,14 +460,6 @@ void CMesh::ReleaseUploadBuffers()
 	}
 }
 
-BOOL CMesh::RayIntersectionByTriangle(const Ray& ray, const Vec3& v0, const Vec3& v1, const Vec3& v2, float& nearHitDistance)
-{
-	float fHitDistance{};
-	BOOL intersected = ray.Intersects(v0, v1, v2, nearHitDistance);
-	if (intersected && (fHitDistance < nearHitDistance)) nearHitDistance = fHitDistance;
-
-	return intersected;
-}
 
 int CMesh::CheckRayIntersection(const Ray& ray, float& nearHitDistance)
 {
@@ -496,12 +488,8 @@ int CMesh::CheckRayIntersection(const Ray& ray, float& nearHitDistance)
 			UINT v1Idx = ((nIndices) ? (indices[curSubSet][(i * nOffset) + 1]) : ((i * nOffset) + 1));
 			UINT v2Idx = ((nIndices) ? (indices[curSubSet][(i * nOffset) + 2]) : ((i * nOffset) + 2));
 
-			XMVECTOR v0 = XMLoadFloat3(&(vertices[v0Idx].position));
-			XMVECTOR v1 = XMLoadFloat3(&(vertices[v1Idx].position));
-			XMVECTOR v2 = XMLoadFloat3(&(vertices[v2Idx].position));
-
 			float fHitDistance;
-			BOOL bIntersected = ray.Intersects(v0, v1, v2, fHitDistance);
+			bool bIntersected = ray.Intersects(vertices[v0Idx].position, vertices[v1Idx].position, vertices[v2Idx].position, fHitDistance);
 
 			if (bIntersected)
 			{

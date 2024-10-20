@@ -5,8 +5,12 @@
 #include"Material.h"
 #include"Component.h"
 
-enum class LAYER_TYPE {
-
+enum class LAYER_TYPE : UINT8
+{
+	PLAYER,
+	ENEMY,
+	UI,
+	TERRAIN,
 };
 
 class CPlayer;
@@ -20,6 +24,7 @@ private:
 	std::map<COMPONENT_TYPE, std::shared_ptr<CComponent>> mComponents{};
 	std::vector<std::shared_ptr<CMonoBehaviour>> mScripts{};
 
+	std::shared_ptr<CTransform> mTransform{};
 private:
 	bool mActive = true;
 	std::wstring mName{};
@@ -37,20 +42,42 @@ public:
 	virtual void FixedUpdate();
 
 public:
-	void AddComponent(const std::shared_ptr<CComponent>& component);
-
-	void SetActive(bool active) { mActive = active; }
+	template<typename T, typename... Args>
+	std::shared_ptr<T> AddComponent(Args&&... args);
+	bool AddComponent(const std::shared_ptr<CComponent>& component);
 
 	template<typename T>
 	std::shared_ptr<T> GetComponent();
+	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
 	bool GetActive() const { return mActive; }
 	std::wstring GetName() const { return mName; }
+
+	void SetActive(bool active) { mActive = active; }
+	void SetLayerType(LAYER_TYPE type) { mLayerType = type; }
+	void SetName(const std::wstring& name) { mName = name; }
 
 private:
 	template<typename T>
 	COMPONENT_TYPE GetComponentType();
 };
 
+
+template<typename T, typename ...Args>
+inline std::shared_ptr<T> CGameObject::AddComponent(Args&&... args)
+{
+	std::shared_ptr<T> component = std::make_shared<T>(args...);
+	COMPONENT_TYPE componentType = component->GetType();
+
+	auto itr = mComponents.find(componentType);
+
+	if (itr != mComponents.end()) {
+		return std::static_pointer_cast<T>(itr->second);
+	}
+
+	mComponents[componentType] = component;
+
+	return component;
+}
 
 template<typename T>
 inline std::shared_ptr<T> CGameObject::GetComponent()

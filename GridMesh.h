@@ -2,23 +2,23 @@
 #include"stdafx.h"
 #include "Mesh.h"
 
-class CHeightMapImage;
+class CHeightMap;
 
 class CHeightMapGridMesh : public CMesh
 {
 private:
-	int width;
-	int height;
+	UINT width;
+	UINT height;
 
 private:
 
-	XMFLOAT3 CalculateNormal(int x, int z, CHeightMapImage* heightMapImage);
+	XMFLOAT3 CalculateNormal(int x, int z, CHeightMap* heightMapImage);
 
 public:
 	BoundingBox aabb;
 
 	CHeightMapGridMesh() = default;
-	CHeightMapGridMesh(int xStart, int zStart, int nWidth, int nLength, CHeightMapImage* heightMapImage);
+	CHeightMapGridMesh(int xStart, int zStart, int nWidth, int nLength, CHeightMap* heightMapImage);
 	virtual ~CHeightMapGridMesh();
 	int GetWidth() { return width; }
 	int GetLength() { return height; }

@@ -3,7 +3,7 @@
 #include"HeightMapImage.h"
 
 
-XMFLOAT3 CHeightMapGridMesh::CalculateNormal(int x, int z, CHeightMapImage* heightMapImage)
+XMFLOAT3 CHeightMapGridMesh::CalculateNormal(int x, int z, CHeightMap* heightMapImage)
 {
 	XMFLOAT3 normal = { 0.f,0.f,0.f };
 
@@ -103,7 +103,7 @@ XMFLOAT3 CHeightMapGridMesh::CalculateNormal(int x, int z, CHeightMapImage* heig
 	return normal;
 }
 
-CHeightMapGridMesh::CHeightMapGridMesh(int xStart, int zStart, int nWidth, int nLength, CHeightMapImage* heightMapImage)
+CHeightMapGridMesh::CHeightMapGridMesh(int xStart, int zStart, int nWidth, int nLength, CHeightMap* heightMapImage)
 {
 	width = nWidth;
 	height = nLength;
@@ -112,9 +112,10 @@ CHeightMapGridMesh::CHeightMapGridMesh(int xStart, int zStart, int nWidth, int n
 
 	primitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
-	int size = width * height;
+	size_t size = width * height;
 
 	vertices.reserve(size);
+
 	
 	int maxX = xStart + width, maxZ = zStart + height;
 
@@ -127,7 +128,6 @@ CHeightMapGridMesh::CHeightMapGridMesh(int xStart, int zStart, int nWidth, int n
 
 			XMFLOAT3 position = XMFLOAT3( x - maxX/2, y, z - maxZ/2) * scale;
 			XMFLOAT3 normal = CalculateNormal(x, z, heightMapImage);
-			//XMFLOAT3 normal = { 0.f,1.f,0.f };
 			vertices.emplace_back(position, normal);
 		}
 	}

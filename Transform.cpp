@@ -27,23 +27,21 @@ void CTransform::Update()
 void CTransform::LateUpdate()
 {
 	auto parent = mParent.lock();
-	bool parentMoved = false;
-
-	if (parent) parentMoved = parent->isMoved;
+	bool parentMoved = parent && parent->isMoved;
 
 	if (isMoved || parentMoved)
 		dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
 	if (dirtyFramesNum > 0) {
 		if (isMoved) {
-			mLocalMat = Matrix::CreateScale(mScale) * Matrix::CreateFromQuaternion(mRotation);
-			mLocalMat._41 = mPosition.x; mLocalMat._42 = mPosition.y; mLocalMat._43 = mPosition.z;
-
+			UpdateLocalMatrix();
 			mWorldMat = mLocalMat;
 			if (parent) mWorldMat *= parent->mWorldMat;
+			UpdateBaseLineVec();
 		}
 		else if (parentMoved) {
 			mWorldMat = mLocalMat * parent->mWorldMat;
+			UpdateBaseLineVec();
 		}
 		dirtyFramesNum--;
 	}
@@ -102,7 +100,7 @@ void CTransform::Move(const Vec3& direction, float distance)
 void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
 {
 	Vec3 lookVec = lookDir.GetNormalized();
-	Matrix rotateMat = Matrix::CreateWorld(mPosition, lookVec, up);
+	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
 	mRotation = Quaternion::CreateFromRotationMatrix(rotateMat);
 
 	isMoved = true;
@@ -110,7 +108,8 @@ void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
 
 void CTransform::LookAt(const Vec3& lookPos, const Vec3& up)
 {
-	Matrix rotateMat = Matrix::CreateLookAt(mPosition, lookPos, up);
+	Vec3 lookVec = (lookPos - mPosition).GetNormalized();
+	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
 	mRotation = Quaternion::CreateFromRotationMatrix(rotateMat);
 
 	isMoved = true;
@@ -118,7 +117,8 @@ void CTransform::LookAt(const Vec3& lookPos, const Vec3& up)
 
 void CTransform::LookAt(const CTransform& target, const Vec3& up)
 {
-	Matrix rotateMat = Matrix::CreateLookAt(mPosition, target.mPosition, up);
+	Vec3 lookVec = (target.mPosition - mPosition).GetNormalized();
+	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
 	mRotation = Quaternion::CreateFromRotationMatrix(rotateMat);
 
 	isMoved = true;
@@ -160,5 +160,20 @@ std::shared_ptr<CTransform> CTransform::FindChild(const std::wstring& name)
 			return child;
 	}
 	return nullptr;
+}
+
+void CTransform::UpdateLocalMatrix()
+{
+	mLocalMat = Matrix::CreateScale(mScale) * Matrix::CreateFromQuaternion(mRotation);
+	mLocalMat._41 = mPosition.x;
+	mLocalMat._42 = mPosition.y;
+	mLocalMat._43 = mPosition.z;
+}
+
+void CTransform::UpdateBaseLineVec()
+{
+	mRight = mWorldMat.Right().GetNormalized();
+	mUp = mWorldMat.Up().GetNormalized();
+	mLook = mWorldMat.Backward().GetNormalized();
 }
 
