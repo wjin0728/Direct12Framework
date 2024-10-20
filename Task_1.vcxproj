@@ -180,7 +180,6 @@
     <ClInclude Include="UploadBuffer.h" />
     <ClInclude Include="WICTextureLoader12.h" />
     <ClInclude Include="GridMesh.h" />
-    <ClInclude Include="HeightMapImage.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="SceneStateMachine.h" />
     <ClInclude Include="GameApplication.h" />
@@ -218,7 +217,6 @@
     <ClCompile Include="UploadBuffer.cpp" />
     <ClCompile Include="WICTextureLoader12.cpp" />
     <ClCompile Include="GridMesh.cpp" />
-    <ClCompile Include="HeightMapImage.cpp" />
     <ClCompile Include="SceneStateMachine.cpp" />
     <ClCompile Include="GameApplication.cpp" />
     <ClCompile Include="GameObject.cpp" />

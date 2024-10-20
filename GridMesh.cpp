@@ -3,110 +3,102 @@
 #include"HeightMapImage.h"
 
 
-Vec3 CHeightMapGridMesh::CalculateNormal(int x, int z, CHeightMap* heightMapImage)
+void CHeightMapGridMesh::LoadHeightMap(const std::wstring& fileName)
 {
-	Vec3 normal = { 0.f,0.f,0.f };
+	size_t heightMapSize = width * height;
+	BYTE* pHeightMapPixels = new BYTE[heightMapSize];
+	memset(pHeightMapPixels, 0, heightMapSize);
 
-	std::queue<Vec3> normals;
+	HANDLE hFile = ::CreateFile(fileName.c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY, NULL);
+	DWORD dwBytesRead;
+	::ReadFile(hFile, pHeightMapPixels, heightMapSize, &dwBytesRead, NULL);
+	::CloseHandle(hFile);
 
-	if ((x < (width - 1)) && (z < (height - 1))) 
-		normals.push(heightMapImage->GetHeightMapNormal(x, z));
-	if ((z > 0) && (x < (width - 1))) 
-		normals.push(heightMapImage->GetHeightMapNormal(x, z - 1));
-
-	Vec3 scale = heightMapImage->GetScale();
-
-	const BYTE* heightMapPixels = heightMapImage->GetHeightMapPixels();
-
-	if (z & 1) 
+	heightMap = new BYTE[heightMapSize];
+	for (int y = 0; y < height; y++)
 	{
-		if ((x > 0) && (z < (height - 1)))
+		for (int x = 0; x < width; x++)
 		{
-			float y1 = (float)heightMapPixels[x + width * z] * scale.y;
-			float y2 = (float)heightMapPixels[x - 1 + width * z] * scale.y;
-			float y3 = (float)heightMapPixels[x + width * (z + 1)] * scale.y;
-
-			Vec3 edge1 = { -scale.x, y2 - y1, 0.f };
-			Vec3 edge2 = { 0.f, y3 - y1, scale.z };
-
-			normals.push(edge1.Cross(edge2));
-		}
-		if ((x > 0) && (z > 0))
-		{
-			float y1 = (float)heightMapPixels[x + width * z] * scale.y;
-			float y2 = (float)heightMapPixels[x + width * (z - 1)] * scale.y;
-			float y3 = (float)heightMapPixels[x - 1 + width * z] * scale.y;
-
-			Vec3 edge1 = { 0.f, y2 - y1, -scale.z };
-			Vec3 edge2 = { -scale.x, y3 - y1, 0.f };
-
-			normals.push(edge1.Cross(edge2));
-		}
-		if ((x < (width - 1)) && (z < (height - 1)))
-		{
-			float y1 = (float)heightMapPixels[x + width * z] * scale.y;
-			float y2 = (float)heightMapPixels[x + 1 + width * (z + 1)] * scale.y;
-			float y3 = (float)heightMapPixels[x + 1 + width * z] * scale.y;
-
-			Vec3 edge1 = { scale.x, y2 - y1, scale.z };
-			Vec3 edge2 = { scale.x, y3 - y1, 0 };
-
-			normals.push(edge1.Cross(edge2));
-		}
-		if ((x < (width - 1)) && (z > 0))
-		{
-			float y1 = (float)heightMapPixels[x + width * z] * scale.y;
-			float y2 = (float)heightMapPixels[x + 1 + width * z] * scale.y;
-			float y3 = (float)heightMapPixels[x + 1 + width * (z - 1)] * scale.y;
-
-			Vec3 edge1 = { scale.x, y2 - y1, 0.f };
-			Vec3 edge2 = { scale.x, y3 - y1, -scale.z };
-
-			normals.push(edge1.Cross(edge2));
+			heightMap[x + ((height - 1 - y) * width)] = pHeightMapPixels[x +
+				(y * width)];
 		}
 	}
-	else 
-	{
-		if (x > 0 && (z < (height - 1))) 
-			normals.push(heightMapImage->GetHeightMapNormal(x - 1, z));
-		if ((z > 0) && (x > 0)) 
-			normals.push(heightMapImage->GetHeightMapNormal(x - 1, z - 1));
-
-		if ((x > 0) && (z < (height - 1))) 
-		{
-			float y1 = (float)heightMapPixels[x + width * z] * scale.y;
-			float y2 = (float)heightMapPixels[x - 1 + width * (z + 1)] * scale.y;
-			float y3 = (float)heightMapPixels[x + width * (z + 1)] * scale.y;
-
-			Vec3 edge1 = { -scale.x, y2 - y1, scale.z };
-			Vec3 edge2 = { 0.f, y3 - y1, scale.z };
-
-			normals.push(edge1.Cross(edge2));
-		}
-		if ((x > 0) && (z > 0))
-		{
-			float y1 = (float)heightMapPixels[x + width * z] * scale.y;
-			float y2 = (float)heightMapPixels[x + width * (z - 1)] * scale.y;
-			float y3 = (float)heightMapPixels[x - 1 + width * (z - 1)] * scale.y;
-
-			Vec3 edge1 = { -scale.x, y2 - y1, -scale.z };
-			Vec3 edge2 = { 0.f, y3 - y1, -scale.z };
-
-			normals.push(edge1.Cross(edge2));
-		}
-	}
-	while (!normals.empty())
-	{
-		normal = normal + normals.front();
-		normals.pop();
-	}
-	return normal;
+	if (pHeightMapPixels) delete[] pHeightMapPixels;
 }
 
-CHeightMapGridMesh::CHeightMapGridMesh(int xStart, int zStart, int nWidth, int nLength, CHeightMap* heightMapImage)
+void CHeightMapGridMesh::CalculateNormal()
 {
-	width = nWidth;
-	height = nLength;
+	std::vector<Vec3> normals(width * height, Vec3::Zero);
+
+	for (UINT i = 0; i < height - 1; ++i) {
+		for (UINT j = 0; j < width - 1; ++j) {
+			UINT idx0 = (i * width) + j;              //좌측 하단
+			UINT idx1 = ((i + 1) * width) + j;		  //좌측 상단
+			UINT idx2 = ((i + 1) * width) + (j + 1);  //우측 상단
+			UINT idx3 = (i * width) + (j + 1);		  //우측 하단
+
+			Vec3 edge1 = vertices[idx1].position - vertices[idx0].position;
+			Vec3 edge2 = vertices[idx2].position - vertices[idx0].position;
+			Vec3 edge3 = vertices[idx3].position - vertices[idx0].position;
+
+			Vec3 normal1 = edge1.Cross(edge2);
+			normals[idx0] += normal1;
+			normals[idx1] += normal1;
+			normals[idx2] += normal1;
+
+			Vec3 normal2 = edge2.Cross(edge3);
+			normals[idx0] += normal2;
+			normals[idx2] += normal2;
+			normals[idx3] += normal2;
+		}
+	}
+	std::transform(normals.begin(), normals.end(), normals.begin(), [](Vec3& n) { n.Normalize(); });
+
+	for (size_t  i = 0; i < vertices.size(); ++i) {
+		vertices[i].normal = normals[i];
+	}
+}
+
+void CHeightMapGridMesh::CalculateTextureCoord()
+{
+	float increaseVal = static_cast<float>(TEXTURE_REPEAT_COUNT) / width;
+	UINT increaseCnt = width / TEXTURE_REPEAT_COUNT;
+
+	Vec2 uv{ 0.f, 1.f };
+
+	UINT uCount{};
+	UINT vCount{};
+
+	for (UINT i = 0; i < height - 1; ++i) {
+		for (UINT j = 0; j < width - 1; ++j) {
+			vertices[(i * width) + j].texCoord = uv;
+
+			uv.x += increaseVal;
+			uCount++;
+
+			if (uCount == increaseCnt) {
+				uv.x = 0.f;
+				uCount = 0;
+			}
+		}
+		uv.y -= increaseVal;
+		vCount++;
+
+		if (vCount == increaseCnt) {
+			uv.y = 0.f;
+			vCount = 0;
+		}
+	}
+}
+
+CHeightMapGridMesh::CHeightMapGridMesh(const std::wstring& fileName, int _width, int _height, Vec3 _scale)
+{
+	width = _width;
+	height = _height;
+	scale = _scale;
+
+	LoadHeightMap(fileName);
 
 	stride = sizeof(CVertex);
 
@@ -116,24 +108,50 @@ CHeightMapGridMesh::CHeightMapGridMesh(int xStart, int zStart, int nWidth, int n
 
 	vertices.reserve(size);
 
-	
-	int maxX = xStart + width, maxZ = zStart + height;
+	int maxX = width, maxZ = height;
 
-	Vec3 scale = heightMapImage->GetScale();
-	const BYTE* heightMapPixels = heightMapImage->GetHeightMapPixels();
-
-	for (int z = zStart; z < maxZ; z++) {
-		for (int x = xStart; x < maxX; x++) {
-			int y = heightMapPixels[x + (z * nWidth)];
+	for (int z = 0; z < maxZ; z++) {
+		for (int x = 0; x < maxX; x++) {
+			int y = heightMap[x + (z * width)];
 
 			Vec3 position = Vec3( x - maxX/2, y, z - maxZ/2) * scale;
-			Vec3 normal = CalculateNormal(x, z, heightMapImage);
-			vertices.emplace_back(position, normal);
+			vertices.emplace_back(position);
 		}
 	}
+	CalculateNormal();
+	CalculateTextureCoord();
 }
 
 CHeightMapGridMesh::~CHeightMapGridMesh()
 {
 
+}
+
+float CHeightMapGridMesh::GetHeight(float fx, float fz)
+{
+	if ((fx < 0.0f) || (fz < 0.0f) || (fx >= width) || (fz >= height)) {
+		return 0.0f;
+	}
+
+	int x = (int)fx;
+	int z = (int)fz;
+
+	float fxPercent = fx - x;
+	float fzPercent = fz - z;
+
+	float fBottomLeft = (float)heightMap[x + (z * width)];
+	float fBottomRight = (float)heightMap[(x + 1) + (z * width)];
+	float fTopLeft = (float)heightMap[x + ((z + 1) * width)];
+	float fTopRight = (float)heightMap[(x + 1) + ((z + 1) * width)];
+
+	if (fzPercent >= fxPercent)
+		fBottomRight = fBottomLeft + (fTopRight - fTopLeft);
+	else
+		fTopLeft = fTopRight + (fBottomLeft - fBottomRight);
+
+	float fTopHeight = SimpleMath::Flerp(fTopLeft, fTopRight, fxPercent);
+	float fBottomHeight = SimpleMath::Flerp(fBottomLeft, fBottomRight, fxPercent);
+	float fHeight = SimpleMath::Flerp(fBottomHeight, fTopHeight, fzPercent);
+
+	return fHeight;
 }

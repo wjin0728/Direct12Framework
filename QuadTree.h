@@ -34,9 +34,6 @@ private:
 		std::array<UINT, 4> mCorners{};
 		std::array<std::shared_ptr<Node>, 4> mChildren{};
 
-		Vec2 position{}; //x, z
-		float width{};
-
 		BoundingBox aabb{};
 		bool isLeaf = false;
 

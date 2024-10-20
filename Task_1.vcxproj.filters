@@ -148,9 +148,6 @@
     <ClInclude Include="SimpleMath.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="HeightMapImage.h">
-      <Filter>Resources\Texture</Filter>
-    </ClInclude>
     <ClInclude Include="MeshRenderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
@@ -252,9 +249,6 @@
     </ClCompile>
     <ClCompile Include="SimpleMath.cpp">
       <Filter>Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="HeightMapImage.cpp">
-      <Filter>Resources\Texture</Filter>
     </ClCompile>
     <ClCompile Include="MeshRenderer.cpp">
       <Filter>GameObject\Component</Filter>

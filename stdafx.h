@@ -18,6 +18,7 @@
 #include<array>
 #include<queue>
 #include<map>
+#include"algorithm"
 #include <Mmsystem.h>
 
 #include <d3d12.h>

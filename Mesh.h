@@ -10,6 +10,7 @@ class CVertex
 public:
 	CVertex() { position = Vec3(0, 0, 0); normal = Vec3(0, 0, 0);};
 	CVertex(float x, float y, float z) { position = Vec3(x, y, z); }
+	CVertex(const Vec3& pos) { position = pos; }
 	CVertex(const Vec3& pos, const Vec3& nor);
 	CVertex(const Vec3& pos, const Vec2& uv, const Vec3& nor, const Vec3& tan)
 	: position(pos), texCoord(uv), normal(nor), tangent(tan) {};

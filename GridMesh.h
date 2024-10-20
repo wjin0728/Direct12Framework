@@ -2,23 +2,32 @@
 #include"stdafx.h"
 #include "Mesh.h"
 
+enum : UINT {
+	TEXTURE_REPEAT_COUNT = 2
+};
+
 class CHeightMap;
 
 class CHeightMapGridMesh : public CMesh
 {
 private:
-	UINT width;
-	UINT height;
+	BYTE* heightMap;
+
+	UINT width{};
+	UINT height{};
+	Vec3 scale{};
 
 private:
-
-	Vec3 CalculateNormal(int x, int z, CHeightMap* heightMapImage);
+	void LoadHeightMap(const std::wstring& fileName);
+	void CalculateNormal();
+	void CalculateTextureCoord();
 
 public:
 	CHeightMapGridMesh() = default;
-	CHeightMapGridMesh(int xStart, int zStart, int nWidth, int nLength, CHeightMap* heightMapImage);
+	CHeightMapGridMesh(const std::wstring& fileName, int _width, int _height, Vec3 _scale);
 	virtual ~CHeightMapGridMesh();
+
 	int GetWidth() const { return width; }
-	int GetLength() const { return height; }
+	float GetHeight(float fx, float fz);
 };
 
