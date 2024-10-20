@@ -86,6 +86,7 @@ public:
 
 public:
 	const std::vector<CVertex>& GetVertices() const { return vertices; }
+	const ComPtr<ID3D12Resource>& GetVertexBuffer() const { return vertexBuffer; }
 };
 
 

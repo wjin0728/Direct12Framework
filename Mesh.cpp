@@ -272,16 +272,16 @@ std::shared_ptr<CMesh> CMesh::CreateRectangleMesh(Vec2 scale)
 {
 	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
 
-	float w2 = 0.5f * scale.x;
+	float fx = 0.5f * scale.x;
 	float fy = 0.5f * scale.y;
 
 	m->vertices.resize(4);
 
 	// ¾Õ¸é
-	m->vertices[0] = CVertex(Vec3(-w2, -fy, 0), Vec2(0.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
-	m->vertices[1] = CVertex(Vec3(-w2, +fy, 0), Vec2(0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
-	m->vertices[2] = CVertex(Vec3(+w2, +fy, 0), Vec2(1.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
-	m->vertices[3] = CVertex(Vec3(+w2, -fy, 0), Vec2(1.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[0] = CVertex(Vec3(-fx, -fy, 0), Vec2(0.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[1] = CVertex(Vec3(-fx, +fy, 0), Vec2(0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[2] = CVertex(Vec3(+fx, +fy, 0), Vec2(1.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
+	m->vertices[3] = CVertex(Vec3(+fx, -fy, 0), Vec2(1.0f, 1.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(1.0f, 0.0f, 0.0f));
 
 	m->indices.emplace_back(6);
 

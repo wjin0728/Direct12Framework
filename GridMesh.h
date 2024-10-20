@@ -12,15 +12,13 @@ private:
 
 private:
 
-	XMFLOAT3 CalculateNormal(int x, int z, CHeightMap* heightMapImage);
+	Vec3 CalculateNormal(int x, int z, CHeightMap* heightMapImage);
 
 public:
-	BoundingBox aabb;
-
 	CHeightMapGridMesh() = default;
 	CHeightMapGridMesh(int xStart, int zStart, int nWidth, int nLength, CHeightMap* heightMapImage);
 	virtual ~CHeightMapGridMesh();
-	int GetWidth() { return width; }
-	int GetLength() { return height; }
+	int GetWidth() const { return width; }
+	int GetLength() const { return height; }
 };
 

@@ -17,6 +17,7 @@ class CPlayer;
 class CMonoBehaviour;
 class CMeshRenderer;
 class CTransform;
+class CCamara;
 
 class CGameObject
 {
@@ -49,6 +50,7 @@ public:
 	template<typename T>
 	std::shared_ptr<T> GetComponent();
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
+	std::shared_ptr<CCamera> GetCamera();
 	bool GetActive() const { return mActive; }
 	std::wstring GetName() const { return mName; }
 
@@ -99,4 +101,6 @@ inline COMPONENT_TYPE CGameObject::GetComponentType()
 		return COMPONENT_TYPE::TRANSFORM;
 	else if (std::is_same_v<T, CMeshRenderer>)
 		return COMPONENT_TYPE::MESH_RENDERER;
+	else if (std::is_same_v<T, CCamera>)
+		return COMPONENT_TYPE::CAMERA;
 }

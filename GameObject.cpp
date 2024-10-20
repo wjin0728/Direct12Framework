@@ -1,6 +1,7 @@
 #include "GameObject.h"
 #include"MonoBehaviour.h"
 #include"Transform.h"
+#include"Camera.h"
 
 CGameObject::CGameObject()
 {
@@ -102,6 +103,16 @@ bool CGameObject::AddComponent(const std::shared_ptr<CComponent>& component)
 	mComponents[componentType] = component;
 
 	return true;
+}
+
+std::shared_ptr<CCamera> CGameObject::GetCamera()
+{
+	auto itr = mComponents.find(COMPONENT_TYPE::CAMERA);
+
+	if (itr != mComponents.end()) {
+		return std::static_pointer_cast<CCamera>(itr->second);
+	}
+	return nullptr;
 }
 
 

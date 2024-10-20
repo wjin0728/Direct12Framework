@@ -3802,6 +3802,6 @@ inline Vector3 RandomUnitVectorOnSphere()
     {
         XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), 0.0f);
         if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) 
-            return Vector3(v).Normalize();
+            return Vector3(v).GetNormalized();
     }
 }
