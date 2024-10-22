@@ -2,14 +2,17 @@
 #include"stdafx.h"
 #include"Component.h"
 
-class CCamera : public CComponent
+class CCamera : public CComponent, std::enable_shared_from_this<CCamera>
 {
 public:
 	CCamera();
 	virtual ~CCamera();
 
 private:
-	
+	static std::vector<std::shared_ptr<CCamera>> mCameras;
+	static std::shared_ptr<CCamera> mMainCamea;
+
+private:
 	float mNearZ{};
 	float mFarZ{};
 	float mAspectRatio{};
@@ -19,7 +22,6 @@ private:
 	BoundingFrustum mFrustumView = BoundingFrustum();
 	BoundingFrustum mFrustumWorld = BoundingFrustum();
 	Matrix mInverseViewMat = Matrix::Identity;
-
 
 public:
 	D3D12_VIEWPORT mViewport{};
@@ -41,7 +43,8 @@ public:
 	virtual void FixedUpdate();
 
 public:
-	void SetFOVAngle(float fovAngle);
+	static const std::vector<std::shared_ptr<CCamera>>& GetAllCameras() { return mCameras; }
+	static std::shared_ptr<CCamera> GetMainCamera() { return mMainCamea; }
 
 	void GenerateViewMatrix();
 	void GeneratePerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle);
@@ -52,6 +55,8 @@ public:
 
 	bool IsInFrustum(const BoundingOrientedBox& boundingBox);
 	bool IsInFrustum(const BoundingBox& boundingBox);
+
+	void SetFOVAngle(float fovAngle);
 
 	float GetNear() const { return mNearZ; }
 	float GetFar() const { return mFarZ; }

@@ -6,7 +6,6 @@ enum : UINT {
 	TEXTURE_REPEAT_COUNT = 2
 };
 
-class CHeightMap;
 
 class CHeightMapGridMesh : public CMesh
 {
@@ -24,7 +23,7 @@ private:
 
 public:
 	CHeightMapGridMesh() = default;
-	CHeightMapGridMesh(const std::wstring& fileName, int _width, int _height, Vec3 _scale);
+	void Initialize(const std::wstring& fileName, int _width, int _height, Vec3 _scale);
 	virtual ~CHeightMapGridMesh();
 
 	int GetWidth() const { return width; }

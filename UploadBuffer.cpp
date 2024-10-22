@@ -56,6 +56,7 @@ void CUploadBuffer::CreateBuffer()
 
 	D3D12_RANGE readRange = { 0, 0 };
 	ThrowIfFailed(buffer->Map(0, &readRange, (void**)&mappedData));
+	
 }
 
 void CUploadBuffer::UpdateConstantBuffer(UINT idx)

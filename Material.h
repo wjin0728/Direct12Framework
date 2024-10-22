@@ -12,11 +12,17 @@ public:
 	int diffuseMapIdx = -1;
 	int normalMapIdx = -1;
 
-	int dirtyFramesNum = FRAMERESOURCE_NUM;
+	int dirtyFramesNum{3};
 
 public:
 	CMaterial() = default;
-	CMaterial(const XMFLOAT4& albedo);
-	void UpdateShaderVariables(ID3D12GraphicsCommandList* cmdList);
 };
 
+class CTerrainMaterial : public CMaterial
+{
+public:
+	int detailMap1Idx = -1;
+
+public:
+	CTerrainMaterial() = default;
+};

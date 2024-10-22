@@ -35,16 +35,14 @@ void CQuadTree::ReleaseUploadBuffer(std::shared_ptr<Node>& node)
 	}
 }
 
-void CQuadTree::Render(const std::shared_ptr<class CGameObject> cameraObject)
+void CQuadTree::Render(const std::shared_ptr<class CCamera>& camera)
 {
-	auto camera = cameraObject->GetCamera();
-
 	if (camera) {
 		RenderNode(mRoot, camera);
 	}
 }
 
-void CQuadTree::RenderNode(const std::shared_ptr<Node>& node, const std::shared_ptr<class CCamera> camera)
+void CQuadTree::RenderNode(const std::shared_ptr<Node>& node, const std::shared_ptr<class CCamera>& camera)
 {
 	if (!camera->IsInFrustum(node->aabb)) {
 		return;

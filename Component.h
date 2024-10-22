@@ -23,11 +23,12 @@ class CGameObject;
 class CComponent
 {
 protected:
-	COMPONENT_TYPE type;
-	std::weak_ptr<CGameObject> owner;
+	COMPONENT_TYPE type{};
+	std::weak_ptr<CGameObject> owner{};
 
 public:
 	CComponent(COMPONENT_TYPE type);
+	CComponent(const CComponent& other) : type(other.type) {}
 	virtual ~CComponent();
 
 	virtual void Awake() {}; 
@@ -37,7 +38,11 @@ public:
 	virtual void LateUpdate() {};
 	virtual void FixedUpdate() {}; 
 
+	virtual std::shared_ptr<CComponent> Clone() = 0;
+
 public:
+	void SetOwner(const std::shared_ptr<CGameObject>& _owner) { owner = _owner; }
+
 	std::shared_ptr<CGameObject> GetOwner() { return owner.lock(); }
 	COMPONENT_TYPE GetType() const { return type; }
 };

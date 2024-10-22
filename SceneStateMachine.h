@@ -3,6 +3,7 @@
 
 class CScene;
 class CFrameResource;
+class CGameObject;
 
 class CSceneManager
 {
@@ -14,6 +15,8 @@ private:
 	//ÇöÀç ¾À
 	SCENE_TYPE curSCENE_TYPE{};
 	std::shared_ptr<CScene> curScene{};
+
+	std::vector<std::shared_ptr<CGameObject>> maintainedObjects{};
 
 public:
 
@@ -31,6 +34,8 @@ public:
 
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+
+	void MaintainToAllScenes(const std::shared_ptr<CGameObject>& object) { maintainedObjects.push_back(object); }
 
 	std::shared_ptr<CScene> GetCurScene() { return curScene; }
 };

@@ -170,6 +170,7 @@
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="MonoBehaviour.h" />
     <ClInclude Include="ObjectPool.h" />
+    <ClInclude Include="ObjectPoolManager.h" />
     <ClInclude Include="QuadTree.h" />
     <ClInclude Include="RenderTargetGroup.h" />
     <ClInclude Include="ResourceManager.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="MeshRenderer.cpp" />
     <ClCompile Include="MonoBehaviour.cpp" />
     <ClCompile Include="ObjectPool.cpp" />
+    <ClCompile Include="ObjectPoolManager.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="RenderTargetGroup.cpp" />
     <ClCompile Include="ResourceManager.cpp" />

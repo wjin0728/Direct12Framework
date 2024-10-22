@@ -23,4 +23,12 @@ std::shared_ptr<CUploadBuffer> CFrameResource::GetConstBuffer(CONSTANT_BUFFER_TY
 	return constBuffers[static_cast<UINT>(type)];
 }
 
+UINT CFrameResource::GetTopSRVIndex()
+{
+	UINT idx = cbvIdxQueue.top();
+	cbvIdxQueue.pop();
+
+	return idx;
+}
+
 

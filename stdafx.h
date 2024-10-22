@@ -17,6 +17,7 @@
 #include<random>
 #include<array>
 #include<queue>
+#include<stack>
 #include<map>
 #include"algorithm"
 #include <Mmsystem.h>
@@ -143,7 +144,7 @@ public:							\
 #define DEVICE INSTANCE(CDX12Manager).GetDevice()
 #define CMDLIST INSTANCE(CDX12Manager).GetCommandList()
 #define CONSTBUFFER(T) INSTANCE(CDX12Manager).GetConstBuffer(T)
-#define RESOURCE INSTANCE(CResourceManager).
+#define RESOURCE INSTANCE(CResourceManager)
 
 namespace BinaryReader
 {
@@ -198,19 +199,9 @@ enum class RESOURCE_TYPE : UINT8
 	END
 };
 
-enum class OBJECT_TYPE : UINT8
-{
-	ENEMY,
-	PLAYER_BULLET,
-	ENEMY_BULLET,
-
-	END
-};
-
 enum {
 	SCENE_TYPE_COUNT = SCENE_TYPE::END,
-	RESOURCE_TYPE_COUNT = RESOURCE_TYPE::END,
-	OBJECT_TYPE_COUNT = OBJECT_TYPE::END
+	RESOURCE_TYPE_COUNT = RESOURCE_TYPE::END
 };
 
 

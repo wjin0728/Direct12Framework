@@ -1,34 +1,30 @@
 #pragma once
-#include"stdafx.h"
-#include "GameObject.h"
+#include"Component.h"
+#include"QuadTree.h"
+#include"Material.h"
 
-class CHeightMap;
-class CHeightMapGridMesh;
-
-class CTerrain :
-    public CGameObject
+class CTerrain : public CComponent
 {
 private:
-    std::shared_ptr<CHeightMap> heightMap;
-    std::vector<std::shared_ptr<CHeightMapGridMesh>> gridMeshes;
+	std::shared_ptr<CQuadTree> mQuadTree{};
 
-    int width;
-    int height;
-    XMFLOAT3 scale;
+	std::shared_ptr<CHeightMapGridMesh> mTerrainMesh{};
+	std::shared_ptr<CTerrainMaterial> mTerrainMaterial{};
 
 public:
-    CTerrain() = default;
-    CTerrain(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, LPCTSTR fileName, int
-        _width, int _length, int _blockWidth, int _blockLength, XMFLOAT3 _scale, XMFLOAT4 color);
-    virtual ~CTerrain();
+	CTerrain(const std::shared_ptr<CHeightMapGridMesh>& mesh, const std::shared_ptr<CTerrainMaterial>& material);
+	~CTerrain();
 
-public:
-    int GetHeightMapWidth();
-    int GetHeightMapLength();
-    XMFLOAT3 GetScale() { return scale; }
-    float GetWidth() { return(width * scale.x); }
-    float GetLength() { return(height * scale.z); }
+	virtual void Awake();
+	virtual void Start();
 
-    virtual void Render(ID3D12GraphicsCommandList* cmdList, CCamera* pCamera);
+	virtual void Update();
+	virtual void LateUpdate();
+	virtual void FixedUpdate();
+
+	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CTerrain>(mTerrainMesh, mTerrainMaterial); }
+
+	void Render(const std::shared_ptr<class CCamera>& camera);
+
 };
 

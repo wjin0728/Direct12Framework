@@ -50,6 +50,9 @@
     <Filter Include="GameObject\Component">
       <UniqueIdentifier>{dc1b8f67-20b7-4203-8591-dca6283ce85e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameObject\Component\Scripts">
+      <UniqueIdentifier>{941b0b65-03f4-467c-abb5-0b5f6c14555e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Scene.h">
@@ -78,9 +81,6 @@
     </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Resources\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="Terrain.h">
-      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Resources\Texture</Filter>
@@ -118,9 +118,6 @@
     <ClInclude Include="FrameResource.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectPool.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="RenderTargetGroup.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -151,7 +148,18 @@
     <ClInclude Include="MeshRenderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="QuadTree.h" />
+    <ClInclude Include="QuadTree.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPool.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPoolManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -183,9 +191,6 @@
     </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>Lights</Filter>
-    </ClCompile>
-    <ClCompile Include="Terrain.cpp">
-      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Resources\Texture</Filter>
@@ -220,9 +225,6 @@
     <ClCompile Include="FrameResource.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectPool.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="RenderTargetGroup.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -254,7 +256,16 @@
       <Filter>GameObject\Component</Filter>
     </ClCompile>
     <ClCompile Include="QuadTree.cpp">
-      <Filter>Client</Filter>
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectPool.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectPoolManager.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

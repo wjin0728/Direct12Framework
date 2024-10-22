@@ -3,10 +3,12 @@
 #include"Transform.h"
 #include"Camera.h"
 
-CGameObject::CGameObject()
+CGameObject::CGameObject(bool makeTransform)
 {
-	mTransform = std::make_shared<CTransform>();
-	mComponents[COMPONENT_TYPE::TRANSFORM] = mTransform;
+	if (makeTransform) {
+		mTransform = std::make_shared<CTransform>();
+		mComponents[COMPONENT_TYPE::TRANSFORM] = mTransform;
+	}
 }
 
 CGameObject::~CGameObject()
@@ -105,14 +107,60 @@ bool CGameObject::AddComponent(const std::shared_ptr<CComponent>& component)
 	return true;
 }
 
-std::shared_ptr<CCamera> CGameObject::GetCamera()
+std::shared_ptr<CGameObject> CGameObject::FindByTag(const std::wstring& tag)
 {
-	auto itr = mComponents.find(COMPONENT_TYPE::CAMERA);
-
-	if (itr != mComponents.end()) {
-		return std::static_pointer_cast<CCamera>(itr->second);
+	if (mTag == tag) {
+		return std::shared_ptr<CGameObject>(this);
 	}
-	return nullptr;
+
+	std::shared_ptr<CGameObject> obj = nullptr;
+
+	auto& children = mTransform->mChildren;
+	for (auto& child : children) {
+		obj = child->GetOwner()->FindByTag(tag);
+	}
+
+	return obj;
+}
+
+std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGameObject>& original)
+{
+	std::shared_ptr<CGameObject> instance = std::make_shared<CGameObject>();
+
+	for (const auto& [key, component] : original->mComponents) {
+		instance->mComponents[key] = component->Clone();
+		instance->mComponents[key]->SetOwner(instance);
+	}
+
+	for (const auto& originChildTransform : original->mTransform->mChildren) {
+		auto childInstance = Instantiate(originChildTransform->GetOwner());
+		childInstance->mTransform->SetParent(instance->mTransform);          
+	}
+
+	return instance;
+}
+
+std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGameObject>& original)
+{
+	std::shared_ptr<CGameObject> instance = std::make_shared<CGameObject>(false);
+
+	for (const auto& [key, component] : original->mComponents) {
+		instance->mComponents[key] = component->Clone();
+		instance->mComponents[key]->SetOwner(instance);
+	}
+
+	instance->mTransform = instance->GetComponent<CTransform>();
+	instance->mTag = original->mTag;
+	instance->mLayerType = original->mLayerType;
+	
+
+
+	for (const auto& originChildTransform : original->mTransform->mChildren) {
+		auto childInstance = Instantiate(originChildTransform->GetOwner());
+		childInstance->mTransform->SetParent(instance->mTransform);
+	}
+
+	return instance;
 }
 
 

@@ -18,6 +18,7 @@ private: //상수 버퍼
 
 public: //펜스
 	UINT64 fence{};
+	std::priority_queue<UINT, std::vector<UINT>, std::greater<UINT>> cbvIdxQueue;
 
 public:
 	CFrameResource();
@@ -25,6 +26,8 @@ public:
 
 public:
 	std::shared_ptr<CUploadBuffer> GetConstBuffer(CONSTANT_BUFFER_TYPE type);
+	UINT GetTopSRVIndex();
 
+	void ReturnSRVIndex(UINT idx) { cbvIdxQueue.push(idx); }
 };
 

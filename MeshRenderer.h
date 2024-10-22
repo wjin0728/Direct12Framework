@@ -12,6 +12,7 @@ private:
 
 public:
 	CMeshRenderer();
+	CMeshRenderer(const CMeshRenderer& other) : m_mesh(other.m_mesh), m_material(other.m_material), CComponent(other) {}
 	~CMeshRenderer();
 
 	virtual void Awake();
@@ -20,6 +21,8 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 	virtual void FixedUpdate();
+
+	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CMeshRenderer>(*this); } 
 
 public:
 	void SetMesh(const std::shared_ptr<CMesh>& mesh) { m_mesh = mesh; }

@@ -16,6 +16,9 @@ private:
 	Matrix mLocalMat = Matrix::Identity;
 
 private:
+	int mCbvIdx = -1;
+
+private:
 	friend CGameObject;
 	friend class CCamera;
 
@@ -29,14 +32,14 @@ public:
 	CTransform();
 	~CTransform();
 
+	virtual std::shared_ptr<CComponent> Clone() override;
+
 	virtual void Awake() override;
 	virtual void Start() override;
 
 	virtual void Update() override;
 	virtual void LateUpdate() override;
 	virtual void FixedUpdate() override;
-
-	void SetParent(std::shared_ptr<CTransform> parent);
 
 public:
 	void MoveStrafe(float distance = 1.0f);
@@ -52,6 +55,7 @@ public:
 	void Rotate(const Vec3& rotation);
 	void Rotate(const Vec3& axis, float angle);
 
+	void SetParent(std::shared_ptr<CTransform> parent);
 	void SetPosition(const Vec3& position) { mPosition = position; };
 	void SetRotation(const Vec3& rotation) { mRotation = Quaternion::CreateFromYawPitchRoll(rotation); };
 	void SetScale(const Vec3& scale) { mScale = scale; };
@@ -67,9 +71,9 @@ public:
 	Vec3 GetUp() const { return mUp; };
 	Vec3 GetRight() const { return mRight; };
 
-	std::wstring GetObjectName();
+	const std::wstring& GetObjectTag();
 
-	std::vector<std::shared_ptr<CTransform>>& GetChildren() { return mChildren; }
+	const std::vector<std::shared_ptr<CTransform>>& GetChildren() { return mChildren; }
 	std::shared_ptr<CTransform> GetChild(UINT idx) { return mChildren[idx]; };
 	std::shared_ptr<CTransform> FindChild(const std::wstring& name);
 

@@ -7,14 +7,25 @@
 #include"UploadBuffer.h"
 #include"Transform.h"
 
+std::vector<std::shared_ptr<CCamera>> CCamera::mCameras{};
+std::shared_ptr<CCamera> CCamera::mMainCamea{};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CCamera::CCamera() : CComponent(COMPONENT_TYPE::CAMERA)
 {
+	mCameras.emplace_back(std::shared_ptr<CCamera>(this));
+	
+	if (!mMainCamea) mMainCamea = mCameras.back();
 }
 
 CCamera::~CCamera()
 {
+	auto it = std::find(mCameras.begin(), mCameras.end(), this);
+	if (it != mCameras.end())
+	{
+		mCameras.erase(it);
+	}
 }
 
 void CCamera::GenerateViewMatrix()
@@ -44,7 +55,10 @@ void CCamera::GenerateViewMatrix()
 
 void CCamera::Awake()
 {
-
+	if (GetOwner()->GetTag() == L"MainCamera") {
+		auto it = std::find(mCameras.begin(), mCameras.end(), this);
+		mMainCamea = *it;
+	}
 }
 
 void CCamera::Start()

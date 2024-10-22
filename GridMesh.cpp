@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "GridMesh.h"
-#include"HeightMapImage.h"
 
 
 void CHeightMapGridMesh::LoadHeightMap(const std::wstring& fileName)
@@ -92,7 +91,12 @@ void CHeightMapGridMesh::CalculateTextureCoord()
 	}
 }
 
-CHeightMapGridMesh::CHeightMapGridMesh(const std::wstring& fileName, int _width, int _height, Vec3 _scale)
+CHeightMapGridMesh::~CHeightMapGridMesh()
+{
+
+}
+
+void CHeightMapGridMesh::Initialize(const std::wstring& fileName, int _width, int _height, Vec3 _scale)
 {
 	width = _width;
 	height = _height;
@@ -114,17 +118,12 @@ CHeightMapGridMesh::CHeightMapGridMesh(const std::wstring& fileName, int _width,
 		for (int x = 0; x < maxX; x++) {
 			int y = heightMap[x + (z * width)];
 
-			Vec3 position = Vec3( x - maxX/2, y, z - maxZ/2) * scale;
+			Vec3 position = Vec3(x - maxX / 2, y, z - maxZ / 2) * scale;
 			vertices.emplace_back(position);
 		}
 	}
 	CalculateNormal();
 	CalculateTextureCoord();
-}
-
-CHeightMapGridMesh::~CHeightMapGridMesh()
-{
-
 }
 
 float CHeightMapGridMesh::GetHeight(float fx, float fz)

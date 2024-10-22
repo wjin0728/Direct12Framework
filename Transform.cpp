@@ -11,6 +11,23 @@ CTransform::~CTransform()
 {
 }
 
+std::shared_ptr<CComponent> CTransform::Clone()
+{
+	std::shared_ptr<CTransform> copy = std::make_shared<CTransform>();
+	copy->isMoved = isMoved;
+	copy->mRight = mRight;
+	copy->mUp = mUp;
+	copy->mLook = mLook;
+	copy->mPosition = mPosition;
+	copy->mScale = mScale;
+	copy->mRotation = mRotation;
+	copy->mWorldMat = mWorldMat;
+	copy->mLocalMat = mLocalMat;
+	copy->dirtyFramesNum = dirtyFramesNum;
+
+	return copy;
+}
+
 void CTransform::Awake()
 {
 }
@@ -145,10 +162,10 @@ void CTransform::Rotate(const Vec3& axis, float angle)
 	isMoved = true;
 }
 
-std::wstring CTransform::GetObjectName()
+const std::wstring& CTransform::GetObjectTag()
 {
 	if(!owner.expired()) 
-		return owner.lock()->GetName();
+		return owner.lock()->GetTag();
 
 	return L"Unknown";
 }
@@ -156,7 +173,7 @@ std::wstring CTransform::GetObjectName()
 std::shared_ptr<CTransform> CTransform::FindChild(const std::wstring& name)
 {
 	for (const auto& child : mChildren) {
-		if (name == child->GetObjectName())
+		if (name == child->GetObjectTag())
 			return child;
 	}
 	return nullptr;

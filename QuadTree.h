@@ -1,7 +1,6 @@
 #pragma once
 #include"stdafx.h"
 #include"GridMesh.h"
-#include"HeightMapImage.h"
 
 
 enum : UINT
@@ -54,8 +53,8 @@ public:
 
 	void ReleaseUploadBuffer(std::shared_ptr<Node>& node);
 
-	void Render(const std::shared_ptr<class CGameObject> cameraObject);
-	void RenderNode(const std::shared_ptr<Node>& node, const std::shared_ptr<class CCamera> camera);
+	void Render(const std::shared_ptr<class CCamera>& camera);
+	void RenderNode(const std::shared_ptr<Node>& node, const std::shared_ptr<class CCamera>& camera);
 
 private:
 	UINT CalculateTriangleCount(const std::array<UINT, 4>& corners) const;

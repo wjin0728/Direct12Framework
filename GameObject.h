@@ -18,21 +18,23 @@ class CMonoBehaviour;
 class CMeshRenderer;
 class CTransform;
 class CCamara;
+class CTerrain;
 
-class CGameObject
+class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
 private:
 	std::map<COMPONENT_TYPE, std::shared_ptr<CComponent>> mComponents{};
 	std::vector<std::shared_ptr<CMonoBehaviour>> mScripts{};
 
 	std::shared_ptr<CTransform> mTransform{};
+
 private:
 	bool mActive = true;
-	std::wstring mName{};
+	std::wstring mTag{};
 	LAYER_TYPE mLayerType{};
 
 public:
-	CGameObject();
+	CGameObject(bool makeTransform = true);
 	virtual ~CGameObject();
 
 	virtual void Awake();
@@ -43,6 +45,9 @@ public:
 	virtual void FixedUpdate();
 
 public:
+	static std::shared_ptr<CGameObject> Instantiate(const std::shared_ptr<CGameObject>& original);
+	static std::shared_ptr<CGameObject> Instantiate(const std::unique_ptr<CGameObject>& original);
+
 	template<typename T, typename... Args>
 	std::shared_ptr<T> AddComponent(Args&&... args);
 	bool AddComponent(const std::shared_ptr<CComponent>& component);
@@ -50,13 +55,14 @@ public:
 	template<typename T>
 	std::shared_ptr<T> GetComponent();
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
-	std::shared_ptr<CCamera> GetCamera();
+	const std::wstring& GetTag() const { return mTag; }
 	bool GetActive() const { return mActive; }
-	std::wstring GetName() const { return mName; }
 
 	void SetActive(bool active) { mActive = active; }
 	void SetLayerType(LAYER_TYPE type) { mLayerType = type; }
-	void SetName(const std::wstring& name) { mName = name; }
+	void SetTag(const std::wstring& tag) { mTag = tag; }
+
+	std::shared_ptr<CGameObject> FindByTag(const std::wstring& tag);
 
 private:
 	template<typename T>
@@ -103,4 +109,6 @@ inline COMPONENT_TYPE CGameObject::GetComponentType()
 		return COMPONENT_TYPE::MESH_RENDERER;
 	else if (std::is_same_v<T, CCamera>)
 		return COMPONENT_TYPE::CAMERA;
+	else if (std::is_same_v<T, CTerrain>)
+		return COMPONENT_TYPE::TERRAIN;
 }
