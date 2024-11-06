@@ -34,6 +34,15 @@ std::shared_ptr<CTexture> CResourceManager::Create2DTexture(const std::wstring& 
 	return m;
 }
 
+void CResourceManager::UpdateMaterials()
+{
+	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(RESOURCE_TYPE::MATERIAL)];
+
+	for (auto& [key, material] : keyObjMap) {
+		static_pointer_cast<CMaterial>(material)->Update();
+	}
+}
+
 void CResourceManager::LoadDefaultMeshes()
 {
 	{
@@ -58,8 +67,39 @@ void CResourceManager::LoadDefaultMeshes()
 
 void CResourceManager::LoadDefaultTexture()
 {
+	{
+		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
+		texture->LoadFromFile(L"Resources\\Textures\\Base_Texture.dds");
+		texture->SetName(L"TerrainBase");
+		Add(texture);
+	}
+	{
+		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
+		texture->LoadFromFile(L"Resources\\Textures\\MainMenu.dds");
+		texture->SetName(L"MainMenu");
+		Add(texture);
+	}
+	{
+		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
+		texture->LoadFromFile(L"Resources\\Textures\\scrolling.dds");
+		texture->SetName(L"Scrolling");
+		Add(texture);
+	}
+	{
+		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
+		texture->LoadFromFile(L"Resources\\Textures\\Detail_Texture_7.dds");
+		texture->SetName(L"TerrainDetail");
+		Add(texture);
+	}
+	{
+		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
+		texture->LoadFromFile(L"Resources\\Textures\\SkyBox_0.dds");
+		texture->SetName(L"SkyBox");
+		texture->SetTextureType(TEXTURECUBE);
+		Add(texture);
+	}
 	auto& textures = resources[static_cast<UINT>(RESOURCE_TYPE::TEXTURE)];
-	
+
 	for (auto& [name, texture] : textures) {
 		static_pointer_cast<CTexture>(texture)->CreateSRV();
 	}
@@ -67,7 +107,23 @@ void CResourceManager::LoadDefaultTexture()
 
 void CResourceManager::LoadDefaultMaterials()
 {
-	std::shared_ptr<CMaterial> mat = std::make_shared<CMaterial>();
+	{
+		std::shared_ptr<CMaterial> mat = std::make_shared<CMaterial>();
+		mat->SetName(L"MainMenu");
+		mat->mDiffuseMapIdx = Get<CTexture>(L"MainMenu")->GetSrvIndex();
+		Add(mat);
+	}
+	{
+		std::shared_ptr<CMaterial> mat = std::make_shared<CMaterial>();
+		mat->SetName(L"SkyBox");
+		Add(mat);
+	}
+	{
+		std::shared_ptr<CMaterial> mat = std::make_shared<CMaterial>();
+		mat->SetName(L"Scrolling");
+		mat->mDiffuseMapIdx = Get<CTexture>(L"Scrolling")->GetSrvIndex();
+		Add(mat);
+	}
 }
 
 void CResourceManager::LoadDefaultShaders()
@@ -86,13 +142,70 @@ void CResourceManager::LoadDefaultShaders()
 
 		Add(shader);
 	}
+	{
+		ShaderInfo info;
+		info.shaderType = SHADER_TYPE::FORWARD;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		shader->Initialize(info, L"Resources\\Shaders\\Sprite.hlsl");
+		shader->SetName(L"Sprite");
+
+		Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = SHADER_TYPE::FORWARD;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		shader->Initialize(info, L"Resources\\Shaders\\Terrain.hlsl");
+		shader->SetName(L"Terrain");
+
+		Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = SHADER_TYPE::FORWARD;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_EQUAL;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		shader->Initialize(info, L"Resources\\Shaders\\SkyBox.hlsl");
+		shader->SetName(L"SkyBox");
+
+		Add(shader);
+	}
+}
+
+void CResourceManager::ReleaseUploadBuffers()
+{
+	for (auto& map : resources) {
+		for (auto& [name, resource] : map) {
+			resource->ReleaseUploadBuffer();
+		}
+	}
 }
 
 UINT CResourceManager::GetTopSRVIndex()
 {
-	UINT idx = srvIdxQueue.top();
+	UINT idx = srvIdxQueue.front();
 	srvIdxQueue.pop();
 
+	return idx;
+}
+
+UINT CResourceManager::GetMaterialSRVIndex()
+{
+	UINT idx = resources[static_cast<UINT8>(RESOURCE_TYPE::MATERIAL)].size();
 	return idx;
 }
 

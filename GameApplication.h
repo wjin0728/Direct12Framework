@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Player.h"
 #include "Scene.h"
 #include "Timer.h"
 
@@ -32,7 +31,6 @@ public:
 
 	int Run();
 
-	void ProcessInput();
 	void Update();
 	void Render();
 	void ShowFPS();

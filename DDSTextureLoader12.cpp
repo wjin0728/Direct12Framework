@@ -251,7 +251,7 @@ namespace
             bDXT10Header = true;
         }
 
-        // setup the pointers in the process request
+        // SetLocalUp the pointers in the process request
         *header = hdr;
         auto offset = sizeof(uint32_t)
             + sizeof(DDS_HEADER)
@@ -406,7 +406,7 @@ namespace
             bDXT10Header = true;
         }
 
-        // setup the pointers in the process request
+        // SetLocalUp the pointers in the process request
         *header = hdr;
         auto offset = sizeof(uint32_t) + sizeof(DDS_HEADER)
             + (bDXT10Header ? sizeof(DDS_HEADER_DXT10) : 0u);

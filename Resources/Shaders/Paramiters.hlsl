@@ -2,9 +2,9 @@
 #define PARAM_DEFINE
 
 
-#define DIRECTIONAL_LIGHT 10
-#define POINT_LIGHT 10
-#define SPOT_LIGHT 10
+#define DIRECTIONAL_LIGHT 5
+#define POINT_LIGHT 5
+#define SPOT_LIGHT 5
 #define MAX_MATERIAL 10
 
 #define TEXTURE_COUNT 10
@@ -21,8 +21,16 @@ struct Material
     float4 emissive;
     float3 fresnelR0;
     int diffuseMapIdx;
+    int normalMapIdx;
+    float3 padding1;
 };
 
+struct TerrainMaterial
+{
+    Material material;
+    int detailMapTdx;
+    float3 padding1;
+};
 
 struct DirectionalLight
 {
@@ -65,19 +73,22 @@ struct LightColor
 
 cbuffer CBPassData : register(b0)
 {
-    matrix viewMat;
-    matrix projMat;
-    matrix viewProjMat;
-    float3 camPos;
-    float passPadding;
-    float2 renderTargetSize;
-    float deltaTime;
-    float totalTime;
+    matrix viewMat : packoffset(c0); 
+    matrix projMat : packoffset(c4); 
+    matrix viewProjMat : packoffset(c8); 
+    float3 camPos : packoffset(c12.x); 
+    float passPadding : packoffset(c12.w); 
+    float2 renderTargetSize : packoffset(c13.x); 
+    float deltaTime : packoffset(c13.z); 
+    float totalTime : packoffset(c13.w);
+    
+    TerrainMaterial terrainMat : packoffset(c14);
 };
 
 cbuffer CBObjectData : register(b1)
 {
     matrix worldMat;
+    matrix texMat;
     int materialIdx;
     float3 objectPadding;
 };
@@ -91,7 +102,7 @@ cbuffer CBLightsData : register(b2)
     uint lightPadding;
 };
 
-
+TextureCube skyBoxMap : register(t0, space2);
 Texture2D diffuseMap[TEXTURE_COUNT] : register(t0);
 
 StructuredBuffer<Material> materials : register(t0, space1);

@@ -8,10 +8,11 @@ protected:
 	RESOURCE_TYPE type;
 
 protected:
-	friend class ResourceManager;
+	friend class CResourceManager;
 
 	virtual void LoadFromFile(std::wstring_view _fileName) {};
 	virtual void Save(std::wstring_view _fileName) {};
+	virtual void ReleaseUploadBuffer() {}
 
 public:
 	RESOURCE_TYPE GetType() const { return type; }

@@ -2,10 +2,10 @@
 #include "Camera.h"
 #include "Mesh.h"
 #include"GameObject.h"
+#include"Transform.h"
 #include"DX12Manager.h"
 #include"FrameResource.h"
 #include"UploadBuffer.h"
-#include"Transform.h"
 
 std::vector<std::shared_ptr<CCamera>> CCamera::mCameras{};
 std::shared_ptr<CCamera> CCamera::mMainCamea{};
@@ -14,27 +14,42 @@ std::shared_ptr<CCamera> CCamera::mMainCamea{};
 //
 CCamera::CCamera() : CComponent(COMPONENT_TYPE::CAMERA)
 {
-	mCameras.emplace_back(std::shared_ptr<CCamera>(this));
-	
-	if (!mMainCamea) mMainCamea = mCameras.back();
 }
 
 CCamera::~CCamera()
 {
-	auto it = std::find(mCameras.begin(), mCameras.end(), this);
+	auto it = findByRawPointer(mCameras, this);
 	if (it != mCameras.end())
 	{
 		mCameras.erase(it);
 	}
+	if (mMainCamea.get() == this) {
+		mMainCamea = nullptr;
+		for (const auto& camera : mCameras) {
+			if (camera->GetOwner()->GetTag() == L"MainCamera") {
+				mMainCamea = camera;
+				break;
+			}
+		}
+	}
+}
+
+std::shared_ptr<CComponent> CCamera::Clone()
+{
+	std::shared_ptr<CCamera> copy = std::make_shared<CCamera>();
+
+	return copy;
 }
 
 void CCamera::GenerateViewMatrix()
 {
-	auto transform = owner.lock()->GetTransform(); 
-	Vec3 position = transform->mPosition;
-	Vec3 right = transform->mRight;
-	Vec3 up = transform->mUp;
-	Vec3 look = transform->mLook;
+	auto transform = GetTransform(); 
+	const Matrix& worldMat = transform->GetWorldMat();
+
+	Vec3 position = Vec3(worldMat._41, worldMat._42, worldMat._43);
+	Vec3 right = worldMat.Right();
+	Vec3 up = worldMat.Up();
+	Vec3 look = worldMat.Backward();
 
 	mViewMat._11 = right.x; mViewMat._12 = up.x; mViewMat._13 = look.x;
 	mViewMat._21 = right.y; mViewMat._22 = up.y; mViewMat._23 = look.y;
@@ -50,15 +65,29 @@ void CCamera::GenerateViewMatrix()
 	mInverseViewMat._31 = look.x; mInverseViewMat._32 = look.y; mInverseViewMat._33 = look.z;
 	mInverseViewMat._41 = position.x; mInverseViewMat._42 = position.y; mInverseViewMat._43 = position.z;
 
-	mFrustumWorld.Transform(mFrustumWorld, mInverseViewMat);
+	mFrustumView.Transform(mFrustumWorld, mInverseViewMat);
+}
+
+void CCamera::DeleteMainCamera()
+{
+	auto it = findByRawPointer(mCameras, mMainCamea.get());
+	if (it != mCameras.end())
+	{
+		mCameras.erase(it);
+	}
+	mMainCamea = nullptr;
+
+	for (const auto& camera : mCameras) {
+		if (camera->GetOwner()->GetTag() == L"MainCamera") {
+			mMainCamea = camera;
+			break;
+		}
+	}
 }
 
 void CCamera::Awake()
 {
-	if (GetOwner()->GetTag() == L"MainCamera") {
-		auto it = std::find(mCameras.begin(), mCameras.end(), this);
-		mMainCamea = *it;
-	}
+	GenerateViewMatrix();
 }
 
 void CCamera::Start()
@@ -71,15 +100,7 @@ void CCamera::Update()
 
 void CCamera::LateUpdate()
 {
-	auto transform = owner.lock()->GetTransform();
-
-	if (transform->isMoved) {
-		GenerateViewMatrix();
-	}
-}
-
-void CCamera::FixedUpdate()
-{
+	GenerateViewMatrix();
 }
 
 void CCamera::SetFOVAngle(float fovAngle)
@@ -88,14 +109,29 @@ void CCamera::SetFOVAngle(float fovAngle)
 	mProjectRectDist = float(1.0f / tan(XMConvertToRadians(mFovAngle * 0.5f)));
 }
 
+void CCamera::AddCamera(const std::shared_ptr<CCamera>& camera)
+{
+	auto it = std::find(mCameras.begin(), mCameras.end(), camera);
+	if (it != mCameras.end())
+	{
+		return;
+	}
+
+	mCameras.push_back(camera);
+
+	if (camera->GetOwner()->GetTag() == L"MainCamera") {
+		mMainCamea = camera;
+	}
+}
+
 void CCamera::GeneratePerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle)
 {
 	mAspectRatio = (float(mViewport.Width) / float(mViewport.Height));
-	mPerspectiveProjectMat = Matrix::CreatePerspectiveFieldOfView(fovAngle, mAspectRatio, nearPlane, farPlane);
+	mPerspectiveProjectMat = Matrix::CreatePerspectiveFieldOfView(XMConvertToRadians(fovAngle), mAspectRatio, nearPlane, farPlane);
 
 	mNearZ = nearPlane;
 	mFarZ = farPlane;
-	mFovAngle = fovAngle;
+	SetFOVAngle(fovAngle);
 
 	BoundingFrustum::CreateFromMatrix(mFrustumView, mPerspectiveProjectMat);
 }
@@ -142,4 +178,9 @@ bool CCamera::IsInFrustum(const BoundingOrientedBox& boundingBox)
 bool CCamera::IsInFrustum(const BoundingBox& boundingBox)
 {
 	return mFrustumWorld.Intersects(boundingBox);
+}
+
+const Vec3& CCamera::GetLocalPosition() 
+{
+	return GetTransform()->GetWorldPosition();
 }

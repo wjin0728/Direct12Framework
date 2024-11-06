@@ -4,6 +4,10 @@
 #include"ResourceManager.h"
 
 
+CTexture::CTexture(bool isSR, TEXTURE_TYPE texType) : isSR(isSR), texType(texType)
+{
+}
+
 CTexture::~CTexture()
 {
 	if (srvIdx != -1) {
@@ -121,13 +125,17 @@ void CTexture::ReleaseUploadBuffer()
 
 void CTexture::CreateSRV()
 {
-	if(isSR) {
-		srvIdx = INSTANCE(CResourceManager).GetTopSRVIndex();
-
-		auto descriptorHeap = INSTANCE(CDX12Manager).GetDescriptorHeaps();
+	if (isSR && (srvIdx == -1)) {
 		D3D12_SHADER_RESOURCE_VIEW_DESC desc = GetShaderResourceViewDesc();
+		auto descriptorHeap = INSTANCE(CDX12Manager).GetDescriptorHeaps();
 
-		descriptorHeap->CreateSRV(texResource, desc, srvIdx);
+		if (texType == TEXTURECUBE) {
+			descriptorHeap->CreateCubeMap(texResource, desc, 0);
+		}
+		else {
+			srvIdx = INSTANCE(CResourceManager).GetTopSRVIndex();
+			descriptorHeap->CreateSRV(texResource, desc, srvIdx);
+		}
 	}
 }
 
@@ -141,7 +149,7 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc()
 
 	D3D12_RESOURCE_DESC resourceDesc = texResource->GetDesc();
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
 	switch (texType)

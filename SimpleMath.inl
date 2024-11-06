@@ -992,6 +992,18 @@ inline void Vector3::Clamp(const Vector3& vmin, const Vector3& vmax, Vector3& re
     XMStoreFloat3(&result, X);
 }
 
+inline Vector3 Vector3::ClampLength(const Vector3& v, float min, float max) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR v1 = XMLoadFloat3(&v);
+    XMVECTOR X = XMVector3ClampLength(v, min, max);
+    XMFLOAT3 result;
+
+    XMStoreFloat3(&result, X);
+
+    return result;
+}
+
 //------------------------------------------------------------------------------
 // Static functions
 //------------------------------------------------------------------------------
@@ -2598,7 +2610,7 @@ inline Matrix Matrix::CreatePerspectiveFieldOfView(float fov, float aspectRatio,
 {
     using namespace DirectX;
     Matrix R;
-    XMStoreFloat4x4(&R, XMMatrixPerspectiveFovRH(fov, aspectRatio, nearPlane, farPlane));
+    XMStoreFloat4x4(&R, XMMatrixPerspectiveFovLH(fov, aspectRatio, nearPlane, farPlane));
     return R;
 }
 
@@ -2606,7 +2618,7 @@ inline Matrix Matrix::CreatePerspective(float width, float height, float nearPla
 {
     using namespace DirectX;
     Matrix R;
-    XMStoreFloat4x4(&R, XMMatrixPerspectiveRH(width, height, nearPlane, farPlane));
+    XMStoreFloat4x4(&R, XMMatrixPerspectiveLH(width, height, nearPlane, farPlane));
     return R;
 }
 
@@ -2614,7 +2626,7 @@ inline Matrix Matrix::CreatePerspectiveOffCenter(float left, float right, float 
 {
     using namespace DirectX;
     Matrix R;
-    XMStoreFloat4x4(&R, XMMatrixPerspectiveOffCenterRH(left, right, bottom, top, nearPlane, farPlane));
+    XMStoreFloat4x4(&R, XMMatrixPerspectiveOffCenterLH(left, right, bottom, top, nearPlane, farPlane));
     return R;
 }
 
@@ -2622,7 +2634,7 @@ inline Matrix Matrix::CreateOrthographic(float width, float height, float zNearP
 {
     using namespace DirectX;
     Matrix R;
-    XMStoreFloat4x4(&R, XMMatrixOrthographicRH(width, height, zNearPlane, zFarPlane));
+    XMStoreFloat4x4(&R, XMMatrixOrthographicLH(width, height, zNearPlane, zFarPlane));
     return R;
 }
 
@@ -2630,7 +2642,7 @@ inline Matrix Matrix::CreateOrthographicOffCenter(float left, float right, float
 {
     using namespace DirectX;
     Matrix R;
-    XMStoreFloat4x4(&R, XMMatrixOrthographicOffCenterRH(left, right, bottom, top, zNearPlane, zFarPlane));
+    XMStoreFloat4x4(&R, XMMatrixOrthographicOffCenterLH(left, right, bottom, top, zNearPlane, zFarPlane));
     return R;
 }
 
@@ -2641,7 +2653,7 @@ inline Matrix Matrix::CreateLookAt(const Vector3& eye, const Vector3& target, co
     XMVECTOR eyev = XMLoadFloat3(&eye);
     XMVECTOR targetv = XMLoadFloat3(&target);
     XMVECTOR upv = XMLoadFloat3(&up);
-    XMStoreFloat4x4(&R, XMMatrixLookAtRH(eyev, targetv, upv));
+    XMStoreFloat4x4(&R, XMMatrixLookAtLH(eyev, targetv, upv));
     return R;
 }
 
@@ -2659,7 +2671,7 @@ inline Matrix Matrix::CreateLookTo(const Vector3& eye, const Vector3& direction,
 inline Matrix Matrix::CreateWorld(const Vector3& position, const Vector3& forward, const Vector3& up) noexcept
 {
     using namespace DirectX;
-    XMVECTOR zaxis = XMVector3Normalize(XMVectorNegate(XMLoadFloat3(&forward)));
+    XMVECTOR zaxis = XMVector3Normalize(XMLoadFloat3(&forward));
     XMVECTOR yaxis = XMLoadFloat3(&up);
     XMVECTOR xaxis = XMVector3Normalize(XMVector3Cross(yaxis, zaxis));
     yaxis = XMVector3Cross(zaxis, xaxis);
@@ -3166,7 +3178,7 @@ inline Quaternion Quaternion::CreateFromYawPitchRoll(const Vector3& angles) noex
     return R;
 }
 
-inline Quaternion Quaternion::CreateFromRotationMatrix(const Matrix& M) noexcept
+inline Quaternion Quaternion::CreateFromLocalRotationMatrix(const Matrix& M) noexcept
 {
     using namespace DirectX;
     XMMATRIX M0 = XMLoadFloat4x4(&M);
@@ -3241,7 +3253,6 @@ inline Quaternion Quaternion::Slerp(const Quaternion& q1, const Quaternion& q2, 
     using namespace DirectX;
     XMVECTOR Q0 = XMLoadFloat4(&q1);
     XMVECTOR Q1 = XMLoadFloat4(&q2);
-
     Quaternion result;
     XMStoreFloat4(&result, XMQuaternionSlerp(Q0, Q1, t));
     return result;
@@ -3266,6 +3277,13 @@ inline Quaternion Quaternion::Concatenate(const Quaternion& q1, const Quaternion
     return result;
 }
 
+inline Quaternion Quaternion::LookRotation(const Vector3& v, const Vector3& up) noexcept
+{
+    using namespace DirectX;
+    Matrix rotateMat = Matrix::CreateWorld(Vector3::Zero, v, up);
+
+    return Quaternion::CreateFromLocalRotationMatrix(rotateMat);
+}
 
 /****************************************************************************
  *

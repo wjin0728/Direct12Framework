@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "GridMesh.h"
+#include"DX12Manager.h"
 
 
 void CHeightMapGridMesh::LoadHeightMap(const std::wstring& fileName)
 {
-	size_t heightMapSize = width * height;
+	UINT heightMapSize = width * height;
 	BYTE* pHeightMapPixels = new BYTE[heightMapSize];
 	memset(pHeightMapPixels, 0, heightMapSize);
 
@@ -15,9 +16,9 @@ void CHeightMapGridMesh::LoadHeightMap(const std::wstring& fileName)
 	::CloseHandle(hFile);
 
 	heightMap = new BYTE[heightMapSize];
-	for (int y = 0; y < height; y++)
+	for (UINT y = 0; y < height; y++)
 	{
-		for (int x = 0; x < width; x++)
+		for (UINT x = 0; x < width; x++)
 		{
 			heightMap[x + ((height - 1 - y) * width)] = pHeightMapPixels[x +
 				(y * width)];
@@ -52,7 +53,7 @@ void CHeightMapGridMesh::CalculateNormal()
 			normals[idx3] += normal2;
 		}
 	}
-	std::transform(normals.begin(), normals.end(), normals.begin(), [](Vec3& n) { n.Normalize(); });
+	std::transform(normals.begin(), normals.end(), normals.begin(), [](Vec3& n) { return n.GetNormalized(); });
 
 	for (size_t  i = 0; i < vertices.size(); ++i) {
 		vertices[i].normal = normals[i];
@@ -69,8 +70,8 @@ void CHeightMapGridMesh::CalculateTextureCoord()
 	UINT uCount{};
 	UINT vCount{};
 
-	for (UINT i = 0; i < height - 1; ++i) {
-		for (UINT j = 0; j < width - 1; ++j) {
+	for (UINT i = 0; i < height; ++i) {
+		for (UINT j = 0; j < width; ++j) {
 			vertices[(i * width) + j].texCoord = uv;
 
 			uv.x += increaseVal;
@@ -85,7 +86,7 @@ void CHeightMapGridMesh::CalculateTextureCoord()
 		vCount++;
 
 		if (vCount == increaseCnt) {
-			uv.y = 0.f;
+			uv.y = 1.f;
 			vCount = 0;
 		}
 	}
@@ -118,12 +119,15 @@ void CHeightMapGridMesh::Initialize(const std::wstring& fileName, int _width, in
 		for (int x = 0; x < maxX; x++) {
 			int y = heightMap[x + (z * width)];
 
-			Vec3 position = Vec3(x - maxX / 2, y, z - maxZ / 2) * scale;
+			Vec3 position = Vec3(x - maxX / 2.f, y, z - maxZ / 2.f) * scale;
 			vertices.emplace_back(position);
 		}
 	}
 	CalculateNormal();
 	CalculateTextureCoord();
+
+	vertexBuffer = CreateBufferResource(DEVICE, CMDLIST, vertices.data(), stride * vertices.size(),
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &vertexUploadBuffer);
 }
 
 float CHeightMapGridMesh::GetHeight(float fx, float fz)
@@ -139,17 +143,17 @@ float CHeightMapGridMesh::GetHeight(float fx, float fz)
 	float fzPercent = fz - z;
 
 	float fBottomLeft = (float)heightMap[x + (z * width)];
-	float fBottomRight = (float)heightMap[(x + 1) + (z * width)];
+	float fBottomLocalRight = (float)heightMap[(x + 1) + (z * width)];
 	float fTopLeft = (float)heightMap[x + ((z + 1) * width)];
 	float fTopRight = (float)heightMap[(x + 1) + ((z + 1) * width)];
 
 	if (fzPercent >= fxPercent)
-		fBottomRight = fBottomLeft + (fTopRight - fTopLeft);
+		fBottomLocalRight = fBottomLeft + (fTopRight - fTopLeft);
 	else
-		fTopLeft = fTopRight + (fBottomLeft - fBottomRight);
+		fTopLeft = fTopRight + (fBottomLeft - fBottomLocalRight);
 
 	float fTopHeight = SimpleMath::Flerp(fTopLeft, fTopRight, fxPercent);
-	float fBottomHeight = SimpleMath::Flerp(fBottomLeft, fBottomRight, fxPercent);
+	float fBottomHeight = SimpleMath::Flerp(fBottomLeft, fBottomLocalRight, fxPercent);
 	float fHeight = SimpleMath::Flerp(fBottomHeight, fTopHeight, fzPercent);
 
 	return fHeight;

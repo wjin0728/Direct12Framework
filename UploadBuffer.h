@@ -5,24 +5,30 @@ enum class CONSTANT_BUFFER_TYPE : UINT {
 	PASS,
 	OBJECT,
 	LIGHT,
-	MATERIAL,
+
+	END
+};
+
+enum class STRUCTED_BUFFER_TYPE : UINT {
+	MATERIAL = static_cast<UINT>(CONSTANT_BUFFER_TYPE::END),
 
 	END
 };
 
 enum {
-	CONSTANT_BUFFER_TYPE_COUNT = CONSTANT_BUFFER_TYPE::END,
-	TEXTURE_COUNT = 20,
-	MATERIAL_COUNT = 20,
-	MESH_COUNT = 20,
+	UPLOAD_BUFFER_TYPE_COUNT = static_cast<UINT>(STRUCTED_BUFFER_TYPE::END),
+	TEXTURE_COUNT = 50,
+	CUBE_MAP_COUNT = 5,
+	MATERIAL_COUNT = 1000,
+	MESH_COUNT = 50,
 	PASS_COUNT = 1,
-	OBJECT_COUNT = 100
+	OBJECT_COUNT = 500
 };
 
 
 class CUploadBuffer
 {
-private:
+protected:
 	ComPtr<ID3D12Resource> buffer = ComPtr<ID3D12Resource>();
 
 	BYTE* mappedData{};
@@ -34,16 +40,37 @@ private:
 
 public:
 	CUploadBuffer() {};
-	~CUploadBuffer();
+	virtual ~CUploadBuffer();
 
 public:
-	void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1);
+	virtual void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1) = 0;
 
-	void UpdateData(const void* _data, UINT idx = 0, UINT _dataNum = 1);
-	void UpdateConstantBuffer(UINT idx = 0);
-	void UpdateStructedBuffer(UINT idx = 0);
+	void CopyData(const void* _data, UINT idx = 0, UINT _dataNum = 1);
+	virtual void UpdateBuffer(UINT idx = 0) = 0;
 
-private:
+protected:
 	void CreateBuffer();
 };
 
+
+class CConstantBuffer : public CUploadBuffer
+{
+public:
+	CConstantBuffer() {};
+	virtual ~CConstantBuffer() {};
+
+public:
+	virtual void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1);
+	virtual void UpdateBuffer(UINT idx = 0);
+};
+
+class CStructedBuffer : public CUploadBuffer
+{
+public:
+	CStructedBuffer() {};
+	virtual ~CStructedBuffer() {};
+
+public:
+	virtual void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1);
+	virtual void UpdateBuffer(UINT idx = 0);
+};

@@ -1,4 +1,8 @@
 #pragma once
+#include"stdafx.h"
+
+#define TIMER INSTANCE(CGameTimer)
+#define DELTA_TIME INSTANCE(CGameTimer).GetDeltaTime()
 
 const ULONG MAX_SAMPLE_COUNT = 50; // Maximum frame time sample count
 

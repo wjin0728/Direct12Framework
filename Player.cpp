@@ -13,16 +13,16 @@ CPlayer::~CPlayer()
 {
 }
 
-void CPlayer::SetPosition(float x, float y, float z)
+void CPlayer::SetLocalPosition(float x, float y, float z)
 {
 	position = XMFLOAT3(x, y, z);
 	if(camera)
 		SetCameraOffset(cameraOffset);
 
-	CGameObject::SetPosition(x, y, z);
+	CGameObject::SetLocalPosition(x, y, z);
 }
 
-void CPlayer::SetRotation(float x, float y, float z)
+void CPlayer::SetLocalRotation(float x, float y, float z)
 {
 	pitch = x, yaw = y, roll = z;
 }
@@ -30,7 +30,7 @@ void CPlayer::SetRotation(float x, float y, float z)
 void CPlayer::SetCameraOffset(const XMFLOAT3& xmf3CameraOffset)
 {
 	cameraOffset = xmf3CameraOffset;
-	camera->SetLookAt(Vector3::Add(position, cameraOffset), Vector3::Add(camera->GetPosition(), look, 10.f), up);
+	camera->SetLocalLookAt(Vector3::Add(position, cameraOffset), Vector3::Add(camera->GetLocalPosition(), look, 10.f), up);
 	camera->GenerateViewMatrix();
 }
 
@@ -211,7 +211,7 @@ void CAirplanePlayer::Update(float deltaTime, XMFLOAT4X4* pxmf4x4Parent)
 	CPlayer::Update(deltaTime);
 
 	playerLight->SetDirection(look);
-	playerLight->Setposition(position);
+	playerLight->SetLocalPosition(position);
 
 	if (isShieldOn && shieldMesh)
 	{
@@ -270,7 +270,7 @@ void CAirplanePlayer::FireBullet(std::shared_ptr<CGameObject>& pLockedObject)
 /*
 	if (pLockedObject) 
 	{
-		LookAt(pLockedObject->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+		LookAt(pLockedObject->GetLocalPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 		OnUpdateTransform();
 	}
 */
@@ -287,7 +287,7 @@ void CAirplanePlayer::FireBullet(std::shared_ptr<CGameObject>& pLockedObject)
 
 	if (pBulletObject)
 	{
-		XMFLOAT3 xmf3Position = GetPosition();
+		XMFLOAT3 xmf3Position = GetLocalPosition();
 		XMFLOAT3 xmf3Direction = GetLook();
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 2.0f, false));
 

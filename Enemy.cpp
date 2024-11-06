@@ -14,14 +14,14 @@ CEnemy::~CEnemy()
 	for (int i = 0; i < ENEMY_BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
 }
 
-void CEnemy::SetPosition(float x, float y, float z)
+void CEnemy::SetLocalPosition(float x, float y, float z)
 {
 	position = XMFLOAT3(x, y, z);
 
-	CGameObject::SetPosition(x, y, z);
+	CGameObject::SetLocalPosition(x, y, z);
 }
 
-void CEnemy::SetRotation(float x, float y, float z)
+void CEnemy::SetLocalRotation(float x, float y, float z)
 {
 	pitch = x, yaw = y, roll = z;
 }
@@ -171,7 +171,7 @@ void CEnemy::FireBullet()
 
 	if (pBulletObject)
 	{
-		XMFLOAT3 xmf3Position = GetPosition();
+		XMFLOAT3 xmf3Position = GetLocalPosition();
 		XMFLOAT3 xmf3Direction = GetLook();
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, false));
 

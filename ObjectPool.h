@@ -2,6 +2,7 @@
 #include"stdafx.h"
 
 class CGameObject;
+class CTransform;
 
 class CObjectPool
 {
@@ -16,10 +17,13 @@ public:
 	void Initialize(std::unique_ptr<CGameObject>&& original, UINT objCnt);
 
 private:
-	void CreatePoolableObject();
+	std::shared_ptr<CGameObject> CreatePoolableObject() const;
 
+private:
+	friend class CObjectPoolManager;
+
+	void PushObject(std::shared_ptr<CGameObject> object);
+	std::shared_ptr<CGameObject> PopObject(const std::shared_ptr<CTransform>& parent = nullptr);
+
+	void Clear();
 };
-
-//오늘 할 일
-//1. 오브젝트 풀 구현하기
-//3. 오브젝트의 cbv 인덱스를 어떤 방식으로 지정해줄지 정하기

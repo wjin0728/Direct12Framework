@@ -1,8 +1,7 @@
 //-----------------------------------------------------------------------------
 // File: CGameTimer.cpp
 //-----------------------------------------------------------------------------
-
-#include "stdafx.h"
+#include"stdafx.h"
 #include "Timer.h"
 
 
@@ -24,7 +23,7 @@ void CGameTimer::Tick(float fLockFPS)
 		deltaTime = 0.0f;
 		return;
 	}
-	double _deltaTime;
+	float _deltaTime;
 
 	QueryPerformanceCounter((LARGE_INTEGER *)&currentTime);
 
@@ -43,7 +42,7 @@ void CGameTimer::Tick(float fLockFPS)
 
     if (fabsf(_deltaTime - deltaTime) < 1.0f)
     {
-        ::memmove(&m_fFrameTime[1], m_fFrameTime, (MAX_SAMPLE_COUNT - 1) * sizeof(float));
+		::memmove(&m_fFrameTime[1], m_fFrameTime, (static_cast<size_t>(MAX_SAMPLE_COUNT) - 1) * sizeof(float));
         m_fFrameTime[0] = _deltaTime;
         if (m_nSampleCount < MAX_SAMPLE_COUNT) m_nSampleCount++;
     }

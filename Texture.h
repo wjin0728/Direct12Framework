@@ -13,7 +13,7 @@ enum TEXTURE_TYPE {
 class CTexture : public CResource
 {
 public:
-	CTexture(bool isSR = true, TEXTURE_TYPE texType = TEXTURE2D) : isSR(isSR), texType(texType) {};
+	CTexture(bool isSR = true, TEXTURE_TYPE texType = TEXTURE2D);
 	~CTexture();
 
 protected:
@@ -32,7 +32,7 @@ public:
 		D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = XMFLOAT4());
 	void CreateFromResource(ComPtr<ID3D12Resource> resource);
 
-	void ReleaseUploadBuffer();
+	virtual void ReleaseUploadBuffer();
 
 
 	ComPtr<ID3D12Resource>& GetResource();
@@ -41,6 +41,7 @@ public:
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc();
 
 	void SetSrvIndex(UINT idx) { srvIdx = idx; }
+	void SetTextureType(TEXTURE_TYPE type) { texType = type; }
 
 	void CreateSRV();
 };

@@ -1,15 +1,15 @@
 #include "stdafx.h"
 #include "Light.h"
 
-CDirectionalLight::CDirectionalLight(const XMFLOAT4& _color, const XMFLOAT3& _strength, const XMFLOAT3& _direction) : CLight(_color, _strength), direction(_direction)
+CDirectionalLight::CDirectionalLight(const Color& _color, const Vec3& _strength, const Vec3& _direction) : CLight(_color, _strength), direction(_direction)
 {
-	direction = Vector3::Normalize(direction);
+	direction = direction.GetNormalized();
 }
 
-void CDirectionalLight::SetDirection(const XMFLOAT3& _direction)
+void CDirectionalLight::SetDirection(const Vec3& _direction)
 {
 	direction = _direction;
-	direction = Vector3::Normalize(direction);
+	direction = direction.GetNormalized();
 }
 
 void CDirectionalLight::UpdateLightData(CBDirectionalLightInfo& data) const
@@ -19,12 +19,12 @@ void CDirectionalLight::UpdateLightData(CBDirectionalLightInfo& data) const
 	data.direction = direction;
 }
 
-CPointLight::CPointLight(const XMFLOAT4& _color, const XMFLOAT3& _strength, const XMFLOAT3& _position, float _range)
+CPointLight::CPointLight(const Color& _color, const Vec3& _strength, const Vec3& _position, float _range)
 	: CLight(_color, _strength), position(_position), range(_range)
 {
 }
 
-void CPointLight::Setposition(const XMFLOAT3& _position)
+void CPointLight::SetLocalPosition(const Vec3& _position)
 {
 	position = _position;
 }
@@ -42,22 +42,22 @@ void CPointLight::UpdateLightData(CBPointLightInfo& data) const
 	data.range = range;
 }
 
-CSpotLight::CSpotLight(const XMFLOAT4& _color, const XMFLOAT3& _strength, const XMFLOAT3& _direction, const XMFLOAT3& _position,
+CSpotLight::CSpotLight(const Color& _color, const Vec3& _strength, const Vec3& _direction, const Vec3& _position,
 	float _range, float _fallOffStart, float _fallOffEnd, float _spotPower)
 	: CLight(_color, _strength), direction(_direction), position(_position), range(_range) , spotPower(_spotPower)
 {
-	direction = Vector3::Normalize(direction);
-	fallOffStart = cos(DegreeToRadian(_fallOffStart));
-	fallOffEnd = cos(DegreeToRadian(_fallOffEnd));
+	direction = direction.GetNormalized();
+	fallOffStart = cos(XMConvertToRadians(_fallOffStart));
+	fallOffEnd = cos(XMConvertToRadians(_fallOffEnd));
 }
 
-void CSpotLight::SetDirection(const XMFLOAT3& _direction)
+void CSpotLight::SetDirection(const Vec3& _direction)
 {
 	direction = _direction;
-	direction = Vector3::Normalize(direction);
+	direction = direction.GetNormalized();
 }
 
-void CSpotLight::Setposition(const XMFLOAT3& _position)
+void CSpotLight::SetLocalPosition(const Vec3& _position)
 {
 	position = _position;
 }
@@ -69,12 +69,12 @@ void CSpotLight::SetRange(float _range)
 
 void CSpotLight::SetfallOffStart(float _fallOffStart)
 {
-	fallOffStart = cos(DegreeToRadian(_fallOffStart));
+	fallOffStart = cos(XMConvertToRadians(_fallOffStart));
 }
 
 void CSpotLight::SetfallOffEnd(float _fallOffEnd)
 {
-	fallOffEnd = cos(DegreeToRadian(_fallOffEnd));
+	fallOffEnd = cos(XMConvertToRadians(_fallOffEnd));
 }
 
 void CSpotLight::SetSpotPower(float _spotPower)

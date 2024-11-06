@@ -76,7 +76,7 @@ protected:
 	virtual void CalculateNormal();
 
 public:
-	void ReleaseUploadBuffers();
+	virtual void ReleaseUploadBuffer();
 
 	int CheckRayIntersection(const Ray& ray, float& nearHitDistance);
 public:
@@ -88,6 +88,7 @@ public:
 public:
 	const std::vector<CVertex>& GetVertices() const { return vertices; }
 	const ComPtr<ID3D12Resource>& GetVertexBuffer() const { return vertexBuffer; }
+	UINT GetSubMeshNum() const { return subMeshNum; }
 };
 
 

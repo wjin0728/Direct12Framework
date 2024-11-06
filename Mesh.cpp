@@ -115,19 +115,18 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 {
 	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
 
-	int nPositions = 0, nColors = 0, nNormals = 0, nIndices = 0;
-	int nvertices = 0;
-
+	int nvertices{};
 	BinaryReader::ReadDateFromFile(inFile, nvertices);
 
-	//vertices.resize(nvertices);
+	m->vertices.resize(nvertices);
 
 	std::string meshName;
 	BinaryReader::ReadDateFromFile(inFile, meshName);
+	m->name = BinaryReader::stringToWstring(meshName);
 
 	std::string token;
 
-	for (; ; )
+	while (true)
 	{
 		BinaryReader::ReadDateFromFile(inFile, token);
 
@@ -143,6 +142,7 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 		}
 		else if (token == "<Positions>:")
 		{
+			int nPositions{};
 			BinaryReader::ReadDateFromFile(inFile, nPositions);
 
 			for (int i = 0; i < nPositions; i++) {
@@ -151,17 +151,48 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 		}
 		else if (token == "<Colors>:")
 		{
+
 		}
 		else if (token == "<Normals>:")
 		{
+			int nNormals{};
 			BinaryReader::ReadDateFromFile(inFile, nNormals);
 
 			for (int i = 0; i < nNormals; i++) {
 				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].normal);
 			}
 		}
+		else if (token == "<TextureCoords0>:")
+		{
+			int nTextureCoord{};
+			BinaryReader::ReadDateFromFile(inFile, nTextureCoord);
+
+			for (int i = 0; i < nTextureCoord; i++) {
+				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].texCoord);
+			}
+		}
+		else if (token == "<Tangents>:")
+		{
+			int nTangent{};
+			BinaryReader::ReadDateFromFile(inFile, nTangent);
+
+			for (int i = 0; i < nTangent; i++) {
+				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].tangent);
+			}
+
+		}
+		else if (token == "<BiTangents>:")
+		{
+			int nBiTangent{};
+			Vec3 biTangent{};
+			BinaryReader::ReadDateFromFile(inFile, nBiTangent);
+			for (int i = 0; i < nBiTangent; i++) {
+				BinaryReader::ReadDateFromFile(inFile, biTangent);
+			}
+		}
 		else if (token == "<Indices>:")
 		{
+			int nIndices{};
 			BinaryReader::ReadDateFromFile(inFile, nIndices);
 
 			m->indices.emplace_back(nIndices);
@@ -181,6 +212,8 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 					BinaryReader::ReadDateFromFile(inFile, token);
 					if (token == "<SubMesh>:")
 					{
+						int subMeshIdx = 0;
+						BinaryReader::ReadDateFromFile(inFile, subMeshIdx);
 						int nIndex = 0;
 						BinaryReader::ReadDateFromFile(inFile, nIndex);
 
@@ -198,6 +231,8 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 			break;
 		}
 	}
+	m->CreateVertexBufferView(DEVICE, CMDLIST);
+	m->CreateIndexBufferView(DEVICE, CMDLIST);
 
 	return m;
 }
@@ -451,7 +486,7 @@ void CMesh::CalculateNormal()
 	}
 }
 
-void CMesh::ReleaseUploadBuffers()
+void CMesh::ReleaseUploadBuffer()
 {
 	if(vertexUploadBuffer)
 		vertexUploadBuffer.Reset();

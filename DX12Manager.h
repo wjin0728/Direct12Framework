@@ -76,6 +76,7 @@ public:
 	void ChangeSwapChainState();
 
 	void MoveToNextFrameResource();
+	void UpdateFrameResources();
 	void WaitForGpu();
 
 	void OpenCommandList();
@@ -89,7 +90,7 @@ public:
 	ID3D12Device* GetDevice() const { return mDevice.Get(); }
 	ID3D12RootSignature* GetRootSignature() const {	return mRootSignature.Get(); }
 	CFrameResource* GetCurFrameResource() const { return mCurFrameResource; }
-	std::shared_ptr<CUploadBuffer> GetConstBuffer(CONSTANT_BUFFER_TYPE type);
+	std::shared_ptr<CUploadBuffer> GetBuffer(UINT type);
 	std::shared_ptr<CDescriptorHeaps> GetDescriptorHeaps() const { return descriptorHeaps; };
 
 	XMFLOAT2 GetRenderTargetSize() const { return renderTargetSize; }

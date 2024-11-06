@@ -4,16 +4,18 @@
 class CTransform : public CComponent, public std::enable_shared_from_this<CTransform>
 {
 private:
-	Vec3 mRight = Vec3::Right;
-	Vec3 mUp = Vec3::Up;
-	Vec3 mLook = Vec3::Backward;
+	Vec3 mLocalRight = Vec3::Right;
+	Vec3 mLocalUp = Vec3::Up;
+	Vec3 mLocalLook = Vec3::Backward;
 
-	Vec3 mPosition{};
-	Vec3 mScale = { 1.f,1.f,1.f };
-	Quaternion mRotation = Quaternion::Identity;
+	Vec3 mLocalPosition{};
+	Vec3 mLocalScale = { 1.f,1.f,1.f };
+	Quaternion mLocalRotation = Quaternion::Identity;
+	Vec3 mLocalEulerAngle{};
 
 	Matrix mWorldMat = Matrix::Identity;
 	Matrix mLocalMat = Matrix::Identity;
+	Matrix mTextureMat = Matrix::Identity;
 
 private:
 	int mCbvIdx = -1;
@@ -23,12 +25,11 @@ private:
 	friend class CCamera;
 
 	bool isMoved{};
-	int dirtyFramesNum{};
 
 	std::weak_ptr<CTransform> mParent{};
-	std::vector<std::shared_ptr<CTransform>> mChildren{};
 
 public:
+	int dirtyFramesNum{};
 	CTransform();
 	~CTransform();
 
@@ -39,7 +40,11 @@ public:
 
 	virtual void Update() override;
 	virtual void LateUpdate() override;
-	virtual void FixedUpdate() override;
+
+	void Reset();
+	void SetCBVIndex();
+	void ReturnCBVIndex();
+	void BindConstantBuffer();
 
 public:
 	void MoveStrafe(float distance = 1.0f);
@@ -56,29 +61,38 @@ public:
 	void Rotate(const Vec3& axis, float angle);
 
 	void SetParent(std::shared_ptr<CTransform> parent);
-	void SetPosition(const Vec3& position) { mPosition = position; };
-	void SetRotation(const Vec3& rotation) { mRotation = Quaternion::CreateFromYawPitchRoll(rotation); };
-	void SetScale(const Vec3& scale) { mScale = scale; };
-	void SetLook(const Vec3& look) { mLook = look; };
-	void SetUp(const Vec3& up) { mUp = up; };
-	void SetRight(const Vec3& right) { mRight = right; };
+	void SetLocalPosition(const Vec3& position) { mLocalPosition = position; isMoved = true; };
+	void SetLocalRotation(const Vec3& rotation) { mLocalRotation = Quaternion::CreateFromYawPitchRoll(rotation); 
+	mLocalEulerAngle = rotation; isMoved = true; };
+	void SetLocalRotation(const Quaternion & rotation) { mLocalRotation = rotation; isMoved = true; }
+	void SetLocalScale(const Vec3& scale) { mLocalScale = scale; isMoved = true; };
+	void SetLocalLook(const Vec3& look) { mLocalLook = look; };
+	void SetLocalUp(const Vec3& up) { mLocalUp = up; };
+	void SetLocalRight(const Vec3& right) { mLocalRight = right; };
 
-	Vec3 GetPosition() const { return mPosition; };
-	Vec3 GetWorldPosition() const { return Vec3(mWorldMat._41, mWorldMat._42, mWorldMat._43); };
-	Vec3 GetRotation() const { return Vec3::GetAngleToQuaternion(mRotation); }
-	Vec3 GetScale() const { return mScale; };
-	Vec3 GetLook() const { return mLook; };
-	Vec3 GetUp() const { return mUp; };
-	Vec3 GetRight() const { return mRight; };
+	void SetTexMat(const Matrix& mat) { mTextureMat = mat; }
 
-	const std::wstring& GetObjectTag();
+	std::shared_ptr<CTransform> GetParent() const { return mParent.lock(); }
+	Vec3 GetLocalPosition() const { return mLocalPosition; }
+	Vec3 GetWorldPosition();
+	Vec3 GetLocalEulerAngles() const { return mLocalEulerAngle; }
+	Quaternion GetLocalRotation() const { return mLocalRotation; }
+	Vec3 GetLocalScale() const { return mLocalScale; };
 
-	const std::vector<std::shared_ptr<CTransform>>& GetChildren() { return mChildren; }
-	std::shared_ptr<CTransform> GetChild(UINT idx) { return mChildren[idx]; };
-	std::shared_ptr<CTransform> FindChild(const std::wstring& name);
+	Vec3 GetWorldLook() const { return mWorldMat.Backward(); };
+	Vec3 GetWorldUp() const { return mWorldMat.Up(); };
+	Vec3 GetWorldRight() const { return mWorldMat.Right(); };
+
+	Vec3 GetLocalLook() const { return mLocalMat.Backward(); };
+	Vec3 GetLocalUp() const { return mLocalMat.Up(); };
+	Vec3 GetLocalRight() const { return mLocalMat.Right(); };
+
+	const Matrix& GetWorldMat();
+	const Matrix& GetTexMat() { return mTextureMat; }
 
 private:
 	void UpdateLocalMatrix();
-	void UpdateBaseLineVec();
+	void UpdateWorldMatrix();
+	void CopyToCbvBuffer();
 };
 

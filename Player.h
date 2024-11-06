@@ -33,8 +33,8 @@ public:
 	std::shared_ptr<CCamera> camera;
 
 public:
-	void SetPosition(float x, float y, float z);
-	void SetRotation(float x, float y, float z);
+	void SetLocalPosition(float x, float y, float z);
+	void SetLocalRotation(float x, float y, float z);
 
 	void LookAt(const XMFLOAT3& xmf3LookAt, const XMFLOAT3& xmf3Up);
 
@@ -74,7 +74,6 @@ public:
 	float maxSpeed = 200.f;
 
 	float bulletRange = 1500.0f;
-	CBulletObject* m_ppBullets[BULLETS];
 
 	void SetMesh(std::shared_ptr<CMesh>& pMesh);
 	void SetShield(std::shared_ptr<CMesh>& pMesh, std::shared_ptr<CShader>& _shieldShader);

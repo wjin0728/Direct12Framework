@@ -10,7 +10,6 @@ enum : UINT
 	CORNER_BL,
 	CORNER_BR,
 
-
 	MAX_TRIANGLE_COUNT = 8192
 };
 
@@ -47,11 +46,12 @@ private:
 
 public:
 	CQuadTree() {};
-	~CQuadTree() {};
+	~CQuadTree();
 
 	void Initialize(const std::shared_ptr<CHeightMapGridMesh>& terrainMesh);
 
 	void ReleaseUploadBuffer(std::shared_ptr<Node>& node);
+	void ReleaseBuffer(std::shared_ptr<Node>& node);
 
 	void Render(const std::shared_ptr<class CCamera>& camera);
 	void RenderNode(const std::shared_ptr<Node>& node, const std::shared_ptr<class CCamera>& camera);

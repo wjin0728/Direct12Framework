@@ -157,23 +157,33 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AvoidObstacle.h" />
+    <ClInclude Include="BattleScene.h" />
+    <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Collider.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="CResource.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="DescriptorHeaps.h" />
     <ClInclude Include="DX12Manager.h" />
+    <ClInclude Include="FollowTarget.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="LightManager.h" />
+    <ClInclude Include="MainScene.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MenuScene.h" />
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="MonoBehaviour.h" />
     <ClInclude Include="ObjectPool.h" />
     <ClInclude Include="ObjectPoolManager.h" />
+    <ClInclude Include="PlayerController.h" />
     <ClInclude Include="QuadTree.h" />
     <ClInclude Include="RenderTargetGroup.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="RigidBody.h" />
+    <ClInclude Include="ScrollTexture.h" />
     <ClInclude Include="SimpleMath.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
@@ -182,35 +192,42 @@
     <ClInclude Include="WICTextureLoader12.h" />
     <ClInclude Include="GridMesh.h" />
     <ClInclude Include="Light.h" />
-    <ClInclude Include="SceneStateMachine.h" />
+    <ClInclude Include="SceneManager.h" />
     <ClInclude Include="GameApplication.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Player.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="Enemy.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AvoidObstacle.cpp" />
+    <ClCompile Include="BattleScene.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Collider.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="DescriptorHeaps.cpp" />
     <ClCompile Include="DX12Manager.cpp" />
+    <ClCompile Include="FollowTarget.cpp" />
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightManager.cpp" />
+    <ClCompile Include="MainScene.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MenuScene.cpp" />
     <ClCompile Include="MeshRenderer.cpp" />
     <ClCompile Include="MonoBehaviour.cpp" />
     <ClCompile Include="ObjectPool.cpp" />
     <ClCompile Include="ObjectPoolManager.cpp" />
+    <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="RenderTargetGroup.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="RigidBody.cpp" />
+    <ClCompile Include="ScrollTexture.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SimpleMath.cpp" />
     <ClCompile Include="Terrain.cpp" />
@@ -219,11 +236,10 @@
     <ClCompile Include="UploadBuffer.cpp" />
     <ClCompile Include="WICTextureLoader12.cpp" />
     <ClCompile Include="GridMesh.cpp" />
-    <ClCompile Include="SceneStateMachine.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="GameApplication.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdafx.h</PrecompiledHeaderFile>
@@ -233,48 +249,52 @@
     </ClCompile>
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="Enemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\Shaders\Lighting.hlsl">
+    <None Include="Resources\Shaders\Lighting.hlsl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\OutLinePS.hlsl">
+    </None>
+    <None Include="Resources\Shaders\OutLinePS.hlsl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\OutLineVS.hlsl">
+    </None>
+    <None Include="Resources\Shaders\OutLineVS.hlsl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Paramiters.hlsl">
+    </None>
+    <None Include="Resources\Shaders\Paramiters.hlsl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Terrain.hlsl">
+    </None>
+    <None Include="Resources\Shaders\Terrain.hlsl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Tex2D.hlsl">
+    </None>
+    <None Include="Resources\Shaders\Sprite.hlsl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\Utility.hlsl">
+    </None>
+    <None Include="Resources\Shaders\Utility.hlsl">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\SkyBox.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

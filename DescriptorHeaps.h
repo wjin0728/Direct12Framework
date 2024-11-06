@@ -22,16 +22,18 @@ private:
 
 	DescriptorHandle dsvStartHandle{};
 	DescriptorHandle srvStartHandle{};
+	DescriptorHandle cubeMapStartHandle{};
 	DescriptorHandle uavStartHandle{};
 
 public:
-	void Initialize(UINT cbvNum, UINT srvNum, UINT uavNum);
+	void Initialize(UINT cbvNum, UINT srvNum, UINT cubeMapNum, UINT uavNum);
 
 	void InitDsvDescriptorHeap();
-	void InitSrvDescriptorHeap(UINT cbvNum, UINT srvNum, UINT uavNum);
+	void InitSrvDescriptorHeap(UINT cbvNum, UINT srvNum, UINT cubeMapNum, UINT uavNum);
 
 	void CreateDSV(ComPtr<ID3D12Resource> resource);
 	void CreateSRV(ComPtr<ID3D12Resource> resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, UINT idx) const;
+	void CreateCubeMap(ComPtr<ID3D12Resource> resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, UINT idx) const;
 	void CreateUAV(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12Resource> counterResource, 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC desc, UINT idx) const;
 

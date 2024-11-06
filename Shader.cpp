@@ -21,7 +21,7 @@ D3D12_RASTERIZER_DESC CShader::InitRasterizerState()
 {
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 
-	switch (info.rasterizerType)
+	switch (mInfo.rasterizerType)
 	{
 	case RASTERIZER_TYPE::CULL_BACK:
 		rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
@@ -61,7 +61,7 @@ D3D12_BLEND_DESC CShader::InitBlendState()
 
 	D3D12_RENDER_TARGET_BLEND_DESC& renderTarget = blendDesc.RenderTarget[0];
 
-	switch (info.blendType)
+	switch (mInfo.blendType)
 	{
 	case BLEND_TYPE::DEFAULT:
 		renderTarget.BlendEnable = FALSE;
@@ -113,6 +113,36 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 	d3dDepthStencilDesc.DepthEnable = TRUE;
 	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+
+	switch (mInfo.depthStencilType)
+	{
+	case DEPTH_STENCIL_TYPE::LESS:
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+		break;
+	case DEPTH_STENCIL_TYPE::LESS_EQUAL:
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		break;
+	case DEPTH_STENCIL_TYPE::GREATER:
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+		break;
+	case DEPTH_STENCIL_TYPE::GREATER_EQUAL:
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+		break;
+	case DEPTH_STENCIL_TYPE::NO_DEPTH_TEST:
+		d3dDepthStencilDesc.DepthEnable = FALSE;
+		break;
+	case DEPTH_STENCIL_TYPE::LESS_NO_WRITE:
+		d3dDepthStencilDesc.DepthEnable = TRUE;
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		break;
+	case DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE:
+		d3dDepthStencilDesc.DepthEnable = FALSE;
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		break;
+	default:
+		break;
+	}
+	
 	d3dDepthStencilDesc.StencilEnable = FALSE;
 	d3dDepthStencilDesc.StencilReadMask = 0x00;
 	d3dDepthStencilDesc.StencilWriteMask = 0x00;
@@ -153,6 +183,7 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::w
 
 void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 {
+	mInfo = info;
 	ComPtr<ID3DBlob> vsBlob, psBlob;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};

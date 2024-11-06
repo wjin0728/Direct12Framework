@@ -1,484 +1,188 @@
 #include "stdafx.h"
+#include"GameObject.h"
 #include "Scene.h"
-#include"SceneStateMachine.h"
-#include"Camera.h"
-#include"Shader.h"
+#include"SceneManager.h"
 #include"Player.h"
-#include"Enemy.h";
+#include"Shader.h"
 #include"Terrain.h"
 #include"LightManager.h"
 #include"DX12Manager.h"
 #include"ResourceManager.h"
 #include"Timer.h"
+#include"Camera.h"
 
 
-CScene::CScene(CSceneManager& sceneStateMachine) : sceneStateMachine(sceneStateMachine) {}
-
-CMenuScene::CMenuScene(CSceneManager& sceneStateMachine) : CScene(sceneStateMachine) {}
-
-void CMenuScene::Initialize()
+CScene::CScene()
 {
-	BuildObjects();
+
 }
 
-void CMenuScene::Destroy()
+void CScene::Awake()
 {
-	ReleaseObjects();
-}
-
-void CMenuScene::InitLights()
-{
-	lightManager = std::make_unique<CLightManager>();
-	lightManager->Initialize();
-
-	XMFLOAT4 lightColor = { 1.f,1.f,1.f,1.f };
-	XMFLOAT3 strength = { 1.f,1.f,1.f };
-	XMFLOAT3 dir = { 0.f,0.f,1.f };
-
-	std::shared_ptr<CDirectionalLight> dirLight = std::make_shared<CDirectionalLight>(lightColor, strength, dir);
-
-	lightManager->AddDirectionalLight(dirLight);
-}
-
-void CMenuScene::BuildObjects()
-{
-	auto renderTargetSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
-	float clientWidth = renderTargetSize.x;
-	float clientHeight = renderTargetSize.y;
-
-	camera = std::make_shared<CCamera>();
-	camera->SetViewport(0, 0, clientWidth, clientHeight);
-	camera->SetScissorRect(0, 0, clientWidth, clientHeight);
-	camera->SetLookAt({ 0.f,0.f,-30.f }, { 0.f,0.f,1.f }, { 0.f,1.f,0.f });
-	camera->SetFOVAngle(60.0f);
-	camera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
-	camera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, clientWidth, clientHeight);
-
-
-	float width = 6.f;
-	float xOffset = 10.f;
-	auto cubeMesh = INSTANCE(CResourceManager).Get<CMesh>(L"Cube");
-
-	
-}
-
-void CMenuScene::ReleaseObjects()
-{
-}
-
-void CMenuScene::ProcessInput(HWND hWnd)
-{
-}
-
-void CMenuScene::Update()
-{
-	float deltaTime = INSTANCE(CGameTimer).GetDeltaTime();
-	auto& DX12Mgr = INSTANCE(CDX12Manager);
-
-	CBPassData passData{};
-	passData.viewProjMat = camera->GetViewProjMat();
-	passData.camPos = camera->GetPosition();
-	passData.deltaTime = INSTANCE(CGameTimer).GetDeltaTime();
-	passData.totalTime = INSTANCE(CGameTimer).GetTotalTime();
-	passData.renderTargetSize = DX12Mgr.GetRenderTargetSize();
-
-	auto passBuffer = CONSTBUFFER(CONSTANT_BUFFER_TYPE::PASS);
-	passBuffer->UpdateData(&passData);
-
-	for (auto& [shader, objectList] : objects) {
-		for (auto& object : objectList) {
-			object->Update(deltaTime);
+	for (const auto& [layer, objects] : mObjects) {
+		for (const auto& object : objects) {
+			object->Awake();
 		}
 	}
 }
 
-void CMenuScene::Render()
+void CScene::Start()
 {
-
-}
-
-bool CMenuScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-	case WM_RBUTTONDOWN:
-	case WM_LBUTTONDOWN:
-		//sceneStateMachine.AddScene(MAINSTAGE);
-		return true;
-		break;
-	default:
-		break;
+	for (const auto& [layer, objects] : mObjects) {
+		for (const auto& object : objects) {
+			object->Start();
+		}
 	}
-	return false;
 }
 
-bool CMenuScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void CScene::Update()
 {
-	switch (nMessageID)
-	{
-	case WM_KEYDOWN:
-		//if(wParam == VK_ESCAPE)
-		//sceneStateMachine.AddScene(MAINSTAGE);
-		return true;
-		break;
-	default:
-		break;
+	for (const auto& [layer, objects] : mObjects) {
+		for (const auto& object : objects) {
+			object->Update();
+		}
 	}
-	return false;
 }
 
-void CMenuScene::ChangeViewport(int width, int height)
+void CScene::LateUpdate()
 {
-	camera->SetViewport(0, 0, width, height);
-	camera->SetScissorRect(0, 0, width, height);
-	camera->GeneratePerspectiveProjectionMatrix(1.01f, 1000.0f, 60.0f);
-	camera->SetFOVAngle(60.0f);
-
-	camera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, width, height);
+	for (const auto& [layer, objects] : mObjects) {
+		for (const auto& object : objects) {
+			object->LateUpdate();
+		}
+	}
+	INSTANCE(CResourceManager).UpdateMaterials();
+	UpdatePassData();
 }
 
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-CPlayScene::CPlayScene(CSceneManager& sceneStateMachine) : CScene(sceneStateMachine)
+std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::wstring& tag)
 {
-	
+	std::shared_ptr<CGameObject> obj = nullptr;
+
+	for (const auto& [layer, objects] : mObjects) {
+		if (obj = FindObjectWithTag(layer, tag))
+			return obj;
+	}
+	return obj;
 }
 
-void CPlayScene::Initialize()
+std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::wstring& renderLayer, const std::wstring& tag)
 {
-
-	BuildObjects();
-}
-
-void CPlayScene::Destroy()
-{
-	ReleaseObjects();
-}
-
-void CPlayScene::InitLights()
-{
-	lightManager = std::make_unique<CLightManager>();
-	lightManager->Initialize();
-
-	XMFLOAT4 lightColor = { 1.f,1.f,1.f,1.f };
-	XMFLOAT3 strength = { 0.5f,0.5f,0.5f };
-	XMFLOAT3 dir = { 1.f,-1.f,1.f };
-
-	std::shared_ptr<CDirectionalLight> dirLight = std::make_shared<CDirectionalLight>(lightColor, strength, dir);
-
-	lightManager->AddDirectionalLight(dirLight);
-
-}
-
-void CPlayScene::BuildObjects()
-{
-	
-
-}
-
-void CPlayScene::ReleaseObjects()
-{
-	if (CExplosiveObject::m_pExplosionMesh) CExplosiveObject::m_pExplosionMesh.reset();
-}
-
-std::shared_ptr<CGameObject> CPlayScene::PickObjectPointedByCursor(int xClient, int yClient)
-{
-	XMFLOAT3 xmf3PickPosition;
-	xmf3PickPosition.x = (((2.0f * xClient) / (float)camera->viewport.Width) - 1) / camera->perspectiveProjectMat._11;
-	xmf3PickPosition.y = -(((2.0f * yClient) / (float)camera->viewport.Height) - 1) / camera->perspectiveProjectMat._22;
-	xmf3PickPosition.z = 1.0f;
-
-	XMVECTOR xmvPickPosition = XMLoadFloat3(&xmf3PickPosition);
-	XMMATRIX xmmtxView = XMLoadFloat4x4(&camera->viewMat);
-
-	int nIntersected = 0;
-	float fNearestHitDistance = FLT_MAX;
-	std::shared_ptr<CGameObject> pNearestObject;
-
-	for (auto& [shader, objectList] : objects) {
-		for (auto& object : objectList) {
-			float fHitDistance = FLT_MAX;
-			nIntersected = object->PickObjectByRayIntersection(xmf3PickPosition, xmmtxView, &fHitDistance);
-			if ((nIntersected > 0) && (fHitDistance < fNearestHitDistance))
-			{
-				fNearestHitDistance = fHitDistance;
-				pNearestObject = object;
+	for (const auto& object : mObjects[renderLayer]) {
+		if (object->GetTag() == tag) {
+			return object;
+		}
+		auto& children = object->GetChildren();
+		for (const auto& child : children) {
+			if (child->GetTag() == tag) {
+				return child;
 			}
 		}
 	}
-
-	return pNearestObject;
+	return nullptr;
 }
 
-
-
-void CPlayScene::CheckObjectByObjectCollisions()
+void CScene::AddObject(const std::wstring& renderLayer, std::shared_ptr<CGameObject> object)
 {
-	for (auto& [shader, objectList] : objects) {
-		for (auto& object : objectList)
-		{
-			object->collidedObject = nullptr;
-		}
+	if (!mObjects.contains(renderLayer)) {
+		return;
 	}
 
-	for (auto& [shader, objectList] : objects) {
-		for (auto& object1 : objectList)
-		{
-			if (object1->collidedObject) continue;
+	auto& objectList = mObjects[renderLayer];
 
-			for (auto& [shader, objectList] : objects) {
-				for (auto& object2 : objectList) {
+	auto itr = std::find(objectList.begin(), objectList.end(), object);
+	if (itr != objectList.end()) {
+		return;
+	}
 
-				}
-			}
-		}
+	object->SetRenderLayer(renderLayer);
+	objectList.push_back(object);
+}
+
+void CScene::DestroyObject(std::shared_ptr<CGameObject> object)
+{
+	const std::wstring& key = object->GetRenderLayer();
+	if (!mObjects.contains(key)) {
+		return;
+	}
+
+	auto& objectList = mObjects[key];
+
+	auto itr = std::find(objectList.begin(), objectList.end(), object);
+	if (itr != objectList.end()) {
+		objectList.erase(itr);
 	}
 }
 
-void CPlayScene::CheckObjectByWallCollisions()
+bool CScene::PrepareRender()
 {
-	/*for (int i = 0; i < m_nObjects; i++)
-	{
-		ContainmentType containType = m_pWallsObject->oobb.Contains(m_ppObjects[i]->oobb);
-		switch (containType)
-		{
-		case DISJOINT:
-		{
-			int nPlaneIndex = -1;
-			for (int j = 0; j < 6; j++)
-			{
-				PlaneIntersectionType intersectType = m_ppObjects[i]->oobb.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
-				if (intersectType == BACK)
-				{
-					nPlaneIndex = j;
-					break;
-				}
-			}
-			if (nPlaneIndex != -1)
-			{
-				XMVECTOR xmvNormal = XMVectorSet(m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].x, m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].y, m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].z, 0.0f);
-				XMVECTOR xmvReflect = XMVector3Reflect(XMLoadFloat3(&m_ppObjects[i]->movingDirection), xmvNormal);
-				XMStoreFloat3(&m_ppObjects[i]->movingDirection, xmvReflect);
-			}
-			break;
-		}
-		case INTERSECTS:
-		{
-			int nPlaneIndex = -1;
-			for (int j = 0; j < 6; j++)
-			{
-				PlaneIntersectionType intersectType = m_ppObjects[i]->oobb.Intersects(XMLoadFloat4(&m_pWallsObject->m_pxmf4WallPlanes[j]));
-				if (intersectType == INTERSECTING)
-				{
-					nPlaneIndex = j;
-					break;
-				}
-			}
-			if (nPlaneIndex != -1)
-			{
-				XMVECTOR xmvNormal = XMVectorSet(m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].x, m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].y, m_pWallsObject->m_pxmf4WallPlanes[nPlaneIndex].z, 0.0f);
-				XMVECTOR xmvReflect = XMVector3Reflect(XMLoadFloat3(&m_ppObjects[i]->movingDirection), xmvNormal);
-				XMStoreFloat3(&m_ppObjects[i]->movingDirection, xmvReflect);
-			}
-			break;
-		}
-		case CONTAINS:
-			break;
-		}
-	}*/
+	const auto& camera = CCamera::GetMainCamera();
+	if (!camera) {
+		return false;
+	}
+
+	camera->SetViewportsAndScissorRects(CMDLIST);
+
+	return true;
 }
 
-void CPlayScene::CheckPlayerByWallCollision()
+void CScene::RenderForLayer(const std::wstring& layer, bool frustumCulling)
 {
-}
+	if (!mObjects.contains(layer)) {
+		return;
+	}
 
-
-void CPlayScene::CheckObjectByBulletCollisions()
-{
-	CBulletObject** ppBullets = ((CAirplanePlayer*)m_pPlayer.get())->m_ppBullets;
-
-	for (auto& [shader, objectList] : objects) {
-		for (auto& object : objectList) {
-			for (int j = 0; j < BULLETS; j++)
-			{
-				if (!object->active) continue;
-				if (ppBullets[j]->active && object->oobb.Intersects(ppBullets[j]->oobb))
-				{
-					CExplosiveObject* pExplosiveObject = (CExplosiveObject*)object.get();
-					pExplosiveObject->blowingUp = true;
-					pExplosiveObject->active = false;
-					lockedObject = nullptr;
-					ppBullets[j]->Reset();
-				}
-			}
+	mShaders[layer]->SetPipelineState(CMDLIST);
+	if(frustumCulling) {
+		for (const auto& object : mObjects[layer]) {
+			object->Render(CCamera::GetMainCamera());
+		}
+	}
+	else {
+		for (const auto& object : mObjects[layer]) {
+			object->Render();
 		}
 	}
 }
 
-void CPlayScene::CheckPlayerByBulletCollision()
+void CScene::RenderTerrain(const std::wstring& layer)
 {
-	if (((CAirplanePlayer*)m_pPlayer.get())->IsShieldOn()) {
-
-		for (auto& [shader, objectList] : objects) {
-			for (auto& object : objectList) 
-			{
-				CBulletObject** ppBullets = ((CEnemy*)object.get())->m_ppBullets;
-
-				for (int j = 0; j < ENEMY_BULLETS; j++)
-				{
-					if (ppBullets[j]->active && ((CAirplanePlayer*)m_pPlayer.get())->shieldBS.Intersects(ppBullets[j]->oobb)) {
-						ppBullets[j]->Reset();
-					}
-				}
-			}
-		}
+	if (!mTerrain) {
+		return;
 	}
-	else 
-	{
-		if (m_pPlayer->isInvincible) return;
-
-		for (auto& [shader, objectList] : objects) {
-			for (auto& object : objectList) {
-				CBulletObject** ppBullets = ((CEnemy*)object.get())->m_ppBullets;
-
-				for (int j = 0; j < ENEMY_BULLETS; j++)
-				{
-					if (ppBullets[j]->active && m_pPlayer->oobb.Intersects(ppBullets[j]->oobb))
-					{
-						ppBullets[j]->Reset();
-						m_pPlayer->BeInvincible();
-						return;
-					}
-				}
-			}
-		}
+	if (!mShaders.contains(layer)) {
+		return;
 	}
+	mShaders[layer]->SetPipelineState(CMDLIST);
+	mTerrain->Render(CCamera::GetMainCamera());
 }
 
-void CPlayScene::ProcessInput(HWND hWnd)
+void CScene::UpdatePassData()
 {
-	float deltaTime = INSTANCE(CGameTimer).GetDeltaTime();
-	static UCHAR pKeyBuffer[256];
+	CBPassData passData;
 
-	if (GetKeyboardState(pKeyBuffer))
-	{
-		DWORD dwDirection = 0;
-		if (pKeyBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
-		if (pKeyBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
-		if (pKeyBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeyBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeyBuffer[VK_SHIFT] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeyBuffer[VK_CONTROL] & 0xF0) dwDirection |= DIR_DOWN;
+	const auto& camera = CCamera::GetMainCamera();
+	if (camera) {
+		passData.camPos = camera->GetLocalPosition();
+		passData.projMat = camera->GetPerspectiveProjectMat().Transpose();
+		passData.viewMat = camera->GetViewMat().Transpose();
+		passData.viewProjMat = camera->GetViewProjMat().Transpose();
+	}
+	passData.deltaTime = DELTA_TIME;
+	passData.totalTime = TIMER.GetTotalTime();
+	passData.renderTargetSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
 
-		if (dwDirection) m_pPlayer->Move(dwDirection, deltaTime*15.f);
+	if (mTerrain) {
+		auto terrainMat = mTerrain->GetMaterial();
 
+		passData.terrainMat.material.albedoColor = terrainMat->mAlbedoColor;
+		passData.terrainMat.material.emissiveColor = terrainMat->mEmissiveColor;
+		passData.terrainMat.material.fresnelR0 = terrainMat->mFresnelR0;
+		passData.terrainMat.material.specularColor = terrainMat->mSpecularColor;
+		passData.terrainMat.material.diffuseMapIdx = terrainMat->mDiffuseMapIdx;
+		passData.terrainMat.material.normalMapIdx = terrainMat->mNormalMapIdx;
+		passData.terrainMat.detailMapIdx = terrainMat->mDetailMap1Idx;
 	}
 
-	if (GetCapture() == hWnd) {
-		SetCursor(NULL);
-		POINT ptCursorPos;
-		GetCursorPos(&ptCursorPos);
-		float cxMouseDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		float cyMouseDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		if (cxMouseDelta || cyMouseDelta)
-		{
-			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				m_pPlayer->Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
-			else
-				m_pPlayer->Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
-		}
-	}
-}
-
-void CPlayScene::Update()
-{
-	float deltaTime = INSTANCE(CGameTimer).GetDeltaTime();
-
-	m_pPlayer->Update(deltaTime);
-
-	for (auto& [shader, objectList] : objects) {
-		for (auto& object : objectList) {
-			object->Update(deltaTime);
-		}
-	}
-
-	CheckPlayerByWallCollision();
-	
-	CheckObjectByWallCollisions();
-
-	CheckObjectByObjectCollisions();
-
-	CheckObjectByBulletCollisions();
-
-	CheckPlayerByBulletCollision();
-}
-
-
-void CPlayScene::Render()
-{
-
-	
-}
-
-bool CPlayScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-	case WM_RBUTTONDOWN:
-		GetCursorPos(&m_ptOldCursorPos);
-		lockedObject = PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam));                                      
-		break;
-	case WM_LBUTTONDOWN:
-		GetCursorPos(&m_ptOldCursorPos);
-		break;
-	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
-		break;
-	case WM_MOUSEMOVE:
-		break;
-	default:
-		break;
-	}
-	return false;
-}
-
-bool CPlayScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case VK_RETURN:
-			break;
-		case VK_SPACE:
-			((CAirplanePlayer*)m_pPlayer.get())->FireBullet(lockedObject);
-			//lockedObject = nullptr;
-			break;
-		case 'E':
-			((CAirplanePlayer*)m_pPlayer.get())->ShieldOn();
-			break;
-		default:
-			break;
-		}
-		break;
-	default:
-		break;
-	}
-	return false;
-}
-
-void CPlayScene::ChangeViewport(int width, int height)
-{
-	camera->SetViewport(0, 0, width, height);
-	camera->SetScissorRect(0, 0, width, height);
-	camera->GeneratePerspectiveProjectionMatrix(1.01f, 1000.0f, 60.0f);
-	camera->SetFOVAngle(60.0f);
-
-	camera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, width, height);
+	UPLOADBUFFER(CONSTANT_BUFFER_TYPE::PASS)->CopyData(&passData);
 }

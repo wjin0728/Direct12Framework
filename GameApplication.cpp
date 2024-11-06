@@ -3,8 +3,9 @@
 #include"Timer.h"
 #include"DX12Manager.h"
 #include"ResourceManager.h"
-#include"SceneStateMachine.h"
-
+#include"SceneManager.h"
+#include"InputManager.h"
+#include"ObjectPoolManager.h"
 
 
 bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdShow)
@@ -20,20 +21,18 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 
 	//매니저 초기화
 	INSTANCE(CDX12Manager).Initialize(mHwnd);
+	INSTANCE(CObjectPoolManager).Initialize();
+	TIMER.Initilaize();
+	INPUT.Initialize(mHwnd);
 
 	INSTANCE(CDX12Manager).OpenCommandList();
-
 	INSTANCE(CResourceManager).Initialize();
-	INSTANCE(CGameTimer).Initilaize();
-
-	//메인 씬 초기화
-	INSTANCE(CSceneManager).AddScene(SCENE_TYPE::MENU);
-	INSTANCE(CSceneManager).InitCurrentScene();
 	INSTANCE(CDX12Manager).CloseCommandList();
 
-	INSTANCE(CSceneManager).ReleaseConstBuffer();
+	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAIN);
 
-	INSTANCE(CGameTimer).Reset();
+
+	TIMER.Reset();
 
 	return true;
 }
@@ -42,7 +41,7 @@ int CGameApplication::Run()
 {
 	MSG msg{};
 
-	auto& timer = INSTANCE(CGameTimer);
+	auto& timer = TIMER;
 	timer.Reset();
 
 	while (msg.message != WM_QUIT)
@@ -55,9 +54,7 @@ int CGameApplication::Run()
 		}
 		else
 		{
-			timer.Tick(120.0f);
-
-			ProcessInput();
+			timer.Tick(120.f);
 			Update();
 			Render();
 
@@ -71,28 +68,23 @@ int CGameApplication::Run()
 }
 
 
-void CGameApplication::ProcessInput()
-{
-	INSTANCE(CSceneManager).ProcessInput(mHwnd);
-}
-
 void CGameApplication::Update()
 {
+	INPUT.Update();
 	INSTANCE(CDX12Manager).MoveToNextFrameResource();
-
 	INSTANCE(CSceneManager).Update();
 }
 
 void CGameApplication::Render()
 {
 	INSTANCE(CDX12Manager).BeforeRender();
-	//sceneStateMachine.Render();
+	INSTANCE(CSceneManager).Render();
 	INSTANCE(CDX12Manager).AfterRender();
 }
 
 void CGameApplication::ShowFPS()
 {
-	auto frameRate = appName + INSTANCE(CGameTimer).GetFrameRate();
+	auto frameRate = appName + TIMER.GetFrameRate();
 	SetWindowText(mHwnd, frameRate.c_str());
 }
 
@@ -104,28 +96,14 @@ void CGameApplication::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPAR
 	{
 	case WM_RBUTTONDOWN:
 	case WM_LBUTTONDOWN:
-		::SetCapture(hWnd);
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
-		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
 		break;
 	default:
 		break;
-	}
-
-	if (INSTANCE(CSceneManager).OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam)) {
-		INSTANCE(CDX12Manager).OpenCommandList();
-
-		INSTANCE(CSceneManager).InitCurrentScene();
-
-		INSTANCE(CDX12Manager).CloseCommandList();
-
-		INSTANCE(CSceneManager).ReleaseConstBuffer();
-
-		INSTANCE(CGameTimer).Reset();
 	}
 }
 
@@ -137,17 +115,12 @@ void CGameApplication::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case VK_ESCAPE:
-			::PostQuitMessage(0);
-			return;
-			break;
 		case VK_RETURN:
 			break;
 		case VK_SPACE:
 			break;
 		case VK_F9:
 			INSTANCE(CDX12Manager).ChangeSwapChainState();
-			INSTANCE(CSceneManager).ChangeSceneViewport(clientWidth, clientHeight);
 			return;
 			break;
 		default:
@@ -156,18 +129,6 @@ void CGameApplication::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, W
 		break;
 	default:
 		break;
-	}
-
-	if (INSTANCE(CSceneManager).OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam)) {
-		INSTANCE(CDX12Manager).OpenCommandList();
-
-		INSTANCE(CSceneManager).InitCurrentScene();
-
-		INSTANCE(CDX12Manager).CloseCommandList();
-
-		INSTANCE(CSceneManager).ReleaseConstBuffer();
-
-		INSTANCE(CGameTimer).Reset();
 	}
 }
 

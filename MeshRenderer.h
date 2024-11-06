@@ -3,16 +3,17 @@
 
 class CMesh;
 class CMaterial;
+class CCamera;
 
 class CMeshRenderer : public CComponent
 {
 private:
 	std::shared_ptr<CMesh> m_mesh;
-	std::shared_ptr<CMaterial> m_material;
+	std::vector<std::shared_ptr<CMaterial>> m_materials;
 
 public:
 	CMeshRenderer();
-	CMeshRenderer(const CMeshRenderer& other) : m_mesh(other.m_mesh), m_material(other.m_material), CComponent(other) {}
+	CMeshRenderer(const CMeshRenderer& other) : m_mesh(other.m_mesh), m_materials(other.m_materials), CComponent(other) {}
 	~CMeshRenderer();
 
 	virtual void Awake();
@@ -20,17 +21,19 @@ public:
 
 	virtual void Update();
 	virtual void LateUpdate();
-	virtual void FixedUpdate();
+
+	void Render();
 
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CMeshRenderer>(*this); } 
 
 public:
 	void SetMesh(const std::shared_ptr<CMesh>& mesh) { m_mesh = mesh; }
 	void SetMesh(const std::wstring& name);
-	void SetMaterial(const std::shared_ptr<CMaterial>& material) { m_material = material; }
-	void SetMaterial(const std::wstring& name);
+	void AddMaterial(const std::shared_ptr<CMaterial>& material);
+	void AddMaterial(const std::wstring& name);
 
 	std::shared_ptr<CMesh> GetMesh() const { return m_mesh; }
-	std::shared_ptr<CMaterial> GetMaterial() const { return m_material; }
+	std::shared_ptr<CMaterial> GetMaterial(UINT idx = 0) const { return m_materials[idx]; }
+	int GetMaterialIndex() const;
 };
 

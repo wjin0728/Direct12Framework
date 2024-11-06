@@ -5,9 +5,9 @@
 #include<string>
 #include"CResource.h"
 #include"Texture.h"
+#include"Mesh.h"
+#include"Material.h"
 
-
-class CMesh;
 class CMaterial;
 class CShader;
 
@@ -17,9 +17,9 @@ class CResourceManager
 
 private:
 	using KeyObjMap = std::unordered_map<std::wstring, std::shared_ptr<CResource>>;
-	std::array<KeyObjMap, RESOURCE_TYPE_COUNT> resources;
+	std::array<KeyObjMap, RESOURCE_TYPE_COUNT> resources{};
 
-	std::priority_queue<UINT, std::vector<UINT>, std::greater<UINT>> srvIdxQueue;
+	std::queue<UINT> srvIdxQueue{};
 
 public:
 	void Initialize();
@@ -39,6 +39,7 @@ public:
 public:
 	std::shared_ptr<CTexture> Create2DTexture(const std::wstring& name, DXGI_FORMAT format, UINT width, UINT height,
 		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = XMFLOAT4());
+	void UpdateMaterials();
 
 private:
 	void LoadDefaultMeshes();
@@ -47,7 +48,10 @@ private:
 	void LoadDefaultShaders();
 
 public:
+	void ReleaseUploadBuffers();
+
 	UINT GetTopSRVIndex();
+	UINT GetMaterialSRVIndex();
 
 	void ReturnSRVIndex(UINT idx) { srvIdxQueue.push(idx); }
 };

@@ -21,6 +21,7 @@
 #include<map>
 #include"algorithm"
 #include <Mmsystem.h>
+#include <codecvt>
 
 #include <d3d12.h>
 #include"SimpleMath.h"
@@ -37,6 +38,7 @@
 #include"d3dx12.h"
 #include"DDSTextureLoader12.h"
 #include"WICTextureLoader12.h"
+#include"BinaryReader.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -72,6 +74,7 @@ using SimpleMath::Matrix;
 using SimpleMath::Quaternion;
 using SimpleMath::Plane;
 using SimpleMath::Ray;
+using SimpleMath::Color;
 
 inline XMFLOAT4 GetRandomColor() {
 	std::random_device rd;
@@ -143,48 +146,23 @@ public:							\
 
 #define DEVICE INSTANCE(CDX12Manager).GetDevice()
 #define CMDLIST INSTANCE(CDX12Manager).GetCommandList()
-#define CONSTBUFFER(T) INSTANCE(CDX12Manager).GetConstBuffer(T)
+#define UPLOADBUFFER(T) INSTANCE(CDX12Manager).GetBuffer(static_cast<UINT>(T))
 #define RESOURCE INSTANCE(CResourceManager)
 
-namespace BinaryReader
-{
-	template<typename Type>
-	inline void ReadDateFromFile(std::ifstream& inFile, Type& date)
-	{
-		inFile.read((char*)&date, sizeof(Type));
-
-		if (!inFile) {
-			ZeroMemory(&date, sizeof(Type));
-		}
-	}
-
-	template<>
-	inline void ReadDateFromFile(std::ifstream& inFile, std::string& date)
-	{
-		char strLen = 0;
-
-		inFile.read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
-
-		if (!inFile) {
-			date.clear();
-		}
-
-
-
-		date.resize((int)strLen);
-		inFile.read(&date[0], strLen);
-
-		if (!inFile) {
-			date.clear();
-		}
-	}
+template <typename T, template <typename, typename> class Container, typename Alloc = std::allocator<std::shared_ptr<T>>>
+typename Container<std::shared_ptr<T>, Alloc>::iterator 
+findByRawPointer(Container<std::shared_ptr<T>, Alloc>& container, T* rawPtr) {
+	return std::find_if(container.begin(), container.end(),
+		[rawPtr](const std::shared_ptr<T>& ptr) { return ptr.get() == rawPtr; });
 }
+
 
 
 enum class SCENE_TYPE : UINT8
 {
 	MENU,
 	MAINSTAGE,
+	MAIN,
 
 	END
 };
@@ -204,59 +182,94 @@ enum {
 	RESOURCE_TYPE_COUNT = RESOURCE_TYPE::END
 };
 
+enum class COMPONENT_TYPE : UINT8
+{
+	TRANSFORM,
+	COLLIDER,
+	MESH_RENDERER,
+	CAMERA,
+	LIGHT,
+	TERRAIN,
+	RIGID_BODY,
+	// ...
+	SCRIPT,
+
+	NOTHING,
+	END
+};
 
 #define DIRECTIONAL_LIGHT 5
 #define POINT_LIGHT 5
 #define SPOT_LIGHT 5
+#define DETAIL_MAP 5
 
+
+struct CBMaterialDate {
+	Color albedoColor{};
+	Color specularColor{};
+	Color emissiveColor{};
+	Vec3 fresnelR0{};
+	int diffuseMapIdx = -1;
+	int normalMapIdx = -1;
+	Vec3 padding1{};
+};
+
+
+struct CBTerrainMaterialDate {
+	CBMaterialDate material;
+	int detailMapIdx = -1;
+	Vec3 padding1{};
+};
 
 struct CBPassData
 {
-	XMFLOAT4X4 viewMat;
-	XMFLOAT4X4 projMat;
-	XMFLOAT4X4 viewProjMat;
-	XMFLOAT3 camPos;
-	float padding;
-	XMFLOAT2 renderTargetSize;
-	float deltaTime;
-	float totalTime;
+	Matrix viewMat = Matrix::Identity;
+	Matrix projMat = Matrix::Identity;
+	Matrix viewProjMat = Matrix::Identity;
+	Vec3 camPos = Vec3::Zero;
+	float padding{};
+	Vec2 renderTargetSize{};
+	float deltaTime{};
+	float totalTime{};
+	CBTerrainMaterialDate terrainMat;
 };
 
 struct CBObjectData
 {
-	XMFLOAT4X4 worldMAt;
-	UINT materialIdx;
-	XMFLOAT3 padding;
+	Matrix worldMAt = Matrix::Identity;
+	Matrix textureMat = Matrix::Identity;
+	int materialIdx = -1;
+	Vec3 padding;
 };
 
 struct CBDirectionalLightInfo
 {
-	XMFLOAT4 color;
-	XMFLOAT3 strength;
+	Color color;
+	Vec3 strength;
 	float padding1;
-	XMFLOAT3 direction;
+	Vec3 direction;
 	float padding2;
 };
 
 struct CBPointLightInfo
 {
-	XMFLOAT4 color;
-	XMFLOAT3 strength;
+	Color color;
+	Vec3 strength;
 	float range;
-	XMFLOAT3 position;
+	Vec3 position;
 	float padding;
 };
 
 struct CBSpotLightInfo
 {
-	XMFLOAT4 color;
-	XMFLOAT3 strength;
+	Color color;
+	Vec3 strength;
 	float range;
-	XMFLOAT3 direction;
+	Vec3 direction;
 	float fallOffStart;
-	XMFLOAT3 position;
+	Vec3 position;
 	float fallOffEnd;
-	XMFLOAT3 padding;
+	Vec3 padding;
 	float spotPower;
 };
 

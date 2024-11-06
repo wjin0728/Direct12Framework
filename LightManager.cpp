@@ -38,8 +38,7 @@ void CLightManager::Update()
 	}
 	data.lightNum = { (UINT)directionalLights.size(), (UINT)pointLights.size(), (UINT)spotLights.size() };
 
-	auto constantBuffer = INSTANCE(CDX12Manager).GetConstBuffer(CONSTANT_BUFFER_TYPE::LIGHT);
-	constantBuffer->UpdateData(&data);
-	constantBuffer->UpdateConstantBuffer();
+	auto constantBuffer = UPLOADBUFFER(CONSTANT_BUFFER_TYPE::LIGHT);
+	constantBuffer->CopyData(&data);
 }
 

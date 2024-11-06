@@ -268,6 +268,8 @@ namespace DirectX
             void Clamp(const Vector3& vmin, const Vector3& vmax) noexcept;
             void Clamp(const Vector3& vmin, const Vector3& vmax, Vector3& result) const noexcept;
 
+            static Vector3 ClampLength(const Vector3& v, float min, float max) noexcept;
+
             // Static functions
             static float Distance(const Vector3& v1, const Vector3& v2) noexcept;
             static float DistanceSquared(const Vector3& v1, const Vector3& v2) noexcept;
@@ -717,7 +719,7 @@ namespace DirectX
             static Quaternion CreateFromAxisAngle(const Vector3& axis, float angle) noexcept;
             static Quaternion CreateFromYawPitchRoll(float yaw, float pitch, float roll) noexcept;
             static Quaternion CreateFromYawPitchRoll(const Vector3& angles) noexcept;
-            static Quaternion CreateFromRotationMatrix(const Matrix& M) noexcept;
+            static Quaternion CreateFromLocalRotationMatrix(const Matrix& M) noexcept;
 
             static void Lerp(const Quaternion& q1, const Quaternion& q2, float t, Quaternion& result) noexcept;
             static Quaternion Lerp(const Quaternion& q1, const Quaternion& q2, float t) noexcept;
@@ -727,6 +729,8 @@ namespace DirectX
 
             static void Concatenate(const Quaternion& q1, const Quaternion& q2, Quaternion& result) noexcept;
             static Quaternion Concatenate(const Quaternion& q1, const Quaternion& q2) noexcept;
+
+            static Quaternion LookRotation(const Vector3& v, const Vector3& up = Vector3(0, 1, 0)) noexcept;
 
             // Constants
             static const Quaternion Identity;

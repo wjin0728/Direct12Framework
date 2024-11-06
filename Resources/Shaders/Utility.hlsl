@@ -4,6 +4,31 @@
 #include"Paramiters.hlsl"
 
 
+float3 GammaDecoding(float3 color)
+{
+    return pow(color, 2.2f);
+}
+
+float3 GammaEncoding(float3 color)
+{
+    return pow(color, 0.4545f);
+}
+
+
+float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, float3 tangent)
+{
+    float3 normalT = 2.0f * normalMapSample - 1.0f;
+    
+    float3 N = unitNormalW;
+    float3 T = normalize(tangent - dot(tangent, N) * N);
+    float3 B = cross(N, T);
+
+    float3x3 TBN = float3x3(T, B, N);
+
+    return mul(normalT, TBN);
+}
+
+
 LightColor ComputeDirectionalLight(DirectionalLight light, float3 normal, float3 camDir, Material material)
 {
     float3 lightDir = -light.direction;
@@ -26,14 +51,13 @@ LightColor ComputeDirectionalLight(DirectionalLight light, float3 normal, float3
         {
             float m = shininess * 256.f;
             float3 halfV = normalize(camDir + lightDir);
-            float viewHalfDot = dot(halfV, camDir);
+            float viewHalfDot = max(dot(halfV, normal), 0.f);
             float3 fresnelFactor = material.fresnelR0 + (1.0 - material.fresnelR0) * pow(1.0 - viewHalfDot, 5);
             
-            specularFactor = ((m + 8.f) * pow(max(viewHalfDot, 0.f), m)) / 8.f;
+            specularFactor = ((m + 8.f) * pow(viewHalfDot, m)) / 8.f;
             specularColor = specularFactor * (light.color * material.specular).rgb * fresnelFactor;
         }
     }
-    
     LightColor lightColor;
     
     float4 strength = float4(light.strength, 1.f);

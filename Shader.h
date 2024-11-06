@@ -59,7 +59,7 @@ struct ShaderInfo
 class CShader : public CResource
 {
 protected:
-	ShaderInfo info;
+	ShaderInfo mInfo;
 	ComPtr<ID3D12PipelineState> d3dPiplineState = ComPtr<ID3D12PipelineState>();
 
 private:
@@ -67,6 +67,7 @@ private:
 public:
 	CShader() = default;
 	virtual ~CShader() {};
+	virtual void ReleaseUploadBuffer() {}
 
 protected:
 	virtual D3D12_INPUT_LAYOUT_DESC InitInputLayout();
@@ -82,5 +83,5 @@ public:
 	
 public:
 	void SetPipelineState(ID3D12GraphicsCommandList* cmdList) { cmdList->SetPipelineState(d3dPiplineState.Get()); }
-	SHADER_TYPE GetShaderType() const { return this->info.shaderType; }
+	SHADER_TYPE GetShaderType() const { return this->mInfo.shaderType; }
 };

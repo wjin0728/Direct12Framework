@@ -5,6 +5,10 @@
 #include"Camera.h"
 
 
+CQuadTree::~CQuadTree()
+{
+}
+
 void CQuadTree::Initialize(const std::shared_ptr<CHeightMapGridMesh>& terrainMesh)
 {
 	mTerrainMesh = terrainMesh;
@@ -31,6 +35,20 @@ void CQuadTree::ReleaseUploadBuffer(std::shared_ptr<Node>& node)
 	else {
 		for (auto& child : node->mChildren) {
 			ReleaseUploadBuffer(child);
+		}
+	}
+}
+
+void CQuadTree::ReleaseBuffer(std::shared_ptr<Node>& node)
+{
+	if (node->isLeaf) {
+		if (node->mIndexBuffer) {
+			node->mIndexBuffer.Reset();
+		}
+	}
+	else {
+		for (auto& child : node->mChildren) {
+			ReleaseBuffer(child);
 		}
 	}
 }
@@ -123,20 +141,21 @@ void CQuadTree::SubDivide(std::shared_ptr<Node>& node, const std::array<UINT, 4>
 	UINT rightEdgeCenter = (corners[CORNER_TR] + corners[CORNER_BR]) / 2;
 
 	{
-		std::array<UINT, 4> corners{ corners[CORNER_TL], topEdgeCenter, leftEdgeCenter, center };
-		SubDivide(node->mChildren[CORNER_TL], corners);
+		std::array<UINT, 4> childCorner{ corners[CORNER_TL], topEdgeCenter, leftEdgeCenter, center };
+
+		SubDivide(node->mChildren[CORNER_TL], childCorner);
 	}
 	{
-		std::array<UINT, 4> corners{ topEdgeCenter, corners[CORNER_TR], center, rightEdgeCenter };
-		SubDivide(node->mChildren[CORNER_TR], corners);
+		std::array<UINT, 4> childCorner{ topEdgeCenter, corners[CORNER_TR], center, rightEdgeCenter };
+		SubDivide(node->mChildren[CORNER_TR], childCorner);
 	}
 	{
-		std::array<UINT, 4> corners{ leftEdgeCenter, center, corners[CORNER_BL], bottomEdgeCenter };
-		SubDivide(node->mChildren[CORNER_BL], corners);
+		std::array<UINT, 4> childCorner{ leftEdgeCenter, center, corners[CORNER_BL], bottomEdgeCenter };
+		SubDivide(node->mChildren[CORNER_BL], childCorner);
 	}
 	{
-		std::array<UINT, 4> corners{ center, rightEdgeCenter, bottomEdgeCenter, corners[CORNER_BR] };
-		SubDivide(node->mChildren[CORNER_BR], corners);
+		std::array<UINT, 4> childCorner{ center, rightEdgeCenter, bottomEdgeCenter, corners[CORNER_BR] };
+		SubDivide(node->mChildren[CORNER_BR], childCorner);
 	}
 
 	BoundingBox aabb1{}, aabb2{};

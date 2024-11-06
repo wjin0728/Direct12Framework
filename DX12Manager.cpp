@@ -57,12 +57,12 @@ void CDX12Manager::InitSwapChain(HWND hWnd)
 {
 	RECT rcClient;
 	GetClientRect(hWnd, &rcClient);
-	renderTargetSize.x = rcClient.right - rcClient.left;
-	renderTargetSize.y = rcClient.bottom - rcClient.top;
+	renderTargetSize.x = static_cast<UINT>(rcClient.right - rcClient.left);
+	renderTargetSize.y = static_cast<UINT>(rcClient.bottom - rcClient.top);
 
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc{};
-	dxgiSwapChainDesc.BufferDesc.Width = renderTargetSize.x;
-	dxgiSwapChainDesc.BufferDesc.Height = renderTargetSize.y;
+	dxgiSwapChainDesc.BufferDesc.Width = static_cast<UINT>(renderTargetSize.x);
+	dxgiSwapChainDesc.BufferDesc.Height = static_cast<UINT>(renderTargetSize.y);
 	dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
@@ -135,7 +135,7 @@ void CDX12Manager::ChangeSwapChainState()
 void CDX12Manager::InitDescriptorHeaps()
 {
 	descriptorHeaps = std::make_shared<CDescriptorHeaps>();
-	descriptorHeaps->Initialize(0, TEXTURE_COUNT, 0);
+	descriptorHeaps->Initialize(0, TEXTURE_COUNT, CUBE_MAP_COUNT,0);
 }
 
 void CDX12Manager::InitRenderTargetGroups()
@@ -167,7 +167,7 @@ void CDX12Manager::InitDepthStencilView()
 	(
 		L"DepthStencil", 
 		DXGI_FORMAT_D24_UNORM_S8_UINT,
-		renderTargetSize.x, renderTargetSize.y, 
+		static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE, 
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
@@ -236,14 +236,21 @@ std::vector<CD3DX12_STATIC_SAMPLER_DESC> CDX12Manager::InitStaticSamplers()
 
 void CDX12Manager::InitRootSignature()
 {
-	D3D12_DESCRIPTOR_RANGE textureTable;
+	D3D12_DESCRIPTOR_RANGE textureTable{};
 	textureTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	textureTable.NumDescriptors = TEXTURE_COUNT;
-	textureTable.BaseShaderRegister = 0; //t0: gtxtTexture
+	textureTable.BaseShaderRegister = 0; //t0: 
 	textureTable.RegisterSpace = 0;
 	textureTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[5];
+	D3D12_DESCRIPTOR_RANGE cubeMapTable{};
+	cubeMapTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	cubeMapTable.NumDescriptors = CUBE_MAP_COUNT;
+	cubeMapTable.BaseShaderRegister = 0; 
+	cubeMapTable.RegisterSpace = 2;
+	cubeMapTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[6];
 	//렌더 패스 정보
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0;
@@ -258,24 +265,28 @@ void CDX12Manager::InitRootSignature()
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[2].Descriptor.ShaderRegister = 2;
 	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	//재질 정보
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 	pd3dRootParameters[3].Descriptor.ShaderRegister = 0;
 	pd3dRootParameters[3].Descriptor.RegisterSpace = 1;
-	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	//텍스쳐 정보
 	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[4].DescriptorTable.pDescriptorRanges = &textureTable;
-	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	//큐브맵 정보
+	pd3dRootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &cubeMapTable;
+	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
 
 	auto samplers = InitStaticSamplers();
 
@@ -378,7 +389,10 @@ void CDX12Manager::MoveToNextFrameResource()
 	}
 }
 
-
+void CDX12Manager::UpdateFrameResources()
+{
+	mCurFrameResource->Update();
+}
 
 void CDX12Manager::BeforeRender()
 {
@@ -389,9 +403,11 @@ void CDX12Manager::BeforeRender()
 
 	cmdList->SetGraphicsRootSignature(mRootSignature.Get());
 	descriptorHeaps->SetSRVDescriptorHeap();
+	mCurFrameResource->Update();
 
 	auto& swapChainBuffers = renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)];
 	swapChainBuffers->ChangeResourceToTarget(curBackBuffIdx);
+	swapChainBuffers->SetRenderTarget(curBackBuffIdx);
 	swapChainBuffers->ClearRenderTarget(curBackBuffIdx);
 	swapChainBuffers->ClearDepthStencil();
 }
@@ -414,7 +430,9 @@ void CDX12Manager::AfterRender()
 	ThrowIfFailed(cmdQueue->Signal(d3dFence.Get(), mainFence));
 }
 
-std::shared_ptr<CUploadBuffer> CDX12Manager::GetConstBuffer(CONSTANT_BUFFER_TYPE type)
+std::shared_ptr<CUploadBuffer> CDX12Manager::GetBuffer(UINT type)
 {
-	return mCurFrameResource->GetConstBuffer(type);
+	return mCurFrameResource->GetBuffer(type);
 }
+
+

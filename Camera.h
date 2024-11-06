@@ -8,6 +8,8 @@ public:
 	CCamera();
 	virtual ~CCamera();
 
+	virtual std::shared_ptr<CComponent> Clone();
+
 private:
 	static std::vector<std::shared_ptr<CCamera>> mCameras;
 	static std::shared_ptr<CCamera> mMainCamea;
@@ -40,9 +42,11 @@ public:
 
 	virtual void Update();
 	virtual void LateUpdate();
-	virtual void FixedUpdate();
 
 public:
+	static void AddCamera(const std::shared_ptr<CCamera>& camera);
+	static void DeleteMainCamera();
+
 	static const std::vector<std::shared_ptr<CCamera>>& GetAllCameras() { return mCameras; }
 	static std::shared_ptr<CCamera> GetMainCamera() { return mMainCamea; }
 
@@ -62,6 +66,8 @@ public:
 	float GetFar() const { return mFarZ; }
 	float GetAspect() const { return mAspectRatio; }
 	float GetFov() const { return mFovAngle; }
+
+	const Vec3& GetLocalPosition();
 
 	Matrix GetViewMat() const { return mViewMat; }
 	Matrix GetViewProjMat() const { return mViewPerspectiveProjectMat; }

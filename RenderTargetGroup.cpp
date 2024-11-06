@@ -75,9 +75,9 @@ void CRenderTargetGroup::SetRenderTargets()
 
 void CRenderTargetGroup::SetRenderTarget(UINT idx)
 {
-	D3D12_CPU_DESCRIPTOR_HANDLE handle(idx * rtvDescriptorSize);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle(rtvHeapHandle, idx * rtvDescriptorSize);
 
-	CMDLIST->OMSetRenderTargets(1, &rtvHeapHandle, FALSE, &handle);
+	CMDLIST->OMSetRenderTargets(1, &handle, FALSE, &dsVHeapHandle);
 }
 
 void CRenderTargetGroup::ClearRenderTargets()

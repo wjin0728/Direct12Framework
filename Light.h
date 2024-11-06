@@ -1,20 +1,21 @@
 #pragma once
 #include"stdafx.h"
+#include"Component.h"
 
 class CLight
 {
 protected:
-	XMFLOAT4 color;
-	XMFLOAT3 strength;
-	float padding;
+	Color color = { 1.f,1.f,1.f,1.f };
+	Vec3 strength = { 1.f,1.f,1.f };
+	float padding{};
 
 public:
-	CLight() = default;
-	CLight(const XMFLOAT4& _color, const XMFLOAT3& _strength) : color(_color), strength(_strength) {}
+	CLight() {}
+	CLight(const Color& _color, const Vec3& _strength) : color(_color), strength(_strength) {}
 
 public:
-	void SetStrength(const XMFLOAT3& _strength) { strength = _strength; }
-	void SetColor(const XMFLOAT4& _color) { color = _color; }
+	void SetStrength(const Vec3& _strength) { strength = _strength; }
+	void SetColor(const Color& _color) { color = _color; }
 
 };
 
@@ -26,14 +27,14 @@ public:
 class CDirectionalLight : public CLight
 {
 private:
-	XMFLOAT3 direction;
+	Vec3 direction = Vec3::Zero;
 
 public:
 	CDirectionalLight() = default;
-	CDirectionalLight(const XMFLOAT4& _color, const XMFLOAT3& _strength, const XMFLOAT3& _direction);
+	CDirectionalLight(const Color& _color, const Vec3& _strength, const Vec3& _direction);
 
 public:
-	void SetDirection(const XMFLOAT3& _direction);
+	void SetDirection(const Vec3& _direction);
 
 	void UpdateLightData(CBDirectionalLightInfo& data) const;
 };
@@ -47,15 +48,15 @@ public:
 class CPointLight : public CLight
 {
 private:
-	XMFLOAT3 position;
-	float range;
+	Vec3 position = Vec3::Zero;
+	float range{};
 
 public:
 	CPointLight() = default;
-	CPointLight(const XMFLOAT4& _color, const XMFLOAT3& _strength, const XMFLOAT3& _position, float _range);
+	CPointLight(const Color& _color, const Vec3& _strength, const Vec3& _position, float _range);
 
 public:
-	void Setposition(const XMFLOAT3& _position);
+	void SetLocalPosition(const Vec3& _position);
 	void SetRange(float _range);
 
 	void UpdateLightData(CBPointLightInfo& data) const;
@@ -70,21 +71,21 @@ public:
 class CSpotLight : public CLight
 {
 private:
-	XMFLOAT3 direction;
-	XMFLOAT3 position;
-	float range;
-	float fallOffStart;
-	float fallOffEnd;
-	float spotPower;
+	Vec3 direction = Vec3::Zero;
+	Vec3 position = Vec3::Zero;
+	float range{};
+	float fallOffStart{};
+	float fallOffEnd{};
+	float spotPower{};
 
 public:
 	CSpotLight() = default;
-	CSpotLight(const XMFLOAT4& _color, const XMFLOAT3& _strength, const XMFLOAT3& _direction, const XMFLOAT3& _position,
+	CSpotLight(const Color& _color, const Vec3& _strength, const Vec3& _direction, const Vec3& _position,
 		float _range, float _fallOffStart, float _fallOffEnd, float _spotPower);
 
 public:
-	void SetDirection(const XMFLOAT3& _direction);
-	void Setposition(const XMFLOAT3& _position);
+	void SetDirection(const Vec3& _direction);
+	void SetLocalPosition(const Vec3& _position);
 	void SetRange(float _range);
 	void SetfallOffStart(float _fallOffStart);
 	void SetfallOffEnd(float _fallOffEnd);

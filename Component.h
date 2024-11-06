@@ -1,24 +1,9 @@
 #pragma once
-#include"stdafx.h"
 
-enum class COMPONENT_TYPE : UINT8
-{
-	TRANSFORM,
-	MESH_RENDERER,
-	CAMERA,
-	LIGHT,
-	TERRAIN,
-	// ...
-	SCRIPT,
-	END,
-};
+class CTransform;
 
-enum
-{
-	FIXED_COMPONENT_COUNT = static_cast<UINT8>(COMPONENT_TYPE::END) - 1
-};
 
-class CGameObject;
+#include"GameObject.h"
 
 class CComponent
 {
@@ -28,7 +13,7 @@ protected:
 
 public:
 	CComponent(COMPONENT_TYPE type);
-	CComponent(const CComponent& other) : type(other.type) {}
+	CComponent(const CComponent& other);
 	virtual ~CComponent();
 
 	virtual void Awake() {}; 
@@ -36,14 +21,14 @@ public:
 
 	virtual void Update() {}; 
 	virtual void LateUpdate() {};
-	virtual void FixedUpdate() {}; 
 
 	virtual std::shared_ptr<CComponent> Clone() = 0;
 
 public:
-	void SetOwner(const std::shared_ptr<CGameObject>& _owner) { owner = _owner; }
+	void SetOwner(const std::shared_ptr<CGameObject>& _owner);
 
-	std::shared_ptr<CGameObject> GetOwner() { return owner.lock(); }
+	std::shared_ptr<CGameObject> GetOwner(); const
+	std::shared_ptr<CTransform> GetTransform(); const
 	COMPONENT_TYPE GetType() const { return type; }
 };
 

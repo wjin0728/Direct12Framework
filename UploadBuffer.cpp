@@ -11,65 +11,57 @@ CUploadBuffer::~CUploadBuffer()
 	mappedData = nullptr;
 }
 
-void CUploadBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum)
-{
-	rootParamIdx = _rootParamIdx;
-	dataSize = _dataSize;
-	dataNum = _dataNum;
-
-	CreateBuffer();
-}
-
-void CUploadBuffer::UpdateData(const void* _data, UINT idx, UINT _dataNum)
+void CUploadBuffer::CopyData(const void* _data, UINT idx, UINT _dataNum)
 {
 	assert(idx < dataNum);
 
-	memcpy(&mappedData[idx * dataSize], _data, dataSize * static_cast<size_t>(_dataNum));
+	memcpy(&mappedData[idx * byteSize], _data, dataSize * static_cast<size_t>(_dataNum));
 }
 
 void CUploadBuffer::CreateBuffer()
 {
-	byteSize = ((sizeof(dataSize) + 255) & ~255);
+	CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize * dataNum);
 
-	D3D12_HEAP_PROPERTIES d3dHeapPropertiesDesc{};
-	d3dHeapPropertiesDesc.Type = D3D12_HEAP_TYPE_UPLOAD;
-	d3dHeapPropertiesDesc.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	d3dHeapPropertiesDesc.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-	d3dHeapPropertiesDesc.CreationNodeMask = 1;
-	d3dHeapPropertiesDesc.VisibleNodeMask = 1;
-
-	D3D12_RESOURCE_DESC d3dResourceDesc{};
-	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	d3dResourceDesc.Alignment = 0;
-	d3dResourceDesc.Width = byteSize * dataNum;
-	d3dResourceDesc.Height = 1;
-	d3dResourceDesc.DepthOrArraySize = 1;
-	d3dResourceDesc.MipLevels = 1;
-	d3dResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-	d3dResourceDesc.SampleDesc.Count = 1;
-	d3dResourceDesc.SampleDesc.Quality = 0;
-	d3dResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	d3dResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-	ThrowIfFailed(INSTANCE(CDX12Manager).GetDevice()->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE,
-		&d3dResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&buffer)));
+	ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, 
+		&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&buffer)));
 
 	D3D12_RANGE readRange = { 0, 0 };
 	ThrowIfFailed(buffer->Map(0, &readRange, (void**)&mappedData));
-	
 }
 
-void CUploadBuffer::UpdateConstantBuffer(UINT idx)
+
+void CConstantBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum)
 {
-	D3D12_GPU_VIRTUAL_ADDRESS bufferLocation = buffer->GetGPUVirtualAddress() + (byteSize * static_cast<unsigned long long>(idx));
+	rootParamIdx = _rootParamIdx;
+	dataSize = _dataSize;
+	dataNum = _dataNum;
+	byteSize = ((sizeof(dataSize) + 255) & ~255);
+
+	CreateBuffer();
+}
+
+void CConstantBuffer::UpdateBuffer(UINT idx)
+{
+	D3D12_GPU_VIRTUAL_ADDRESS bufferLocation = buffer->GetGPUVirtualAddress() + (byteSize * static_cast<size_t>(idx));
 
 	auto cmdList = INSTANCE(CDX12Manager).GetCommandList();
 	cmdList->SetGraphicsRootConstantBufferView(rootParamIdx, bufferLocation);
 }
 
-void CUploadBuffer::UpdateStructedBuffer(UINT idx)
+void CStructedBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum)
 {
-	D3D12_GPU_VIRTUAL_ADDRESS bufferLocation = buffer->GetGPUVirtualAddress() + (byteSize * static_cast<unsigned long long>(idx));
+	rootParamIdx = _rootParamIdx;
+	dataSize = _dataSize;
+	dataNum = _dataNum;
+	byteSize = dataSize;
+
+	CreateBuffer();
+}
+
+void CStructedBuffer::UpdateBuffer(UINT idx)
+{
+	D3D12_GPU_VIRTUAL_ADDRESS bufferLocation = buffer->GetGPUVirtualAddress() + (byteSize * static_cast<size_t>(idx));
 
 	auto cmdList = INSTANCE(CDX12Manager).GetCommandList();
 	cmdList->SetGraphicsRootShaderResourceView(rootParamIdx, bufferLocation);

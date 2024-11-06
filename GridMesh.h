@@ -3,7 +3,7 @@
 #include "Mesh.h"
 
 enum : UINT {
-	TEXTURE_REPEAT_COUNT = 2
+	TEXTURE_REPEAT_COUNT = 1
 };
 
 
