@@ -6,6 +6,8 @@
 #include"MeshRenderer.h"
 #include"Collider.h"
 #include"GameObject.h"
+#include"SceneManager.h"
+#include"Scene.h"
 
 CTransform::CTransform() : CComponent(COMPONENT_TYPE::TRANSFORM), dirtyFramesNum(FRAME_RESOURCE_COUNT)
 {
@@ -19,7 +21,7 @@ CTransform::~CTransform()
 std::shared_ptr<CComponent> CTransform::Clone()
 {
 	std::shared_ptr<CTransform> copy = std::make_shared<CTransform>();
-	copy->isMoved = isMoved;
+	copy->mDirtyFlag = mDirtyFlag;
 	copy->mLocalRight = mLocalRight;
 	copy->mLocalUp = mLocalUp;
 	copy->mLocalLook = mLocalLook;
@@ -37,7 +39,7 @@ void CTransform::Awake()
 {
 	SetCBVIndex();
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
-	isMoved = true;
+	mDirtyFlag = true;
 
 }
 
@@ -47,7 +49,6 @@ void CTransform::Start()
 
 void CTransform::Update()
 {
-
 }
 
 void CTransform::LateUpdate()
@@ -67,7 +68,7 @@ void CTransform::Reset()
 	mWorldMat = Matrix::Identity;
 	mLocalMat = Matrix::Identity;
 
-	isMoved = true;
+	mDirtyFlag = true;
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 }
 
@@ -78,22 +79,43 @@ void CTransform::SetCBVIndex()
 	}
 }
 
-void CTransform::SetParent(std::shared_ptr<CTransform> parent)
+void CTransform::SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalMat)
 {
-	auto _parent = mParent.lock();
-	auto& parentChildren = parent->GetOwner()->GetChildren();
+	auto curParent = mParent.lock();
+	auto ownerObj = owner->GetSptrFromThis();
 
-	if (_parent) {
-		auto it = std::find(parentChildren.begin(), parentChildren.end(), owner.lock());
-
-		if (it != parentChildren.end()) {
-			parentChildren.erase(it);
+	if (curParent) {
+		if (curParent.get() == parent.get()) {
+			return;
 		}
+		curParent->GetOwner()->RemoveChild(ownerObj);
 	}
+	else {
+		if (!parent) {
+			return;
+		}
+		INSTANCE(CSceneManager).GetCurScene()->RemoveObject(ownerObj);
+	}
+	
+	UpdateWorldMatrix();
 
 	mParent = parent;
+
 	if (parent) {
-		parentChildren.push_back(owner.lock());
+		parent->GetOwner()->AddChild(ownerObj);
+
+		if (isKeepLocalMat) {
+			mLocalMat = mWorldMat * parent->GetWorldMat().Invert();
+			mDirtyFlag = true;
+		}
+	}
+	else {
+		INSTANCE(CSceneManager).GetCurScene()->AddObject(GetRoot()->owner->GetRenderLayer(), ownerObj);
+
+		if (isKeepLocalMat) {
+			mLocalMat = mWorldMat;
+			mDirtyFlag = true;
+		}
 	}
 }
 
@@ -122,28 +144,28 @@ void CTransform::MoveStrafe(float distance)
 {
 	mLocalPosition += (mLocalRight * distance);
 
-	isMoved = true;
+	mDirtyFlag = true;
 }
 
 void CTransform::MoveUp(float distance)
 {
 	mLocalPosition += (mLocalUp * distance);
 
-	isMoved = true;
+	mDirtyFlag = true;
 }
 
 void CTransform::MoveForward(float distance)
 {
 	mLocalPosition += (mLocalLook * distance);
 
-	isMoved = true;
+	mDirtyFlag = true;
 }
 
 void CTransform::Move(const Vec3& direction, float distance)
 {
 	mLocalPosition += (direction * distance);
 
-	isMoved = true;
+	mDirtyFlag = true;
 }
 
 void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
@@ -151,8 +173,9 @@ void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
 	Vec3 lookVec = lookDir.GetNormalized();
 	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
 	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
 
-	isMoved = true;
+	mDirtyFlag = true;
 }
 
 void CTransform::LookAt(const Vec3& lookPos, const Vec3& up)
@@ -160,8 +183,9 @@ void CTransform::LookAt(const Vec3& lookPos, const Vec3& up)
 	Vec3 lookVec = (lookPos - mLocalPosition).GetNormalized();
 	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
 	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
 
-	isMoved = true;
+	mDirtyFlag = true;
 }
 
 void CTransform::LookAt(const CTransform& target, const Vec3& up)
@@ -169,37 +193,65 @@ void CTransform::LookAt(const CTransform& target, const Vec3& up)
 	Vec3 lookVec = (target.mLocalPosition - mLocalPosition).GetNormalized();
 	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
 	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
 
-	isMoved = true;
+	mDirtyFlag = true;
 }
 
 void CTransform::Rotate(float pitch, float yaw, float roll)
 {
 	mLocalRotation = SimpleMath::Quaternion::CreateFromYawPitchRoll(
-		XMConvertToRadians(pitch), XMConvertToRadians(yaw), XMConvertToRadians(roll)) * mLocalRotation;
+		XMConvertToRadians(yaw), XMConvertToRadians(pitch), XMConvertToRadians(roll)) * mLocalRotation;
+	mLocalEulerAngle.x += pitch; mLocalEulerAngle.y += yaw; mLocalEulerAngle.z += roll;
 
-	isMoved = true;
+	mDirtyFlag = true;
 }
 
 void CTransform::Rotate(const Vec3& rotation)
 {
 	Vec3 angles = { XMConvertToRadians(rotation.x), XMConvertToRadians(rotation.y) ,XMConvertToRadians(rotation.z) };
 	mLocalRotation = Quaternion::CreateFromYawPitchRoll(angles) * mLocalRotation;
+	mLocalEulerAngle += rotation;
 
-	isMoved = true;
+	mDirtyFlag = true;
 }
 
 void CTransform::Rotate(const Vec3& axis, float angle)
 {
 	mLocalRotation = Quaternion::CreateFromAxisAngle(axis, angle) * mLocalRotation;
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
 
-	isMoved = true;
+	mDirtyFlag = true;
+}
+
+void CTransform::RotateX(float angle)
+{
+	Rotate(angle, 0.f, 0.f);
+}
+
+void CTransform::RotateY(float angle)
+{
+	Rotate(0.f, angle, 0.f);
+}
+
+void CTransform::RotateZ(float angle)
+{
+	Rotate(0.f, 0.f, angle);
 }
 
 const Matrix& CTransform::GetWorldMat()
 {
 	UpdateWorldMatrix();
 	return mWorldMat;
+}
+
+std::shared_ptr<CTransform> CTransform::GetRoot()
+{
+	auto parent = mParent.lock();
+	if (!parent) {
+		return shared_from_this();
+	}
+	return parent->GetRoot();
 }
 
 void CTransform::UpdateLocalMatrix()
@@ -214,13 +266,13 @@ void CTransform::UpdateWorldMatrix()
 {
 	auto parent = mParent.lock();
 
-	if (!isMoved && !parent) {
+	if (!mDirtyFlag && !parent) {
 		return;
 	}
 
-	if (isMoved) {
+	if (mDirtyFlag) {                       
 		UpdateLocalMatrix();
-		isMoved = false;
+		mDirtyFlag = false;
 	}
 
 	mWorldMat = parent ? (mLocalMat * parent->GetWorldMat()) : mLocalMat;
@@ -246,7 +298,7 @@ void CTransform::CopyToCbvBuffer()
 	objDate.worldMAt = mWorldMat.Transpose();
 	objDate.textureMat = mTextureMat.Transpose();
 
-	auto meshRenderer = owner.lock()->GetMeshRendere();
+	auto meshRenderer = owner->GetMeshRendere();
 	if (meshRenderer)
 		objDate.materialIdx = meshRenderer->GetMaterialIndex();
 

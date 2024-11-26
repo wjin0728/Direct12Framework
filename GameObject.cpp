@@ -7,13 +7,15 @@
 #include"ResourceManager.h"
 #include"Terrain.h"
 #include"Collider.h"
+#include"UploadBuffer.h"
 
 
 CGameObject::CGameObject(bool makeTransform)
 {
 	if (makeTransform) {
 		mTransform = std::make_shared<CTransform>();
-		mComponents[COMPONENT_TYPE::TRANSFORM] = mTransform;
+		mComponents.push_back(mTransform);
+		mTransform->SetOwner(this);
 	}
 }
 
@@ -23,11 +25,8 @@ CGameObject::~CGameObject()
 
 void CGameObject::Awake()
 {
-	for (auto& [type, component] : mComponents) {
+	for (auto& component : mComponents) {
 		component->Awake();
-	}
-	for (auto& [type, script] : mScripts) {
-		script->Awake();
 	}
 
 	for (auto& child : mChildren) {
@@ -35,19 +34,16 @@ void CGameObject::Awake()
 	}
 
 	if(!mMeshRenderer)
-		mMeshRenderer = std::static_pointer_cast<CMeshRenderer>(GetComponent(COMPONENT_TYPE::MESH_RENDERER));
+		mMeshRenderer = GetComponent<CMeshRenderer>();
 	if (!mCollider) {
-		mCollider = std::static_pointer_cast<CCollider>(GetComponent(COMPONENT_TYPE::COLLIDER));
+		mCollider = GetComponent<CCollider>();
 	}
 }
 
 void CGameObject::Start()
 {
-	for (auto& [type, component] : mComponents) {
+	for (auto& component : mComponents) {
 		component->Start();
-	}
-	for (auto& [type, script] : mScripts) {
-		script->Start();
 	}
 
 	for (auto& child : mChildren) {
@@ -61,11 +57,8 @@ void CGameObject::Update()
 		return;
 	}
 
-	for (auto& [type, component] : mComponents) {
+	for (auto& component : mComponents) {
 		component->Update();
-	}
-	for (auto& [type, script] : mScripts) {
-		script->Update();
 	}
 
 	for (auto& child : mChildren) {
@@ -79,11 +72,8 @@ void CGameObject::LateUpdate()
 		return;
 	}
 
-	for (auto& [type, component] : mComponents) {
+	for (auto& component : mComponents) {
 		component->LateUpdate();
-	}
-	for (auto& [type, script] : mScripts) {
-		script->LateUpdate();
 	}
 
 	for (auto& child : mChildren) {
@@ -128,91 +118,6 @@ void CGameObject::Render()
 	}
 }
 
-bool CGameObject::AddComponent(const std::shared_ptr<CComponent>& component)
-{
-	COMPONENT_TYPE componentType = component->GetType();
-
-	auto itr = mComponents.find(componentType);
-
-	if (itr != mComponents.end()) {
-		return false;
-	}
-
-	mComponents[componentType] = component;
-
-	return true;
-}
-
-bool CGameObject::AddScript(const std::shared_ptr<CMonoBehaviour>& component)
-{
-	const std::string& name = component->GetName();
-
-	auto itr = mScripts.find(name);
-
-	if (itr != mScripts.end()) {
-		return false;
-	}
-
-	mScripts[name] = component;
-
-	return true;
-}
-
-std::shared_ptr<CComponent> CGameObject::AddComponent(COMPONENT_TYPE type)
-{
-	auto itr = mComponents.find(type);
-
-	if (itr != mComponents.end()) {
-		return itr->second;
-	}
-	
-	return nullptr;
-}
-
-std::shared_ptr<CMonoBehaviour> CGameObject::AddComponent(const std::string& name)
-{
-	auto itr = mScripts.find(name);
-
-	if (itr != mScripts.end()) {
-		return itr->second;
-	}
-
-
-	return std::shared_ptr<CMonoBehaviour>();
-}
-
-std::shared_ptr<CComponent> CGameObject::GetComponent(COMPONENT_TYPE type)
-{
-	auto itr = mComponents.find(type);
-
-	if (itr != mComponents.end()) {
-		return itr->second;
-	}
-
-	return nullptr;
-}
-
-std::shared_ptr<CMonoBehaviour> CGameObject::GetComponent(const std::string& name)
-{
-	auto itr = mScripts.find(name);
-
-	if (itr != mScripts.end()) {
-		return itr->second;
-	}
-
-	return nullptr;
-}
-
-void CGameObject::SetComponentOwner(const std::shared_ptr<CGameObject>& owner)
-{
-	for (auto& [type, component] : mComponents) {
-		component->SetOwner(owner);
-	}
-	for (auto& [type, script] : mScripts) {
-		script->SetOwner(owner);
-	}
-}
-
 void CGameObject::SetParent(const std::shared_ptr<CGameObject>& parent)
 {
 	mTransform->SetParent(parent->mTransform);
@@ -230,14 +135,14 @@ void CGameObject::ReturnCBVIndex()
 std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGameObject>& original, 
 	const std::shared_ptr<CTransform>& parentTransform)
 {
-	std::shared_ptr<CGameObject> instance = std::make_shared<CGameObject>();
+	std::shared_ptr<CGameObject> instance = std::make_shared<CGameObject>(false);
 
-	for (const auto& [key, component] : original->mComponents) {
-		instance->mComponents[key] = component->Clone();
-		instance->mComponents[key]->SetOwner(instance);
+	for (const auto& component : original->mComponents) {
+		instance->mComponents.push_back(component->Clone());
+		instance->mComponents.back()->SetOwner(instance.get());
 	}
 
-	instance->mTransform = std::static_pointer_cast<CTransform>(instance->GetComponent(COMPONENT_TYPE::TRANSFORM));
+	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
 	instance->mLayerType = original->mLayerType;
 
@@ -259,12 +164,12 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 {
 	std::shared_ptr<CGameObject> instance = std::make_shared<CGameObject>(false);
 
-	for (const auto& [key, component] : original->mComponents) {
-		instance->mComponents[key] = component->Clone();
-		instance->mComponents[key]->SetOwner(instance);
+	for (const auto& component : original->mComponents) {
+		instance->mComponents.push_back(component->Clone());
+		instance->mComponents.back()->SetOwner(instance.get());
 	}
 
-	instance->mTransform = std::static_pointer_cast<CTransform>(instance->GetComponent(COMPONENT_TYPE::TRANSFORM));
+	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
 	instance->mLayerType = original->mLayerType;
 
@@ -292,7 +197,6 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::wstring&
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
 	camera->GeneratePerspectiveProjectionMatrix(nearPlane, farPlane, fovAngle);
 
-	object->SetComponentOwner(object);
 	object->SetActive(true);
 	CCamera::AddCamera(camera);
 
@@ -310,7 +214,6 @@ std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::wstring&
 	meshRenderer->SetMesh(RESOURCE.Get<CMesh>(meshName));
 	meshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
 
-	object->SetComponentOwner(object);
 	object->SetActive(true);
 
 	return object;
@@ -322,13 +225,16 @@ std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(const std::wstring
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
 	object->mTag = tag;
 
-	std::shared_ptr<CHeightMapGridMesh> mesh = std::make_shared<CHeightMapGridMesh>();
-	mesh->Initialize(heightMapName, width, height, scale);
-	mesh->SetName(L"HeightMap01");
-	RESOURCE.Add(mesh);
+	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(L"HeightMapMesh"));
+	if (!mesh) {
+		mesh = std::make_shared<CHeightMapGridMesh>();
+		mesh->Initialize(heightMapName, width, height, scale);
+		mesh->SetName(L"HeightMap01");
+		RESOURCE.Add(mesh);
+	}
 
 	std::shared_ptr<CTerrainMaterial> material = std::make_shared<CTerrainMaterial>();
-	material->mSpecularColor = { 0.2,0.2,0.2,0.001 };
+	material->mSpecularColor = { 0.0,0.0,0.0,0.001 };
 
 	auto texture = RESOURCE.Get<CTexture>(L"TerrainBase");
 	if (texture) {
@@ -343,12 +249,10 @@ std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(const std::wstring
 		material->mNormalMapIdx = texture->GetSrvIndex();
 	}
 
-	auto terrain = std::make_shared<CTerrain>();
-	object->AddComponent(terrain);
+	auto terrain = object->AddComponent<CTerrain>();
 	terrain->SetHeightMapGridMesh(mesh);
 	terrain->SetMaterial(material);
 
-	object->SetComponentOwner(object);
 	object->SetActive(true);
 
 	return object;
@@ -374,6 +278,11 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(const std::wstrin
 	return root;
 }
 
+std::shared_ptr<CGameObject> CGameObject::GetSptrFromThis()
+{
+	return shared_from_this();
+}
+
 void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& inFile)
 {
 	using namespace BinaryReader;
@@ -395,12 +304,12 @@ void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& 
 		}
 		else if (token == "<Transform>:") {
 			obj->CreateTransformFromFile(inFile);
-			obj->mTransform->SetOwner(obj);
+			obj->mTransform->SetOwner(obj.get());
 		}
 		else if (token == "<Mesh>:") {
 			obj->CreateMeshRendererFromFile(inFile);
-			obj->mMeshRenderer->SetOwner(obj);
-			obj->mCollider->SetOwner(obj);
+			obj->mMeshRenderer->SetOwner(obj.get());
+			obj->mCollider->SetOwner(obj.get());
 		}
 		else if (token == "<Children>:") {
 			int childrenCnt{};
@@ -438,9 +347,20 @@ void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile)
 	using namespace BinaryReader;
 	mMeshRenderer = std::make_shared<CMeshRenderer>();
 	AddComponent(mMeshRenderer);
-	auto mesh = CMesh::CreateMeshFromFile(inFile);
+
+	std::string meshName;
+	BinaryReader::ReadDateFromFile(inFile, meshName);
+	std::wstring meshNameW = BinaryReader::stringToWstring(meshName);
+
+	std::shared_ptr<CMesh> mesh{};
+	if (!(mesh = RESOURCE.Get<CMesh>(meshNameW))) {
+		mesh = CMesh::CreateMeshFromFile(inFile);
+		mesh->SetName(meshNameW);
+		RESOURCE.Add(mesh);
+	}
 	mMeshRenderer->SetMesh(mesh);
-	RESOURCE.Add(mesh);
+
+	
 
 	mCollider = std::make_shared<CCollider>();
 	AddComponent(mCollider);
@@ -458,9 +378,7 @@ void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile)
 			ReadDateFromFile(inFile, matIdx);
 
 			auto material = CMaterial::CreateMaterialFromFile(inFile);
-			material->SetName(std::to_wstring(RANDOM_COLOR + matIdx));
 			mMeshRenderer->AddMaterial(material);
-			RESOURCE.Add(material);
 		}
 	}
 }
@@ -475,6 +393,7 @@ const BoundingBox& CGameObject::CombineChildrenOOBB()
 
 	for (const auto& child : mChildren) {
 		BoundingBox childAABB = child->CombineChildrenOOBB();
+
 		BoundingBox::CreateMerged(result, result, childAABB);
 	}
 
@@ -503,6 +422,25 @@ std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::wstring& na
 	}
 
 	return obj;
+}
+
+void CGameObject::AddChild(std::shared_ptr<CGameObject> child)
+{
+	auto itr = findByRawPointer(mChildren, child.get());
+
+	if (itr != mChildren.end()) {
+		return;
+	}
+	mChildren.push_back(child);
+}
+
+void CGameObject::RemoveChild(std::shared_ptr<CGameObject> child)
+{
+	auto itr = findByRawPointer(mChildren, child.get());
+
+	if (itr != mChildren.end()) {
+		mChildren.erase(itr);
+	}
 }
 
 

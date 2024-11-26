@@ -24,7 +24,7 @@ void CPlayerController::Awake()
 		subRotor = subRotorObj->GetTransform();
 	}
 
-	rigidBody = std::static_pointer_cast<CRigidBody>(GetOwner()->GetComponent(COMPONENT_TYPE::RIGID_BODY));
+	rigidBody = GetOwner()->GetComponent<CRigidBody>();
 }
 
 void CPlayerController::Start()
@@ -33,12 +33,8 @@ void CPlayerController::Start()
 
 void CPlayerController::Update()
 {
-	bool isDecelerate = false;
-
-	Vec3 acccel = GetTransform()->GetLocalLook() * 20.f;
-
-	rigidBody->SetAcceleration(acccel);
-	rigidBody->SetUseFriction(isDecelerate);
+	OnKeyEvents();
+	OnMouseEvents();
 
 	float power = DELTA_TIME * 3000;
 
@@ -103,9 +99,9 @@ void CPlayerController::OnKeyEvents()
 
 void CPlayerController::OnMouseEvents()
 {
-	/*Vec2 mouseDelta = INPUT.GetMouseDelta();
+	Vec2 mouseDelta = INPUT.GetMouseDelta();
 	if (mouseDelta != Vec2::Zero) {
-		GetTransform()->Rotate({ 0.f , mouseDelta.x * DELTA_TIME * 60, 0.f });
-	}*/
+		GetTransform()->RotateY(mouseDelta.x * DELTA_TIME * 60);
+	}
 
 }

@@ -26,15 +26,13 @@ void CMenuScene::Initialize()
 	const auto& rectMesh = RESOURCE.Get<CMesh>(L"Rectangle");
 	{
 		auto object = std::make_shared<CGameObject>();
-		auto renderer = std::make_shared<CMeshRenderer>();
-		object->AddComponent(renderer);
+
+		auto renderer = object->AddComponent<CMeshRenderer>();
 		renderer->SetMesh(rectMesh);
 		renderer->AddMaterial(RESOURCE.Get<CMaterial>(L"Scrolling"));
+
 		object->GetTransform()->SetLocalScale({ 0.5f, 10.f,1.f });
-
-		object->AddComponent(std::make_shared<CScrollTexture>());
-
-		object->SetComponentOwner(object);
+		object->AddComponent<CScrollTexture>();
 		object->SetActive(true);
 		object->SetRenderLayer(L"UI");
 		mObjects[L"UI"].push_back(object);

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Component.h"
-#include"GameObject.h"
 #include"Transform.h"
+#include"GameObject.h"
 
 CComponent::CComponent(COMPONENT_TYPE type) : type(type)
 {
@@ -15,19 +15,19 @@ CComponent::~CComponent()
 {
 }
 
-void CComponent::SetOwner(const std::shared_ptr<CGameObject>& _owner)
+void CComponent::SetOwner(CGameObject* _owner)
 {
     owner = _owner;
 }
 
-std::shared_ptr<CGameObject> CComponent::GetOwner()
+CGameObject* CComponent::GetOwner() const
 {
-    return owner.lock();
+    return owner;
 }
 
-const std::shared_ptr<CTransform> CComponent::GetTransform()
+std::shared_ptr<CTransform> CComponent::GetTransform() const
 {
-    return owner.lock()->GetTransform();
+    return owner->GetTransform();
 }
 
 

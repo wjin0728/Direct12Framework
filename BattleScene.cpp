@@ -74,17 +74,12 @@ void CBattleScene::Initialize()
 	Player->GetTransform()->SetLocalScale({ 0.4f, 0.4f, 0.4f });
 	Player->CalculateRootOOBB();
 
-	auto rigidBody = std::make_shared<CRigidBody>();
-	Player->AddComponent(rigidBody);
-	rigidBody->SetOwner(Player);
+	Player->AddComponent<CRigidBody>();
+	Player->AddComponent<CPlayerController>();
 
-	auto playerController = std::make_shared<CPlayerController>();
-	Player->AddScript(playerController);
-	playerController->SetOwner(Player);
-
-	auto avoidObstacle = std::make_shared<CAvoidObstacle>();
+	/*auto avoidObstacle = std::make_shared<CAvoidObstacle>();
 	Player->AddScript(avoidObstacle);
-	avoidObstacle->SetOwner(Player);
+	avoidObstacle->SetOwner(Player);*/
 
 	mObjects[L"Opaque"].push_back(Player);
 
@@ -94,10 +89,8 @@ void CBattleScene::Initialize()
 #pragma region Main Camera
 	{
 		auto playerFollower = std::make_shared<CGameObject>();
-		auto followTarget = std::make_shared<CFollowTarget>();
-		playerFollower->AddScript(followTarget);
+		auto followTarget = playerFollower->AddComponent<CFollowTarget>();
 		followTarget->SetTarget(Player);
-		playerFollower->SetComponentOwner(playerFollower);
 		playerFollower->GetTransform()->SetLocalPosition({ 0.f,200.f,0.f });
 
 		auto cameraObj = CGameObject::CreateCameraObject(L"MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
@@ -116,7 +109,7 @@ void CBattleScene::Initialize()
 			257, 257, { 8.0f, 1.5f, 8.0f });
 		mObjects[L"Terrain"].push_back(terrainObj);
 
-		mTerrain = std::dynamic_pointer_cast<CTerrain>(terrainObj->GetComponent(COMPONENT_TYPE::TERRAIN));
+		mTerrain = terrainObj->GetComponent<CTerrain>();
 
 		auto skyBox = CGameObject::CreateRenderObject(L"SkyBox", L"Cube", L"SkyBox");
 		skyBox->GetTransform()->SetLocalScale({ 2000.f,2000.f,2000.f });

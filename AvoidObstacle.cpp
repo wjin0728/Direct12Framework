@@ -18,7 +18,7 @@ CAvoidObstacle::~CAvoidObstacle()
 
 void CAvoidObstacle::Awake()
 {
-	mRigidBody = std::static_pointer_cast<CRigidBody>(GetOwner()->GetComponent(COMPONENT_TYPE::RIGID_BODY));
+	mRigidBody = GetOwner()->GetComponent<CRigidBody>();
 	destination = GetTransform()->GetWorldPosition() + Vec3::Backward * 100.f;
 }
 

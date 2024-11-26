@@ -2,7 +2,6 @@
 #include"GameObject.h"
 #include "Scene.h"
 #include"SceneManager.h"
-#include"Player.h"
 #include"Shader.h"
 #include"Terrain.h"
 #include"LightManager.h"
@@ -99,7 +98,25 @@ void CScene::AddObject(const std::wstring& renderLayer, std::shared_ptr<CGameObj
 	objectList.push_back(object);
 }
 
-void CScene::DestroyObject(std::shared_ptr<CGameObject> object)
+void CScene::AddObject(std::shared_ptr<CGameObject> object)
+{
+	const std::wstring& renderLayer = object->GetRenderLayer();
+
+	if (!mObjects.contains(renderLayer)) {
+		return;
+	}
+
+	auto& objectList = mObjects[renderLayer];
+
+	auto itr = std::find(objectList.begin(), objectList.end(), object);
+	if (itr != objectList.end()) {
+		return;
+	}
+
+	objectList.push_back(object);
+}
+
+void CScene::RemoveObject(std::shared_ptr<CGameObject> object)
 {
 	const std::wstring& key = object->GetRenderLayer();
 	if (!mObjects.contains(key)) {
@@ -108,7 +125,7 @@ void CScene::DestroyObject(std::shared_ptr<CGameObject> object)
 
 	auto& objectList = mObjects[key];
 
-	auto itr = std::find(objectList.begin(), objectList.end(), object);
+	auto itr = findByRawPointer(objectList, object.get());
 	if (itr != objectList.end()) {
 		objectList.erase(itr);
 	}

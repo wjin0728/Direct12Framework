@@ -1,15 +1,29 @@
 #pragma once
+#include"GameObject.h"
 
 class CTransform;
 
+enum class COMPONENT_TYPE : UINT8
+{
+	TRANSFORM,
+	COLLIDER,
+	MESH_RENDERER,
+	CAMERA,
+	LIGHT,
+	TERRAIN,
+	RIGID_BODY,
+	// ...
+	SCRIPT,
 
-#include"GameObject.h"
+	NOTHING,
+	END
+};
 
 class CComponent
 {
 protected:
 	COMPONENT_TYPE type{};
-	std::weak_ptr<CGameObject> owner{};
+	CGameObject* owner{};
 
 public:
 	CComponent(COMPONENT_TYPE type);
@@ -25,10 +39,10 @@ public:
 	virtual std::shared_ptr<CComponent> Clone() = 0;
 
 public:
-	void SetOwner(const std::shared_ptr<CGameObject>& _owner);
+	void SetOwner(CGameObject* _owner);
 
-	std::shared_ptr<CGameObject> GetOwner(); const
-	std::shared_ptr<CTransform> GetTransform(); const
+	CGameObject* GetOwner() const;
+	std::shared_ptr<CTransform> GetTransform() const;
 	COMPONENT_TYPE GetType() const { return type; }
 };
 

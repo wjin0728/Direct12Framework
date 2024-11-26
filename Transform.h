@@ -24,7 +24,7 @@ private:
 	friend CGameObject;
 	friend class CCamera;
 
-	bool isMoved{};
+	bool mDirtyFlag{};
 
 	std::weak_ptr<CTransform> mParent{};
 
@@ -59,13 +59,21 @@ public:
 	void Rotate(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
 	void Rotate(const Vec3& rotation);
 	void Rotate(const Vec3& axis, float angle);
+	void RotateX(float angle);
+	void RotateY(float angle);
+	void RotateZ(float angle);
 
-	void SetParent(std::shared_ptr<CTransform> parent);
-	void SetLocalPosition(const Vec3& position) { mLocalPosition = position; isMoved = true; };
+	//첫 번째 인자에 nullptr를 넣을 시 부모와 분리되어 씬의 오브젝트 컨테이너에 합류됨
+	void SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalMat = false);
+
+	void SetLocalPosition(const Vec3& position) { mLocalPosition = position; mDirtyFlag = true; };
 	void SetLocalRotation(const Vec3& rotation) { mLocalRotation = Quaternion::CreateFromYawPitchRoll(rotation); 
-	mLocalEulerAngle = rotation; isMoved = true; };
-	void SetLocalRotation(const Quaternion & rotation) { mLocalRotation = rotation; isMoved = true; }
-	void SetLocalScale(const Vec3& scale) { mLocalScale = scale; isMoved = true; };
+	mLocalEulerAngle = rotation; mDirtyFlag = true; };
+	void SetLocalRotation(const Quaternion & rotation) { mLocalRotation = rotation; mDirtyFlag = true; }
+	void SetLocalRotationX(float angle) { SetLocalRotation({ angle, 0.f, 0.f }); }
+	void SetLocalRotationY(float angle) { SetLocalRotation({ 0.f, angle, 0.f }); }
+	void SetLocalRotationZ(float angle) { SetLocalRotation({ 0.f, 0.f, angle }); }
+	void SetLocalScale(const Vec3& scale) { mLocalScale = scale; mDirtyFlag = true; };
 	void SetLocalLook(const Vec3& look) { mLocalLook = look; };
 	void SetLocalUp(const Vec3& up) { mLocalUp = up; };
 	void SetLocalRight(const Vec3& right) { mLocalRight = right; };
@@ -89,6 +97,8 @@ public:
 
 	const Matrix& GetWorldMat();
 	const Matrix& GetTexMat() { return mTextureMat; }
+
+	std::shared_ptr<CTransform> GetRoot();
 
 private:
 	void UpdateLocalMatrix();

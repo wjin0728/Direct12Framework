@@ -120,10 +120,6 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 
 	m->vertices.resize(nvertices);
 
-	std::string meshName;
-	BinaryReader::ReadDateFromFile(inFile, meshName);
-	m->name = BinaryReader::stringToWstring(meshName);
-
 	std::string token;
 
 	while (true)

@@ -11,7 +11,6 @@ enum class CONSTANT_BUFFER_TYPE : UINT {
 
 enum class STRUCTED_BUFFER_TYPE : UINT {
 	MATERIAL = static_cast<UINT>(CONSTANT_BUFFER_TYPE::END),
-
 	END
 };
 

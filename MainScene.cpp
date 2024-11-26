@@ -26,13 +26,10 @@ void CMainScene::Initialize()
 	{
 		auto object = std::make_shared<CGameObject>();
 
-		auto renderer = std::make_shared<CMeshRenderer>();
-		object->AddComponent(renderer);
-
+		auto renderer = object->AddComponent<CMeshRenderer>();
 		renderer->SetMesh(rectMesh);
 		renderer->AddMaterial(RESOURCE.Get<CMaterial>(L"MainMenu"));
 
-		object->SetComponentOwner(object);
 		object->SetActive(true);
 		object->SetRenderLayer(L"UI");
 		mObjects[L"UI"].push_back(object);

@@ -2,6 +2,7 @@
 #include "ObjectPoolManager.h"
 #include"GameObject.h"
 #include"Transform.h"
+#include"UploadBuffer.h"
 
 void CObjectPoolManager::Initialize()
 {

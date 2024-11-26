@@ -41,9 +41,11 @@ public:
 	std::shared_ptr<CGameObject> FindObjectWithTag(const std::wstring& renderLayer, const std::wstring& tag);
 
 	void AddObject(const std::wstring& renderLayer, std::shared_ptr<CGameObject> object);
-	void DestroyObject(std::shared_ptr<CGameObject> object);
+	void AddObject(std::shared_ptr<CGameObject> object);
+	void RemoveObject(std::shared_ptr<CGameObject> object);
 	
 	const std::unordered_map<std::wstring, ObjectList>& GetObjects() const { return mObjects; }
+	ObjectList& GetObjects(const std::wstring& layer) { return mObjects[layer]; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
 
 protected:

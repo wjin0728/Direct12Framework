@@ -149,6 +149,7 @@ public:							\
 #define UPLOADBUFFER(T) INSTANCE(CDX12Manager).GetBuffer(static_cast<UINT>(T))
 #define RESOURCE INSTANCE(CResourceManager)
 
+
 template <typename T, template <typename, typename> class Container, typename Alloc = std::allocator<std::shared_ptr<T>>>
 typename Container<std::shared_ptr<T>, Alloc>::iterator 
 findByRawPointer(Container<std::shared_ptr<T>, Alloc>& container, T* rawPtr) {
@@ -182,21 +183,7 @@ enum {
 	RESOURCE_TYPE_COUNT = RESOURCE_TYPE::END
 };
 
-enum class COMPONENT_TYPE : UINT8
-{
-	TRANSFORM,
-	COLLIDER,
-	MESH_RENDERER,
-	CAMERA,
-	LIGHT,
-	TERRAIN,
-	RIGID_BODY,
-	// ...
-	SCRIPT,
 
-	NOTHING,
-	END
-};
 
 #define DIRECTIONAL_LIGHT 5
 #define POINT_LIGHT 5
