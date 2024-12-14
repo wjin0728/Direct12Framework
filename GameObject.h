@@ -20,6 +20,8 @@ class CComponent;
 class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
 	friend CComponent;
+	friend CTransform;
+
 private:
 	std::vector<std::shared_ptr<CComponent>> mComponents{};
 
@@ -31,10 +33,17 @@ private:
 
 private:
 	bool mActive = true;
+	bool mIsStatic{false};
+	bool mIsInstancing{false};
+
 	std::wstring mName{};
 	std::wstring mTag{};
 	std::wstring mRenderLayer{};
 	LAYER_TYPE mLayerType{};
+
+private:
+	BoundingSphere mRootLocalBS = BoundingSphere();
+	BoundingSphere mRootBS = BoundingSphere();
 
 public:
 	CGameObject(bool makeTransform = true);
@@ -46,7 +55,6 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 
-	void Render(const std::shared_ptr<CCamera>& camera);
 	void Render();
 
 public:
@@ -79,8 +87,11 @@ public:
 	const std::wstring& GetRenderLayer() const { return mRenderLayer; }
 	bool GetActive() const { return mActive; }
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return mChildren; }
+	BoundingSphere GetRootBoundingSphere() const { return mRootBS; }
 
 	void SetActive(bool active) { mActive = active; }
+	void SetStatic(bool isStatic);
+	void SetInstancing(bool isInstancing);
 	void SetLayerType(LAYER_TYPE type) { mLayerType = type; }
 	void SetRenderLayer(const std::wstring& layer) { mRenderLayer = layer; }
 	void SetName(const std::wstring& name) { mName = name; }

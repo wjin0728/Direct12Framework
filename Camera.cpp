@@ -6,6 +6,8 @@
 #include"DX12Manager.h"
 #include"FrameResource.h"
 #include"UploadBuffer.h"
+#include"GameObject.h"
+#include"MeshRenderer.h"
 
 std::vector<std::shared_ptr<CCamera>> CCamera::mCameras{};
 std::shared_ptr<CCamera> CCamera::mMainCamea{};
@@ -178,6 +180,11 @@ bool CCamera::IsInFrustum(const BoundingOrientedBox& boundingBox)
 bool CCamera::IsInFrustum(const BoundingBox& boundingBox)
 {
 	return mFrustumWorld.Intersects(boundingBox);
+}
+
+bool CCamera::IsInFrustum(std::shared_ptr<class CGameObject> obj)
+{
+	return mFrustumWorld.Intersects(obj->GetRootBoundingSphere());
 }
 
 const Vec3& CCamera::GetLocalPosition() 

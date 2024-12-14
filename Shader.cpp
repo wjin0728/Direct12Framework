@@ -4,15 +4,63 @@
 
 D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 {
-	D3D12_INPUT_ELEMENT_DESC* desc = new D3D12_INPUT_ELEMENT_DESC[4];
-	desc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	desc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	desc[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	desc[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	D3D12_INPUT_ELEMENT_DESC* desc{};
+	size_t elementNum{};
 
+	switch (mInfo.inputLayoutYype)
+	{
+	case INPUT_LAYOUT_TYPE::DEFAULT: {
+		elementNum = 4;
+		desc = new D3D12_INPUT_ELEMENT_DESC[elementNum];
+		desc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		break;
+	}
+	case INPUT_LAYOUT_TYPE::TEXTURE: {
+		elementNum = 2;
+		desc = new D3D12_INPUT_ELEMENT_DESC[elementNum];
+		desc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		break;
+	}
+	case INPUT_LAYOUT_TYPE::BILLBOARD: {
+		elementNum = 8;
+		desc = new D3D12_INPUT_ELEMENT_DESC[elementNum];
+		desc[0] = { "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0 };
+		desc[1] = { "POSITIONW",	0, DXGI_FORMAT_R32G32B32_FLOAT,		1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[2] = { "SIZE",			0, DXGI_FORMAT_R32G32_FLOAT,	   1, 12, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[3] = { "MATERIAL_IDX", 0, DXGI_FORMAT_R32_UINT,		   1, 20, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[4] = { "texMatrix",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 24, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[5] = { "texMatrix",	1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 40, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[6] = { "texMatrix",	2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 56, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[7] = { "texMatrix",	3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 72, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		break;
+	}
+	case INPUT_LAYOUT_TYPE::PARTICLE: {
+		elementNum = 11;
+		desc = new D3D12_INPUT_ELEMENT_DESC[elementNum];
+		desc[0] = { "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0 };
+		desc[1] = { "POSITIONW",	0, DXGI_FORMAT_R32G32B32_FLOAT,		1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[2] = { "SIZE",			0, DXGI_FORMAT_R32G32_FLOAT,	   1, 12, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[3] = { "MATERIAL_IDX", 0, DXGI_FORMAT_R32_UINT,		   1, 20, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[4] = { "texMatrix",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 24, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[5] = { "texMatrix",	1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 40, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[6] = { "texMatrix",	2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 56, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[7] = { "texMatrix",	3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 72, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[8] = { "VELOCITY",	0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 88, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[9] = { "TYPE",	0, DXGI_FORMAT_R32_UINT, 1, 100, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[10] = { "AGE",	0, DXGI_FORMAT_R32_FLOAT, 1, 104, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		break;
+	}
+	default:
+		break;
+	}
+	
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc{};
 	d3dInputLayoutDesc.pInputElementDescs = desc;
-	d3dInputLayoutDesc.NumElements = 4;
+	d3dInputLayoutDesc.NumElements = elementNum;
 
 	return d3dInputLayoutDesc;
 }
@@ -56,7 +104,7 @@ D3D12_RASTERIZER_DESC CShader::InitRasterizerState()
 D3D12_BLEND_DESC CShader::InitBlendState()
 {
 	D3D12_BLEND_DESC blendDesc{};
-	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.AlphaToCoverageEnable = TRUE;
 	blendDesc.IndependentBlendEnable = FALSE;
 
 	D3D12_RENDER_TARGET_BLEND_DESC& renderTarget = blendDesc.RenderTarget[0];
@@ -184,7 +232,7 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::w
 void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 {
 	mInfo = info;
-	ComPtr<ID3DBlob> vsBlob, psBlob;
+	ComPtr<ID3DBlob> vsBlob, psBlob, gsBlob;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
 
@@ -192,6 +240,15 @@ void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 
 	pipelineStateDesc.VS = CreateShader(vsBlob, fileName, "VS_Main", "vs_5_1");
 	pipelineStateDesc.PS = CreateShader(psBlob, fileName, "PS_Main", "ps_5_1");
+
+	if (mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::BILLBOARD || mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::PARTICLE) {
+		pipelineStateDesc.GS = CreateShader(gsBlob, fileName, "GS_Main", "gs_5_1");
+	}
+	if (mInfo.shaderType == SHADER_TYPE::TERRAIN) {
+		ComPtr<ID3DBlob> hsBlob{}, dsBlob;
+		pipelineStateDesc.HS = CreateShader(hsBlob, fileName, "HS_Main", "hs_5_1");
+		pipelineStateDesc.DS = CreateShader(dsBlob, fileName, "DS_Main", "ds_5_1");
+	}
 
 	pipelineStateDesc.RasterizerState = InitRasterizerState();
 	pipelineStateDesc.BlendState = InitBlendState();

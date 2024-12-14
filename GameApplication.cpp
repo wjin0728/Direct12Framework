@@ -54,7 +54,7 @@ int CGameApplication::Run()
 		}
 		else
 		{
-			timer.Tick(120.f);
+			timer.Tick(0.f);
 			Update();
 			Render();
 

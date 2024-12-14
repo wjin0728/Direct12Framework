@@ -59,6 +59,7 @@ public:
 
 	bool IsInFrustum(const BoundingOrientedBox& boundingBox);
 	bool IsInFrustum(const BoundingBox& boundingBox);
+	bool IsInFrustum(std::shared_ptr<class CGameObject> obj);
 
 	void SetFOVAngle(float fovAngle);
 

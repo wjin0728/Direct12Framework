@@ -61,7 +61,8 @@ void CResourceManager::LoadDefaultMeshes()
 	auto& meshes = resources[static_cast<UINT>(RESOURCE_TYPE::MESH)];
 
 	for (auto& mesh : meshes) {
-		static_pointer_cast<CMesh>(mesh.second)->CreateBufferViews();
+		static_pointer_cast<CMesh>(mesh.second)->CreateVertexBuffer();
+		static_pointer_cast<CMesh>(mesh.second)->CreateIndexBuffers();
 	}
 }
 
@@ -98,6 +99,24 @@ void CResourceManager::LoadDefaultTexture()
 		texture->SetTextureType(TEXTURECUBE);
 		Add(texture);
 	}
+	{
+		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
+		texture->LoadFromFile(L"Resources\\Textures\\tree01.dds");
+		texture->SetName(L"Tree1");
+		Add(texture);
+	}
+	{
+		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
+		texture->LoadFromFile(L"Resources\\Textures\\tree02.dds");
+		texture->SetName(L"Tree2");
+		Add(texture);
+	}
+	{
+		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
+		texture->LoadFromFile(L"Resources\\Textures\\tree03.dds");
+		texture->SetName(L"Tree3");
+		Add(texture);
+	}
 	auto& textures = resources[static_cast<UINT>(RESOURCE_TYPE::TEXTURE)];
 
 	for (auto& [name, texture] : textures) {
@@ -124,6 +143,24 @@ void CResourceManager::LoadDefaultMaterials()
 		mat->mDiffuseMapIdx = Get<CTexture>(L"Scrolling")->GetSrvIndex();
 		Add(mat);
 	}
+	{
+		std::shared_ptr<CMaterial> mat = std::make_shared<CMaterial>();
+		mat->SetName(L"Tree1");
+		mat->mDiffuseMapIdx = Get<CTexture>(L"Tree1")->GetSrvIndex();
+		Add(mat);
+	}
+	{
+		std::shared_ptr<CMaterial> mat = std::make_shared<CMaterial>();
+		mat->SetName(L"Tree2");
+		mat->mDiffuseMapIdx = Get<CTexture>(L"Tree2")->GetSrvIndex();
+		Add(mat);
+	}
+	{
+		std::shared_ptr<CMaterial> mat = std::make_shared<CMaterial>();
+		mat->SetName(L"Tree3");
+		mat->mDiffuseMapIdx = Get<CTexture>(L"Tree3")->GetSrvIndex();
+		Add(mat);
+	}
 }
 
 void CResourceManager::LoadDefaultShaders()
@@ -131,6 +168,7 @@ void CResourceManager::LoadDefaultShaders()
 	{
 		ShaderInfo info;
 		info.shaderType = SHADER_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
@@ -145,6 +183,7 @@ void CResourceManager::LoadDefaultShaders()
 	{
 		ShaderInfo info;
 		info.shaderType = SHADER_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
@@ -158,11 +197,12 @@ void CResourceManager::LoadDefaultShaders()
 	}
 	{
 		ShaderInfo info;
-		info.shaderType = SHADER_TYPE::FORWARD;
+		info.shaderType = SHADER_TYPE::TERRAIN;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
-		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		shader->Initialize(info, L"Resources\\Shaders\\Terrain.hlsl");
@@ -173,6 +213,7 @@ void CResourceManager::LoadDefaultShaders()
 	{
 		ShaderInfo info;
 		info.shaderType = SHADER_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_EQUAL;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
@@ -181,6 +222,21 @@ void CResourceManager::LoadDefaultShaders()
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		shader->Initialize(info, L"Resources\\Shaders\\SkyBox.hlsl");
 		shader->SetName(L"SkyBox");
+
+		Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = SHADER_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::BILLBOARD;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_EQUAL;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		shader->Initialize(info, L"Resources\\Shaders\\Billboard.hlsl");
+		shader->SetName(L"Billboard");
 
 		Add(shader);
 	}

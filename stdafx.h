@@ -44,29 +44,6 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
 
-#pragma comment(lib, "winmm.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "dxguid.lib")
-
-
-#define _DEBUG
-
-#define FRAMEBUFFER_WIDTH		1200
-#define FRAMEBUFFER_HEIGHT		720
-
-#define DIR_FORWARD				0x01
-#define DIR_BACKWARD			0x02
-#define DIR_LEFT				0x04
-#define DIR_RIGHT				0x08
-#define DIR_UP					0x10
-#define DIR_DOWN				0x20
-
-#define EXPLOSION_DEBRISES		60
-
-#define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
-
 using Vec2 = SimpleMath::Vector2;
 using Vec3 = SimpleMath::Vector3;
 using Vec4 = SimpleMath::Vector4;
@@ -75,6 +52,23 @@ using SimpleMath::Quaternion;
 using SimpleMath::Plane;
 using SimpleMath::Ray;
 using SimpleMath::Color;
+
+#pragma comment(lib, "winmm.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dxguid.lib")
+
+#include"Enums.h"
+
+#define _DEBUG
+
+#define FRAMEBUFFER_WIDTH		1200
+#define FRAMEBUFFER_HEIGHT		720
+
+#define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
+
+
 
 inline XMFLOAT4 GetRandomColor() {
 	std::random_device rd;
@@ -103,7 +97,7 @@ public:
 	{
 	}
 
-	std::wstring ToString()const 
+	std::wstring ToString()const
 	{
 		_com_error err(ErrorCode);
 		std::wstring msg = err.ErrorMessage();
@@ -157,32 +151,8 @@ findByRawPointer(Container<std::shared_ptr<T>, Alloc>& container, T* rawPtr) {
 		[rawPtr](const std::shared_ptr<T>& ptr) { return ptr.get() == rawPtr; });
 }
 
-
-
-enum class SCENE_TYPE : UINT8
-{
-	MENU,
-	MAINSTAGE,
-	MAIN,
-
-	END
-};
-
-enum class RESOURCE_TYPE : UINT8
-{
-	MATERIAL,
-	MESH,
-	SHADER,
-	TEXTURE,
-
-	END
-};
-
-enum {
-	SCENE_TYPE_COUNT = SCENE_TYPE::END,
-	RESOURCE_TYPE_COUNT = RESOURCE_TYPE::END
-};
-
+ID3D12Resource* CreateBufferResource(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
+	void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource** ppd3dUploadBuffer);
 
 
 #define DIRECTIONAL_LIGHT 5
@@ -205,7 +175,8 @@ struct CBMaterialDate {
 struct CBTerrainMaterialDate {
 	CBMaterialDate material;
 	int detailMapIdx = -1;
-	Vec3 padding1{};
+	int heightMapIdx = -1;
+	Vec2 padding1{};
 };
 
 struct CBPassData
@@ -218,12 +189,17 @@ struct CBPassData
 	Vec2 renderTargetSize{};
 	float deltaTime{};
 	float totalTime{};
+	Vec4 gFogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+	float gFogStart = 50.0f;
+	float gFogRange = 300.0f;
+	Vec2 padding2;
 	CBTerrainMaterialDate terrainMat;
 };
 
 struct CBObjectData
 {
 	Matrix worldMAt = Matrix::Identity;
+	Matrix invWorldMAt = Matrix::Identity;
 	Matrix textureMat = Matrix::Identity;
 	int materialIdx = -1;
 	Vec3 padding;
@@ -268,4 +244,12 @@ struct CBLightsData
 	CBSpotLightInfo spotLights[SPOT_LIGHT];
 	XMUINT3 lightNum;
 	UINT padding;
+};
+
+struct BillboardData
+{
+	Vec3 position{};
+	Vec2 size{};
+	int materialIdx = -1;
+	Matrix textureMat = Matrix::Identity;
 };

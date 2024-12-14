@@ -1,6 +1,8 @@
 #pragma once
 #include"stdafx.h"
 #include"CResource.h"
+#include"VertexBuffer.h"
+#include"IndexBuffer.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -30,12 +32,7 @@ class CMesh : public CResource
 protected:
 	//버텍스
 	std::vector<CVertex> vertices{};
-	ComPtr<ID3D12Resource> vertexBuffer{};
-	ComPtr<ID3D12Resource> vertexUploadBuffer{};
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	UINT slot{};
-	UINT stride = sizeof(CVertex);
-	UINT offset{};
+	std::shared_ptr<CVertexBuffer> mVertexBuffer{};
 
 protected:
 	//인덱스
@@ -43,11 +40,7 @@ protected:
 	int curSubSet{};
 
 	std::vector<std::vector<UINT>> indices{};
-	std::vector<ComPtr<ID3D12Resource>> indexBuffer{};
-	std::vector<ComPtr<ID3D12Resource>> indexUploadBuffer{};
-	std::vector<D3D12_INDEX_BUFFER_VIEW> indexBufferView{};
-	UINT startIndex{};
-	int baseVertex{};
+	std::vector<std::shared_ptr<CIndexBuffer>> mIndexBuffers{};
 
 	D3D12_PRIMITIVE_TOPOLOGY primitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
@@ -61,7 +54,8 @@ public:
 	virtual ~CMesh() = default;
 
 public:
-	void CreateBufferViews();
+	void CreateVertexBuffer();
+	void CreateIndexBuffers();
 
 public:
 	static std::shared_ptr<CMesh> CreateMeshFromFile(std::ifstream& inFile);
@@ -70,8 +64,6 @@ public:
 	static std::shared_ptr<CMesh> CreateSphereMesh(float radius, UINT stackCnt, UINT sliceCnt);
 
 protected:
-	void CreateVertexBufferView(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-	void CreateIndexBufferView(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
 	void CreateOOBBAndOOBS();
 	virtual void CalculateNormal();
 
@@ -82,15 +74,10 @@ public:
 public:
 	virtual void Render(ID3D12GraphicsCommandList* cmdList);
 	virtual void Render(ID3D12GraphicsCommandList* cmdList, int idx);
-	virtual void Render(ID3D12GraphicsCommandList* cmdList, UINT nInstances, const D3D12_VERTEX_BUFFER_VIEW& d3dInstancingBufferView);
-	virtual void Render(ID3D12GraphicsCommandList* cmdList, UINT nInstances);
+	virtual void Render(D3D12_VERTEX_BUFFER_VIEW ibv, UINT instancingNum, int idx);
 
 public:
 	const std::vector<CVertex>& GetVertices() const { return vertices; }
-	const ComPtr<ID3D12Resource>& GetVertexBuffer() const { return vertexBuffer; }
+	const ComPtr<ID3D12Resource>& GetVertexBuffer() const { return mVertexBuffer->mBuffer; }
 	UINT GetSubMeshNum() const { return subMeshNum; }
 };
-
-
-ID3D12Resource* CreateBufferResource(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
-	void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource** ppd3dUploadBuffer);

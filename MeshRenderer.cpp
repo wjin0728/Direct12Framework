@@ -4,7 +4,9 @@
 #include"ResourceManager.h"
 #include"Mesh.h"
 #include"Material.h"
+#include"Transform.h"
 #include"Camera.h"
+#include"InstancingBuffer.h"
 
 CMeshRenderer::CMeshRenderer() : CComponent(COMPONENT_TYPE::MESH_RENDERER)
 {
@@ -33,11 +35,32 @@ void CMeshRenderer::LateUpdate()
 
 void CMeshRenderer::Render()
 {
-	int subMeshNum = m_mesh->GetSubMeshNum();
+	CBObjectData objDate;
+	objDate.worldMAt = GetTransform()->mWorldMat.Transpose();
+	objDate.invWorldMAt = objDate.worldMAt.Invert();
+	objDate.textureMat = GetTransform()->mTextureMat.Transpose();
 
+	int subMeshNum = m_mesh->GetSubMeshNum();
 	for (int i = 0; i < subMeshNum; i++) {
+		objDate.materialIdx = m_materials[i]->mSrvIdx;
+
+		UPLOADBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->CopyData(&objDate, GetTransform()->mCbvIdx);
+		UPLOADBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->UpdateBuffer(GetTransform()->mCbvIdx);
+
 		m_mesh->Render(CMDLIST, i);
 	}
+}
+
+void CMeshRenderer::InstancingRender(D3D12_VERTEX_BUFFER_VIEW ibv, UINT instancingNum)
+{
+	if (m_mesh) {
+		m_mesh->Render(ibv, instancingNum, 0);
+	}
+}
+
+void CMeshRenderer::SetMesh(const std::shared_ptr<CMesh>& mesh)
+{ 
+	m_mesh = mesh;
 }
 
 void CMeshRenderer::SetMesh(const std::wstring& name)

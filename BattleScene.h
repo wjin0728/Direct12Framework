@@ -2,11 +2,13 @@
 #include"stdafx.h"
 #include"Scene.h"
 #include"LightManager.h"
+#include"FrameResource.h"
 
 class CBattleScene : public CScene
 {
 private:
 	std::unique_ptr<CLightManager> lightMgr{};
+	std::vector<std::shared_ptr<class CInstancingGroup>> instancingGroups{};
 
 public:
 	CBattleScene();

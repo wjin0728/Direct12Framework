@@ -28,9 +28,7 @@ void CQuadTree::Initialize(const std::shared_ptr<CHeightMapGridMesh>& terrainMes
 void CQuadTree::ReleaseUploadBuffer(std::shared_ptr<Node>& node)
 {
 	if (node->isLeaf) {
-		if (node->mIndexUploadBuffer) {
-			node->mIndexUploadBuffer.Reset();
-		}
+		node->mIndexBuffer->ReleaseUploadBuffer();
 	}
 	else {
 		for (auto& child : node->mChildren) {
@@ -42,9 +40,7 @@ void CQuadTree::ReleaseUploadBuffer(std::shared_ptr<Node>& node)
 void CQuadTree::ReleaseBuffer(std::shared_ptr<Node>& node)
 {
 	if (node->isLeaf) {
-		if (node->mIndexBuffer) {
-			node->mIndexBuffer.Reset();
-		}
+		node->mIndexBuffer->ReleaseBuffer();
 	}
 	else {
 		for (auto& child : node->mChildren) {
@@ -74,7 +70,7 @@ void CQuadTree::RenderNode(const std::shared_ptr<Node>& node, const std::shared_
 	else {
 		CMDLIST->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		CMDLIST->IASetVertexBuffers(0, 1, &node->mVertexBufferView);
-		CMDLIST->IASetIndexBuffer(&node->mIndexBufferView);
+		node->mIndexBuffer->SetIndexBuffer();
 		CMDLIST->DrawIndexedInstanced(node->indexCnt, 1, 0, 0, 0);
 	}
 }
@@ -172,8 +168,12 @@ void CQuadTree::CreateGridMesh(std::shared_ptr<Node>& node)
 	UINT width = node->mCorners[CORNER_TR] - node->mCorners[CORNER_TL];
 	UINT height = (node->mCorners[CORNER_TL] - node->mCorners[CORNER_BL]) / heightMapWidth;
 
-	size_t indicesNum = static_cast<size_t>(width) * height * 6;
-	node->mIndices.resize(indicesNum);
+	node->mIndices.resize(4);
+
+	node->mIndices[CORNER_TL] = node->mCorners[CORNER_TL];
+	node->mIndices[CORNER_TR] = node->mCorners[CORNER_TR];
+	node->mIndices[CORNER_BL] = node->mCorners[CORNER_BL];
+	node->mIndices[CORNER_BR] = node->mCorners[CORNER_BR];
 
 	UINT idx = 0;
 	for (UINT i = 0; i < height; ++i) {
@@ -195,8 +195,8 @@ void CQuadTree::CreateGridMesh(std::shared_ptr<Node>& node)
 	}
 	node->indexCnt = node->mIndices.size();
 
-	node->mIndexBuffer = CreateBufferResource(DEVICE, CMDLIST, node->mIndices.data(),
-		sizeof(UINT) * node->indexCnt, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &node->mIndexUploadBuffer);
+	node->mIndexBuffer = std::make_shared<CIndexBuffer>();
+	node->mIndexBuffer->CreateBuffer(node->mIndices);
 
 	UINT startOffset = sizeof(CVertex) * node->mCorners[CORNER_BL];
 	UINT vertexNum = node->mCorners[CORNER_TR] - node->mCorners[CORNER_BL] + 1;
@@ -204,9 +204,5 @@ void CQuadTree::CreateGridMesh(std::shared_ptr<Node>& node)
 	node->mVertexBufferView.BufferLocation = mTerrainMesh->GetVertexBuffer()->GetGPUVirtualAddress() + startOffset;
 	node->mVertexBufferView.StrideInBytes = sizeof(CVertex);
 	node->mVertexBufferView.SizeInBytes = sizeof(CVertex) * vertexNum;
-
-	node->mIndexBufferView.BufferLocation = node->mIndexBuffer->GetGPUVirtualAddress();
-	node->mIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	node->mIndexBufferView.SizeInBytes = sizeof(UINT) * node->indexCnt;
 }
 

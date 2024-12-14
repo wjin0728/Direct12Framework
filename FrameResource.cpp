@@ -2,6 +2,7 @@
 #include"DX12Manager.h"
 #include"FrameResource.h"
 #include"ResourceManager.h"
+#include"InstancingBuffer.h"
 #include"Material.h"
 
 CFrameResource::CFrameResource()
@@ -19,6 +20,9 @@ CFrameResource::CFrameResource()
 
 	mLocalUploadBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::MATERIAL)] = std::make_unique<CStructedBuffer>();
 	mLocalUploadBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::MATERIAL)]->Initialize(3, sizeof(CBMaterialDate), MATERIAL_COUNT);
+
+	mLocalUploadBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::BILLBOARD)] = std::make_unique<CInstancingBuffer>();
+	mLocalUploadBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::BILLBOARD)]->Initialize(0, sizeof(BillboardData), BILLBOARD_COUNT);
 }
 
 std::shared_ptr<CUploadBuffer> CFrameResource::GetBuffer(UINT type)

@@ -161,9 +161,14 @@
     <ClInclude Include="BattleScene.h" />
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Enums.h" />
+    <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="CResource.h" />
+    <ClInclude Include="InstancingBuffer.h" />
+    <ClInclude Include="InstancingGroup.h" />
+    <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="DescriptorHeaps.h" />
     <ClInclude Include="DX12Manager.h" />
@@ -205,8 +210,12 @@
     <ClCompile Include="AvoidObstacle.cpp" />
     <ClCompile Include="BattleScene.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="InstancingBuffer.cpp" />
+    <ClCompile Include="InstancingGroup.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="DescriptorHeaps.cpp" />
     <ClCompile Include="DX12Manager.cpp" />
@@ -293,6 +302,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\SkyBox.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\Billboard.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

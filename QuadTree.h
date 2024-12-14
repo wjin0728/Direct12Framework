@@ -1,6 +1,7 @@
 #pragma once
 #include"stdafx.h"
 #include"GridMesh.h"
+#include"IndexBuffer.h"
 
 
 enum : UINT
@@ -10,7 +11,7 @@ enum : UINT
 	CORNER_BL,
 	CORNER_BR,
 
-	MAX_TRIANGLE_COUNT = 8192
+	MAX_TRIANGLE_COUNT = 30000
 };
 
 class CQuadTree
@@ -22,9 +23,7 @@ private:
 		
 		D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
 
-		ComPtr<ID3D12Resource> mIndexBuffer{};
-		ComPtr<ID3D12Resource> mIndexUploadBuffer{};
-		D3D12_INDEX_BUFFER_VIEW mIndexBufferView{};
+		std::shared_ptr<CIndexBuffer> mIndexBuffer{};
 		std::vector<UINT> mIndices;
 		size_t indexCnt{};
 

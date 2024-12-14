@@ -4,7 +4,7 @@
 
 
 enum {
-	FRAME_RESOURCE_COUNT = 3
+	FRAME_RESOURCE_COUNT = 2
 };
 
 

@@ -30,14 +30,13 @@ void CMaterial::Update()
 std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFile)
 {
 	using namespace BinaryReader;
-
 	std::string token{};
-	ReadDateFromFile(inFile, token);
 
+	ReadDateFromFile(inFile, token);
 	std::wstring name = stringToWstring(token);
 
-	std::shared_ptr<CMaterial> material;
-	if (!(material = RESOURCE.Get<CMaterial>(name))) {
+	std::shared_ptr<CMaterial> material = RESOURCE.Get<CMaterial>(name);
+	if (!material) {
 		material = std::make_shared<CMaterial>();
 		material->SetName(name);
 		RESOURCE.Add(material);
@@ -145,11 +144,10 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			if (token[0] == '@')
 				token.erase(token.begin());
 		}
-		else if (token == "</Materials>" || token == "<Material>:") {
+		else if (token == "</Material>") {
 			break;
 		}
 	}
-
 	return material;
 }
 

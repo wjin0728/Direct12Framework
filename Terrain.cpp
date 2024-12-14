@@ -38,6 +38,7 @@ void CTerrain::SetHeightMapGridMesh(const std::shared_ptr<CHeightMapGridMesh>& m
 	}
 	mQuadTree.reset();
 	mTerrainMesh = mesh;
+	mScale = mesh->GetScale();
 
 	mQuadTree = std::make_shared<CQuadTree>();
 	mQuadTree->Initialize(mTerrainMesh);
@@ -46,5 +47,10 @@ void CTerrain::SetHeightMapGridMesh(const std::shared_ptr<CHeightMapGridMesh>& m
 void CTerrain::SetMaterial(const std::shared_ptr<CTerrainMaterial>& material)
 {
 	mTerrainMaterial = material;
+}
+
+float CTerrain::GetHeight(float x, float z)
+{
+	return mTerrainMesh->GetHeight(x, z);
 }
 

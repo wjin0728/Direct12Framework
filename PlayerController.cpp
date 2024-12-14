@@ -5,6 +5,9 @@
 #include"Timer.h"
 #include"InputManager.h"
 #include"RigidBody.h"
+#include"SceneManager.h"
+#include"Scene.h"
+#include"Terrain.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -12,13 +15,13 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
-	auto mainRotorObj = GetOwner()->FindChildByName(L"MainRotor");
+	auto mainRotorObj = GetOwner()->FindChildByName(L"Rotar");
 
 	if (mainRotorObj) {
 		mainRotor = mainRotorObj->GetTransform();
 	}
 
-	auto subRotorObj = GetOwner()->FindChildByName(L"TailRotor");
+	auto subRotorObj = GetOwner()->FindChildByName(L"HelicopterScrewBack");
 
 	if (subRotorObj) {
 		subRotor = subRotorObj->GetTransform();
@@ -42,7 +45,7 @@ void CPlayerController::Update()
 		mainRotor->Rotate({ 0.f, power , 0.f });
 	}
 	if (subRotor) {
-		subRotor->Rotate({ power, 0.f , 0.f });
+		subRotor->Rotate({ 0.f, 0.f , power });
 	}
 }
 
@@ -101,7 +104,7 @@ void CPlayerController::OnMouseEvents()
 {
 	Vec2 mouseDelta = INPUT.GetMouseDelta();
 	if (mouseDelta != Vec2::Zero) {
-		GetTransform()->RotateY(mouseDelta.x * DELTA_TIME * 60);
+		GetTransform()->RotateY(mouseDelta.x * DELTA_TIME * 30);
 	}
 
 }

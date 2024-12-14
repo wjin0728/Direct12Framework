@@ -17,7 +17,7 @@ CMenuScene::CMenuScene()
 
 void CMenuScene::Initialize()
 {
-	mObjects[L"UI"] = ObjectList{};
+	mRenderLayers[L"UI"] = ObjectList{};
 	mShaders[L"UI"] = RESOURCE.Get<CShader>(L"Sprite");
 
 	auto cameraObj = CGameObject::CreateCameraObject(L"MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize());
@@ -35,7 +35,7 @@ void CMenuScene::Initialize()
 		object->AddComponent<CScrollTexture>();
 		object->SetActive(true);
 		object->SetRenderLayer(L"UI");
-		mObjects[L"UI"].push_back(object);
+		AddObject(L"UI", object);
 	}
 }
 

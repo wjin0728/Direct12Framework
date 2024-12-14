@@ -37,10 +37,16 @@ std::shared_ptr<CComponent> CTransform::Clone()
 
 void CTransform::Awake()
 {
-	SetCBVIndex();
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 	mDirtyFlag = true;
 
+	if (owner->mTag == L"Billboard") {
+		std::cout << "";
+	}
+
+	UpdateWorldMatrix();
+
+	if(!owner->mIsInstancing) SetCBVIndex();
 }
 
 void CTransform::Start()
@@ -132,12 +138,6 @@ void CTransform::ReturnCBVIndex()
 	}
 	INSTANCE(CObjectPoolManager).ReturnCBVIndex(mCbvIdx);
 	mCbvIdx = -1;
-}
-
-void CTransform::BindConstantBuffer()
-{
-	CopyToCbvBuffer();
-	UPLOADBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->UpdateBuffer(mCbvIdx);
 }
 
 void CTransform::MoveStrafe(float distance)
@@ -239,9 +239,9 @@ void CTransform::RotateZ(float angle)
 	Rotate(0.f, 0.f, angle);
 }
 
-const Matrix& CTransform::GetWorldMat()
+const Matrix& CTransform::GetWorldMat(bool update)
 {
-	UpdateWorldMatrix();
+	if(update && !owner->mIsStatic) UpdateWorldMatrix();
 	return mWorldMat;
 }
 
@@ -280,30 +280,12 @@ void CTransform::UpdateWorldMatrix()
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
 	auto collider = GetOwner()->GetCollider();
+	auto meshRenderer = GetOwner()->GetMeshRendere();
+
+	GetOwner()->mRootLocalBS.Transform(GetOwner()->mRootBS, mWorldMat);
 	if (collider) {
 		collider->UpdateOOBB(mWorldMat);
 	}
-}
-
-
-void CTransform::CopyToCbvBuffer()
-{
-	UpdateWorldMatrix();
-
-	if (dirtyFramesNum <= 0) {
-		return;
-	}
-
-	CBObjectData objDate;
-	objDate.worldMAt = mWorldMat.Transpose();
-	objDate.textureMat = mTextureMat.Transpose();
-
-	auto meshRenderer = owner->GetMeshRendere();
-	if (meshRenderer)
-		objDate.materialIdx = meshRenderer->GetMaterialIndex();
-
-	UPLOADBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->CopyData(&objDate, mCbvIdx);
-
-	dirtyFramesNum--;
+	
 }
 

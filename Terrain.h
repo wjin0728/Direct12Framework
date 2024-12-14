@@ -11,6 +11,8 @@ private:
 	std::shared_ptr<CHeightMapGridMesh> mTerrainMesh{};
 	std::shared_ptr<CTerrainMaterial> mTerrainMaterial{};
 
+	Vec3 mScale = Vec3::One;
+
 public:
 	CTerrain();
 	~CTerrain();
@@ -30,5 +32,7 @@ public:
 	void SetMaterial(const std::shared_ptr<CTerrainMaterial>& material);
 
 	std::shared_ptr<CTerrainMaterial> GetMaterial() const { return mTerrainMaterial; }
+
+	float GetHeight(float x, float z);
 };
 

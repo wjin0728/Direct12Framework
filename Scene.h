@@ -18,7 +18,8 @@ protected:
 	friend class CSceneManager;
 	using ObjectList = std::vector<std::shared_ptr<CGameObject>>;
 
-	std::unordered_map<std::wstring, ObjectList> mObjects{};
+	ObjectList mObjects{};
+	std::unordered_map<std::wstring, ObjectList> mRenderLayers{};
 	std::unordered_map<std::wstring, std::shared_ptr<CShader>> mShaders{};
 	std::shared_ptr<CTerrain> mTerrain{ nullptr };
 		 
@@ -44,8 +45,8 @@ public:
 	void AddObject(std::shared_ptr<CGameObject> object);
 	void RemoveObject(std::shared_ptr<CGameObject> object);
 	
-	const std::unordered_map<std::wstring, ObjectList>& GetObjects() const { return mObjects; }
-	ObjectList& GetObjects(const std::wstring& layer) { return mObjects[layer]; }
+	const std::unordered_map<std::wstring, ObjectList>& GetObjects() const { return mRenderLayers; }
+	ObjectList& GetObjects(const std::wstring& layer) { return mRenderLayers[layer]; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
 
 protected:

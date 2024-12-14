@@ -11,11 +11,11 @@ CUploadBuffer::~CUploadBuffer()
 	mappedData = nullptr;
 }
 
-void CUploadBuffer::CopyData(const void* _data, UINT idx, UINT _dataNum)
+void CUploadBuffer::CopyData(const void* _data, UINT idx)
 {
 	assert(idx < dataNum);
 
-	memcpy(&mappedData[idx * byteSize], _data, dataSize * static_cast<size_t>(_dataNum));
+	memcpy(&mappedData[idx * byteSize], _data, dataSize);
 }
 
 void CUploadBuffer::CreateBuffer()

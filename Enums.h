@@ -1,0 +1,25 @@
+#pragma once
+
+enum class SCENE_TYPE : UINT8
+{
+	MENU,
+	MAINSTAGE,
+	MAIN,
+
+	END
+};
+
+enum class RESOURCE_TYPE : UINT8
+{
+	MATERIAL,
+	MESH,
+	SHADER,
+	TEXTURE,
+
+	END
+};
+
+enum {
+	SCENE_TYPE_COUNT = SCENE_TYPE::END,
+	RESOURCE_TYPE_COUNT = RESOURCE_TYPE::END
+};

@@ -178,6 +178,17 @@
     <ClInclude Include="ScrollTexture.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
+    <ClInclude Include="IndexBuffer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingGroup.h" />
+    <ClInclude Include="InstancingBuffer.h" />
+    <ClInclude Include="Enums.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -306,6 +317,18 @@
     <ClCompile Include="ScrollTexture.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBuffer.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancingGroup.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancingBuffer.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -334,6 +357,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="Resources\Shaders\SkyBox.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="Resources\Shaders\Billboard.hlsl">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>

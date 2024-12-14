@@ -15,6 +15,7 @@
 #include"InputManager.h"
 #include"Terrain.h"
 #include"Camera.h"
+#include"InstancingGroup.h"
 
 CBattleScene::CBattleScene()
 {
@@ -22,56 +23,57 @@ CBattleScene::CBattleScene()
 
 void CBattleScene::Initialize()
 {
-	mObjects[L"Opaque"] = ObjectList{};
+	mRenderLayers[L"Opaque"] = ObjectList{};
 	mShaders[L"Opaque"] = RESOURCE.Get<CShader>(L"Forward");
-	mObjects[L"Terrain"] = ObjectList{};
+	mRenderLayers[L"Terrain"] = ObjectList{};
 	mShaders[L"Terrain"] = RESOURCE.Get<CShader>(L"Terrain");
-	mObjects[L"SkyBox"] = ObjectList{};
+	mRenderLayers[L"SkyBox"] = ObjectList{};
 	mShaders[L"SkyBox"] = RESOURCE.Get<CShader>(L"SkyBox");
 
-#pragma region Obstacles
-
-	std::random_device rd; 
-	std::mt19937 gen(rd()); 
-	std::uniform_real_distribution<float> disX(-30.f, 30.f); 
-	std::uniform_real_distribution<float> disY(180.f, 200.f);
-	std::uniform_real_distribution<float> disZ(50.f, 1000.f);
-
-	Vec3 size = { 25.f,25.f,25.f };
-	Vec3 colliderSize = { 1.4f, 1.4f, 1.4f };
-
-	auto obstaclePrefab = CGameObject::CreateObjectFromFile(L"Obstacle", L"Resources\\Models\\Stone_1.bin");
-	obstaclePrefab->GetTransform()->SetLocalScale(size);
-	obstaclePrefab->GetCollider()->SetScale(colliderSize);
-	auto obstaclePrefab2 = CGameObject::CreateObjectFromFile(L"Obstacle", L"Resources\\Models\\Stone_2.bin");
-	obstaclePrefab2->GetTransform()->SetLocalScale(size);
-	obstaclePrefab2->GetCollider()->SetScale(colliderSize);
-	auto obstaclePrefab3 = CGameObject::CreateObjectFromFile(L"Obstacle", L"Resources\\Models\\Stone_5.bin");
-	obstaclePrefab3->GetTransform()->SetLocalScale(size);
-	obstaclePrefab3->GetCollider()->SetScale(colliderSize);
-
-
-	for (int i = 0; i < 100; i++) {
-		auto obstacle = CGameObject::Instantiate(obstaclePrefab);
-		obstacle->GetTransform()->SetLocalPosition({ disX(gen),disY(gen),disZ(gen) });
-		mObjects[L"Opaque"].push_back(obstacle);
-
-		auto obstacle2 = CGameObject::Instantiate(obstaclePrefab2);
-		obstacle2->GetTransform()->SetLocalPosition({ disX(gen),disY(gen),disZ(gen) });
-		mObjects[L"Opaque"].push_back(obstacle2);
-
-		auto obstacle3 = CGameObject::Instantiate(obstaclePrefab3);
-		obstacle3->GetTransform()->SetLocalPosition({ disX(gen),disY(gen),disZ(gen) });
-		mObjects[L"Opaque"].push_back(obstacle3);
-	}
-
-#pragma endregion
+//#pragma region Obstacles
+//
+//	std::random_device rd; 
+//	std::mt19937 gen(rd()); 
+//	std::uniform_real_distribution<float> disX(-30.f, 30.f); 
+//	std::uniform_real_distribution<float> disY(180.f, 200.f);
+//	std::uniform_real_distribution<float> disZ(50.f, 1000.f);
+//
+//	Vec3 size = { 25.f,25.f,25.f };
+//
+//	auto obstaclePrefab = CGameObject::CreateObjectFromFile(L"Obstacle", L"Resources\\Models\\Stone_1.bin");
+//	obstaclePrefab->GetTransform()->SetLocalScale(size);
+//	auto obstaclePrefab2 = CGameObject::CreateObjectFromFile(L"Obstacle", L"Resources\\Models\\Stone_2.bin");
+//	obstaclePrefab2->GetTransform()->SetLocalScale(size);
+//	auto obstaclePrefab3 = CGameObject::CreateObjectFromFile(L"Obstacle", L"Resources\\Models\\Stone_5.bin");
+//	obstaclePrefab3->GetTransform()->SetLocalScale(size);
+//
+//
+//	for (int i = 0; i < 100; i++) {
+//		auto obstacle = CGameObject::Instantiate(obstaclePrefab);
+//		obstacle->SetStatic(true);
+//		obstacle->GetTransform()->SetLocalPosition({ disX(gen),disY(gen),disZ(gen) });
+//
+//		auto obstacle2 = CGameObject::Instantiate(obstaclePrefab2);
+//		obstacle2->SetStatic(true);
+//		obstacle2->GetTransform()->SetLocalPosition({ disX(gen),disY(gen),disZ(gen) });
+//
+//		auto obstacle3 = CGameObject::Instantiate(obstaclePrefab3);
+//		obstacle3->SetStatic(true);
+//		obstacle3->GetTransform()->SetLocalPosition({ disX(gen),disY(gen),disZ(gen) });
+//
+//		AddObject(L"Opaque", obstacle);
+//		AddObject(L"Opaque", obstacle2);
+//		AddObject(L"Opaque", obstacle3);
+//	}
+//
+//#pragma endregion
 
 #pragma region Player
 
-	auto Player = CGameObject::CreateObjectFromFile(L"Player", L"Resources\\Models\\SuperCobra.bin");
+	auto Player = CGameObject::CreateObjectFromFile(L"Player", L"Resources\\Models\\HelicopterModel.bin");
+	Player->SetStatic(false);
 	Player->GetTransform()->SetLocalPosition({ 0.f,200.f,0.f });
-	Player->GetTransform()->SetLocalScale({ 0.4f, 0.4f, 0.4f });
+	Player->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
 	Player->CalculateRootOOBB();
 
 	Player->AddComponent<CRigidBody>();
@@ -81,7 +83,7 @@ void CBattleScene::Initialize()
 	Player->AddScript(avoidObstacle);
 	avoidObstacle->SetOwner(Player);*/
 
-	mObjects[L"Opaque"].push_back(Player);
+	AddObject(L"Opaque", Player);
 
 #pragma endregion
 
@@ -89,17 +91,20 @@ void CBattleScene::Initialize()
 #pragma region Main Camera
 	{
 		auto playerFollower = std::make_shared<CGameObject>();
+		playerFollower->SetStatic(false);
+
 		auto followTarget = playerFollower->AddComponent<CFollowTarget>();
 		followTarget->SetTarget(Player);
 		playerFollower->GetTransform()->SetLocalPosition({ 0.f,200.f,0.f });
 
 		auto cameraObj = CGameObject::CreateCameraObject(L"MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
-			1.f, 1000.f);
+			1.f, 2000.f);
+		cameraObj->SetStatic(false);
 		cameraObj->GetTransform()->SetLocalPosition({ 0.f, 3.f, -6.f });
 		cameraObj->GetTransform()->Rotate({ 15.f,0.f,0.f });
 		cameraObj->SetParent(playerFollower);
 
-		mObjects[L"Opaque"].push_back(playerFollower);
+		AddObject(L"Opaque", playerFollower);
 	}
 #pragma endregion
 
@@ -107,14 +112,44 @@ void CBattleScene::Initialize()
 	{
 		auto terrainObj = CGameObject::CreateTerrainObject(L"Terrain", L"Resources\\Textures\\HeightMap.raw", 
 			257, 257, { 8.0f, 1.5f, 8.0f });
-		mObjects[L"Terrain"].push_back(terrainObj);
+		AddObject(L"", terrainObj);
 
 		mTerrain = terrainObj->GetComponent<CTerrain>();
 
 		auto skyBox = CGameObject::CreateRenderObject(L"SkyBox", L"Cube", L"SkyBox");
+		skyBox->SetStatic(true);
 		skyBox->GetTransform()->SetLocalScale({ 2000.f,2000.f,2000.f });
-		mObjects[L"SkyBox"].push_back(skyBox);
+
+		AddObject(L"SkyBox", skyBox);
 	}
+#pragma endregion
+
+#pragma region Billboard
+	auto instancingGroup = std::make_shared<CInstancingGroup>();
+	instancingGroup->Initialize(INSTANCE_BUFFER_TYPE::BILLBOARD);
+	instancingGroups.push_back(instancingGroup);
+
+
+
+	for (float i = -2000.f; i < 2000.f; i+=50.f) {
+		for (float j = -2000.f; j < 2000.f; j+=50.f) {
+			float width = 50.f;
+			float height = 50.f;
+
+			float halfWidth = 0.5f * width;
+			float halfHeight = 0.5f * height;
+
+			auto billboard = CGameObject::CreateRenderObject(L"Billboard", L"", L"Tree2");
+			billboard->SetStatic(true);
+			billboard->SetInstancing(true);
+			billboard->GetTransform()->SetLocalPosition({ i,mTerrain->GetHeight(i, j) + halfHeight,j});
+			billboard->GetTransform()->SetLocalScale({ halfWidth, halfHeight, 1.f });
+
+			AddObject(L"", billboard);
+			instancingGroup->AddObject(billboard);
+		}
+	}
+
 #pragma endregion
 
 	SetLights();
@@ -146,6 +181,10 @@ void CBattleScene::Render()
 	RenderForLayer(L"SkyBox", false);
 	RenderForLayer(L"Opaque");
 	RenderTerrain(L"Terrain");
+
+	for (const auto& instancingGroup : instancingGroups) {
+		instancingGroup->Render(CCamera::GetMainCamera());
+	}
 }
 
 void CBattleScene::SetLights()

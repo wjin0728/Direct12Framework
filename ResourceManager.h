@@ -112,7 +112,7 @@ inline RESOURCE_TYPE CResourceManager::GetResourceType()
 {
 	if (std::is_same_v<T, CMaterial>)
 		return RESOURCE_TYPE::MATERIAL;
-	else if (std::is_same_v<T, CMesh>)
+	else if (std::is_base_of_v<CMesh, T>)
 		return RESOURCE_TYPE::MESH;
 	else if (std::is_same_v<T, CShader>)
 		return RESOURCE_TYPE::SHADER;

@@ -23,6 +23,7 @@ private:
 private:
 	friend CGameObject;
 	friend class CCamera;
+	friend class CMeshRenderer;
 
 	bool mDirtyFlag{};
 
@@ -44,7 +45,6 @@ public:
 	void Reset();
 	void SetCBVIndex();
 	void ReturnCBVIndex();
-	void BindConstantBuffer();
 
 public:
 	void MoveStrafe(float distance = 1.0f);
@@ -95,7 +95,7 @@ public:
 	Vec3 GetLocalUp() const { return mLocalMat.Up(); };
 	Vec3 GetLocalRight() const { return mLocalMat.Right(); };
 
-	const Matrix& GetWorldMat();
+	const Matrix& GetWorldMat(bool update = true);
 	const Matrix& GetTexMat() { return mTextureMat; }
 
 	std::shared_ptr<CTransform> GetRoot();
@@ -103,6 +103,5 @@ public:
 private:
 	void UpdateLocalMatrix();
 	void UpdateWorldMatrix();
-	void CopyToCbvBuffer();
 };
 

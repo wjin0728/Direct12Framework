@@ -79,27 +79,8 @@ void CGameObject::LateUpdate()
 	for (auto& child : mChildren) {
 		child->LateUpdate();
 	}
-}
 
-void CGameObject::Render(const std::shared_ptr<CCamera>& camera)
-{
-	if (!mActive) {
-		return;
-	}
-
-	mTransform->BindConstantBuffer();
-
-	if (mMeshRenderer) {
-		if (mCollider) {
-			if (camera->IsInFrustum(mCollider->GetWorldOOBB())) {
-				mMeshRenderer->Render();
-			}
-		}
-	}
-
-	for (auto& child : mChildren) {
-		child->Render(camera);
-	}
+	if (!mIsStatic) mTransform->UpdateWorldMatrix();
 }
 
 void CGameObject::Render()
@@ -108,13 +89,37 @@ void CGameObject::Render()
 		return;
 	}
 
-	mTransform->BindConstantBuffer();
 	if (mMeshRenderer) {
 		mMeshRenderer->Render();
 	}
 
 	for (auto& child : mChildren) {
 		child->Render();
+	}
+}
+
+void CGameObject::SetStatic(bool isStatic)
+{
+	mIsStatic = isStatic;
+
+	for (auto& child : mChildren) {
+		child->SetStatic(isStatic);
+	}
+}
+
+void CGameObject::SetInstancing(bool isInstancing)
+{
+	if (isInstancing) {
+		mTransform->ReturnCBVIndex();
+	}
+	else {
+		mTransform->SetCBVIndex();
+	}
+
+	mIsInstancing = isInstancing;
+
+	for (auto& child : mChildren) {
+		child->SetStatic(isInstancing);
 	}
 }
 
@@ -130,7 +135,6 @@ void CGameObject::ReturnCBVIndex()
 		child->ReturnCBVIndex();
 	}
 }
-
 
 std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGameObject>& original, 
 	const std::shared_ptr<CTransform>& parentTransform)
@@ -209,10 +213,10 @@ std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::wstring&
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
 	object->mTag = tag;
 
-	auto meshRenderer = std::make_shared<CMeshRenderer>();
-	object->AddComponent(meshRenderer);
-	meshRenderer->SetMesh(RESOURCE.Get<CMesh>(meshName));
-	meshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
+	object->mMeshRenderer = std::make_shared<CMeshRenderer>();
+	object->AddComponent(object->mMeshRenderer);
+	object->mMeshRenderer->SetMesh(RESOURCE.Get<CMesh>(meshName));
+	object->mMeshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
 
 	object->SetActive(true);
 
@@ -225,7 +229,7 @@ std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(const std::wstring
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
 	object->mTag = tag;
 
-	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(L"HeightMapMesh"));
+	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(L"HeightMap01"));
 	if (!mesh) {
 		mesh = std::make_shared<CHeightMapGridMesh>();
 		mesh->Initialize(heightMapName, width, height, scale);
@@ -269,11 +273,21 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(const std::wstrin
 	root->mTag = tag;
 	InitFromFile(root, ifs);
 
+	Vec3 boundingCenter;
+	float radius;
+
+	BinaryReader::ReadDateFromFile(ifs, boundingCenter);
+	BinaryReader::ReadDateFromFile(ifs, radius);
+
+	root->mRootLocalBS = BoundingSphere(boundingCenter, radius);
+
 	if (!root->GetCollider()) {
 		auto collider = std::make_shared<CCollider>();
 		root->AddComponent(collider);
 		root->mCollider = collider;
 	}
+
+	
 
 	return root;
 }
@@ -299,7 +313,11 @@ void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& 
 			ReadDateFromFile(inFile, textureCnt);
 
 			std::string name{};
+
 			ReadDateFromFile(inFile, name);
+			if (name == "ID55inst") {
+				std::cout << "Asdfasdf";
+			}
 			obj->mName = stringToWstring(name);
 		}
 		else if (token == "<Transform>:") {
@@ -352,34 +370,32 @@ void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile)
 	BinaryReader::ReadDateFromFile(inFile, meshName);
 	std::wstring meshNameW = BinaryReader::stringToWstring(meshName);
 
-	std::shared_ptr<CMesh> mesh{};
-	if (!(mesh = RESOURCE.Get<CMesh>(meshNameW))) {
-		mesh = CMesh::CreateMeshFromFile(inFile);
-		mesh->SetName(meshNameW);
-		RESOURCE.Add(mesh);
-	}
+	std::shared_ptr<CMesh> mesh = CMesh::CreateMeshFromFile(inFile);
+	mesh->SetName(meshNameW);
 	mMeshRenderer->SetMesh(mesh);
-
-	
+	RESOURCE.Add(mesh);
 
 	mCollider = std::make_shared<CCollider>();
 	AddComponent(mCollider);
 	mCollider->SetLocalOOBB(mesh->oobb);
 
 	std::string token{};
+
 	ReadDateFromFile(inFile, token);
 
 	if (token == "<Materials>:") {
 		int materialCnt{};
 		ReadDateFromFile(inFile, materialCnt);
-		ReadDateFromFile(inFile, token);
-		for (int i = 0; i < materialCnt; i++) {
-			int matIdx{};
-			ReadDateFromFile(inFile, matIdx);
 
-			auto material = CMaterial::CreateMaterialFromFile(inFile);
+		for (int i = 0; i < materialCnt; i++) {
+			ReadDateFromFile(inFile, token);
+			
+			std::shared_ptr<CMaterial> material = CMaterial::CreateMaterialFromFile(inFile);
+			
 			mMeshRenderer->AddMaterial(material);
 		}
+
+		ReadDateFromFile(inFile, token);
 	}
 }
 

@@ -28,5 +28,6 @@ public:
 
 	int GetWidth() const { return width; }
 	float GetHeight(float fx, float fz);
+	Vec3 GetScale() const { return scale; }
 };
 

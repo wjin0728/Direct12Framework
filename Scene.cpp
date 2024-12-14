@@ -18,37 +18,29 @@ CScene::CScene()
 
 void CScene::Awake()
 {
-	for (const auto& [layer, objects] : mObjects) {
-		for (const auto& object : objects) {
-			object->Awake();
-		}
+	for (const auto& object : mObjects) {
+		object->Awake();
 	}
 }
 
 void CScene::Start()
 {
-	for (const auto& [layer, objects] : mObjects) {
-		for (const auto& object : objects) {
-			object->Start();
-		}
+	for (const auto& object : mObjects) {
+		object->Start();
 	}
 }
 
 void CScene::Update()
 {
-	for (const auto& [layer, objects] : mObjects) {
-		for (const auto& object : objects) {
-			object->Update();
-		}
+	for (const auto& object : mObjects) {
+		object->Update();
 	}
 }
 
 void CScene::LateUpdate()
 {
-	for (const auto& [layer, objects] : mObjects) {
-		for (const auto& object : objects) {
-			object->LateUpdate();
-		}
+	for (const auto& object : mObjects) {
+		object->LateUpdate();
 	}
 	INSTANCE(CResourceManager).UpdateMaterials();
 	UpdatePassData();
@@ -58,7 +50,7 @@ std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::wstring& tag)
 {
 	std::shared_ptr<CGameObject> obj = nullptr;
 
-	for (const auto& [layer, objects] : mObjects) {
+	for (const auto& [layer, objects] : mRenderLayers) {
 		if (obj = FindObjectWithTag(layer, tag))
 			return obj;
 	}
@@ -67,7 +59,7 @@ std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::wstring& tag)
 
 std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::wstring& renderLayer, const std::wstring& tag)
 {
-	for (const auto& object : mObjects[renderLayer]) {
+	for (const auto& object : mRenderLayers[renderLayer]) {
 		if (object->GetTag() == tag) {
 			return object;
 		}
@@ -83,51 +75,44 @@ std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::wstring& rende
 
 void CScene::AddObject(const std::wstring& renderLayer, std::shared_ptr<CGameObject> object)
 {
-	if (!mObjects.contains(renderLayer)) {
-		return;
+	auto itr = findByRawPointer(mObjects, object.get());
+	if (itr == mObjects.end()) {
+		mObjects.push_back(object);
 	}
 
-	auto& objectList = mObjects[renderLayer];
+	if (mRenderLayers.contains(renderLayer)) {
+		auto& objectList = mRenderLayers[renderLayer];
 
-	auto itr = std::find(objectList.begin(), objectList.end(), object);
-	if (itr != objectList.end()) {
-		return;
+		auto itr = findByRawPointer(objectList, object.get());
+		if (itr == objectList.end()) {
+			object->SetRenderLayer(renderLayer);
+			objectList.push_back(object);
+		}
 	}
-
-	object->SetRenderLayer(renderLayer);
-	objectList.push_back(object);
 }
 
 void CScene::AddObject(std::shared_ptr<CGameObject> object)
 {
 	const std::wstring& renderLayer = object->GetRenderLayer();
 
-	if (!mObjects.contains(renderLayer)) {
-		return;
-	}
-
-	auto& objectList = mObjects[renderLayer];
-
-	auto itr = std::find(objectList.begin(), objectList.end(), object);
-	if (itr != objectList.end()) {
-		return;
-	}
-
-	objectList.push_back(object);
+	AddObject(renderLayer, object);
 }
 
 void CScene::RemoveObject(std::shared_ptr<CGameObject> object)
 {
-	const std::wstring& key = object->GetRenderLayer();
-	if (!mObjects.contains(key)) {
-		return;
+	auto itr = findByRawPointer(mObjects, object.get());
+	if (itr != mObjects.end()) {
+		mObjects.erase(itr);
 	}
 
-	auto& objectList = mObjects[key];
+	const std::wstring& key = object->GetRenderLayer();
+	if (mRenderLayers.contains(key)) {
+		auto& objectList = mRenderLayers[key];
 
-	auto itr = findByRawPointer(objectList, object.get());
-	if (itr != objectList.end()) {
-		objectList.erase(itr);
+		auto itr = findByRawPointer(objectList, object.get());
+		if (itr != objectList.end()) {
+			objectList.erase(itr);
+		}
 	}
 }
 
@@ -145,18 +130,20 @@ bool CScene::PrepareRender()
 
 void CScene::RenderForLayer(const std::wstring& layer, bool frustumCulling)
 {
-	if (!mObjects.contains(layer)) {
+	if (!mRenderLayers.contains(layer)) {
 		return;
 	}
 
 	mShaders[layer]->SetPipelineState(CMDLIST);
 	if(frustumCulling) {
-		for (const auto& object : mObjects[layer]) {
-			object->Render(CCamera::GetMainCamera());
+		auto camera = CCamera::GetMainCamera();
+		for (const auto& object : mRenderLayers[layer]) {
+			if (!camera->IsInFrustum(object)) continue;
+			object->Render();
 		}
 	}
 	else {
-		for (const auto& object : mObjects[layer]) {
+		for (const auto& object : mRenderLayers[layer]) {
 			object->Render();
 		}
 	}
@@ -188,6 +175,10 @@ void CScene::UpdatePassData()
 	passData.deltaTime = DELTA_TIME;
 	passData.totalTime = TIMER.GetTotalTime();
 	passData.renderTargetSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
+
+	passData.gFogRange = 1000.f;
+	passData.gFogStart = 100.f;
+	//passData.gFogColor = Color(0.5f, 0.5f, 0.5f);
 
 	if (mTerrain) {
 		auto terrainMat = mTerrain->GetMaterial();

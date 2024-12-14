@@ -29,9 +29,10 @@ void CFollowTarget::Update()
 	dir.y = 0.f;
 	if (dir.Length() > 0) dir.Normalize();
 
-	float f = DELTA_TIME * 20.f;
+	float f = DELTA_TIME * 10.f;
+	float f2 = DELTA_TIME * 40.f;
 
-	Vec3 position = Vec3::Lerp(transform->GetLocalPosition(), targetTrans->GetLocalPosition(), f);
+	Vec3 position = Vec3::Lerp(transform->GetLocalPosition(), targetTrans->GetLocalPosition(), f2);
 	transform->SetLocalPosition(position);
 
 	Quaternion rotation = Quaternion::Slerp(transform->GetLocalRotation(), Quaternion::LookRotation(dir), f);

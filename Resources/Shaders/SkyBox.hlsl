@@ -35,5 +35,16 @@ VS_OUTPUT VS_Main(VS_INPUT input)
 
 float4 PS_Main(VS_OUTPUT input) : SV_TARGET
 {
-    return skyBoxMap.Sample(linearWrap, input.localPos);
+    float3 camDir = (camPos - input.position.xyz);
+    float distToEye = length(camDir);
+    camDir /= distToEye;
+    
+    float4 color = skyBoxMap.Sample(linearWrap, input.localPos);
+    
+    #ifdef FOG
+    color = lerp(color, gFogColor, 0.9f);
+#endif
+    
+    return color;
+
 }

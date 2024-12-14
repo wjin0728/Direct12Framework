@@ -105,8 +105,6 @@ void CHeightMapGridMesh::Initialize(const std::wstring& fileName, int _width, in
 
 	LoadHeightMap(fileName);
 
-	stride = sizeof(CVertex);
-
 	primitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
 	size_t size = width * height;
@@ -126,12 +124,17 @@ void CHeightMapGridMesh::Initialize(const std::wstring& fileName, int _width, in
 	CalculateNormal();
 	CalculateTextureCoord();
 
-	vertexBuffer = CreateBufferResource(DEVICE, CMDLIST, vertices.data(), stride * vertices.size(),
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &vertexUploadBuffer);
+	CreateVertexBuffer();
 }
 
 float CHeightMapGridMesh::GetHeight(float fx, float fz)
 {
+	fx /= scale.x; fz /= scale.z;
+
+	fx += width / 2.f;
+	fz += height / 2.f;
+
+
 	if ((fx < 0.0f) || (fz < 0.0f) || (fx >= width) || (fz >= height)) {
 		return 0.0f;
 	}
@@ -156,5 +159,5 @@ float CHeightMapGridMesh::GetHeight(float fx, float fz)
 	float fBottomHeight = SimpleMath::Flerp(fBottomLeft, fBottomLocalRight, fxPercent);
 	float fHeight = SimpleMath::Flerp(fBottomHeight, fTopHeight, fzPercent);
 
-	return fHeight;
+	return fHeight * scale.y;
 }
