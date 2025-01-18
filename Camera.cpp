@@ -9,9 +9,6 @@
 #include"GameObject.h"
 #include"MeshRenderer.h"
 
-std::vector<std::shared_ptr<CCamera>> CCamera::mCameras{};
-std::shared_ptr<CCamera> CCamera::mMainCamea{};
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CCamera::CCamera() : CComponent(COMPONENT_TYPE::CAMERA)
@@ -20,20 +17,6 @@ CCamera::CCamera() : CComponent(COMPONENT_TYPE::CAMERA)
 
 CCamera::~CCamera()
 {
-	auto it = findByRawPointer(mCameras, this);
-	if (it != mCameras.end())
-	{
-		mCameras.erase(it);
-	}
-	if (mMainCamea.get() == this) {
-		mMainCamea = nullptr;
-		for (const auto& camera : mCameras) {
-			if (camera->GetOwner()->GetTag() == L"MainCamera") {
-				mMainCamea = camera;
-				break;
-			}
-		}
-	}
 }
 
 std::shared_ptr<CComponent> CCamera::Clone()
@@ -61,6 +44,7 @@ void CCamera::GenerateViewMatrix()
 	mViewMat._43 = -(position.Dot(look));
 
 	mViewPerspectiveProjectMat = mViewMat * mPerspectiveProjectMat;
+	mViewOrthographicProjectMat = mViewMat * mOrthographicProjectMat;
 
 	mInverseViewMat._11 = right.x; mInverseViewMat._12 = right.y; mInverseViewMat._13 = right.z;
 	mInverseViewMat._21 = up.x; mInverseViewMat._22 = up.y; mInverseViewMat._23 = up.z;
@@ -68,23 +52,6 @@ void CCamera::GenerateViewMatrix()
 	mInverseViewMat._41 = position.x; mInverseViewMat._42 = position.y; mInverseViewMat._43 = position.z;
 
 	mFrustumView.Transform(mFrustumWorld, mInverseViewMat);
-}
-
-void CCamera::DeleteMainCamera()
-{
-	auto it = findByRawPointer(mCameras, mMainCamea.get());
-	if (it != mCameras.end())
-	{
-		mCameras.erase(it);
-	}
-	mMainCamea = nullptr;
-
-	for (const auto& camera : mCameras) {
-		if (camera->GetOwner()->GetTag() == L"MainCamera") {
-			mMainCamea = camera;
-			break;
-		}
-	}
 }
 
 void CCamera::Awake()
@@ -109,21 +76,6 @@ void CCamera::SetFOVAngle(float fovAngle)
 {
 	mFovAngle = fovAngle;
 	mProjectRectDist = float(1.0f / tan(XMConvertToRadians(mFovAngle * 0.5f)));
-}
-
-void CCamera::AddCamera(const std::shared_ptr<CCamera>& camera)
-{
-	auto it = std::find(mCameras.begin(), mCameras.end(), camera);
-	if (it != mCameras.end())
-	{
-		return;
-	}
-
-	mCameras.push_back(camera);
-
-	if (camera->GetOwner()->GetTag() == L"MainCamera") {
-		mMainCamea = camera;
-	}
 }
 
 void CCamera::GeneratePerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle)

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GridMesh.h"
 #include"DX12Manager.h"
+#include"ResourceManager.h"
 
 
 void CHeightMapGridMesh::LoadHeightMap(const std::wstring& fileName)
@@ -24,7 +25,31 @@ void CHeightMapGridMesh::LoadHeightMap(const std::wstring& fileName)
 				(y * width)];
 		}
 	}
+
+	XMCOLOR* data = new XMCOLOR[heightMapSize];
+	for (int i = 0; i < heightMapSize; i++) {
+		data[i].a = pHeightMapPixels[i];
+		data[i].r = pHeightMapPixels[i];
+		data[i].g = pHeightMapPixels[i];
+		data[i].b = pHeightMapPixels[i];
+	}
+
+	auto heightMapTex = RESOURCE.Create2DTexture(L"heightMap", DXGI_FORMAT_R8G8B8A8_UNORM, data, sizeof(XMCOLOR), width, height,
+		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		D3D12_RESOURCE_FLAG_NONE
+	);
+
+	heightMapTex->CreateSRV();
+
 	if (pHeightMapPixels) delete[] pHeightMapPixels;
+
+	if (data) delete[] data;
+}
+
+void CHeightMapGridMesh::CreateHeightMapSRV()
+{
+	
 }
 
 void CHeightMapGridMesh::CalculateNormal()

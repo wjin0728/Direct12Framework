@@ -13,6 +13,7 @@ private:
 
 	Vec3 mScale = Vec3::One;
 
+	std::shared_ptr<CTexture> heightMap{};
 public:
 	CTerrain();
 	~CTerrain();
@@ -34,5 +35,6 @@ public:
 	std::shared_ptr<CTerrainMaterial> GetMaterial() const { return mTerrainMaterial; }
 
 	float GetHeight(float x, float z);
+	Vec3 GetScale() const { return mScale; }
 };
 

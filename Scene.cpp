@@ -9,6 +9,7 @@
 #include"ResourceManager.h"
 #include"Timer.h"
 #include"Camera.h"
+#include"InstancingGroup.h"
 
 
 CScene::CScene()
@@ -44,6 +45,84 @@ void CScene::LateUpdate()
 	}
 	INSTANCE(CResourceManager).UpdateMaterials();
 	UpdatePassData();
+}
+
+void CScene::RenderShadowPass()
+{
+	auto& camera = mCameras[L"DirectinalLight"];
+	if (!camera) {
+		return;
+	}
+	if (!mShaders.contains(L"Shadow") || !mRenderLayers.contains(L"Opaque")) {
+		return;
+	}
+
+	INSTANCE(CDX12Manager).PrepareShadowPass();
+
+	auto shadowPassBuffer = UPLOADBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	shadowPassBuffer->UpdateBuffer(1);
+
+	mShaders[L"Shadow"]->SetPipelineState(CMDLIST);
+	camera->SetViewportsAndScissorRects(CMDLIST);
+
+	/*auto& objects = mRenderLayers[L"Opaque"];
+	for (const auto& object : objects) {
+		if (!camera->IsInFrustum(object)) continue;
+		object->Render();
+	}*/
+
+	auto shadowMap = RESOURCE.Get<CTexture>(L"ShadowMap");
+
+	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
+}
+
+void CScene::RenderForwardPass()
+{
+	auto& backBuffer = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
+	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
+
+	backBuffer->ChangeResourceToTarget(backBufferIdx);
+	backBuffer->SetRenderTarget(backBufferIdx);
+	backBuffer->ClearRenderTarget(backBufferIdx);
+	backBuffer->ClearDepthStencil();
+
+	auto& camera = mCameras[L"MainCamera"];
+	if (!camera) {
+		return;
+	}
+
+	auto shadowPassBuffer = UPLOADBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	shadowPassBuffer->UpdateBuffer(0);
+
+	camera->SetViewportsAndScissorRects(CMDLIST);
+
+	RenderForLayer(L"SkyBox", false);
+	RenderForLayer(L"Opaque");
+	RenderTerrain(L"Terrain");
+
+	for (const auto& instancingGroup : instancingGroups) {
+		instancingGroup->Render(camera);
+	}
+	RenderForLayer(L"UI", false);
+
+	backBuffer->ChangeTargetToResource(backBufferIdx);
+}
+
+void CScene::RenderGBufferPass()
+{
+}
+
+void CScene::RenderLightingPass()
+{
+}
+
+void CScene::RenderFinalPass()
+{
+	auto& finalBuffer = RT_GROUP(RENDER_TARGET_GROUP_TYPE::FINAL_PASS);
+	finalBuffer->ChangeResourceToTarget(0);
+	finalBuffer->SetRenderTarget(0);
+
+	RenderForLayer(L"UI", false);
 }
 
 std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::wstring& tag)
@@ -116,16 +195,23 @@ void CScene::RemoveObject(std::shared_ptr<CGameObject> object)
 	}
 }
 
-bool CScene::PrepareRender()
+void CScene::AddCamera(std::shared_ptr<CCamera> camera)
 {
-	const auto& camera = CCamera::GetMainCamera();
-	if (!camera) {
-		return false;
+	auto& tag = camera->GetOwner()->GetTag();
+	if (mCameras.contains(tag)) {
+		return;
 	}
 
-	camera->SetViewportsAndScissorRects(CMDLIST);
+	mCameras[tag] = camera;
+}
 
-	return true;
+void CScene::RemoveCamera(const std::wstring& tag)
+{
+	if (!mCameras.contains(tag)) {
+		return;
+	}
+
+	mCameras.erase(tag);
 }
 
 void CScene::RenderForLayer(const std::wstring& layer, bool frustumCulling)
@@ -136,7 +222,7 @@ void CScene::RenderForLayer(const std::wstring& layer, bool frustumCulling)
 
 	mShaders[layer]->SetPipelineState(CMDLIST);
 	if(frustumCulling) {
-		auto camera = CCamera::GetMainCamera();
+		auto& camera = mCameras[L"MainCamera"];
 		for (const auto& object : mRenderLayers[layer]) {
 			if (!camera->IsInFrustum(object)) continue;
 			object->Render();
@@ -158,19 +244,30 @@ void CScene::RenderTerrain(const std::wstring& layer)
 		return;
 	}
 	mShaders[layer]->SetPipelineState(CMDLIST);
-	mTerrain->Render(CCamera::GetMainCamera());
+	mTerrain->Render(mCameras[L"MainCamera"]);
 }
 
 void CScene::UpdatePassData()
 {
 	CBPassData passData;
+	Matrix T(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
 
-	const auto& camera = CCamera::GetMainCamera();
+	auto& camera = mCameras[L"MainCamera"];
+	auto& lightCamera = mCameras[L"DirectinalLight"];
+
+
 	if (camera) {
 		passData.camPos = camera->GetLocalPosition();
-		passData.projMat = camera->GetPerspectiveProjectMat().Transpose();
-		passData.viewMat = camera->GetViewMat().Transpose();
 		passData.viewProjMat = camera->GetViewProjMat().Transpose();
+
+		if (lightCamera) {
+			passData.shadowTransform = (lightCamera->GetViewOrthoProjMat() * T).Transpose();
+			passData.shadowMapIdx = RESOURCE.Get<CTexture>(L"ShadowMap")->GetSrvIndex();
+		}
 	}
 	passData.deltaTime = DELTA_TIME;
 	passData.totalTime = TIMER.GetTotalTime();
@@ -190,7 +287,15 @@ void CScene::UpdatePassData()
 		passData.terrainMat.material.diffuseMapIdx = terrainMat->mDiffuseMapIdx;
 		passData.terrainMat.material.normalMapIdx = terrainMat->mNormalMapIdx;
 		passData.terrainMat.detailMapIdx = terrainMat->mDetailMap1Idx;
+		passData.terrainMat.heightMapIdx = RESOURCE.Get<CTexture>(L"heightMap")->GetSrvIndex();
+		passData.terrainMat.scale = mTerrain->GetScale();
+	}
+	UPLOADBUFFER(CONSTANT_BUFFER_TYPE::PASS)->CopyData(&passData);
+
+	if (lightCamera) {
+		passData.camPos = lightCamera->GetLocalPosition();
+		passData.viewProjMat = lightCamera->GetViewOrthoProjMat().Transpose();
 	}
 
-	UPLOADBUFFER(CONSTANT_BUFFER_TYPE::PASS)->CopyData(&passData);
+	UPLOADBUFFER(CONSTANT_BUFFER_TYPE::PASS)->CopyData(&passData, 1);
 }

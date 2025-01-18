@@ -17,7 +17,8 @@ void CResourceManager::Initialize()
 	LoadDefaultShaders();
 }
 
-std::shared_ptr<CTexture> CResourceManager::Create2DTexture(const std::wstring& name, DXGI_FORMAT format, UINT width, UINT height,
+std::shared_ptr<CTexture> CResourceManager::Create2DTexture(const std::wstring& name, DXGI_FORMAT format
+	, void* data, size_t dataSize, UINT width, UINT height,
 	const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor)
 {
 	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(RESOURCE_TYPE::TEXTURE)];
@@ -27,7 +28,7 @@ std::shared_ptr<CTexture> CResourceManager::Create2DTexture(const std::wstring& 
 		return std::static_pointer_cast<CTexture>(itr->second);
 
 	std::shared_ptr<CTexture> m = std::make_shared<CTexture>();
-	m->Create2DTexture(format, width, height, heapProperty, heapFlags, resFlags, clearColor);
+	m->Create2DTexture(format, data, dataSize, width, height, heapProperty, heapFlags, resFlags, clearColor);
 
 	keyObjMap[name] = m;
 
@@ -68,29 +69,34 @@ void CResourceManager::LoadDefaultMeshes()
 
 void CResourceManager::LoadDefaultTexture()
 {
+	std::vector<std::shared_ptr<CTexture>> textures{};
 	{
 		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
 		texture->LoadFromFile(L"Resources\\Textures\\Base_Texture.dds");
 		texture->SetName(L"TerrainBase");
 		Add(texture);
+		textures.push_back(texture);
 	}
 	{
 		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
 		texture->LoadFromFile(L"Resources\\Textures\\MainMenu.dds");
 		texture->SetName(L"MainMenu");
 		Add(texture);
+		textures.push_back(texture);
 	}
 	{
 		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
 		texture->LoadFromFile(L"Resources\\Textures\\scrolling.dds");
 		texture->SetName(L"Scrolling");
 		Add(texture);
+		textures.push_back(texture);
 	}
 	{
 		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
 		texture->LoadFromFile(L"Resources\\Textures\\Detail_Texture_7.dds");
 		texture->SetName(L"TerrainDetail");
 		Add(texture);
+		textures.push_back(texture);
 	}
 	{
 		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
@@ -98,29 +104,32 @@ void CResourceManager::LoadDefaultTexture()
 		texture->SetName(L"SkyBox");
 		texture->SetTextureType(TEXTURECUBE);
 		Add(texture);
+		textures.push_back(texture);
 	}
 	{
 		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
 		texture->LoadFromFile(L"Resources\\Textures\\tree01.dds");
 		texture->SetName(L"Tree1");
 		Add(texture);
+		textures.push_back(texture);
 	}
 	{
 		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
 		texture->LoadFromFile(L"Resources\\Textures\\tree02.dds");
 		texture->SetName(L"Tree2");
 		Add(texture);
+		textures.push_back(texture);
 	}
 	{
 		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
 		texture->LoadFromFile(L"Resources\\Textures\\tree03.dds");
 		texture->SetName(L"Tree3");
 		Add(texture);
+		textures.push_back(texture);
 	}
-	auto& textures = resources[static_cast<UINT>(RESOURCE_TYPE::TEXTURE)];
 
-	for (auto& [name, texture] : textures) {
-		static_pointer_cast<CTexture>(texture)->CreateSRV();
+	for (auto& texture : textures) {
+		texture->CreateSRV();
 	}
 }
 
@@ -237,6 +246,21 @@ void CResourceManager::LoadDefaultShaders()
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		shader->Initialize(info, L"Resources\\Shaders\\Billboard.hlsl");
 		shader->SetName(L"Billboard");
+
+		Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = SHADER_TYPE::SHADOW;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_EQUAL;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		shader->Initialize(info, L"Resources\\Shaders\\Shadow.hlsl");
+		shader->SetName(L"Shadow");
 
 		Add(shader);
 	}

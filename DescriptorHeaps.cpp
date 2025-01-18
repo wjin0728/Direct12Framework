@@ -2,6 +2,7 @@
 #include "DescriptorHeaps.h"
 #include"DX12Manager.h"
 #include"ResourceManager.h"
+#include"Texture.h"
 
 void CDescriptorHeaps::Initialize(UINT cbvNum, UINT srvNum, UINT cubeMapNum, UINT uavNum)
 {
@@ -13,7 +14,7 @@ void CDescriptorHeaps::Initialize(UINT cbvNum, UINT srvNum, UINT cubeMapNum, UIN
 void CDescriptorHeaps::InitDsvDescriptorHeap()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
-	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.NumDescriptors = DS_TYPE_COUNT;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0;
@@ -46,25 +47,35 @@ void CDescriptorHeaps::InitSrvDescriptorHeap(UINT cbvNum, UINT srvNum, UINT cube
 	uavStartHandle.gpuHandle.ptr = (cubeMapStartHandle.gpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<size_t>(cubeMapNum));
 }
 
-void CDescriptorHeaps::CreateDSV(ComPtr<ID3D12Resource> resource)
+void CDescriptorHeaps::CreateDSV(std::shared_ptr<CTexture> resource, DS_TYPE type)
 {
-	DEVICE->CreateDepthStencilView(resource.Get(), NULL, dsvStartHandle.cpuHandle);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = dsvStartHandle.cpuHandle;
+	handle.ptr += (dsvDescriptorSize * static_cast<size_t>(type));
+
+	DEVICE->CreateDepthStencilView(resource->GetResource().Get(), &resource->GetDSVDesc(), handle);
+
+	if (type == DS_TYPE::SHADOW_MAP) {
+		shadowMapHandle.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(srvStartHandle.cpuHandle, 80, cbvSrvDescriptorSize);
+		shadowMapHandle.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvStartHandle.gpuHandle, 80, cbvSrvDescriptorSize);
+
+		DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &resource->GetSRVDesc(), shadowMapHandle.cpuHandle);
+	}
 }
 
-void CDescriptorHeaps::CreateSRV(ComPtr<ID3D12Resource> resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, UINT idx) const
+void CDescriptorHeaps::CreateSRV(std::shared_ptr<CTexture> resource, UINT idx) const
 {
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = srvStartHandle.cpuHandle;
 	handle.ptr += (cbvSrvDescriptorSize * static_cast<size_t>(idx));
 
-	DEVICE->CreateShaderResourceView(resource.Get(), &desc, handle);
+	DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &resource->GetSRVDesc(), handle);
 }
 
-void CDescriptorHeaps::CreateCubeMap(ComPtr<ID3D12Resource> resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, UINT idx) const
+void CDescriptorHeaps::CreateCubeMap(std::shared_ptr<CTexture> resource, UINT idx) const
 {
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = cubeMapStartHandle.cpuHandle;
 	handle.ptr += (cbvSrvDescriptorSize * static_cast<size_t>(idx));
 
-	DEVICE->CreateShaderResourceView(resource.Get(), &desc, handle);
+	DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &resource->GetSRVDesc(), handle);
 }
 
 void CDescriptorHeaps::CreateUAV(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12Resource> counterResource
@@ -82,4 +93,12 @@ void CDescriptorHeaps::SetSRVDescriptorHeap()
 	CMDLIST->SetDescriptorHeaps(1, descriptorHeaps);
 	CMDLIST->SetGraphicsRootDescriptorTable(4, srvStartHandle.gpuHandle);
 	CMDLIST->SetGraphicsRootDescriptorTable(5, cubeMapStartHandle.gpuHandle);
+	CMDLIST->SetGraphicsRootDescriptorTable(6, shadowMapHandle.gpuHandle);
+}
+
+CD3DX12_CPU_DESCRIPTOR_HANDLE CDescriptorHeaps::GetDSVHandle(DS_TYPE type) const
+{
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = dsvStartHandle.cpuHandle;
+	handle.ptr += (dsvDescriptorSize * static_cast<size_t>(type));
+	return handle;
 }

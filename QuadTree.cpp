@@ -28,7 +28,7 @@ void CQuadTree::Initialize(const std::shared_ptr<CHeightMapGridMesh>& terrainMes
 void CQuadTree::ReleaseUploadBuffer(std::shared_ptr<Node>& node)
 {
 	if (node->isLeaf) {
-		node->mIndexBuffer->ReleaseUploadBuffer();
+		node->mVertexBuffer->ReleaseUploadBuffer();
 	}
 	else {
 		for (auto& child : node->mChildren) {
@@ -40,7 +40,7 @@ void CQuadTree::ReleaseUploadBuffer(std::shared_ptr<Node>& node)
 void CQuadTree::ReleaseBuffer(std::shared_ptr<Node>& node)
 {
 	if (node->isLeaf) {
-		node->mIndexBuffer->ReleaseBuffer();
+		node->mVertexBuffer = nullptr;
 	}
 	else {
 		for (auto& child : node->mChildren) {
@@ -58,9 +58,9 @@ void CQuadTree::Render(const std::shared_ptr<class CCamera>& camera)
 
 void CQuadTree::RenderNode(const std::shared_ptr<Node>& node, const std::shared_ptr<class CCamera>& camera)
 {
-	if (!camera->IsInFrustum(node->aabb)) {
+	/*if (!camera->IsInFrustum(node->aabb)) {
 		return;
-	}
+	}*/
 
 	if (!node->isLeaf) {
 		for (auto& child : node->mChildren) {
@@ -68,10 +68,9 @@ void CQuadTree::RenderNode(const std::shared_ptr<Node>& node, const std::shared_
 		}
 	}
 	else {
-		CMDLIST->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		CMDLIST->IASetVertexBuffers(0, 1, &node->mVertexBufferView);
-		node->mIndexBuffer->SetIndexBuffer();
-		CMDLIST->DrawIndexedInstanced(node->indexCnt, 1, 0, 0, 0);
+		CMDLIST->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+		node->mVertexBuffer->SetVertexBuffer();
+		CMDLIST->DrawInstanced(4, 1, 0, 0);
 	}
 }
 
@@ -164,45 +163,16 @@ void CQuadTree::SubDivide(std::shared_ptr<Node>& node, const std::array<UINT, 4>
 
 void CQuadTree::CreateGridMesh(std::shared_ptr<Node>& node)
 {
-	//인덱스 설정
-	UINT width = node->mCorners[CORNER_TR] - node->mCorners[CORNER_TL];
-	UINT height = (node->mCorners[CORNER_TL] - node->mCorners[CORNER_BL]) / heightMapWidth;
+	auto& terrainVertices = mTerrainMesh->GetVertices();
 
-	node->mIndices.resize(4);
+	node->mVertices.resize(4);
 
-	node->mIndices[CORNER_TL] = node->mCorners[CORNER_TL];
-	node->mIndices[CORNER_TR] = node->mCorners[CORNER_TR];
-	node->mIndices[CORNER_BL] = node->mCorners[CORNER_BL];
-	node->mIndices[CORNER_BR] = node->mCorners[CORNER_BR];
+	node->mVertices[CORNER_TL] = terrainVertices[node->mCorners[CORNER_TL]];
+	node->mVertices[CORNER_TR] = terrainVertices[node->mCorners[CORNER_TR]];
+	node->mVertices[CORNER_BL] = terrainVertices[node->mCorners[CORNER_BL]];
+	node->mVertices[CORNER_BR] = terrainVertices[node->mCorners[CORNER_BR]];
 
-	UINT idx = 0;
-	for (UINT i = 0; i < height; ++i) {
-		for (UINT j = 0; j < width; ++j) {
-			UINT idx0 = (i * heightMapWidth) + j;              //좌측 하단
-			UINT idx1 = ((i + 1) * heightMapWidth) + j;		   //좌측 상단
-			UINT idx2 = ((i + 1) * heightMapWidth) + (j + 1);  //우측 상단
-			UINT idx3 = (i * heightMapWidth) + (j + 1);		   //우측 하단
-
-			//상단 삼각형
-			node->mIndices[idx++] = idx0;
-			node->mIndices[idx++] = idx1;
-			node->mIndices[idx++] = idx2;
-			//하단 삼각형
-			node->mIndices[idx++] = idx0;
-			node->mIndices[idx++] = idx2;
-			node->mIndices[idx++] = idx3;
-		}
-	}
-	node->indexCnt = node->mIndices.size();
-
-	node->mIndexBuffer = std::make_shared<CIndexBuffer>();
-	node->mIndexBuffer->CreateBuffer(node->mIndices);
-
-	UINT startOffset = sizeof(CVertex) * node->mCorners[CORNER_BL];
-	UINT vertexNum = node->mCorners[CORNER_TR] - node->mCorners[CORNER_BL] + 1;
-
-	node->mVertexBufferView.BufferLocation = mTerrainMesh->GetVertexBuffer()->GetGPUVirtualAddress() + startOffset;
-	node->mVertexBufferView.StrideInBytes = sizeof(CVertex);
-	node->mVertexBufferView.SizeInBytes = sizeof(CVertex) * vertexNum;
+	node->mVertexBuffer = std::make_shared<CVertexBuffer>();
+	node->mVertexBuffer->CreateBuffer(node->mVertices);
 }
 

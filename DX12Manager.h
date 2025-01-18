@@ -5,6 +5,7 @@
 #include"RenderTargetGroup.h"
 #include"Texture.h"
 
+#define RT_GROUP(T) INSTANCE(CDX12Manager).GetRenderTargetGroup(T)
 
 class CDX12Manager
 {
@@ -85,6 +86,9 @@ public:
 	void BeforeRender();
 	void AfterRender();
 
+	void PrepareShadowPass();
+	void PrepareFinalPass();
+
 public:
 	ID3D12GraphicsCommandList* GetCommandList() const { return cmdList.Get(); }
 	ID3D12Device* GetDevice() const { return mDevice.Get(); }
@@ -92,7 +96,10 @@ public:
 	CFrameResource* GetCurFrameResource() const { return mCurFrameResource; }
 	std::shared_ptr<CUploadBuffer> GetBuffer(UINT type);
 	std::shared_ptr<CDescriptorHeaps> GetDescriptorHeaps() const { return descriptorHeaps; };
+	std::shared_ptr <CRenderTargetGroup> GetRenderTargetGroup(RENDER_TARGET_GROUP_TYPE type) { 
+		return renderTargetGroups[(UINT)type]; }
 
+	UINT GetCurrBackBufferIdx() const { return curBackBuffIdx; }
 	XMFLOAT2 GetRenderTargetSize() const { return renderTargetSize; }
 };
 

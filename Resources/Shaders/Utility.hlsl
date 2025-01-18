@@ -28,6 +28,36 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, floa
     return mul(normalT, TBN);
 }
 
+float CalcShadowFactor(float4 shadowPosH)
+{
+    shadowPosH.xyz /= shadowPosH.w;
+
+    // Depth in NDC space.
+    float depth = shadowPosH.z;
+
+    uint width, height, numMips;
+    diffuseMap[shadowMapIdx].GetDimensions(0, width, height, numMips);
+
+    // Texel size.
+    float dx = 1.0f / (float) width;
+
+    float percentLit = 0.0f;
+    const float2 offsets[9] =
+    {
+        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+        float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+        float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx)
+    };
+
+    [unroll]
+    for (int i = 0; i < 9; ++i)
+    {
+        percentLit += (shadowMap.SampleCmpLevelZero(shadowSam,
+            shadowPosH.xy + offsets[i], depth).r);
+    }
+    
+    return percentLit / 9.0f;
+}
 
 LightColor ComputeDirectionalLight(DirectionalLight light, float3 normal, float3 camDir, Material material)
 {
@@ -195,7 +225,7 @@ LightColor ComputeSpotLight(SpotLight light, float3 position, float3 normal, flo
 }
 
 
-LightColor CalculatePhongLight(float3 position, float3 normal, float3 camDir, Material material)
+LightColor CalculatePhongLight(float3 position, float3 normal, float3 camDir, Material material, float3 shadowFactor)
 {
     LightColor finalColor;
     finalColor.diffuse = float4(0.f, 0.f, 0.f, 1.f);
@@ -205,8 +235,8 @@ LightColor CalculatePhongLight(float3 position, float3 normal, float3 camDir, Ma
     for (uint i = 0; i < lightNum.x; i++)
     {
         LightColor color = ComputeDirectionalLight(dirLights[i], normal, camDir, material);
-        finalColor.diffuse += color.diffuse;
-        finalColor.specular += color.specular;
+        finalColor.diffuse += color.diffuse * shadowFactor[0];
+        finalColor.specular += color.specular * shadowFactor[0];
     }
     [unroll(POINT_LIGHT)]
     for (i = 0; i < lightNum.y; i++)

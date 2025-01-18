@@ -234,6 +234,8 @@ void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 	mInfo = info;
 	ComPtr<ID3DBlob> vsBlob, psBlob, gsBlob;
 
+	ComPtr<ID3DBlob> hsBlob{}, dsBlob{};
+
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
 
 	pipelineStateDesc.pRootSignature = INSTANCE(CDX12Manager).GetRootSignature();
@@ -245,7 +247,6 @@ void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 		pipelineStateDesc.GS = CreateShader(gsBlob, fileName, "GS_Main", "gs_5_1");
 	}
 	if (mInfo.shaderType == SHADER_TYPE::TERRAIN) {
-		ComPtr<ID3DBlob> hsBlob{}, dsBlob;
 		pipelineStateDesc.HS = CreateShader(hsBlob, fileName, "HS_Main", "hs_5_1");
 		pipelineStateDesc.DS = CreateShader(dsBlob, fileName, "DS_Main", "ds_5_1");
 	}
@@ -274,6 +275,14 @@ void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 	case SHADER_TYPE::FORWARD:
 		pipelineStateDesc.NumRenderTargets = 1;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		break;
+	case SHADER_TYPE::SHADOW:
+		pipelineStateDesc.NumRenderTargets = 0;
+		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+
+		pipelineStateDesc.RasterizerState.DepthBias = 100000;
+		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.0f;
+		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
 		break;
 	}
 	auto device = INSTANCE(CDX12Manager).GetDevice();

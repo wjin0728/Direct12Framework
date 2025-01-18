@@ -7,8 +7,8 @@
 class CBattleScene : public CScene
 {
 private:
-	std::unique_ptr<CLightManager> lightMgr{};
-	std::vector<std::shared_ptr<class CInstancingGroup>> instancingGroups{};
+	std::shared_ptr<CGameObject> dirLightObj{};
+	std::shared_ptr<CDirectionalLight> dirLight{};
 
 public:
 	CBattleScene();
@@ -18,9 +18,9 @@ public:
 
 	virtual void Update();
 	virtual void LateUpdate();
-	virtual void Render();
 
 private:
+
 	void SetLights();
 };
 

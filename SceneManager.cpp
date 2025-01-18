@@ -9,6 +9,8 @@
 #include"GameObject.h"
 #include"MeshRenderer.h"
 
+//#define DEFFERD_RENDERING
+
 
 void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 {
@@ -70,7 +72,17 @@ void CSceneManager::Render()
 	if (!curScene) {
 		return;
 	}
-	curScene->Render();
+
+	curScene->RenderShadowPass();
+
+#ifdef DEFFERD_RENDERING
+	curScene->RenderGBufferPass();
+	curScene->RenderLightingPass();
+	curScene->RenderFinalPass();
+#else
+	curScene->RenderForwardPass();
+#endif 
+
 }
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)

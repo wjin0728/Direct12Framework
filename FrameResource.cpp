@@ -32,7 +32,6 @@ std::shared_ptr<CUploadBuffer> CFrameResource::GetBuffer(UINT type)
 
 void CFrameResource::Update()
 {
-	mLocalUploadBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::PASS)]->UpdateBuffer();
 	mLocalUploadBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)]->UpdateBuffer();
 	mLocalUploadBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::MATERIAL)]->UpdateBuffer();
 }

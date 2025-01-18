@@ -11,21 +11,17 @@ public:
 	virtual std::shared_ptr<CComponent> Clone();
 
 private:
-	static std::vector<std::shared_ptr<CCamera>> mCameras;
-	static std::shared_ptr<CCamera> mMainCamea;
-
-private:
 	float mNearZ{};
 	float mFarZ{};
 	float mAspectRatio{};
 	float mFovAngle = 90.0f;
 	float mProjectRectDist = 1.0f;
 		  
-	BoundingFrustum mFrustumView = BoundingFrustum();
-	BoundingFrustum mFrustumWorld = BoundingFrustum();
 	Matrix mInverseViewMat = Matrix::Identity;
 
 public:
+	BoundingFrustum mFrustumView = BoundingFrustum();
+	BoundingFrustum mFrustumWorld = BoundingFrustum();
 	D3D12_VIEWPORT mViewport{};
 	D3D12_RECT mScissorRect{};
 
@@ -44,12 +40,6 @@ public:
 	virtual void LateUpdate();
 
 public:
-	static void AddCamera(const std::shared_ptr<CCamera>& camera);
-	static void DeleteMainCamera();
-
-	static const std::vector<std::shared_ptr<CCamera>>& GetAllCameras() { return mCameras; }
-	static std::shared_ptr<CCamera> GetMainCamera() { return mMainCamea; }
-
 	void GenerateViewMatrix();
 	void GeneratePerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle);
 	void GenerateOrthographicProjectionMatrix(float nearPlane, float farPlane, float width, float height);
@@ -72,6 +62,7 @@ public:
 
 	Matrix GetViewMat() const { return mViewMat; }
 	Matrix GetViewProjMat() const { return mViewPerspectiveProjectMat; }
+	Matrix GetViewOrthoProjMat() const { return mViewOrthographicProjectMat; }
 	Matrix GetPerspectiveProjectMat() const { return mPerspectiveProjectMat; }
 	Matrix GetOrthographicProjectionMat() const { return mOrthographicProjectMat; }
 };

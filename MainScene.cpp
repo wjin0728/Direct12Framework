@@ -44,7 +44,6 @@ void CMainScene::Update()
 		return;
 	}
 	if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-		CCamera::DeleteMainCamera();
 		INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAINSTAGE);
 		return;
 	}
@@ -53,10 +52,4 @@ void CMainScene::Update()
 		return;
 	}
 	CScene::Update();
-}
-
-void CMainScene::Render()
-{
-	PrepareRender();
-	RenderForLayer(L"UI", false);
 }

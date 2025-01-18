@@ -8,6 +8,8 @@
 #include"Terrain.h"
 #include"Collider.h"
 #include"UploadBuffer.h"
+#include"SceneManager.h"
+#include"Scene.h"
 
 
 CGameObject::CGameObject(bool makeTransform)
@@ -202,7 +204,8 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::wstring&
 	camera->GeneratePerspectiveProjectionMatrix(nearPlane, farPlane, fovAngle);
 
 	object->SetActive(true);
-	CCamera::AddCamera(camera);
+	
+	INSTANCE(CSceneManager).GetCurScene()->AddCamera(camera);
 
 	return object;
 }

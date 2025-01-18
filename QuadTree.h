@@ -20,12 +20,9 @@ private:
 	struct Node
 	{
 		friend CQuadTree;
-		
-		D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
 
-		std::shared_ptr<CIndexBuffer> mIndexBuffer{};
-		std::vector<UINT> mIndices;
-		size_t indexCnt{};
+		std::shared_ptr<CVertexBuffer> mVertexBuffer{};
+		std::vector<CVertex> mVertices{};
 
 		UINT mCenter{};
 		std::array<UINT, 4> mCorners{};

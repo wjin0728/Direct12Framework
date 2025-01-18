@@ -6,6 +6,8 @@ enum class RENDER_TARGET_GROUP_TYPE : UINT
 {
 	SWAP_CHAIN,
 	G_BUFFER,
+	SHADOW_PASS,
+	FINAL_PASS,
 
 	END
 };
@@ -28,6 +30,8 @@ private:
 	ComPtr<ID3D12DescriptorHeap> rtvHeap{};
 	std::vector<RenderTarget> renderTargets{};
 
+	std::shared_ptr<CTexture> depthStencilBuffer{};
+
 	UINT rtvDescriptorSize{};
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle{};
 	D3D12_CPU_DESCRIPTOR_HANDLE dsVHeapHandle{};
@@ -42,10 +46,9 @@ public:
 public:
 	void Initialize(std::vector<RenderTarget>& rtVec, D3D12_CPU_DESCRIPTOR_HANDLE _dsVHeapHandle);
 
-	void BeforeRender();
-
 	void SetRenderTargets();
 	void SetRenderTarget(UINT idx);
+	void SetOnlyDepthStencil();
 
 	void ClearRenderTargets();
 	void ClearRenderTarget(UINT idx);

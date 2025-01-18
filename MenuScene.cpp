@@ -42,15 +42,8 @@ void CMenuScene::Initialize()
 void CMenuScene::Update()
 {
 	if (INPUT.IsKeyDown(KEY_TYPE::ESCAPE)) {
-		CCamera::DeleteMainCamera();
 		INSTANCE(CSceneManager).ReturnPrevScene();
 		return;
 	}
 	CScene::Update();
-}
-
-void CMenuScene::Render()
-{
-	PrepareRender();
-	RenderForLayer(L"UI", false);
 }

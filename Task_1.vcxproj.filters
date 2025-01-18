@@ -362,5 +362,8 @@
     <None Include="Resources\Shaders\Billboard.hlsl">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="Resources\Shaders\Shadow.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

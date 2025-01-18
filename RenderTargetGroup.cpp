@@ -51,23 +51,6 @@ void CRenderTargetGroup::Initialize(std::vector<RenderTarget>& rtVec, D3D12_CPU_
 	}
 }
 
-void CRenderTargetGroup::BeforeRender()
-{
-	auto cmdList = INSTANCE(CDX12Manager).GetCommandList();
-
-	cmdList->ResourceBarrier(resourceToTarget.size(), resourceToTarget.data());
-
-	cmdList->OMSetRenderTargets(renderTargets.size(), &rtvHeapHandle, TRUE, &dsVHeapHandle);
-
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = rtvHeapHandle;
-	for (auto& rt : renderTargets) {
-		cmdList->ClearRenderTargetView(handle, rt.clearColor, 0, NULL);
-
-		handle.ptr += rtvDescriptorSize;
-	}
-
-}
-
 void CRenderTargetGroup::SetRenderTargets()
 {
 	CMDLIST->OMSetRenderTargets(renderTargets.size(), &rtvHeapHandle, TRUE, &dsVHeapHandle);
@@ -78,6 +61,11 @@ void CRenderTargetGroup::SetRenderTarget(UINT idx)
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle(rtvHeapHandle, idx * rtvDescriptorSize);
 
 	CMDLIST->OMSetRenderTargets(1, &handle, FALSE, &dsVHeapHandle);
+}
+
+void CRenderTargetGroup::SetOnlyDepthStencil()
+{
+	CMDLIST->OMSetRenderTargets(0, nullptr, FALSE, &dsVHeapHandle);
 }
 
 void CRenderTargetGroup::ClearRenderTargets()

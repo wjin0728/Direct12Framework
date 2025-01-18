@@ -9,7 +9,7 @@
 
 #define TEXTURE_COUNT 10
 
-#define FOG
+//#define FOG
 
 static const float a0 = 1.f;
 static const float a1 = 0.01f;
@@ -27,12 +27,13 @@ struct Material
     float3 padding1;
 };
 
-struct TerrainMaterial
+struct TerrainData
 {
     Material material;
+    float3 scale;
     int detailMapTdx;
     int heightMapIdx;
-    float2 padding1;
+    float3 padding1;
 };
 
 struct DirectionalLight
@@ -76,21 +77,20 @@ struct LightColor
 
 cbuffer CBPassData : register(b0)
 {
-    matrix viewMat : packoffset(c0); 
-    matrix projMat : packoffset(c4); 
-    matrix viewProjMat : packoffset(c8); 
-    float3 camPos : packoffset(c12.x); 
-    float passPadding : packoffset(c12.w); 
-    float2 renderTargetSize : packoffset(c13.x); 
-    float deltaTime : packoffset(c13.z); 
-    float totalTime : packoffset(c13.w);
+    matrix viewProjMat;
+    float3 camPos; 
+    uint shadowMapIdx; 
+    float2 renderTargetSize; 
+    float deltaTime; 
+    float totalTime;
     
-    float4 gFogColor : packoffset(c14);
-    float gFogStart : packoffset(c15.x);
-    float gFogRange : packoffset(c15.y);
+    float4 gFogColor;
+    float gFogStart;
+    float gFogRange;
     
-    float2 passPadding2 : packoffset(c15.z);
-    TerrainMaterial terrainMat : packoffset(c16);
+    float2 passPadding2;
+    TerrainData terrainData;
+    matrix shadowTransform;
 };
 
 cbuffer CBObjectData : register(b1)
@@ -114,6 +114,8 @@ cbuffer CBLightsData : register(b2)
 TextureCube skyBoxMap : register(t0, space2);
 Texture2D diffuseMap[TEXTURE_COUNT] : register(t0);
 
+Texture2D shadowMap : register(t0, space3);
+
 StructuredBuffer<Material> materials : register(t0, space1);
 
 SamplerState pointWrap : register(s0);
@@ -122,5 +124,6 @@ SamplerState linearWrap : register(s2);
 SamplerState linearClamp : register(s3);
 SamplerState anisoWrap : register(s4);
 SamplerState anisoClamp : register(s5);
+SamplerComparisonState shadowSam : register(s6);
 
 #endif

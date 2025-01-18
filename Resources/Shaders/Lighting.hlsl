@@ -17,6 +17,7 @@ struct VS_OUTPUT
     float3 worldNormal : NORMAL;
     float3 worldTangent : TANGENT;
     float2 uv : TEXCOORD;
+    float4 ShadowPosH : POSITION1;
 };
 
 //¡§¡° ºŒ¿Ã¥ı
@@ -30,6 +31,8 @@ VS_OUTPUT VS_Main(VS_INPUT input)
     output.worldNormal = mul((input.normal), (float3x3) invWorldMat);
     output.worldTangent = mul((input.tangent), (float3x3) invWorldMat);
     output.uv = input.uv;
+    
+    output.ShadowPosH = mul(output.worldPos, shadowTransform);
     
     return output;
 }
@@ -63,8 +66,11 @@ float4 PS_Main(VS_OUTPUT input) : SV_TARGET
         float4 normalMapSample = diffuseMap[normalMapIdx].Sample(anisoWrap, input.uv);
         normal = NormalSampleToWorldSpace(normalMapSample.rgb, normal, input.worldTangent);
     }
+
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor[0] = CalcShadowFactor(input.ShadowPosH);
     
-    LightColor finalColor = CalculatePhongLight(input.position.xyz, normal, camDir, material);
+    LightColor finalColor = CalculatePhongLight(input.position.xyz, normal, camDir, material, shadowFactor);
     
     color.xyz = GammaEncoding((finalColor.diffuse.xyz * color.xyz) + finalColor.specular.xyz + (0.1 * color.xyz));
     

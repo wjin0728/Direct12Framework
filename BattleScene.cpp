@@ -29,6 +29,7 @@ void CBattleScene::Initialize()
 	mShaders[L"Terrain"] = RESOURCE.Get<CShader>(L"Terrain");
 	mRenderLayers[L"SkyBox"] = ObjectList{};
 	mShaders[L"SkyBox"] = RESOURCE.Get<CShader>(L"SkyBox");
+	mShaders[L"Shadow"] = RESOURCE.Get<CShader>(L"Shadow");
 
 //#pragma region Obstacles
 //
@@ -100,11 +101,11 @@ void CBattleScene::Initialize()
 		auto cameraObj = CGameObject::CreateCameraObject(L"MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
 			1.f, 2000.f);
 		cameraObj->SetStatic(false);
-		cameraObj->GetTransform()->SetLocalPosition({ 0.f, 3.f, -6.f });
+		cameraObj->GetTransform()->SetLocalPosition({ 0.f, 4.f, -8.f });
 		cameraObj->GetTransform()->Rotate({ 15.f,0.f,0.f });
 		cameraObj->SetParent(playerFollower);
 
-		AddObject(L"Opaque", playerFollower);
+		AddObject(L"", playerFollower);
 	}
 #pragma endregion
 
@@ -125,40 +126,42 @@ void CBattleScene::Initialize()
 #pragma endregion
 
 #pragma region Billboard
-	auto instancingGroup = std::make_shared<CInstancingGroup>();
-	instancingGroup->Initialize(INSTANCE_BUFFER_TYPE::BILLBOARD);
-	instancingGroups.push_back(instancingGroup);
-
-
-
-	for (float i = -2000.f; i < 2000.f; i+=50.f) {
-		for (float j = -2000.f; j < 2000.f; j+=50.f) {
-			float width = 50.f;
-			float height = 50.f;
-
-			float halfWidth = 0.5f * width;
-			float halfHeight = 0.5f * height;
-
-			auto billboard = CGameObject::CreateRenderObject(L"Billboard", L"", L"Tree2");
-			billboard->SetStatic(true);
-			billboard->SetInstancing(true);
-			billboard->GetTransform()->SetLocalPosition({ i,mTerrain->GetHeight(i, j) + halfHeight,j});
-			billboard->GetTransform()->SetLocalScale({ halfWidth, halfHeight, 1.f });
-
-			AddObject(L"", billboard);
-			instancingGroup->AddObject(billboard);
-		}
-	}
+	//auto instancingGroup = std::make_shared<CInstancingGroup>();
+	//instancingGroup->Initialize(INSTANCE_BUFFER_TYPE::BILLBOARD);
+	//instancingGroups.push_back(instancingGroup);
+	//
+	//
+	//
+	//for (float i = -500.f; i < 500.f; i+=50.f) {
+	//	for (float j = -500.f; j < 500.f; j+=50.f) {
+	//		float width = 50.f;
+	//		float height = 50.f;
+	//
+	//		float halfWidth = 0.5f * width;
+	//		float halfHeight = 0.5f * height;
+	//
+	//		auto billboard = CGameObject::CreateRenderObject(L"Billboard", L"", L"Tree2");
+	//		billboard->SetStatic(true);
+	//		billboard->SetInstancing(true);
+	//		billboard->GetTransform()->SetLocalPosition({ i,mTerrain->GetHeight(i, j) + halfHeight,j});
+	//		billboard->GetTransform()->SetLocalScale({ halfWidth, halfHeight, 1.f });
+	//
+	//		AddObject(L"", billboard);
+	//		instancingGroup->AddObject(billboard);
+	//	}
+	//}
 
 #pragma endregion
 
 	SetLights();
+
+	auto shadowMap = RESOURCE.Get<CTexture>(L"ShadowMap");
+	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
 }
 
 void CBattleScene::Update()
 {
 	if (INPUT.IsKeyDown(KEY_TYPE::ESCAPE)) {
-		CCamera::DeleteMainCamera();
 		INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAIN);
 		return;
 	}
@@ -173,18 +176,34 @@ void CBattleScene::LateUpdate()
 {
 	CScene::LateUpdate();
 	lightMgr->Update();
-}
 
-void CBattleScene::Render()
-{
-	PrepareRender();
-	RenderForLayer(L"SkyBox", false);
-	RenderForLayer(L"Opaque");
-	RenderTerrain(L"Terrain");
+	auto& mainCam = mCameras[L"MainCamera"];
+	auto& camera = mCameras[L"DirectinalLight"];
 
-	for (const auto& instancingGroup : instancingGroups) {
-		instancingGroup->Render(CCamera::GetMainCamera());
+	Vec3 corners[8]{};
+	mainCam->mFrustumWorld.GetCorners(corners);
+
+	Vec3 center{};
+	for (int i = 0; i < 8; ++i) {
+		center += corners[i];
 	}
+	center /= 8.f;
+
+	float max = -FLT_MAX;
+	for (int i = 0; i < 8; ++i) {
+		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
+	}
+	float r = max;
+
+	auto transform = dirLightObj->GetTransform();
+
+	Vec3 dir = dirLight->direction;
+	dir.Normalize();
+	transform->LookTo(dir);
+	transform->SetLocalPosition(center - (dir * r));
+	camera->GenerateViewMatrix();
+
+	UpdatePassData();
 }
 
 void CBattleScene::SetLights()
@@ -194,9 +213,42 @@ void CBattleScene::SetLights()
 
 	Vec4 lightColor = { 1.f,1.f,1.f,1.f };
 	Vec3 strength = { 1.f,1.f,1.f };
-	Vec3 dir = { 1.f,-1.f,1.f };
+	Vec3 dir = { 0.f,-1.f,0.f };
 
-	std::shared_ptr<CDirectionalLight> dirLight = std::make_shared<CDirectionalLight>(lightColor, strength, dir);
-
+	dirLight = std::make_shared<CDirectionalLight>(lightColor, strength, dir);
 	lightMgr->AddDirectionalLight(dirLight);
+
+	dirLightObj = std::make_shared<CGameObject>();
+	dirLightObj->SetTag(L"DirectinalLight");
+	auto camera = std::make_shared<CCamera>();
+	dirLightObj->AddComponent(camera);
+	camera->SetViewport(0, 0, 2048, 2048);
+	camera->SetScissorRect(0, 0, 2048, 2048);
+
+	auto& mainCam = mCameras[L"MainCamera"];
+	Vec3 corners[8]{};
+	mainCam->mFrustumView.GetCorners(corners);
+
+	Vec3 center{};
+	for (int i = 0; i < 8; ++i) {
+		center += corners[i];
+	}
+	center /= 8.f;
+
+	float max = -FLT_MAX;
+	for (int i = 0; i < 8; ++i) {
+		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
+	}
+	float r = max;
+
+	camera->GenerateOrthographicProjectionMatrix(1.f, r*2.f, r * 2.f, r * 2.f);
+	dirLightObj->SetActive(true);
+
+	AddCamera(camera);
+
+	auto transform = dirLightObj->GetTransform();
+	transform->LookTo(dir);
+	transform->SetLocalPosition(center - (dir * r));
+
+	AddObject(dirLightObj);
 }

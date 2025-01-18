@@ -27,9 +27,9 @@ public:
 class CDirectionalLight : public CLight
 {
 private:
-	Vec3 direction = Vec3::Zero;
 
 public:
+	Vec3 direction = Vec3::Zero;
 	CDirectionalLight() = default;
 	CDirectionalLight(const Color& _color, const Vec3& _strength, const Vec3& _direction);
 

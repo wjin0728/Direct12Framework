@@ -10,14 +10,18 @@ enum : UINT {
 class CHeightMapGridMesh : public CMesh
 {
 private:
+	friend class CTerrain;
 	BYTE* heightMap;
 
 	UINT width{};
 	UINT height{};
 	Vec3 scale{};
 
+	D3D12_GPU_VIRTUAL_ADDRESS heightMapSRV;
+
 private:
 	void LoadHeightMap(const std::wstring& fileName);
+	void CreateHeightMapSRV();
 	void CalculateNormal();
 	void CalculateTextureCoord();
 

@@ -128,7 +128,6 @@ void CDX12Manager::ChangeSwapChainState()
 		renderTargetSize.y, dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags));
 	curBackBuffIdx = mSwapChain->GetCurrentBackBufferIndex();
 
-	//d3dDepthStencilBuffer.Reset();
 	InitDepthStencilView();
 }
 
@@ -140,9 +139,10 @@ void CDX12Manager::InitDescriptorHeaps()
 
 void CDX12Manager::InitRenderTargetGroups()
 {
-	auto dsvHeapHandle = descriptorHeaps->GetDSVStartHandle();
+	auto dsvHeapHandle = descriptorHeaps->GetDSVHandle(DS_TYPE::MAIN_BUFFER);
 
 #pragma region swapchain targets
+
 	{
 		std::vector<RenderTarget> renderTargets(SWAP_CHAIN_COUNT);
 
@@ -156,9 +156,21 @@ void CDX12Manager::InitRenderTargetGroups()
 		}
 
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)] = std::make_shared<CRenderTargetGroup>();
-		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)]->Initialize(renderTargets, dsvHeapHandle.cpuHandle);
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)]->Initialize(renderTargets, dsvHeapHandle);
 	}
-	
+#pragma endregion
+
+#pragma region Shadow Pass
+
+	{
+		auto dsv = descriptorHeaps->GetDSVHandle(DS_TYPE::SHADOW_MAP);
+		std::vector<RenderTarget> renderTargets;
+
+
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SHADOW_PASS)] = std::make_shared<CRenderTargetGroup>();
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SHADOW_PASS)]->Initialize(renderTargets, dsv);
+	}
+#pragma endregion
 }
 
 void CDX12Manager::InitDepthStencilView()
@@ -166,14 +178,28 @@ void CDX12Manager::InitDepthStencilView()
 	auto dsBuffer = INSTANCE(CResourceManager).Create2DTexture
 	(
 		L"DepthStencil", 
-		DXGI_FORMAT_D24_UNORM_S8_UINT,
+		DXGI_FORMAT_R24G8_TYPELESS,
+		nullptr, 0,
 		static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE, 
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
 	);
+	dsBuffer->SetTextureType(DEPTH_STENCIL);
+	descriptorHeaps->CreateDSV(dsBuffer, DS_TYPE::MAIN_BUFFER);
 
-	descriptorHeaps->CreateDSV(dsBuffer->GetResource().Get());
+	auto shadowMap = INSTANCE(CResourceManager).Create2DTexture
+	(
+		L"ShadowMap",
+		DXGI_FORMAT_R24G8_TYPELESS,
+		nullptr, 0,
+		2048, 2048,
+		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+	);
+	shadowMap->SetTextureType(DEPTH_STENCIL);
+	descriptorHeaps->CreateDSV(shadowMap, DS_TYPE::SHADOW_MAP);
 }
 
 std::vector<CD3DX12_STATIC_SAMPLER_DESC> CDX12Manager::InitStaticSamplers()
@@ -230,8 +256,19 @@ std::vector<CD3DX12_STATIC_SAMPLER_DESC> CDX12Manager::InitStaticSamplers()
 		8
 	);
 
+	CD3DX12_STATIC_SAMPLER_DESC shadow(
+		6, // shaderRegister
+		D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressW
+		0.0f,                               // mipLODBias
+		16,                                 // maxAnisotropy
+		D3D12_COMPARISON_FUNC_LESS_EQUAL,
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK);
+
 	return std::vector<CD3DX12_STATIC_SAMPLER_DESC>{
-		pointWrap, pointClamp, linearWrap, linearClamp, anisotropicalWrap, anisotropicalClamp};
+		pointWrap, pointClamp, linearWrap, linearClamp, anisotropicalWrap, anisotropicalClamp, shadow};
 }
 
 void CDX12Manager::InitRootSignature()
@@ -250,7 +287,14 @@ void CDX12Manager::InitRootSignature()
 	cubeMapTable.RegisterSpace = 2;
 	cubeMapTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[6];
+	D3D12_DESCRIPTOR_RANGE shadowMapTable{};
+	shadowMapTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	shadowMapTable.NumDescriptors = 1;
+	shadowMapTable.BaseShaderRegister = 0;
+	shadowMapTable.RegisterSpace = 3;
+	shadowMapTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
 	//렌더 패스 정보
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0;
@@ -275,17 +319,21 @@ void CDX12Manager::InitRootSignature()
 	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[4].DescriptorTable.pDescriptorRanges = &textureTable;
-	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//큐브맵 정보
 	pd3dRootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &cubeMapTable;
 	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+	pd3dRootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &shadowMapTable;
+	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	auto samplers = InitStaticSamplers();
 
@@ -403,19 +451,10 @@ void CDX12Manager::BeforeRender()
 	cmdList->SetGraphicsRootSignature(mRootSignature.Get());
 	descriptorHeaps->SetSRVDescriptorHeap();
 	mCurFrameResource->Update();
-
-	auto& swapChainBuffers = renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)];
-	swapChainBuffers->ChangeResourceToTarget(curBackBuffIdx);
-	swapChainBuffers->SetRenderTarget(curBackBuffIdx);
-	swapChainBuffers->ClearRenderTarget(curBackBuffIdx);
-	swapChainBuffers->ClearDepthStencil();
 }
 
 void CDX12Manager::AfterRender()
 {
-	auto& swapChainBuffers = renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)];
-	swapChainBuffers->ChangeTargetToResource(curBackBuffIdx);
-
 	ThrowIfFailed(cmdList->Close());
 
 	ID3D12CommandList* pcmdLists[] = { cmdList.Get() };
@@ -427,6 +466,25 @@ void CDX12Manager::AfterRender()
 	mCurFrameResource->fence = ++mainFence;
 
 	ThrowIfFailed(cmdQueue->Signal(d3dFence.Get(), mainFence));
+}
+
+void CDX12Manager::PrepareShadowPass()
+{
+	auto& swapChainBuffers = renderTargetGroups[(UINT)RENDER_TARGET_GROUP_TYPE::SHADOW_PASS];
+	auto shadowMap = RESOURCE.Get<CTexture>(L"ShadowMap");
+
+	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
+	swapChainBuffers->SetOnlyDepthStencil();
+	swapChainBuffers->ClearDepthStencil(1.f);
+}
+
+void CDX12Manager::PrepareFinalPass()
+{
+	auto& swapChainBuffers = renderTargetGroups[(UINT)RENDER_TARGET_GROUP_TYPE::FINAL_PASS];
+	swapChainBuffers->ChangeResourceToTarget(0);
+	swapChainBuffers->SetRenderTarget(0);
+	swapChainBuffers->ClearRenderTarget(0);
 }
 
 std::shared_ptr<CUploadBuffer> CDX12Manager::GetBuffer(UINT type)

@@ -22,7 +22,6 @@ void CTexture::LoadFromFile(std::wstring_view _fileName)
 	}
 
 	std::wstring extension = std::filesystem::path(_fileName).extension();
-
 	std::unique_ptr<uint8_t[]> ddsData;
 	std::vector<D3D12_SUBRESOURCE_DATA> vSubresources;
 	DDS_ALPHA_MODE ddsAlphaMode = DDS_ALPHA_MODE_UNKNOWN;
@@ -59,30 +58,82 @@ void CTexture::LoadFromFile(std::wstring_view _fileName)
 	CMDLIST->ResourceBarrier(1, &resourceBarrier);
 }
 
-void CTexture::Create2DTexture(DXGI_FORMAT format, UINT width, UINT height, 
+void CTexture::Create2DTexture(DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
 	const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor)
 {
 	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Tex2D(format, width, height);
 	desc.Flags = resFlags;
 
-	D3D12_CLEAR_VALUE optimizedClearValue = {};
-	D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+	D3D12_CLEAR_VALUE* optimizedClearValue = NULL;
+	D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+
+	isSR = true;
 
 	if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)
 	{
-		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
-		optimizedClearValue = CD3DX12_CLEAR_VALUE(format, 1.0f, 0);
 		isSR = false;
+		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
+
+		DXGI_FORMAT clearFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		if (format == DXGI_FORMAT_R32_TYPELESS) {
+			clearFormat = DXGI_FORMAT_D32_FLOAT;
+		}
+		optimizedClearValue = new CD3DX12_CLEAR_VALUE(clearFormat, 1.0f, 0);
 	}
 	else if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
 	{
 		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
 		float arrFloat[4] = { clearColor.x, clearColor.y, clearColor.z, clearColor.w };
-		optimizedClearValue = CD3DX12_CLEAR_VALUE(format, arrFloat);
+		optimizedClearValue = new CD3DX12_CLEAR_VALUE(format, arrFloat);
 		isSR = true;
 	}
 
-	DEVICE->CreateCommittedResource(&heapProperty,heapFlags, &desc, resourceStates, &optimizedClearValue, IID_PPV_ARGS(&texResource));
+	ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperty, heapFlags, &desc, resourceStates, optimizedClearValue, IID_PPV_ARGS(&texResource)));
+
+	if (optimizedClearValue) delete optimizedClearValue;
+
+	if (data) {
+		const UINT num2DSubresources = desc.DepthOrArraySize * 1;
+		const UINT64 uploadBufferSize = GetRequiredIntermediateSize(texResource.Get(), 0, num2DSubresources);
+
+
+		size_t rowPitch = dataSize * width;
+
+		CD3DX12_RESOURCE_DESC uploadDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
+		CD3DX12_HEAP_PROPERTIES uploadHeapProps(D3D12_HEAP_TYPE_UPLOAD);
+
+		DEVICE->CreateCommittedResource(
+			&uploadHeapProps,
+			D3D12_HEAP_FLAG_NONE,
+			&uploadDesc,
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&uploadBuffer)
+		);
+
+		D3D12_SUBRESOURCE_DATA textureData = {};
+		textureData.pData = data;
+		textureData.RowPitch = rowPitch;
+		textureData.SlicePitch = rowPitch * height;
+
+		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			texResource.Get(),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			D3D12_RESOURCE_STATE_COPY_DEST
+		);
+
+		CMDLIST->ResourceBarrier(1, &barrier);
+
+		UpdateSubresources(CMDLIST, texResource.Get(), uploadBuffer.Get(), 0, 0, 1, &textureData);
+
+		barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+			texResource.Get(),
+			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_GENERIC_READ
+		);
+
+		CMDLIST->ResourceBarrier(1, &barrier);
+	}
 
 	switch (desc.Dimension)
 	{
@@ -126,17 +177,27 @@ void CTexture::ReleaseUploadBuffer()
 void CTexture::CreateSRV()
 {
 	if (isSR && (srvIdx == -1)) {
-		D3D12_SHADER_RESOURCE_VIEW_DESC desc = GetShaderResourceViewDesc();
+		D3D12_SHADER_RESOURCE_VIEW_DESC desc = GetSRVDesc();
 		auto descriptorHeap = INSTANCE(CDX12Manager).GetDescriptorHeaps();
 
 		if (texType == TEXTURECUBE) {
-			descriptorHeap->CreateCubeMap(texResource, desc, 0);
+			descriptorHeap->CreateCubeMap(shared_from_this(), 0);
 		}
 		else {
 			srvIdx = INSTANCE(CResourceManager).GetTopSRVIndex();
-			descriptorHeap->CreateSRV(texResource, desc, srvIdx);
+			descriptorHeap->CreateSRV(shared_from_this(), srvIdx);
 		}
 	}
+}
+
+void CTexture::CreateUAV()
+{
+}
+
+void CTexture::ChangeResourceState(D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
+{
+	CMDLIST->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texResource.Get(),
+		before, after));
 }
 
 ComPtr<ID3D12Resource>& CTexture::GetResource()
@@ -144,7 +205,7 @@ ComPtr<ID3D12Resource>& CTexture::GetResource()
 	return texResource;
 }
 
-D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc()
+D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetSRVDesc()
 {
 
 	D3D12_RESOURCE_DESC resourceDesc = texResource->GetDesc();
@@ -162,6 +223,18 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc()
 		srvDesc.Texture2D.MostDetailedMip = 0;
 		srvDesc.Texture2D.PlaneSlice = 0;
 		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+		break;
+	case TEXTURE_TYPE::DEPTH_STENCIL: //[]
+		srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		if (resourceDesc.Format == DXGI_FORMAT_R32_TYPELESS) {
+			srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		}
+
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.MipLevels = 1;
+		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+		srvDesc.Texture2D.PlaneSlice = 0;
 		break;
 	case TEXTURE_TYPE::TEXTURE2DARRAY:
 		srvDesc.Format = resourceDesc.Format;
@@ -191,4 +264,27 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc()
 	}
 
 	return srvDesc;
+}
+
+D3D12_DEPTH_STENCIL_VIEW_DESC CTexture::GetDSVDesc()
+{
+	D3D12_RESOURCE_DESC resourceDesc = texResource->GetDesc();
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+
+	switch (resourceDesc.Format)
+	{
+	case DXGI_FORMAT_R32_TYPELESS:
+		dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		break;
+	case DXGI_FORMAT_R24G8_TYPELESS:
+		dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		break;
+	default:
+		dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		break;
+	}
+	return dsvDesc;
 }

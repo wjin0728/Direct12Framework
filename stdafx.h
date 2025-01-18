@@ -172,20 +172,19 @@ struct CBMaterialDate {
 };
 
 
-struct CBTerrainMaterialDate {
+struct CBTerrainDate {
 	CBMaterialDate material;
+	Vec3 scale = Vec3::One;
 	int detailMapIdx = -1;
 	int heightMapIdx = -1;
-	Vec2 padding1{};
+	Vec3 padding1{};
 };
 
 struct CBPassData
 {
-	Matrix viewMat = Matrix::Identity;
-	Matrix projMat = Matrix::Identity;
 	Matrix viewProjMat = Matrix::Identity;
 	Vec3 camPos = Vec3::Zero;
-	float padding{};
+	UINT shadowMapIdx{};
 	Vec2 renderTargetSize{};
 	float deltaTime{};
 	float totalTime{};
@@ -193,7 +192,8 @@ struct CBPassData
 	float gFogStart = 50.0f;
 	float gFogRange = 300.0f;
 	Vec2 padding2;
-	CBTerrainMaterialDate terrainMat;
+	CBTerrainDate terrainMat;
+	Matrix shadowTransform = Matrix::Identity;
 };
 
 struct CBObjectData

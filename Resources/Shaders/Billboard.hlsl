@@ -107,7 +107,7 @@ float4 PS_Main(GS_OUTPUT input) : SV_TARGET
     camDir /= distToEye;
     
     
-    LightColor finalColor = CalculatePhongLight(input.posW.xyz, normal, camDir, material);
+    LightColor finalColor = CalculatePhongLight(input.posW.xyz, normal, camDir, material, float3(1.f,1.f,1.f));
     
     color.xyz = GammaEncoding((finalColor.diffuse.xyz * color.xyz) + finalColor.specular.xyz + (0.1 * color.xyz));
     

@@ -37,7 +37,7 @@ public:
 	RESOURCE_TYPE GetResourceType();
 
 public:
-	std::shared_ptr<CTexture> Create2DTexture(const std::wstring& name, DXGI_FORMAT format, UINT width, UINT height,
+	std::shared_ptr<CTexture> Create2DTexture(const std::wstring& name, DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
 		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = XMFLOAT4());
 	void UpdateMaterials();
 
