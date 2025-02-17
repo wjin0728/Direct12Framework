@@ -10,6 +10,8 @@ private:
 	std::shared_ptr<CGameObject> dirLightObj{};
 	std::shared_ptr<CDirectionalLight> dirLight{};
 
+	static constexpr UINT CASCADE_COUNT = 3;
+
 public:
 	CBattleScene();
 	virtual ~CBattleScene() = default;

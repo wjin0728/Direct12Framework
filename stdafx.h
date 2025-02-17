@@ -63,8 +63,8 @@ using SimpleMath::Color;
 
 #define _DEBUG
 
-#define FRAMEBUFFER_WIDTH		1200
-#define FRAMEBUFFER_HEIGHT		720
+#define FRAMEBUFFER_WIDTH		2000
+#define FRAMEBUFFER_HEIGHT		1200
 
 #define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
 
@@ -183,17 +183,22 @@ struct CBTerrainDate {
 struct CBPassData
 {
 	Matrix viewProjMat = Matrix::Identity;
+	Matrix shadowTransform = Matrix::Identity;
+
+	Vec4 gFogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+
 	Vec3 camPos = Vec3::Zero;
 	UINT shadowMapIdx{};
+
 	Vec2 renderTargetSize{};
+	Vec2 padding2;
+
 	float deltaTime{};
 	float totalTime{};
-	Vec4 gFogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
 	float gFogStart = 50.0f;
 	float gFogRange = 300.0f;
-	Vec2 padding2;
+
 	CBTerrainDate terrainMat;
-	Matrix shadowTransform = Matrix::Identity;
 };
 
 struct CBObjectData

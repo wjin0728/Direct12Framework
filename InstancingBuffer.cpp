@@ -1,14 +1,6 @@
 #include "stdafx.h"
 #include "InstancingBuffer.h"
 
-CInstancingBuffer::~CInstancingBuffer()
-{
-	if (buffer != nullptr) {
-		buffer->Unmap(0, NULL);
-	}
-	mappedData = nullptr;
-}
-
 
 void CInstancingBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum)
 {

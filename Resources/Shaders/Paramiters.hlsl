@@ -9,7 +9,9 @@
 
 #define TEXTURE_COUNT 10
 
-//#define FOG
+#define CASCADE_COUNT_FLAG 3
+
+#define FOG
 
 static const float a0 = 1.f;
 static const float a1 = 0.01f;
@@ -78,19 +80,19 @@ struct LightColor
 cbuffer CBPassData : register(b0)
 {
     matrix viewProjMat;
+    matrix shadowTransform;
+    float4 gFogColor;
     float3 camPos; 
     uint shadowMapIdx; 
     float2 renderTargetSize; 
+    float2 passPadding2;
     float deltaTime; 
     float totalTime;
     
-    float4 gFogColor;
     float gFogStart;
     float gFogRange;
     
-    float2 passPadding2;
     TerrainData terrainData;
-    matrix shadowTransform;
 };
 
 cbuffer CBObjectData : register(b1)

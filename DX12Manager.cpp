@@ -111,7 +111,7 @@ void CDX12Manager::ChangeSwapChainState()
 	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	dxgiTargetParameters.Width = renderTargetSize.y;
 	dxgiTargetParameters.Height = renderTargetSize.y;
-	dxgiTargetParameters.RefreshRate.Numerator = 60;
+	dxgiTargetParameters.RefreshRate.Numerator = 144;
 	dxgiTargetParameters.RefreshRate.Denominator = 1;
 	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -193,7 +193,7 @@ void CDX12Manager::InitDepthStencilView()
 		L"ShadowMap",
 		DXGI_FORMAT_R24G8_TYPELESS,
 		nullptr, 0,
-		2048, 2048,
+		4048, 4048,
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
@@ -379,8 +379,8 @@ void CDX12Manager::Destroy()
 #if defined(_DEBUG)
 	IDXGIDebug1* pdxgiDebug = NULL;
 	DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pdxgiDebug));
-	HRESULT hResult = pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
-		DXGI_DEBUG_RLO_DETAIL);
+	/*HRESULT hResult = pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
+		DXGI_DEBUG_RLO_DETAIL);*/
 	pdxgiDebug->Release();
 #endif
 	mSwapChain->SetFullscreenState(FALSE, NULL);

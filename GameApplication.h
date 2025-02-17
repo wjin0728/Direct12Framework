@@ -13,7 +13,7 @@ private:
 	HINSTANCE mHInstance = nullptr;
 	HWND mHwnd = nullptr;
 
-	std::wstring appName = L"¿ìÁö´Ï²¨ (";
+	std::wstring appName = L"Á¹ÀÛ (";
 
 	bool active = true;
 

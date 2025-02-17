@@ -34,7 +34,16 @@ float4 PS_Main(VS_OUTPUT input) : SV_Target
         return color;
     
     color = diffuseMap[idx].Sample(linearWrap, input.uv);
-    color *= materials[materialIdx].albedo;
-
+    
+    int type = materials[materialIdx].normalMapIdx;
+    if (type == -1)
+    {
+        color *= materials[materialIdx].albedo;
+    }
+    else if (type == 0)
+    {
+        color = color.xxxw;
+    }
+    
     return color;
 }

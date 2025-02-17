@@ -323,11 +323,11 @@
     <ClCompile Include="VertexBuffer.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="InstancingGroup.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="InstancingBuffer.cpp">
-      <Filter>Client</Filter>
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancingGroup.cpp">
+      <Filter>Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -363,6 +363,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="Resources\Shaders\Shadow.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="Resources\Shaders\TerrainShadow.hlsl">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>

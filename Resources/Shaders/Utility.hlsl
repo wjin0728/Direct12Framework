@@ -30,7 +30,7 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, floa
 
 float CalcShadowFactor(float4 shadowPosH)
 {
-    shadowPosH.xyz /= shadowPosH.w;
+    //shadowPosH.xyz /= shadowPosH.w;
 
     // Depth in NDC space.
     float depth = shadowPosH.z;
@@ -52,8 +52,8 @@ float CalcShadowFactor(float4 shadowPosH)
     [unroll]
     for (int i = 0; i < 9; ++i)
     {
-        percentLit += (shadowMap.SampleCmpLevelZero(shadowSam,
-            shadowPosH.xy + offsets[i], depth).r);
+        percentLit += diffuseMap[shadowMapIdx].SampleCmpLevelZero(shadowSam,
+            shadowPosH.xy + offsets[i], depth).r;
     }
     
     return percentLit / 9.0f;
@@ -175,7 +175,6 @@ LightColor ComputeSpotLight(SpotLight light, float3 position, float3 normal, flo
     
     lightDir = normalize(lightDir);
  
-    
     
     //디퓨즈, 스페큘러항 계산
     float diffuseFactor = dot(lightDir, normal);

@@ -11,7 +11,7 @@ private:
 
 public:
 	CInstancingBuffer() = default;
-	~CInstancingBuffer();
+	~CInstancingBuffer() {};
 
 public:
 	virtual void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1);

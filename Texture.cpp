@@ -71,7 +71,6 @@ void CTexture::Create2DTexture(DXGI_FORMAT format, void* data, size_t dataSize, 
 
 	if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)
 	{
-		isSR = false;
 		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
 		DXGI_FORMAT clearFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -174,7 +173,7 @@ void CTexture::ReleaseUploadBuffer()
 	}
 }
 
-void CTexture::CreateSRV()
+int CTexture::CreateSRV()
 {
 	if (isSR && (srvIdx == -1)) {
 		D3D12_SHADER_RESOURCE_VIEW_DESC desc = GetSRVDesc();
@@ -188,6 +187,8 @@ void CTexture::CreateSRV()
 			descriptorHeap->CreateSRV(shared_from_this(), srvIdx);
 		}
 	}
+
+	return srvIdx;
 }
 
 void CTexture::CreateUAV()

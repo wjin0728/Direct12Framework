@@ -42,7 +42,7 @@ float4 PS_Main(VS_OUTPUT input) : SV_TARGET
     float4 color = skyBoxMap.Sample(linearWrap, input.localPos);
     
     #ifdef FOG
-    color = lerp(color, gFogColor, 0.9f);
+    color = gFogColor;
 #endif
     
     return color;

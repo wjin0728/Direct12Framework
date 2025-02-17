@@ -65,14 +65,14 @@ void CScene::RenderShadowPass()
 	mShaders[L"Shadow"]->SetPipelineState(CMDLIST);
 	camera->SetViewportsAndScissorRects(CMDLIST);
 
-	/*auto& objects = mRenderLayers[L"Opaque"];
+	auto& objects = mRenderLayers[L"Opaque"];
 	for (const auto& object : objects) {
 		if (!camera->IsInFrustum(object)) continue;
 		object->Render();
-	}*/
+	}
 
 	auto shadowMap = RESOURCE.Get<CTexture>(L"ShadowMap");
-
+	 
 	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
 }
 
@@ -91,8 +91,8 @@ void CScene::RenderForwardPass()
 		return;
 	}
 
-	auto shadowPassBuffer = UPLOADBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-	shadowPassBuffer->UpdateBuffer(0);
+	auto forwardPassBuffer = UPLOADBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	forwardPassBuffer->UpdateBuffer(0);
 
 	camera->SetViewportsAndScissorRects(CMDLIST);
 
@@ -103,6 +103,7 @@ void CScene::RenderForwardPass()
 	for (const auto& instancingGroup : instancingGroups) {
 		instancingGroup->Render(camera);
 	}
+
 	RenderForLayer(L"UI", false);
 
 	backBuffer->ChangeTargetToResource(backBufferIdx);
@@ -273,9 +274,9 @@ void CScene::UpdatePassData()
 	passData.totalTime = TIMER.GetTotalTime();
 	passData.renderTargetSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
 
-	passData.gFogRange = 1000.f;
+	passData.gFogRange = 120.f;
 	passData.gFogStart = 100.f;
-	//passData.gFogColor = Color(0.5f, 0.5f, 0.5f);
+	passData.gFogColor = Color(0.6f, 0.6f, 0.6f);
 
 	if (mTerrain) {
 		auto terrainMat = mTerrain->GetMaterial();

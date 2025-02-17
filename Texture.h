@@ -45,7 +45,7 @@ public:
 	void SetSrvIndex(UINT idx) { srvIdx = idx; }
 	void SetTextureType(TEXTURE_TYPE type) { texType = type; }
 
-	void CreateSRV();
+	int CreateSRV();
 	void CreateUAV();
 
 	void ChangeResourceState(D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);

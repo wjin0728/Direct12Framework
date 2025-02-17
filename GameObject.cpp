@@ -226,6 +226,23 @@ std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::wstring&
 	return object;
 }
 
+std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::wstring& tag, const std::wstring& materialName, Vec2 pos)
+{
+	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
+	object->mTag = tag;
+
+	object->mMeshRenderer = std::make_shared<CMeshRenderer>();
+	object->AddComponent(object->mMeshRenderer);
+	object->mMeshRenderer->SetMesh(RESOURCE.Get<CMesh>(L"Rectangle"));
+	object->mMeshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
+
+	object->GetTransform()->SetLocalPosition({ pos.x, pos.y, 0.f });
+	object->SetActive(true);
+	object->SetRenderLayer(L"UI");
+
+	return object;
+}
+
 std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(const std::wstring& tag, const std::wstring& heightMapName, 
 	UINT width, UINT height, Vec3 scale)
 {

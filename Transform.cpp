@@ -171,7 +171,11 @@ void CTransform::Move(const Vec3& direction, float distance)
 void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
 {
 	Vec3 lookVec = lookDir.GetNormalized();
-	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
+
+	Vec3 Up = up.GetNormalized();
+	if (lookDir == Vec3(0.f, -1.f, 0.f) || lookDir == Vec3(0.f, 1.f, 0.f)) Up = Vec3(0.f, 0.f, 1.f);
+
+	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, Up);
 	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
 	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
 
@@ -260,6 +264,10 @@ void CTransform::UpdateLocalMatrix()
 	mLocalMat._41 = mLocalPosition.x;
 	mLocalMat._42 = mLocalPosition.y;
 	mLocalMat._43 = mLocalPosition.z;
+
+	mLocalRight = Vec3(mLocalMat._11, mLocalMat._12, mLocalMat._13);
+	mLocalUp = Vec3(mLocalMat._21, mLocalMat._22, mLocalMat._23);
+	mLocalLook = Vec3(mLocalMat._31, mLocalMat._32, mLocalMat._33);
 }
 
 void CTransform::UpdateWorldMatrix()

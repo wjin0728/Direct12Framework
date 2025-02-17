@@ -41,7 +41,6 @@ VS_OUTPUT VS_Main(VS_INPUT input)
 #define TRANSPARENT_CLIP
 
 //«»ºø ºŒ¿Ã¥ı
-[earlydepthstencil]
 float4 PS_Main(VS_OUTPUT input) : SV_TARGET
 {
     float4 color = float4(1.f, 1.f, 1.f, 1.f);

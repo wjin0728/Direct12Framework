@@ -71,6 +71,7 @@ public:
 	//기본 설정을 가진 렌더 오브젝트를 생성한다.
 	static std::shared_ptr<CGameObject> CreateRenderObject(const std::wstring& tag, 
 		const std::wstring& meshName, const std::wstring& materialName);
+	static std::shared_ptr<CGameObject> CreateUIObject(const std::wstring& tag, const std::wstring& materialName, Vec2 pos);
 	//기본 설정을 가진 지형 오브젝트를 생성한다.
 	static std::shared_ptr<CGameObject> CreateTerrainObject(const std::wstring& tag, const std::wstring& heightMapName,
 		UINT width, UINT height, Vec3 scale = {1.f,1.f,1.f});

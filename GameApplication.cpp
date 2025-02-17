@@ -62,7 +62,7 @@ int CGameApplication::Run()
 		}
 	}
 
-	//INSTANCE(CDX12Manager).Destroy();
+	INSTANCE(CDX12Manager).Destroy();
 
 	return (int)msg.wParam;
 }

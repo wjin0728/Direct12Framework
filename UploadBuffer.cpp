@@ -21,7 +21,7 @@ void CUploadBuffer::CopyData(const void* _data, UINT idx)
 void CUploadBuffer::CreateBuffer()
 {
 	CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize * dataNum);
+	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(byteSize* dataNum);
 
 	ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, 
 		&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&buffer)));
@@ -36,7 +36,7 @@ void CConstantBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataN
 	rootParamIdx = _rootParamIdx;
 	dataSize = _dataSize;
 	dataNum = _dataNum;
-	byteSize = ((sizeof(dataSize) + 255) & ~255);
+	byteSize = ((dataSize + 255) & ~255);
 
 	CreateBuffer();
 }
