@@ -368,5 +368,8 @@
     <None Include="Resources\Shaders\TerrainShadow.hlsl">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="Resources\Shaders\Triplanar.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>
