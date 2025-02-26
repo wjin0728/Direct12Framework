@@ -9,9 +9,11 @@
 
 #define TEXTURE_COUNT 10
 
+#define TERRAIN_SPLAT_COUNT 7
+
 #define CASCADE_COUNT_FLAG 3
 
-#define FOG
+//#define FOG
 
 static const float a0 = 1.f;
 static const float a1 = 0.01f;
@@ -29,13 +31,26 @@ struct Material
     float3 padding1;
 };
 
+struct TerrainSplat
+{
+    int layerNum;
+    struct Layer
+    {
+        int diffuseIdx;
+        int normalIdx;
+        
+        float metallic;
+        float smoothness;
+    } layer[4];
+};
+
 struct TerrainData
 {
-    Material material;
     float3 scale;
-    int detailMapTdx;
     int heightMapIdx;
-    float3 padding1;
+    
+    int splatNum;
+    TerrainSplat splat[TERRAIN_SPLAT_COUNT];
 };
 
 struct DirectionalLight

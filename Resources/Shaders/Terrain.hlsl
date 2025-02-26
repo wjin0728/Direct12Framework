@@ -115,11 +115,11 @@ DS_OUTPUT DS_Main(TessFactor tessFactors, float2 uv : SV_DomainLocation, const O
     dout.uv = lerp(uv1, uv2, uv.y);
 	
     Texture2D heightMap = diffuseMap[terrainData.heightMapIdx];
-    p.y = heightMap.SampleLevel(linearWrap, dout.uv, 0).r*255.f * terrainData.scale.y;
+    p.y = heightMap.SampleLevel(linearWrap, dout.uv, 0).r / 65535f * terrainData.scale.y;
     
     dout.worldPos = float4(p, 1.0f);
     dout.position = mul(dout.worldPos, viewProjMat);
-    dout.ShadowPosH = mul(dout.worldPos, shadowTransform);
+    //dout.ShadowPosH = mul(dout.worldPos, shadowTransform);
 	
     return dout;
 }

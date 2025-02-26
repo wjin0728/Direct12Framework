@@ -335,9 +335,6 @@ void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& 
 			std::string name{};
 
 			ReadDateFromFile(inFile, name);
-			if (name == "ID55inst") {
-				std::cout << "Asdfasdf";
-			}
 			obj->mName = stringToWstring(name);
 		}
 		else if (token == "<Transform>:") {

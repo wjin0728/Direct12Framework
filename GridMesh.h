@@ -11,10 +11,9 @@ class CHeightMapGridMesh : public CMesh
 {
 private:
 	friend class CTerrain;
-	BYTE* heightMap;
+	std::vector<uint16_t> heightData;
 
-	UINT width{};
-	UINT height{};
+	UINT resolution{};
 	Vec3 scale{};
 
 	D3D12_GPU_VIRTUAL_ADDRESS heightMapSRV;
@@ -27,7 +26,7 @@ private:
 
 public:
 	CHeightMapGridMesh() = default;
-	void Initialize(const std::wstring& fileName, int _width, int _height, Vec3 _scale);
+	void Initialize(const std::wstring& fileName, UINT _resoultion, Vec3 _scale);
 	virtual ~CHeightMapGridMesh();
 
 	int GetWidth() const { return width; }

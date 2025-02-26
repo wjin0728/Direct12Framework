@@ -113,8 +113,8 @@ void CBattleScene::Initialize()
 
 #pragma region Terrain
 	{
-		auto terrainObj = CGameObject::CreateTerrainObject(L"Terrain", L"Resources\\Textures\\HeightMap.raw", 
-			257, 257, { 8.0f, 1.5f, 8.0f });
+		auto terrainObj = CGameObject::CreateTerrainObject(L"Terrain", L"Resources\\Textures\\lobby.raw", 
+			513, 513, { 1.0f, 1.f, 1.0f });
 		AddObject(L"", terrainObj);
 
 		mTerrain = terrainObj->GetComponent<CTerrain>();
@@ -256,7 +256,6 @@ void CBattleScene::SetLights()
 		center += corners[i];
 	}
 	center /= 8.f;
-
 	float max = -FLT_MAX;
 	for (int i = 0; i < 8; ++i) {
 		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);

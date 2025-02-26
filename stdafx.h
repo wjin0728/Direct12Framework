@@ -155,10 +155,10 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* device, ID3D12GraphicsCommand
 	void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource** ppd3dUploadBuffer);
 
 
-#define DIRECTIONAL_LIGHT 5
-#define POINT_LIGHT 5
-#define SPOT_LIGHT 5
-#define DETAIL_MAP 5
+constexpr auto DIRECTIONAL_LIGHT = 5;
+constexpr auto POINT_LIGHT = 5;
+constexpr auto SPOT_LIGHT = 5;
+constexpr auto TERRAIN_SPLAT_COUNT = 7;
 
 
 struct CBMaterialDate {
@@ -171,13 +171,25 @@ struct CBMaterialDate {
 	Vec3 padding1{};
 };
 
+struct TerrainSplat
+{
+	int layerNum;
+	struct Layer
+	{
+		int diffuseIdx;
+		int normalIdx;
+
+		float metallic;
+		float smoothness;
+	} layer[4];
+};
 
 struct CBTerrainDate {
-	CBMaterialDate material;
 	Vec3 scale = Vec3::One;
-	int detailMapIdx = -1;
 	int heightMapIdx = -1;
-	Vec3 padding1{};
+
+	int splatNum;
+	TerrainSplat splats[TERRAIN_SPLAT_COUNT];
 };
 
 struct CBPassData
