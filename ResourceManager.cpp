@@ -44,6 +44,35 @@ void CResourceManager::UpdateMaterials()
 	}
 }
 
+void CResourceManager::LoadSceneResourcesFromFile(const std::wstring& fileName)
+{
+	using namespace BinaryReader;
+
+	std::ifstream ifs{ fileName, std::ios::binary };
+	if (!ifs) {
+		return;
+	}
+
+	std::string token{};
+
+	int meshCount{};
+	ReadDateFromFile(ifs, meshCount);
+	for (int i = 0; i < meshCount;i++) {
+		std::string meshName;
+		ReadDateFromFile(ifs, meshName);
+
+		if (!Get<CMesh>(stringToWstring(meshName))) {
+			Add(CMesh::CreateMeshFromFile(meshName));
+		}
+	}
+
+	int materialCount{};
+	ReadDateFromFile(ifs, materialCount);
+	for (int i = 0; i < materialCount; i++) {
+		Add(CMaterial::CreateMaterialFromFile(ifs));
+	}
+}
+
 void CResourceManager::LoadDefaultMeshes()
 {
 	{

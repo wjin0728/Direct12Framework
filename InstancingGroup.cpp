@@ -36,7 +36,7 @@ void CInstancingGroup::AddObject(std::shared_ptr<class CGameObject> object)
 void CInstancingGroup::Render(const std::shared_ptr<class CCamera>& camera)
 {
 	int instancingCnt{};
-	auto instancingBuffer = std::static_pointer_cast<CInstancingBuffer>(UPLOADBUFFER(mType));
+	auto instancingBuffer = INSTANCINGBUFFER(mType);
 	mInstancingBufferView = instancingBuffer->GetInstancingBufferView();
 
 	switch (mType)
@@ -51,9 +51,8 @@ void CInstancingGroup::Render(const std::shared_ptr<class CCamera>& camera)
 			objDate.position = obj->GetTransform()->GetWorldPosition();
 			objDate.size = { obj->GetTransform()->GetLocalScale().x, obj->GetTransform()->GetLocalScale().y };
 			objDate.textureMat = obj->GetTransform()->GetTexMat().Transpose();
-			objDate.materialIdx = obj->GetMeshRendere()->GetMaterialIndex();
 
-			instancingBuffer->CopyData(&objDate, instancingCnt++);
+			instancingBuffer->UpdateBuffer(instancingCnt++, &objDate);
 		}
 
 		if (!mObjects.empty()) {

@@ -3,6 +3,7 @@
 #include"CResource.h"
 
 
+
 class CMaterial : public CResource
 {
 public:
@@ -10,16 +11,17 @@ public:
 	Color mSpecularColor = Color(1.f, 1.f, 1.f, 1.f);
 	Color mEmissiveColor = Color(0.f, 0.f, 0.f, 1.f);
 	Vec3 mFresnelR0 = Vec3(0.04f, 0.04f, 0.04f);
-	int mSrvIdx = -1;
+	UINT mPoolOffset{};
 
 	int mDiffuseMapIdx = -1;
 	int mNormalMapIdx = -1;
 
-	int mDirtyFramesNum{3};
+	std::shared_ptr<class CShader> mShader{};
 
 public:
 	CMaterial();
 	virtual void Update();
+	virtual void BindToShader();
 	virtual void ReleaseUploadBuffer() {}
 	static std::shared_ptr<CMaterial> CreateMaterialFromFile(std::ifstream& inFile);
 };

@@ -118,9 +118,15 @@ void CMesh::CreateIndexBuffers()
 	}
 }
 
-std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
+std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(const std::string& name)
 {
+	std::ifstream inFile{ name + ".bin", std::ios::binary};
+	if (!inFile) {
+		return nullptr;
+	}
+
 	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
+	m->name = BinaryReader::stringToWstring(name);
 
 	int nvertices{};
 	BinaryReader::ReadDateFromFile(inFile, nvertices);
@@ -151,10 +157,6 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 			for (int i = 0; i < nPositions; i++) {
 				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].position);
 			}
-		}
-		else if (token == "<Colors>:")
-		{
-
 		}
 		else if (token == "<Normals>:")
 		{
@@ -193,15 +195,6 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].tangent);
 			}
 
-		}
-		else if (token == "<BiTangents>:")
-		{
-			int nBiTangent{};
-			Vec3 biTangent{};
-			BinaryReader::ReadDateFromFile(inFile, nBiTangent);
-			for (int i = 0; i < nBiTangent; i++) {
-				BinaryReader::ReadDateFromFile(inFile, biTangent);
-			}
 		}
 		else if (token == "<Indices>:")
 		{
@@ -248,6 +241,113 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 	m->CreateIndexBuffers();
 
 	return m;
+}
+
+std::shared_ptr<CMesh> CMesh::CreateMeshFromFBX(std::string& fileName)
+{
+	std::shared_ptr<CMesh> newMesh = std::make_shared<CMesh>();
+	//FbxManager* manager = FbxManager::Create();
+	//FbxIOSettings* ios = FbxIOSettings::Create(manager, IOSROOT);
+	//manager->SetIOSettings(ios);
+
+	//FbxImporter* importer = FbxImporter::Create(manager, "");
+	//if (!importer->Initialize(fileName.c_str(), -1, manager->GetIOSettings())) {
+	//	std::cerr << "FBX 초기화 실패: " << importer->GetStatus().GetErrorString() << std::endl;
+	//	manager->Destroy();
+
+	//	return nullptr;
+	//}
+
+	//FbxScene* scene = FbxScene::Create(manager, "scene");
+	//importer->Import(scene);
+	//importer->Destroy();
+
+	//
+	//FbxGeometryConverter converter(manager);
+
+
+	//FbxNode* rootNode = scene->GetRootNode();
+	//for (int i = 0; i < rootNode->GetChildCount(); i++) {
+	//	FbxNode* node = rootNode->GetChild(i);
+	//	if (node->GetNodeAttribute() && node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh) {
+	//		FbxMesh* mesh = node->GetMesh();
+
+	//		bool needTriangulate = false;
+	//		for (int i = 0; i < mesh->GetPolygonCount(); i++) {
+	//			if (mesh->GetPolygonSize(i) > 3) { 
+	//				needTriangulate = true;
+	//			}
+	//		}
+
+	//		if(needTriangulate) converter.Triangulate(mesh, true);
+
+	//		int vertexCount = mesh->GetControlPointsCount();
+	//		FbxVector4* controlPoints = mesh->GetControlPoints();
+	//		newMesh->vertices.resize(vertexCount);
+
+	//		// Position
+	//		for (int j = 0; j < vertexCount; j++) {
+	//			newMesh->vertices[j].position.x = (float)controlPoints[j][0];
+	//			newMesh->vertices[j].position.y = (float)controlPoints[j][1];
+	//			newMesh->vertices[j].position.z = (float)controlPoints[j][2];
+	//		}
+
+	//		// UV (TexCoord)
+	//		FbxGeometryElementUV* uvElement = mesh->GetElementUV(0);
+	//		if (uvElement) {
+	//			for (int j = 0; j < mesh->GetPolygonCount(); j++) {
+	//				for (int k = 0; k < mesh->GetPolygonSize(j); k++) {
+	//					int vertexIndex = mesh->GetPolygonVertex(j, k);
+	//					FbxVector2 uv = uvElement->GetDirectArray().GetAt(vertexIndex);
+	//					newMesh->vertices[vertexIndex].texCoord.x = (float)uv[0];
+	//					newMesh->vertices[vertexIndex].texCoord.y = (float)uv[1];
+	//				}
+	//			}
+	//		}
+
+	//		// Normal
+	//		FbxGeometryElementNormal* normalElement = mesh->GetElementNormal(0);
+	//		if (normalElement) {
+	//			for (int j = 0; j < mesh->GetPolygonCount(); j++) {
+	//				for (int k = 0; k < mesh->GetPolygonSize(j); k++) {
+	//					int vertexIndex = mesh->GetPolygonVertex(j, k);
+	//					FbxVector4 normal = normalElement->GetDirectArray().GetAt(vertexIndex);
+	//					newMesh->vertices[vertexIndex].normal.x = (float)normal[0];
+	//					newMesh->vertices[vertexIndex].normal.y = (float)normal[1];
+	//					newMesh->vertices[vertexIndex].normal.z = (float)normal[2];
+	//				}
+	//			}
+	//		}
+
+	//		// Tangent
+	//		FbxGeometryElementTangent* tangentElement = mesh->GetElementTangent(0);
+	//		if (tangentElement) {
+	//			for (int j = 0; j < mesh->GetPolygonCount(); j++) {
+	//				for (int k = 0; k < mesh->GetPolygonSize(j); k++) {
+	//					int vertexIndex = mesh->GetPolygonVertex(j, k);
+	//					FbxVector4 tangent = tangentElement->GetDirectArray().GetAt(vertexIndex);
+	//					newMesh->vertices[vertexIndex].tangent.x = (float)tangent[0];
+	//					newMesh->vertices[vertexIndex].tangent.y = (float)tangent[1];
+	//					newMesh->vertices[vertexIndex].tangent.z = (float)tangent[2];
+	//				}
+	//			}
+	//		}
+	//		UINT polygonCount = mesh->GetPolygonCount();
+	//		newMesh->indices.push_back(std::vector<UINT>(polygonCount * 3));
+	//		for (int j = 0; j < polygonCount; j++) {
+	//			newMesh->indices[0].push_back(mesh->GetPolygonVertex(j, 0));
+	//			newMesh->indices[0].push_back(mesh->GetPolygonVertex(j, 1));
+	//			newMesh->indices[0].push_back(mesh->GetPolygonVertex(j, 2));
+	//		}
+	//	}
+	//}
+
+	//manager->Destroy();
+
+	//newMesh->CreateVertexBuffer();
+	//newMesh->CreateIndexBuffers();
+
+	return newMesh;
 }
 
 std::shared_ptr<CMesh> CMesh::CreateCubeMesh(Vec3 scale)

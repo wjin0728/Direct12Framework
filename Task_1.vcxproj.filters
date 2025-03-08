@@ -184,9 +184,16 @@
     <ClInclude Include="VertexBuffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="InstancingGroup.h" />
-    <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="Enums.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingBuffer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingGroup.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="CBData.h">
       <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>

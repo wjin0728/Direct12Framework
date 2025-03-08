@@ -1,6 +1,18 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
+cbuffer MaterialData : register(b0, space1)
+{
+    float fallOff;
+    float2 tilling;
+    float padding;
+    
+    uint topTexIdx;
+    uint topNormalIdx;
+    uint sideTexIdx;
+    uint sideNormalIdx;
+};
+
 
 float4 TriplanarSampling(Texture2D topTexMap, Texture2D midTexMap, Texture2D botTexMap, float3 worldPos, float3 worldNormal, float falloff, float2 tiling)
 {
@@ -33,10 +45,11 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
     float4 position : SV_POSITION;
-    float4 worldPos : POSITION;
-    float3 worldNormal : NORMAL;
-    float3 worldTangent : TANGENT;
-    float4 ShadowPosH : POSITION1;
+    float4 worldPos : TEXCOORD0;
+    float3 worldNormal : TEXCOORD1;
+    float3 worldTangent : TEXCOORD2;
+    float3 worldBitangent : TEXCOORD3;
+    float4 ShadowPosH : TEXCOORD4;
 };
 
 //¡§¡° ºŒ¿Ã¥ı
@@ -62,11 +75,8 @@ VS_OUTPUT VS_Main(VS_INPUT input)
 float4 PS_Main(VS_OUTPUT input) : SV_TARGET
 {
     float4 color = float4(1.f, 1.f, 1.f, 1.f);
-    Material material = materials[materialIdx];
-    int diffuseMapIdx = material.diffuseMapIdx;
-    int normalMapIdx = material.normalMapIdx;
     
-    float4 texColor = diffuseMap[diffuseMapIdx].Sample(anisoWrap, input.uv);
+    float4 texColor = TriplanarSampling(diffuseMap[topTexIdx], diffuseMap[sideTexIdx], diffuseMap[topTexIdx], input.worldPos, input.worldNormal, fallOff, tilling);
     color = float4(GammaDecoding(texColor.rgb), texColor.a);
     
     #ifdef TRANSPARENT_CLIP

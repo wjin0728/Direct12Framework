@@ -252,7 +252,7 @@ std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(const std::wstring
 	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(L"HeightMap01"));
 	if (!mesh) {
 		mesh = std::make_shared<CHeightMapGridMesh>();
-		mesh->Initialize(heightMapName, width, height, scale);
+		mesh->Initialize(heightMapName, width, scale);
 		mesh->SetName(L"HeightMap01");
 		RESOURCE.Add(mesh);
 	}
@@ -379,41 +379,7 @@ void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 
 void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile)
 {
-	using namespace BinaryReader;
-	mMeshRenderer = std::make_shared<CMeshRenderer>();
-	AddComponent(mMeshRenderer);
-
-	std::string meshName;
-	BinaryReader::ReadDateFromFile(inFile, meshName);
-	std::wstring meshNameW = BinaryReader::stringToWstring(meshName);
-
-	std::shared_ptr<CMesh> mesh = CMesh::CreateMeshFromFile(inFile);
-	mesh->SetName(meshNameW);
-	mMeshRenderer->SetMesh(mesh);
-	RESOURCE.Add(mesh);
-
-	mCollider = std::make_shared<CCollider>();
-	AddComponent(mCollider);
-	mCollider->SetLocalOOBB(mesh->oobb);
-
-	std::string token{};
-
-	ReadDateFromFile(inFile, token);
-
-	if (token == "<Materials>:") {
-		int materialCnt{};
-		ReadDateFromFile(inFile, materialCnt);
-
-		for (int i = 0; i < materialCnt; i++) {
-			ReadDateFromFile(inFile, token);
-			
-			std::shared_ptr<CMaterial> material = CMaterial::CreateMaterialFromFile(inFile);
-			
-			mMeshRenderer->AddMaterial(material);
-		}
-
-		ReadDateFromFile(inFile, token);
-	}
+	
 }
 
 const BoundingBox& CGameObject::CombineChildrenOOBB()

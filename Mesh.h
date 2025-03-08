@@ -58,7 +58,8 @@ public:
 	void CreateIndexBuffers();
 
 public:
-	static std::shared_ptr<CMesh> CreateMeshFromFile(std::ifstream& inFile);
+	static std::shared_ptr<CMesh> CreateMeshFromFile(const std::string& name);
+	static std::shared_ptr<CMesh> CreateMeshFromFBX(std::string& fileName);
 	static std::shared_ptr<CMesh> CreateCubeMesh(Vec3 scale = {1.f,1.f,1.f});
 	static std::shared_ptr<CMesh> CreateRectangleMesh(Vec2 scale = { 1.f,1.f });
 	static std::shared_ptr<CMesh> CreateSphereMesh(float radius, UINT stackCnt, UINT sliceCnt);

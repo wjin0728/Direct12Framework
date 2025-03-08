@@ -59,8 +59,8 @@ void CScene::RenderShadowPass()
 
 	INSTANCE(CDX12Manager).PrepareShadowPass();
 
-	auto shadowPassBuffer = UPLOADBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-	shadowPassBuffer->UpdateBuffer(1);
+	auto shadowPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	shadowPassBuffer->BindToShader(sizeof(CBPassData));
 
 	mShaders[L"Shadow"]->SetPipelineState(CMDLIST);
 	camera->SetViewportsAndScissorRects(CMDLIST);
@@ -91,8 +91,8 @@ void CScene::RenderForwardPass()
 		return;
 	}
 
-	auto forwardPassBuffer = UPLOADBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-	forwardPassBuffer->UpdateBuffer(0);
+	auto forwardPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	forwardPassBuffer->BindToShader(0);
 
 	camera->SetViewportsAndScissorRects(CMDLIST);
 
@@ -281,22 +281,16 @@ void CScene::UpdatePassData()
 	if (mTerrain) {
 		auto terrainMat = mTerrain->GetMaterial();
 
-		passData.terrainMat.material.albedoColor = terrainMat->mAlbedoColor;
-		passData.terrainMat.material.emissiveColor = terrainMat->mEmissiveColor;
-		passData.terrainMat.material.fresnelR0 = terrainMat->mFresnelR0;
-		passData.terrainMat.material.specularColor = terrainMat->mSpecularColor;
-		passData.terrainMat.material.diffuseMapIdx = terrainMat->mDiffuseMapIdx;
-		passData.terrainMat.material.normalMapIdx = terrainMat->mNormalMapIdx;
-		passData.terrainMat.detailMapIdx = terrainMat->mDetailMap1Idx;
+		
 		passData.terrainMat.heightMapIdx = RESOURCE.Get<CTexture>(L"heightMap")->GetSrvIndex();
 		passData.terrainMat.scale = mTerrain->GetScale();
 	}
-	UPLOADBUFFER(CONSTANT_BUFFER_TYPE::PASS)->CopyData(&passData);
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(0, &passData, sizeof(CBPassData));
 
 	if (lightCamera) {
 		passData.camPos = lightCamera->GetLocalPosition();
 		passData.viewProjMat = lightCamera->GetViewOrthoProjMat().Transpose();
 	}
 
-	UPLOADBUFFER(CONSTANT_BUFFER_TYPE::PASS)->CopyData(&passData, 1);
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(sizeof(CBPassData), &passData, sizeof(CBPassData));
 }

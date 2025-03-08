@@ -6,14 +6,10 @@
 
 CMaterial::CMaterial()
 {
-	mSrvIdx = INSTANCE(CResourceManager).GetMaterialSRVIndex();
 }
 
 void CMaterial::Update()
 {
-	if (mDirtyFramesNum <= 0) {
-		return;
-	}
 
 	CBMaterialDate materialDate{};
 	materialDate.albedoColor = mAlbedoColor;
@@ -22,9 +18,13 @@ void CMaterial::Update()
 	materialDate.diffuseMapIdx = mDiffuseMapIdx;
 	materialDate.normalMapIdx = mNormalMapIdx;
 
-	UPLOADBUFFER(STRUCTED_BUFFER_TYPE::MATERIAL)->CopyData(&materialDate, mSrvIdx);
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->UpdateBuffer(mPoolOffset, &materialDate, sizeof(CBMaterialDate));
 
-	mDirtyFramesNum--;
+}
+
+void CMaterial::BindToShader()
+{
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->BindToShader(mPoolOffset);
 }
 
 std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFile)
@@ -40,6 +40,20 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		material = std::make_shared<CMaterial>();
 		material->SetName(name);
 		RESOURCE.Add(material);
+	}
+
+	ReadDateFromFile(inFile, token);
+	if (token == "SyntyStudios/Basic_LOD_Shader") {
+
+	}
+	else if (token == "SyntyStudios/Triplanar_01" || token == "SyntyStudios/Triplanar_Basic") {
+
+	}
+	else if (token == "SyntyStudios/VegitationShader" || token == "SyntyStudios/VegitationShader_Basic") {
+
+	}
+	else if (token == "Universal Render Pipeline/Lit") {
+
 	}
 
 	while (true)
@@ -153,9 +167,4 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 
 void CTerrainMaterial::Update()
 {
-	if (mDirtyFramesNum <= 0) {
-		return;
-	}
-
-	mDirtyFramesNum--;
 }

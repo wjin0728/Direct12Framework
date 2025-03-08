@@ -40,13 +40,13 @@ void CMeshRenderer::Render()
 	objDate.invWorldMAt = objDate.worldMAt.Invert();
 	objDate.textureMat = GetTransform()->mTextureMat.Transpose();
 
+	UINT offset = sizeof(CBObjectData) * GetTransform()->mCbvIdx;
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->UpdateBuffer(offset, &objDate, sizeof(CBObjectData));
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->BindToShader(offset);
+
 	int subMeshNum = m_mesh->GetSubMeshNum();
 	for (int i = 0; i < subMeshNum; i++) {
-		objDate.materialIdx = m_materials[i]->mSrvIdx;
-
-		UPLOADBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->CopyData(&objDate, GetTransform()->mCbvIdx);
-		UPLOADBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->UpdateBuffer(GetTransform()->mCbvIdx);
-
+		m_materials[i]->BindToShader();
 		m_mesh->Render(CMDLIST, i);
 	}
 }
@@ -76,9 +76,4 @@ void CMeshRenderer::AddMaterial(const std::shared_ptr<CMaterial>& material)
 void CMeshRenderer::AddMaterial(const std::wstring& name)
 {
 	m_materials.push_back(INSTANCE(CResourceManager).Get<CMaterial>(name));
-}
-
-int CMeshRenderer::GetMaterialIndex() const
-{
-	return m_materials[0]->mSrvIdx;
 }

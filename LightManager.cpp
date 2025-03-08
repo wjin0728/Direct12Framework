@@ -38,7 +38,7 @@ void CLightManager::Update()
 	}
 	data.lightNum = { (UINT)directionalLights.size(), (UINT)pointLights.size(), (UINT)spotLights.size() };
 
-	auto constantBuffer = UPLOADBUFFER(CONSTANT_BUFFER_TYPE::LIGHT);
-	constantBuffer->CopyData(&data);
+	auto constantBuffer = CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::LIGHT);
+	constantBuffer->UpdateBuffer(0, &data, sizeof(CBLightsData));
 }
 

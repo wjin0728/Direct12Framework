@@ -20,17 +20,6 @@ static const float a1 = 0.01f;
 static const float a2 = 0.0001f;
 
 
-struct Material
-{
-    float4 albedo;
-    float4 specular;
-    float4 emissive;
-    float3 fresnelR0;
-    int diffuseMapIdx;
-    int normalMapIdx;
-    float3 padding1;
-};
-
 struct TerrainSplat
 {
     int layerNum;
@@ -115,8 +104,6 @@ cbuffer CBObjectData : register(b1)
     matrix worldMat;
     matrix invWorldMat;
     matrix texMat;
-    int materialIdx;
-    float3 objectPadding;
 };
 
 cbuffer CBLightsData : register(b2)
@@ -132,8 +119,6 @@ TextureCube skyBoxMap : register(t0, space2);
 Texture2D diffuseMap[TEXTURE_COUNT] : register(t0);
 
 Texture2D shadowMap : register(t0, space3);
-
-StructuredBuffer<Material> materials : register(t0, space1);
 
 SamplerState pointWrap : register(s0);
 SamplerState pointClamp : register(s1);

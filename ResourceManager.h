@@ -41,6 +41,8 @@ public:
 		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = XMFLOAT4());
 	void UpdateMaterials();
 
+	void LoadSceneResourcesFromFile(const std::wstring& fileName);
+
 private:
 	void LoadDefaultMeshes();
 	void LoadDefaultTexture();
@@ -80,6 +82,8 @@ inline std::shared_ptr<T> CResourceManager::Load(const std::wstring& name, std::
 template<typename T>
 inline bool CResourceManager::Add(const std::shared_ptr<T>& resource)
 {
+	if (!resource) return false;
+
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
 	KeyObjMap& keyObjMap = resources[static_cast<UINT>(resourceType)];
 

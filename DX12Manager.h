@@ -94,7 +94,9 @@ public:
 	ID3D12Device* GetDevice() const { return mDevice.Get(); }
 	ID3D12RootSignature* GetRootSignature() const {	return mRootSignature.Get(); }
 	CFrameResource* GetCurFrameResource() const { return mCurFrameResource; }
-	std::shared_ptr<CUploadBuffer> GetBuffer(UINT type);
+	std::shared_ptr<CConstantBuffer> GetConstantBuffer(UINT type);
+	std::shared_ptr<CStructedBuffer> GetStructedBuffer(UINT type);
+	std::shared_ptr<CInstancingBuffer> GetInstancingBuffer(UINT type);
 	std::shared_ptr<CDescriptorHeaps> GetDescriptorHeaps() const { return descriptorHeaps; };
 	std::shared_ptr <CRenderTargetGroup> GetRenderTargetGroup(RENDER_TARGET_GROUP_TYPE type) { 
 		return renderTargetGroups[(UINT)type]; }

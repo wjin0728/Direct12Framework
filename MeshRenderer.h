@@ -36,6 +36,5 @@ public:
 
 	std::shared_ptr<CMesh> GetMesh() const { return m_mesh; }
 	std::shared_ptr<CMaterial> GetMaterial(UINT idx = 0) const { return m_materials[idx]; }
-	int GetMaterialIndex() const;
 };
 

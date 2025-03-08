@@ -1,6 +1,9 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
+cbuffer CBObjectData : register(b0, space1)
+{
+};
 
 struct VS_INPUT
 {

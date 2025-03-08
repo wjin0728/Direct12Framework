@@ -29,7 +29,7 @@ public:
 	void Initialize(const std::wstring& fileName, UINT _resoultion, Vec3 _scale);
 	virtual ~CHeightMapGridMesh();
 
-	int GetWidth() const { return width; }
+	int GetWidth() const { return resolution; }
 	float GetHeight(float fx, float fz);
 	Vec3 GetScale() const { return scale; }
 };
