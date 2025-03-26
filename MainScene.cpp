@@ -16,25 +16,6 @@ CMainScene::CMainScene()
 
 void CMainScene::Initialize()
 {
-	mRenderLayers[L"UI"] = ObjectList{};
-	mShaders[L"UI"] = RESOURCE.Get<CShader>(L"Sprite");
-
-	auto cameraObj = CGameObject::CreateCameraObject(L"MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize());
-	AddObject(L"UI", cameraObj);
-
-	const auto& rectMesh = RESOURCE.Get<CMesh>(L"Rectangle");
-	{
-		auto object = std::make_shared<CGameObject>();
-
-		auto renderer = object->AddComponent<CMeshRenderer>();
-		renderer->SetMesh(rectMesh);
-		renderer->AddMaterial(RESOURCE.Get<CMaterial>(L"MainMenu"));
-
-		object->SetActive(true);
-		object->SetRenderLayer(L"UI");
-
-		AddObject(L"UI", object);
-	}
 }
 
 void CMainScene::Update()

@@ -134,6 +134,11 @@ bool CCamera::IsInFrustum(const BoundingBox& boundingBox)
 	return mFrustumWorld.Intersects(boundingBox);
 }
 
+bool CCamera::IsInFrustum(const BoundingSphere& boundingSphere)
+{
+	return mFrustumWorld.Intersects(boundingSphere);
+}
+
 bool CCamera::IsInFrustum(std::shared_ptr<class CGameObject> obj)
 {
 	return mFrustumWorld.Intersects(obj->GetRootBoundingSphere());

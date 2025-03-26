@@ -1,7 +1,21 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
-#define DYNAMIC_TESSELLATION
+//#define DYNAMIC_TESSELLATION
+
+cbuffer MaterialData : register(b0, space1)
+{
+    float3 size;
+    int heightMapIdx;
+
+    int splatNum;
+    int alphaMapIdx[TERRAIN_SPLAT_COUNT];
+    int diffuseIdx[TERRAIN_SPLAT_COUNT * 4];
+    int normalIdx[TERRAIN_SPLAT_COUNT * 4];
+
+    float metallic[TERRAIN_SPLAT_COUNT * 4];
+    float smoothness[TERRAIN_SPLAT_COUNT * 4];
+};
 
 float CalculateTessFactor(float3 position)
 {
@@ -25,7 +39,7 @@ struct VS_INPUT
 
 
 //¡§¡° ºŒ¿Ã¥ı∏¶ ¡§¿««—¥Ÿ.
-VS_INPUT VS_Main(VS_INPUT input)
+VS_INPUT VS_Forward(VS_INPUT input)
 {   
     return input;
 }
@@ -81,7 +95,7 @@ struct HS_OUTPUT
 [outputcontrolpoints(4)]
 [patchconstantfunc("ConstantHS")]
 [maxtessfactor(64.0f)]
-HS_OUTPUT HS_Main(InputPatch<VS_INPUT, 4> p, uint i : SV_OutputControlPointID, uint patchId : SV_PrimitiveID)
+HS_OUTPUT HS_Forward(InputPatch<VS_INPUT, 4> p, uint i : SV_OutputControlPointID, uint patchId : SV_PrimitiveID)
 {
     HS_OUTPUT hout;
 	
@@ -98,13 +112,12 @@ struct DS_OUTPUT
     float4 position : SV_POSITION;
     float4 worldPos : POSITION;
     float2 uv : TEXCOORD;
-    float4 ShadowPosH : POSITION1;
 };
 
 [domain("quad")]
-DS_OUTPUT DS_Main(TessFactor tessFactors, float2 uv : SV_DomainLocation, const OutputPatch<HS_OUTPUT, 4> quad)
+DS_OUTPUT DS_Forward(TessFactor tessFactors, float2 uv : SV_DomainLocation, const OutputPatch<HS_OUTPUT, 4> quad)
 {
-    DS_OUTPUT dout;
+    DS_OUTPUT dout = (DS_OUTPUT)0;
 	
     float3 v1 = lerp(quad[0].PosL, quad[1].PosL, uv.x);
     float3 v2 = lerp(quad[2].PosL, quad[3].PosL, uv.x);
@@ -114,12 +127,11 @@ DS_OUTPUT DS_Main(TessFactor tessFactors, float2 uv : SV_DomainLocation, const O
     float2 uv2 = lerp(quad[2].uv, quad[3].uv, uv.x);
     dout.uv = lerp(uv1, uv2, uv.y);
 	
-    Texture2D heightMap = diffuseMap[terrainData.heightMapIdx];
-    p.y = heightMap.SampleLevel(linearWrap, dout.uv, 0).r / 65535f * terrainData.scale.y;
+    Texture2D heightMap = diffuseMap[74];
+    p.y = heightMap.SampleLevel(linearWrap, dout.uv, 0).r * 1.f;
     
     dout.worldPos = float4(p, 1.0f);
     dout.position = mul(dout.worldPos, viewProjMat);
-    //dout.ShadowPosH = mul(dout.worldPos, shadowTransform);
 	
     return dout;
 }
@@ -127,27 +139,20 @@ DS_OUTPUT DS_Main(TessFactor tessFactors, float2 uv : SV_DomainLocation, const O
 #define TRANSPARENT_CLIP
 
 //«»ºø ºŒ¿Ã¥ı
-[earlydepthstencil]
-float4 PS_Main(DS_OUTPUT input) : SV_TARGET
+float4 PS_Forward(DS_OUTPUT input) : SV_TARGET
 {
     float4 color = float4(1.f, 1.f, 1.f, 1.f);
     
-    Material mat = terrainData.material;
     
-    float4 texColor = diffuseMap[mat.diffuseMapIdx].Sample(linearWrap, input.uv);
+    float4 texColor = diffuseMap[20].Sample(linearWrap, input.uv);
     color = float4(GammaDecoding(texColor.rgb), texColor.a);
+    return texColor;
     
-    if (terrainData.detailMapTdx != -1)
-    {
-        float4 detailColor = diffuseMap[terrainData.detailMapTdx].Sample(linearWrap, input.uv * 50.f);
-    
-        color = lerp(color, float4(GammaDecoding(detailColor.rgb), detailColor.a), 0.7);
-    }
     
 #ifdef TRANSPARENT_CLIP
     clip(color.a - 0.1);
 #endif
-    Texture2D heightMap = diffuseMap[terrainData.heightMapIdx];
+    Texture2D heightMap = diffuseMap[heightMapIdx];
     float4 height = heightMap.SampleLevel(linearClamp, input.uv, 0);
     
     float heightLeft = heightMap.SampleLevel(linearClamp, input.uv - float2(0.01, 0), 0).r;
@@ -155,8 +160,8 @@ float4 PS_Main(DS_OUTPUT input) : SV_TARGET
     float heightDown = heightMap.SampleLevel(linearClamp, input.uv - float2(0, 0.01), 0).r;
     float heightUp = heightMap.SampleLevel(linearClamp, input.uv + float2(0, 0.01), 0).r;
     
-    float3 tangent = float3(1.0, (heightRight - heightLeft), 0.f) * terrainData.scale;
-    float3 bitangent = float3(0.0, (heightDown - heightUp), -1.f) * terrainData.scale;
+    float3 tangent = float3(1.0, (heightRight - heightLeft), 0.f) * size;
+    float3 bitangent = float3(0.0, (heightDown - heightUp), -1.f) * size;
     
     float3 normal = cross(normalize(tangent), normalize(bitangent));
     float3 camDir = (camPos - input.worldPos.xyz);
@@ -164,11 +169,22 @@ float4 PS_Main(DS_OUTPUT input) : SV_TARGET
     camDir /= distToEye;
     
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-    shadowFactor[0] = CalcShadowFactor(input.ShadowPosH);
     
-    LightColor finalColor = CalculatePhongLight(input.position.xyz, normal, camDir, mat, shadowFactor);
+    LightingData lightingData = (LightingData) 0;
+    lightingData.cameraDirection = camDir;
+    lightingData.normalWS = normal;
+    lightingData.positionWS = input.worldPos.xyz;
+    lightingData.shadowFactor = 1.f;
     
-    color.xyz = GammaEncoding((finalColor.diffuse.xyz * color.xyz) + finalColor.specular.xyz + (0.05 * color.xyz));
+    SurfaceData surfaceData = (SurfaceData) 0;
+    surfaceData.albedo = color.rgb;
+    surfaceData.metallic = metallic[0];
+    surfaceData.smoothness = smoothness[0];
+    surfaceData.specular = 0.5f;
+    
+    float3 finalColor = CalculatePhongLight(lightingData, surfaceData);
+    
+    color.xyz = GammaEncoding(finalColor);
     
     #ifdef FOG
     float fogAmount = saturate((distToEye - gFogStart) / gFogRange);

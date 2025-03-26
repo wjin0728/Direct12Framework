@@ -29,7 +29,7 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CDX12Manager).CloseCommandList();
 
-	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAIN);
+	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAINSTAGE);
 
 
 	TIMER.Reset();

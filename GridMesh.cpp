@@ -4,12 +4,12 @@
 #include"ResourceManager.h"
 
 
-void CHeightMapGridMesh::LoadHeightMap(const std::wstring& fileName)
+void CHeightMapGridMesh::LoadHeightMap(const std::string& fileName)
 {
 	UINT heightMapSize = resolution * resolution;
 
 	std::vector<uint16_t> heightMap;
-	std::ifstream file(fileName, std::ios::binary);
+	std::ifstream file("Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
 	if (!file.is_open()) {
 		return;
 	}
@@ -25,13 +25,23 @@ void CHeightMapGridMesh::LoadHeightMap(const std::wstring& fileName)
 		}
 	}
 
-	auto heightMapTex = RESOURCE.Create2DTexture(L"heightMap", DXGI_FORMAT_R16_UNORM, heightMap.data(), sizeof(uint16_t), resolution, resolution,
+	XMCOLOR* data = new XMCOLOR[heightMapSize];
+	for (int i = 0; i < heightMapSize; i++) {
+		data[i].a = heightData[i];
+		data[i].r = heightData[i];
+		data[i].g = heightData[i];
+		data[i].g = heightData[i];
+	}
+
+	heightMapTex = RESOURCE.Create2DTexture(fileName, DXGI_FORMAT_R8G8B8A8_UNORM, data, sizeof(XMCOLOR), resolution, resolution,
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		D3D12_RESOURCE_FLAG_NONE
 	);
 
 	heightMapTex->CreateSRV();
+
+	if (data) delete[] data;
 }
 
 void CHeightMapGridMesh::CreateHeightMapSRV()
@@ -74,14 +84,41 @@ void CHeightMapGridMesh::CalculateNormal()
 
 void CHeightMapGridMesh::CalculateTextureCoord()
 {
-	
+	float increaseVal = static_cast<float>(TEXTURE_REPEAT_COUNT) / resolution;
+	UINT increaseCnt = resolution / TEXTURE_REPEAT_COUNT;
+
+	Vec2 uv{ 0.f, 1.f };
+
+	UINT uCount{};
+	UINT vCount{};
+
+	for (UINT i = 0; i < resolution; ++i) {
+		for (UINT j = 0; j < resolution; ++j) {
+			vertices[(i * resolution) + j].texCoord = uv;
+
+			uv.x += increaseVal;
+			uCount++;
+
+			if (uCount == increaseCnt) {
+				uv.x = 0.f;
+				uCount = 0;
+			}
+		}
+		uv.y -= increaseVal;
+		vCount++;
+
+		if (vCount == increaseCnt) {
+			uv.y = 1.f;
+			vCount = 0;
+		}
+	}
 }
 
 CHeightMapGridMesh::~CHeightMapGridMesh()
 {
 }
 
-void CHeightMapGridMesh::Initialize(const std::wstring& fileName, UINT _resoultion, Vec3 _scale)
+void CHeightMapGridMesh::Initialize(const std::string& fileName, UINT _resoultion, Vec3 _scale, Vec3 offset)
 {
 	resolution = _resoultion;
 	scale = _scale;
@@ -97,17 +134,14 @@ void CHeightMapGridMesh::Initialize(const std::wstring& fileName, UINT _resoulti
 	float xGap = scale.x / resolution;
 	float zGap = scale.z / resolution;
 
-	float width = scale.x;
-	float length = scale.z;
-
 	for (int i = 0; i < resolution; i++) {
 		for (int j = 0; j < resolution; j++) {
-			float x = j * xGap - (scale.x / 2.f);
-			float z = i * zGap - (scale.z / 2.f);
+			float x = j * xGap;
+			float z = i * zGap;
 
 			float y = (float)(heightData[j + (i * resolution)]) / USHORT_MAX * scale.y;
 
-			Vec3 position = { x,y,z };
+			Vec3 position = Vec3{ x,y,z } + offset;
 			vertices.emplace_back(position);
 		}
 	}

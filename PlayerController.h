@@ -12,8 +12,6 @@ private:
 
 	std::shared_ptr<class CRigidBody> rigidBody{};
 
-	std::shared_ptr<CTransform> mainRotor{};
-	std::shared_ptr<CTransform> subRotor{};
 
 public:
 	CPlayerController() : CMonoBehaviour("PlayerController") {};

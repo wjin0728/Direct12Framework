@@ -36,9 +36,9 @@ private:
 	bool mIsStatic{false};
 	bool mIsInstancing{false};
 
-	std::wstring mName{};
-	std::wstring mTag{};
-	std::wstring mRenderLayer{};
+	std::string mName{};
+	std::string mTag{};
+	std::string mRenderLayer{};
 	LAYER_TYPE mLayerType{};
 
 private:
@@ -55,7 +55,7 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 
-	void Render();
+	void Render(std::shared_ptr<CCamera> camera, int pass = 0);
 
 public:
 	//오브젝트의 복사본을 생성한다.
@@ -66,26 +66,25 @@ public:
 		const std::shared_ptr<CTransform>& parentTransform = nullptr);
 
 	//기본 설정을 가진 카메라 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateCameraObject(const std::wstring& tag, Vec2 rtSize, 
+	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, 
 		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 60.f);
 	//기본 설정을 가진 렌더 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateRenderObject(const std::wstring& tag, 
-		const std::wstring& meshName, const std::wstring& materialName);
-	static std::shared_ptr<CGameObject> CreateUIObject(const std::wstring& tag, const std::wstring& materialName, Vec2 pos);
+	static std::shared_ptr<CGameObject> CreateRenderObject(const std::string& tag, 
+		const std::string& meshName, const std::string& materialName);
+	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& tag, const std::string& materialName, Vec2 pos);
 	//기본 설정을 가진 지형 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateTerrainObject(const std::wstring& tag, const std::wstring& heightMapName,
-		UINT width, UINT height, Vec3 scale = {1.f,1.f,1.f});
+	static std::shared_ptr<CGameObject> CreateTerrainObject(std::ifstream& ifs);
 	//바이너리 파일을 통해 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateObjectFromFile(const std::wstring& tag, const std::wstring& fileName);
+	static std::shared_ptr<CGameObject> CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
 	std::shared_ptr<CMeshRenderer> GetMeshRendere() { return mMeshRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
-	const std::wstring& GetName() const { return mName; }
-	const std::wstring& GetTag() const { return mTag; }
-	const std::wstring& GetRenderLayer() const { return mRenderLayer; }
+	const std::string& GetName() const { return mName; }
+	const std::string& GetTag() const { return mTag; }
+	const std::string& GetRenderLayer() const { return mRenderLayer; }
 	bool GetActive() const { return mActive; }
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return mChildren; }
 	BoundingSphere GetRootBoundingSphere() const { return mRootBS; }
@@ -94,16 +93,14 @@ public:
 	void SetStatic(bool isStatic);
 	void SetInstancing(bool isInstancing);
 	void SetLayerType(LAYER_TYPE type) { mLayerType = type; }
-	void SetRenderLayer(const std::wstring& layer) { mRenderLayer = layer; }
-	void SetName(const std::wstring& name) { mName = name; }
-	void SetTag(const std::wstring& tag) { mTag = tag; }
+	void SetRenderLayer(const std::string& layer) { mRenderLayer = layer; }
+	void SetName(const std::string& name) { mName = name; }
+	void SetTag(const std::string& tag) { mTag = tag; }
 	void SetParent(const std::shared_ptr<CGameObject>& parent);
 
 	void ReturnCBVIndex();
-	 
-	void CalculateRootOOBB();
 
-	std::shared_ptr<CGameObject> FindChildByName(const std::wstring& name);
+	std::shared_ptr<CGameObject> FindChildByName(const std::string& name);
 
 	void AddChild(std::shared_ptr<CGameObject> child);
 	void RemoveChild(std::shared_ptr<CGameObject> child);
@@ -117,10 +114,10 @@ public:
 
 private:
 
-	static void InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& inFile);
+	static std::shared_ptr<CGameObject> InitFromFile(std::ifstream& inFile, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 	void CreateTransformFromFile(std::ifstream& inFile);
 	void CreateMeshRendererFromFile(std::ifstream& inFile);
-	const BoundingBox& CombineChildrenOOBB();
+	void CreateTerrainFromFile(std::ifstream& inFile);
 };
 
 

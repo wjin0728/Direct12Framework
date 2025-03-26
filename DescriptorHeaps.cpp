@@ -52,13 +52,15 @@ void CDescriptorHeaps::CreateDSV(std::shared_ptr<CTexture> resource, DS_TYPE typ
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = dsvStartHandle.cpuHandle;
 	handle.ptr += (dsvDescriptorSize * static_cast<size_t>(type));
 
-	DEVICE->CreateDepthStencilView(resource->GetResource().Get(), &resource->GetDSVDesc(), handle);
+	auto dsvDesc = resource->GetDSVDesc();
+	DEVICE->CreateDepthStencilView(resource->GetResource().Get(), &dsvDesc, handle);
 
 	if (type == DS_TYPE::SHADOW_MAP) {
 		shadowMapHandle.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(srvStartHandle.cpuHandle, 80, cbvSrvDescriptorSize);
 		shadowMapHandle.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvStartHandle.gpuHandle, 80, cbvSrvDescriptorSize);
 
-		DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &resource->GetSRVDesc(), shadowMapHandle.cpuHandle);
+		auto srvDesc = resource->GetSRVDesc();
+		DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &srvDesc, shadowMapHandle.cpuHandle);
 	}
 }
 
@@ -67,7 +69,8 @@ void CDescriptorHeaps::CreateSRV(std::shared_ptr<CTexture> resource, UINT idx) c
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = srvStartHandle.cpuHandle;
 	handle.ptr += (cbvSrvDescriptorSize * static_cast<size_t>(idx));
 
-	DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &resource->GetSRVDesc(), handle);
+	auto srvDesc = resource->GetSRVDesc();
+	DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &srvDesc, handle);
 }
 
 void CDescriptorHeaps::CreateCubeMap(std::shared_ptr<CTexture> resource, UINT idx) const
@@ -75,7 +78,8 @@ void CDescriptorHeaps::CreateCubeMap(std::shared_ptr<CTexture> resource, UINT id
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = cubeMapStartHandle.cpuHandle;
 	handle.ptr += (cbvSrvDescriptorSize * static_cast<size_t>(idx));
 
-	DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &resource->GetSRVDesc(), handle);
+	auto srvDesc = resource->GetSRVDesc();
+	DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &srvDesc, handle);
 }
 
 void CDescriptorHeaps::CreateUAV(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12Resource> counterResource
@@ -84,7 +88,7 @@ void CDescriptorHeaps::CreateUAV(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12R
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = uavStartHandle.cpuHandle;
 	handle.ptr += (cbvSrvDescriptorSize * static_cast<size_t>(idx));
 
-	DEVICE->CreateUnorderedAccessView(resource.Get(), counterResource.Get(), & desc, handle);
+	DEVICE->CreateUnorderedAccessView(resource.Get(), counterResource.Get(), &desc, handle);
 }
 
 void CDescriptorHeaps::SetSRVDescriptorHeap()

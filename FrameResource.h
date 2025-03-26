@@ -4,7 +4,7 @@
 
 
 enum {
-	FRAME_RESOURCE_COUNT = 2
+	FRAME_RESOURCE_COUNT = 1
 };
 
 class CInstancingBuffer;

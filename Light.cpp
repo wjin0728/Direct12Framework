@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Light.h"
 
-CDirectionalLight::CDirectionalLight(const Color& _color, const Vec3& _strength, const Vec3& _direction) : CLight(_color, _strength), direction(_direction)
+CDirectionalLight::CDirectionalLight(const Vec3& _color, const Vec3& _strength, const Vec3& _direction) : CLight(_color, _strength), direction(_direction)
 {
 	direction = direction.GetNormalized();
 }
@@ -19,7 +19,7 @@ void CDirectionalLight::UpdateLightData(CBDirectionalLightInfo& data) const
 	data.direction = direction;
 }
 
-CPointLight::CPointLight(const Color& _color, const Vec3& _strength, const Vec3& _position, float _range)
+CPointLight::CPointLight(const Vec3& _color, const Vec3& _strength, const Vec3& _position, float _range)
 	: CLight(_color, _strength), position(_position), range(_range)
 {
 }
@@ -42,7 +42,7 @@ void CPointLight::UpdateLightData(CBPointLightInfo& data) const
 	data.range = range;
 }
 
-CSpotLight::CSpotLight(const Color& _color, const Vec3& _strength, const Vec3& _direction, const Vec3& _position,
+CSpotLight::CSpotLight(const Vec3& _color, const Vec3& _strength, const Vec3& _direction, const Vec3& _position,
 	float _range, float _fallOffStart, float _fallOffEnd, float _spotPower)
 	: CLight(_color, _strength), direction(_direction), position(_position), range(_range) , spotPower(_spotPower)
 {

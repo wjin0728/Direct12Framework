@@ -10,7 +10,7 @@ class CObjectPoolManager
 	MAKE_SINGLETON(CObjectPoolManager)
 
 private:
-	std::unordered_map<std::wstring, std::unique_ptr<CObjectPool>> mPools{};
+	std::unordered_map<std::string, std::unique_ptr<CObjectPool>> mPools{};
 	std::shared_ptr<CTransform> mRootTransform{};
 
 	std::queue<UINT> cbvIdxQueue;
@@ -21,7 +21,7 @@ public:
 	void CreatePool(std::unique_ptr<CGameObject>&& original, UINT objCnt);
 
 	void PushObject(std::shared_ptr<CGameObject> object);
-	std::shared_ptr<CGameObject> PopObject(const std::wstring& key, const std::shared_ptr<CTransform>& parent = nullptr);
+	std::shared_ptr<CGameObject> PopObject(const std::string& key, const std::shared_ptr<CTransform>& parent = nullptr);
 
 	UINT GetTopCBVIndex();
 	void ReturnCBVIndex(UINT idx);

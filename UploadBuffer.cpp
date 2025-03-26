@@ -58,20 +58,21 @@ CConstantBuffer::~CConstantBuffer()
 void CConstantBuffer::Initialize(UINT _rootParamIdx, UINT initialSize)
 {
 	rootParamIdx = _rootParamIdx;
-	bufferSize = ((initialSize + 255) & ~255);
+	bufferSize = ALIGNED_SIZE(initialSize);
 
 	CreateBuffer();
 }
 
 UINT CConstantBuffer::AddData(const void* data, UINT dataSize)
 {
-	mNextOffset += dataSize;
+	UINT currentOffset = mNextOffset;
+	mNextOffset += ALIGNED_SIZE(dataSize);
 	if (mNextOffset >= bufferSize) {
 		Resize(mNextOffset * 1.5f);
 	}
-	memcpy(&mappedData[mNextOffset], data, dataSize);
+	memcpy(&mappedData[currentOffset], data, dataSize);
 
-	return mNextOffset;
+	return currentOffset;
 }
 
 void CConstantBuffer::UpdateBuffer(UINT offSet, const void* data, UINT dataSize)
@@ -112,7 +113,7 @@ void CConstantBuffer::Resize(UINT size)
 	D3D12_RANGE readRange = { 0, 0 };
 	ThrowIfFailed(newBuffer->Map(0, &readRange, (void**)&newMappedData));
 
-	memcpy(newMappedData, mappedData, bufferSize);
+	std::memcpy(newMappedData, mappedData, bufferSize);
 
 	buffer->Unmap(0, NULL);
 	mappedData = newMappedData;

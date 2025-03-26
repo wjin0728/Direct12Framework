@@ -17,10 +17,8 @@ CCollider::~CCollider()
 std::shared_ptr<CComponent> CCollider::Clone()
 {
 	std::shared_ptr<CCollider> copy = std::make_shared<CCollider>();
-	copy->mLocalAabb = mLocalAabb;
 	copy->mLocalOobb = mLocalOobb;
 	copy->mWorldOOBB = mWorldOOBB;
-	copy->mScale = mScale;
 
 	return copy;
 }
@@ -41,16 +39,20 @@ void CCollider::Update()
 
 void CCollider::LateUpdate()
 {
+	UpdateOOBB(GetTransform()->GetWorldMat());
 }
 
 void CCollider::UpdateOOBB(const Matrix& worldMat)
 {
-	Matrix mat = Matrix::CreateScale(mScale) * worldMat;
-	mLocalOobb.Transform(mWorldOOBB, mat);
+	mLocalOobb.Transform(mWorldOOBB, worldMat);
 }
 
-void CCollider::SetLocalOOBB(const BoundingOrientedBox& oobb)
+void CCollider::Initialize(const Vec3& center, const Vec3& size)
+{
+	mLocalOobb = BoundingOrientedBox(center, size, { 0.f,0.f,0.f,1.f });
+}
+
+void CCollider::Initialize(const BoundingOrientedBox& oobb)
 {
 	mLocalOobb = oobb;
-	mLocalAabb = BoundingBox::BoundingBox(mLocalOobb.Center, mLocalOobb.Extents);
 }

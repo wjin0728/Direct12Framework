@@ -13,72 +13,50 @@
 
 #define CASCADE_COUNT_FLAG 3
 
+//#define LIGHTING
+
 //#define FOG
 
 static const float a0 = 1.f;
 static const float a1 = 0.01f;
 static const float a2 = 0.0001f;
 
-
-struct TerrainSplat
-{
-    int layerNum;
-    struct Layer
-    {
-        int diffuseIdx;
-        int normalIdx;
-        
-        float metallic;
-        float smoothness;
-    } layer[4];
-};
-
-struct TerrainData
-{
-    float3 scale;
-    int heightMapIdx;
-    
-    int splatNum;
-    TerrainSplat splat[TERRAIN_SPLAT_COUNT];
-};
-
 struct DirectionalLight
 {
-    float4 color;
+    float3 color;
     float3 strength;
-    float padding1;
     float3 direction;
-    float padding2;
+    float3 padding0;
 };
 
 
 struct PointLight
 {
-    float4 color;
+    float3 color;
     float3 strength;
     float range;
     float3 position;
-    float padding;
+    float2 padding;
 };
 
 
 struct SpotLight
 {
-    float4 color;
+    float3 color;
     float3 strength;
     float range;
     float3 direction;
     float fallOffStart;
     float3 position;
     float fallOffEnd;
-    float3 padding;
+    float4 padding;
     float spotPower;
 };
 
 struct LightColor
 {
-    float4 diffuse;
-    float4 specular;
+    float3 diffuse;
+    float3 specular;
 };
 
 cbuffer CBPassData : register(b0)
@@ -95,8 +73,6 @@ cbuffer CBPassData : register(b0)
     
     float gFogStart;
     float gFogRange;
-    
-    TerrainData terrainData;
 };
 
 cbuffer CBObjectData : register(b1)

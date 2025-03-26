@@ -13,7 +13,7 @@ void CObjectPoolManager::Initialize()
 
 void CObjectPoolManager::CreatePool(std::unique_ptr<CGameObject>&& original, UINT objCnt)
 {
-	const std::wstring& tag = original->GetTag();
+	const std::string& tag = original->GetTag();
 
 	if (!mPools.contains(tag)) {
 		mPools[tag] = std::make_unique<CObjectPool>();
@@ -27,14 +27,14 @@ void CObjectPoolManager::PushObject(std::shared_ptr<CGameObject> object)
 		return;
 	}
 
-	const std::wstring& tag = object->GetTag();
+	const std::string& tag = object->GetTag();
 
 	if (mPools.contains(tag)) {
 		mPools[tag]->PushObject(object);
 	}
 }
 
-std::shared_ptr<CGameObject> CObjectPoolManager::PopObject(const std::wstring& key, const const std::shared_ptr<CTransform>& parent)
+std::shared_ptr<CGameObject> CObjectPoolManager::PopObject(const std::string& key, const const std::shared_ptr<CTransform>& parent)
 {
 	auto itr = mPools.find(key);
 	if (itr == mPools.end()) {

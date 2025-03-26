@@ -42,7 +42,7 @@ void CInstancingGroup::Render(const std::shared_ptr<class CCamera>& camera)
 	switch (mType)
 	{
 	case INSTANCE_BUFFER_TYPE::BILLBOARD: {
-		RESOURCE.Get<CShader>(L"Billboard")->SetPipelineState(CMDLIST);
+		RESOURCE.Get<CShader>("Billboard")->SetPipelineState(CMDLIST);
 
 		for (const auto& obj : mObjects) {
 			//if (!camera->IsInFrustum(obj)) continue;

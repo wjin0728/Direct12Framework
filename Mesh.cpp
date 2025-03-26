@@ -120,13 +120,12 @@ void CMesh::CreateIndexBuffers()
 
 std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(const std::string& name)
 {
-	std::ifstream inFile{ name + ".bin", std::ios::binary};
+	std::ifstream inFile{ MODEL_PATH(name) , std::ios::binary};
 	if (!inFile) {
 		return nullptr;
 	}
-
 	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
-	m->name = BinaryReader::stringToWstring(name);
+	m->name = name;
 
 	int nvertices{};
 	BinaryReader::ReadDateFromFile(inFile, nvertices);
@@ -156,6 +155,15 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(const std::string& name)
 
 			for (int i = 0; i < nPositions; i++) {
 				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].position);
+			}
+		}
+		else if (token == "<Colors>:")
+		{
+			int nColors{};
+			BinaryReader::ReadDateFromFile(inFile, nColors);
+
+			for (int i = 0; i < nColors; i++) {
+				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].color);
 			}
 		}
 		else if (token == "<Normals>:")

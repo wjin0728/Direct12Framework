@@ -15,17 +15,6 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
-	auto mainRotorObj = GetOwner()->FindChildByName(L"Rotar");
-
-	if (mainRotorObj) {
-		mainRotor = mainRotorObj->GetTransform();
-	}
-
-	auto subRotorObj = GetOwner()->FindChildByName(L"HelicopterScrewBack");
-
-	if (subRotorObj) {
-		subRotor = subRotorObj->GetTransform();
-	}
 
 	rigidBody = GetOwner()->GetComponent<CRigidBody>();
 }
@@ -41,12 +30,6 @@ void CPlayerController::Update()
 
 	float power = DELTA_TIME * 3000;
 
-	if (mainRotor) {
-		mainRotor->Rotate({ 0.f, power , 0.f });
-	}
-	if (subRotor) {
-		subRotor->Rotate({ 0.f, 0.f , power });
-	}
 }
 
 void CPlayerController::LateUpdate()
@@ -88,16 +71,6 @@ void CPlayerController::OnKeyEvents()
 	rigidBody->SetAcceleration(acccel);
 	rigidBody->SetUseFriction(isDecelerate);
 
-	/*Vec3 velocity = rigidBody->GetVelocity();
-
-	float val1 = GetTransform()->GetLocalRight().Dot(velocity);
-	float angle1 = val1 * -10.f;
-
-	float val2 = GetTransform()->GetLocalLook().Dot(velocity);
-	float angle2 = val2 * -5.f;
-
-	Vec3 rotation 
-	GetTransform()->SetLocalRotation(angle2, 0.f, angle1);*/
 }
 
 void CPlayerController::OnMouseEvents()

@@ -15,7 +15,6 @@ CTransform::CTransform() : CComponent(COMPONENT_TYPE::TRANSFORM), dirtyFramesNum
 
 CTransform::~CTransform()
 {
-	ReturnCBVIndex();
 }
 
 std::shared_ptr<CComponent> CTransform::Clone()
@@ -30,7 +29,7 @@ std::shared_ptr<CComponent> CTransform::Clone()
 	copy->mLocalRotation = mLocalRotation;
 	copy->mWorldMat = mWorldMat;
 	copy->mLocalMat = mLocalMat;
-	copy->dirtyFramesNum = dirtyFramesNum;
+	copy->dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
 	return copy;
 }
@@ -40,13 +39,7 @@ void CTransform::Awake()
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 	mDirtyFlag = true;
 
-	if (owner->mTag == L"Billboard") {
-		std::cout << "";
-	}
-
 	UpdateWorldMatrix();
-
-	if(!owner->mIsInstancing) SetCBVIndex();
 }
 
 void CTransform::Start()
@@ -76,13 +69,6 @@ void CTransform::Reset()
 
 	mDirtyFlag = true;
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
-}
-
-void CTransform::SetCBVIndex()
-{
-	if (mCbvIdx < 0) {
-		mCbvIdx = INSTANCE(CObjectPoolManager).GetTopCBVIndex();
-	}
 }
 
 void CTransform::SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalMat)
@@ -129,15 +115,6 @@ Vec3 CTransform::GetWorldPosition()
 {
 	UpdateWorldMatrix();
 	return Vec3(mWorldMat._41, mWorldMat._42, mWorldMat._43);
-}
-
-void CTransform::ReturnCBVIndex()
-{
-	if (mCbvIdx < 0) {
-		return;
-	}
-	INSTANCE(CObjectPoolManager).ReturnCBVIndex(mCbvIdx);
-	mCbvIdx = -1;
 }
 
 void CTransform::MoveStrafe(float distance)
@@ -287,13 +264,6 @@ void CTransform::UpdateWorldMatrix()
 
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
-	auto collider = GetOwner()->GetCollider();
-	auto meshRenderer = GetOwner()->GetMeshRendere();
-
 	GetOwner()->mRootLocalBS.Transform(GetOwner()->mRootBS, mWorldMat);
-	if (collider) {
-		collider->UpdateOOBB(mWorldMat);
-	}
-	
 }
 

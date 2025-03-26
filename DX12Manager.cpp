@@ -119,7 +119,7 @@ void CDX12Manager::ChangeSwapChainState()
 	ThrowIfFailed(mSwapChain->ResizeTarget(&dxgiTargetParameters));
 
 	for (int i = 0; i < SWAP_CHAIN_COUNT; i++) {
-		auto target = INSTANCE(CResourceManager).Get<CTexture>(L"SwapChainTarget_" + std::to_wstring(i));
+		auto target = INSTANCE(CResourceManager).Get<CTexture>("SwapChainTarget_" + std::to_string(i));
 	}
 
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc{};
@@ -149,10 +149,10 @@ void CDX12Manager::InitRenderTargetGroups()
 		for (UINT i = 0; i < renderTargets.size(); i++)
 		{
 			renderTargets[i].rt = std::make_shared<CTexture>();
-			renderTargets[i].rt->SetName(L"SwapChainTarget_" + std::to_wstring(i));
+			renderTargets[i].rt->SetName("SwapChainTarget_" + std::to_string(i));
 
 			mSwapChain->GetBuffer(i, IID_PPV_ARGS(&renderTargets[i].rt->GetResource()));
-			INSTANCE(CResourceManager).Add(renderTargets[i].rt);
+			RESOURCE.Add(renderTargets[i].rt);
 		}
 
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)] = std::make_shared<CRenderTargetGroup>();
@@ -166,7 +166,6 @@ void CDX12Manager::InitRenderTargetGroups()
 		auto dsv = descriptorHeaps->GetDSVHandle(DS_TYPE::SHADOW_MAP);
 		std::vector<RenderTarget> renderTargets;
 
-
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SHADOW_PASS)] = std::make_shared<CRenderTargetGroup>();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SHADOW_PASS)]->Initialize(renderTargets, dsv);
 	}
@@ -177,7 +176,7 @@ void CDX12Manager::InitDepthStencilView()
 {
 	auto dsBuffer = INSTANCE(CResourceManager).Create2DTexture
 	(
-		L"DepthStencil", 
+		"DepthStencil", 
 		DXGI_FORMAT_R24G8_TYPELESS,
 		nullptr, 0,
 		static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
@@ -190,7 +189,7 @@ void CDX12Manager::InitDepthStencilView()
 
 	auto shadowMap = INSTANCE(CResourceManager).Create2DTexture
 	(
-		L"ShadowMap",
+		"ShadowMap",
 		DXGI_FORMAT_R24G8_TYPELESS,
 		nullptr, 0,
 		4048, 4048,
@@ -314,7 +313,7 @@ void CDX12Manager::InitRootSignature()
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[3].Descriptor.ShaderRegister = 0;
 	pd3dRootParameters[3].Descriptor.RegisterSpace = 1;
-	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//텍스쳐 정보
 	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
@@ -394,6 +393,8 @@ void CDX12Manager::CreateFrameResources()
 		}
 		frameResource = std::make_unique<CFrameResource>();
 	}
+
+	mCurFrameResource = mFrameResources.front().get();
 }
 
 void CDX12Manager::WaitForGpu()
@@ -450,6 +451,7 @@ void CDX12Manager::BeforeRender()
 
 	cmdList->SetGraphicsRootSignature(mRootSignature.Get());
 	descriptorHeaps->SetSRVDescriptorHeap();
+	RESOURCE.UpdateMaterials();
 	mCurFrameResource->BindToShader();
 }
 
@@ -471,7 +473,7 @@ void CDX12Manager::AfterRender()
 void CDX12Manager::PrepareShadowPass()
 {
 	auto& swapChainBuffers = renderTargetGroups[(UINT)RENDER_TARGET_GROUP_TYPE::SHADOW_PASS];
-	auto shadowMap = RESOURCE.Get<CTexture>(L"ShadowMap");
+	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
 
 	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 

@@ -85,18 +85,15 @@ void CGameObject::LateUpdate()
 	if (!mIsStatic) mTransform->UpdateWorldMatrix();
 }
 
-void CGameObject::Render()
+void CGameObject::Render(std::shared_ptr<CCamera> camera, int pass)
 {
-	if (!mActive) {
-		return;
+	if (mName == "SM_Env_Skydome_01" && pass == FORWARD) {
+		int i = 0;
 	}
-
-	if (mMeshRenderer) {
-		mMeshRenderer->Render();
-	}
-
+	if (!mActive) return;
+	if (mMeshRenderer) mMeshRenderer->Render(camera, pass);
 	for (auto& child : mChildren) {
-		child->Render();
+		child->Render(camera, pass);
 	}
 }
 
@@ -112,10 +109,10 @@ void CGameObject::SetStatic(bool isStatic)
 void CGameObject::SetInstancing(bool isInstancing)
 {
 	if (isInstancing) {
-		mTransform->ReturnCBVIndex();
+		mMeshRenderer->ReturnCBVIndex();
 	}
 	else {
-		mTransform->SetCBVIndex();
+		mMeshRenderer->SetCBVIndex();
 	}
 
 	mIsInstancing = isInstancing;
@@ -132,7 +129,9 @@ void CGameObject::SetParent(const std::shared_ptr<CGameObject>& parent)
 
 void CGameObject::ReturnCBVIndex()
 {
-	mTransform->ReturnCBVIndex();
+	if (!mMeshRenderer) return;
+
+	mMeshRenderer->ReturnCBVIndex();
 	for (auto& child : mChildren) {
 		child->ReturnCBVIndex();
 	}
@@ -151,6 +150,11 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
 	instance->mLayerType = original->mLayerType;
+	instance->mRootLocalBS = original->mRootLocalBS;
+	instance->mName = original->mName;
+
+	instance->mMeshRenderer = instance->GetComponent<CMeshRenderer>();
+	instance->mCollider = instance->GetComponent<CCollider>();
 
 	if (parentTransform) {
 		instance->mTransform->SetParent(parentTransform);
@@ -178,6 +182,11 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
 	instance->mLayerType = original->mLayerType;
+	instance->mRootLocalBS = original->mRootLocalBS;
+	instance->mName = original->mName;
+
+	instance->mMeshRenderer = instance->GetComponent<CMeshRenderer>();
+	instance->mCollider = instance->GetComponent<CCollider>();
 
 	if (parentTransform) {
 		instance->mTransform->SetParent(parentTransform);
@@ -191,7 +200,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 }
 
 
-std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::wstring& tag, Vec2 rtSize, 
+std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& tag, Vec2 rtSize, 
 	float nearPlane, float farPlane, float fovAngle)
 {
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
@@ -210,8 +219,8 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::wstring&
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::wstring& tag, 
-	const std::wstring& meshName, const std::wstring& materialName)
+std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::string& tag, 
+	const std::string& meshName, const std::string& materialName)
 {
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
 	object->mTag = tag;
@@ -226,89 +235,77 @@ std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::wstring&
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::wstring& tag, const std::wstring& materialName, Vec2 pos)
+std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& tag, const std::string& materialName, Vec2 pos)
 {
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
 	object->mTag = tag;
 
 	object->mMeshRenderer = std::make_shared<CMeshRenderer>();
 	object->AddComponent(object->mMeshRenderer);
-	object->mMeshRenderer->SetMesh(RESOURCE.Get<CMesh>(L"Rectangle"));
+	object->mMeshRenderer->SetMesh(RESOURCE.Get<CMesh>("Rectangle"));
 	object->mMeshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
 
 	object->GetTransform()->SetLocalPosition({ pos.x, pos.y, 0.f });
 	object->SetActive(true);
-	object->SetRenderLayer(L"UI");
+	object->SetRenderLayer("UI");
 
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(const std::wstring& tag, const std::wstring& heightMapName, 
-	UINT width, UINT height, Vec3 scale)
+std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(std::ifstream& ifs)
 {
+	using namespace BinaryReader;
+	std::string name{};
+	ReadDateFromFile(ifs, name);
+		
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
-	object->mTag = tag;
 
-	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(L"HeightMap01"));
-	if (!mesh) {
+	UINT resolution{};
+	Vec3 size{};
+	ReadDateFromFile(ifs, resolution);
+
+	auto material = std::static_pointer_cast<CTerrainMaterial>(RESOURCE.Get<CMaterial>(name + "Material"));
+	if (!material) {
+		material = std::make_shared<CTerrainMaterial>();
+		material->LoadTerrainData(ifs);
+		material->SetName(name + "Material");
+		RESOURCE.Add(material);
+	}
+	size = material->GetSize();
+
+	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(name + "Mesh"));
+	if (!mesh) { 
 		mesh = std::make_shared<CHeightMapGridMesh>();
-		mesh->Initialize(heightMapName, width, scale);
-		mesh->SetName(L"HeightMap01");
+		mesh->Initialize(name + "Heightmap", resolution, size);
+		mesh->SetName(name + "Mesh");
 		RESOURCE.Add(mesh);
 	}
-
-	std::shared_ptr<CTerrainMaterial> material = std::make_shared<CTerrainMaterial>();
-	material->mSpecularColor = { 0.0,0.0,0.0,0.001 };
-
-	auto texture = RESOURCE.Get<CTexture>(L"TerrainBase");
-	if (texture) {
-		material->mDiffuseMapIdx = texture->GetSrvIndex();
-	}
-	texture = RESOURCE.Get<CTexture>(L"TerrainDetail");
-	if (texture) {
-		material->mDetailMap1Idx = texture->GetSrvIndex();
-	}
-	texture = RESOURCE.Get<CTexture>(L"TerrainNormal");
-	if (texture) {
-		material->mNormalMapIdx = texture->GetSrvIndex();
-	}
-
 	auto terrain = object->AddComponent<CTerrain>();
 	terrain->SetHeightMapGridMesh(mesh);
 	terrain->SetMaterial(material);
+
+	object->CreateTransformFromFile(ifs);
+
 
 	object->SetActive(true);
 
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(const std::wstring& tag, const std::wstring& fileName)
+std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs)
 {
-	std::ifstream ifs{ fileName, std::ios::binary };
-	if (!ifs) {
-		return nullptr;
+	std::shared_ptr<CGameObject> root = InitFromFile(ifs, prefabs);
+	if (root) {
+		Vec3 boundingCenter;
+		float radius;
+
+		BinaryReader::ReadDateFromFile(ifs, boundingCenter);
+		BinaryReader::ReadDateFromFile(ifs, radius);
+
+		root->mRootLocalBS = BoundingSphere(boundingCenter, radius);
+		root->SetActive(true);
+		root->SetStatic(false);
 	}
-
-	std::shared_ptr<CGameObject> root = std::make_shared<CGameObject>();
-	root->mTag = tag;
-	InitFromFile(root, ifs);
-
-	Vec3 boundingCenter;
-	float radius;
-
-	BinaryReader::ReadDateFromFile(ifs, boundingCenter);
-	BinaryReader::ReadDateFromFile(ifs, radius);
-
-	root->mRootLocalBS = BoundingSphere(boundingCenter, radius);
-
-	if (!root->GetCollider()) {
-		auto collider = std::make_shared<CCollider>();
-		root->AddComponent(collider);
-		root->mCollider = collider;
-	}
-
-	
-
 	return root;
 }
 
@@ -317,42 +314,58 @@ std::shared_ptr<CGameObject> CGameObject::GetSptrFromThis()
 	return shared_from_this();
 }
 
-void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& inFile)
+std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs)
 {
 	using namespace BinaryReader;
 
-	int frameNum{};
-	int textureCnt{};
+	std::shared_ptr<CGameObject> obj = std::make_shared<CGameObject>();
 
 	std::string token{};
 
 	while (true) {
 		ReadDateFromFile(inFile, token);
+		if (token == "<Prefab>:") {
+			std::string prefabName{};
+			ReadDateFromFile(inFile, prefabName);
+			obj = CGameObject::Instantiate(prefabs[prefabName]);
+			obj->SetActive(true);
+			obj->SetStatic(false);
+			obj->CreateTransformFromFile(inFile);
+			return obj;
+		}
 		if (token == "<Frame>:") {
-			ReadDateFromFile(inFile, frameNum);
-			ReadDateFromFile(inFile, textureCnt);
-
-			std::string name{};
-
-			ReadDateFromFile(inFile, name);
-			obj->mName = stringToWstring(name);
+			ReadDateFromFile(inFile, obj->mName);
+			if (obj->mName == "SM_Env_Bush_02") {
+				int n{};
+			}
+		}
+		else if (token == "<Tag>:") {
+			ReadDateFromFile(inFile, obj->mTag);
 		}
 		else if (token == "<Transform>:") {
 			obj->CreateTransformFromFile(inFile);
-			obj->mTransform->SetOwner(obj.get());
 		}
 		else if (token == "<Mesh>:") {
 			obj->CreateMeshRendererFromFile(inFile);
-			obj->mMeshRenderer->SetOwner(obj.get());
-			obj->mCollider->SetOwner(obj.get());
+		}
+		else if (token == "<Terrain>:") {
+			obj->CreateTerrainFromFile(inFile);
+		}
+		else if (token == "<Collider>:") {
+			Vec3 center{};
+			Vec3 size{};
+			ReadDateFromFile(inFile, center);
+			ReadDateFromFile(inFile, size);
+
+			auto collider = obj->AddComponent<CCollider>();
+			collider->Initialize(center, size);
 		}
 		else if (token == "<Children>:") {
 			int childrenCnt{};
 			ReadDateFromFile(inFile, childrenCnt);
 
 			for (int i = 0; i < childrenCnt; i++) {
-				std::shared_ptr<CGameObject> child = std::make_shared<CGameObject>();
-				InitFromFile(child, inFile);
+				std::shared_ptr<CGameObject> child = InitFromFile(inFile, prefabs);
 				child->SetParent(obj);
 			}
 		}
@@ -360,6 +373,7 @@ void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& 
 			break;
 		}
 	}
+	return obj;
 }
 
 void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
@@ -370,45 +384,66 @@ void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 	ReadDateFromFile(inFile, mTransform->mLocalScale);
 	ReadDateFromFile(inFile, mTransform->mLocalRotation);
 
-	std::string token{};
-	ReadDateFromFile(inFile, token);
-	if (token == "<TransformMatrix>:") {
-		ReadDateFromFile(inFile, mTransform->mLocalMat);
-	}
+	ReadDateFromFile(inFile, mTransform->mLocalMat);
 }
 
 void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile)
 {
-	
-}
+	using namespace BinaryReader;
 
-const BoundingBox& CGameObject::CombineChildrenOOBB()
-{
-	if (!mCollider) {
-		return BoundingBox();
+	mMeshRenderer = AddComponent<CMeshRenderer>();
+
+	std::string meshName{};
+	ReadDateFromFile(inFile, meshName);
+	mMeshRenderer->SetMesh(meshName);
+
+	int materialCnt{};
+	std::string materialName{};
+	ReadDateFromFile(inFile, materialCnt);
+	for (int i = 0; i < materialCnt; i++) {
+		ReadDateFromFile(inFile, materialName);
+		mMeshRenderer->AddMaterial(materialName);
 	}
 
-	BoundingBox result = mCollider->GetAABB();
 
-	for (const auto& child : mChildren) {
-		BoundingBox childAABB = child->CombineChildrenOOBB();
-
-		BoundingBox::CreateMerged(result, result, childAABB);
-	}
-
-	return result;
 }
 
-void CGameObject::CalculateRootOOBB()
+void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 {
-	BoundingBox combinedAABB = CombineChildrenOOBB();
-	BoundingOrientedBox oobb{};
-	BoundingOrientedBox::CreateFromBoundingBox(oobb, combinedAABB);
+	using namespace BinaryReader;
+	std::string name{};
+	ReadDateFromFile(inFile, name);
+	UINT resolution{};
+	Vec3 size{};
+	Vec3 offset{};
+	ReadDateFromFile(inFile, resolution);
 
-	mCollider->SetLocalOOBB(oobb);
+	auto material = std::static_pointer_cast<CTerrainMaterial>(RESOURCE.Get<CMaterial>(name + "Material"));
+	if (!material) {
+		material = std::make_shared<CTerrainMaterial>();
+		material->LoadTerrainData(inFile);
+		material->SetName(name + "Material");
+		RESOURCE.Add(material);
+	}
+	size = material->GetSize();
+
+	ReadDateFromFile(inFile, offset);
+
+	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(name + "Mesh"));
+	if (!mesh) {
+		mesh = std::make_shared<CHeightMapGridMesh>();
+		mesh->Initialize(name + "Heightmap", resolution, size, offset);
+		mesh->SetName(name + "Mesh");
+		RESOURCE.Add(mesh);
+	}
+	auto terrain = AddComponent<CTerrain>();
+	terrain->SetHeightMapGridMesh(mesh);
+	terrain->SetMaterial(material);
+
+	INSTANCE(CSceneManager).GetCurScene()->SetTerrain(terrain);
 }
 
-std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::wstring& name)
+std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::string& name)
 {
 	std::shared_ptr<CGameObject> obj{ nullptr };
 

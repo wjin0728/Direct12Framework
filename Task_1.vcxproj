@@ -160,7 +160,6 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AvoidObstacle.h" />
     <ClInclude Include="BattleScene.h" />
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
@@ -192,7 +191,6 @@
     <ClInclude Include="RenderTargetGroup.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="RigidBody.h" />
-    <ClInclude Include="ScrollTexture.h" />
     <ClInclude Include="SimpleMath.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
@@ -211,7 +209,6 @@
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AvoidObstacle.cpp" />
     <ClCompile Include="BattleScene.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -240,7 +237,6 @@
     <ClCompile Include="RenderTargetGroup.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="RigidBody.cpp" />
-    <ClCompile Include="ScrollTexture.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SimpleMath.cpp" />
     <ClCompile Include="Terrain.cpp" />
@@ -268,7 +264,7 @@
     <None Include="SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\Lighting.hlsl">
+    <None Include="Resources\Shaders\Common.hlsl">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -305,7 +301,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\SkyBox.hlsl">
+    <None Include="Resources\Shaders\Skybox.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
@@ -326,6 +322,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\Triplanar.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\Vegitation.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

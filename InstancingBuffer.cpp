@@ -16,6 +16,8 @@ void CInstancingBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT inst
 	mMaxInstanceNum = instanceNum;
 	dataSize = _dataSize;
 
+	bufferSize = mMaxInstanceNum * dataSize;
+
 	CreateBuffer();
 
 	mInstancingBufferView.BufferLocation = buffer->GetGPUVirtualAddress();

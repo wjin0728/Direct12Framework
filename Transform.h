@@ -18,9 +18,6 @@ private:
 	Matrix mTextureMat = Matrix::Identity;
 
 private:
-	int mCbvIdx = -1;
-
-private:
 	friend CGameObject;
 	friend class CCamera;
 	friend class CMeshRenderer;
@@ -43,8 +40,6 @@ public:
 	virtual void LateUpdate() override;
 
 	void Reset();
-	void SetCBVIndex();
-	void ReturnCBVIndex();
 
 public:
 	void MoveStrafe(float distance = 1.0f);

@@ -16,7 +16,7 @@ class CResourceManager
 	MAKE_SINGLETON(CResourceManager)
 
 private:
-	using KeyObjMap = std::unordered_map<std::wstring, std::shared_ptr<CResource>>;
+	using KeyObjMap = std::unordered_map<std::string, std::shared_ptr<CResource>>;
 	std::array<KeyObjMap, RESOURCE_TYPE_COUNT> resources{};
 
 	std::queue<UINT> srvIdxQueue{};
@@ -25,23 +25,23 @@ public:
 	void Initialize();
 
 	template<typename T>
-	std::shared_ptr<T> Load(const std::wstring& name, std::wstring_view fileName);
+	std::shared_ptr<T> Load(const std::string& name, std::string_view fileName);
 
 	template<typename T>
 	bool Add(const std::shared_ptr<T>& resource);
 
 	template<typename T>
-	std::shared_ptr<T> Get(const std::wstring& key);
+	std::shared_ptr<T> Get(const std::string& key);
 
 	template<typename T>
 	RESOURCE_TYPE GetResourceType();
 
 public:
-	std::shared_ptr<CTexture> Create2DTexture(const std::wstring& name, DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
+	std::shared_ptr<CTexture> Create2DTexture(const std::string& name, DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
 		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = XMFLOAT4());
 	void UpdateMaterials();
 
-	void LoadSceneResourcesFromFile(const std::wstring& fileName);
+	void LoadSceneResourcesFromFile(std::ifstream& ifs);
 
 private:
 	void LoadDefaultMeshes();
@@ -59,7 +59,7 @@ public:
 };
 
 template<typename T>
-inline std::shared_ptr<T> CResourceManager::Load(const std::wstring& name, std::wstring_view fileName)
+inline std::shared_ptr<T> CResourceManager::Load(const std::string& name, std::string_view fileName)
 {
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
 	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(resourceType)];
@@ -87,7 +87,7 @@ inline bool CResourceManager::Add(const std::shared_ptr<T>& resource)
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
 	KeyObjMap& keyObjMap = resources[static_cast<UINT>(resourceType)];
 
-	std::wstring key = resource->GetName();
+	std::string key = resource->GetName();
 
 	auto itr = keyObjMap.find(key);
 	if (itr != keyObjMap.end())
@@ -99,7 +99,7 @@ inline bool CResourceManager::Add(const std::shared_ptr<T>& resource)
 }
 
 template<typename T>
-inline std::shared_ptr<T> CResourceManager::Get(const std::wstring& key)
+inline std::shared_ptr<T> CResourceManager::Get(const std::string& key)
 {
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
 	KeyObjMap& keyObjMap = resources[static_cast<UINT>(resourceType)];
@@ -114,7 +114,7 @@ inline std::shared_ptr<T> CResourceManager::Get(const std::wstring& key)
 template<typename T>
 inline RESOURCE_TYPE CResourceManager::GetResourceType()
 {
-	if (std::is_same_v<T, CMaterial>)
+	if (std::is_base_of_v<T, CMaterial>)
 		return RESOURCE_TYPE::MATERIAL;
 	else if (std::is_base_of_v<CMesh, T>)
 		return RESOURCE_TYPE::MESH;
