@@ -54,6 +54,17 @@ D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 		desc[10] = { "AGE",	0, DXGI_FORMAT_R32_FLOAT, 1, 104, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 		break;
 	}
+	case INPUT_LAYOUT_TYPE::ANIMATION: {
+		elementNum = 6;
+		desc = new D3D12_INPUT_ELEMENT_DESC[elementNum];
+		desc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[4] = { "BONEWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }; // »À´ë °¡ÁßÄ¡
+		desc[5] = { "BONEINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 60, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }; // »À´ë ÀÎµ¦½º
+		break;
+	}
 	default:
 		break;
 	}
@@ -250,7 +261,7 @@ void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 		pipelineStateDesc.HS = CreateShader(hsBlob, fileName, "HS_Main", "hs_5_1");
 		pipelineStateDesc.DS = CreateShader(dsBlob, fileName, "DS_Main", "ds_5_1");
 	}
-
+	//D3D12_ROOT_PARAMETER
 	pipelineStateDesc.RasterizerState = InitRasterizerState();
 	pipelineStateDesc.BlendState = InitBlendState();
 	pipelineStateDesc.DepthStencilState = InitDepthStencilState();

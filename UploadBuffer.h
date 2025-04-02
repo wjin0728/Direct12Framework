@@ -5,6 +5,7 @@ enum class CONSTANT_BUFFER_TYPE : UINT {
 	PASS,
 	OBJECT,
 	LIGHT,
+	BONE_TRANSFORM,
 
 	END
 };
@@ -28,7 +29,8 @@ enum {
 	MESH_COUNT = 50,
 	PASS_COUNT = 2,
 	OBJECT_COUNT = 500,
-	BILLBOARD_COUNT = 20000
+	BILLBOARD_COUNT = 20000,
+	BONE_TRANSFORM_COUNT = 10
 };
 
 
@@ -53,6 +55,8 @@ public:
 
 	void CopyData(const void* _data, UINT idx = 0);
 	virtual void UpdateBuffer(UINT idx = 0) {};
+
+	BYTE* GetMappedData() { return mappedData; }
 
 protected:
 	void CreateBuffer();

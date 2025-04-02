@@ -4,6 +4,8 @@
 class CTransform : public CComponent, public std::enable_shared_from_this<CTransform>
 {
 private:
+	friend class CAnimationController;
+
 	Vec3 mLocalRight = Vec3::Right;
 	Vec3 mLocalUp = Vec3::Up;
 	Vec3 mLocalLook = Vec3::Backward;
@@ -12,6 +14,10 @@ private:
 	Vec3 mLocalScale = { 1.f,1.f,1.f };
 	Quaternion mLocalRotation = Quaternion::Identity;
 	Vec3 mLocalEulerAngle{};
+
+	Vec3 mScaleLayerBlending{};
+	Vec3 mRotationLayerBlending{};
+	Vec3 mPositionLayerBlending{};
 
 	Matrix mWorldMat = Matrix::Identity;
 	Matrix mLocalMat = Matrix::Identity;
@@ -87,6 +93,10 @@ public:
 	Quaternion GetLocalRotation() const { return mLocalRotation; }
 	Vec3 GetLocalScale() const { return mLocalScale; };
 
+	Vec3 GetPositionLayerBlending() const { return mPositionLayerBlending; }
+	Vec3 GetRotationLayerBlending() const { return mRotationLayerBlending; }
+	Vec3 GetScaleLayerBlending() const { return mScaleLayerBlending; };
+
 	Vec3 GetWorldLook() const { return mWorldMat.Backward(); };
 	Vec3 GetWorldUp() const { return mWorldMat.Up(); };
 	Vec3 GetWorldRight() const { return mWorldMat.Right(); };
@@ -95,6 +105,8 @@ public:
 	Vec3 GetLocalUp() const { return mLocalMat.Up(); };
 	Vec3 GetLocalRight() const { return mLocalMat.Right(); };
 
+	Matrix GetLocalMat() const { return mLocalMat; }
+	Matrix GetWorldMat() const { return mWorldMat; }
 	const Matrix& GetWorldMat(bool update = true);
 	const Matrix& GetTexMat() { return mTextureMat; }
 
@@ -103,5 +115,6 @@ public:
 private:
 	void UpdateLocalMatrix();
 	void UpdateWorldMatrix();
+	void ApplyBlendedTransform();
 };
 

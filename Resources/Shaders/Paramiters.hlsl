@@ -13,6 +13,8 @@
 
 #define FOG
 
+#define SKINNED_ANIMATION_BONES 128
+
 static const float a0 = 1.f;
 static const float a1 = 0.01f;
 static const float a2 = 0.0001f;
@@ -111,6 +113,16 @@ cbuffer CBLightsData : register(b2)
     SpotLight spotLights[SPOT_LIGHT];
     uint3 lightNum;
     uint lightPadding;
+};
+
+cbuffer CBBoneTransforms : register(b3)
+{
+    matrix boneTransforms[SKINNED_ANIMATION_BONES];
+};
+
+cbuffer CBBoneOffsets : register(b4)
+{
+    matrix boneOffsets[SKINNED_ANIMATION_BONES];
 };
 
 TextureCube skyBoxMap : register(t0, space2);

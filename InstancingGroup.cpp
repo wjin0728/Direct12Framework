@@ -51,7 +51,7 @@ void CInstancingGroup::Render(const std::shared_ptr<class CCamera>& camera)
 			objDate.position = obj->GetTransform()->GetWorldPosition();
 			objDate.size = { obj->GetTransform()->GetLocalScale().x, obj->GetTransform()->GetLocalScale().y };
 			objDate.textureMat = obj->GetTransform()->GetTexMat().Transpose();
-			objDate.materialIdx = obj->GetMeshRendere()->GetMaterialIndex();
+			objDate.materialIdx = obj->GetMeshRenderer()->GetMaterialIndex();
 
 			instancingBuffer->CopyData(&objDate, instancingCnt++);
 		}

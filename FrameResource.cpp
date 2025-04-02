@@ -4,6 +4,7 @@
 #include"ResourceManager.h"
 #include"InstancingBuffer.h"
 #include"Material.h"
+#include"SkinnedMesh.h"
 
 CFrameResource::CFrameResource()
 {
@@ -18,8 +19,11 @@ CFrameResource::CFrameResource()
 	mLocalUploadBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)] = std::make_unique<CConstantBuffer>();
 	mLocalUploadBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)]->Initialize(2, sizeof(CBLightsData));
 
+	mLocalUploadBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)] = std::make_unique<CConstantBuffer>();
+	mLocalUploadBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)]->Initialize(3, sizeof(Matrix) * SKINNED_ANIMATION_BONES, BONE_TRANSFORM_COUNT);
+
 	mLocalUploadBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::MATERIAL)] = std::make_unique<CStructedBuffer>();
-	mLocalUploadBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::MATERIAL)]->Initialize(3, sizeof(CBMaterialDate), MATERIAL_COUNT);
+	mLocalUploadBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::MATERIAL)]->Initialize(5, sizeof(CBMaterialDate), MATERIAL_COUNT);
 
 	mLocalUploadBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::BILLBOARD)] = std::make_unique<CInstancingBuffer>();
 	mLocalUploadBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::BILLBOARD)]->Initialize(0, sizeof(BillboardData), BILLBOARD_COUNT);
@@ -34,6 +38,7 @@ void CFrameResource::Update()
 {
 	mLocalUploadBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)]->UpdateBuffer();
 	mLocalUploadBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::MATERIAL)]->UpdateBuffer();
+	mLocalUploadBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)]->UpdateBuffer();
 }
 
 

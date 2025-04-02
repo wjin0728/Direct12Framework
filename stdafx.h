@@ -68,6 +68,7 @@ using SimpleMath::Color;
 
 #define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
 
+#define BONE_INDEX_WEIGHT		0x1000
 
 
 inline XMFLOAT4 GetRandomColor() {

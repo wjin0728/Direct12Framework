@@ -15,6 +15,13 @@ class CCamera;
 class CTerrain;
 class CCollider;
 class CComponent;
+class CSkinnedMesh;
+class CAnimationController;
+class CModelInfo;
+class CAnimationTrack;
+class CAnimationLayer;
+class CAnimationSet;
+class CModelInfo;
 
 
 class CGameObject : public std::enable_shared_from_this<CGameObject>
@@ -76,11 +83,12 @@ public:
 	static std::shared_ptr<CGameObject> CreateTerrainObject(const std::wstring& tag, const std::wstring& heightMapName,
 		UINT width, UINT height, Vec3 scale = {1.f,1.f,1.f});
 	//바이너리 파일을 통해 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateObjectFromFile(const std::wstring& tag, const std::wstring& fileName);
+	static std::shared_ptr<CModelInfo> CreateObjectFromFile(const std::wstring& tag, const std::wstring& fileName);
 
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
-	std::shared_ptr<CMeshRenderer> GetMeshRendere() { return mMeshRenderer; }
+	std::shared_ptr<CMeshRenderer> GetMeshRenderer() { return mMeshRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
+	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::wstring& GetName() const { return mName; }
@@ -115,11 +123,33 @@ public:
 	template<typename T>
 	std::shared_ptr<T> GetComponent();
 
+public:
+	void UpdateTransform(const Matrix* parent = nullptr);
+	virtual void Animate(float elapsedTime);
+	void ResetForAnimationBlending();
+	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
+
+	std::shared_ptr<CAnimationController> mAnimationController{};
+
+	void FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int meshNum);
+	
+	void SetTrackAnimationSet(int trackIndex, int setIndex);
+	void SetTrackAnimationPosition(int trackIndex, float position);
+
 private:
 
-	static void InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& inFile);
+	static void InitFromFile(std::shared_ptr<CModelInfo> model, std::ifstream& inFile);
+	static void InitHierarchyFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& inFile, int* skinnedMeshCnt);
+	static void InitAnimationFromFile(std::shared_ptr<CModelInfo> model, std::ifstream& inFile);
+
 	void CreateTransformFromFile(std::ifstream& inFile);
-	void CreateMeshRendererFromFile(std::ifstream& inFile);
+	void CreateMeshRendererFromFile(std::ifstream& inFile, std::string& meshType);
+
+	static void CreateAnimationSetFromFile(std::shared_ptr<CModelInfo>& model, std::ifstream& inFile);
+	static void CreateAnimationLayerFromFile(std::shared_ptr<CModelInfo>& model, std::ifstream& inFile, std::shared_ptr<CAnimationSet>& animSet, int layerIndex);
+	static void CreateAnimationCurvesFromFile(std::ifstream& inFile, std::shared_ptr<CAnimationLayer>& layer, int curveIndex);
+	static int CalculateCommonBoneNum(std::shared_ptr<CAnimationSet>& animSet);
+
 	const BoundingBox& CombineChildrenOOBB();
 };
 

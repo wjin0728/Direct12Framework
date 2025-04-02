@@ -10,7 +10,9 @@
 #include"UploadBuffer.h"
 #include"SceneManager.h"
 #include"Scene.h"
-
+#include"Animation.h"
+#include"SkinnedMesh.h"
+#include <unordered_set>
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -37,9 +39,8 @@ void CGameObject::Awake()
 
 	if(!mMeshRenderer)
 		mMeshRenderer = GetComponent<CMeshRenderer>();
-	if (!mCollider) {
+	if (!mCollider)
 		mCollider = GetComponent<CCollider>();
-	}
 }
 
 void CGameObject::Start()
@@ -282,16 +283,17 @@ std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(const std::wstring
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(const std::wstring& tag, const std::wstring& fileName)
+std::shared_ptr<CModelInfo> CGameObject::CreateObjectFromFile(const std::wstring& tag, const std::wstring& fileName)
 {
 	std::ifstream ifs{ fileName, std::ios::binary };
 	if (!ifs) {
 		return nullptr;
 	}
+	ifs.seekg(0, std::ios_base::beg);
 
-	std::shared_ptr<CGameObject> root = std::make_shared<CGameObject>();
-	root->mTag = tag;
-	InitFromFile(root, ifs);
+	std::shared_ptr<CModelInfo> modelInfo = std::make_shared<CModelInfo>();
+	modelInfo->mRootObject->mTag = tag;
+	InitFromFile(modelInfo, ifs);
 
 	Vec3 boundingCenter;
 	float radius;
@@ -299,17 +301,17 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(const std::wstrin
 	BinaryReader::ReadDateFromFile(ifs, boundingCenter);
 	BinaryReader::ReadDateFromFile(ifs, radius);
 
-	root->mRootLocalBS = BoundingSphere(boundingCenter, radius);
+	modelInfo->mRootObject->mRootLocalBS = BoundingSphere(boundingCenter, radius);
 
-	if (!root->GetCollider()) {
+	if (!modelInfo->mRootObject->GetCollider()) {
 		auto collider = std::make_shared<CCollider>();
-		root->AddComponent(collider);
-		root->mCollider = collider;
+		modelInfo->mRootObject->AddComponent(collider);
+		modelInfo->mRootObject->mCollider = collider;
 	}
 
 	
 
-	return root;
+	return modelInfo;
 }
 
 std::shared_ptr<CGameObject> CGameObject::GetSptrFromThis()
@@ -317,8 +319,46 @@ std::shared_ptr<CGameObject> CGameObject::GetSptrFromThis()
 	return shared_from_this();
 }
 
-void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& inFile)
+void CGameObject::InitFromFile(std::shared_ptr<CModelInfo> model, std::ifstream& inFile)
 {
+	using namespace BinaryReader;
+
+	int frameNum{};
+	int textureCnt{};
+	int skinnedMeshCnt{};
+
+	std::string token{};
+
+	while (true) {
+		ReadDateFromFile(inFile, token);
+		if (token == "<Hierarchy>") {
+			while (true) {
+				ReadDateFromFile(inFile, token); // </Hierarchy>
+				if (token == "<Frame>:") {
+					std::shared_ptr<CGameObject> root = std::make_shared<CGameObject>();
+					InitHierarchyFromFile(root, inFile, &skinnedMeshCnt);
+					if (root) model->mRootObject->AddChild(root);
+				}
+				else if (token == "</Hierarchy>") {
+					break;
+				}
+			}
+		}
+		else if (token == "<Animation>") {
+			InitAnimationFromFile(model, inFile);
+
+			model->mAnimationSets->mBoneFrameCaches.resize(model->mRootObject->mChildren.size());
+			model->mRootObject->mChildren.front()->CacheFrameHierarchies(model->mAnimationSets->mBoneFrameCaches);
+
+			model->PrepareSkinning(skinnedMeshCnt);
+		}
+		else if (token == "</Animation>") {
+			break;
+		}
+	}
+}
+
+void CGameObject::InitHierarchyFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& inFile, int* skinnedMeshCnt) {
 	using namespace BinaryReader;
 
 	int frameNum{};
@@ -326,26 +366,25 @@ void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& 
 
 	std::string token{};
 
+	ReadDateFromFile(inFile, frameNum);
+	ReadDateFromFile(inFile, textureCnt);
+
+	std::string name{};
+
+	ReadDateFromFile(inFile, name);
+	if (name == "ID55inst") {
+		std::cout << "Asdfasdf";
+	}
+	obj->mName = stringToWstring(name);
+
 	while (true) {
 		ReadDateFromFile(inFile, token);
-		if (token == "<Frame>:") {
-			ReadDateFromFile(inFile, frameNum);
-			ReadDateFromFile(inFile, textureCnt);
-
-			std::string name{};
-
-			ReadDateFromFile(inFile, name);
-			if (name == "ID55inst") {
-				std::cout << "Asdfasdf";
-			}
-			obj->mName = stringToWstring(name);
-		}
-		else if (token == "<Transform>:") {
+		if (token == "<Transform>:") {
 			obj->CreateTransformFromFile(inFile);
 			obj->mTransform->SetOwner(obj.get());
 		}
-		else if (token == "<Mesh>:") {
-			obj->CreateMeshRendererFromFile(inFile);
+		else if (token == "<Mesh>:" || token == "<SkinDeformations>:") {
+			obj->CreateMeshRendererFromFile(inFile, token);
 			obj->mMeshRenderer->SetOwner(obj.get());
 			obj->mCollider->SetOwner(obj.get());
 		}
@@ -354,12 +393,39 @@ void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& 
 			ReadDateFromFile(inFile, childrenCnt);
 
 			for (int i = 0; i < childrenCnt; i++) {
-				std::shared_ptr<CGameObject> child = std::make_shared<CGameObject>();
-				InitFromFile(child, inFile);
-				child->SetParent(obj);
+				ReadDateFromFile(inFile, token);
+				if (token == "<Frame>:") {
+					std::shared_ptr<CGameObject> child = std::make_shared<CGameObject>();
+					InitHierarchyFromFile(child, inFile, skinnedMeshCnt);
+					if (child) child->SetParent(obj);
+				}
 			}
 		}
 		else if (token == "</Frame>") {
+			break;
+		}
+	}
+}
+void CGameObject::InitAnimationFromFile(std::shared_ptr<CModelInfo> model, std::ifstream& inFile)
+{
+	using namespace BinaryReader;
+
+	std::string token{};
+	int setsNum{};
+
+	while (true) {
+		ReadDateFromFile(inFile, token);
+
+		if (token == "<AnimationSets>:") {
+			ReadDateFromFile(inFile, setsNum);
+			model->mAnimationSets = std::make_shared<CAnimationSets>(setsNum);
+		}
+		else if (token == "<AnimationSet>:") {
+			CreateAnimationSetFromFile(model, inFile);
+		}
+		else if (token == "</AnimationSets>")
+		{
+
 			break;
 		}
 	}
@@ -368,29 +434,38 @@ void CGameObject::InitFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& 
 void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 {
 	using namespace BinaryReader;
-	ReadDateFromFile(inFile, mTransform->mLocalPosition);
-	ReadDateFromFile(inFile, mTransform->mLocalEulerAngle);
+	ReadDateFromFile(inFile, mTransform->mLocalMat);
 	ReadDateFromFile(inFile, mTransform->mLocalScale);
-	ReadDateFromFile(inFile, mTransform->mLocalRotation);
+	ReadDateFromFile(inFile, mTransform->mLocalEulerAngle);
+	ReadDateFromFile(inFile, mTransform->mLocalPosition);
 
-	std::string token{};
-	ReadDateFromFile(inFile, token);
-	if (token == "<TransformMatrix>:") {
-		ReadDateFromFile(inFile, mTransform->mLocalMat);
-	}
+	//std::string token{};
+	//ReadDateFromFile(inFile, token);
+	//if (token == "<TransformMatrix>:") {
+	//	ReadDateFromFile(inFile, mTransform->mLocalMat);
+	//}
 }
 
-void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile)
+void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile, std::string& meshType)
 {
 	using namespace BinaryReader;
+
 	mMeshRenderer = std::make_shared<CMeshRenderer>();
 	AddComponent(mMeshRenderer);
+
+	std::shared_ptr<CMesh> mesh;
+	std::string token{};
+
+	if (meshType == "<SkinDeformations>:") {
+		mesh = CSkinnedMesh::CreateSkinnedMeshFromFile(inFile);
+		ReadDateFromFile(inFile, token); // <Mesh>:
+	}
+	mesh = CMesh::CreateMeshFromFile(inFile);
 
 	std::string meshName;
 	BinaryReader::ReadDateFromFile(inFile, meshName);
 	std::wstring meshNameW = BinaryReader::stringToWstring(meshName);
 
-	std::shared_ptr<CMesh> mesh = CMesh::CreateMeshFromFile(inFile);
 	mesh->SetName(meshNameW);
 	mMeshRenderer->SetMesh(mesh);
 	RESOURCE.Add(mesh);
@@ -398,8 +473,6 @@ void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile)
 	mCollider = std::make_shared<CCollider>();
 	AddComponent(mCollider);
 	mCollider->SetLocalOOBB(mesh->oobb);
-
-	std::string token{};
 
 	ReadDateFromFile(inFile, token);
 
@@ -409,14 +482,154 @@ void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile)
 
 		for (int i = 0; i < materialCnt; i++) {
 			ReadDateFromFile(inFile, token);
-			
+
 			std::shared_ptr<CMaterial> material = CMaterial::CreateMaterialFromFile(inFile);
-			
+
 			mMeshRenderer->AddMaterial(material);
 		}
 
 		ReadDateFromFile(inFile, token);
 	}
+}
+
+void CGameObject::CreateAnimationSetFromFile(std::shared_ptr<CModelInfo>& model, std::ifstream& inFile)
+{
+	using namespace BinaryReader;
+	
+	int setNum{};
+	float startTime{};
+	float endTime{};
+	std::string token;
+
+	ReadDateFromFile(inFile, setNum);
+	ReadDateFromFile(inFile, token); // Animation Set Name
+	ReadDateFromFile(inFile, startTime);
+	ReadDateFromFile(inFile, endTime);
+
+	auto animSet = std::make_shared<CAnimationSet>(startTime, endTime, token);
+	model->mAnimationSets->mAnimationSet[setNum] = animSet;
+
+	ReadDateFromFile(inFile, token);
+	if (token != "<AnimationLayers>:") {
+		int layersNum{};
+		ReadDateFromFile(inFile, layersNum);
+
+		animSet->mLayers.resize(layersNum);
+		animSet->mScales.resize(layersNum);
+		animSet->mRotations.resize(layersNum);
+		animSet->mTranslations.resize(layersNum);
+
+		for (int i = 0; i < layersNum; i++) {
+			CreateAnimationLayerFromFile(model, inFile, animSet, i);
+		}
+
+		ReadDateFromFile(inFile, token); //</AnimationLayers>
+
+		int commonBoneNum = CalculateCommonBoneNum(animSet);
+		if (commonBoneNum) {
+			animSet->mCommonBoneFrameCaches.resize(commonBoneNum);
+		}
+
+	}
+
+	ReadDateFromFile(inFile, token); //</AnimationSet>
+}
+
+void CGameObject::CreateAnimationLayerFromFile(std::shared_ptr<CModelInfo>& model, std::ifstream& inFile, std::shared_ptr<CAnimationSet>& animSet, int layerIndex)
+{
+	using namespace BinaryReader;
+
+	std::string token;
+	ReadDateFromFile(inFile, token);
+	if (token != "<AnimationLayer>:")
+		return;
+
+	int layerNum{};
+	ReadDateFromFile(inFile, layerNum);
+
+	animSet->mLayers[layerIndex] = std::make_shared<CAnimationLayer>();
+	auto layer = animSet->mLayers[layerIndex];
+
+	int cacheNum{};
+	ReadDateFromFile(inFile, cacheNum);
+
+	layer->mBoneFrameCaches.resize(cacheNum);
+	layer->mAnimationCurves.resize(cacheNum);
+
+	animSet->mScales[layerIndex].resize(cacheNum);
+	animSet->mRotations[layerIndex].resize(cacheNum);
+	animSet->mTranslations[layerIndex].resize(cacheNum);
+
+	ReadDateFromFile(inFile, layer->mWeight);
+
+	for (int j = 0; j < cacheNum; j++)
+	{
+		ReadDateFromFile(inFile, token);
+		if (token != "<AnimationCurve>:")
+			break;
+
+		int curveNude{};
+		ReadDateFromFile(inFile, curveNude); //j
+
+		ReadDateFromFile(inFile, token); //Frame Name
+		layer->mBoneFrameCaches[j] = model->mRootObject->FindChildByName(stringToWstring(token));
+
+		CreateAnimationCurvesFromFile(inFile, layer, j);
+	}
+
+	ReadDateFromFile(inFile, token); //</AnimationLayer>
+}
+
+void CGameObject::CreateAnimationCurvesFromFile(std::ifstream& inFile, std::shared_ptr<CAnimationLayer>& layer, int curveIndex)
+{
+	using namespace BinaryReader;
+	std::string token;
+
+	while (true) {
+		ReadDateFromFile(inFile, token);
+
+		if (token == "<TX>:") layer->LoadKeyValues(curveIndex, 0, inFile);
+		else if (token == "<TY>:") layer->LoadKeyValues(curveIndex, 1, inFile);
+		else if (token == "<TZ>:") layer->LoadKeyValues(curveIndex, 2, inFile);
+		else if (token == "<RX>:") layer->LoadKeyValues(curveIndex, 3, inFile);
+		else if (token == "<RY>:") layer->LoadKeyValues(curveIndex, 4, inFile);
+		else if (token == "<RZ>:") layer->LoadKeyValues(curveIndex, 5, inFile);
+		else if (token == "<SX>:") layer->LoadKeyValues(curveIndex, 6, inFile);
+		else if (token == "<SY>:") layer->LoadKeyValues(curveIndex, 7, inFile);
+		else if (token == "<SZ>:") layer->LoadKeyValues(curveIndex, 8, inFile);
+		else if (token == "</AnimationCurve>")
+		{
+			break;
+		}
+	}
+}
+
+int CGameObject::CalculateCommonBoneNum(std::shared_ptr<CAnimationSet>& animSet)
+{
+	int64_t commonBoneNum = 0;
+	std::unordered_map<std::shared_ptr<CGameObject>, std::pair<int64_t, int64_t>> global_map;
+
+	for (const auto& layer : animSet->mLayers) {
+		std::unordered_map<std::shared_ptr<CGameObject>, int> local_count;
+		for (const auto& cache : layer->mBoneFrameCaches) {
+			local_count[cache]++;
+		}
+
+		for (const auto& [cache, m] : local_count) {
+			auto& sums = global_map[cache];
+			sums.first += m;
+			sums.second += static_cast<int64_t>(m) * m;
+		}
+	}
+
+	for (const auto& [cache, sums] : global_map) {
+		int64_t sum_m = sums.first;
+		int64_t sum_m2 = sums.second;
+		int64_t contrib = (sum_m * sum_m - sum_m2) / 2;
+		commonBoneNum += contrib;
+	}
+
+	return commonBoneNum;
 }
 
 const BoundingBox& CGameObject::CombineChildrenOOBB()
@@ -443,6 +656,74 @@ void CGameObject::CalculateRootOOBB()
 	BoundingOrientedBox::CreateFromBoundingBox(oobb, combinedAABB);
 
 	mCollider->SetLocalOOBB(oobb);
+}
+
+void CGameObject::UpdateTransform(const Matrix* parent)
+{
+	if (parent) {
+		mTransform->mWorldMat = mTransform->mLocalMat * (*parent);
+	}
+	else {
+		mTransform->mWorldMat = mTransform->mLocalMat;
+	}
+
+	// 필요하다면 여기서 콜라이더나 바운딩볼 갱신
+
+	for (auto& child : mChildren) {
+		child->UpdateTransform(&mTransform->mWorldMat);
+	}
+}
+
+void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches)
+{
+	boneFrameCaches.push_back(GetSptrFromThis());
+
+	for (auto& child : mChildren) {
+		child->CacheFrameHierarchies(boneFrameCaches);
+	}
+}
+
+void CGameObject::Animate(float elapsedTime)
+{
+	//OnPrepareRender();
+	
+	if (mAnimationController) {
+		ResetForAnimationBlending();
+		mAnimationController->AdvanceTime(elapsedTime, shared_from_this());
+	}
+
+	for (auto& child : mChildren) {
+		child->Animate(elapsedTime);
+	}
+}
+
+void CGameObject::ResetForAnimationBlending()
+{
+	mTransform->mScaleLayerBlending = Vec3(0.0f, 0.0f, 0.0f);
+	mTransform->mRotationLayerBlending = Vec3(0.0f, 0.0f, 0.0f);
+	mTransform->mPositionLayerBlending = Vec3(0.0f, 0.0f, 0.0f);
+
+	for (auto& child : mChildren) {
+		child->ResetForAnimationBlending();
+	}
+}
+
+void CGameObject::FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int skinnedMeshNum)
+{
+	if (mMeshRenderer) {
+		auto mesh = mMeshRenderer->GetMesh();
+		if (mesh) {
+			auto skinned = std::dynamic_pointer_cast<CSkinnedMesh>(mesh);
+			if (skinned) {
+				skinnedMeshes.push_back(skinned);
+				skinnedMeshNum++;
+			}
+		}
+	}
+
+	for (auto& child : mChildren) {
+		child->FindAndSetSkinnedMesh(skinnedMeshes, skinnedMeshNum);
+	}
 }
 
 std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::wstring& name)
@@ -479,4 +760,13 @@ void CGameObject::RemoveChild(std::shared_ptr<CGameObject> child)
 	}
 }
 
+void CGameObject::SetTrackAnimationSet(int trackIndex, int setIndex)
+{
+	if (mAnimationController) mAnimationController->SetTrackAnimationSet(trackIndex, setIndex);
+}
+
+void CGameObject::SetTrackAnimationPosition(int trackIndex, float position)
+{
+	if (mAnimationController) mAnimationController->SetTrackPosition(trackIndex, position);
+}
 

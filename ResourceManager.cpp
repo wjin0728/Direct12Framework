@@ -264,6 +264,21 @@ void CResourceManager::LoadDefaultShaders()
 
 		Add(shader);
 	}
+	{
+		ShaderInfo info;
+		info.shaderType = SHADER_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::ANIMATION;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		shader->Initialize(info, L"Resources\\Shaders\\Animation.hlsl");
+		shader->SetName(L"Animation");
+
+		Add(shader);
+	}
 }
 
 void CResourceManager::ReleaseUploadBuffers()

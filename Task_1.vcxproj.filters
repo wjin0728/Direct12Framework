@@ -55,9 +55,6 @@
     <ClInclude Include="GameObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Resources\Mesh</Filter>
-    </ClInclude>
     <ClInclude Include="GridMesh.h">
       <Filter>Resources\Mesh</Filter>
     </ClInclude>
@@ -184,10 +181,23 @@
     <ClInclude Include="VertexBuffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="InstancingGroup.h" />
-    <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="Enums.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingBuffer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingGroup.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedMesh.h">
+      <Filter>Resources\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -329,6 +339,12 @@
     <ClCompile Include="InstancingGroup.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedMesh.cpp">
+      <Filter>Resources\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -366,6 +382,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="Resources\Shaders\TerrainShadow.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="Resources\Shaders\Animation.hlsl">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>

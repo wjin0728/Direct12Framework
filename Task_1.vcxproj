@@ -168,6 +168,8 @@
     <ClInclude Include="CResource.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingGroup.h" />
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="SkinnedMesh.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="DescriptorHeaps.h" />
@@ -215,6 +217,8 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="SkinnedMesh.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="DescriptorHeaps.cpp" />
@@ -317,6 +321,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\TerrainShadow.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\Animation.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

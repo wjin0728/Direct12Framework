@@ -288,7 +288,7 @@ void CTransform::UpdateWorldMatrix()
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
 	auto collider = GetOwner()->GetCollider();
-	auto meshRenderer = GetOwner()->GetMeshRendere();
+	auto meshRenderer = GetOwner()->GetMeshRenderer();
 
 	GetOwner()->mRootLocalBS.Transform(GetOwner()->mRootBS, mWorldMat);
 	if (collider) {
@@ -297,3 +297,9 @@ void CTransform::UpdateWorldMatrix()
 	
 }
 
+void CTransform::ApplyBlendedTransform()
+{
+	mLocalScale = mScaleLayerBlending;
+	mLocalEulerAngle = mRotationLayerBlending;
+	mLocalPosition = mPositionLayerBlending;
+}

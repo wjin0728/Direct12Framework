@@ -122,10 +122,8 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 {
 	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
 
-	int nvertices{};
-	BinaryReader::ReadDateFromFile(inFile, nvertices);
-
-	m->vertices.resize(nvertices);
+	std::string name{};
+	BinaryReader::ReadDateFromFile(inFile, name);
 
 	std::string token;
 
@@ -143,14 +141,15 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 			BoundingOrientedBox::CreateFromBoundingBox(m->oobb, BoundingBox(boundingCenter, boundingExtent));
 			BoundingSphere::CreateFromBoundingBox(m->oobs, m->oobb);
 		}
-		else if (token == "<Positions>:")
+		else if (token == "<Positions>:" || token == "<ControlPoints>:")
 		{
 			int nPositions{};
 			BinaryReader::ReadDateFromFile(inFile, nPositions);
+			m->vertices.resize(nPositions);
 
 			for (int i = 0; i < nPositions; i++) {
 				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].position);
-			}
+		}
 		}
 		else if (token == "<Colors>:")
 		{
@@ -163,7 +162,7 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
 
 			for (int i = 0; i < nNormals; i++) {
 				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].normal);
-			}
+	}
 		}
 		else if (token == "<TextureCoords0>:")
 		{

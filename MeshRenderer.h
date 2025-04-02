@@ -4,6 +4,7 @@
 class CMesh;
 class CMaterial;
 class CCamera;
+class CSkinnedMesh;
 
 class CMeshRenderer : public CComponent
 {

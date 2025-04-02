@@ -16,6 +16,7 @@
 #include"Terrain.h"
 #include"Camera.h"
 #include"InstancingGroup.h"
+#include"Animation.h"
 
 CBattleScene::CBattleScene()
 {
@@ -33,60 +34,29 @@ void CBattleScene::Initialize()
 	mRenderLayers[L"UI"] = ObjectList{};
 	mShaders[L"UI"] = RESOURCE.Get<CShader>(L"Sprite");
 
-#pragma region Obstacles
-
-	std::random_device rd; 
-	std::mt19937 gen(rd()); 
-	std::uniform_real_distribution<float> disX(-30.f, 30.f); 
-	std::uniform_real_distribution<float> disY(180.f, 200.f);
-	std::uniform_real_distribution<float> disZ(50.f, 1000.f);
-
-	Vec3 size = { 25.f,25.f,25.f };
-
-	auto obstaclePrefab = CGameObject::CreateObjectFromFile(L"Obstacle", L"Resources\\Models\\Stone_1.bin");
-	obstaclePrefab->GetTransform()->SetLocalScale(size);
-	auto obstaclePrefab2 = CGameObject::CreateObjectFromFile(L"Obstacle", L"Resources\\Models\\Stone_2.bin");
-	obstaclePrefab2->GetTransform()->SetLocalScale(size);
-	auto obstaclePrefab3 = CGameObject::CreateObjectFromFile(L"Obstacle", L"Resources\\Models\\Stone_5.bin");
-	obstaclePrefab3->GetTransform()->SetLocalScale(size);
-
-
-	for (int i = 0; i < 100; i++) {
-		auto obstacle = CGameObject::Instantiate(obstaclePrefab);
-		obstacle->SetStatic(true);
-		obstacle->GetTransform()->SetLocalPosition({ disX(gen),disY(gen),disZ(gen) });
-
-		auto obstacle2 = CGameObject::Instantiate(obstaclePrefab2);
-		obstacle2->SetStatic(true);
-		obstacle2->GetTransform()->SetLocalPosition({ disX(gen),disY(gen),disZ(gen) });
-
-		auto obstacle3 = CGameObject::Instantiate(obstaclePrefab3);
-		obstacle3->SetStatic(true);
-		obstacle3->GetTransform()->SetLocalPosition({ disX(gen),disY(gen),disZ(gen) });
-
-		AddObject(L"Opaque", obstacle);
-		AddObject(L"Opaque", obstacle2);
-		AddObject(L"Opaque", obstacle3);
-	}
-
-#pragma endregion
-
 #pragma region Player
 
-	auto Player = CGameObject::CreateObjectFromFile(L"Player", L"Resources\\Models\\HelicopterModel.bin");
-	Player->SetStatic(false);
-	Player->GetTransform()->SetLocalPosition({ 0.f,200.f,0.f });
-	Player->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
-	Player->CalculateRootOOBB();
+	auto Player = CGameObject::CreateObjectFromFile(L"Player", L"Resources\\Models\\dummy.bin");
 
-	Player->AddComponent<CRigidBody>();
-	Player->AddComponent<CPlayerController>();
+	auto controller = std::make_shared<CAnimationController>(Player->mAnimationSets);
+	Player->mRootObject->mAnimationController = controller;
+	controller->SetTrackAnimationSet(0, 0);
+	controller->SetTrackStartEndTime(0, 0.0f, 2.5f);
+
+	Player->GetRootObject()->SetStatic(false);
+	Player->GetRootObject()->GetTransform()->SetLocalPosition({ 0.f,200.f,0.f });
+	Player->GetRootObject()->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
+	Player->GetRootObject()->CalculateRootOOBB();
+
+	Player->GetRootObject()->AddComponent<CRigidBody>();
+	Player->GetRootObject()->AddComponent<CPlayerController>();
+	Player->GetRootObject()->AddComponent<CAnimationController>();
 
 	/*auto avoidObstacle = std::make_shared<CAvoidObstacle>();
 	Player->AddScript(avoidObstacle);
 	avoidObstacle->SetOwner(Player);*/
 
-	AddObject(L"Opaque", Player);
+	AddObject(L"Opaque", Player->GetRootObject());
 
 #pragma endregion
 
@@ -97,7 +67,7 @@ void CBattleScene::Initialize()
 		playerFollower->SetStatic(false);
 
 		auto followTarget = playerFollower->AddComponent<CFollowTarget>();
-		followTarget->SetTarget(Player);
+		followTarget->SetTarget(Player->GetRootObject());
 		playerFollower->GetTransform()->SetLocalPosition({ 0.f,200.f,0.f });
 
 		auto cameraObj = CGameObject::CreateCameraObject(L"MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
