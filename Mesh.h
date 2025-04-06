@@ -52,7 +52,7 @@ public:
 public:
 	CMesh() = default;
 	CMesh(std::ifstream& inFile);
-	virtual ~CMesh() = default;
+	virtual ~CMesh() {};
 
 public:
 	void CreateVertexBuffer();

@@ -11,6 +11,7 @@
 #include"SceneManager.h"
 #include"Scene.h"
 #include"Animation.h"
+#include"SkinnedMesh.h"
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -681,7 +682,7 @@ void CGameObject::ResetForAnimationBlending()
 void CGameObject::FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int skinnedMeshNum)
 {
 	if (mMeshRenderer) {
-		auto mesh = mMeshRenderer->GetMesh();
+		std::shared_ptr<CMesh> mesh = mMeshRenderer->GetMesh();
 		if (mesh) {
 			auto skinned = std::dynamic_pointer_cast<CSkinnedMesh>(mesh);
 			if (skinned) {

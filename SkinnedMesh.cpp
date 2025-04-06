@@ -21,9 +21,7 @@ void CSkinnedMesh::UpdateShaderVariables()
 	auto currFrameResource = INSTANCE(CDX12Manager).GetCurFrameResource();
 
 	if (mBoneTransformIndex >= 0) {
-		currFrameResource
-			->GetConstantBuffer((UINT)CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)
-			->UpdateBuffer(mBoneTransformIndex);
+		//currFrameResource->GetConstantBuffer((UINT)CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(mBoneTransformIndex, );
 	}
 }
 

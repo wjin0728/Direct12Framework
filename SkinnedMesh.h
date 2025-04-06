@@ -36,7 +36,7 @@ private:
 
 public:
 	CSkinnedMesh();
-	~CSkinnedMesh();
+	virtual ~CSkinnedMesh();
 
 public:
 	void CreateSkinnedVertexBuffer();

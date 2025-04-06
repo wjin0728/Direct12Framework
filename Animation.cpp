@@ -322,9 +322,7 @@ void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameO
 		if (index >= 0) {
 			auto curFrameResource = INSTANCE(CDX12Manager).GetCurFrameResource();
 
-			curFrameResource
-				->GetConstantBuffer((UINT)CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)
-				->CopyData(finalBones.data(), index);
+			curFrameResource->GetConstantBuffer((UINT)CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(index, finalBones.data());
 		}
 	}
 }
