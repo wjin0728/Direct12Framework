@@ -93,6 +93,22 @@ inline std::wstring AnsiToWString(const std::string& str)
 	return std::wstring(buffer);
 }
 
+inline void PrintDebug(const std::string& str)
+{
+	TCHAR pstrDebug[256] = { 0 };
+
+	std::wstring wtag;
+	int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
+	if (size > 0) {
+		wtag.resize(size);
+		MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wtag[0], size);
+	}
+
+	_stprintf_s(pstrDebug, 256, _T("%s\n"), wtag.c_str());
+	OutputDebugString(pstrDebug);
+}
+
+
 class DxException
 {
 public:

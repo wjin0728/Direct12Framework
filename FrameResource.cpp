@@ -4,6 +4,7 @@
 #include"ResourceManager.h"
 #include"InstancingBuffer.h"
 #include"Material.h"
+#include"SkinnedMesh.h"
 
 CFrameResource::CFrameResource()
 {
@@ -18,8 +19,11 @@ CFrameResource::CFrameResource()
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)] = std::make_unique<CConstantBuffer>();
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)]->Initialize(2, ALIGNED_SIZE(sizeof(CBLightsData)));
 
+	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)] = std::make_unique<CConstantBuffer>();
+	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)]->Initialize(3, ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES) * BONE_TRANSFORM_COUNT);
+
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)] = std::make_unique<CConstantBuffer>();
-	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)]->Initialize(3, ALIGNED_SIZE(100) * 100);
+	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)]->Initialize(5, ALIGNED_SIZE(100) * 100);
 
 	mInstancingBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::BILLBOARD)] = std::make_unique<CInstancingBuffer>();
 	mInstancingBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::BILLBOARD)]->Initialize(0, sizeof(BillboardData), BILLBOARD_COUNT);

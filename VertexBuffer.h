@@ -5,6 +5,7 @@ class CVertexBuffer
 {
 private:
 	friend class CMesh;
+	friend class CSkinnedMesh;
 
 	ComPtr<ID3D12Resource> mBuffer{};
 	ComPtr<ID3D12Resource> mUploadBuffer{};

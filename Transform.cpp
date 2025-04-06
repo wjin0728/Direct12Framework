@@ -267,3 +267,9 @@ void CTransform::UpdateWorldMatrix()
 	GetOwner()->mRootLocalBS.Transform(GetOwner()->mRootBS, mWorldMat);
 }
 
+void CTransform::ApplyBlendedTransform()
+{
+	mLocalScale = mScaleLayerBlending;
+	mLocalEulerAngle = mRotationLayerBlending;
+	mLocalPosition = mPositionLayerBlending;
+}
