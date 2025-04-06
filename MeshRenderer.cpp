@@ -40,7 +40,8 @@ void CMeshRenderer::LateUpdate()
 
 void CMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 {
-	//if (camera && !camera->IsInFrustum(mWorldBS)) return;
+	if (!m_materials[0]->GetShader((PASS_TYPE)pass)) return;
+	if (camera && !camera->IsInFrustum(mWorldBS)) return;
 
 	CBObjectData objDate;
 	objDate.worldMAt = GetTransform()->mWorldMat.Transpose();

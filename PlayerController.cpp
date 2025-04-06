@@ -28,8 +28,6 @@ void CPlayerController::Update()
 	OnKeyEvents();
 	OnMouseEvents();
 
-	float power = DELTA_TIME * 3000;
-
 }
 
 void CPlayerController::LateUpdate()

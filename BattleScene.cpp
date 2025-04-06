@@ -14,6 +14,7 @@
 #include"InputManager.h"
 #include"Terrain.h"
 #include"Camera.h"
+#include"Material.h"
 #include"InstancingGroup.h"
 
 CBattleScene::CBattleScene()
@@ -22,25 +23,15 @@ CBattleScene::CBattleScene()
 
 void CBattleScene::Initialize()
 {
-	mRenderLayers["Opaque"] = ObjectList{};
-	mShaders["Opaque"] = RESOURCE.Get<CShader>("Forward");
-	mRenderLayers["Terrain"] = ObjectList{};
-	mShaders["Terrain"] = RESOURCE.Get<CShader>("Terrain");
-	mRenderLayers["SkyBox"] = ObjectList{};
-	mShaders["SkyBox"] = RESOURCE.Get<CShader>("SkyBox");
-	mShaders["Shadow"] = RESOURCE.Get<CShader>("Shadow");
-	mRenderLayers["UI"] = ObjectList{};
-	mShaders["UI"] = RESOURCE.Get<CShader>("Sprite");
-
 	LoadSceneFromFile(SCENE_PATH(std::string("Lobby")));
 
 #pragma region Player
 
 	auto Player = std::make_shared<CGameObject>();
 	Player->SetStatic(false);
-	Player->GetTransform()->SetLocalPosition({ 0.f,50.f,0.f });
+	Player->GetTransform()->SetLocalPosition({ 0.f,10.f,0.f });
 	Player->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
-	Player->GetTransform()->SetLocalRotationY(90.f);
+	//Player->GetTransform()->SetLocalRotationY(90.f);
 
 	Player->AddComponent<CRigidBody>();
 	Player->AddComponent<CPlayerController>();
@@ -57,15 +48,18 @@ void CBattleScene::Initialize()
 		auto followTarget = playerFollower->AddComponent<CFollowTarget>();
 		followTarget->SetTarget(Player);
 		playerFollower->GetTransform()->SetLocalPosition({ 0.f,10.f,0.f });
+		//playerFollower->GetTransform()->SetLocalRotationY(90.f);
 
 		auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
-			1.f, 500.f);
+			1.f, 100.f);
 		cameraObj->SetStatic(false);
-		cameraObj->GetTransform()->SetLocalPosition({ 0.f, 4.f, -8.f });
+		cameraObj->GetTransform()->SetLocalPosition({ 0.f, 0.f, 0.f });
 		cameraObj->GetTransform()->Rotate({ 15.f,0.f,0.f });
 		cameraObj->SetParent(playerFollower);
 
 		AddObject("", playerFollower);
+
+		auto uiCamera = CGameObject::CreateCameraObject("UICamera", INSTANCE(CDX12Manager).GetRenderTargetSize(), 0.f, 100.f, INSTANCE(CDX12Manager).GetRenderTargetSize());
 	}
 #pragma endregion
 
@@ -116,7 +110,6 @@ void CBattleScene::LateUpdate()
 
 	Vec3 dir = dirLight->direction;
 	dir.Normalize();
-	transform->SetLocalPosition(center - (r * dir));
 	transform->LookTo(dir);
 	camera->GenerateViewMatrix();
 
@@ -130,7 +123,7 @@ void CBattleScene::SetLights()
 
 	Vec3 lightColor = { 1.f,1.f,1.f};
 	Vec3 strength = { 1.f,1.f,1.f };
-	Vec3 dir = { 1.f,1.f,1.f };
+	Vec3 dir = { 0.5f,-1.f,0.5f };
 
 	dirLight = std::make_shared<CDirectionalLight>(lightColor, strength, dir);
 	lightMgr->AddDirectionalLight(dirLight);
@@ -139,16 +132,14 @@ void CBattleScene::SetLights()
 	dirLightObj->SetTag("DirectinalLight");
 	auto camera = std::make_shared<CCamera>();
 	dirLightObj->AddComponent(camera);
-	camera->SetViewport(0, 0, 4048, 4048);
-	camera->SetScissorRect(0, 0, 4048, 4048);
+
+	Vec2 shadowMapSize = { 4096.f * 3, 4096.f * 3 };
+	camera->SetViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
+	camera->SetScissorRect(0, 0, shadowMapSize.x, shadowMapSize.y);
 
 	auto& mainCam = mCameras["MainCamera"];
 	Vec3 corners[8]{};
 	mainCam->mFrustumView.GetCorners(corners);
-
-	float fov = mainCam->GetFov();
-	float tanHalfVFov = tanf(XMConvertToRadians(fov / 2.0f));
-	float tanHalfHFov = tanHalfVFov * mainCam->GetAspect();
 
 	Vec3 center{};
 	for (int i = 0; i < 8; ++i) {
@@ -160,7 +151,7 @@ void CBattleScene::SetLights()
 		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
 	}
 	float r = max;
-
+	
 	camera->GenerateOrthographicProjectionMatrix(1.f, r*2.f, r * 2.f, r * 2.f);
 
 	AddCamera(camera);
@@ -171,5 +162,5 @@ void CBattleScene::SetLights()
 	transform->SetLocalPosition(center - (r*dir));
 	transform->LookTo(dir);
 
-	AddObject(dirLightObj);
+	mObjects.push_back(dirLightObj);
 }

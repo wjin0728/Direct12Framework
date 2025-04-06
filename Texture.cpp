@@ -179,7 +179,6 @@ void CTexture::ReleaseUploadBuffer()
 int CTexture::CreateSRV()
 {
 	if (isSR && (srvIdx == -1)) {
-		D3D12_SHADER_RESOURCE_VIEW_DESC desc = GetSRVDesc();
 		auto descriptorHeap = INSTANCE(CDX12Manager).GetDescriptorHeaps();
 
 		if (texType == TEXTURECUBE) {

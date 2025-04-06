@@ -67,7 +67,7 @@ public:
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
 
 protected:
-	void RenderForLayer(const std::string& layer, bool frustumCulling = true);
+	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);
 	void RenderTerrain(const std::string& layer);
 	void UpdatePassData();
 };

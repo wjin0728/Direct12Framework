@@ -87,9 +87,6 @@ void CGameObject::LateUpdate()
 
 void CGameObject::Render(std::shared_ptr<CCamera> camera, int pass)
 {
-	if (mName == "SM_Env_Skydome_01" && pass == FORWARD) {
-		int i = 0;
-	}
 	if (!mActive) return;
 	if (mMeshRenderer) mMeshRenderer->Render(camera, pass);
 	for (auto& child : mChildren) {
@@ -219,6 +216,26 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& 
 	return object;
 }
 
+std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& tag, Vec2 rtSize,
+	float nearPlane, float farPlane, Vec2 size)
+{
+	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
+	object->SetTag(tag);
+
+	auto camera = std::make_shared<CCamera>();
+	object->AddComponent(camera);
+	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
+	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
+	camera->GenerateOrthographicProjectionMatrix(nearPlane, farPlane, size.x, size.y);
+
+	object->SetActive(true);
+
+	INSTANCE(CSceneManager).GetCurScene()->AddCamera(camera);
+	INSTANCE(CSceneManager).GetCurScene()->AddObject(object);
+
+	return object;
+}
+
 std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::string& tag, 
 	const std::string& meshName, const std::string& materialName)
 {
@@ -235,10 +252,10 @@ std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::string& 
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& tag, const std::string& materialName, Vec2 pos)
+std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size)
 {
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
-	object->mTag = tag;
+	object->mTag = "UI";
 
 	object->mMeshRenderer = std::make_shared<CMeshRenderer>();
 	object->AddComponent(object->mMeshRenderer);
@@ -246,8 +263,11 @@ std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& tag,
 	object->mMeshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
 
 	object->GetTransform()->SetLocalPosition({ pos.x, pos.y, 0.f });
+	object->GetTransform()->SetLocalScale({ size.x, size.y, 1.f });
 	object->SetActive(true);
 	object->SetRenderLayer("UI");
+
+	INSTANCE(CSceneManager).GetCurScene()->AddObject(object);
 
 	return object;
 }
@@ -304,7 +324,16 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(std::ifstream& if
 
 		root->mRootLocalBS = BoundingSphere(boundingCenter, radius);
 		root->SetActive(true);
-		root->SetStatic(false);
+
+		float isStatic{};
+		BinaryReader::ReadDateFromFile(ifs, isStatic);
+
+		if (isStatic) {
+			root->SetStatic(true);
+		}
+		else {
+			root->SetStatic(false);
+		}
 	}
 	return root;
 }
@@ -329,15 +358,11 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			ReadDateFromFile(inFile, prefabName);
 			obj = CGameObject::Instantiate(prefabs[prefabName]);
 			obj->SetActive(true);
-			obj->SetStatic(false);
 			obj->CreateTransformFromFile(inFile);
 			return obj;
 		}
 		if (token == "<Frame>:") {
 			ReadDateFromFile(inFile, obj->mName);
-			if (obj->mName == "SM_Env_Bush_02") {
-				int n{};
-			}
 		}
 		else if (token == "<Tag>:") {
 			ReadDateFromFile(inFile, obj->mTag);

@@ -58,7 +58,7 @@ void CResourceManager::LoadSceneResourcesFromFile(std::ifstream& ifs)
 
 		if (!Get<CMesh>(meshName)) {
 			Add(CMesh::CreateMeshFromFile(meshName));
-		}
+		}	
 	}
 
 	int materialCount{};
@@ -93,33 +93,10 @@ void CResourceManager::LoadDefaultMeshes()
 
 void CResourceManager::LoadDefaultTexture()
 {
-	{
-		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
-		texture->LoadFromFile(TEXTURE_PATH("Grass_Mid_01"));
-		texture->SetName("Grass_Mid_01");
-		Add(texture);
-	}
-
-	{
-		std::shared_ptr<CTexture> texture = std::make_shared<CTexture>();
-		texture->LoadFromFile(TEXTURE_PATH("Grass_Mid_01_Normals"));
-		texture->SetName("Grass_Mid_01_Normals");
-		Add(texture);
-	}
 }
 
 void CResourceManager::LoadDefaultMaterials()
 {
-	CommonProperties properties;
-	properties.mainTexIdx = Get<CTexture>("Grass_Mid_01")->GetSrvIndex();
-	properties.mainColor = { 1.f,1.f,1.f };
-	properties.normalTexIdx = Get<CTexture>("Grass_Mid_01_Normals")->GetSrvIndex();
-	properties.metallic = 0.2f;
-	properties.smoothness = 0.2f;
-
-	auto material = std::make_shared<CMaterial>(&properties, sizeof(CommonProperties));
-	material->SetShader("Common");
-	Add(material);
 }
 
 void CResourceManager::LoadDefaultShaders()

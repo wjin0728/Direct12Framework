@@ -1,16 +1,15 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
-cbuffer MaterialData : register(b0, space1)
+cbuffer MaterialData : register(b3)
 {
     float3 topColor;
-    float3 bottomColor;
-    
     float offset;
+    float3 bottomColor;
     float distance;
-    float falloff;
     
     float3 padding;
+    float falloff;
 };
 
 //
@@ -44,6 +43,8 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
     
+    output.position = output.position.xyww;
+    
     output.uv = input.uv;
     
     return output;
@@ -61,50 +62,12 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     
     float2 uv = input.uv;
     
-    float3 botcol = { 1.f, 1.f, 1.f };
-    float3 topcol = { 0.f, 0.6f, 0.8f };
-    
-    float fall = 0.8;
-    float off = 69.2f;
-    float dis = 148.f;
-    
-    float clampResult13 = clamp(((off + worldPosition.y) / dis), 0.0, 1.0);
-    float3 lerpResult18 = lerp(botcol, topcol, saturate(pow(clampResult13, fall)));
+    float clampResult13 = clamp(((offset + worldPosition.y) / distance), 0.0, 1.0);
+    float3 lerpResult18 = lerp(bottomColor, topColor, saturate(pow(clampResult13, falloff)));
     float2 texCoord21 = uv * float2(1, 1) + float2(0, 0);
-    float3 lerpResult4 = lerp(botcol, topcol, texCoord21.y);
+    float3 lerpResult4 = lerp(bottomColor, topColor, texCoord21.y);
     
     float3 staticSwitch20 = lerpResult18;
 
     return float4(staticSwitch20, 1.f);
-}
-
-//
-//Shadow Cast
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-struct VS_SHADOW_INPUT
-{
-    float3 position : POSITION;
-    float3 normal : NORMAL;
-};
-
-struct VS_SHADOW_OUTPUT
-{
-    float4 position : SV_POSITION;
-};
-
-VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
-{
-    VS_SHADOW_OUTPUT output = (VS_SHADOW_OUTPUT) 0;
-    
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
-    
-    output.position = positionInputs.positionWS;
-    
-    return output;
-}
-
-void PS_Shadow(VS_SHADOW_OUTPUT input)
-{
-   
 }

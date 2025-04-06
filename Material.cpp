@@ -15,6 +15,7 @@ CMaterial::CMaterial(void* data, UINT dataSize) : matData(new BYTE[dataSize]), d
 
 void CMaterial::Initialize(void* data, UINT dataSize)
 {
+	this->dataSize = dataSize;
 	matData.reset(new BYTE[dataSize]);
 	std::memcpy(matData.get(), data, dataSize);
 	mPoolOffset = CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->AddData(matData.get(), dataSize);
@@ -106,8 +107,8 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			}
 		}
 	}
-	else if (token == "SyntyStudios/Triplanar_01" || token == "SyntyStudios/Triplanar_Basic") {
-		material->SetShader("Triplaner");
+	else if (token == "SyntyStudios/Triplanar01" || token == "SyntyStudios/TriplanarBasic") {
+		material->SetShader("Triplanar");
 		matData = std::make_unique<BYTE[]>(sizeof(TriplanarProperties));
 		TriplanarProperties* data = reinterpret_cast<TriplanarProperties*>(matData.get());
 		dataSize = sizeof(TriplanarProperties);
@@ -266,7 +267,11 @@ int CMaterial::GetTextureIdx(std::ifstream& inFile)
 
 void CTerrainMaterial::Update()
 {
-	CMaterial::Update();
+	if (mDirtyFrames <= 0) return;
+
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->UpdateBuffer(mPoolOffset, &data, dataSize);
+
+	mDirtyFrames--;
 }
 
 void CTerrainMaterial::LoadTerrainData(std::ifstream& inFile)
@@ -278,18 +283,28 @@ void CTerrainMaterial::LoadTerrainData(std::ifstream& inFile)
 	ReadDateFromFile(inFile, data.splatNum);
 
 	for (int i = 0; i < data.splatNum; i++) {
-		data.alphaMapIdx[i] = GetTextureIdx(inFile);
+		data.alphaMapIdx[i].x = GetTextureIdx(inFile);
 	}
 
 	int splatCnt{};
 	ReadDateFromFile(inFile, splatCnt);
 	for (int i = 0; i < splatCnt; i++) {
-		data.diffuseIdx[i] = GetTextureIdx(inFile);
-		data.normalIdx[i] = GetTextureIdx(inFile);
-		ReadDateFromFile(inFile, data.metallic[i]);
-		ReadDateFromFile(inFile, data.smoothness[i]);
+		UINT idx = i / 4;
+		UINT idx2 = i % 4;
+
+		data.splats[idx].data[idx2].x = GetTextureIdx(inFile);
+		data.splats[idx].data[idx2].y = GetTextureIdx(inFile);
+		ReadDateFromFile(inFile, data.splats[idx].data[idx2].z);
+		ReadDateFromFile(inFile, data.splats[idx].data[idx2].w);
 	}
+
 
 	Initialize(&data, sizeof(TerrainData));
 	SetShader("Terrain");
+
+	mDirtyFrames = FRAME_RESOURCE_COUNT + 1;
 }
+
+
+
+

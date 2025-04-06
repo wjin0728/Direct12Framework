@@ -77,7 +77,7 @@ UINT CConstantBuffer::AddData(const void* data, UINT dataSize)
 
 void CConstantBuffer::UpdateBuffer(UINT offSet, const void* data, UINT dataSize)
 {
-	memcpy(&mappedData[offSet], data, dataSize);
+	std::memcpy(&mappedData[offSet], data, dataSize);
 }
 
 void CConstantBuffer::BindToShader(UINT offSet)

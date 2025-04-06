@@ -54,14 +54,6 @@ void CDescriptorHeaps::CreateDSV(std::shared_ptr<CTexture> resource, DS_TYPE typ
 
 	auto dsvDesc = resource->GetDSVDesc();
 	DEVICE->CreateDepthStencilView(resource->GetResource().Get(), &dsvDesc, handle);
-
-	if (type == DS_TYPE::SHADOW_MAP) {
-		shadowMapHandle.cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(srvStartHandle.cpuHandle, 80, cbvSrvDescriptorSize);
-		shadowMapHandle.gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvStartHandle.gpuHandle, 80, cbvSrvDescriptorSize);
-
-		auto srvDesc = resource->GetSRVDesc();
-		DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &srvDesc, shadowMapHandle.cpuHandle);
-	}
 }
 
 void CDescriptorHeaps::CreateSRV(std::shared_ptr<CTexture> resource, UINT idx) const
@@ -97,7 +89,6 @@ void CDescriptorHeaps::SetSRVDescriptorHeap()
 	CMDLIST->SetDescriptorHeaps(1, descriptorHeaps);
 	CMDLIST->SetGraphicsRootDescriptorTable(4, srvStartHandle.gpuHandle);
 	CMDLIST->SetGraphicsRootDescriptorTable(5, cubeMapStartHandle.gpuHandle);
-	CMDLIST->SetGraphicsRootDescriptorTable(6, shadowMapHandle.gpuHandle);
 }
 
 CD3DX12_CPU_DESCRIPTOR_HANDLE CDescriptorHeaps::GetDSVHandle(DS_TYPE type) const

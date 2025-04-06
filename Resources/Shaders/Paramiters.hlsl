@@ -5,15 +5,14 @@
 #define DIRECTIONAL_LIGHT 5
 #define POINT_LIGHT 5
 #define SPOT_LIGHT 5
-#define MAX_MATERIAL 10
 
-#define TEXTURE_COUNT 10
+#define TEXTURE_COUNT 200
 
-#define TERRAIN_SPLAT_COUNT 7
+#define TERRAIN_SPLAT_COUNT 2
 
 #define CASCADE_COUNT_FLAG 3
 
-//#define LIGHTING
+#define LIGHTING
 
 //#define FOG
 
@@ -24,39 +23,37 @@ static const float a2 = 0.0001f;
 struct DirectionalLight
 {
     float3 color;
+    float padding1;
     float3 strength;
+    float padding2;
     float3 direction;
-    float3 padding0;
+    float padding3;
 };
 
 
 struct PointLight
 {
     float3 color;
+    float padding1;
     float3 strength;
     float range;
     float3 position;
-    float2 padding;
+    float padding2;
 };
 
 
 struct SpotLight
 {
     float3 color;
+    float padding1;
     float3 strength;
     float range;
     float3 direction;
     float fallOffStart;
     float3 position;
     float fallOffEnd;
-    float4 padding;
     float spotPower;
-};
-
-struct LightColor
-{
-    float3 diffuse;
-    float3 specular;
+    float3 padding2;
 };
 
 cbuffer CBPassData : register(b0)
@@ -93,8 +90,6 @@ cbuffer CBLightsData : register(b2)
 
 TextureCube skyBoxMap : register(t0, space2);
 Texture2D diffuseMap[TEXTURE_COUNT] : register(t0);
-
-Texture2D shadowMap : register(t0, space3);
 
 SamplerState pointWrap : register(s0);
 SamplerState pointClamp : register(s1);

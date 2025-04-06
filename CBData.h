@@ -3,7 +3,7 @@
 constexpr auto DIRECTIONAL_LIGHT = 5;
 constexpr auto POINT_LIGHT = 5;
 constexpr auto SPOT_LIGHT = 5;
-constexpr auto TERRAIN_SPLAT_COUNT = 7;
+constexpr auto TERRAIN_SPLAT_COUNT = 2;
 
 
 struct CBPassData
@@ -32,34 +32,39 @@ struct CBObjectData
 	Matrix textureMat = Matrix::Identity;
 };
 
+
 struct CBDirectionalLightInfo
 {
 	Vec3 color;
+	float padding1;
 	Vec3 strength;
+	float padding2;
 	Vec3 direction;
-	Vec3 padding0;
+	float padding3;
 };
 
 struct CBPointLightInfo
 {
 	Vec3 color;
+	float padding1;
 	Vec3 strength;
 	float range;
 	Vec3 position;
-	Vec2 padding0;
+	float padding2;
 };
 
 struct CBSpotLightInfo
 {
 	Vec3 color;
+	float padding1;
 	Vec3 strength;
 	float range;
 	Vec3 direction;
 	float fallOffStart;
 	Vec3 position;
 	float fallOffEnd;
-	Vec4 padding;
 	float spotPower;
+	Vec3 padding2;
 };
 
 

@@ -72,7 +72,6 @@ void CSceneManager::Render()
 	if (!curScene) {
 		return;
 	}
-
 	curScene->RenderShadowPass();
 
 #ifdef DEFFERD_RENDERING

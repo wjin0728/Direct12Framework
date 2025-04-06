@@ -11,10 +11,11 @@ class CHeightMapGridMesh : public CMesh
 {
 private:
 	friend class CTerrain;
-	std::vector<uint16_t> heightData;
+	std::vector<float> heightData;
 
 	UINT resolution{};
 	Vec3 scale{};
+	Vec3 offset{};
 
 	std::shared_ptr<class CTexture> heightMapTex;
 
@@ -32,6 +33,7 @@ public:
 	int GetWidth() const { return resolution; }
 	float GetHeight(float fx, float fz);
 	Vec3 GetScale() const { return scale; }
+	Vec3 GetOffset() const { return offset; }
 	UINT GetHeightMapIdx() const { return heightMapTex->GetSrvIndex(); }
 };
 

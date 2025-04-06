@@ -4,11 +4,10 @@
 #include"FrameResource.h"
 #include"Shader.h"
 
-
 struct CommonProperties
 {
-	int mainTexIdx = -1;
 	Vec3 mainColor{};
+	int mainTexIdx = -1;
 
 	int normalTexIdx = -1;
 	float smoothness{};
@@ -19,7 +18,7 @@ struct CommonProperties
 struct TriplanarProperties
 {
 	float fallOff{};
-	Vec2 tilling{};
+	float tilling{};
 	float padding{};
 
 	int topTexIdx = -1;
@@ -48,13 +47,19 @@ struct VegitationProperties
 struct SkyboxProperties
 {
 	Vec3 topColor;
-	Vec3 bottomColor;
-
 	float offset;
+	Vec3 bottomColor;
 	float distance;
-	float falloff;
 
-	Vec3 padding;
+	Vec3 padding1;
+	float falloff;
+};
+
+struct UIProperties
+{
+	Vec3 color{};
+	float type{0};
+	int textureIdx = -1;
 };
 
 
@@ -82,22 +87,32 @@ public:
 	virtual void BindDataToShader();
 	virtual void ReleaseUploadBuffer() {}
 
+	std::shared_ptr<CShader> GetShader(PASS_TYPE passType) const
+	{
+		return mShaders[passType];
+	}
+
 protected:
 	static int GetTextureIdx(std::ifstream& inFile);
 };
 
-struct TerrainData
+struct alignas(16) SplatData
+{
+	Vec4 data[4];
+};
+
+struct alignas(16) TerrainData
 {
 	Vec3 size = Vec3::One;
+	float yOffset{};
+
 	int heightMapIdx = -1;
-
 	int splatNum;
-	int alphaMapIdx[TERRAIN_SPLAT_COUNT];
-	int diffuseIdx[TERRAIN_SPLAT_COUNT * 4];
-	int normalIdx[TERRAIN_SPLAT_COUNT * 4];
+	Vec2 heightMapResolution;
 
-	float metallic[TERRAIN_SPLAT_COUNT * 4];
-	float smoothness[TERRAIN_SPLAT_COUNT * 4];
+	SplatData splats[TERRAIN_SPLAT_COUNT];
+
+	Vec4 alphaMapIdx[TERRAIN_SPLAT_COUNT];
 };
 
 class CTerrainMaterial : public CMaterial

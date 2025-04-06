@@ -8,13 +8,13 @@ void CHeightMapGridMesh::LoadHeightMap(const std::string& fileName)
 {
 	UINT heightMapSize = resolution * resolution;
 
-	std::vector<uint16_t> heightMap;
+	std::vector<float> heightMap;
 	std::ifstream file("Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
 	if (!file.is_open()) {
 		return;
 	}
 	heightMap.resize(heightMapSize);
-	file.read(reinterpret_cast<char*>(heightMap.data()), heightMapSize * sizeof(uint16_t));
+	file.read(reinterpret_cast<char*>(heightMap.data()), heightMapSize * sizeof(float));
 
 	heightData.resize(heightMapSize);
 	for (UINT y = 0; y < resolution; y++)
@@ -25,23 +25,12 @@ void CHeightMapGridMesh::LoadHeightMap(const std::string& fileName)
 		}
 	}
 
-	XMCOLOR* data = new XMCOLOR[heightMapSize];
-	for (int i = 0; i < heightMapSize; i++) {
-		data[i].a = heightData[i];
-		data[i].r = heightData[i];
-		data[i].g = heightData[i];
-		data[i].g = heightData[i];
-	}
-
-	heightMapTex = RESOURCE.Create2DTexture(fileName, DXGI_FORMAT_R8G8B8A8_UNORM, data, sizeof(XMCOLOR), resolution, resolution,
+	heightMapTex = RESOURCE.Create2DTexture(fileName, DXGI_FORMAT_R32_FLOAT, heightData.data(), sizeof(float), resolution, resolution,
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		D3D12_RESOURCE_FLAG_NONE
 	);
-
 	heightMapTex->CreateSRV();
-
-	if (data) delete[] data;
 }
 
 void CHeightMapGridMesh::CreateHeightMapSRV()
@@ -122,6 +111,7 @@ void CHeightMapGridMesh::Initialize(const std::string& fileName, UINT _resoultio
 {
 	resolution = _resoultion;
 	scale = _scale;
+	this->offset = offset;
 
 	LoadHeightMap(fileName);
 
@@ -139,7 +129,7 @@ void CHeightMapGridMesh::Initialize(const std::string& fileName, UINT _resoultio
 			float x = j * xGap;
 			float z = i * zGap;
 
-			float y = (float)(heightData[j + (i * resolution)]) / USHORT_MAX * scale.y;
+			float y = heightData[j + (i * resolution)] * scale.y;
 
 			Vec3 position = Vec3{ x,y,z } + offset;
 			vertices.emplace_back(position);

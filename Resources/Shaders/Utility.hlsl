@@ -28,6 +28,7 @@ struct SurfaceData
 {
     float3 albedo;
     float3 specular;
+    float3 emissive;
     float metallic;
     float smoothness;
 };
@@ -53,22 +54,7 @@ VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS)
     return output;
 }
 
-float3 UnpackNormalScale(float4 packedNormal, float scale)
-{
-    float3 normal;
-    normal.xy = packedNormal.xy * 2.0 - 1.0; // 0~1 → -1~1
-    normal.xy *= scale; // 강도 적용
-    normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy))); // Z 재계산
-    return normal;
-}
-
-
 float3 GammaDecoding(float3 color)
-{
-    return pow(color, 2.2f);
-}
-
-float4 GammaDecoding(float4 color)
 {
     return pow(color, 2.2f);
 }
@@ -83,22 +69,21 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 ta
 {
     float3 normalT = 2.0f * normalMapSample - 1.0f;
 
-    float3x3 TBN = float3x3(normal, tangent, bitangent);
+    float3x3 TBN = float3x3(tangent, bitangent, normal);
 
     return mul(normalT, TBN);
 }
 
 float CalcShadowFactor(float4 shadowPosH)
 {
-    //shadowPosH.xyz /= shadowPosH.w;
+    shadowPosH.xyz /= shadowPosH.w;
 
     // Depth in NDC space.
     float depth = shadowPosH.z;
 
     uint width, height, numMips;
     diffuseMap[shadowMapIdx].GetDimensions(0, width, height, numMips);
-
-    // Texel size.
+    
     float dx = 1.0f / (float) width;
 
     float percentLit = 0.0f;
@@ -113,17 +98,15 @@ float CalcShadowFactor(float4 shadowPosH)
     for (int i = 0; i < 9; ++i)
     {
         percentLit += diffuseMap[shadowMapIdx].SampleCmpLevelZero(shadowSam,
-            shadowPosH.xy + offsets[i], depth).r;
+            shadowPosH.xy + offsets[i], depth ).r;
     }
     
     return percentLit / 9.0f;
 }
 
-float3 FresnelSchlick(float cosTheta, float3 F0)
+float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
 {
-    float x = 1.0 - cosTheta;
-    float x2 = x * x;
-    return F0 + (1.0 - F0) * x2 * x2 * x;
+    return F0 + (max(1.0 - roughness, F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 float DistributionGGX(float3 N, float3 H, float roughness)
@@ -152,42 +135,43 @@ float GeometrySmith(float3 N, float3 V, float3 L, float roughness)
 
 float3 ComputeDirectionalLight(DirectionalLight light, LightingData lightingData, SurfaceData surfaceData)
 {
-    float3 normal = lightingData.normalWS;
-    float3 camDir = lightingData.cameraDirection;
+    float3 normal = normalize(lightingData.normalWS);
+    float3 camDir = normalize(lightingData.cameraDirection);
     float3 albedo = surfaceData.albedo;
-    float3 specular = surfaceData.specular;
     float metallic = surfaceData.metallic;
-    float smoothness = surfaceData.smoothness;
-    float3 lightDir = -light.direction;
-    float3 lightColor = light.color * light.strength * lightingData.shadowFactor;
-   
-    smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
+    float smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
     float roughness = 1.0 - smoothness;
-    float3 F0 = float3(0.04, 0.04, 0.04); // 비금속 기본값
-    F0 = lerp(F0, albedo, metallic); // 금속성 반영
-    
+
+    float3 lightDir = normalize(-light.direction);
+    float3 lightColor = light.color * light.strength * lightingData.shadowFactor;
+
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, albedo, metallic);
+
     float3 halfV = normalize(camDir + lightDir);
-    float viewHalfDot = max(dot(halfV, normal), 0.f);
-    float NdotL = max(dot(normal, lightDir), 0.0);
+    if (all(halfV == 0)) halfV = camDir;
+    float NdotL = max((dot(normal, lightDir) * 0.5f) + 0.5f, 0.0);
     float NdotV = max(dot(normal, camDir), 0.0);
-    
-    float3 F = FresnelSchlick(max(dot(halfV, camDir), 0.0), F0);
+    float VdotH = max(dot(camDir, halfV), 0.0);
+
+    float3 F = FresnelSchlickRoughness(VdotH, F0, roughness);
     float NDF = DistributionGGX(normal, halfV, roughness);
     float G = GeometrySmith(normal, camDir, lightDir, roughness);
 
-    // Specular (Cook-Torrance)
     float3 numerator = NDF * G * F;
-    float denominator = 4.0 * NdotV * NdotL + 0.0001; // 0 나누기 방지
-    specular *= (numerator / denominator);
+    float denominator = max(4.0 * NdotL * NdotV, 0.00001);
+    float3 specular = numerator / denominator;
 
-    // Diffuse (에너지 보존)
-    float3 kS = F; // Specular 비율
-    float3 kD = 1.0 - kS; // Diffuse 비율
-    kD *= 1.0 - metallic; // 금속은 Diffuse 없음
-    float3 diffuse = albedo / 3.14159;
+    float3 kS = F;
+    float3 kD = max(1.0 - kS, 0.0) * (1.0 - metallic);
+    float3 diffuse = albedo;
 
-    // 최종 직접 조명
-    return (kD * diffuse + specular) * lightColor * NdotL;
+    float3 up = float3(0, 1, 0);
+    float ndotUp = saturate(dot(normal, up));
+    float3 directLight = (kD * diffuse + specular) * lightColor * NdotL;
+    float3 ambient = 0.2f * albedo; // 추가
+    
+    return directLight + ambient + (0.2f * albedo * ndotUp);
 }
 
 
@@ -220,12 +204,12 @@ float3 ComputePointLight(PointLight light, LightingData lightingData, SurfaceDat
     float NdotL = max(dot(normal, lightDir), 0.0);
     float NdotV = max(dot(normal, camDir), 0.0);
     
-    float3 F = FresnelSchlick(max(dot(halfV, camDir), 0.0), F0);
+    float3 F = FresnelSchlickRoughness(NdotV, F0, roughness);
     float NDF = DistributionGGX(normal, halfV, roughness);
     float G = GeometrySmith(normal, camDir, lightDir, roughness);
     
     float3 numerator = NDF * G * F;
-    float denominator = 4.0 * NdotV * NdotL + 0.0001; // 0 나누기 방지
+    float denominator = 4.0 * NdotV * NdotL + 0.00001;
     specular *= (numerator / denominator);
     
     float3 kS = F;
@@ -259,20 +243,20 @@ float3 ComputeSpotLight(SpotLight light, LightingData lightingData, SurfaceData 
     smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
     float roughness = 1.0 - smoothness;
     
-    float3 F0 = float3(0.04, 0.04, 0.04); // 비금속 기본값
-    F0 = lerp(F0, albedo, metallic); // 금속성 반영
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, albedo, metallic); 
     
     float3 halfV = normalize(camDir + lightDir);
     float viewHalfDot = max(dot(halfV, normal), 0.f);
     float NdotL = max(dot(normal, lightDir), 0.0);
     float NdotV = max(dot(normal, camDir), 0.0);
     
-    float3 F = FresnelSchlick(max(dot(halfV, camDir), 0.0), F0);
+    float3 F = FresnelSchlickRoughness(NdotV, F0, roughness);
     float NDF = DistributionGGX(normal, halfV, roughness);
     float G = GeometrySmith(normal, camDir, lightDir, roughness);
     
     float3 numerator = NDF * G * F;
-    float denominator = 4.0 * NdotV * NdotL + 0.0001; // 0 나누기 방지
+    float denominator = 4.0 * NdotV * NdotL + 0.0001;
     specular *= (numerator / denominator);
     
     float3 kS = F;
@@ -300,8 +284,6 @@ float3 ComputeSpotLight(SpotLight light, LightingData lightingData, SurfaceData 
 
 float3 CalculatePhongLight(LightingData lightingData, SurfaceData surfaceData)
 {   
-    float3 shadowFactor = lightingData.shadowFactor;
-    
     float3 finalColor = float3(0, 0, 0);
     
     [unroll(DIRECTIONAL_LIGHT)]
@@ -309,20 +291,10 @@ float3 CalculatePhongLight(LightingData lightingData, SurfaceData surfaceData)
     {
         finalColor += ComputeDirectionalLight(dirLights[i], lightingData, surfaceData);
     }
-    [unroll(POINT_LIGHT)]
-    for (i = 0; i < lightNum.y; i++)
-    {
-        finalColor += ComputePointLight(pointLights[i], lightingData, surfaceData);
-    }
-    [unroll(SPOT_LIGHT)]
-    for (i = 0; i < lightNum.z; i++)
-    {
-        finalColor += ComputeSpotLight(spotLights[i], lightingData, surfaceData);
-    }
     
-    float3 ambient = surfaceData.albedo * 0.1;
+    float3 ambient = surfaceData.albedo * 0.2f;
     
-    return finalColor + ambient;
+    return finalColor + surfaceData.emissive;
 }
 
 #endif

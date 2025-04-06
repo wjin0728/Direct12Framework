@@ -170,6 +170,48 @@ void CDX12Manager::InitRenderTargetGroups()
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::SHADOW_PASS)]->Initialize(renderTargets, dsv);
 	}
 #pragma endregion
+
+#pragma region G Pass
+	{
+		std::vector<RenderTarget> renderTargets(4);
+		renderTargets[0].rt = std::make_shared<CTexture>();
+		renderTargets[0].rt->SetName("GBufferAlbedo");
+		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[0].rt);
+
+		renderTargets[1].rt = std::make_shared<CTexture>();
+		renderTargets[1].rt->SetName("GBufferNormal");
+		renderTargets[1].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[1].rt);
+
+		renderTargets[2].rt = std::make_shared<CTexture>();
+		renderTargets[2].rt->SetName("GBufferEmissive");
+		renderTargets[2].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[2].rt);
+
+		renderTargets[3].rt = std::make_shared<CTexture>();
+		renderTargets[3].rt->SetName("GBufferPosition");
+		renderTargets[3].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[3].rt);
+
+		auto dsv = descriptorHeaps->GetDSVHandle(DS_TYPE::MAIN_BUFFER);
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::G_BUFFER)] = std::make_shared<CRenderTargetGroup>();
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::G_BUFFER)]->Initialize(renderTargets, dsv);
+	}
+
+#pragma endregion
 }
 
 void CDX12Manager::InitDepthStencilView()
@@ -192,7 +234,7 @@ void CDX12Manager::InitDepthStencilView()
 		"ShadowMap",
 		DXGI_FORMAT_R24G8_TYPELESS,
 		nullptr, 0,
-		4048, 4048,
+		4096.f *3, 4096.f *3,
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
@@ -286,14 +328,7 @@ void CDX12Manager::InitRootSignature()
 	cubeMapTable.RegisterSpace = 2;
 	cubeMapTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_DESCRIPTOR_RANGE shadowMapTable{};
-	shadowMapTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	shadowMapTable.NumDescriptors = 1;
-	shadowMapTable.BaseShaderRegister = 0;
-	shadowMapTable.RegisterSpace = 3;
-	shadowMapTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[6];
 	//렌더 패스 정보
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0;
@@ -311,8 +346,8 @@ void CDX12Manager::InitRootSignature()
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	//재질 정보
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[3].Descriptor.ShaderRegister = 0;
-	pd3dRootParameters[3].Descriptor.RegisterSpace = 1;
+	pd3dRootParameters[3].Descriptor.ShaderRegister = 3;
+	pd3dRootParameters[3].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//텍스쳐 정보
 	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -324,11 +359,6 @@ void CDX12Manager::InitRootSignature()
 	pd3dRootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &cubeMapTable;
 	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
-	pd3dRootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &shadowMapTable;
-	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =

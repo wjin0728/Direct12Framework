@@ -1,7 +1,7 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
-cbuffer MaterialData : register(b0, space1)
+cbuffer MaterialData : register(b3)
 {
     uint ForwardTexIdx;
     float3 ForwardColor;

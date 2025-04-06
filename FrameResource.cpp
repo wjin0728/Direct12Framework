@@ -20,9 +20,6 @@ CFrameResource::CFrameResource()
 
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)] = std::make_unique<CConstantBuffer>();
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)]->Initialize(3, ALIGNED_SIZE(100) * 100);
-
-	mInstancingBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::BILLBOARD)] = std::make_unique<CInstancingBuffer>();
-	mInstancingBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::BILLBOARD)]->Initialize(0, sizeof(BillboardData), BILLBOARD_COUNT);
 }
 
 

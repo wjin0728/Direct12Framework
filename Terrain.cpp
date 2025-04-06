@@ -52,6 +52,8 @@ void CTerrain::SetMaterial(const std::shared_ptr<CTerrainMaterial>& material)
 
 	if (mTerrainMesh) {
 		material->data.heightMapIdx = mTerrainMesh->GetHeightMapIdx();
+		material->data.yOffset = mTerrainMesh->GetOffset().y;
+		material->data.heightMapResolution = { (float)mTerrainMesh->GetWidth(), (float)mTerrainMesh->GetWidth() };
 	}
 }
 

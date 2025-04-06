@@ -59,11 +59,8 @@ void CScene::RenderShadowPass()
 
 	auto offset = ALIGNED_SIZE(sizeof(CBPassData));
 	shadowPassBuffer->BindToShader(offset);
-	camera->SetViewportsAndScissorRects(CMDLIST);
 
-	for (const auto& object : mObjects) {
-		object->Render(camera, SHADOW);
-	}
+	RenderForLayer("Opaque", camera, SHADOW);
 
 	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
 	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
@@ -85,28 +82,27 @@ void CScene::RenderForwardPass()
 
 	auto& camera = mCameras["MainCamera"];
 	if (camera) {
-		camera->SetViewportsAndScissorRects(CMDLIST);
-
-		for (const auto& object : mObjects) {
-			object->Render(camera, FORWARD);
-		}
+		RenderForLayer("Opaque", camera);
 
 		/*for (const auto& instancingGroup : instancingGroups) {
 			instancingGroup->Render(camera);
 		}*/
-
-		//RenderForLayer("UI", false);
-		mTerrain->Render(camera);
+		if(mTerrain) mTerrain->Render(camera);
 	}
+	auto& uiCamera = mCameras["UICamera"];
+	//RenderForLayer("UI", uiCamera);
+
 	backBuffer->ChangeTargetToResource(backBufferIdx);
 }
 
 void CScene::RenderGBufferPass()
 {
+
 }
 
 void CScene::RenderLightingPass()
 {
+
 }
 
 void CScene::RenderFinalPass()
@@ -115,7 +111,7 @@ void CScene::RenderFinalPass()
 	finalBuffer->ChangeResourceToTarget(0);
 	finalBuffer->SetRenderTarget(0);
 
-	RenderForLayer("UI", false);
+	//RenderForLayer("UI", false);
 }
 
 void CScene::LoadSceneFromFile(const std::string& fileName)
@@ -124,20 +120,17 @@ void CScene::LoadSceneFromFile(const std::string& fileName)
 	if (!ifs) {
 		return;
 	}
-
 	//공유 리소스 로드
 	RESOURCE.LoadSceneResourcesFromFile(ifs);
-
 	//프리팹
 	std::unordered_map<std::string, std::shared_ptr<CGameObject>> prefabs{};
 	CreatePrefabs(ifs, prefabs);
 
 	int rootNum{};
 	BinaryReader::ReadDateFromFile(ifs, rootNum);
-
 	for (int i = 0; i < rootNum; i++) {
 		auto object = CGameObject::CreateObjectFromFile(ifs, prefabs);
-		mObjects.push_back(object);
+		AddObject("Opaque", object);
 	}
 }
 
@@ -189,14 +182,15 @@ void CScene::AddObject(const std::string& renderLayer, std::shared_ptr<CGameObje
 		mObjects.push_back(object);
 	}
 
-	if (mRenderLayers.contains(renderLayer)) {
-		auto& objectList = mRenderLayers[renderLayer];
+	if (!mRenderLayers.contains(renderLayer)) {
+		mRenderLayers[renderLayer] = ObjectList{};
+	}
+	auto& objectList = mRenderLayers[renderLayer];
 
-		auto itr = findByRawPointer(objectList, object.get());
-		if (itr == objectList.end()) {
-			object->SetRenderLayer(renderLayer);
-			objectList.push_back(object);
-		}
+	auto itr2 = findByRawPointer(objectList, object.get());
+	if (itr2 == objectList.end()) {
+		object->SetRenderLayer(renderLayer);
+		objectList.push_back(object);
 	}
 }
 
@@ -249,18 +243,14 @@ void CScene::RemoveCamera(const std::string& tag)
 	mCameras.erase(tag);
 }
 
-void CScene::RenderForLayer(const std::string& layer, bool frustumCulling)
+void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass)
 {
 	if (!mRenderLayers.contains(layer)) {
 		return;
 	}
-
-	mShaders[layer]->SetPipelineState(CMDLIST);
-	if(frustumCulling) {
-		auto& camera = mCameras["MainCamera"];
-		for (const auto& object : mRenderLayers[layer]) {
-			object->Render(camera);
-		}
+	camera->SetViewportsAndScissorRects(CMDLIST);
+	for (const auto& object : mRenderLayers[layer]) {
+		object->Render(camera, pass);
 	}
 }
 
@@ -302,9 +292,9 @@ void CScene::UpdatePassData()
 	passData.totalTime = TIMER.GetTotalTime();
 	passData.renderTargetSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
 
-	passData.gFogRange = 120.f;
-	passData.gFogStart = 100.f;
-	passData.gFogColor = Color(0.6f, 0.6f, 0.6f);
+	passData.gFogRange = 50.f;
+	passData.gFogStart = 20.f;
+	passData.gFogColor = Color(0.2f, 0.2f, 0.2f);
 
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(0, &passData, sizeof(CBPassData));
 
@@ -313,5 +303,5 @@ void CScene::UpdatePassData()
 		passData.viewProjMat = lightCamera->GetViewOrthoProjMat().Transpose();
 	}
 
-	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(sizeof(CBPassData), &passData, sizeof(CBPassData));
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(ALIGNED_SIZE(sizeof(CBPassData)), &passData, sizeof(CBPassData));
 }

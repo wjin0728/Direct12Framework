@@ -1,7 +1,7 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
-cbuffer MaterialData : register(b0, space1)
+cbuffer MaterialData : register(b3)
 {
     float3 leafColor;
     float leafSmoothness;
@@ -81,14 +81,13 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 normal = worldNormal;
     float3 worldTangent = input.tangentWS;
     float3 worldBitangent = input.bitangentWS;
-    
     float2 uvLeaf = input.uv;
     float2 uvTrunk = input.uv;
-    
+
     float4 texColor = (input.color.b > 0.5) ? diffuseMap[leafTexIdx].Sample(anisoClamp, uvLeaf) : diffuseMap[trunkTexIdx].Sample(anisoClamp, uvTrunk);
     texColor.rgb = GammaDecoding(texColor.rgb);
     
-    color = max(texColor, float4(leafColor, 0.f));
+    color = max(texColor, float4(0.f,0.f,0.f, 0.f));
     
     #ifdef TRANSPARENT_CLIP
     clip(color.a - 0.5);
@@ -120,15 +119,14 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     lightingData.cameraDirection = camDir;
     lightingData.normalWS = normal;
     lightingData.positionWS = worldPosition;
-    lightingData.shadowFactor = 1.f;
+    lightingData.shadowFactor = CalcShadowFactor(input.ShadowPosH);
     
     SurfaceData surfaceData = (SurfaceData) 0;
     surfaceData.albedo = color.rgb;
-    //surfaceData.metallic = lerpResult188 + lerpResult195;
-    //surfaceData.smoothness = lerpResult191 + lerpResult190;
-    surfaceData.metallic = 0.2f;
-    surfaceData.smoothness = 0.2f;
+    surfaceData.metallic = lerpResult188 + lerpResult195;
+    surfaceData.smoothness = lerpResult191 + lerpResult190;
     surfaceData.specular = 0.5f;
+    surfaceData.emissive = 0.f;
     
 #ifdef LIGHTING
     float3 finalColor = CalculatePhongLight(lightingData, surfaceData);
@@ -170,7 +168,9 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
     
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
     
-    output.position = positionInputs.positionWS;
+    output.position = positionInputs.positionCS;
+    output.uv = input.uv;
+    output.color = input.color;
     
     return output;
 }

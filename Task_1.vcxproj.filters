@@ -61,9 +61,6 @@
     <ClInclude Include="GridMesh.h">
       <Filter>Resources\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>Lights</Filter>
-    </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Resources\Material</Filter>
     </ClInclude>
@@ -190,6 +187,9 @@
     <ClInclude Include="CBData.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -206,9 +206,6 @@
     </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>Resources\Material</Filter>
-    </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Lights</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Resources\Texture</Filter>
@@ -324,6 +321,9 @@
     <ClCompile Include="InstancingGroup.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -367,6 +367,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="Resources\Shaders\Vegitation.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="Resources\Shaders\Cloud.hlsl">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>

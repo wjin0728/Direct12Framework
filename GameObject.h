@@ -68,10 +68,11 @@ public:
 	//기본 설정을 가진 카메라 오브젝트를 생성한다.
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, 
 		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 60.f);
+	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, float nearPlane, float farPlane, Vec2 size);
 	//기본 설정을 가진 렌더 오브젝트를 생성한다.
 	static std::shared_ptr<CGameObject> CreateRenderObject(const std::string& tag, 
 		const std::string& meshName, const std::string& materialName);
-	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& tag, const std::string& materialName, Vec2 pos);
+	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size);
 	//기본 설정을 가진 지형 오브젝트를 생성한다.
 	static std::shared_ptr<CGameObject> CreateTerrainObject(std::ifstream& ifs);
 	//바이너리 파일을 통해 오브젝트를 생성한다.
