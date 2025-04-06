@@ -12,6 +12,7 @@ enum class COMPONENT_TYPE : UINT8
 	LIGHT,
 	TERRAIN,
 	RIGID_BODY,
+	ANIMATION,
 	// ...
 	SCRIPT,
 

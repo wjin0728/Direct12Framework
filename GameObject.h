@@ -15,7 +15,8 @@ class CCamera;
 class CTerrain;
 class CCollider;
 class CComponent;
-
+class CAnimationController;
+class CSkinnedMesh;
 
 class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
@@ -33,8 +34,8 @@ private:
 
 private:
 	bool mActive = true;
-	bool mIsStatic{false};
-	bool mIsInstancing{false};
+	bool mIsStatic{ false };
+	bool mIsInstancing{ false };
 
 	std::string mName{};
 	std::string mTag{};
@@ -59,18 +60,18 @@ public:
 
 public:
 	//오브젝트의 복사본을 생성한다.
-	static std::shared_ptr<CGameObject> Instantiate(const std::shared_ptr<CGameObject>& original, 
+	static std::shared_ptr<CGameObject> Instantiate(const std::shared_ptr<CGameObject>& original,
 		const std::shared_ptr<CTransform>& parentTransform = nullptr);
 	//오브젝트의 복사본을 생성한다.
 	static std::shared_ptr<CGameObject> Instantiate(const std::unique_ptr<CGameObject>& original,
 		const std::shared_ptr<CTransform>& parentTransform = nullptr);
 
 	//기본 설정을 가진 카메라 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, 
+	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize,
 		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 60.f);
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, float nearPlane, float farPlane, Vec2 size);
 	//기본 설정을 가진 렌더 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateRenderObject(const std::string& tag, 
+	static std::shared_ptr<CGameObject> CreateRenderObject(const std::string& tag,
 		const std::string& meshName, const std::string& materialName);
 	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size);
 	//기본 설정을 가진 지형 오브젝트를 생성한다.
@@ -119,6 +120,22 @@ private:
 	void CreateTransformFromFile(std::ifstream& inFile);
 	void CreateMeshRendererFromFile(std::ifstream& inFile);
 	void CreateTerrainFromFile(std::ifstream& inFile);
+	void CreateAnimationFromFile(std::string& fileName);
+
+public:
+	void UpdateTransform(const Matrix* parent = nullptr);
+	virtual void Animate(float elapsedTime);
+	void ResetForAnimationBlending();
+	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
+
+	std::shared_ptr<CAnimationController> mAnimationController{};
+
+	void FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int meshNum);
+
+	void SetTrackAnimationSet(int trackIndex, int setIndex);
+	void SetTrackAnimationPosition(int trackIndex, float position);
+
+
 };
 
 

@@ -187,6 +187,12 @@
     <ClInclude Include="CBData.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedMesh.h">
+      <Filter>Resources\Mesh</Filter>
+    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
@@ -320,6 +326,12 @@
     </ClCompile>
     <ClCompile Include="InstancingGroup.cpp">
       <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedMesh.cpp">
+      <Filter>Resources\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>GameObject\Component</Filter>
