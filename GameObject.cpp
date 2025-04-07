@@ -371,10 +371,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 		else if (token == "<Transform>:") {
 			obj->CreateTransformFromFile(inFile);
 		}
-		else if (token == "<Mesh>:") {
-			obj->CreateMeshRendererFromFile(inFile);
-		}
-		else if (token == "<SkinnedMesh>:") {
+		else if (token == "<Renderer>:") {
 			obj->CreateMeshRendererFromFile(inFile);
 		}
 		else if (token == "<Terrain>:") {
