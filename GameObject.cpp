@@ -374,6 +374,9 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 		else if (token == "<Mesh>:") {
 			obj->CreateMeshRendererFromFile(inFile);
 		}
+		else if (token == "<SkinnedMesh>:") {
+			obj->CreateMeshRendererFromFile(inFile);
+		}
 		else if (token == "<Terrain>:") {
 			obj->CreateTerrainFromFile(inFile);
 		}
@@ -651,20 +654,6 @@ void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>
 
 	for (auto& child : mChildren) {
 		child->CacheFrameHierarchies(boneFrameCaches);
-	}
-}
-
-void CGameObject::Animate(float elapsedTime)
-{
-	//OnPrepareRender();
-
-	if (mAnimationController) {
-		ResetForAnimationBlending();
-		mAnimationController->AdvanceTime(elapsedTime, shared_from_this());
-	}
-
-	for (auto& child : mChildren) {
-		child->Animate(elapsedTime);
 	}
 }
 

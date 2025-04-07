@@ -175,6 +175,13 @@ public:
 
     void SetAnimationCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr <CCallbackHandler>& callbackHandler);
 
+public:
+    virtual void Awake();
+    virtual void Start();
+
+    virtual void Update();
+    virtual void LateUpdate();
+
     void AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject);
     void UpdateShaderVariables();
 };

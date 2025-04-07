@@ -124,7 +124,6 @@ private:
 
 public:
 	void UpdateTransform(const Matrix* parent = nullptr);
-	virtual void Animate(float elapsedTime);
 	void ResetForAnimationBlending();
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
 

@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "Transform.h"
 #include "SkinnedMesh.h"
+#include "Timer.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -216,6 +217,84 @@ void CAnimationController::SetAnimationCallbackHandler(std::shared_ptr<CAnimatio
 	animationSet->SetCallbackHandler(callbackHandler);
 }
 
+void CAnimationController::Awake()
+{
+}
+
+void CAnimationController::Start()
+{
+}
+
+void CAnimationController::Update()
+{
+}
+
+void CAnimationController::LateUpdate()
+{
+	mTime += DELTA_TIME;
+	int nEnabledAnimationTracks = 0;
+
+	for (auto& track : mTracks) {
+		if (track->mEnabled) {
+			nEnabledAnimationTracks++;
+			std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
+			animationSet->Animate(DELTA_TIME * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
+		}
+	}
+
+	//*
+	if (nEnabledAnimationTracks == 1) {
+		for (auto& track : mTracks) {
+			if (track->mEnabled) {
+				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
+
+				for (auto& layer : animationSet->mLayers) {
+					for (auto& cache : layer->mBoneFrameCaches) {
+						cache->GetTransform()->ApplyBlendedTransform();
+					}
+				}
+			}
+		}
+	}
+	else {
+		for (auto& track : mTracks) {
+			if (track->mEnabled) {
+				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
+
+				for (auto& layer : animationSet->mLayers) {
+					for (auto& cache : layer->mBoneFrameCaches) {
+						cache->GetTransform()->ApplyBlendedTransform();
+					}
+				}
+			}
+		}
+	}
+	//*/
+
+	GetTransform()->UpdateWorldMatrix();
+
+	for (auto& track : mTracks) {
+		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
+			mAnimationSets->mAnimationSet[track->mAnimationSetIndex]->HandleCallback();
+	}
+
+	for (auto& skinnedMesh : mAnimationSets->mSkinnedMeshes) {
+		const int boneNum = skinnedMesh->GetBoneNum();
+		std::vector<Matrix> finalBones(boneNum);
+
+		for (int i = 0; auto & bone : finalBones) {
+			bone = skinnedMesh->mBoneFrameCaches[i++]->GetTransform()->GetWorldMat();
+		}
+
+		int index = skinnedMesh->GetBoneTransformIndex();
+		if (index >= 0) {
+			auto curFrameResource = INSTANCE(CDX12Manager).GetCurFrameResource();
+
+			curFrameResource->GetConstantBuffer((UINT)CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(index, finalBones.data());
+		}
+	}
+}
+
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
 {
 	if (trackIndex < mTracks.size()) {
@@ -263,66 +342,5 @@ void CAnimationController::UpdateShaderVariables()
 
 void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)
 {
-	mTime += elapsedTime;
-	int nEnabledAnimationTracks = 0;
-
-	for (auto& track : mTracks) {
-		if (track->mEnabled) {
-			nEnabledAnimationTracks++;
-			std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
-			animationSet->Animate(elapsedTime * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
-		}
-	}
-
-	//*
-	if (nEnabledAnimationTracks == 1) {
-		for (auto& track : mTracks) {
-			if (track->mEnabled) {
-				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
-				
-				for (auto& layer : animationSet->mLayers) {
-					for (auto& cache : layer->mBoneFrameCaches) {
-						cache->GetTransform()->ApplyBlendedTransform();
-					}
-				}
-			}
-		}
-	}
-	else {
-		for (auto& track : mTracks) {
-			if (track->mEnabled) {
-				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
-				
-				for (auto& layer : animationSet->mLayers) {
-					for (auto& cache : layer->mBoneFrameCaches) {
-						cache->GetTransform()->ApplyBlendedTransform();
-					}
-				}
-			}
-		}
-	}
-	//*/
-
-	rootGameObject->UpdateTransform();
-
-	for (auto& track : mTracks) {
-		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
-			mAnimationSets->mAnimationSet[track->mAnimationSetIndex]->HandleCallback();
-	}
-
-	for (auto& skinnedMesh : mAnimationSets->mSkinnedMeshes) {
-		const int boneNum = skinnedMesh->GetBoneNum();
-		std::vector<std::shared_ptr<Matrix>> finalBones(boneNum);
-
-		for (int i = 0; auto& bone : finalBones) {
-			bone = std::make_shared<Matrix>(skinnedMesh->mBoneFrameCaches[i++]->GetTransform()->mWorldMat);
-		}
-
-		int index = skinnedMesh->GetBoneTransformIndex();
-		if (index >= 0) {
-			auto curFrameResource = INSTANCE(CDX12Manager).GetCurFrameResource();
-
-			curFrameResource->GetConstantBuffer((UINT)CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(index, finalBones.data());
-		}
-	}
+	
 }
