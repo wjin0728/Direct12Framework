@@ -385,4 +385,9 @@
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\Shaders\Animation.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>
