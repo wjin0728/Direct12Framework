@@ -1,7 +1,7 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
-cbuffer MaterialData : register(b3)
+cbuffer MaterialData : register(b5)
 {
     float3 leafColor;
     float leafSmoothness;
@@ -186,4 +186,88 @@ void PS_Shadow(VS_SHADOW_OUTPUT input)
 #ifdef TRANSPARENT_CLIP
     clip(color.a - 0.5);
 #endif
+}
+
+
+//
+//G Pass
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+VS_OUTPUT VS_GPass(VS_INPUT input)
+{
+    VS_OUTPUT output = (VS_OUTPUT) 0;
+    
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+    
+    output.positionWS = positionInputs.positionWS;
+    output.position = positionInputs.positionCS;
+    
+    output.normalWS = normalInputs.normalWS;
+    output.tangentWS = normalInputs.tangentWS;
+    output.bitangentWS = normalInputs.bitangentWS;
+    
+    output.ShadowPosH = mul(output.positionWS, shadowTransform);
+        
+    output.color = input.color;
+    output.uv = input.uv;
+    
+    return output;
+}
+
+struct PS_GPASS_OUTPUT
+{
+    float4 albedo : SV_Target0;
+    float4 normalWS : SV_Target1;
+    float4 emissive : SV_Target2;
+    float4 positionWS : SV_Target3;
+};
+
+PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
+{
+    PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
+    
+    float4 color = float4(1.f, 1.f, 1.f, 1.f);
+    float3 worldPosition = input.positionWS.xyz;
+    float3 worldNormal = normalize(input.normalWS);
+    float3 normal = worldNormal;
+    float3 worldTangent = input.tangentWS;
+    float3 worldBitangent = input.bitangentWS;
+    float2 uvLeaf = input.uv;
+    float2 uvTrunk = input.uv;
+
+    float4 texColor = (input.color.b > 0.5) ? diffuseMap[leafTexIdx].Sample(anisoClamp, uvLeaf) : diffuseMap[trunkTexIdx].Sample(anisoClamp, uvTrunk);
+    
+    color = max(texColor, float4(0.f, 0.f, 0.f, 0.f));
+    
+#ifdef TRANSPARENT_CLIP
+    clip(color.a - 0.5);
+#endif
+    
+    if (input.color.b > 0.5 && leafNormalIdx != -1)
+    {
+        float3 normalMapSample = diffuseMap[leafNormalIdx].Sample(anisoClamp, uvLeaf).rgb;
+        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
+    }
+    else if (input.color.b <= 0.5 && trunkNormalIdx != -1)
+    {
+        float3 normalMapSample = diffuseMap[trunkNormalIdx].Sample(anisoClamp, uvTrunk).rgb;
+        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
+    }
+    float temp = (1.0 - input.color.b);
+    float lerpResult188 = lerp(leafMetallic, 0.0, temp);
+    float lerpResult195 = lerp(trunkMetallic, 0.0, input.color.b);
+				
+    float lerpResult191 = lerp(leafSmoothness, 0.0, temp);
+    float lerpResult190 = lerp(trunkSmoothness, 0.0, input.color.b);
+    
+    float shadowFactor = CalcShadowFactor(input.ShadowPosH);
+    
+    output.albedo = color;
+    output.normalWS = float4(normal, lerpResult188 + lerpResult195);
+    output.positionWS = float4(worldPosition, lerpResult191 + lerpResult190);
+    output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
+    
+    return output;
 }

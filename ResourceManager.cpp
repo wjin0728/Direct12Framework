@@ -242,7 +242,7 @@ void CResourceManager::LoadDefaultShaders()
 		Add(shader);
 	}
 	{
-		ShaderInfo info;
+		/*ShaderInfo info;
 		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::ANIMATION;
 		info.blendType = BLEND_TYPE::DEFAULT;
@@ -254,7 +254,7 @@ void CResourceManager::LoadDefaultShaders()
 		shader->Initialize(info, "Resources\\Shaders\\Animation.hlsl");
 		shader->SetName("Animation");
 
-		Add(shader);
+		Add(shader);*/
 	}
 }
 

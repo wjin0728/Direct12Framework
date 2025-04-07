@@ -1,7 +1,7 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
-cbuffer MaterialData : register(b3)
+cbuffer MaterialData : register(b5)
 {
     float fallOff;
     float tilling;

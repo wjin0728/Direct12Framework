@@ -8,7 +8,7 @@ struct SplatData
     float4 data[4];
 };
 
-cbuffer MaterialData : register(b3)
+cbuffer MaterialData : register(b5)
 {
     float3 size;
     float yOffset;
@@ -266,6 +266,12 @@ float4 PS_Forward(DS_OUTPUT input) : SV_TARGET
 //G Pass
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+
+VS_INPUT VS_GPass(VS_INPUT input)
+{
+    return input;
+}
+
 struct PS_GPASS_OUTPUT
 {
     float4 albedo : SV_Target0;
@@ -274,7 +280,7 @@ struct PS_GPASS_OUTPUT
     float4 positionWS : SV_Target3;
 };
 
-PS_GPASS_OUTPUT PS_GPass(VS_GPASS_OUTPUT input) : SV_Target
+PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
 {
     PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
     
@@ -341,8 +347,8 @@ PS_GPASS_OUTPUT PS_GPass(VS_GPASS_OUTPUT input) : SV_Target
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
     
     output.albedo = color;
-    output.normalWS = float4(normal, 0.f);
-    output.positionWS = float4(worldPosition, 0.f);
+    output.normalWS = float4(normal, blendedMetallic);
+    output.positionWS = float4(positionWS, blendedSmoothness);
     output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
     
     return output;

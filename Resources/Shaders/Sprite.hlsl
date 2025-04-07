@@ -1,6 +1,6 @@
 #include"Paramiters.hlsl"
 
-cbuffer MaterialData : register(b3)
+cbuffer MaterialData : register(b5)
 {
     float3 color;
     float type;
