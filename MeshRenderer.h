@@ -1,15 +1,14 @@
 #pragma once
-#include "Component.h"
+#include "Renderer.h"
 
 class CMesh;
 class CMaterial;
 class CCamera;
 
-class CMeshRenderer : public CComponent
+class CMeshRenderer : public CRenderer
 {
 private:
 	std::shared_ptr<CMesh> m_mesh;
-	std::vector<std::shared_ptr<CMaterial>> m_materials;
 
 	BoundingSphere mWorldBS{};
 
@@ -19,16 +18,16 @@ private:
 
 public:
 	CMeshRenderer();
-	CMeshRenderer(const CMeshRenderer& other) : m_mesh(other.m_mesh), m_materials(other.m_materials), CComponent(other) {}
+	CMeshRenderer(const CMeshRenderer& other) : m_mesh(other.m_mesh), CRenderer(other) {}
 	~CMeshRenderer();
 
-	virtual void Awake();
-	virtual void Start();
+	virtual void Awake() override;
+	virtual void Start() override;
 
-	virtual void Update();
-	virtual void LateUpdate();
+	virtual void Update() override;
+	virtual void LateUpdate() override;
 
-	void Render(std::shared_ptr<CCamera> camera, int pass = 0);
+	virtual void Render(std::shared_ptr<CCamera> camera, int pass = 0) override;
 	void InstancingRender(D3D12_VERTEX_BUFFER_VIEW ibv, UINT instancingNum);
 
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CMeshRenderer>(*this); } 
@@ -38,10 +37,7 @@ public:
 	void ReturnCBVIndex();
 	void SetMesh(const std::shared_ptr<CMesh>& mesh);
 	void SetMesh(const std::string& name);
-	void AddMaterial(const std::shared_ptr<CMaterial>& material);
-	void AddMaterial(const std::string& name);
 
 	std::shared_ptr<CMesh> GetMesh() const { return m_mesh; }
-	std::shared_ptr<CMaterial> GetMaterial(UINT idx = 0) const { return m_materials[idx]; }
 };
 

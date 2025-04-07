@@ -27,6 +27,7 @@ private:
 	friend CGameObject;
 	friend class CCamera;
 	friend class CMeshRenderer;
+	friend class CSkinnedMeshRenderer;
 
 	bool mDirtyFlag{};
 
