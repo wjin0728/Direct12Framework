@@ -408,7 +408,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 {
 	using namespace BinaryReader;
 
-	std::ifstream ifs{ fileName, std::ios::binary };
+	std::ifstream ifs{ "Resources\\Animation\\" + fileName, std::ios::binary};
 	if (!ifs) {
 		return;
 	}
