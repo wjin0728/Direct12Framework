@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Serverframework/TriumServer/protocol.h"
+#include "../ServerFramework/TriumServer/protocol.h"
 #include "Player.h"
 #include <mutex>
 
@@ -32,11 +32,16 @@ public:
 	void Using_Packet(char* packet_ptr);
 	void print_error(const char* msg, int err_no);
 
-	void send_cs_move_packet() {
+	void send_cs_move_packet(uint8_t dir, Vec3 look) {
 		CS_MOVE_PACKET p;
+
 		p.size = sizeof(p);
 		p.type = CS_MOVE;
-		p.id = my_info.id;
+		p.id = my_info.GetID();	
+		p.dir = dir;
+		p.look_x = look.x;
+		p.look_y = look.y;
+		p.look_z = look.z;
 
 		Send_Packet(&p);
 	}

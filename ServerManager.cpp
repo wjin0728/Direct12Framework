@@ -120,11 +120,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_LOGIN_INFO: {
 		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet_ptr);
 
-		my_info.id = packet->id;
+		my_info.SetID(packet->id);
 
-		players[my_info.id].id = packet->id;
-
-		my_info = players[my_info.id];
+		players[packet->id].SetID(packet->id);
 
 		break;
 	}
@@ -148,6 +146,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 void ServerManager::Send_Packet(void* packet)
 {
+	cout << "Send_Packet" << endl;
 	OVER_PLUS* sdata = new OVER_PLUS{ reinterpret_cast<char*>(packet) };
 	int sed = WSASend(server_soket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, send_callback);
 	if (0 != sed) {
