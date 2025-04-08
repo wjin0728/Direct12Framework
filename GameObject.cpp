@@ -395,7 +395,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			ReadDateFromFile(inFile, animName);
 			animName = animName.substr(0, animName.find('@') + 1) + "anim";
 
-			obj->CreateAnimationFromFile(animName);
+			obj->CreateAnimationFromFile(ANIMATION_PATH(animName));
 		}
 		else if (token == "</Frame>") {
 			break;
@@ -412,6 +412,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 	if (!ifs) {
 		return;
 	}
+	
 
 	mAnimationController = AddComponent<CAnimationController>();
 
@@ -440,7 +441,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 			mAnimationController->mAnimationSets->mAnimationSet[setNum] = animSet;
 
 			ReadDateFromFile(ifs, token);
-			if (token != "<AnimationLayers>:") {
+			if (token == "<AnimationLayers>:") {
 				int layersNum{};
 				ReadDateFromFile(ifs, layersNum);
 
@@ -450,97 +451,86 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 				animSet->mTranslations.resize(layersNum);
 
 				for (int i = 0; i < layersNum; i++) {
-					std::string token;
 					ReadDateFromFile(ifs, token);
-					if (token != "<AnimationLayer>:")
-						return;
+					if (token == "<AnimationLayer>:") {
+						int layerNum{};
+						ReadDateFromFile(ifs, layerNum);
 
-					int layerNum{};
-					ReadDateFromFile(ifs, layerNum);
+						animSet->mLayers[i] = std::make_shared<CAnimationLayer>();
+						auto layer = animSet->mLayers[i];
 
-					animSet->mLayers[i] = std::make_shared<CAnimationLayer>();
-					auto layer = animSet->mLayers[i];
+						int cacheNum{};
+						ReadDateFromFile(ifs, cacheNum);
 
-					int cacheNum{};
-					ReadDateFromFile(ifs, cacheNum);
+						layer->mBoneNames.resize(cacheNum);
+						layer->mBoneFrameCaches.resize(cacheNum);
+						layer->mAnimationCurves.resize(cacheNum);
 
-					layer->mBoneFrameCaches.resize(cacheNum);
-					layer->mBoneNames.resize(cacheNum);
-					layer->mAnimationCurves.resize(cacheNum);
+						animSet->mScales[i].resize(cacheNum);
+						animSet->mRotations[i].resize(cacheNum);
+						animSet->mTranslations[i].resize(cacheNum);
 
-					animSet->mScales[i].resize(cacheNum);
-					animSet->mRotations[i].resize(cacheNum);
-					animSet->mTranslations[i].resize(cacheNum);
+						ReadDateFromFile(ifs, layer->mWeight);
 
-					ReadDateFromFile(ifs, layer->mWeight);
-
-					for (int j = 0; j < cacheNum; j++)
-					{
-						ReadDateFromFile(ifs, token);
-						if (token != "<AnimationCurve>:")
-							break;
-
-						int curveNude{};
-						ReadDateFromFile(ifs, curveNude); //j
-
-						ReadDateFromFile(ifs, token); //Frame Name
-						layer->mBoneNames[j] = token;
-
-						while (true) {
+						for (int j = 0; j < cacheNum; j++)
+						{
 							ReadDateFromFile(ifs, token);
+							if (token == "<AnimationCurve>:") {
+								int curveNude{};
+								ReadDateFromFile(ifs, curveNude); //j
+								ReadDateFromFile(ifs, layer->mBoneNames[j]);
 
-							if (token == "<TX>:") layer->LoadKeyValues(j, 0, ifs);
-							else if (token == "<TY>:") layer->LoadKeyValues(j, 1, ifs);
-							else if (token == "<TZ>:") layer->LoadKeyValues(j, 2, ifs);
-							else if (token == "<RX>:") layer->LoadKeyValues(j, 3, ifs);
-							else if (token == "<RY>:") layer->LoadKeyValues(j, 4, ifs);
-							else if (token == "<RZ>:") layer->LoadKeyValues(j, 5, ifs);
-							else if (token == "<SX>:") layer->LoadKeyValues(j, 6, ifs);
-							else if (token == "<SY>:") layer->LoadKeyValues(j, 7, ifs);
-							else if (token == "<SZ>:") layer->LoadKeyValues(j, 8, ifs);
-							else if (token == "</AnimationCurve>")
-							{
-								break;
+								while (true) {
+									ReadDateFromFile(ifs, token);
+
+									if (token == "<TX>:") layer->LoadKeyValues(j, 0, ifs);
+									else if (token == "<TY>:") layer->LoadKeyValues(j, 1, ifs);
+									else if (token == "<TZ>:") layer->LoadKeyValues(j, 2, ifs);
+									else if (token == "<RX>:") layer->LoadKeyValues(j, 3, ifs);
+									else if (token == "<RY>:") layer->LoadKeyValues(j, 4, ifs);
+									else if (token == "<RZ>:") layer->LoadKeyValues(j, 5, ifs);
+									else if (token == "<SX>:") layer->LoadKeyValues(j, 6, ifs);
+									else if (token == "<SY>:") layer->LoadKeyValues(j, 7, ifs);
+									else if (token == "<SZ>:") layer->LoadKeyValues(j, 8, ifs);
+									else if (token == "</AnimationCurve>")
+									{
+										break;
+									}
+								}
 							}
 						}
-
+						ReadDateFromFile(ifs, token); //</AnimationLayer>
 					}
-
-					ReadDateFromFile(ifs, token); //</AnimationLayer>
-
 				}
-
 				ReadDateFromFile(ifs, token); //</AnimationLayers>
 
-				int64_t commonBoneNum = 0;
-				std::unordered_map<CTransform*, std::pair<int64_t, int64_t>> global_map;
-
-				for (const auto& layer : animSet->mLayers) {
-					std::unordered_map<CTransform*, int> local_count;
-					for (const auto& cache : layer->mBoneFrameCaches) {
-						local_count[cache.lock().get()]++;
-					}
-
-					for (const auto& [cache, m] : local_count) {
-						auto& sums = global_map[cache];
-						sums.first += m;
-						sums.second += static_cast<int64_t>(m) * m;
-					}
-				}
-
-				for (const auto& [cache, sums] : global_map) {
-					int64_t sum_m = sums.first;
-					int64_t sum_m2 = sums.second;
-					int64_t contrib = (sum_m * sum_m - sum_m2) / 2;
-					commonBoneNum += contrib;
-				}
-
-				if (commonBoneNum) {
-					animSet->mBoneFrameCaches.resize(commonBoneNum);
-				}
-
+				//int64_t commonBoneNum = 0;
+				//std::unordered_map<CTransform*, std::pair<int64_t, int64_t>> global_map;
+				//
+				//for (const auto& layer : animSet->mLayers) {
+				//	std::unordered_map<CTransform*, int> local_count;
+				//	for (const auto& cache : layer->mBoneFrameCaches) {
+				//		local_count[cache.lock().get()]++;
+				//	}
+				//
+				//	for (const auto& [cache, m] : local_count) {
+				//		auto& sums = global_map[cache];
+				//		sums.first += m;
+				//		sums.second += static_cast<int64_t>(m) * m;
+				//	}
+				//}
+				//
+				//for (const auto& [cache, sums] : global_map) {
+				//	int64_t sum_m = sums.first;
+				//	int64_t sum_m2 = sums.second;
+				//	int64_t contrib = (sum_m * sum_m - sum_m2) / 2;
+				//	commonBoneNum += contrib;
+				//}
+				//
+				//if (commonBoneNum) {
+				//	animSet->mBoneFrameCaches.resize(commonBoneNum);
+				//}
 			}
-
 			ReadDateFromFile(ifs, token); //</AnimationSet>
 		}
 		else if (token == "</AnimationSets>")
@@ -548,13 +538,6 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 			break;
 		}
 	}
-
-	auto controller = std::make_shared<CAnimationController>(mAnimationController->mAnimationSets);
-	mAnimationController = controller;
-
-	controller->SetTrackAnimationSet(0, 0);
-	controller->SetTrackStartEndTime(0, 0.0f, 2.5f);
-
 }
 
 void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
@@ -681,24 +664,33 @@ void CGameObject::ResetForAnimationBlending()
 	}
 }
 
-void CGameObject::FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int skinnedMeshNum)
-{
-	if (mRenderer) {
-		std::shared_ptr<CMesh> mesh = mRenderer->GetMesh();
-		if (mesh) {
-			auto skinned = std::dynamic_pointer_cast<CSkinnedMesh>(mesh);
-			if (skinned) {
-				skinnedMeshes.push_back(skinned);
-				skinnedMeshNum++;
+//void CGameObject::FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int skinnedMeshNum)
+//{
+//	if (mRenderer) {
+//		std::shared_ptr<CMesh> mesh = mRenderer->GetMesh();
+//		if (mesh) {
+//			auto skinned = std::dynamic_pointer_cast<CSkinnedMesh>(mesh);
+//			if (skinned) {
+//				skinnedMeshes.push_back(skinned);
+//				skinnedMeshNum++;
+//			}
+//		}
+//	}
+//
+//	for (auto& child : mChildren) {
+//		child->FindAndSetSkinnedMesh(skinnedMeshes, skinnedMeshNum);
+//	}
+//}
+
+void CGameObject::SetAnimationLayerCache(std::shared_ptr<CGameObject> root) {
+	for (auto& set : mAnimationController->mAnimationSets->mAnimationSet) {
+		for (auto& layer : set->mLayers) {
+			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
+				cache = root->FindChildByName(layer->mBoneNames[i++])->GetTransform();
 			}
 		}
 	}
-
-	for (auto& child : mChildren) {
-		child->FindAndSetSkinnedMesh(skinnedMeshes, skinnedMeshNum);
-	}
 }
-
 
 
 std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::string& name)

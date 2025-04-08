@@ -72,6 +72,7 @@ using SimpleMath::Color;
 #define TEXTURE_PATH(name)			"Resources\\Textures\\" + std::string(name) + ".dds"
 #define MODEL_PATH(name)			"Resources\\Models\\" + (name) + ".bin"
 #define SCENE_PATH(name)			"Resources\\Scenes\\" + (name) + ".bin"
+#define ANIMATION_PATH(name)		"Resources\\Animation\\" + (name) + ".bin"
 
 #define ALIGNED_SIZE(size)				((size + 255) & ~255)
 
