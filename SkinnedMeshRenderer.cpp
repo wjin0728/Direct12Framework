@@ -13,12 +13,11 @@ CSkinnedMeshRenderer::CSkinnedMeshRenderer() : CRenderer()
 
 CSkinnedMeshRenderer::~CSkinnedMeshRenderer()
 {
-    ReturnCBVIndex();
 }
 
 void CSkinnedMeshRenderer::Awake()
 {
-    SetCBVIndex();
+	CRenderer::Awake();
 }
 
 void CSkinnedMeshRenderer::Update()
@@ -59,24 +58,13 @@ void CSkinnedMeshRenderer::SetSkinnedMesh(const std::shared_ptr<CSkinnedMesh>& m
     if (mSkinnedMesh) mWorldBS = mSkinnedMesh->oobs;
 }
 
-void CSkinnedMeshRenderer::AddBone(const std::shared_ptr<Matrix>& bone)
+void CSkinnedMeshRenderer::SetSkinnedMesh(const std::string& name)
+{
+	mSkinnedMesh = INSTANCE(CResourceManager).Get<CSkinnedMesh>(name);
+	if (mSkinnedMesh) mWorldBS = mSkinnedMesh->oobs;
+}
+
+void CSkinnedMeshRenderer::AddBone(const std::shared_ptr<CTransform>& bone)
 {
     mBoneTransforms.push_back(bone);
-}
-
-void CSkinnedMeshRenderer::SetCBVIndex()
-{
-    if (mCbvIdx < 0) {
-        mCbvIdx = INSTANCE(CObjectPoolManager).GetTopCBVIndex();
-        mCbvOffset = ALIGNED_SIZE(sizeof(CBObjectData)) * mCbvIdx;
-    }
-}
-
-void CSkinnedMeshRenderer::ReturnCBVIndex()
-{
-    if (mCbvIdx >= 0) {
-        INSTANCE(CObjectPoolManager).ReturnCBVIndex(mCbvIdx);
-        mCbvIdx = -1;
-        mCbvOffset = 0;
-    }
 }

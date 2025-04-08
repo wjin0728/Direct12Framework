@@ -8,17 +8,15 @@ class CSkinnedMeshRenderer : public CRenderer
 {
 private:
 	friend class CAnimationController;
+	friend class CGameObject;
 
-	std::shared_ptr<CSkinnedMesh> mSkinnedMesh;
-	std::vector<std::shared_ptr<Matrix>> mBoneTransforms{};
-
-	BoundingSphere mWorldBS{};
-	int mCbvIdx = -1;
-	UINT mCbvOffset{};
+    std::shared_ptr<CSkinnedMesh> mSkinnedMesh{};
+	std::vector<std::string> mBoneNames{};
+	std::vector<std::weak_ptr<CTransform>> mBoneTransforms{};
 
 public:
     CSkinnedMeshRenderer();
-    CSkinnedMeshRenderer(const CSkinnedMeshRenderer& other) : mSkinnedMesh(other.mSkinnedMesh), mBoneTransforms(other.mBoneTransforms), CRenderer(other) {}
+    CSkinnedMeshRenderer(const CSkinnedMeshRenderer& other) : mSkinnedMesh(other.mSkinnedMesh), mBoneNames(other.mBoneNames), CRenderer(other) {}
     ~CSkinnedMeshRenderer();
 
     virtual void Awake() override;
@@ -31,10 +29,8 @@ public:
 
 public:
     void SetSkinnedMesh(const std::shared_ptr<CSkinnedMesh>& mesh);
-    void AddBone(const std::shared_ptr<Matrix>& bone);
+    void SetSkinnedMesh(const std::string& name);
+    void AddBone(const std::shared_ptr<CTransform>& bone);
     std::shared_ptr<CSkinnedMesh> GetSkinnedMesh() const { return mSkinnedMesh; }
-private:
-    void SetCBVIndex();
-    void ReturnCBVIndex();
 };
 

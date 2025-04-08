@@ -17,12 +17,11 @@ CMeshRenderer::CMeshRenderer() : CRenderer()
 
 CMeshRenderer::~CMeshRenderer()
 {
-	ReturnCBVIndex();
 }
 
 void CMeshRenderer::Awake()
 {
-	SetCBVIndex();
+	CRenderer::Awake();
 }
 
 void CMeshRenderer::Start()
@@ -64,24 +63,6 @@ void CMeshRenderer::InstancingRender(D3D12_VERTEX_BUFFER_VIEW ibv, UINT instanci
 	if (m_mesh) {
 		m_mesh->Render(ibv, instancingNum, 0);
 	}
-}
-
-void CMeshRenderer::SetCBVIndex()
-{
-	if (mCbvIdx < 0) {
-		mCbvIdx = INSTANCE(CObjectPoolManager).GetTopCBVIndex();
-		mCbvOffset = ALIGNED_SIZE(sizeof(CBObjectData)) * mCbvIdx;
-	}
-}
-
-void CMeshRenderer::ReturnCBVIndex()
-{
-	if (mCbvIdx < 0) {
-		return;
-	}
-	INSTANCE(CObjectPoolManager).ReturnCBVIndex(mCbvIdx);
-	mCbvIdx = -1;
-	mCbvOffset = 0;
 }
 
 void CMeshRenderer::SetMesh(const std::shared_ptr<CMesh>& mesh)

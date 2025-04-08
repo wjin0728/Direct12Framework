@@ -8,12 +8,18 @@ class CRenderer : public CComponent {
 protected:
     std::vector<std::shared_ptr<CMaterial>> m_materials;
 
+    BoundingSphere mWorldBS{};
+
+    bool isDirty{};
+    int mCbvIdx = -1;
+    UINT mCbvOffset{};
+
 public:
     CRenderer();
     CRenderer(const CRenderer& other) : m_materials(other.m_materials), CComponent(other) {}
     virtual ~CRenderer();
 
-    virtual void Awake() override {}
+    virtual void Awake();
     virtual void Start() override {}
 
     virtual void Update() override {}
@@ -22,6 +28,10 @@ public:
     virtual void Render(std::shared_ptr<CCamera> camera, int pass = 0) = 0;
 
     virtual std::shared_ptr<CComponent> Clone() override = 0;
+
+public:
+    void SetCBVIndex();
+    void ReturnCBVIndex();
 
 public:
     void AddMaterial(const std::shared_ptr<CMaterial>& material);

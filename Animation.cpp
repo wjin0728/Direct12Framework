@@ -128,7 +128,7 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 	int i = 0, j = 0;
 	for (int i = 0;  auto & layer : mLayers) {
 		for (int j = 0; auto & boneFrame : layer->mBoneFrameCaches) {
-			std::shared_ptr<CTransform> transform = boneFrame->GetTransform();
+			std::shared_ptr<CTransform> transform = boneFrame.lock();
 
 			mScales[i][j] = transform->GetLocalScale();
 			mRotations[i][j] = transform->GetLocalEulerAngles();
@@ -143,7 +143,7 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 	// 애니메이션 레이어들을 블렌딩한다.
 	for (int i = 0;  auto & layer : mLayers) {
 		for (int j = 0;  auto & boneFrame : layer->mBoneFrameCaches) {
-			std::shared_ptr<CTransform> transform = boneFrame->GetTransform();
+			std::shared_ptr<CTransform> transform = boneFrame.lock();
 
 			switch (layer->mBlendMode) {
 			case ANIMATION_BLEND_TYPE::ADDITIVE: {
@@ -202,10 +202,6 @@ CAnimationController::CAnimationController(std::shared_ptr<CAnimationSets>& sets
 {
 	mApplyRootMotion = applyRootMotion;
 	mAnimationSets = sets;
-
-	for (int i = 0; auto& skinnedMesh : mAnimationSets->mSkinnedMeshes) {
-		skinnedMesh->mBoneTransformIndex = i++;
-	}
 }
 
 CAnimationController::~CAnimationController()
@@ -250,7 +246,7 @@ void CAnimationController::LateUpdate()
 
 				for (auto& layer : animationSet->mLayers) {
 					for (auto& cache : layer->mBoneFrameCaches) {
-						cache->GetTransform()->ApplyBlendedTransform();
+						cache.lock()->ApplyBlendedTransform();
 					}
 				}
 			}
@@ -263,7 +259,7 @@ void CAnimationController::LateUpdate()
 
 				for (auto& layer : animationSet->mLayers) {
 					for (auto& cache : layer->mBoneFrameCaches) {
-						cache->GetTransform()->ApplyBlendedTransform();
+						cache.lock()->GetTransform()->ApplyBlendedTransform();
 					}
 				}
 			}

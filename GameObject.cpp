@@ -12,6 +12,8 @@
 #include"Scene.h"
 #include"Animation.h"
 #include"SkinnedMesh.h"
+#include"Renderer.h"
+#include"SkinnedMeshRenderer.h"
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -36,8 +38,10 @@ void CGameObject::Awake()
 		child->Awake();
 	}
 
-	if(!mMeshRenderer)
-		mMeshRenderer = GetComponent<CMeshRenderer>();
+	mRenderer = GetComponent<CRenderer>();
+	if (!mRenderer) {
+		mRenderer = GetComponent<CSkinnedMeshRenderer>();
+	}
 	if (!mCollider) {
 		mCollider = GetComponent<CCollider>();
 	}
@@ -89,7 +93,7 @@ void CGameObject::LateUpdate()
 void CGameObject::Render(std::shared_ptr<CCamera> camera, int pass)
 {
 	if (!mActive) return;
-	if (mMeshRenderer) mMeshRenderer->Render(camera, pass);
+	if (mRenderer) mRenderer->Render(camera, pass);
 	for (auto& child : mChildren) {
 		child->Render(camera, pass);
 	}
@@ -107,10 +111,10 @@ void CGameObject::SetStatic(bool isStatic)
 void CGameObject::SetInstancing(bool isInstancing)
 {
 	if (isInstancing) {
-		mMeshRenderer->ReturnCBVIndex();
+		mRenderer->ReturnCBVIndex();
 	}
 	else {
-		mMeshRenderer->SetCBVIndex();
+		mRenderer->SetCBVIndex();
 	}
 
 	mIsInstancing = isInstancing;
@@ -127,9 +131,9 @@ void CGameObject::SetParent(const std::shared_ptr<CGameObject>& parent)
 
 void CGameObject::ReturnCBVIndex()
 {
-	if (!mMeshRenderer) return;
+	if (!mRenderer) return;
 
-	mMeshRenderer->ReturnCBVIndex();
+	mRenderer->ReturnCBVIndex();
 	for (auto& child : mChildren) {
 		child->ReturnCBVIndex();
 	}
@@ -151,7 +155,10 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
 
-	instance->mMeshRenderer = instance->GetComponent<CMeshRenderer>();
+	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
+	if (!instance->mRenderer) {
+		instance->mRenderer = instance->GetComponent<CSkinnedMeshRenderer>();
+	}
 	instance->mCollider = instance->GetComponent<CCollider>();
 
 	if (parentTransform) {
@@ -183,7 +190,10 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
 
-	instance->mMeshRenderer = instance->GetComponent<CMeshRenderer>();
+	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
+	if (!instance->mRenderer) {
+		instance->mRenderer = instance->GetComponent<CSkinnedMeshRenderer>();
+	}
 	instance->mCollider = instance->GetComponent<CCollider>();
 
 	if (parentTransform) {
@@ -237,31 +247,16 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& 
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::string& tag, 
-	const std::string& meshName, const std::string& materialName)
-{
-	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
-	object->mTag = tag;
-
-	object->mMeshRenderer = std::make_shared<CMeshRenderer>();
-	object->AddComponent(object->mMeshRenderer);
-	object->mMeshRenderer->SetMesh(RESOURCE.Get<CMesh>(meshName));
-	object->mMeshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
-
-	object->SetActive(true);
-
-	return object;
-}
-
 std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size)
 {
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
 	object->mTag = "UI";
 
-	object->mMeshRenderer = std::make_shared<CMeshRenderer>();
-	object->AddComponent(object->mMeshRenderer);
-	object->mMeshRenderer->SetMesh(RESOURCE.Get<CMesh>("Rectangle"));
-	object->mMeshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
+	auto meshRenderer = std::make_shared<CMeshRenderer>();
+	object->mRenderer = meshRenderer;
+	object->AddComponent(object->mRenderer);
+	meshRenderer->SetMesh(RESOURCE.Get<CMesh>("Rectangle"));
+	meshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
 
 	object->GetTransform()->SetLocalPosition({ pos.x, pos.y, 0.f });
 	object->GetTransform()->SetLocalScale({ size.x, size.y, 1.f });
@@ -372,7 +367,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			obj->CreateTransformFromFile(inFile);
 		}
 		else if (token == "<Renderer>:") {
-			obj->CreateMeshRendererFromFile(inFile);
+			obj->CreateRendererFromFile(inFile);
 		}
 		else if (token == "<Terrain>:") {
 			obj->CreateTerrainFromFile(inFile);
@@ -470,6 +465,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 					ReadDateFromFile(ifs, cacheNum);
 
 					layer->mBoneFrameCaches.resize(cacheNum);
+					layer->mBoneNames.resize(cacheNum);
 					layer->mAnimationCurves.resize(cacheNum);
 
 					animSet->mScales[i].resize(cacheNum);
@@ -488,7 +484,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 						ReadDateFromFile(ifs, curveNude); //j
 
 						ReadDateFromFile(ifs, token); //Frame Name
-						layer->mBoneFrameCaches[j] = FindChildByName(token);
+						layer->mBoneNames[j] = token;
 
 						while (true) {
 							ReadDateFromFile(ifs, token);
@@ -517,12 +513,12 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 				ReadDateFromFile(ifs, token); //</AnimationLayers>
 
 				int64_t commonBoneNum = 0;
-				std::unordered_map<std::shared_ptr<CGameObject>, std::pair<int64_t, int64_t>> global_map;
+				std::unordered_map<CTransform*, std::pair<int64_t, int64_t>> global_map;
 
 				for (const auto& layer : animSet->mLayers) {
-					std::unordered_map<std::shared_ptr<CGameObject>, int> local_count;
+					std::unordered_map<CTransform*, int> local_count;
 					for (const auto& cache : layer->mBoneFrameCaches) {
-						local_count[cache]++;
+						local_count[cache.lock().get()]++;
 					}
 
 					for (const auto& [cache, m] : local_count) {
@@ -540,7 +536,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 				}
 
 				if (commonBoneNum) {
-					animSet->mCommonBoneFrameCaches.resize(commonBoneNum);
+					animSet->mBoneFrameCaches.resize(commonBoneNum);
 				}
 
 			}
@@ -572,25 +568,45 @@ void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 	ReadDateFromFile(inFile, mTransform->mLocalMat);
 }
 
-void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile)
+void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 {
 	using namespace BinaryReader;
+	std::string token{};
 
-	mMeshRenderer = AddComponent<CMeshRenderer>();
+	ReadDateFromFile(inFile, token);
+	if (token == "<SkinnedMesh>:") {
+		auto skinnedMeshRenderer = std::make_shared<CSkinnedMeshRenderer>();
+		mRenderer = skinnedMeshRenderer;
 
-	std::string meshName{};
-	ReadDateFromFile(inFile, meshName);
-	mMeshRenderer->SetMesh(meshName);
+		std::string meshName{};
+		ReadDateFromFile(inFile, meshName);
+		skinnedMeshRenderer->SetSkinnedMesh(meshName);
+
+		UINT boneCount{};
+		ReadDateFromFile(inFile, boneCount);
+		skinnedMeshRenderer->mBoneNames.resize(boneCount);
+		for (UINT i = 0; i < boneCount; i++) {
+			std::string boneName{};
+			ReadDateFromFile(inFile, boneName);
+			skinnedMeshRenderer->mBoneNames[i] = boneName;
+		}
+	}
+	else if (token == "<Mesh>:") {
+		auto meshRenderer = std::make_shared<CMeshRenderer>();
+		mRenderer = meshRenderer;
+
+		std::string meshName{};
+		ReadDateFromFile(inFile, meshName);
+		meshRenderer->SetMesh(meshName);
+	}
 
 	int materialCnt{};
 	std::string materialName{};
 	ReadDateFromFile(inFile, materialCnt);
 	for (int i = 0; i < materialCnt; i++) {
 		ReadDateFromFile(inFile, materialName);
-		mMeshRenderer->AddMaterial(materialName);
+		mRenderer->AddMaterial(materialName);
 	}
-
-
 }
 
 void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
@@ -667,8 +683,8 @@ void CGameObject::ResetForAnimationBlending()
 
 void CGameObject::FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int skinnedMeshNum)
 {
-	if (mMeshRenderer) {
-		std::shared_ptr<CMesh> mesh = mMeshRenderer->GetMesh();
+	if (mRenderer) {
+		std::shared_ptr<CMesh> mesh = mRenderer->GetMesh();
 		if (mesh) {
 			auto skinned = std::dynamic_pointer_cast<CSkinnedMesh>(mesh);
 			if (skinned) {
