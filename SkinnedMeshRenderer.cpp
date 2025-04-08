@@ -33,6 +33,7 @@ void CSkinnedMeshRenderer::LateUpdate()
 {
     mSkinnedMesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
 
+    CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_OFFSET)->UpdateBuffer(0, mSkinnedMesh->mBindPoseBoneOffsets.data(), sizeof(Matrix) * mSkinnedMesh->mBindPoseBoneOffsets.size());
 }
 
 void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)

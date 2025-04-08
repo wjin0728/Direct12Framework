@@ -77,7 +77,7 @@ public:
 	static std::shared_ptr<CGameObject> CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
-	std::shared_ptr<CRenderer> GetMeshRendere() { return mRenderer; }
+	std::shared_ptr<CRenderer> GetRenderer() { return mRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
@@ -127,7 +127,6 @@ public:
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
 
 	void SetAnimationLayerCache(std::shared_ptr<CGameObject> root);
-	//void FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int meshNum);
 };
 
 

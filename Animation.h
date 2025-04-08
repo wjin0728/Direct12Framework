@@ -118,7 +118,7 @@ public:
 
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
     std::vector<std::string> mBoneNames{};
-    //std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
+    std::vector<std::shared_ptr<CTransform>> mBoneFrameCaches{};
 
 public:
     void SetCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr<CCallbackHandler>& callbackHandler);

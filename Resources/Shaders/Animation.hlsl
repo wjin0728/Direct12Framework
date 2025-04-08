@@ -3,22 +3,22 @@
 
 #define MAX_VERTEX_INFLUENCES 4
 
-//void ApplyBoneTransform(float3 position, float3 normal, float3 tangent, uint4 boneIndices, float4 boneWeights,
-//                        out float3 outPosition, out float3 outNormal, out float3 outTangent)
-//{
-//    outPosition = float3(0.0f, 0.0f, 0.0f);
-//    outNormal = float3(0.0f, 0.0f, 0.0f);
-//    outTangent = float3(0.0f, 0.0f, 0.0f);
-//
-//    for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
-//    {
-//        // 뼈대 오프셋과 변환 행렬을 결합
-//        matrix vertexToBoneWorld = mul(boneOffsets[boneIndices[i]], boneTransforms[boneIndices[i]]);
-//        outPosition += boneWeights[i] * mul(float4(position, 1.0f), vertexToBoneWorld).xyz;
-//        outNormal += boneWeights[i] * mul(normal, (float3x3)vertexToBoneWorld);
-//        outTangent += boneWeights[i] * mul(tangent, (float3x3)vertexToBoneWorld);
-//    }
-//}
+void ApplyBoneTransform(float3 position, float3 normal, float3 tangent, uint4 boneIndices, float4 boneWeights,
+                        out float3 outPosition, out float3 outNormal, out float3 outTangent)
+{
+    outPosition = float3(0.0f, 0.0f, 0.0f);
+    outNormal = float3(0.0f, 0.0f, 0.0f);
+    outTangent = float3(0.0f, 0.0f, 0.0f);
+
+    for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
+    {
+        // 뼈대 오프셋과 변환 행렬을 결합
+        matrix vertexToBoneWorld = mul(boneOffsets[boneIndices[i]], boneTransforms[boneIndices[i]]);
+        outPosition += boneWeights[i] * mul(float4(position, 1.0f), vertexToBoneWorld).xyz;
+        outNormal += boneWeights[i] * mul(normal, (float3x3)vertexToBoneWorld);
+        outTangent += boneWeights[i] * mul(tangent, (float3x3)vertexToBoneWorld);
+    }
+}
 
 cbuffer MaterialData : register(b5)
 {

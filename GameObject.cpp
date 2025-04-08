@@ -465,7 +465,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 						ReadDateFromFile(ifs, cacheNum);
 
 						layer->mBoneNames.resize(cacheNum);
-						layer->mBoneFrameCaches.resize(cacheNum);
+						layer->mBoneFrameCaches.reserve(cacheNum);
 						layer->mAnimationCurves.resize(cacheNum);
 
 						animSet->mScales[i].resize(cacheNum);
@@ -666,23 +666,6 @@ void CGameObject::ResetForAnimationBlending()
 	}
 }
 
-//void CGameObject::FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int skinnedMeshNum)
-//{
-//	if (mRenderer) {
-//		std::shared_ptr<CMesh> mesh = mRenderer->GetMesh();
-//		if (mesh) {
-//			auto skinned = std::dynamic_pointer_cast<CSkinnedMesh>(mesh);
-//			if (skinned) {
-//				skinnedMeshes.push_back(skinned);
-//				skinnedMeshNum++;
-//			}
-//		}
-//	}
-//
-//	for (auto& child : mChildren) {
-//		child->FindAndSetSkinnedMesh(skinnedMeshes, skinnedMeshNum);
-//	}
-//}
 
 void CGameObject::SetAnimationLayerCache(std::shared_ptr<CGameObject> root) {
 	for (auto& set : mAnimationController->mAnimationSets->mAnimationSet) {

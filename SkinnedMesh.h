@@ -16,7 +16,7 @@ struct SkinnedVertex
 class CSkinnedMesh : public CMesh
 {
 private:
-	friend class CAnimationController;
+	friend class CSkinnedMeshRenderer;
 
 	std::vector<SkinnedVertex> mSkinnedData{};
 

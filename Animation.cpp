@@ -4,6 +4,7 @@
 #include "Transform.h"
 #include "SkinnedMesh.h"
 #include "Timer.h"
+#include "SkinnedMeshRenderer.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -218,7 +219,7 @@ void CAnimationController::Awake()
 	for (auto& set : mAnimationSets->mAnimationSet) {
 		for (auto& layer : set->mLayers) {
 			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
-				owner->FindChildByName(layer->mBoneNames[i++]);
+				layer->mBoneFrameCaches.push_back(owner->FindChildByName(layer->mBoneNames[i++])->GetTransform());
 			}
 		}
 	}
@@ -280,6 +281,15 @@ void CAnimationController::LateUpdate()
 		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
 			mAnimationSets->mAnimationSet[track->mAnimationSetIndex]->HandleCallback();
 	}
+
+	std::vector<Matrix> boneTransforms;
+	auto caches = mAnimationSets->mAnimationSet.front()->mLayers.front()->mBoneFrameCaches;
+
+	for (auto& cache : caches) {
+		boneTransforms.push_back(cache.lock()->GetTransform()->GetWorldMat().Transpose());
+	}
+
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(0, boneTransforms.data(), sizeof(Matrix) * boneTransforms.size());
 }
 
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
