@@ -267,7 +267,7 @@ void CAnimationController::LateUpdate()
 	}
 	//*/
 
-	GetTransform()->UpdateWorldMatrix();
+	owner->UpdateTransform(nullptr);
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled && mAnimationSets->mAnimationSet.size())

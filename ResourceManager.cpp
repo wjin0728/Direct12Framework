@@ -2,6 +2,7 @@
 #include "ResourceManager.h"
 #include"DX12Manager.h"
 #include"Mesh.h"
+#include"SkinnedMesh.h"
 #include"Material.h"
 #include"Shader.h"
 
@@ -59,6 +60,16 @@ void CResourceManager::LoadSceneResourcesFromFile(std::ifstream& ifs)
 		if (!Get<CMesh>(meshName)) {
 			Add(CMesh::CreateMeshFromFile(meshName));
 		}	
+	}
+
+	ReadDateFromFile(ifs, meshCount);
+	for (int i = 0; i < meshCount; i++) {
+		std::string meshName;
+		ReadDateFromFile(ifs, meshName);
+
+		if (!Get<CSkinnedMesh>(meshName)) {
+			Add(CSkinnedMesh::CreateSkinnedMeshFromFile(meshName));
+		}
 	}
 
 	int materialCount{};
@@ -242,7 +253,7 @@ void CResourceManager::LoadDefaultShaders()
 		Add(shader);
 	}
 	{
-		/*ShaderInfo info;
+		ShaderInfo info;
 		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::ANIMATION;
 		info.blendType = BLEND_TYPE::DEFAULT;
@@ -251,10 +262,23 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Resources\\Shaders\\Animation.hlsl");
-		shader->SetName("Animation");
+		shader->Initialize(info, "Animation");
 
-		Add(shader);*/
+		Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::SHADOW;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::ANIMATION;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		shader->Initialize(info, "Animation");
+
+		Add(shader);
 	}
 }
 

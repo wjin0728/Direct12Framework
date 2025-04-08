@@ -18,6 +18,9 @@ CSkinnedMeshRenderer::~CSkinnedMeshRenderer()
 void CSkinnedMeshRenderer::Awake()
 {
 	CRenderer::Awake();
+    for (int i = 0; const auto & boneName : mBoneNames) {
+		mBoneTransforms[i++] = owner->FindChildByName(boneName)->GetTransform();
+	}
 }
 
 void CSkinnedMeshRenderer::Update()
@@ -28,21 +31,6 @@ void CSkinnedMeshRenderer::LateUpdate()
 {
     mSkinnedMesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
 
-    for (auto& skinnedMesh : mAnimationSets->mSkinnedMeshes) {
-        const int boneNum = skinnedMesh->GetBoneNum();
-        std::vector<Matrix> finalBones(boneNum);
-
-        for (int i = 0; auto & bone : finalBones) {
-            bone = skinnedMesh->mBoneFrameCaches[i++]->GetTransform()->GetWorldMat();
-        }
-
-        int index = skinnedMesh->GetBoneTransformIndex();
-        if (index >= 0) {
-            auto curFrameResource = INSTANCE(CDX12Manager).GetCurFrameResource();
-
-            curFrameResource->GetConstantBuffer((UINT)CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(index, finalBones.data());
-        }
-    }
 }
 
 void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)

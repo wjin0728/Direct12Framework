@@ -93,7 +93,9 @@ void CGameObject::LateUpdate()
 void CGameObject::Render(std::shared_ptr<CCamera> camera, int pass)
 {
 	if (!mActive) return;
-	if (mRenderer) mRenderer->Render(camera, pass);
+	if (mRenderer) {
+		mRenderer->Render(camera, pass);
+	}
 	for (auto& child : mChildren) {
 		child->Render(camera, pass);
 	}
@@ -408,7 +410,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 {
 	using namespace BinaryReader;
 
-	std::ifstream ifs{ "Resources\\Animation\\" + fileName, std::ios::binary};
+	std::ifstream ifs{ fileName, std::ios::binary};
 	if (!ifs) {
 		return;
 	}
@@ -568,6 +570,7 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 		UINT boneCount{};
 		ReadDateFromFile(inFile, boneCount);
 		skinnedMeshRenderer->mBoneNames.resize(boneCount);
+		skinnedMeshRenderer->mBoneTransforms.resize(boneCount);
 		for (UINT i = 0; i < boneCount; i++) {
 			std::string boneName{};
 			ReadDateFromFile(inFile, boneName);

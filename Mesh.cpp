@@ -426,8 +426,6 @@ std::ifstream& CMesh::ReadMeshData(std::ifstream& inFile)
 
 	vertices.resize(nvertices);
 
-	std::string token;
-
 	while (true)
 	{
 		BinaryReader::ReadDateFromFile(inFile, token);
