@@ -3,6 +3,7 @@
 #include"GameObject.h"
 #include"Transform.h"
 #include"Timer.h"
+#include"InputManager.h"
 
 CFollowTarget::CFollowTarget() : CMonoBehaviour("FollowTarget")
 {
@@ -23,22 +24,66 @@ void CFollowTarget::Start()
 void CFollowTarget::Update()
 {
 	auto targetTrans = mTarget->GetTransform();
+	
 	auto transform = GetTransform();
+	Vec3 moveDir = Vec3::Zero;
 
-	Vec3 dir = targetTrans->GetLocalLook();
-	dir.y = 0.f;
-	if (dir.Length() > 0) dir.Normalize();
+	if (INPUT.IsKeyPress(KEY_TYPE::W)) {
+		moveDir += transform->GetLocalLook();
+		moveDir.y = 0.f;
+		moveDir.Normalize();
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::S)) {
+		moveDir -= transform->GetLocalLook();
+		moveDir.y = 0.f;
+		moveDir.Normalize();
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::D)) {
+		moveDir += transform->GetLocalRight();
+		moveDir.y = 0.f;
+		moveDir.Normalize();
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
+		moveDir -= transform->GetLocalRight();
+		moveDir.y = 0.f;
+		moveDir.Normalize();
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) {
+		moveDir += Vec3::Up;
 
-	float f = DELTA_TIME * 10.f;
-	float f2 = DELTA_TIME * 40.f;
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) {
+		moveDir -= Vec3::Up;
+	}
 
-	Vec3 position = Vec3::Lerp(transform->GetLocalPosition(), targetTrans->GetLocalPosition(), f2);
-	transform->SetLocalPosition(position);
+	Vec3 acccel = Vec3::Zero;
+	bool isDecelerate = true;
 
-	Quaternion rotation = Quaternion::Slerp(transform->GetLocalRotation(), Quaternion::LookRotation(dir), f);
-	transform->SetLocalRotation(rotation);
+	if (moveDir != Vec3::Zero) {
+		acccel = moveDir.GetNormalized() * 10.f;
+		isDecelerate = false;
+	}
+
+	targetTrans->SetLocalPosition(targetTrans->GetLocalPosition() + acccel * DELTA_TIME);
+
+
+	Vec2 mouseDelta = INPUT.GetMouseDelta();
+	if (mouseDelta != Vec2::Zero) {
+		GetTransform()->RotateAround(targetTrans->GetWorldPosition(), Vec3::Up, mouseDelta.x * 0.01f);
+		GetTransform()->RotateAround(targetTrans->GetWorldPosition(), transform->GetWorldRight(), mouseDelta.y * 0.01f);
+		GetTransform()->LookAt(targetTrans->GetWorldPosition(), Vec3::Up);
+		GetTransform()->SetLocalUp(Vec3::Up);
+	}
+
+	
 }
 
 void CFollowTarget::LateUpdate()
 {
+	auto targetTrans = mTarget->GetTransform();
+
+	auto transform = GetTransform();
+
+	Vec3 position = targetTrans->GetWorldPosition() - transform->GetLocalLook() * 10.f;
+	transform->SetLocalPosition(position);
 }

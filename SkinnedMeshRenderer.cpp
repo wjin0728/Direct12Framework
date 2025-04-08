@@ -18,8 +18,10 @@ CSkinnedMeshRenderer::~CSkinnedMeshRenderer()
 void CSkinnedMeshRenderer::Awake()
 {
 	CRenderer::Awake();
+	auto root = owner->GetTransform()->GetRoot()->owner;
+
     for (int i = 0; const auto & boneName : mBoneNames) {
-		mBoneTransforms[i++] = owner->FindChildByName(boneName)->GetTransform();
+		mBoneTransforms.push_back(root->FindChildByName(boneName)->GetTransform());
 	}
 }
 

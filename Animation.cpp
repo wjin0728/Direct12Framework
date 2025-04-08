@@ -41,11 +41,11 @@ CAnimationLayer::~CAnimationLayer()
 
 void CAnimationLayer::LoadKeyValues(int boneFrame, int curve, std::ifstream& file)
 {
-	int keyNum;
+	int keyNum{};
 	float data;
+	BinaryReader::ReadDateFromFile(file, keyNum);
 	auto animationCurve = std::make_shared<CAnimationCurve>(keyNum);
 
-	BinaryReader::ReadDateFromFile(file, keyNum);
 
 	for (int i = 0; i < keyNum; ++i) {
 		BinaryReader::ReadDateFromFile(file, data);

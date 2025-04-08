@@ -560,7 +560,7 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 
 	ReadDateFromFile(inFile, token);
 	if (token == "<SkinnedMesh>:") {
-		auto skinnedMeshRenderer = std::make_shared<CSkinnedMeshRenderer>();
+		auto skinnedMeshRenderer = AddComponent<CSkinnedMeshRenderer>();
 		mRenderer = skinnedMeshRenderer;
 
 		std::string meshName{};
@@ -570,7 +570,6 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 		UINT boneCount{};
 		ReadDateFromFile(inFile, boneCount);
 		skinnedMeshRenderer->mBoneNames.resize(boneCount);
-		skinnedMeshRenderer->mBoneTransforms.resize(boneCount);
 		for (UINT i = 0; i < boneCount; i++) {
 			std::string boneName{};
 			ReadDateFromFile(inFile, boneName);
@@ -578,7 +577,7 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 		}
 	}
 	else if (token == "<Mesh>:") {
-		auto meshRenderer = std::make_shared<CMeshRenderer>();
+		auto meshRenderer = AddComponent<CMeshRenderer>();
 		mRenderer = meshRenderer;
 
 		std::string meshName{};
