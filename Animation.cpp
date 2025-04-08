@@ -215,6 +215,13 @@ void CAnimationController::SetAnimationCallbackHandler(std::shared_ptr<CAnimatio
 
 void CAnimationController::Awake()
 {
+	for (auto& set : mAnimationSets->mAnimationSet) {
+		for (auto& layer : set->mLayers) {
+			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
+				owner->FindChildByName(layer->mBoneNames[i++]);
+			}
+		}
+	}
 }
 
 void CAnimationController::Start()
