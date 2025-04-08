@@ -196,6 +196,12 @@
     <ClInclude Include="Light.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
+    <ClInclude Include="SkinnedMeshRenderer.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -336,6 +342,12 @@
     <ClCompile Include="Light.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
+    <ClCompile Include="SkinnedMeshRenderer.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -384,10 +396,8 @@
     <None Include="Resources\Shaders\Cloud.hlsl">
       <Filter>HLSL</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Resources\Shaders\Animation.hlsl">
+    <None Include="Resources\Shaders\Animation.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
+    </None>
   </ItemGroup>
 </Project>

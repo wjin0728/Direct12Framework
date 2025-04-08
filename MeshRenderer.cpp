@@ -10,10 +10,10 @@
 #include"InstancingBuffer.h"
 #include"ObjectPoolManager.h"
 
-CMeshRenderer::CMeshRenderer() : CComponent(COMPONENT_TYPE::MESH_RENDERER)
+CMeshRenderer::CMeshRenderer() : CRenderer()
 {
+	type = COMPONENT_TYPE::MESH_RENDERER; // 타입 재설정
 }
-
 
 CMeshRenderer::~CMeshRenderer()
 {
@@ -96,12 +96,3 @@ void CMeshRenderer::SetMesh(const std::string& name)
 	if (m_mesh) mWorldBS = m_mesh->oobs;
 }
 
-void CMeshRenderer::AddMaterial(const std::shared_ptr<CMaterial>& material)
-{
-	m_materials.push_back(material);
-}
-
-void CMeshRenderer::AddMaterial(const std::string& name)
-{
-	m_materials.push_back(INSTANCE(CResourceManager).Get<CMaterial>(name));
-}
