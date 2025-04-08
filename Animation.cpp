@@ -49,11 +49,11 @@ void CAnimationLayer::LoadKeyValues(int boneFrame, int curve, std::ifstream& fil
 
 	for (int i = 0; i < keyNum; ++i) {
 		BinaryReader::ReadDateFromFile(file, data);
-		animationCurve->mKeyTimes[i] = data;
+		animationCurve->mKeyTimes.push_back(data);
 	}
 	for (int i = 0; i < keyNum; ++i) {
 		BinaryReader::ReadDateFromFile(file, data);
-		animationCurve->mKeyValues[i] = data;
+		animationCurve->mKeyValues.push_back(data);
 	}
 
 	mAnimationCurves[boneFrame][curve] = animationCurve;
@@ -272,22 +272,6 @@ void CAnimationController::LateUpdate()
 	for (auto& track : mTracks) {
 		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
 			mAnimationSets->mAnimationSet[track->mAnimationSetIndex]->HandleCallback();
-	}
-
-	for (auto& skinnedMesh : mAnimationSets->mSkinnedMeshes) {
-		const int boneNum = skinnedMesh->GetBoneNum();
-		std::vector<Matrix> finalBones(boneNum);
-
-		for (int i = 0; auto & bone : finalBones) {
-			bone = skinnedMesh->mBoneFrameCaches[i++]->GetTransform()->GetWorldMat();
-		}
-
-		int index = skinnedMesh->GetBoneTransformIndex();
-		if (index >= 0) {
-			auto curFrameResource = INSTANCE(CDX12Manager).GetCurFrameResource();
-
-			curFrameResource->GetConstantBuffer((UINT)CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(index, finalBones.data());
-		}
 	}
 }
 
