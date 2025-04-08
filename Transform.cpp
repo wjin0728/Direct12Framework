@@ -220,6 +220,19 @@ void CTransform::RotateZ(float angle)
 	Rotate(0.f, 0.f, angle);
 }
 
+void CTransform::RotateAround(const Vec3& point, const Vec3& axis, float angle)
+{
+	Vec3 normalizedAxis = axis.GetNormalized();
+
+	Quaternion rot = Quaternion::CreateFromAxisAngle(normalizedAxis, angle);
+	Vec3 dir = mLocalPosition - point;
+	Quaternion dirQuat(dir.x, dir.y, dir.z, 0.0f);
+	Quaternion rotatedQuat = rot * dirQuat * rot.Inverse();
+	Vec3 rotatedDir(rotatedQuat.x, rotatedQuat.y, rotatedQuat.z);
+	mLocalPosition = point + rotatedDir;
+	mDirtyFlag = true;
+}
+
 const Matrix& CTransform::GetWorldMat(bool update)
 {
 	if(update && !owner->mIsStatic) UpdateWorldMatrix();

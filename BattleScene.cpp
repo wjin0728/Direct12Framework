@@ -27,37 +27,28 @@ void CBattleScene::Initialize()
 
 #pragma region Player
 
-	auto Player = std::make_shared<CGameObject>();
+	auto Player = FindObjectWithTag("Player");
 	Player->SetStatic(false);
-	Player->GetTransform()->SetLocalPosition({ 0.f,10.f,0.f });
-	Player->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
-	//Player->GetTransform()->SetLocalRotationY(90.f);
+	Player->GetTransform()->SetLocalRotationX(95.7f);
 
 	Player->AddComponent<CRigidBody>();
-	Player->AddComponent<CPlayerController>();
-
-	AddObject("", Player);
+	//Player->AddComponent<CPlayerController>();
 
 #pragma endregion
 
 #pragma region Main Camera
 	{
-		auto playerFollower = std::make_shared<CGameObject>();
-		playerFollower->SetStatic(false);
-
-		auto followTarget = playerFollower->AddComponent<CFollowTarget>();
-		followTarget->SetTarget(Player);
-		playerFollower->GetTransform()->SetLocalPosition({ 0.f,10.f,0.f });
-		//playerFollower->GetTransform()->SetLocalRotationY(90.f);
 
 		auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
 			1.f, 100.f);
 		cameraObj->SetStatic(false);
-		cameraObj->GetTransform()->SetLocalPosition({ 0.f, 0.f, 0.f });
+		cameraObj->GetTransform()->SetLocalPosition({ 0.f, 30.f, -10.f });
 		cameraObj->GetTransform()->Rotate({ 15.f,0.f,0.f });
-		cameraObj->SetParent(playerFollower);
 
-		AddObject("", playerFollower);
+		auto playerFollower = cameraObj->AddComponent<CFollowTarget>();
+		playerFollower->SetTarget(Player);
+
+		AddObject(cameraObj);
 
 		auto uiCamera = CGameObject::CreateCameraObject("UICamera", INSTANCE(CDX12Manager).GetRenderTargetSize(), 0.f, 100.f, INSTANCE(CDX12Manager).GetRenderTargetSize());
 	}

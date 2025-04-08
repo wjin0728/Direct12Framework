@@ -47,9 +47,6 @@
     <Filter Include="GameObject\Component\Scripts">
       <UniqueIdentifier>{941b0b65-03f4-467c-abb5-0b5f6c14555e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Server">
-      <UniqueIdentifier>{d82ca6cc-fa05-4582-92c9-4c6ecf54f7e2}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Scene.h">
@@ -199,11 +196,11 @@
     <ClInclude Include="Light.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Server</Filter>
+    <ClInclude Include="SkinnedMeshRenderer.h">
+      <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="ServerManager.h">
-      <Filter>Server</Filter>
+    <ClInclude Include="Renderer.h">
+      <Filter>GameObject\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -345,11 +342,11 @@
     <ClCompile Include="Light.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Server</Filter>
+    <ClCompile Include="SkinnedMeshRenderer.cpp">
+      <Filter>GameObject\Component</Filter>
     </ClCompile>
-    <ClCompile Include="ServerManager.cpp">
-      <Filter>Server</Filter>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>GameObject\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

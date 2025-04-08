@@ -66,6 +66,7 @@ public:
 	static std::shared_ptr<CMesh> CreateSphereMesh(float radius, UINT stackCnt, UINT sliceCnt);
 
 protected:
+	std::ifstream& ReadMeshData(std::ifstream& inFile);
 	void CreateOOBBAndOOBS();
 	virtual void CalculateNormal();
 

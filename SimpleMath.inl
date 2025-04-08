@@ -3140,6 +3140,15 @@ inline void Quaternion::Inverse(Quaternion& result) const noexcept
     XMStoreFloat4(&result, XMQuaternionInverse(q));
 }
 
+inline Quaternion Quaternion::Inverse() const noexcept
+{
+    using namespace DirectX;
+    XMVECTOR q = XMLoadFloat4(this);
+	Quaternion result;
+    XMStoreFloat4(&result, XMQuaternionInverse(q));
+	return result;
+}
+
 inline float Quaternion::Dot(const Quaternion& q) const noexcept
 {
     using namespace DirectX;

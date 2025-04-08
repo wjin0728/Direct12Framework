@@ -713,6 +713,8 @@ namespace DirectX
 
             void Inverse(Quaternion& result) const noexcept;
 
+            Quaternion Inverse() const noexcept;
+
             float Dot(const Quaternion& Q) const noexcept;
 
             // Static functions

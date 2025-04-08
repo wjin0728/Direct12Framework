@@ -9,7 +9,7 @@ enum class LAYER_TYPE : UINT8
 };
 
 class CMonoBehaviour;
-class CMeshRenderer;
+class CRenderer;
 class CTransform;
 class CCamera;
 class CTerrain;
@@ -27,7 +27,7 @@ private:
 	std::vector<std::shared_ptr<CComponent>> mComponents{};
 
 	std::shared_ptr<CTransform> mTransform{};
-	std::shared_ptr<CMeshRenderer> mMeshRenderer{};
+	std::shared_ptr<CRenderer> mRenderer{};
 	std::shared_ptr<CCollider> mCollider{};
 
 	std::vector<std::shared_ptr<CGameObject>> mChildren{};
@@ -70,9 +70,6 @@ public:
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize,
 		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 60.f);
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, float nearPlane, float farPlane, Vec2 size);
-	//기본 설정을 가진 렌더 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateRenderObject(const std::string& tag,
-		const std::string& meshName, const std::string& materialName);
 	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size);
 	//기본 설정을 가진 지형 오브젝트를 생성한다.
 	static std::shared_ptr<CGameObject> CreateTerrainObject(std::ifstream& ifs);
@@ -80,7 +77,7 @@ public:
 	static std::shared_ptr<CGameObject> CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
-	std::shared_ptr<CMeshRenderer> GetMeshRendere() { return mMeshRenderer; }
+	std::shared_ptr<CRenderer> GetMeshRendere() { return mRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
@@ -118,24 +115,19 @@ private:
 
 	static std::shared_ptr<CGameObject> InitFromFile(std::ifstream& inFile, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 	void CreateTransformFromFile(std::ifstream& inFile);
-	void CreateMeshRendererFromFile(std::ifstream& inFile);
+	void CreateRendererFromFile(std::ifstream& inFile);
 	void CreateTerrainFromFile(std::ifstream& inFile);
 	void CreateAnimationFromFile(std::string& fileName);
 
 public:
+	std::shared_ptr<CAnimationController> mAnimationController{};
+
 	void UpdateTransform(const Matrix* parent = nullptr);
-	virtual void Animate(float elapsedTime);
 	void ResetForAnimationBlending();
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
 
-	std::shared_ptr<CAnimationController> mAnimationController{};
-
-	void FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int meshNum);
-
-	void SetTrackAnimationSet(int trackIndex, int setIndex);
-	void SetTrackAnimationPosition(int trackIndex, float position);
-
-
+	void SetAnimationLayerCache(std::shared_ptr<CGameObject> root);
+	//void FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int meshNum);
 };
 
 

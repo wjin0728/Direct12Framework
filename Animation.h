@@ -65,7 +65,8 @@ public:
     ANIMATION_BLEND_TYPE mBlendMode = ANIMATION_BLEND_TYPE::OVERRIDE;
 
     std::vector<std::array<std::shared_ptr<CAnimationCurve>, 9>> mAnimationCurves;
-    std::vector<std::shared_ptr<CGameObject>> mBoneFrameCaches;
+    std::vector<std::string> mBoneNames{};
+    std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
 
     void LoadKeyValues(int boneFrame, int curve, std::ifstream& file);
     void GetSRT(const std::array<std::shared_ptr<CAnimationCurve>, 9>& curves, float position, Vec3& scale, Vec3& rotation, Vec3& translation);
@@ -87,7 +88,9 @@ public:
     ANIMATION_TYPE mType = ANIMATION_TYPE::LOOP;
 
     std::vector<std::shared_ptr<CAnimationLayer>> mLayers;
-    std::vector<std::shared_ptr<CGameObject>> mCommonBoneFrameCaches;
+    std::vector<std::string> mBoneNames{};
+    //std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
+
     std::vector<std::vector<Vec3>> mScales;
     std::vector<std::vector<Vec3>> mRotations;
     std::vector<std::vector<Vec3>> mTranslations;
@@ -114,8 +117,8 @@ public:
     ~CAnimationSets();
 
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
-    std::vector<std::shared_ptr<CSkinnedMesh>> mSkinnedMeshes{};
-    std::vector<std::shared_ptr<CGameObject>> mBoneFrameCaches{};
+    std::vector<std::string> mBoneNames{};
+    //std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
 
 public:
     void SetCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr<CCallbackHandler>& callbackHandler);
@@ -174,6 +177,13 @@ public:
     void SetAnimationType(std::shared_ptr<CAnimationSet>& animationSet, ANIMATION_TYPE type);
 
     void SetAnimationCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr <CCallbackHandler>& callbackHandler);
+
+public:
+    virtual void Awake();
+    virtual void Start();
+
+    virtual void Update();
+    virtual void LateUpdate();
 
     void AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject);
     void UpdateShaderVariables();

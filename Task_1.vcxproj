@@ -73,8 +73,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <AllProjectBMIsArePublic>false</AllProjectBMIsArePublic>
-    <IncludePath>./include;$(IncludePath)</IncludePath>
-    <LibraryPath>./lib/x64/release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <AllProjectBMIsArePublic>false</AllProjectBMIsArePublic>
@@ -171,9 +171,9 @@
     <ClInclude Include="CResource.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingGroup.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="ServerManager.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="SkinnedMesh.h" />
+    <ClInclude Include="SkinnedMeshRenderer.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="DescriptorHeaps.h" />
@@ -220,9 +220,9 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="ServerManager.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SkinnedMesh.cpp" />
+    <ClCompile Include="SkinnedMeshRenderer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="DescriptorHeaps.cpp" />

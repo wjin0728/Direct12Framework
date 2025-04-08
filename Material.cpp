@@ -71,8 +71,10 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	size_t dataSize{};
 
 	ReadDateFromFile(inFile, token);
-	if (token == "SyntyStudios/Basic_LOD_Shader") {
-		material->SetShader("Common");
+	if (token == "SyntyStudios/Basic_LOD_Shader" || token == "Universal_Render_Pipeline/Lit") {
+		if(token == "SyntyStudios/Basic_LOD_Shader") material->SetShader("Common");
+		else if (token == "Universal_Render_Pipeline/Lit") material->SetShader("Animation");
+		
 		matData = std::make_unique<BYTE[]>(sizeof(CommonProperties));
 		CommonProperties* data = reinterpret_cast<CommonProperties*>(matData.get());
 		dataSize = sizeof(CommonProperties);

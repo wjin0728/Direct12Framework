@@ -41,21 +41,30 @@ void CPlayerController::OnKeyEvents()
 
 	if (INPUT.IsKeyPress(KEY_TYPE::W)) {
 		moveDir += transform->GetLocalLook();
+		moveDir.y = 0.f;
+		moveDir.Normalize();
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) {
 		moveDir -= transform->GetLocalLook();
+		moveDir.y = 0.f;
+		moveDir.Normalize();
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::D)) {
 		moveDir += transform->GetLocalRight();
+		moveDir.y = 0.f;
+		moveDir.Normalize();
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
 		moveDir -= transform->GetLocalRight();
+		moveDir.y = 0.f;
+		moveDir.Normalize();
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) {
-		moveDir += transform->GetLocalUp();
+		moveDir += Vec3::Up;
+
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) {
-		moveDir -= transform->GetLocalUp();
+		moveDir -= Vec3::Up;
 	}
 
 	Vec3 acccel = Vec3::Zero;

@@ -126,127 +126,7 @@ std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(const std::string& name)
 	}
 	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
 	m->name = name;
-
-	int nvertices{};
-	BinaryReader::ReadDateFromFile(inFile, nvertices);
-
-	m->vertices.resize(nvertices);
-
-	std::string token;
-
-	while (true)
-	{
-		BinaryReader::ReadDateFromFile(inFile, token);
-
-		if (token == "<Bounds>:")
-		{
-			Vec3 boundingCenter, boundingExtent;
-
-			BinaryReader::ReadDateFromFile(inFile, boundingCenter);
-			BinaryReader::ReadDateFromFile(inFile, boundingExtent);
-
-			BoundingOrientedBox::CreateFromBoundingBox(m->oobb, BoundingBox(boundingCenter, boundingExtent));
-			BoundingSphere::CreateFromBoundingBox(m->oobs, m->oobb);
-		}
-		else if (token == "<Positions>:")
-		{
-			int nPositions{};
-			BinaryReader::ReadDateFromFile(inFile, nPositions);
-
-			for (int i = 0; i < nPositions; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].position);
-			}
-		}
-		else if (token == "<Colors>:")
-		{
-			int nColors{};
-			BinaryReader::ReadDateFromFile(inFile, nColors);
-
-			for (int i = 0; i < nColors; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].color);
-			}
-		}
-		else if (token == "<Normals>:")
-		{
-			int nNormals{};
-			BinaryReader::ReadDateFromFile(inFile, nNormals);
-
-			for (int i = 0; i < nNormals; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].normal);
-			}
-		}
-		else if (token == "<TextureCoords0>:")
-		{
-			int nTextureCoord{};
-			BinaryReader::ReadDateFromFile(inFile, nTextureCoord);
-
-			for (int i = 0; i < nTextureCoord; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].texCoord);
-			}
-		}
-		else if (token == "<TextureCoords1>:")
-		{
-			int nTextureCoord{};
-			BinaryReader::ReadDateFromFile(inFile, nTextureCoord);
-
-			Vec2 temp;
-			for (int i = 0; i < nTextureCoord; i++) {
-				BinaryReader::ReadDateFromFile(inFile, temp);
-			}
-		}
-		else if (token == "<Tangents>:")
-		{
-			int nTangent{};
-			BinaryReader::ReadDateFromFile(inFile, nTangent);
-
-			for (int i = 0; i < nTangent; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].tangent);
-			}
-
-		}
-		else if (token == "<Indices>:")
-		{
-			int nIndices{};
-			BinaryReader::ReadDateFromFile(inFile, nIndices);
-
-			m->indices.emplace_back(nIndices);
-			inFile.read((char*)&m->indices[0][0], sizeof(UINT) * nIndices);
-		}
-		else if (token == "<SubMeshes>:")
-		{
-			BinaryReader::ReadDateFromFile(inFile, m->subMeshNum);
-
-			if (m->subMeshNum > 0)
-			{
-				m->indices.clear();
-				m->indices.resize(m->subMeshNum);
-
-				for (int i = 0; i < m->subMeshNum; i++)
-				{
-					BinaryReader::ReadDateFromFile(inFile, token);
-					if (token == "<SubMesh>:")
-					{
-						int subMeshIdx = 0;
-						BinaryReader::ReadDateFromFile(inFile, subMeshIdx);
-						int nIndex = 0;
-						BinaryReader::ReadDateFromFile(inFile, nIndex);
-
-						if (nIndex > 0)
-						{
-							m->indices[i].resize(nIndex);
-							inFile.read((char*)&(m->indices[i][0]), sizeof(UINT) * nIndex);
-						}
-					}
-				}
-			}
-		}
-		else if (token == "</Mesh>")
-		{
-			break;
-		}
-	}
-	m->CreateVertexBuffer();
-	m->CreateIndexBuffers();
+	m->ReadMeshData(inFile);
 
 	return m;
 }
@@ -535,6 +415,132 @@ std::shared_ptr<CMesh> CMesh::CreateSphereMesh(float radius, UINT stackCnt, UINT
 	m->CreateOOBBAndOOBS();
 
 	return m;
+}
+
+std::ifstream& CMesh::ReadMeshData(std::ifstream& inFile)
+{
+	std::string token;
+
+	int nvertices{};
+	BinaryReader::ReadDateFromFile(inFile, nvertices);
+
+	vertices.resize(nvertices);
+
+	while (true)
+	{
+		BinaryReader::ReadDateFromFile(inFile, token);
+
+		if (token == "<Bounds>:")
+		{
+			Vec3 boundingCenter, boundingExtent;
+
+			BinaryReader::ReadDateFromFile(inFile, boundingCenter);
+			BinaryReader::ReadDateFromFile(inFile, boundingExtent);
+
+			BoundingOrientedBox::CreateFromBoundingBox(oobb, BoundingBox(boundingCenter, boundingExtent));
+			BoundingSphere::CreateFromBoundingBox(oobs, oobb);
+		}
+		else if (token == "<Positions>:")
+		{
+			int nPositions{};
+			BinaryReader::ReadDateFromFile(inFile, nPositions);
+
+			for (int i = 0; i < nPositions; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].position);
+			}
+		}
+		else if (token == "<Colors>:")
+		{
+			int nColors{};
+			BinaryReader::ReadDateFromFile(inFile, nColors);
+
+			for (int i = 0; i < nColors; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].color);
+			}
+		}
+		else if (token == "<Normals>:")
+		{
+			int nNormals{};
+			BinaryReader::ReadDateFromFile(inFile, nNormals);
+
+			for (int i = 0; i < nNormals; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].normal);
+			}
+		}
+		else if (token == "<TextureCoords0>:")
+		{
+			int nTextureCoord{};
+			BinaryReader::ReadDateFromFile(inFile, nTextureCoord);
+
+			for (int i = 0; i < nTextureCoord; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].texCoord);
+			}
+		}
+		else if (token == "<TextureCoords1>:")
+		{
+			int nTextureCoord{};
+			BinaryReader::ReadDateFromFile(inFile, nTextureCoord);
+
+			Vec2 temp;
+			for (int i = 0; i < nTextureCoord; i++) {
+				BinaryReader::ReadDateFromFile(inFile, temp);
+			}
+		}
+		else if (token == "<Tangents>:")
+		{
+			int nTangent{};
+			BinaryReader::ReadDateFromFile(inFile, nTangent);
+
+			for (int i = 0; i < nTangent; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].tangent);
+			}
+
+		}
+		else if (token == "<Indices>:")
+		{
+			int nIndices{};
+			BinaryReader::ReadDateFromFile(inFile, nIndices);
+
+			indices.emplace_back(nIndices);
+			inFile.read((char*)&indices[0][0], sizeof(UINT) * nIndices);
+		}
+		else if (token == "<SubMeshes>:")
+		{
+			BinaryReader::ReadDateFromFile(inFile, subMeshNum);
+
+			if (subMeshNum > 0)
+			{
+				indices.clear();
+				indices.resize(subMeshNum);
+
+				for (int i = 0; i < subMeshNum; i++)
+				{
+					BinaryReader::ReadDateFromFile(inFile, token);
+					if (token == "<SubMesh>:")
+					{
+						int subMeshIdx = 0;
+						BinaryReader::ReadDateFromFile(inFile, subMeshIdx);
+						int nIndex = 0;
+						BinaryReader::ReadDateFromFile(inFile, nIndex);
+
+						if (nIndex > 0)
+						{
+							indices[i].resize(nIndex);
+							inFile.read((char*)&(indices[i][0]), sizeof(UINT) * nIndex);
+						}
+					}
+				}
+			}
+		}
+		else if (token == "</Mesh>")
+		{
+			break;
+		}
+	}
+	CreateVertexBuffer();
+	CreateIndexBuffers();
+
+	return inFile;
 }
 
 void CMesh::CreateOOBBAndOOBS()

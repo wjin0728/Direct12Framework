@@ -10,19 +10,18 @@
 #include"InstancingBuffer.h"
 #include"ObjectPoolManager.h"
 
-CMeshRenderer::CMeshRenderer() : CComponent(COMPONENT_TYPE::MESH_RENDERER)
+CMeshRenderer::CMeshRenderer() : CRenderer()
 {
+	type = COMPONENT_TYPE::MESH_RENDERER; // 타입 재설정
 }
-
 
 CMeshRenderer::~CMeshRenderer()
 {
-	ReturnCBVIndex();
 }
 
 void CMeshRenderer::Awake()
 {
-	SetCBVIndex();
+	CRenderer::Awake();
 }
 
 void CMeshRenderer::Start()
@@ -66,24 +65,6 @@ void CMeshRenderer::InstancingRender(D3D12_VERTEX_BUFFER_VIEW ibv, UINT instanci
 	}
 }
 
-void CMeshRenderer::SetCBVIndex()
-{
-	if (mCbvIdx < 0) {
-		mCbvIdx = INSTANCE(CObjectPoolManager).GetTopCBVIndex();
-		mCbvOffset = ALIGNED_SIZE(sizeof(CBObjectData)) * mCbvIdx;
-	}
-}
-
-void CMeshRenderer::ReturnCBVIndex()
-{
-	if (mCbvIdx < 0) {
-		return;
-	}
-	INSTANCE(CObjectPoolManager).ReturnCBVIndex(mCbvIdx);
-	mCbvIdx = -1;
-	mCbvOffset = 0;
-}
-
 void CMeshRenderer::SetMesh(const std::shared_ptr<CMesh>& mesh)
 { 
 	m_mesh = mesh;
@@ -96,12 +77,3 @@ void CMeshRenderer::SetMesh(const std::string& name)
 	if (m_mesh) mWorldBS = m_mesh->oobs;
 }
 
-void CMeshRenderer::AddMaterial(const std::shared_ptr<CMaterial>& material)
-{
-	m_materials.push_back(material);
-}
-
-void CMeshRenderer::AddMaterial(const std::string& name)
-{
-	m_materials.push_back(INSTANCE(CResourceManager).Get<CMaterial>(name));
-}
