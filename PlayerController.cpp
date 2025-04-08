@@ -81,7 +81,7 @@ void CPlayerController::OnKeyEvents()
 	}
 
 	if (dir != 0) {
-		INSTANCE(ServerManager).send_cs_move_packet(dir);
+		//INSTANCE(ServerManager).send_cs_move_packet(dir);
 	}
 
 	Vec3 acccel = Vec3::Zero;

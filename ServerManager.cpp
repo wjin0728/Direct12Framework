@@ -25,12 +25,13 @@ void ServerManager::Client_Login()
 
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 
-	connect(server_soket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	err = connect(server_soket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	if (0 != err) {
+		print_error("connect", WSAGetLastError());
+	}
 
 	WSAOVERLAPPED wsaover;
 	ZeroMemory(&wsaover, sizeof(wsaover));
-
-
 
 	CS_LOGIN_PACKET p;
 	p.size = sizeof(p);
@@ -130,15 +131,18 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		cout << "로그인 실패!!!!" << endl;
 		break;
 	}
-	/*case SC_BREAK_ROCK: {
-		// SC_BREAK_ROCK_PACKET* packet = reinterpret_cast<SC_BREAK_ROCK_PACKET*>(packet_ptr);
+	case SC_MOVE_OBJECT: {
+		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
 
-		object_lock.lock();
-		auto obj = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithTag(L"Obstacle");
-		INSTANCE(CSceneManager).GetCurScene()->RemoveObject(obj);
-		object_lock.unlock();
+		cout << "SC_MOVE_PACKET" << endl;
+		//auto obj = SCENE.GetCurScene()->FindObjectWithID(packet->id);
+		//if (obj) {
+		//	obj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		//	// obj->GetTransform()->SetLocalRotation({ packet->rot_x, packet->rot_y, packet->rot_z });
+		//}
+
 		break;
-	}*/
+	}
 	default:
 		break;
 	}
@@ -146,7 +150,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 void ServerManager::Send_Packet(void* packet)
 {
-	cout << "Send_Packet" << endl;
 	OVER_PLUS* sdata = new OVER_PLUS{ reinterpret_cast<char*>(packet) };
 	int sed = WSASend(server_soket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, send_callback);
 	if (0 != sed) {
@@ -158,6 +161,7 @@ void ServerManager::Send_Packet(void* packet)
 }
 void CALLBACK ServerManager::send_callback(DWORD err, DWORD sent_size, LPWSAOVERLAPPED pwsaover, DWORD sendflag)
 {
+	cout << "Send_Packet" << endl;
 	OVER_PLUS* over = reinterpret_cast<OVER_PLUS*>(pwsaover);
 	delete over;
 }
