@@ -5,13 +5,14 @@
 #include "SkinnedMesh.h"
 #include "Timer.h"
 #include "SkinnedMeshRenderer.h"
+#include "ObjectPoolManager.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CAnimationCurve::CAnimationCurve(int keyNum)
 {
-	mKeyTimes.resize(keyNum);
-	mKeyValues.resize(keyNum);
+	mKeyTimes.reserve(keyNum);
+	mKeyValues.reserve(keyNum);
 }
 
 CAnimationCurve::~CAnimationCurve()
@@ -197,12 +198,14 @@ void CAnimationSets::SetCallbackHandler(std::shared_ptr<CAnimationSet>& animatio
 //
 CAnimationController::CAnimationController() : CComponent(COMPONENT_TYPE::ANIMATION)
 {
+	mTracks.push_back(std::make_shared<CAnimationTrack>());
 }
 
 CAnimationController::CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion) : CComponent(COMPONENT_TYPE::ANIMATION)
 {
 	mApplyRootMotion = applyRootMotion;
 	mAnimationSets = sets;
+	mTracks.push_back(std::make_shared<CAnimationTrack>());
 }
 
 CAnimationController::~CAnimationController()
@@ -219,10 +222,23 @@ void CAnimationController::Awake()
 	for (auto& set : mAnimationSets->mAnimationSet) {
 		for (auto& layer : set->mLayers) {
 			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
-				layer->mBoneFrameCaches.push_back(owner->FindChildByName(layer->mBoneNames[i++])->GetTransform());
+				cache = owner->FindChildByName(layer->mBoneNames[i])->GetTransform();
+				++i;
 			}
 		}
 	}
+
+	owner->FindAndSetSkinnedMesh(mAnimationSets->mSkinnedMeshCache);
+
+	if (mBoneTransformIdx == -1) {
+		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
+	}
+
+	SetTrackAnimationSet(0, 0);
+	SetTrackStartEndTime(0, 0.0f, 2.5f);
+	SetTrackPosition(0, 0.55f);
+	SetTrackSpeed(0, 1.5f);
+	SetTrackWeight(0, 1.0f);
 }
 
 void CAnimationController::Start()
@@ -282,14 +298,28 @@ void CAnimationController::LateUpdate()
 			mAnimationSets->mAnimationSet[track->mAnimationSetIndex]->HandleCallback();
 	}
 
-	std::vector<Matrix> boneTransforms;
-	auto caches = mAnimationSets->mAnimationSet.front()->mLayers.front()->mBoneFrameCaches;
+	std::vector<Matrix> finalTransforms;
 
-	for (auto& cache : caches) {
-		boneTransforms.push_back(cache.lock()->GetTransform()->GetWorldMat().Transpose());
+	for (int i = 0; auto & cache : mAnimationSets->mAnimationSet.front()->mLayers.front()->mBoneFrameCaches) {
+		Matrix boneTransform = cache.lock()->GetTransform()->GetWorldMat();
+
+		Matrix bondOffset = Matrix::Identity;
+		if (i != 0) {
+			auto renderer = std::dynamic_pointer_cast<CSkinnedMeshRenderer>(mAnimationSets->mSkinnedMeshCache->GetOwner()->GetRenderer());
+			bondOffset = renderer->GetSkinnedMesh()->GetBindPoseBoneOffset(i - 1);
+		}
+
+		finalTransforms.push_back(bondOffset * boneTransform);
+		finalTransforms.back().Transpose();
+		i++;
 	}
 
-	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(0, boneTransforms.data(), sizeof(Matrix) * boneTransforms.size());
+	UINT offset = mBoneTransformIdx * ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES);
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(
+		offset,
+		finalTransforms.data(),
+		sizeof(Matrix) * finalTransforms.size()
+	);
 }
 
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
@@ -340,4 +370,13 @@ void CAnimationController::UpdateShaderVariables()
 void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)
 {
 	
+}
+
+void CAnimationController::PrepareSkinning()
+{
+
+}
+
+void CAnimationController::UploadBoneOffsets()
+{
 }

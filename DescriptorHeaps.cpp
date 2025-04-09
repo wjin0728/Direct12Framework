@@ -87,8 +87,8 @@ void CDescriptorHeaps::SetSRVDescriptorHeap()
 {
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get() };
 	CMDLIST->SetDescriptorHeaps(1, descriptorHeaps);
-	CMDLIST->SetGraphicsRootDescriptorTable(6, srvStartHandle.gpuHandle);
-	CMDLIST->SetGraphicsRootDescriptorTable(7, cubeMapStartHandle.gpuHandle);
+	CMDLIST->SetGraphicsRootDescriptorTable(5, srvStartHandle.gpuHandle);
+	CMDLIST->SetGraphicsRootDescriptorTable(6, cubeMapStartHandle.gpuHandle);
 }
 
 CD3DX12_CPU_DESCRIPTOR_HANDLE CDescriptorHeaps::GetDSVHandle(DS_TYPE type) const

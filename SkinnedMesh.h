@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "UploadBuffer.h"
 
-#define SKINNED_ANIMATION_BONES		128
+#define SKINNED_ANIMATION_BONES		300
 #define BONES_PER_VERTEX			4
 
 struct SkinnedVertex
@@ -43,4 +43,5 @@ public:
 
 public:
 	UINT GetBoneNum() const { return mBoneNum; }
+	Matrix GetBindPoseBoneOffset(UINT idx) const { return mBindPoseBoneOffsets[idx]; }
 };

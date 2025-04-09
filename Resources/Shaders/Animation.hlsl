@@ -3,18 +3,17 @@
 
 #define MAX_VERTEX_INFLUENCES 4
 
-void ApplyBoneTransform(float3 position, float3 normal, float3 tangent, uint4 boneIndices, float4 boneWeights,
-                        out float3 outPosition, out float3 outNormal, out float3 outTangent)
+void ApplyBoneTransform(float4 position, float3 normal, float3 tangent, uint4 boneIndices, float4 boneWeights,
+                        out float4 outPosition, out float3 outNormal, out float3 outTangent)
 {
-    outPosition = float3(0.0f, 0.0f, 0.0f);
+    outPosition = float4(0.0f, 0.0f, 0.0f, 0.0f);
     outNormal = float3(0.0f, 0.0f, 0.0f);
     outTangent = float3(0.0f, 0.0f, 0.0f);
 
     for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
     {
-        // 뼈대 오프셋과 변환 행렬을 결합
-        matrix vertexToBoneWorld = mul(boneOffsets[boneIndices[i]], boneTransforms[boneIndices[i]]);
-        outPosition += boneWeights[i] * mul(float4(position, 1.0f), vertexToBoneWorld).xyz;
+        matrix vertexToBoneWorld = boneTransforms[boneIndices[i]];
+        outPosition += boneWeights[i] * mul(position, vertexToBoneWorld);
         outNormal += boneWeights[i] * mul(normal, (float3x3)vertexToBoneWorld);
         outTangent += boneWeights[i] * mul(tangent, (float3x3)vertexToBoneWorld);
     }
@@ -64,14 +63,19 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
     
+    float4 positionW;
+    float3 normalW, tangentW;
+
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
     
-    output.positionWS = positionInputs.positionWS;
+    ApplyBoneTransform(positionInputs.positionWS, normalInputs.normalWS, normalInputs.tangentWS, input.boneIndices, input.boneWeights, positionW, normalW, tangentW);
+
+    output.positionWS = positionW;
     output.position = positionInputs.positionCS;
     
-    output.normalWS = normalInputs.normalWS;
-    output.tangentWS = normalInputs.tangentWS;
+    output.normalWS = normalW;
+    output.tangentWS = tangentW;
     output.bitangentWS = normalInputs.bitangentWS;
     
     output.ShadowPosH = mul(output.positionWS, shadowTransform);

@@ -79,6 +79,7 @@ public:
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
 	std::shared_ptr<CRenderer> GetRenderer() { return mRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
+	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::string& GetName() const { return mName; }
@@ -126,7 +127,8 @@ public:
 	void ResetForAnimationBlending();
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
 
-	void SetAnimationLayerCache(std::shared_ptr<CGameObject> root);
+	void FindAndSetSkinnedMesh(std::shared_ptr<CTransform>& cache);
+	void PrepareSkinning();
 };
 
 

@@ -118,7 +118,7 @@ public:
 
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
     std::vector<std::string> mBoneNames{};
-    std::vector<std::shared_ptr<CTransform>> mBoneFrameCaches{};
+    std::shared_ptr<CTransform> mSkinnedMeshCache{};
 
 public:
     void SetCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr<CCallbackHandler>& callbackHandler);
@@ -167,6 +167,8 @@ public:
     std::vector<std::shared_ptr<CAnimationTrack>> mTracks;
     std::shared_ptr<CAnimationSets> mAnimationSets;
 
+    UINT mBoneTransformIdx = -1;
+
     void SetTrackAnimationSet(int trackIndex, int setIndex);
     void SetTrackEnabled(int trackIndex, bool enabled);
     void SetTrackPosition(int trackIndex, float position);
@@ -187,4 +189,6 @@ public:
 
     void AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject);
     void UpdateShaderVariables();
+    void PrepareSkinning();
+    void UploadBoneOffsets();
 };
