@@ -52,9 +52,7 @@ void CFollowTarget::Update()
 		INSTANCE(ServerManager).send_cs_move_packet(dir, transform->GetLocalLook());
 	}
 
-
 	// targetTrans->SetLocalPosition(targetTrans->GetLocalPosition() + acccel * DELTA_TIME);
-
 
 	Vec2 mouseDelta = INPUT.GetMouseDelta();
 	if (mouseDelta != Vec2::Zero) {

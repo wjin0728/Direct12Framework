@@ -21,6 +21,5 @@ public:
 
 public:
 	void SetTarget(const std::shared_ptr<CGameObject>& target) { mTarget = target; }
-
 };
 

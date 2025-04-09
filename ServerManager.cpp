@@ -1,8 +1,11 @@
+
 #include "stdafx.h"
 #include "ServerManager.h"
 #include "SceneManager.h"
 #include "Scene.h"
 #include "GameObject.h"
+#include "FollowTarget.h"
+#include "Transform.h"
 
 void ServerManager::Client_Login()
 {
@@ -123,7 +126,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		my_info.SetID(packet->id);
 
-		players[packet->id].SetID(packet->id);
+		// 플레이어 생성해야 함
+		// mplayers 에도 넣고 옵젝리스트에도 넣어야 함
+		// INSTANCE(CSceneManager).GetCurScene()->SetPlayer(packet->id, 0, 0, 0);
 
 		break;
 	}
@@ -135,11 +140,20 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
 
 		cout << "SC_MOVE_PACKET" << endl;
-		//auto obj = SCENE.GetCurScene()->FindObjectWithID(packet->id);
+		
+		//INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id);
+
 		//if (obj) {
 		//	obj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		//	// obj->GetTransform()->SetLocalRotation({ packet->rot_x, packet->rot_y, packet->rot_z });
 		//}
+
+		INSTANCE(CSceneManager).GetCurScene()->FindObjectWithTag("Player")->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+
+		// 여러명을 그려야하고
+		// servermanager에서 player의 정보를 알아야 됨
+		// 그 player를 기반으로 그림이 그려져야 할 듯
+		// or object를 player id로 찾을 수 있으면 best
 
 		break;
 	}
