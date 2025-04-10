@@ -127,46 +127,24 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 {
 	float pos = UpdatePosition(position, start, end);
 
-	int i = 0, j = 0;
 	for (int i = 0;  auto & layer : mLayers) {
 		for (int j = 0; auto & boneFrame : layer->mBoneFrameCaches) {
-			std::shared_ptr<CTransform> transform = boneFrame.lock();
+			auto transform = boneFrame.lock();
 
 			mScales[i][j] = transform->GetLocalScale();
 			mRotations[i][j] = transform->GetLocalEulerAngles();
 			mTranslations[i][j] = transform->GetLocalPosition();
 
 			layer->GetSRT(layer->mAnimationCurves[j], pos, mScales[i][j], mRotations[i][j], mTranslations[i][j]);
-			++j;
-		}
-		++i;
-	}
 
-	// 애니메이션 레이어들을 블렌딩한다.
-	for (int i = 0;  auto & layer : mLayers) {
-		for (int j = 0;  auto & boneFrame : layer->mBoneFrameCaches) {
-			std::shared_ptr<CTransform> transform = boneFrame.lock();
+			//if (mName == "Necromancer@Walk" && j == 30) {
+			//	std::cout << mScales[i][j].x << " " << mScales[i][j].y << " " << mScales[i][j].z << std::endl;
+			//	std::cout << mRotations[i][j].x << " " << mRotations[i][j].y << " " << mRotations[i][j].z << std::endl;
+			//	std::cout << mTranslations[i][j].x << " " << mTranslations[i][j].y << " " << mTranslations[i][j].z << std::endl;
+			//	std::cout << "======================" << std::endl;
+			//}
 
-			switch (layer->mBlendMode) {
-			case ANIMATION_BLEND_TYPE::ADDITIVE: {
-				transform->GetScaleLayerBlending() += mScales[i][j];
-				transform->GetRotationLayerBlending() += mRotations[i][j];
-				transform->GetPositionLayerBlending() += mTranslations[i][j];
-				break;
-			}
-			case ANIMATION_BLEND_TYPE::OVERRIDE: {
-				transform->GetScaleLayerBlending() = mScales[i][j];
-				transform->GetRotationLayerBlending() = mRotations[i][j];
-				transform->GetPositionLayerBlending() = mTranslations[i][j];
-				break;
-			}
-			case ANIMATION_BLEND_TYPE::OVERRIDE_PASSTHROUGH: {
-				transform->GetScaleLayerBlending() += mScales[i][j] * layer->mWeight;
-				transform->GetRotationLayerBlending() += mRotations[i][j] * layer->mWeight;
-				transform->GetPositionLayerBlending() += mTranslations[i][j] * layer->mWeight;
-				break;
-			}
-			}
+			transform->BlendingTransform(layer->mBlendMode, mScales[i][j], mRotations[i][j], mTranslations[i][j], layer->mWeight);
 			++j;
 		}
 		++i;
@@ -257,7 +235,7 @@ void CAnimationController::LateUpdate()
 	for (auto& track : mTracks) {
 		if (track->mEnabled) {
 			nEnabledAnimationTracks++;
-			std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
+			auto animationSet = mAnimationSets->mAnimationSet[track->mIndex];
 			animationSet->Animate(DELTA_TIME * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
 		}
 	}
@@ -266,7 +244,7 @@ void CAnimationController::LateUpdate()
 	if (nEnabledAnimationTracks == 1) {
 		for (auto& track : mTracks) {
 			if (track->mEnabled) {
-				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
+				auto animationSet = mAnimationSets->mAnimationSet[track->mIndex];
 
 				for (auto& layer : animationSet->mLayers) {
 					for (auto& cache : layer->mBoneFrameCaches) {
@@ -279,7 +257,7 @@ void CAnimationController::LateUpdate()
 	else {
 		for (auto& track : mTracks) {
 			if (track->mEnabled) {
-				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
+				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mIndex];
 
 				for (auto& layer : animationSet->mLayers) {
 					for (auto& cache : layer->mBoneFrameCaches) {
@@ -291,17 +269,17 @@ void CAnimationController::LateUpdate()
 	}
 	//*/
 
-	owner->UpdateTransform(nullptr);
+	owner->GetChildren().front()->GetTransform()->UpdateWorldMatrix();
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
-			mAnimationSets->mAnimationSet[track->mAnimationSetIndex]->HandleCallback();
+			mAnimationSets->mAnimationSet[track->mIndex]->HandleCallback();
 	}
 
 	std::vector<Matrix> finalTransforms;
 
 	for (int i = 0; auto & cache : mAnimationSets->mAnimationSet.front()->mLayers.front()->mBoneFrameCaches) {
-		Matrix boneTransform = cache.lock()->GetTransform()->GetWorldMat();
+		Matrix boneTransform = cache.lock()->GetWorldMat();
 
 		Matrix bondOffset = Matrix::Identity;
 		if (i != 0) {
@@ -311,6 +289,12 @@ void CAnimationController::LateUpdate()
 
 		finalTransforms.push_back(bondOffset * boneTransform);
 		finalTransforms.back().Transpose();
+
+		if (cache.lock()->GetOwner()->GetName() == "Armature") {
+			PrintMatrix(boneTransform);
+			std::cout << "======================" << std::endl;
+		}
+
 		i++;
 	}
 
@@ -340,7 +324,7 @@ void CAnimationController::SetTrackEnabled(int trackIndex, bool enabled)
 void CAnimationController::SetTrackPosition(int trackIndex, float position)
 {
 	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetPosition(position);
-	if (mAnimationSets->mAnimationSet.size()) mAnimationSets->mAnimationSet[mTracks[trackIndex]->mAnimationSetIndex]->SetPosition(position);
+	if (mAnimationSets->mAnimationSet.size()) mAnimationSets->mAnimationSet[mTracks[trackIndex]->mIndex]->SetPosition(position);
 }
 
 void CAnimationController::SetTrackSpeed(int trackIndex, float speed)

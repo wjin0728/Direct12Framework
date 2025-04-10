@@ -16,7 +16,7 @@
 
 //#define FOG
 
-#define SKINNED_ANIMATION_BONES 128
+#define SKINNED_ANIMATION_BONES 300
 
 static const float a0 = 1.f;
 static const float a1 = 0.01f;

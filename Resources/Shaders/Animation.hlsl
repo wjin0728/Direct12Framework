@@ -3,22 +3,6 @@
 
 #define MAX_VERTEX_INFLUENCES 4
 
-void ApplyBoneTransform(float4 position, float3 normal, float3 tangent, uint4 boneIndices, float4 boneWeights,
-                        out float4 outPosition, out float3 outNormal, out float3 outTangent)
-{
-    outPosition = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    outNormal = float3(0.0f, 0.0f, 0.0f);
-    outTangent = float3(0.0f, 0.0f, 0.0f);
-
-    for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
-    {
-        matrix vertexToBoneWorld = boneTransforms[boneIndices[i]];
-        outPosition += boneWeights[i] * mul(position, vertexToBoneWorld);
-        outNormal += boneWeights[i] * mul(normal, (float3x3)vertexToBoneWorld);
-        outTangent += boneWeights[i] * mul(tangent, (float3x3)vertexToBoneWorld);
-    }
-}
-
 cbuffer MaterialData : register(b5)
 {
     float3 ForwardColor;
@@ -61,25 +45,43 @@ struct VS_OUTPUT
 //Á¤Á¡ ¼ÎÀÌ´õ
 VS_OUTPUT VS_Forward(VS_INPUT input)
 {
-    VS_OUTPUT output = (VS_OUTPUT) 0;
+    VS_OUTPUT output = (VS_OUTPUT)0;
     
-    float4 positionW;
-    float3 normalW, tangentW;
+    float3 skinnedPosition = float3(0.0, 0.0, 0.0);
+    float3 skinnedNormal = float3(0.0, 0.0, 0.0);
+    float3 skinnedTangent = float3(0.0, 0.0, 0.0);
+    
+    float weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    weights[0] = input.boneWeights.x;
+    weights[1] = input.boneWeights.y;
+    weights[2] = input.boneWeights.z;
+    weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
 
+    for (int i = 0; i < MAX_VERTEX_INFLUENCES; ++i)
+    {
+        if (weights[i] > 0.0) 
+        {
+            uint boneIndex = input.boneIndices[i];
+            matrix boneTransform = boneTransforms[boneIndex];
+            
+            skinnedPosition += weights[i] * mul(float4(input.position, 1.0), boneTransform).xyz;
+            skinnedNormal += weights[i] * mul(input.normal, (float3x3)boneTransform);
+            skinnedTangent += weights[i] * mul(input.tangent, (float3x3)boneTransform);
+        }
+    }
+    
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
     
-    ApplyBoneTransform(positionInputs.positionWS, normalInputs.normalWS, normalInputs.tangentWS, input.boneIndices, input.boneWeights, positionW, normalW, tangentW);
-
-    output.positionWS = positionW;
+    output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
     
-    output.normalWS = normalW;
-    output.tangentWS = tangentW;
+    output.normalWS = normalInputs.normalWS;
+    output.tangentWS = normalInputs.tangentWS;
     output.bitangentWS = normalInputs.bitangentWS;
     
     output.ShadowPosH = mul(output.positionWS, shadowTransform);
-    
+
     output.uv = input.uv;
     
     return output;
@@ -154,6 +156,8 @@ struct VS_SHADOW_INPUT
 {
     float3 position : POSITION;
     float3 normal : NORMAL;
+    float4 boneWeights : BONEWEIGHTS;
+    uint4 boneIndices : BONEINDICES;
 };
 
 struct VS_SHADOW_OUTPUT
@@ -165,6 +169,18 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
 {
     VS_SHADOW_OUTPUT output = (VS_SHADOW_OUTPUT) 0;
     
+    float3 skinnedPosition = float3(0.0, 0.0, 0.0);
+    for (int i = 0; i < MAX_VERTEX_INFLUENCES; ++i)
+    {
+        if (input.boneWeights[i] > 0.0)
+        {
+            uint boneIndex = input.boneIndices[i];
+            matrix boneTransform = boneTransforms[boneIndex];
+            float3 localPosition = mul(float4(input.position, 1.0), boneTransform).xyz;
+            skinnedPosition += localPosition * input.boneWeights[i];
+        }
+    }
+
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
     
     output.position = positionInputs.positionCS;
@@ -193,6 +209,28 @@ VS_OUTPUT VS_GPass(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
     
+    float3 skinnedPosition = float3(0.0, 0.0, 0.0);
+    float3 skinnedNormal = float3(0.0, 0.0, 0.0);
+    float3 skinnedTangent = float3(0.0, 0.0, 0.0);
+    
+    for (int i = 0; i < MAX_VERTEX_INFLUENCES; ++i)
+    {
+        if (input.boneWeights[i] > 0.0)
+        {
+            uint boneIndex = input.boneIndices[i];
+            matrix boneTransform = boneTransforms[boneIndex];
+            
+            float3 localPosition = mul(float4(input.position, 1.0), boneTransform).xyz;
+            skinnedPosition += localPosition * input.boneWeights[i];
+            
+            float3 localNormal = mul(input.normal, (float3x3)boneTransform);
+            skinnedNormal += localNormal * input.boneWeights[i];
+            
+            float3 localTangent = mul(input.tangent, (float3x3)boneTransform);
+            skinnedTangent += localTangent * input.boneWeights[i];
+        }
+    }
+
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
     

@@ -551,6 +551,16 @@ void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 	ReadDateFromFile(inFile, mTransform->mLocalRotation);
 
 	ReadDateFromFile(inFile, mTransform->mLocalMat);
+
+	//if (mName == "Armature") {
+	//	std::cout << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
+	//	std::cout << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
+	//	std::cout << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
+	//	std::cout << mTransform->mLocalRotation.x << " " << mTransform->mLocalRotation.y << " " << mTransform->mLocalRotation.z << std::endl;
+	//	std::cout << std::endl;
+	//	PrintMatrix(mTransform->mLocalMat);
+	//	std::cout << "======================" << std::endl;
+	//}
 }
 
 void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
@@ -627,23 +637,6 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 	terrain->SetMaterial(material);
 
 	INSTANCE(CSceneManager).GetCurScene()->SetTerrain(terrain);
-}
-
-
-void CGameObject::UpdateTransform(const Matrix* parent)
-{
-	if (parent) {
-		mTransform->mWorldMat = mTransform->mLocalMat * (*parent);
-	}
-	else {
-		mTransform->mWorldMat = mTransform->mLocalMat;
-	}
-
-	// 필요하다면 여기서 콜라이더나 바운딩볼 갱신
-
-	for (auto& child : mChildren) {
-		child->UpdateTransform(&mTransform->mWorldMat);
-	}
 }
 
 void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches)

@@ -123,7 +123,6 @@ private:
 public:
 	std::shared_ptr<CAnimationController> mAnimationController{};
 
-	void UpdateTransform(const Matrix* parent = nullptr);
 	void ResetForAnimationBlending();
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
 

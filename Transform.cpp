@@ -285,4 +285,40 @@ void CTransform::ApplyBlendedTransform()
 	mLocalScale = mScaleLayerBlending;
 	mLocalEulerAngle = mRotationLayerBlending;
 	mLocalPosition = mPositionLayerBlending;
+	mDirtyFlag = true;
+}
+
+void CTransform::BlendingTransform(const ANIMATION_BLEND_TYPE blendType, const Vec3& scale, const Vec3& rotation, const Vec3& position, float weight)
+{
+	switch (blendType) {
+	case ANIMATION_BLEND_TYPE::ADDITIVE: {
+		mScaleLayerBlending += scale;
+		mRotationLayerBlending += rotation;
+		mPositionLayerBlending += position;
+		break;
+	}
+	case ANIMATION_BLEND_TYPE::OVERRIDE: {
+		mScaleLayerBlending = scale;
+		mRotationLayerBlending = rotation;
+		mPositionLayerBlending = position;
+		break;
+	}
+	case ANIMATION_BLEND_TYPE::OVERRIDE_PASSTHROUGH: {
+		mScaleLayerBlending += scale * weight;
+		mRotationLayerBlending += rotation * weight;
+		mPositionLayerBlending += position * weight;
+		break;
+	}
+	}
+}
+
+void CTransform::PrintSRT()
+{
+	std::cout << mLocalScale.x << " " << mLocalScale.y << " " << mLocalScale.z << std::endl;
+	std::cout << mLocalEulerAngle.x << " " << mLocalEulerAngle.y << " " << mLocalEulerAngle.z << std::endl;
+	std::cout << mLocalPosition.x << " " << mLocalPosition.y << " " << mLocalPosition.z << std::endl;
+	std::cout << mLocalRotation.x << " " << mLocalRotation.y << " " << mLocalRotation.z << " " << mLocalRotation.w << std::endl;
+	std::cout << std::endl;
+	PrintMatrix(mLocalMat);
+	std::cout << "======================" << std::endl;
 }

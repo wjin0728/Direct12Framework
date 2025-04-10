@@ -136,13 +136,13 @@ public:
     float mPosition = 0.0f;
     float mWeight = 1.0f;
 
-    int mAnimationSetIndex = 0;
+    int mIndex = 0;
 
     float mStartTime = 0.0f;
     float mEndTime = 0.0f;
     float mLength = 0.0f;
 
-    void SetAnimationSet(int index) { mAnimationSetIndex = index; }
+    void SetAnimationSet(int index) { mIndex = index; }
 
     void SetEnable(bool enable) { mEnabled = enable; }
     void SetSpeed(float s) { mSpeed = s; }
