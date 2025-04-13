@@ -6,7 +6,7 @@
 #include"ResourceManager.h"
 #include"GameObject.h"
 #include"MeshRenderer.h"
-#include"FollowTarget.h"
+#include"ThirdPersonCamera.h"
 #include"Transform.h"
 #include"RigidBody.h"
 #include"Collider.h"
@@ -25,14 +25,15 @@ void CBattleScene::Initialize()
 {
 	LoadSceneFromFile(SCENE_PATH(std::string("Lobby")));
 
+
+
 #pragma region Player
 
 	auto Player = FindObjectWithTag("Player");
 	Player->SetStatic(false);
-	Player->GetTransform()->SetLocalRotationX(95.7f);
 
 	Player->AddComponent<CRigidBody>();
-	//Player->AddComponent<CPlayerController>();
+	auto playerController = Player->AddComponent<CPlayerController>();
 
 #pragma endregion
 
@@ -42,13 +43,12 @@ void CBattleScene::Initialize()
 		auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
 			1.f, 100.f);
 		cameraObj->SetStatic(false);
-		cameraObj->GetTransform()->SetLocalPosition({ 0.f, 30.f, -10.f });
-		cameraObj->GetTransform()->Rotate({ 15.f,0.f,0.f });
 
-		auto playerFollower = cameraObj->AddComponent<CFollowTarget>();
+		auto playerFollower = cameraObj->AddComponent<CThirdPersonCamera>();
 		playerFollower->SetTarget(Player);
 
 		AddObject(cameraObj);
+		playerController->SetCamera(cameraObj->GetComponent<CCamera>());
 
 		auto uiCamera = CGameObject::CreateCameraObject("UICamera", INSTANCE(CDX12Manager).GetRenderTargetSize(), 0.f, 100.f, INSTANCE(CDX12Manager).GetRenderTargetSize());
 	}
@@ -67,7 +67,11 @@ void CBattleScene::Update()
 		::PostQuitMessage(0);
 		return;
 	}
+	else if (INPUT.IsKeyDown(KEY_TYPE::ALT)) {
+		INPUT.ChangeMouseState();
+	}
 	CScene::Update();
+
 }
 
 void CBattleScene::LateUpdate()
@@ -101,6 +105,7 @@ void CBattleScene::LateUpdate()
 
 	Vec3 dir = dirLight->direction;
 	dir.Normalize();
+	transform->SetLocalPosition(center - (r * dir));
 	transform->LookTo(dir);
 	camera->GenerateViewMatrix();
 
@@ -119,18 +124,10 @@ void CBattleScene::SetLights()
 	dirLight = std::make_shared<CDirectionalLight>(lightColor, strength, dir);
 	lightMgr->AddDirectionalLight(dirLight);
 
-	dirLightObj = std::make_shared<CGameObject>();
-	dirLightObj->SetTag("DirectinalLight");
-	auto camera = std::make_shared<CCamera>();
-	dirLightObj->AddComponent(camera);
-
-	Vec2 shadowMapSize = { 4096.f * 3, 4096.f * 3 };
-	camera->SetViewport(0, 0, shadowMapSize.x, shadowMapSize.y);
-	camera->SetScissorRect(0, 0, shadowMapSize.x, shadowMapSize.y);
-
 	auto& mainCam = mCameras["MainCamera"];
 	Vec3 corners[8]{};
 	mainCam->mFrustumView.GetCorners(corners);
+
 
 	Vec3 center{};
 	for (int i = 0; i < 8; ++i) {
@@ -143,15 +140,13 @@ void CBattleScene::SetLights()
 	}
 	float r = max;
 	
-	camera->GenerateOrthographicProjectionMatrix(1.f, r*2.f, r * 2.f, r * 2.f);
+	Vec2 shadowMapSize = { 4096.f * 3, 4096.f * 3 };
+	float size = r * 2.f;
 
-	AddCamera(camera);
-
+	dirLightObj = CGameObject::CreateCameraObject("DirectinalLight", shadowMapSize, 1.f, size, { size, size });
 	auto transform = dirLightObj->GetTransform();
 
 	dir.Normalize();
 	transform->SetLocalPosition(center - (r*dir));
 	transform->LookTo(dir);
-
-	mObjects.push_back(dirLightObj);
 }

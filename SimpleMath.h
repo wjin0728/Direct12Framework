@@ -29,6 +29,8 @@
 #endif
 
 #define EPSILON					1.0e-6f
+constexpr float degToRad = 0.0174532f;
+constexpr float radToDeg = 57.2957795f;
 
 namespace DirectX
 {
@@ -339,6 +341,8 @@ namespace DirectX
         Vector3 operator/ (const Vector3& V1, const Vector3& V2) noexcept;
         Vector3 operator/ (const Vector3& V, float S) noexcept;
         Vector3 operator* (float S, const Vector3& V) noexcept;
+		Vector3 operator* (const Vector3& V, const Quaternion& Q) noexcept;
+		Vector3 operator* (const Quaternion& Q, const Vector3& V) noexcept;
 
         //------------------------------------------------------------------------------
         // 4D vector

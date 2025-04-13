@@ -70,9 +70,10 @@ public:
 	void SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalMat = false);
 
 	void SetLocalPosition(const Vec3& position) { mLocalPosition = position; mDirtyFlag = true; };
-	void SetLocalRotation(const Vec3& rotation) { mLocalRotation = Quaternion::CreateFromYawPitchRoll(rotation); 
+	void SetLocalRotation(const Vec3& rotation) { mLocalRotation = Quaternion::CreateFromYawPitchRoll(rotation * degToRad); 
 	mLocalEulerAngle = rotation; mDirtyFlag = true; };
-	void SetLocalRotation(const Quaternion & rotation) { mLocalRotation = rotation; mDirtyFlag = true; }
+	void SetLocalRotation(const Quaternion& rotation) {
+		mLocalRotation = rotation; mLocalEulerAngle = Vec3::GetAngleToQuaternion(rotation)* radToDeg; mDirtyFlag = true; }
 	void SetLocalRotationX(float angle) { SetLocalRotation({ angle, 0.f, 0.f }); }
 	void SetLocalRotationY(float angle) { SetLocalRotation({ 0.f, angle, 0.f }); }
 	void SetLocalRotationZ(float angle) { SetLocalRotation({ 0.f, 0.f, angle }); }

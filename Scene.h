@@ -28,6 +28,7 @@ protected:
 	std::unique_ptr<CLightManager> lightMgr{};
 
 	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
+	std::array<std::shared_ptr<CGameObject>, 3> mPlayers{};
 		 
 public:
 	CScene();

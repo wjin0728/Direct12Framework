@@ -143,31 +143,38 @@ void CHeightMapGridMesh::Initialize(const std::string& fileName, UINT _resoultio
 
 float CHeightMapGridMesh::GetHeight(float fx, float fz)
 {
-	fx += scale.x / 2.f;
-	fz += scale.z / 2.f;
+	float localX = fx - offset.x;
+	float localZ = fz - offset.z;
 
-	if ((fx < 0.0f) || (fz < 0.0f) || (fx >= scale.x) || (fz >= scale.z)) {
+	if (localX < 0.0f || localZ < 0.0f || localX >= scale.x || localZ >= scale.z) {
 		return 0.0f;
 	}
 
-	int x = (int)fx;
-	int z = (int)fz;
+	float xIndex = localX / (scale.x / (resolution));
+	float zIndex = localZ / (scale.z / (resolution));
+	zIndex = resolution - zIndex;
 
-	float fxPercent = fx - x;
-	float fzPercent = fz - z;
 
-	float fBottomLeft = (float)heightData[x + (z * resolution)] / USHORT_MAX * scale.y;
-	float fBottomLocalRight = (float)heightData[(x + 1) + (z * resolution)] / USHORT_MAX * scale.y;
-	float fTopLeft = (float)heightData[x + ((z + 1) * resolution)] / USHORT_MAX * scale.y;
-	float fTopRight = (float)heightData[(x + 1) + ((z + 1) * resolution)] / USHORT_MAX * scale.y;
+	int x = static_cast<int>(xIndex);
+	int z = static_cast<int>(zIndex);
 
-	if (fzPercent >= fxPercent)
-		fBottomLocalRight = fBottomLeft + (fTopRight - fTopLeft);
-	else
-		fTopLeft = fTopRight + (fBottomLeft - fBottomLocalRight);
+	float fxPercent = xIndex - x;
+	float fzPercent = zIndex - z;
+
+	float fBottomLeft = heightData[x + (z * resolution)] * scale.y;
+	float fBottomRight = heightData[(x + 1) + (z * resolution)] * scale.y;
+	float fTopLeft = heightData[x + ((z + 1) * resolution)] * scale.y;
+	float fTopRight = heightData[(x + 1) + ((z + 1) * resolution)] * scale.y;
+
+	if (fzPercent >= fxPercent) {
+		fBottomRight = fBottomLeft + (fTopRight - fTopLeft);
+	}
+	else {
+		fTopLeft = fTopRight + (fBottomLeft - fBottomRight);
+	}
 
 	float fTopHeight = SimpleMath::Flerp(fTopLeft, fTopRight, fxPercent);
-	float fBottomHeight = SimpleMath::Flerp(fBottomLeft, fBottomLocalRight, fxPercent);
+	float fBottomHeight = SimpleMath::Flerp(fBottomLeft, fBottomRight, fxPercent);
 	float fHeight = SimpleMath::Flerp(fBottomHeight, fTopHeight, fzPercent);
 
 	return fHeight;

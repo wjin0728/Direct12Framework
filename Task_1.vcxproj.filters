@@ -202,6 +202,7 @@
     <ClInclude Include="Renderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
+    <ClInclude Include="ThirdPersonCamera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -347,6 +348,9 @@
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="ThirdPersonCamera.cpp">
+      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

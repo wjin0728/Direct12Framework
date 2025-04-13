@@ -154,7 +154,7 @@ void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
 
 	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, Up);
 	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
-	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 
 	mDirtyFlag = true;
 }
@@ -162,9 +162,8 @@ void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
 void CTransform::LookAt(const Vec3& lookPos, const Vec3& up)
 {
 	Vec3 lookVec = (lookPos - mLocalPosition).GetNormalized();
-	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
-	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
-	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
+	mLocalRotation = Quaternion::LookRotation(lookVec);
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 
 	mDirtyFlag = true;
 }
@@ -172,9 +171,8 @@ void CTransform::LookAt(const Vec3& lookPos, const Vec3& up)
 void CTransform::LookAt(const CTransform& target, const Vec3& up)
 {
 	Vec3 lookVec = (target.mLocalPosition - mLocalPosition).GetNormalized();
-	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
-	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
-	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
+	mLocalRotation = Quaternion::LookRotation(lookVec);
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 
 	mDirtyFlag = true;
 }
@@ -182,7 +180,7 @@ void CTransform::LookAt(const CTransform& target, const Vec3& up)
 void CTransform::Rotate(float pitch, float yaw, float roll)
 {
 	mLocalRotation = SimpleMath::Quaternion::CreateFromYawPitchRoll(
-		XMConvertToRadians(yaw), XMConvertToRadians(pitch), XMConvertToRadians(roll)) * mLocalRotation;
+		yaw * degToRad, pitch * degToRad, roll * degToRad) * mLocalRotation;
 	mLocalEulerAngle.x += pitch; mLocalEulerAngle.y += yaw; mLocalEulerAngle.z += roll;
 
 	mDirtyFlag = true;
@@ -190,7 +188,7 @@ void CTransform::Rotate(float pitch, float yaw, float roll)
 
 void CTransform::Rotate(const Vec3& rotation)
 {
-	Vec3 angles = { XMConvertToRadians(rotation.x), XMConvertToRadians(rotation.y) ,XMConvertToRadians(rotation.z) };
+	Vec3 angles = { rotation.x * degToRad, rotation.y * degToRad ,rotation.z * degToRad };
 	mLocalRotation = Quaternion::CreateFromYawPitchRoll(angles) * mLocalRotation;
 	mLocalEulerAngle += rotation;
 
@@ -199,8 +197,8 @@ void CTransform::Rotate(const Vec3& rotation)
 
 void CTransform::Rotate(const Vec3& axis, float angle)
 {
-	mLocalRotation = Quaternion::CreateFromAxisAngle(axis, angle) * mLocalRotation;
-	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
+	mLocalRotation = Quaternion::CreateFromAxisAngle(axis, angle * degToRad) * mLocalRotation;
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 
 	mDirtyFlag = true;
 }
@@ -230,6 +228,7 @@ void CTransform::RotateAround(const Vec3& point, const Vec3& axis, float angle)
 	Quaternion rotatedQuat = rot * dirQuat * rot.Inverse();
 	Vec3 rotatedDir(rotatedQuat.x, rotatedQuat.y, rotatedQuat.z);
 	mLocalPosition = point + rotatedDir;
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 	mDirtyFlag = true;
 }
 

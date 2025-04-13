@@ -12,6 +12,9 @@ enum class KEY_TYPE
 	SHIFT = VK_SHIFT,
 	CTRL = VK_CONTROL,
 	ESCAPE = VK_ESCAPE,
+	SPACE = VK_SPACE,
+	ENTER = VK_RETURN,
+	ALT = VK_MENU,
 
 	LBUTTON = VK_LBUTTON,
 	RBUTTON = VK_RBUTTON,
@@ -63,6 +66,7 @@ public:
 	bool IsKeyUp(KEY_TYPE key) { return GetState(key) == KEY_STATE::UP; }
 
 	void FixMousePosition(bool fix);
+	void ChangeMouseState();
 	Vec2 GetMouseDelta() const { return mMouseDelta; }
 
 private:

@@ -28,9 +28,13 @@ void CRigidBody::Update()
 		mVelocity = Vec3::ClampLength(mVelocity, 0.f, mMaxVelocity);
 	}
 
-	GetTransform()->Move(mVelocity, DELTA_TIME);
+	if (mVelocity != Vec3::Zero) {
+		GetTransform()->Move(mVelocity, DELTA_TIME);
+	}
+
 	Decelerate();
 }
+
 
 void CRigidBody::LateUpdate()
 {
@@ -38,20 +42,27 @@ void CRigidBody::LateUpdate()
 
 void CRigidBody::Decelerate()
 {
-	if (!mUseFriction) {
-		return;
-	}
+    if (!mUseFriction) {
+        return;
+    }
 
-	Vec3 decelerateDir = -mVelocity.GetNormalized();
-	float deceleration = mFriction * DELTA_TIME;
+    float velocityLength = mVelocity.Length();
+    if (velocityLength < 0.01f) {
+        mVelocity = Vec3::Zero;
+        mUseFriction = false;
+        return;
+    }
 
-	if (deceleration > mVelocity.Length()) {
-		deceleration = mVelocity.Length();
-	}
-
-	mVelocity += decelerateDir * deceleration;
-	if (mVelocity.Length() < 0.01f) {
-		mVelocity = Vec3::Zero;
-		mUseFriction = false;
-	}
+    Vec3 decelerateDir = -mVelocity / velocityLength;
+    float deceleration = mFriction * DELTA_TIME;
+    if (deceleration > velocityLength) {
+        deceleration = velocityLength;
+    }
+    mVelocity += decelerateDir * deceleration;
 }
+
+void CRigidBody::SetUseFriction(bool use)
+{
+	mUseFriction = use;
+}
+
