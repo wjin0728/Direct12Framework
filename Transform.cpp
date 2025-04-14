@@ -262,7 +262,9 @@ void CTransform::UpdateLocalMatrix()
 
 void CTransform::UpdateWorldMatrix()
 {
-	auto parent = mParent.lock();
+	std::shared_ptr<CTransform> parent{};
+	if (owner->GetName() != "Armature")
+		parent = mParent.lock();
 
 	if (!mDirtyFlag && !parent) {
 		return;
@@ -282,10 +284,9 @@ void CTransform::UpdateWorldMatrix()
 
 void CTransform::ApplyBlendedTransform()
 {
-	mLocalScale = mScaleLayerBlending;
-	mLocalEulerAngle = mRotationLayerBlending;
-	mLocalPosition = mPositionLayerBlending;
-	mDirtyFlag = true;
+	SetLocalScale(mScaleLayerBlending);
+	SetLocalRotation(mRotationLayerBlending);
+	SetLocalPosition(mPositionLayerBlending);
 }
 
 void CTransform::BlendingTransform(const ANIMATION_BLEND_TYPE blendType, const Vec3& scale, const Vec3& rotation, const Vec3& position, float weight)

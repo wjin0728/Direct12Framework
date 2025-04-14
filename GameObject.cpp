@@ -552,7 +552,7 @@ void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 
 	ReadDateFromFile(inFile, mTransform->mLocalMat);
 
-	//if (mName == "Armature") {
+	//if (mName == "Premade_Necromancer") {
 	//	std::cout << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
 	//	std::cout << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
 	//	std::cout << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
@@ -660,7 +660,7 @@ void CGameObject::ResetForAnimationBlending()
 }
 
 
-void CGameObject::FindAndSetSkinnedMesh(std::shared_ptr<CTransform>& cache)
+void CGameObject::FindAndSetSkinnedMesh(std::weak_ptr<CTransform>& cache)
 {
 	if (mRenderer && std::dynamic_pointer_cast<CSkinnedMeshRenderer>(mRenderer)) {
 		cache = mTransform;
@@ -669,7 +669,7 @@ void CGameObject::FindAndSetSkinnedMesh(std::shared_ptr<CTransform>& cache)
 
 	for (auto& child : mChildren) {
 		child->FindAndSetSkinnedMesh(cache);
-		if (cache) return;
+		if (cache.lock()) return;
 	}
 }
 
@@ -678,7 +678,28 @@ void CGameObject::PrepareSkinning()
 	mAnimationController->PrepareSkinning();
 }
 
+void CGameObject::UpdateWorldMatrices()
+{
+	GetTransform()->UpdateWorldMatrix();
 
+	for (auto& child : GetChildren()) {
+		child->UpdateWorldMatrices();
+	}
+}
+
+void CGameObject::PrintSRT()
+{
+	std::cout << "S     : " << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
+	std::cout << "Euler : " << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
+	std::cout << "T     : " << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
+	std::cout << "Quat  : " << mTransform->mLocalRotation.x << " " << mTransform->mLocalRotation.y << " " << mTransform->mLocalRotation.z << " " << mTransform->mLocalRotation.w << std::endl;
+	std::cout << std::endl;
+	std::cout << "로컬 변환 행렬" << std::endl;
+	PrintMatrix(mTransform->mLocalMat);
+	std::cout << std::endl;
+	std::cout << "월드 변환 행렬" << std::endl;
+	PrintMatrix(mTransform->mWorldMat);
+}
 
 std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::string& name)
 {
@@ -713,5 +734,4 @@ void CGameObject::RemoveChild(std::shared_ptr<CGameObject> child)
 		mChildren.erase(itr);
 	}
 }
-
 

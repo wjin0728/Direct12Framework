@@ -76,5 +76,4 @@ void PrintMatrix(const Matrix& mat)
 	std::cout << mat._21 << " " << mat._22 << " " << mat._23 << " " << mat._24 << std::endl;
 	std::cout << mat._31 << " " << mat._32 << " " << mat._33 << " " << mat._34 << std::endl;
 	std::cout << mat._41 << " " << mat._42 << " " << mat._43 << " " << mat._44 << std::endl;
-	std::cout << std::endl;
 }

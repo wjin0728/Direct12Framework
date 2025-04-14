@@ -126,8 +126,11 @@ public:
 	void ResetForAnimationBlending();
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
 
-	void FindAndSetSkinnedMesh(std::shared_ptr<CTransform>& cache);
+	void FindAndSetSkinnedMesh(std::weak_ptr<CTransform>& cache);
 	void PrepareSkinning();
+
+	void UpdateWorldMatrices();
+	void PrintSRT();
 };
 
 

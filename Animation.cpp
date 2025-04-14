@@ -135,12 +135,21 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 			mRotations[i][j] = transform->GetLocalEulerAngles();
 			mTranslations[i][j] = transform->GetLocalPosition();
 
+			//if (mName == "Necromancer@Walk" && transform->GetOwner()->GetName() == "Leg.leg.L.003") {
+			//	std::cout << "[SRT 보간 전]" << std::endl;
+			//	std::cout << "S     : " << mScales[i][j].x << " " << mScales[i][j].y << " " << mScales[i][j].z << std::endl;
+			//	std::cout << "Euler : " << mRotations[i][j].x << " " << mRotations[i][j].y << " " << mRotations[i][j].z << std::endl;
+			//	std::cout << "T     : " << mTranslations[i][j].x << " " << mTranslations[i][j].y << " " << mTranslations[i][j].z << std::endl;
+			//	std::cout << "======================" << std::endl;
+			//}
+
 			layer->GetSRT(layer->mAnimationCurves[j], pos, mScales[i][j], mRotations[i][j], mTranslations[i][j]);
 
-			//if (mName == "Necromancer@Walk" && j == 30) {
-			//	std::cout << mScales[i][j].x << " " << mScales[i][j].y << " " << mScales[i][j].z << std::endl;
-			//	std::cout << mRotations[i][j].x << " " << mRotations[i][j].y << " " << mRotations[i][j].z << std::endl;
-			//	std::cout << mTranslations[i][j].x << " " << mTranslations[i][j].y << " " << mTranslations[i][j].z << std::endl;
+			//if (mName == "Necromancer@Walk" && transform->GetOwner()->GetName() == "Leg.leg.L.003") {
+			//	std::cout << "[SRT 보간 후]" << std::endl;
+			//	std::cout << "S     : " << mScales[i][j].x << " " << mScales[i][j].y << " " << mScales[i][j].z << std::endl;
+			//	std::cout << "Euler : " << mRotations[i][j].x << " " << mRotations[i][j].y << " " << mRotations[i][j].z << std::endl;
+			//	std::cout << "T     : " << mTranslations[i][j].x << " " << mTranslations[i][j].y << " " << mTranslations[i][j].z << std::endl;
 			//	std::cout << "======================" << std::endl;
 			//}
 
@@ -215,7 +224,7 @@ void CAnimationController::Awake()
 	SetTrackAnimationSet(0, 0);
 	SetTrackStartEndTime(0, 0.0f, 2.5f);
 	SetTrackPosition(0, 0.55f);
-	SetTrackSpeed(0, 1.5f);
+	SetTrackSpeed(0, 0.5f);
 	SetTrackWeight(0, 1.0f);
 }
 
@@ -269,7 +278,7 @@ void CAnimationController::LateUpdate()
 	}
 	//*/
 
-	owner->GetChildren().front()->GetTransform()->UpdateWorldMatrix();
+	owner->GetChildren().front()->UpdateWorldMatrices();
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
@@ -278,20 +287,22 @@ void CAnimationController::LateUpdate()
 
 	std::vector<Matrix> finalTransforms;
 
+	//finalTransforms.push_back(owner->GetTransform()->GetWorldMat());
+
 	for (int i = 0; auto & cache : mAnimationSets->mAnimationSet.front()->mLayers.front()->mBoneFrameCaches) {
 		Matrix boneTransform = cache.lock()->GetWorldMat();
 
 		Matrix bondOffset = Matrix::Identity;
-		if (i != 0) {
-			auto renderer = std::dynamic_pointer_cast<CSkinnedMeshRenderer>(mAnimationSets->mSkinnedMeshCache->GetOwner()->GetRenderer());
-			bondOffset = renderer->GetSkinnedMesh()->GetBindPoseBoneOffset(i - 1);
+		if (i != 0) { // Armature
+			auto renderer = std::dynamic_pointer_cast<CSkinnedMeshRenderer>(mAnimationSets->mSkinnedMeshCache.lock()->GetOwner()->GetRenderer());
+			bondOffset = renderer->GetSkinnedMesh()->GetBindPoseBoneOffset(i - 1).Invert();
 		}
 
 		finalTransforms.push_back(bondOffset * boneTransform);
-		finalTransforms.back().Transpose();
+		//finalTransforms.back().Transpose();
 
-		if (cache.lock()->GetOwner()->GetName() == "Armature") {
-			PrintMatrix(boneTransform);
+		if (cache.lock()->GetOwner()->GetName() == "Leg.leg.L.003" && owner->GetName() == "Premade_Necromancer") {
+			PrintMatrix(finalTransforms.back());
 			std::cout << "======================" << std::endl;
 		}
 

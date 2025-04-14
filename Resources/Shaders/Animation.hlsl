@@ -59,19 +59,16 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 
     for (int i = 0; i < MAX_VERTEX_INFLUENCES; ++i)
     {
-        if (weights[i] > 0.0) 
-        {
-            uint boneIndex = input.boneIndices[i];
-            matrix boneTransform = boneTransforms[boneIndex];
+        uint boneIndex = input.boneIndices[i];
+        matrix boneTransform = boneTransforms[boneIndex];
             
-            skinnedPosition += weights[i] * mul(float4(input.position, 1.0), boneTransform).xyz;
-            skinnedNormal += weights[i] * mul(input.normal, (float3x3)boneTransform);
-            skinnedTangent += weights[i] * mul(input.tangent, (float3x3)boneTransform);
-        }
+        skinnedPosition += weights[i] * mul(float4(input.position, 1.0), boneTransform).xyz;
+        skinnedNormal += weights[i] * mul(input.normal, (float3x3) boneTransform);
+        skinnedTangent += weights[i] * mul(input.tangent, (float3x3) boneTransform);
     }
     
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(skinnedNormal, skinnedTangent);
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
@@ -181,7 +178,7 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
         }
     }
 
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
     
     output.position = positionInputs.positionCS;
     
@@ -231,8 +228,8 @@ VS_OUTPUT VS_GPass(VS_INPUT input)
         }
     }
 
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(skinnedNormal, skinnedTangent);
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
