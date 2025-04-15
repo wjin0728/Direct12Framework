@@ -67,18 +67,35 @@ void CPlayerController::OnKeyEvents()
 		moveDir -= camRight;
 	}
 
-	Vec3 acccel = Vec3::Zero;
+	Vec3 accel = Vec3::Zero;
 	bool isDecelerate = true;
 
 	if (moveDir != Vec3::Zero) {
-		acccel = moveDir.GetNormalized() * 10.f;
-		isDecelerate = false;
+		moveDir.Normalize();
+
+		Vec3 currentVelocity = rigidBody->GetVelocity();
+		if (currentVelocity != Vec3::Zero) {
+			Vec3 currentDir = currentVelocity.GetNormalized();
+			float dot = currentDir.Dot(moveDir);
+
+			if (dot < 0.0f) {
+				accel = -currentDir * 20.f; 
+			}
+			else {
+				accel = moveDir * 10.f; // 정상 가속
+				isDecelerate = false;
+			}
+		}
+		else {
+			accel = moveDir * 10.f; // 정지 상태에서 가속
+			isDecelerate = false;
+		}
 	}
 
-	rigidBody->SetAcceleration(acccel);
+	rigidBody->SetAcceleration(accel);
 	rigidBody->SetUseFriction(isDecelerate);
 
-	float rotationSpeed = 15.f;
+	float rotationSpeed = 10.f;
 
 	if (moveDir.LengthSquared() > 0.001f)
 	{

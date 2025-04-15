@@ -44,7 +44,7 @@ void CThirdPersonCamera::Update()
 	if (!mTarget || !mCamera) return;
 	float deltaTime = DELTA_TIME;
 	float speed = deltaTime * 5.f;
-
+	
 	Vec2 mouseDelta = INPUT.GetMouseDelta();
 
 	int direction = 0;
@@ -64,6 +64,7 @@ void CThirdPersonCamera::Update()
 
 	float minPitch = -60.f;
 	float maxPitch = 45.f;
+
 	mCameraParams.pitch = std::clamp(mCameraParams.pitch, minPitch, maxPitch);
 	if (mCameraParams.yaw > 180.f) { mCameraParams.yaw -= 360.f; }
 	else if (mCameraParams.yaw < -180.f) { mCameraParams.yaw += 360.f; }
