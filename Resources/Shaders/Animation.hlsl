@@ -49,9 +49,9 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     
-    float3 skinnedPosition = input.position;
-    float3 skinnedNormal = input.normal;
-    float3 skinnedTangent = input.tangent;
+    float3 skinnedPosition = float3(0.f,0.f,0.f);
+    float3 skinnedNormal = float3(0.f, 0.f, 0.f);
+    float3 skinnedTangent = float3(0.f,0.f,0.f);
     
     float weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
     weights[0] = input.boneWeights.x;

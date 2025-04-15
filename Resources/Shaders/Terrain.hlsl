@@ -35,25 +35,21 @@ float CalculateTessFactor(float3 position)
 VertexNormalInputs CalculateTerrainNormal(float2 uv, Texture2D heightMap)
 {
     float2 texelSize = 1.0 / heightMapResolution;
-
-    // 높이 맵 샘플링
+    
     float heightCenter = heightMap.SampleLevel(anisoClamp, uv, 0).r;
     float heightLeft = heightMap.SampleLevel(anisoClamp, uv - float2(texelSize.x, 0), 0).r;
     float heightRight = heightMap.SampleLevel(anisoClamp, uv + float2(texelSize.x, 0), 0).r;
     float heightDown = heightMap.SampleLevel(anisoClamp, uv - float2(0, texelSize.y), 0).r;
     float heightUp = heightMap.SampleLevel(anisoClamp, uv + float2(0, texelSize.y), 0).r;
-
-    // 높이 스케일 및 정점 간 간격 반영
+    
     float heightScale = size.y;
     float dx = (heightRight - heightLeft) * heightScale / (texelSize.x * size.x);
     float dz = (heightUp - heightDown) * heightScale / (texelSize.y * size.z);
-
-    // 노멀 계산
+    
     float3 tangent = normalize(float3(1.0, dx, 0.0));
     float3 bitangent = normalize(float3(0.0, dz, -1.0));
     float3 normal = normalize(cross(tangent, bitangent));
-
-    // 결과 반환
+    
     VertexNormalInputs result = (VertexNormalInputs) 0;
     result.tangentWS = tangent;
     result.bitangentWS = bitangent;
@@ -180,7 +176,7 @@ float4 PS_Forward(DS_OUTPUT input) : SV_TARGET
     float4 color = float4(0.f, 0.f, 0.f, 1.f);
     float2 uv = input.uv;
     float3 positionWS = input.worldPos.xyz;
-    float2 diffuseUV = input.uv * 10.f;
+    float2 diffuseUV = input.uv * 5.f;
     
     VertexNormalInputs normalInputs = CalculateTerrainNormal(uv, diffuseMap[heightMapIdx]);
     float3 normalWS = normalInputs.normalWS;

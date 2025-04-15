@@ -135,23 +135,7 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 			mRotations[i][j] = transform->GetLocalEulerAngles();
 			mTranslations[i][j] = transform->GetLocalPosition();
 
-			//if (mName == "Necromancer@Walk" && transform->GetOwner()->GetName() == "Leg.leg.L.003") {
-			//	std::cout << "[SRT 보간 전]" << std::endl;
-			//	std::cout << "S     : " << mScales[i][j].x << " " << mScales[i][j].y << " " << mScales[i][j].z << std::endl;
-			//	std::cout << "Euler : " << mRotations[i][j].x << " " << mRotations[i][j].y << " " << mRotations[i][j].z << std::endl;
-			//	std::cout << "T     : " << mTranslations[i][j].x << " " << mTranslations[i][j].y << " " << mTranslations[i][j].z << std::endl;
-			//	std::cout << "======================" << std::endl;
-			//}
-
 			layer->GetSRT(layer->mAnimationCurves[j], pos, mScales[i][j], mRotations[i][j], mTranslations[i][j]);
-
-			//if (mName == "Necromancer@Walk" && transform->GetOwner()->GetName() == "Leg.leg.L.003") {
-			//	std::cout << "[SRT 보간 후]" << std::endl;
-			//	std::cout << "S     : " << mScales[i][j].x << " " << mScales[i][j].y << " " << mScales[i][j].z << std::endl;
-			//	std::cout << "Euler : " << mRotations[i][j].x << " " << mRotations[i][j].y << " " << mRotations[i][j].z << std::endl;
-			//	std::cout << "T     : " << mTranslations[i][j].x << " " << mTranslations[i][j].y << " " << mTranslations[i][j].z << std::endl;
-			//	std::cout << "======================" << std::endl;
-			//}
 
 			transform->BlendingTransform(layer->mBlendMode, mScales[i][j], mRotations[i][j], mTranslations[i][j], layer->mWeight);
 			++j;
@@ -238,47 +222,31 @@ void CAnimationController::Update()
 
 void CAnimationController::LateUpdate()
 {
-	mTime += DELTA_TIME;
+	float deltaTime = DELTA_TIME;
+	mTime += deltaTime;
 	int nEnabledAnimationTracks = 0;
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled) {
 			nEnabledAnimationTracks++;
 			auto animationSet = mAnimationSets->mAnimationSet[track->mIndex];
-			animationSet->Animate(DELTA_TIME * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
+			animationSet->Animate(deltaTime * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track.get() == mTracks.front().get());
 		}
 	}
 
-	//*
-	if (nEnabledAnimationTracks == 1) {
-		for (auto& track : mTracks) {
-			if (track->mEnabled) {
-				auto animationSet = mAnimationSets->mAnimationSet[track->mIndex];
+	for (auto& track : mTracks) {
+		if (track->mEnabled) {
+			auto animationSet = mAnimationSets->mAnimationSet[track->mIndex];
 
-				for (auto& layer : animationSet->mLayers) {
-					for (auto& cache : layer->mBoneFrameCaches) {
-						cache.lock()->ApplyBlendedTransform();
-					}
+			for (auto& layer : animationSet->mLayers) {
+				for (auto& cache : layer->mBoneFrameCaches) {
+					cache.lock()->ApplyBlendedTransform();
 				}
 			}
 		}
 	}
-	else {
-		for (auto& track : mTracks) {
-			if (track->mEnabled) {
-				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mIndex];
 
-				for (auto& layer : animationSet->mLayers) {
-					for (auto& cache : layer->mBoneFrameCaches) {
-						cache.lock()->GetTransform()->ApplyBlendedTransform();
-					}
-				}
-			}
-		}
-	}
-	//*/
-
-	owner->GetChildren().front()->UpdateWorldMatrices();
+	owner->UpdateWorldMatrices();
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
@@ -286,9 +254,6 @@ void CAnimationController::LateUpdate()
 	}
 
 	finalTransforms.clear();
-
-	//finalTransforms.push_back(owner->GetTransform()->GetWorldMat());
-
 	for (int i = 0; auto & cache : mAnimationSets->mAnimationSet.front()->mLayers.front()->mBoneFrameCaches) {
 		Matrix boneTransform = cache.lock()->GetWorldMat();
 
@@ -299,7 +264,6 @@ void CAnimationController::LateUpdate()
 		}
 
 		finalTransforms.push_back((bondOffset * boneTransform).Transpose());
-		//finalTransforms.back().Transpose();
 
 		i++;
 	}
