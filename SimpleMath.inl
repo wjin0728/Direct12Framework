@@ -1349,33 +1349,23 @@ inline void Vector3::TransformNormal(const Vector3* varray, size_t count, const 
 
 inline Vector3 DirectX::SimpleMath::Vector3::GetAngleToQuaternion(const Quaternion& quaternion) noexcept
 {
-    Quaternion quat = XMLoadFloat4(&quaternion);
+    XMFLOAT3 eulerAngles;
 
-    float x = XMVectorGetX(quat);
-    float y = XMVectorGetY(quat);
-    float z = XMVectorGetZ(quat);
-    float w = XMVectorGetW(quat);
+    XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(quaternion);
 
-    Vector3 euler;
+    // Pitch (X축 회전)
+    eulerAngles.x = std::asin(-rotationMatrix.r[2].m128_f32[1]);
 
-    // Roll (x-axis rotation)
-    float sinr_cosp = 2.0f * (w * x + y * z);
-    float cosr_cosp = 1.0f - 2.0f * (x * x + y * y);
-    euler.x = atan2f(sinr_cosp, cosr_cosp);
-
-    // Pitch (y-axis rotation)
-    float sinp = 2.0f * (w * y - z * x);
-    if (fabsf(sinp) >= 1.0f)
-        euler.y = copysignf(XM_PIDIV2, sinp); // 90도 또는 -90도
-    else
-        euler.y = asinf(sinp);
-
-    // Yaw (z-axis rotation)
-    float siny_cosp = 2.0f * (w * z + x * y);
-    float cosy_cosp = 1.0f - 2.0f * (y * y + z * z);
-    euler.z = atan2f(siny_cosp, cosy_cosp);
-
-    return euler;
+    // Yaw (Y축 회전)
+    if (std::cos(eulerAngles.x) > 0.0001f) {  // 짐벌락 회피
+        eulerAngles.y = std::atan2(rotationMatrix.r[2].m128_f32[0], rotationMatrix.r[2].m128_f32[2]);
+        eulerAngles.z = std::atan2(rotationMatrix.r[0].m128_f32[1], rotationMatrix.r[1].m128_f32[1]);
+    }
+    else {
+        eulerAngles.y = std::atan2(-rotationMatrix.r[1].m128_f32[0], rotationMatrix.r[0].m128_f32[0]);
+        eulerAngles.z = 0.0f;
+    }
+    return eulerAngles;
 }
 
 

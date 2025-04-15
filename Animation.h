@@ -166,6 +166,7 @@ public:
 
     std::vector<std::shared_ptr<CAnimationTrack>> mTracks;
     std::shared_ptr<CAnimationSets> mAnimationSets;
+    std::vector<Matrix> finalTransforms;
 
     UINT mBoneTransformIdx = -1;
 
@@ -188,7 +189,7 @@ public:
     virtual void LateUpdate();
 
     void AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject);
-    void UpdateShaderVariables();
+    void BindSkinningMatrix();
     void PrepareSkinning();
     void UploadBoneOffsets();
 };

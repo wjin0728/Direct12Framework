@@ -93,6 +93,9 @@ void CGameObject::LateUpdate()
 void CGameObject::Render(std::shared_ptr<CCamera> camera, int pass)
 {
 	if (!mActive) return;
+	if (mAnimationController) {
+		mAnimationController->BindSkinningMatrix();
+	}
 	if (mRenderer) {
 		mRenderer->Render(camera, pass);
 	}
@@ -162,6 +165,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 		instance->mRenderer = instance->GetComponent<CSkinnedMeshRenderer>();
 	}
 	instance->mCollider = instance->GetComponent<CCollider>();
+	instance->mAnimationController = instance->GetComponent<CAnimationController>();
 
 	if (parentTransform) {
 		instance->mTransform->SetParent(parentTransform);
@@ -197,6 +201,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 		instance->mRenderer = instance->GetComponent<CSkinnedMeshRenderer>();
 	}
 	instance->mCollider = instance->GetComponent<CCollider>();
+	instance->mAnimationController = instance->GetComponent<CAnimationController>();
 
 	if (parentTransform) {
 		instance->mTransform->SetParent(parentTransform);

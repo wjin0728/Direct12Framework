@@ -38,6 +38,8 @@ struct VS_OUTPUT
     float3 tangentWS : TEXCOORD2;
     float3 bitangentWS : TEXCOORD3;
     float4 ShadowPosH : TEXCOORD4;
+    float4 boneWeights : BONEWEIGHTS;
+    uint4 boneIndices : BONEINDICES;
     
     float2 uv : TEXCOORD5;
 };
@@ -47,16 +49,16 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     
-    float3 skinnedPosition = float3(0.0, 0.0, 0.0);
-    float3 skinnedNormal = float3(0.0, 0.0, 0.0);
-    float3 skinnedTangent = float3(0.0, 0.0, 0.0);
+    float3 skinnedPosition = input.position;
+    float3 skinnedNormal = input.normal;
+    float3 skinnedTangent = input.tangent;
     
     float weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
     weights[0] = input.boneWeights.x;
     weights[1] = input.boneWeights.y;
     weights[2] = input.boneWeights.z;
     weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
-
+    
     for (int i = 0; i < MAX_VERTEX_INFLUENCES; ++i)
     {
         uint boneIndex = input.boneIndices[i];
@@ -78,7 +80,8 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     output.bitangentWS = normalInputs.bitangentWS;
     
     output.ShadowPosH = mul(output.positionWS, shadowTransform);
-
+    output.boneIndices = input.boneIndices;
+    output.boneWeights = input.boneWeights;
     output.uv = input.uv;
     
     return output;

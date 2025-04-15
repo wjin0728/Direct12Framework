@@ -285,7 +285,7 @@ void CAnimationController::LateUpdate()
 			mAnimationSets->mAnimationSet[track->mIndex]->HandleCallback();
 	}
 
-	std::vector<Matrix> finalTransforms;
+	finalTransforms.clear();
 
 	//finalTransforms.push_back(owner->GetTransform()->GetWorldMat());
 
@@ -298,13 +298,8 @@ void CAnimationController::LateUpdate()
 			bondOffset = renderer->GetSkinnedMesh()->GetBindPoseBoneOffset(i - 1).Invert();
 		}
 
-		finalTransforms.push_back(bondOffset * boneTransform);
+		finalTransforms.push_back((bondOffset * boneTransform).Transpose());
 		//finalTransforms.back().Transpose();
-
-		if (cache.lock()->GetOwner()->GetName() == "Leg.leg.L.003" && owner->GetName() == "Premade_Necromancer") {
-			PrintMatrix(finalTransforms.back());
-			std::cout << "======================" << std::endl;
-		}
 
 		i++;
 	}
@@ -315,6 +310,7 @@ void CAnimationController::LateUpdate()
 		finalTransforms.data(),
 		sizeof(Matrix) * finalTransforms.size()
 	);
+	
 }
 
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
@@ -358,13 +354,15 @@ void CAnimationController::SetAnimationType(std::shared_ptr<CAnimationSet>& anim
 	animationSet->SetAnimationType(type);
 }
 
-void CAnimationController::UpdateShaderVariables()
-{
-}
-
 void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)
 {
 	
+}
+
+void CAnimationController::BindSkinningMatrix()
+{
+	UINT offset = mBoneTransformIdx * ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES);
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->BindToShader(offset);
 }
 
 void CAnimationController::PrepareSkinning()
