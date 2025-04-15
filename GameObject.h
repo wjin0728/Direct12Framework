@@ -77,8 +77,9 @@ public:
 	static std::shared_ptr<CGameObject> CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
-	std::shared_ptr<CRenderer> GetMeshRendere() { return mRenderer; }
+	std::shared_ptr<CRenderer> GetRenderer() { return mRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
+	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::string& GetName() const { return mName; }
@@ -122,12 +123,14 @@ private:
 public:
 	std::shared_ptr<CAnimationController> mAnimationController{};
 
-	void UpdateTransform(const Matrix* parent = nullptr);
 	void ResetForAnimationBlending();
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
 
-	void SetAnimationLayerCache(std::shared_ptr<CGameObject> root);
-	//void FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int meshNum);
+	void FindAndSetSkinnedMesh(std::weak_ptr<CTransform>& cache);
+	void PrepareSkinning();
+
+	void UpdateWorldMatrices();
+	void PrintSRT();
 };
 
 

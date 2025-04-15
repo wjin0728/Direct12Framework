@@ -69,3 +69,11 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* device, ID3D12GraphicsCommand
 	}
 	return(pd3dBuffer);
 }
+
+void PrintMatrix(const Matrix& mat)
+{
+	std::cout << mat._11 << " " << mat._12 << " " << mat._13 << " " << mat._14 << std::endl;
+	std::cout << mat._21 << " " << mat._22 << " " << mat._23 << " " << mat._24 << std::endl;
+	std::cout << mat._31 << " " << mat._32 << " " << mat._33 << " " << mat._34 << std::endl;
+	std::cout << mat._41 << " " << mat._42 << " " << mat._43 << " " << mat._44 << std::endl;
+}

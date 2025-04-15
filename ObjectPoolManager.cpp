@@ -9,6 +9,9 @@ void CObjectPoolManager::Initialize()
 	for (UINT i = 0; i < OBJECT_COUNT; i++) {
 		cbvIdxQueue.push(i);
 	}
+	for (UINT i = 0; i < OBJECT_COUNT; i++) { // BONE_TRANSFORM_COUNT = 10
+		boneTransformIdxQueue.push(i);
+	}
 }
 
 void CObjectPoolManager::CreatePool(std::unique_ptr<CGameObject>&& original, UINT objCnt)
@@ -58,6 +61,24 @@ void CObjectPoolManager::ReturnCBVIndex(UINT idx)
 		return;
 	}
 	cbvIdxQueue.push(idx);
+}
+
+UINT CObjectPoolManager::GetBoneTransformIdx()
+{
+	if (boneTransformIdxQueue.empty()) {
+		throw std::runtime_error("No more bone offset indices available");
+	}
+	UINT idx = boneTransformIdxQueue.front();
+	boneTransformIdxQueue.pop();
+	return idx;
+}
+
+void CObjectPoolManager::ReturnBoneTransformIdx(UINT idx)
+{
+	if (idx < 0 || idx >= BONE_TRANSFORM_COUNT) {
+		return;
+	}
+	boneTransformIdxQueue.push(idx);
 }
 
 void CObjectPoolManager::ClearPool(const std::wstring& key)

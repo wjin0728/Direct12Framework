@@ -23,7 +23,7 @@ CFrameResource::CFrameResource()
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)]->Initialize(3, ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES) * BONE_TRANSFORM_COUNT);
 
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)] = std::make_unique<CConstantBuffer>();
-	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)]->Initialize(5, ALIGNED_SIZE(100) * 100);
+	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)]->Initialize(4, ALIGNED_SIZE(100) * 100);
 }
 
 

@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "GameApplication.h"
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 
 CGameApplication gameApp;

@@ -14,6 +14,7 @@ private:
 	std::shared_ptr<CTransform> mRootTransform{};
 
 	std::queue<UINT> cbvIdxQueue;
+	std::queue<UINT> boneTransformIdxQueue; // Ãß°¡: »À ¿ÀÇÁ¼Â ÀÎµ¦½º Å¥
 
 public:
 	void Initialize();
@@ -25,6 +26,9 @@ public:
 
 	UINT GetTopCBVIndex();
 	void ReturnCBVIndex(UINT idx);
+
+	UINT GetBoneTransformIdx();           // Ãß°¡: »À ¿ÀÇÁ¼Â ÀÎµ¦½º È¹µæ
+	void ReturnBoneTransformIdx(UINT idx); // Ãß°¡: »À ¿ÀÇÁ¼Â ÀÎµ¦½º ¹ÝÈ¯
 
 	void ClearPool(const std::wstring& key);
 	void ClearPools();

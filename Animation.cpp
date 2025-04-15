@@ -4,13 +4,15 @@
 #include "Transform.h"
 #include "SkinnedMesh.h"
 #include "Timer.h"
+#include "SkinnedMeshRenderer.h"
+#include "ObjectPoolManager.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CAnimationCurve::CAnimationCurve(int keyNum)
 {
-	mKeyTimes.resize(keyNum);
-	mKeyValues.resize(keyNum);
+	mKeyTimes.reserve(keyNum);
+	mKeyValues.reserve(keyNum);
 }
 
 CAnimationCurve::~CAnimationCurve()
@@ -125,46 +127,33 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 {
 	float pos = UpdatePosition(position, start, end);
 
-	int i = 0, j = 0;
 	for (int i = 0;  auto & layer : mLayers) {
 		for (int j = 0; auto & boneFrame : layer->mBoneFrameCaches) {
-			std::shared_ptr<CTransform> transform = boneFrame.lock();
+			auto transform = boneFrame.lock();
 
 			mScales[i][j] = transform->GetLocalScale();
 			mRotations[i][j] = transform->GetLocalEulerAngles();
 			mTranslations[i][j] = transform->GetLocalPosition();
 
+			//if (mName == "Necromancer@Walk" && transform->GetOwner()->GetName() == "Leg.leg.L.003") {
+			//	std::cout << "[SRT 보간 전]" << std::endl;
+			//	std::cout << "S     : " << mScales[i][j].x << " " << mScales[i][j].y << " " << mScales[i][j].z << std::endl;
+			//	std::cout << "Euler : " << mRotations[i][j].x << " " << mRotations[i][j].y << " " << mRotations[i][j].z << std::endl;
+			//	std::cout << "T     : " << mTranslations[i][j].x << " " << mTranslations[i][j].y << " " << mTranslations[i][j].z << std::endl;
+			//	std::cout << "======================" << std::endl;
+			//}
+
 			layer->GetSRT(layer->mAnimationCurves[j], pos, mScales[i][j], mRotations[i][j], mTranslations[i][j]);
-			++j;
-		}
-		++i;
-	}
 
-	// 애니메이션 레이어들을 블렌딩한다.
-	for (int i = 0;  auto & layer : mLayers) {
-		for (int j = 0;  auto & boneFrame : layer->mBoneFrameCaches) {
-			std::shared_ptr<CTransform> transform = boneFrame.lock();
+			//if (mName == "Necromancer@Walk" && transform->GetOwner()->GetName() == "Leg.leg.L.003") {
+			//	std::cout << "[SRT 보간 후]" << std::endl;
+			//	std::cout << "S     : " << mScales[i][j].x << " " << mScales[i][j].y << " " << mScales[i][j].z << std::endl;
+			//	std::cout << "Euler : " << mRotations[i][j].x << " " << mRotations[i][j].y << " " << mRotations[i][j].z << std::endl;
+			//	std::cout << "T     : " << mTranslations[i][j].x << " " << mTranslations[i][j].y << " " << mTranslations[i][j].z << std::endl;
+			//	std::cout << "======================" << std::endl;
+			//}
 
-			switch (layer->mBlendMode) {
-			case ANIMATION_BLEND_TYPE::ADDITIVE: {
-				transform->GetScaleLayerBlending() += mScales[i][j];
-				transform->GetRotationLayerBlending() += mRotations[i][j];
-				transform->GetPositionLayerBlending() += mTranslations[i][j];
-				break;
-			}
-			case ANIMATION_BLEND_TYPE::OVERRIDE: {
-				transform->GetScaleLayerBlending() = mScales[i][j];
-				transform->GetRotationLayerBlending() = mRotations[i][j];
-				transform->GetPositionLayerBlending() = mTranslations[i][j];
-				break;
-			}
-			case ANIMATION_BLEND_TYPE::OVERRIDE_PASSTHROUGH: {
-				transform->GetScaleLayerBlending() += mScales[i][j] * layer->mWeight;
-				transform->GetRotationLayerBlending() += mRotations[i][j] * layer->mWeight;
-				transform->GetPositionLayerBlending() += mTranslations[i][j] * layer->mWeight;
-				break;
-			}
-			}
+			transform->BlendingTransform(layer->mBlendMode, mScales[i][j], mRotations[i][j], mTranslations[i][j], layer->mWeight);
 			++j;
 		}
 		++i;
@@ -196,12 +185,14 @@ void CAnimationSets::SetCallbackHandler(std::shared_ptr<CAnimationSet>& animatio
 //
 CAnimationController::CAnimationController() : CComponent(COMPONENT_TYPE::ANIMATION)
 {
+	mTracks.push_back(std::make_shared<CAnimationTrack>());
 }
 
 CAnimationController::CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion) : CComponent(COMPONENT_TYPE::ANIMATION)
 {
 	mApplyRootMotion = applyRootMotion;
 	mAnimationSets = sets;
+	mTracks.push_back(std::make_shared<CAnimationTrack>());
 }
 
 CAnimationController::~CAnimationController()
@@ -215,6 +206,26 @@ void CAnimationController::SetAnimationCallbackHandler(std::shared_ptr<CAnimatio
 
 void CAnimationController::Awake()
 {
+	for (auto& set : mAnimationSets->mAnimationSet) {
+		for (auto& layer : set->mLayers) {
+			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
+				cache = owner->FindChildByName(layer->mBoneNames[i])->GetTransform();
+				++i;
+			}
+		}
+	}
+
+	owner->FindAndSetSkinnedMesh(mAnimationSets->mSkinnedMeshCache);
+
+	if (mBoneTransformIdx == -1) {
+		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
+	}
+
+	SetTrackAnimationSet(0, 0);
+	SetTrackStartEndTime(0, 0.0f, 2.5f);
+	SetTrackPosition(0, 0.55f);
+	SetTrackSpeed(0, 0.5f);
+	SetTrackWeight(0, 1.0f);
 }
 
 void CAnimationController::Start()
@@ -233,7 +244,7 @@ void CAnimationController::LateUpdate()
 	for (auto& track : mTracks) {
 		if (track->mEnabled) {
 			nEnabledAnimationTracks++;
-			std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
+			auto animationSet = mAnimationSets->mAnimationSet[track->mIndex];
 			animationSet->Animate(DELTA_TIME * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
 		}
 	}
@@ -242,7 +253,7 @@ void CAnimationController::LateUpdate()
 	if (nEnabledAnimationTracks == 1) {
 		for (auto& track : mTracks) {
 			if (track->mEnabled) {
-				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
+				auto animationSet = mAnimationSets->mAnimationSet[track->mIndex];
 
 				for (auto& layer : animationSet->mLayers) {
 					for (auto& cache : layer->mBoneFrameCaches) {
@@ -255,7 +266,7 @@ void CAnimationController::LateUpdate()
 	else {
 		for (auto& track : mTracks) {
 			if (track->mEnabled) {
-				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
+				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mIndex];
 
 				for (auto& layer : animationSet->mLayers) {
 					for (auto& cache : layer->mBoneFrameCaches) {
@@ -267,12 +278,43 @@ void CAnimationController::LateUpdate()
 	}
 	//*/
 
-	owner->UpdateTransform(nullptr);
+	owner->GetChildren().front()->UpdateWorldMatrices();
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
-			mAnimationSets->mAnimationSet[track->mAnimationSetIndex]->HandleCallback();
+			mAnimationSets->mAnimationSet[track->mIndex]->HandleCallback();
 	}
+
+	std::vector<Matrix> finalTransforms;
+
+	//finalTransforms.push_back(owner->GetTransform()->GetWorldMat());
+
+	for (int i = 0; auto & cache : mAnimationSets->mAnimationSet.front()->mLayers.front()->mBoneFrameCaches) {
+		Matrix boneTransform = cache.lock()->GetWorldMat();
+
+		Matrix bondOffset = Matrix::Identity;
+		if (i != 0) { // Armature
+			auto renderer = std::dynamic_pointer_cast<CSkinnedMeshRenderer>(mAnimationSets->mSkinnedMeshCache.lock()->GetOwner()->GetRenderer());
+			bondOffset = renderer->GetSkinnedMesh()->GetBindPoseBoneOffset(i - 1).Invert();
+		}
+
+		finalTransforms.push_back(bondOffset * boneTransform);
+		//finalTransforms.back().Transpose();
+
+		if (cache.lock()->GetOwner()->GetName() == "Leg.leg.L.003" && owner->GetName() == "Premade_Necromancer") {
+			PrintMatrix(finalTransforms.back());
+			std::cout << "======================" << std::endl;
+		}
+
+		i++;
+	}
+
+	UINT offset = mBoneTransformIdx * ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES);
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(
+		offset,
+		finalTransforms.data(),
+		sizeof(Matrix) * finalTransforms.size()
+	);
 }
 
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
@@ -293,7 +335,7 @@ void CAnimationController::SetTrackEnabled(int trackIndex, bool enabled)
 void CAnimationController::SetTrackPosition(int trackIndex, float position)
 {
 	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetPosition(position);
-	if (mAnimationSets->mAnimationSet.size()) mAnimationSets->mAnimationSet[mTracks[trackIndex]->mAnimationSetIndex]->SetPosition(position);
+	if (mAnimationSets->mAnimationSet.size()) mAnimationSets->mAnimationSet[mTracks[trackIndex]->mIndex]->SetPosition(position);
 }
 
 void CAnimationController::SetTrackSpeed(int trackIndex, float speed)
@@ -323,4 +365,13 @@ void CAnimationController::UpdateShaderVariables()
 void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)
 {
 	
+}
+
+void CAnimationController::PrepareSkinning()
+{
+
+}
+
+void CAnimationController::UploadBoneOffsets()
+{
 }
