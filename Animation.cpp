@@ -136,8 +136,9 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 			mTranslations[i][j] = transform->GetLocalPosition();
 
 			layer->GetSRT(layer->mAnimationCurves[j], pos, mScales[i][j], mRotations[i][j], mTranslations[i][j]);
-
 			transform->BlendingTransform(layer->mBlendMode, mScales[i][j], mRotations[i][j], mTranslations[i][j], layer->mWeight);
+			transform->ApplyBlendedTransform();
+
 			++j;
 		}
 		++i;
@@ -206,7 +207,6 @@ void CAnimationController::Awake()
 	}
 
 	SetTrackAnimationSet(0, 0);
-	SetTrackStartEndTime(0, 0.0f, 2.5f);
 	SetTrackPosition(0, 0.55f);
 	SetTrackSpeed(0, 0.5f);
 	SetTrackWeight(0, 1.0f);
@@ -234,18 +234,6 @@ void CAnimationController::LateUpdate()
 		}
 	}
 
-	for (auto& track : mTracks) {
-		if (track->mEnabled) {
-			auto animationSet = mAnimationSets->mAnimationSet[track->mIndex];
-
-			for (auto& layer : animationSet->mLayers) {
-				for (auto& cache : layer->mBoneFrameCaches) {
-					cache.lock()->ApplyBlendedTransform();
-				}
-			}
-		}
-	}
-
 	owner->UpdateWorldMatrices();
 
 	for (auto& track : mTracks) {
@@ -255,15 +243,14 @@ void CAnimationController::LateUpdate()
 
 	finalTransforms.clear();
 	for (int i = 0; auto & cache : mAnimationSets->mAnimationSet.front()->mLayers.front()->mBoneFrameCaches) {
-		Matrix boneTransform = cache.lock()->GetWorldMat();
-
-		Matrix bondOffset = Matrix::Identity;
-		if (i != 0) { // Armature
+		if (i) {
+			Matrix boneTransform = cache.lock()->GetWorldMat();
+			Matrix bondOffset = Matrix::Identity;
 			auto renderer = std::dynamic_pointer_cast<CSkinnedMeshRenderer>(mAnimationSets->mSkinnedMeshCache.lock()->GetOwner()->GetRenderer());
-			bondOffset = renderer->GetSkinnedMesh()->GetBindPoseBoneOffset(i - 1).Invert();
-		}
+			bondOffset = renderer->GetSkinnedMesh()->GetBindPoseBoneOffset(i - 1);
 
-		finalTransforms.push_back((bondOffset * boneTransform).Transpose());
+			finalTransforms.push_back((bondOffset * boneTransform).Transpose());
+		}
 
 		i++;
 	}
@@ -274,7 +261,6 @@ void CAnimationController::LateUpdate()
 		finalTransforms.data(),
 		sizeof(Matrix) * finalTransforms.size()
 	);
-	
 }
 
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
