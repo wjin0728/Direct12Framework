@@ -111,6 +111,8 @@ public:
 	std::shared_ptr<T> AddComponent(const std::shared_ptr<T>& component);
 	template<typename T>
 	std::shared_ptr<T> GetComponent();
+	template<typename T>
+	std::shared_ptr<T> GetComponentFromHierarchy();
 
 private:
 
@@ -126,7 +128,6 @@ public:
 	void ResetForAnimationBlending();
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
 
-	void FindAndSetSkinnedMesh(std::weak_ptr<CTransform>& cache);
 	void PrepareSkinning();
 
 	void UpdateWorldMatrices();
@@ -177,5 +178,21 @@ inline std::shared_ptr<T> CGameObject::GetComponent()
 		}
 	}
 
+	return nullptr;
+}
+
+template<typename T>
+inline std::shared_ptr<T> CGameObject::GetComponentFromHierarchy()
+{
+	std::shared_ptr<T> result = GetComponent<T>();
+	if (result) {
+		return result;
+	}
+	for (auto& child : mChildren) {
+		result = child->GetComponentFromHierarchy<T>();
+		if (result) {
+			return result;
+		}
+	}
 	return nullptr;
 }

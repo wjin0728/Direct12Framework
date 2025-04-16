@@ -118,7 +118,6 @@ public:
 
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
     std::vector<std::string> mBoneNames{};
-    std::weak_ptr<CTransform> mSkinnedMeshCache{};
 
 public:
     void SetCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr<CCallbackHandler>& callbackHandler);
@@ -166,6 +165,7 @@ public:
 
     std::vector<std::shared_ptr<CAnimationTrack>> mTracks;
     std::shared_ptr<CAnimationSets> mAnimationSets;
+    std::vector<Matrix> mBindPoseBoneOffsets{};
     std::vector<Matrix> finalTransforms;
 
     UINT mBoneTransformIdx = -1;

@@ -664,20 +664,6 @@ void CGameObject::ResetForAnimationBlending()
 	}
 }
 
-
-void CGameObject::FindAndSetSkinnedMesh(std::weak_ptr<CTransform>& cache)
-{
-	if (mRenderer && std::dynamic_pointer_cast<CSkinnedMeshRenderer>(mRenderer)) {
-		cache = mTransform;
-		return;
-	}
-
-	for (auto& child : mChildren) {
-		child->FindAndSetSkinnedMesh(cache);
-		if (cache.lock()) return;
-	}
-}
-
 void CGameObject::PrepareSkinning()
 {
 	mAnimationController->PrepareSkinning();

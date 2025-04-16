@@ -28,7 +28,9 @@ protected:
 	std::unique_ptr<CLightManager> lightMgr{};
 
 	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
-	std::array<std::shared_ptr<CGameObject>, 3> mPlayers{};
+
+	std::shared_ptr<CGameObject> mPlayer{};
+	std::array<std::shared_ptr<CGameObject>, 2> mOtherPlayers{};
 		 
 public:
 	CScene();
@@ -66,6 +68,8 @@ public:
 	const std::unordered_map<std::string, ObjectList>& GetObjects() const { return mRenderLayers; }
 	ObjectList& GetObjects(const std::string& layer) { return mRenderLayers[layer]; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
+	std::shared_ptr<CGameObject> GetPlayer() { return mPlayer; }
+	std::shared_ptr<CGameObject> GetOtherPlayer(int idx) { return mOtherPlayers[idx]; }
 
 protected:
 	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);

@@ -43,5 +43,5 @@ public:
 
 public:
 	UINT GetBoneNum() const { return mBoneNum; }
-	Matrix GetBindPoseBoneOffset(UINT idx) const { return mBindPoseBoneOffsets[idx]; }
+	std::vector<Matrix>& GetBindPoseBoneOffsets() { return mBindPoseBoneOffsets; }
 };

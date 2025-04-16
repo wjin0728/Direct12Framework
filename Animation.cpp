@@ -200,7 +200,10 @@ void CAnimationController::Awake()
 		}
 	}
 
-	owner->FindAndSetSkinnedMesh(mAnimationSets->mSkinnedMeshCache);
+	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
+	if (skinnedMeshRenderer) {
+		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();
+	}
 
 	if (mBoneTransformIdx == -1) {
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
@@ -225,33 +228,32 @@ void CAnimationController::LateUpdate()
 	float deltaTime = DELTA_TIME;
 	mTime += deltaTime;
 	int nEnabledAnimationTracks = 0;
+	auto& animationSets = mAnimationSets->mAnimationSet;
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled) {
 			nEnabledAnimationTracks++;
-			auto animationSet = mAnimationSets->mAnimationSet[track->mIndex];
-			animationSet->Animate(deltaTime * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track.get() == mTracks.front().get());
+			auto& animationSet = animationSets[track->mIndex];
+			animationSet->Animate(deltaTime * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
 		}
 	}
 
 	owner->UpdateWorldMatrices();
 
 	for (auto& track : mTracks) {
-		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
-			mAnimationSets->mAnimationSet[track->mIndex]->HandleCallback();
+		if (track->mEnabled && animationSets.size())
+			animationSets[track->mIndex]->HandleCallback();
 	}
 
 	finalTransforms.clear();
-	for (int i = 0; auto & cache : mAnimationSets->mAnimationSet.front()->mLayers.front()->mBoneFrameCaches) {
+	for (int i = 0; auto & cache : animationSets.front()->mLayers.front()->mBoneFrameCaches) {
 		if (i) {
 			Matrix boneTransform = cache.lock()->GetWorldMat();
 			Matrix bondOffset = Matrix::Identity;
-			auto renderer = std::dynamic_pointer_cast<CSkinnedMeshRenderer>(mAnimationSets->mSkinnedMeshCache.lock()->GetOwner()->GetRenderer());
-			bondOffset = renderer->GetSkinnedMesh()->GetBindPoseBoneOffset(i - 1);
+			bondOffset = mBindPoseBoneOffsets[i-1];
 
 			finalTransforms.push_back((bondOffset * boneTransform).Transpose());
 		}
-
 		i++;
 	}
 
