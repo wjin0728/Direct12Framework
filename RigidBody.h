@@ -10,8 +10,8 @@ private:
 	Vec3 mVelocity{};
 	Vec3 mAcceleration{};
 
-	float mMaxVelocity = 15.f;
-	float mFriction = 30.0f;
+	float mMaxVelocity = 4.f;
+	float mFriction = 100.0f;
 
 public:
 	CRigidBody();
@@ -39,7 +39,7 @@ public:
 
 	void SetVelocity(const Vec3& vel)  { mVelocity = vel; }
 	void SetUseGravity(bool use) { mUseGravity = use; }
-	void SetUseFriction(bool use) { mUseFriction = use; }
+	void SetUseFriction(bool use);
 	void SetMaxVelocity(float maxVel) { mMaxVelocity = maxVel; }
 	void SetFriction(float friction) { mFriction = friction; }
 	void SetAcceleration(const Vec3& accel) { mAcceleration = accel; }

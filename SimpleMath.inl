@@ -889,6 +889,26 @@ inline Vector3 operator* (float S, const Vector3& V) noexcept
     return R;
 }
 
+inline Vector3 operator* (const Vector3& V, const Quaternion& Q) noexcept
+{
+	using namespace DirectX;
+	XMVECTOR v1 = XMLoadFloat3(&V);
+	XMVECTOR q = XMLoadFloat4(&Q);
+	XMVECTOR X = XMVector3Rotate(v1, q);
+	Vector3 R;
+	XMStoreFloat3(&R, X);
+	return R;
+}
+inline Vector3 operator* (const Quaternion& Q, const Vector3& V) noexcept
+{
+	using namespace DirectX;
+	XMVECTOR v1 = XMLoadFloat3(&V);
+	XMVECTOR q = XMLoadFloat4(&Q);
+	XMVECTOR X = XMVector3Rotate(v1, q);
+	Vector3 R;
+	XMStoreFloat3(&R, X);
+	return R;
+}
 //------------------------------------------------------------------------------
 // Vector operations
 //------------------------------------------------------------------------------
@@ -1327,11 +1347,11 @@ inline void Vector3::TransformNormal(const Vector3* varray, size_t count, const 
     XMVector3TransformNormalStream(resultArray, sizeof(XMFLOAT3), varray, sizeof(XMFLOAT3), count, M);
 }
 
-inline Vector3 DirectX::SimpleMath::Vector3::GetAngleToQuaternion(const Quaternion& quat) noexcept
+inline Vector3 DirectX::SimpleMath::Vector3::GetAngleToQuaternion(const Quaternion& quaternion) noexcept
 {
     XMFLOAT3 eulerAngles;
 
-    XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(quat);
+    XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(quaternion);
 
     // Pitch (XÃà È¸Àü)
     eulerAngles.x = std::asin(-rotationMatrix.r[2].m128_f32[1]);

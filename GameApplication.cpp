@@ -142,10 +142,11 @@ LRESULT CALLBACK CGameApplication::OnProcessingWindowMessage(HWND hWnd, UINT nMe
 	{
 	case WM_ACTIVATE:
 	{
-		if (LOWORD(wParam) == WA_INACTIVE)
-			INSTANCE(CGameTimer).Stop();
-		else
-			INSTANCE(CGameTimer).Start();
+		//if (LOWORD(wParam) == WA_INACTIVE)
+		//	INSTANCE(CGameTimer).Stop();
+		//else
+		//	INSTANCE(CGameTimer).Start();
+		INSTANCE(CGameTimer).Start();
 		break;
 	}
 	case WM_SIZE:

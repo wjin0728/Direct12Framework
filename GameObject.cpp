@@ -93,6 +93,9 @@ void CGameObject::LateUpdate()
 void CGameObject::Render(std::shared_ptr<CCamera> camera, int pass)
 {
 	if (!mActive) return;
+	if (mAnimationController) {
+		mAnimationController->BindSkinningMatrix();
+	}
 	if (mRenderer) {
 		mRenderer->Render(camera, pass);
 	}
@@ -162,6 +165,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 		instance->mRenderer = instance->GetComponent<CSkinnedMeshRenderer>();
 	}
 	instance->mCollider = instance->GetComponent<CCollider>();
+	instance->mAnimationController = instance->GetComponent<CAnimationController>();
 
 	if (parentTransform) {
 		instance->mTransform->SetParent(parentTransform);
@@ -197,6 +201,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 		instance->mRenderer = instance->GetComponent<CSkinnedMeshRenderer>();
 	}
 	instance->mCollider = instance->GetComponent<CCollider>();
+	instance->mAnimationController = instance->GetComponent<CAnimationController>();
 
 	if (parentTransform) {
 		instance->mTransform->SetParent(parentTransform);
@@ -551,6 +556,16 @@ void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 	ReadDateFromFile(inFile, mTransform->mLocalRotation);
 
 	ReadDateFromFile(inFile, mTransform->mLocalMat);
+
+	//if (mName == "Premade_Necromancer") {
+	//	std::cout << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
+	//	std::cout << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
+	//	std::cout << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
+	//	std::cout << mTransform->mLocalRotation.x << " " << mTransform->mLocalRotation.y << " " << mTransform->mLocalRotation.z << std::endl;
+	//	std::cout << std::endl;
+	//	PrintMatrix(mTransform->mLocalMat);
+	//	std::cout << "======================" << std::endl;
+	//}
 }
 
 void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
@@ -629,23 +644,6 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 	INSTANCE(CSceneManager).GetCurScene()->SetTerrain(terrain);
 }
 
-
-void CGameObject::UpdateTransform(const Matrix* parent)
-{
-	if (parent) {
-		mTransform->mWorldMat = mTransform->mLocalMat * (*parent);
-	}
-	else {
-		mTransform->mWorldMat = mTransform->mLocalMat;
-	}
-
-	// 필요하다면 여기서 콜라이더나 바운딩볼 갱신
-
-	for (auto& child : mChildren) {
-		child->UpdateTransform(&mTransform->mWorldMat);
-	}
-}
-
 void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches)
 {
 	boneFrameCaches.push_back(GetSptrFromThis());
@@ -666,34 +664,33 @@ void CGameObject::ResetForAnimationBlending()
 	}
 }
 
-//void CGameObject::FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int skinnedMeshNum)
-//{
-//	if (mRenderer) {
-//		std::shared_ptr<CMesh> mesh = mRenderer->GetMesh();
-//		if (mesh) {
-//			auto skinned = std::dynamic_pointer_cast<CSkinnedMesh>(mesh);
-//			if (skinned) {
-//				skinnedMeshes.push_back(skinned);
-//				skinnedMeshNum++;
-//			}
-//		}
-//	}
-//
-//	for (auto& child : mChildren) {
-//		child->FindAndSetSkinnedMesh(skinnedMeshes, skinnedMeshNum);
-//	}
-//}
+void CGameObject::PrepareSkinning()
+{
+	mAnimationController->PrepareSkinning();
+}
 
-void CGameObject::SetAnimationLayerCache(std::shared_ptr<CGameObject> root) {
-	for (auto& set : mAnimationController->mAnimationSets->mAnimationSet) {
-		for (auto& layer : set->mLayers) {
-			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
-				cache = root->FindChildByName(layer->mBoneNames[i++])->GetTransform();
-			}
-		}
+void CGameObject::UpdateWorldMatrices()
+{
+	GetTransform()->UpdateWorldMatrix();
+
+	for (auto& child : GetChildren()) {
+		child->UpdateWorldMatrices();
 	}
 }
 
+void CGameObject::PrintSRT()
+{
+	std::cout << "S     : " << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
+	std::cout << "Euler : " << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
+	std::cout << "T     : " << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
+	std::cout << "Quat  : " << mTransform->mLocalRotation.x << " " << mTransform->mLocalRotation.y << " " << mTransform->mLocalRotation.z << " " << mTransform->mLocalRotation.w << std::endl;
+	std::cout << std::endl;
+	std::cout << "로컬 변환 행렬" << std::endl;
+	PrintMatrix(mTransform->mLocalMat);
+	std::cout << std::endl;
+	std::cout << "월드 변환 행렬" << std::endl;
+	PrintMatrix(mTransform->mWorldMat);
+}
 
 std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::string& name)
 {
@@ -728,5 +725,4 @@ void CGameObject::RemoveChild(std::shared_ptr<CGameObject> child)
 		mChildren.erase(itr);
 	}
 }
-
 

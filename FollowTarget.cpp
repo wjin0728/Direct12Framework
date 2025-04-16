@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #include "FollowTarget.h"
-#include "GameObject.h"
-#include "Transform.h"
-#include "Timer.h"
-#include "InputManager.h"
+#include"GameObject.h"
+#include"Transform.h"
+#include"Timer.h"
+#include"InputManager.h"
+#include"Terrain.h"
 #include "ServerManager.h"
 
 CFollowTarget::CFollowTarget() : CMonoBehaviour("FollowTarget")
@@ -55,12 +56,16 @@ void CFollowTarget::Update()
 	// targetTrans->SetLocalPosition(targetTrans->GetLocalPosition() + acccel * DELTA_TIME);
 
 	Vec2 mouseDelta = INPUT.GetMouseDelta();
+	Vec3 targetPos = targetTrans->GetWorldPosition();
+
 	if (mouseDelta != Vec2::Zero) {
-		GetTransform()->RotateAround(targetTrans->GetWorldPosition(), Vec3::Up, mouseDelta.x * 0.01f);
-		GetTransform()->RotateAround(targetTrans->GetWorldPosition(), transform->GetWorldRight(), mouseDelta.y * 0.01f);
-		GetTransform()->LookAt(targetTrans->GetWorldPosition(), Vec3::Up);
-		GetTransform()->SetLocalUp(Vec3::Up);
+		transform->RotateAround(targetPos, Vec3::Up, -mouseDelta.x * 0.01f);
+		transform->RotateAround(targetPos, transform->GetWorldRight(), -mouseDelta.y * 0.01f);
+		transform->LookAt(targetPos, Vec3::Up);
 	}
+	transform->GetWorldMat();
+	Vec3 position = targetPos - transform->GetWorldLook() * 10.f;
+	transform->SetLocalPosition(position);
 }
 
 void CFollowTarget::LateUpdate()
@@ -69,6 +74,5 @@ void CFollowTarget::LateUpdate()
 
 	auto transform = GetTransform();
 
-	Vec3 position = targetTrans->GetWorldPosition() - transform->GetLocalLook() * 10.f;
-	transform->SetLocalPosition(position);
+	//float terrainHeight = mTerrain->GetHeight(targetTrans->GetWorldPosition().x, targetTrans->GetWorldPosition().z);
 }

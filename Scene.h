@@ -29,9 +29,8 @@ protected:
 	std::unique_ptr<CLightManager> lightMgr{};
 
 	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
-	
-	std::array<std::shared_ptr<CGameObject>, 3> mPlayers{};
-
+	int clientID{ -1 };
+	std::array<std::vector<std::shared_ptr<CGameObject>>, OBJECT_TYPE::end> mObjectTypes;
 public:
 	CScene();
 	virtual ~CScene() = default;
@@ -68,6 +67,7 @@ public:
 	const std::unordered_map<std::string, ObjectList>& GetObjects() const { return mRenderLayers; }
 	ObjectList& GetObjects(const std::string& layer) { return mRenderLayers[layer]; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
+	std::shared_ptr<CGameObject> GetPlayer(int idx) { return mObjectTypes[PLAYER][idx]; }
 
 	std::shared_ptr<CGameObject> GetPlayer(int id) { return mPlayers[id]; }
 	// void SetPlayer(std::shared_ptr<CGameObject> mPlayer, Vec3 position) { mPlayer->GetTransform()->SetLocalPosition(position); };

@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "UploadBuffer.h"
 
-#define SKINNED_ANIMATION_BONES		128
+#define SKINNED_ANIMATION_BONES		300
 #define BONES_PER_VERTEX			4
 
 struct SkinnedVertex
@@ -16,7 +16,7 @@ struct SkinnedVertex
 class CSkinnedMesh : public CMesh
 {
 private:
-	friend class CAnimationController;
+	friend class CSkinnedMeshRenderer;
 
 	std::vector<SkinnedVertex> mSkinnedData{};
 
@@ -43,4 +43,5 @@ public:
 
 public:
 	UINT GetBoneNum() const { return mBoneNum; }
+	std::vector<Matrix>& GetBindPoseBoneOffsets() { return mBindPoseBoneOffsets; }
 };

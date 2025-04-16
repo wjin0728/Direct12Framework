@@ -1,13 +1,15 @@
 #include "stdafx.h"
 #include "PlayerController.h"
-#include "GameObject.h"
-#include "Transform.h"
-#include "Timer.h"
-#include "InputManager.h"
-#include "RigidBody.h"
-#include "SceneManager.h"
-#include "Scene.h"
-#include "Terrain.h"
+#include"GameObject.h"
+#include"Transform.h"
+#include"Timer.h"
+#include"InputManager.h"
+#include"RigidBody.h"
+#include"SceneManager.h"
+#include"Scene.h"
+#include"Terrain.h"
+#include"Camera.h"
+#include"SceneManager.h"
 #include "ServerManager.h"
 
 CPlayerController::~CPlayerController()
@@ -16,19 +18,24 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
-
 	rigidBody = GetOwner()->GetComponent<CRigidBody>();
 }
 
 void CPlayerController::Start()
 {
+	auto scene = INSTANCE(CSceneManager).GetCurScene();
+	mTerrain = scene->GetTerrain();
 }
 
 void CPlayerController::Update()
 {
 	OnKeyEvents();
-	OnMouseEvents();
+	auto transform = GetTransform();
+	float terrainHeight = mTerrain->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
 
+	Vec3 pos = transform->GetWorldPosition();
+	pos.y = terrainHeight;
+	transform->SetLocalPosition(pos);
 }
 
 void CPlayerController::LateUpdate()
@@ -38,70 +45,48 @@ void CPlayerController::LateUpdate()
 void CPlayerController::OnKeyEvents()
 {
 	auto transform = GetTransform();
+	auto camera = mCamera.lock()->GetTransform();
 	Vec3 moveDir = Vec3::Zero;
 	uint8_t dir = 0;
 
+	Vec3 camForward = camera->GetWorldLook();
+	Vec3 camRight = camera->GetWorldRight();
+	camForward.y = 0.f;
+	camRight.y = 0.f;
+	camForward.Normalize();
+	camRight.Normalize();
+
 	if (INPUT.IsKeyPress(KEY_TYPE::W)) {
-		moveDir += transform->GetLocalLook();
-		moveDir.y = 0.f;
-		moveDir.Normalize();
-
-		dir |= 0x08;
-	}
-	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
-		moveDir -= transform->GetLocalRight();
-		moveDir.y = 0.f;
-		moveDir.Normalize();
-
-		dir |= 0x04;
+		moveDir += camForward;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) {
-		moveDir -= transform->GetLocalLook();
-		moveDir.y = 0.f;
-		moveDir.Normalize();
-
-		dir |= 0x02;
+		moveDir -= camForward;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::D)) {
-		moveDir += transform->GetLocalRight();
-		moveDir.y = 0.f;
-		moveDir.Normalize();
-
-		dir |= 0x01;
+		moveDir += camRight;
 	}
-	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) {
-		moveDir += Vec3::Up;
+	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
+		moveDir -= camRight;
 
-		dir |= 0x20;
-	}
-	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) {
-		moveDir -= Vec3::Up;
-
-		dir |= 0x10;
-	}
-
-	if (dir != 0) {
-		//INSTANCE(ServerManager).send_cs_move_packet(dir);
 	}
 
 	Vec3 acccel = Vec3::Zero;
 	bool isDecelerate = true;
 
 	if (moveDir != Vec3::Zero) {
-		acccel = moveDir.GetNormalized() * 20.f;
+		acccel = moveDir.GetNormalized() * 10.f;
 		isDecelerate = false;
 	}
 
 	rigidBody->SetAcceleration(acccel);
 	rigidBody->SetUseFriction(isDecelerate);
 
-}
+	float rotationSpeed = 15.f;
 
-void CPlayerController::OnMouseEvents()
-{
-	Vec2 mouseDelta = INPUT.GetMouseDelta();
-	if (mouseDelta != Vec2::Zero) {
-		GetTransform()->RotateY(mouseDelta.x * DELTA_TIME * 30);
+	if (moveDir.LengthSquared() > 0.001f)
+	{
+		Quaternion targetRot = Quaternion::LookRotation(moveDir);
+		Quaternion rotation = Quaternion::Slerp(transform->GetLocalRotation(), targetRot, rotationSpeed * DELTA_TIME);
+		transform->SetLocalRotation(rotation);
 	}
-
 }

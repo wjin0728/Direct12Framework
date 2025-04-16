@@ -71,6 +71,11 @@ void CInputManager::FixMousePosition(bool fix)
 	}
 }
 
+void CInputManager::ChangeMouseState()
+{
+	FixMousePosition(!mFixMousePos);
+}
+
 void CInputManager::MoveMouseToCenter()
 {
 	RECT rect;
