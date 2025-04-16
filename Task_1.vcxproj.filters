@@ -47,6 +47,9 @@
     <Filter Include="GameObject\Component\Scripts">
       <UniqueIdentifier>{941b0b65-03f4-467c-abb5-0b5f6c14555e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{65d97862-5dea-4b36-b05d-f340cfbb281c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Scene.h">
@@ -203,6 +206,12 @@
       <Filter>GameObject\Component</Filter>
     </ClInclude>
     <ClInclude Include="ThirdPersonCamera.h" />
+    <ClInclude Include="ServerManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Server</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -351,6 +360,11 @@
     </ClCompile>
     <ClCompile Include="ThirdPersonCamera.cpp">
       <Filter>Client</Filter>
+    <ClCompile Include="Player.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManager.cpp">
+      <Filter>Server</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,14 +1,15 @@
 #pragma once
-#include"stdafx.h"
-#include"Shader.h"
-#include"LightManager.h"
-#include"Texture.h"
-#include"FrameResource.h"
+#include "stdafx.h"
+#include "Shader.h"
+#include "LightManager.h"
+#include "Texture.h"
+#include "FrameResource.h"
 
 class CCamera;
 class CGameObject;
 class CTerrain;
 class CShader;
+class CTransform;
 
 class CSceneManager;
 
@@ -28,10 +29,8 @@ protected:
 	std::unique_ptr<CLightManager> lightMgr{};
 
 	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
-
 	int clientID{ -1 };
 	std::array<std::vector<std::shared_ptr<CGameObject>>, OBJECT_TYPE::end> mObjectTypes;
-		 
 public:
 	CScene();
 	virtual ~CScene() = default;
@@ -69,6 +68,9 @@ public:
 	ObjectList& GetObjects(const std::string& layer) { return mRenderLayers[layer]; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
 	std::shared_ptr<CGameObject> GetPlayer(int idx) { return mObjectTypes[PLAYER][idx]; }
+
+	std::shared_ptr<CGameObject> GetPlayer(int id) { return mPlayers[id]; }
+	// void SetPlayer(std::shared_ptr<CGameObject> mPlayer, Vec3 position) { mPlayer->GetTransform()->SetLocalPosition(position); };
 
 protected:
 	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);

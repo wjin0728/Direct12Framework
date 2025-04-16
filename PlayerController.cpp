@@ -10,6 +10,7 @@
 #include"Terrain.h"
 #include"Camera.h"
 #include"SceneManager.h"
+#include "ServerManager.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -46,6 +47,7 @@ void CPlayerController::OnKeyEvents()
 	auto transform = GetTransform();
 	auto camera = mCamera.lock()->GetTransform();
 	Vec3 moveDir = Vec3::Zero;
+	uint8_t dir = 0;
 
 	Vec3 camForward = camera->GetWorldLook();
 	Vec3 camRight = camera->GetWorldRight();
@@ -65,6 +67,7 @@ void CPlayerController::OnKeyEvents()
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
 		moveDir -= camRight;
+
 	}
 
 	Vec3 acccel = Vec3::Zero;
