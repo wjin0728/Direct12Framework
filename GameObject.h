@@ -42,6 +42,8 @@ private:
 	std::string mRenderLayer{};
 	LAYER_TYPE mLayerType{};
 
+	int mID{ -1 };
+
 private:
 	BoundingSphere mRootLocalBS = BoundingSphere();
 	BoundingSphere mRootBS = BoundingSphere();
@@ -84,6 +86,8 @@ public:
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::string& GetName() const { return mName; }
 	const std::string& GetTag() const { return mTag; }
+	const std::string& GetIDString() const { return std::to_string(mID); }
+	const int GetIDInt() const { return mID; }
 	const std::string& GetRenderLayer() const { return mRenderLayer; }
 	bool GetActive() const { return mActive; }
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return mChildren; }
@@ -96,6 +100,7 @@ public:
 	void SetRenderLayer(const std::string& layer) { mRenderLayer = layer; }
 	void SetName(const std::string& name) { mName = name; }
 	void SetTag(const std::string& tag) { mTag = tag; }
+	void SetID(int id) { mID = id; }
 	void SetParent(const std::shared_ptr<CGameObject>& parent);
 
 	void ReturnCBVIndex();
