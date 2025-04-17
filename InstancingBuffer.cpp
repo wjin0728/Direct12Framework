@@ -2,40 +2,69 @@
 #include "InstancingBuffer.h"
 
 
-void CInstancingBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum)
+CInstancingBuffer::~CInstancingBuffer()
+{
+	if (buffer != nullptr) {
+		buffer->Unmap(0, NULL);
+	}
+	mappedData = nullptr;
+}
+
+void CInstancingBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT instanceNum)
 {
 	rootParamIdx = _rootParamIdx;
-	byteSize = dataSize = _dataSize;
-	dataNum = _dataNum;
+	mMaxInstanceNum = instanceNum;
+	dataSize = _dataSize;
+
+	bufferSize = mMaxInstanceNum * dataSize;
 
 	CreateBuffer();
 
 	mInstancingBufferView.BufferLocation = buffer->GetGPUVirtualAddress();
-	mInstancingBufferView.StrideInBytes = byteSize;
-	mInstancingBufferView.SizeInBytes = dataSize * dataNum;
+	mInstancingBufferView.StrideInBytes = dataSize;
+	mInstancingBufferView.SizeInBytes = dataSize * mMaxInstanceNum;
 }
 
-void CInstancingBuffer::ReallocateBuffer(UINT maxInstanceNum)
+void CInstancingBuffer::UpdateBuffer(UINT idx, const void* data)
 {
-	if (buffer != nullptr) {
-		buffer->Unmap(0, NULL);
-		buffer.Reset();
-	}
+	memcpy(&mappedData[idx * dataSize], data, dataSize);
+}
 
-	UINT dataSize = byteSize * maxInstanceNum;
-
+void CInstancingBuffer::CreateBuffer()
+{
 	CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(dataSize);
+	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 
 	ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
 		&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&buffer)));
 
-	mMaxInstanceNum = maxInstanceNum;
-
 	D3D12_RANGE readRange = { 0, 0 };
 	ThrowIfFailed(buffer->Map(0, &readRange, (void**)&mappedData));
+}
+
+void CInstancingBuffer::Resize(UINT maxInstanceNum)
+{
+	ComPtr<ID3D12Resource> newBuffer;
+
+	UINT newBufferSize = maxInstanceNum * dataSize;
+
+	CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(newBufferSize);
+
+	ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
+		&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&newBuffer)));
+
+	BYTE* newMappedData{};
+	D3D12_RANGE readRange = { 0, 0 };
+	ThrowIfFailed(newBuffer->Map(0, &readRange, (void**)&newMappedData));
+
+	buffer->Unmap(0, NULL);
+	mappedData = newMappedData;
+	buffer = newBuffer;
+
+	bufferSize = newBufferSize;
 
 	mInstancingBufferView.BufferLocation = buffer->GetGPUVirtualAddress();
-	mInstancingBufferView.StrideInBytes = byteSize;
-	mInstancingBufferView.SizeInBytes = dataSize;
+	mInstancingBufferView.StrideInBytes = dataSize;
+	mInstancingBufferView.SizeInBytes = bufferSize;
 }

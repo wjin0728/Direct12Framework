@@ -23,6 +23,7 @@ public:
 	Vec2 texCoord{};
 	Vec3 normal{};
 	Vec3 tangent{};
+	Color color{};
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,19 +53,21 @@ public:
 public:
 	CMesh() = default;
 	CMesh(std::ifstream& inFile);
-	virtual ~CMesh() = default;
+	virtual ~CMesh() {};
 
 public:
 	void CreateVertexBuffer();
 	void CreateIndexBuffers();
 
 public:
-	static std::shared_ptr<CMesh> CreateMeshFromFile(std::ifstream& inFile);
+	static std::shared_ptr<CMesh> CreateMeshFromFile(const std::string& name);
+	static std::shared_ptr<CMesh> CreateMeshFromFBX(std::string& fileName);
 	static std::shared_ptr<CMesh> CreateCubeMesh(Vec3 scale = {1.f,1.f,1.f});
 	static std::shared_ptr<CMesh> CreateRectangleMesh(Vec2 scale = { 1.f,1.f });
 	static std::shared_ptr<CMesh> CreateSphereMesh(float radius, UINT stackCnt, UINT sliceCnt);
 
 protected:
+	std::ifstream& ReadMeshData(std::ifstream& inFile);
 	void CreateOOBBAndOOBS();
 	virtual void CalculateNormal();
 

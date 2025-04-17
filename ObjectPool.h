@@ -7,7 +7,7 @@ class CTransform;
 class CObjectPool
 {
 private:
-	std::wstring mName{};
+	std::string mName{};
 	std::unique_ptr<CGameObject> mOriginal{};
 	std::stack<std::shared_ptr<CGameObject>> mPoolStack{};
 

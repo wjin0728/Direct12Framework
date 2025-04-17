@@ -9,11 +9,14 @@ void CObjectPoolManager::Initialize()
 	for (UINT i = 0; i < OBJECT_COUNT; i++) {
 		cbvIdxQueue.push(i);
 	}
+	for (UINT i = 0; i < OBJECT_COUNT; i++) { // BONE_TRANSFORM_COUNT = 10
+		boneTransformIdxQueue.push(i);
+	}
 }
 
 void CObjectPoolManager::CreatePool(std::unique_ptr<CGameObject>&& original, UINT objCnt)
 {
-	const std::wstring& tag = original->GetTag();
+	const std::string& tag = original->GetTag();
 
 	if (!mPools.contains(tag)) {
 		mPools[tag] = std::make_unique<CObjectPool>();
@@ -27,14 +30,14 @@ void CObjectPoolManager::PushObject(std::shared_ptr<CGameObject> object)
 		return;
 	}
 
-	const std::wstring& tag = object->GetTag();
+	const std::string& tag = object->GetTag();
 
 	if (mPools.contains(tag)) {
 		mPools[tag]->PushObject(object);
 	}
 }
 
-std::shared_ptr<CGameObject> CObjectPoolManager::PopObject(const std::wstring& key, const const std::shared_ptr<CTransform>& parent)
+std::shared_ptr<CGameObject> CObjectPoolManager::PopObject(const std::string& key, const const std::shared_ptr<CTransform>& parent)
 {
 	auto itr = mPools.find(key);
 	if (itr == mPools.end()) {
@@ -58,6 +61,24 @@ void CObjectPoolManager::ReturnCBVIndex(UINT idx)
 		return;
 	}
 	cbvIdxQueue.push(idx);
+}
+
+UINT CObjectPoolManager::GetBoneTransformIdx()
+{
+	if (boneTransformIdxQueue.empty()) {
+		throw std::runtime_error("No more bone offset indices available");
+	}
+	UINT idx = boneTransformIdxQueue.front();
+	boneTransformIdxQueue.pop();
+	return idx;
+}
+
+void CObjectPoolManager::ReturnBoneTransformIdx(UINT idx)
+{
+	if (idx < 0 || idx >= BONE_TRANSFORM_COUNT) {
+		return;
+	}
+	boneTransformIdxQueue.push(idx);
 }
 
 void CObjectPoolManager::ClearPool(const std::wstring& key)

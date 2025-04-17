@@ -1,7 +1,25 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
-#define DYNAMIC_TESSELLATION
+//#define DYNAMIC_TESSELLATION
+
+struct SplatData
+{
+    float4 data[4];
+};
+
+cbuffer MaterialData : register(b5)
+{
+    float3 size;
+    float yOffset;
+    
+    int heightMapIdx;
+    int splatNum;
+    float2 heightMapResolution;
+    
+    SplatData splats[TERRAIN_SPLAT_COUNT];
+    float4 alphaMapIdx[TERRAIN_SPLAT_COUNT];
+};
 
 float CalculateTessFactor(float3 position)
 {
@@ -12,6 +30,32 @@ float CalculateTessFactor(float3 position)
     float s = 64.f *saturate((dMax - d) / (dMax - dMin));
     
     return s;
+}
+
+VertexNormalInputs CalculateTerrainNormal(float2 uv, Texture2D heightMap)
+{
+    float2 texelSize = 1.0 / heightMapResolution;
+    
+    float heightCenter = heightMap.SampleLevel(anisoClamp, uv, 0).r;
+    float heightLeft = heightMap.SampleLevel(anisoClamp, uv - float2(texelSize.x, 0), 0).r;
+    float heightRight = heightMap.SampleLevel(anisoClamp, uv + float2(texelSize.x, 0), 0).r;
+    float heightDown = heightMap.SampleLevel(anisoClamp, uv - float2(0, texelSize.y), 0).r;
+    float heightUp = heightMap.SampleLevel(anisoClamp, uv + float2(0, texelSize.y), 0).r;
+    
+    float heightScale = size.y;
+    float dx = (heightRight - heightLeft) * heightScale / (texelSize.x * size.x);
+    float dz = (heightUp - heightDown) * heightScale / (texelSize.y * size.z);
+    
+    float3 tangent = normalize(float3(1.0, dx, 0.0));
+    float3 bitangent = normalize(float3(0.0, dz, -1.0));
+    float3 normal = normalize(cross(tangent, bitangent));
+    
+    VertexNormalInputs result = (VertexNormalInputs) 0;
+    result.tangentWS = tangent;
+    result.bitangentWS = bitangent;
+    result.normalWS = normal;
+
+    return result;
 }
 
 
@@ -25,7 +69,7 @@ struct VS_INPUT
 
 
 //¡§¡° ºŒ¿Ã¥ı∏¶ ¡§¿««—¥Ÿ.
-VS_INPUT VS_Main(VS_INPUT input)
+VS_INPUT VS_Forward(VS_INPUT input)
 {   
     return input;
 }
@@ -55,13 +99,13 @@ TessFactor ConstantHS(InputPatch<VS_INPUT, 4> patch, uint patchID : SV_Primitive
     pt.InsideTess[0] = CalculateTessFactor(center);
     pt.InsideTess[1] = pt.InsideTess[0];
  #else
-	pt.EdgeTess[0] = 64.f;
-    pt.EdgeTess[1] = 64.f;
-    pt.EdgeTess[2] = 64.f;
-    pt.EdgeTess[3] = 64.f;
+	pt.EdgeTess[0] = 32.f;
+    pt.EdgeTess[1] = 32.f;
+    pt.EdgeTess[2] = 32.f;
+    pt.EdgeTess[3] = 32.f;
     
-    pt.InsideTess[0] = 64.f;
-    pt.InsideTess[1] = 64.f;
+    pt.InsideTess[0] = 32.f;
+    pt.InsideTess[1] = 32.f;
 #endif
     
     return pt;
@@ -81,7 +125,7 @@ struct HS_OUTPUT
 [outputcontrolpoints(4)]
 [patchconstantfunc("ConstantHS")]
 [maxtessfactor(64.0f)]
-HS_OUTPUT HS_Main(InputPatch<VS_INPUT, 4> p, uint i : SV_OutputControlPointID, uint patchId : SV_PrimitiveID)
+HS_OUTPUT HS_Forward(InputPatch<VS_INPUT, 4> p, uint i : SV_OutputControlPointID, uint patchId : SV_PrimitiveID)
 {
     HS_OUTPUT hout;
 	
@@ -98,13 +142,13 @@ struct DS_OUTPUT
     float4 position : SV_POSITION;
     float4 worldPos : POSITION;
     float2 uv : TEXCOORD;
-    float4 ShadowPosH : POSITION1;
+    float4 ShadowPosH : TEXCOORD2;
 };
 
 [domain("quad")]
-DS_OUTPUT DS_Main(TessFactor tessFactors, float2 uv : SV_DomainLocation, const OutputPatch<HS_OUTPUT, 4> quad)
+DS_OUTPUT DS_Forward(TessFactor tessFactors, float2 uv : SV_DomainLocation, const OutputPatch<HS_OUTPUT, 4> quad)
 {
-    DS_OUTPUT dout;
+    DS_OUTPUT dout = (DS_OUTPUT)0;
 	
     float3 v1 = lerp(quad[0].PosL, quad[1].PosL, uv.x);
     float3 v2 = lerp(quad[2].PosL, quad[3].PosL, uv.x);
@@ -114,8 +158,8 @@ DS_OUTPUT DS_Main(TessFactor tessFactors, float2 uv : SV_DomainLocation, const O
     float2 uv2 = lerp(quad[2].uv, quad[3].uv, uv.x);
     dout.uv = lerp(uv1, uv2, uv.y);
 	
-    Texture2D heightMap = diffuseMap[terrainData.heightMapIdx];
-    p.y = heightMap.SampleLevel(linearWrap, dout.uv, 0).r*255.f * terrainData.scale.y;
+    Texture2D heightMap = diffuseMap[heightMapIdx];
+    p.y = heightMap.SampleLevel(linearClamp, dout.uv, 0).r * size.y + yOffset;
     
     dout.worldPos = float4(p, 1.0f);
     dout.position = mul(dout.worldPos, viewProjMat);
@@ -127,48 +171,91 @@ DS_OUTPUT DS_Main(TessFactor tessFactors, float2 uv : SV_DomainLocation, const O
 #define TRANSPARENT_CLIP
 
 //«»ºø ºŒ¿Ã¥ı
-[earlydepthstencil]
-float4 PS_Main(DS_OUTPUT input) : SV_TARGET
+float4 PS_Forward(DS_OUTPUT input) : SV_TARGET
 {
-    float4 color = float4(1.f, 1.f, 1.f, 1.f);
+    float4 color = float4(0.f, 0.f, 0.f, 1.f);
+    float2 uv = input.uv;
+    float3 positionWS = input.worldPos.xyz;
+    float2 diffuseUV = input.uv * 5.f;
     
-    Material mat = terrainData.material;
+    VertexNormalInputs normalInputs = CalculateTerrainNormal(uv, diffuseMap[heightMapIdx]);
+    float3 normalWS = normalInputs.normalWS;
+    float3 tangentWS = normalInputs.tangentWS;
+    float3 bitangentWS = normalInputs.bitangentWS;
+    float3 normal = normalWS;
+    float3 blendedNormal = float3(0.f, 0.f, 0.f);
+    float blendedMetallic = 0.f;
+    float blendedSmoothness = 0.f;
     
-    float4 texColor = diffuseMap[mat.diffuseMapIdx].Sample(linearWrap, input.uv);
-    color = float4(GammaDecoding(texColor.rgb), texColor.a);
-    
-    if (terrainData.detailMapTdx != -1)
+    float totalWeight = 0.0;
+    [unroll(TERRAIN_SPLAT_COUNT)]
+    for (int i = 0; i < splatNum; i++)
     {
-        float4 detailColor = diffuseMap[terrainData.detailMapTdx].Sample(linearWrap, input.uv * 50.f);
-    
-        color = lerp(color, float4(GammaDecoding(detailColor.rgb), detailColor.a), 0.7);
+        SplatData splat = splats[i];
+        float4 weight = diffuseMap[alphaMapIdx[i].x].Sample(anisoClamp, uv);
+        
+        color.rgb += diffuseMap[splat.data[0].x].Sample(anisoWrap, diffuseUV).rgb * weight.r;
+        color.rgb += diffuseMap[splat.data[1].x].Sample(anisoWrap, diffuseUV).rgb * weight.g;
+        color.rgb += diffuseMap[splat.data[2].x].Sample(anisoWrap, diffuseUV).rgb * weight.b;
+        color.rgb += diffuseMap[splat.data[3].x].Sample(anisoWrap, diffuseUV).rgb * weight.a;
+        
+        blendedNormal += (diffuseMap[splat.data[0].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.r;
+        blendedNormal += (diffuseMap[splat.data[1].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.g;
+        blendedNormal += (diffuseMap[splat.data[2].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.b;
+        blendedNormal += (diffuseMap[splat.data[3].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.a;
+        
+        blendedMetallic += splat.data[0].z * weight.r;
+        blendedMetallic += splat.data[1].z * weight.g;
+        blendedMetallic += splat.data[2].z * weight.b;
+        blendedMetallic += splat.data[3].z * weight.a;
+        
+        blendedSmoothness += splat.data[0].w * weight.r;
+        blendedSmoothness += splat.data[1].w * weight.g;
+        blendedSmoothness += splat.data[2].w * weight.b;
+        blendedSmoothness += splat.data[3].w * weight.a;
+        
+        totalWeight += weight.r + weight.g + weight.b + weight.a;
+
     }
     
-#ifdef TRANSPARENT_CLIP
-    clip(color.a - 0.1);
-#endif
-    Texture2D heightMap = diffuseMap[terrainData.heightMapIdx];
-    float4 height = heightMap.SampleLevel(linearClamp, input.uv, 0);
+    if (totalWeight > 0.0)
+    {
+        color.rgb /= totalWeight;
+        blendedNormal /= totalWeight;
+        blendedMetallic /= totalWeight;
+        blendedSmoothness /= totalWeight;
+    }
+    else
+    {
+        blendedNormal = float3(0, 0, 1);
+    }
+    blendedNormal = normalize(blendedNormal);
     
-    float heightLeft = heightMap.SampleLevel(linearClamp, input.uv - float2(0.01, 0), 0).r;
-    float heightRight = heightMap.SampleLevel(linearClamp, input.uv + float2(0.01, 0), 0).r;
-    float heightDown = heightMap.SampleLevel(linearClamp, input.uv - float2(0, 0.01), 0).r;
-    float heightUp = heightMap.SampleLevel(linearClamp, input.uv + float2(0, 0.01), 0).r;
+    normal = normalize(mul(blendedNormal, float3x3(tangentWS, bitangentWS, normalWS)));
+   
     
-    float3 tangent = float3(1.0, (heightRight - heightLeft), 0.f) * terrainData.scale;
-    float3 bitangent = float3(0.0, (heightDown - heightUp), -1.f) * terrainData.scale;
-    
-    float3 normal = cross(normalize(tangent), normalize(bitangent));
+    color.rgb = GammaDecoding(color.rgb);
+   
     float3 camDir = (camPos - input.worldPos.xyz);
     float distToEye = length(camDir);
     camDir /= distToEye;
     
-    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-    shadowFactor[0] = CalcShadowFactor(input.ShadowPosH);
+    LightingData lightingData = (LightingData) 0;
+    lightingData.cameraDirection = camDir;
+    lightingData.normalWS = normal;
+    lightingData.positionWS = input.worldPos.xyz;
+    lightingData.shadowFactor = CalcShadowFactor(input.ShadowPosH);
     
-    LightColor finalColor = CalculatePhongLight(input.position.xyz, normal, camDir, mat, shadowFactor);
+    SurfaceData surfaceData = (SurfaceData) 0;
+    surfaceData.albedo = color.rgb;
+    surfaceData.specular = 0.5f;
+    surfaceData.smoothness = blendedSmoothness;
+    surfaceData.metallic = blendedMetallic;
+    surfaceData.emissive = 0.f;
     
-    color.xyz = GammaEncoding((finalColor.diffuse.xyz * color.xyz) + finalColor.specular.xyz + (0.05 * color.xyz));
+    float3 finalColor = CalculatePhongLight(lightingData, surfaceData);
+    
+    color.xyz = GammaEncoding(finalColor);
     
     #ifdef FOG
     float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
@@ -176,4 +263,97 @@ float4 PS_Main(DS_OUTPUT input) : SV_TARGET
 #endif
 
     return float4(color.xyz, 1.f);
+}
+
+
+//
+//G Pass
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+VS_INPUT VS_GPass(VS_INPUT input)
+{
+    return input;
+}
+
+struct PS_GPASS_OUTPUT
+{
+    float4 albedo : SV_Target0;
+    float4 normalWS : SV_Target1;
+    float4 emissive : SV_Target2;
+    float4 positionWS : SV_Target3;
+};
+
+PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
+{
+    PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
+    
+    float4 color = float4(0.f, 0.f, 0.f, 1.f);
+    float2 uv = input.uv;
+    float3 positionWS = input.worldPos.xyz;
+    float2 diffuseUV = input.uv * 15.f;
+    
+    VertexNormalInputs normalInputs = CalculateTerrainNormal(uv, diffuseMap[heightMapIdx]);
+    float3 normalWS = normalInputs.normalWS;
+    float3 tangentWS = normalInputs.tangentWS;
+    float3 bitangentWS = normalInputs.bitangentWS;
+    float3 normal = normalWS;
+    float3 blendedNormal = float3(0.f, 0.f, 0.f);
+    float blendedMetallic = 0.f;
+    float blendedSmoothness = 0.f;
+    
+    float totalWeight = 0.0;
+    [unroll(TERRAIN_SPLAT_COUNT)]
+    for (int i = 0; i < splatNum; i++)
+    {
+        SplatData splat = splats[i];
+        float4 weight = diffuseMap[alphaMapIdx[i].x].Sample(anisoClamp, uv);
+        
+        color.rgb += diffuseMap[splat.data[0].x].Sample(anisoWrap, diffuseUV).rgb * weight.r;
+        color.rgb += diffuseMap[splat.data[1].x].Sample(anisoWrap, diffuseUV).rgb * weight.g;
+        color.rgb += diffuseMap[splat.data[2].x].Sample(anisoWrap, diffuseUV).rgb * weight.b;
+        color.rgb += diffuseMap[splat.data[3].x].Sample(anisoWrap, diffuseUV).rgb * weight.a;
+        
+        blendedNormal += (diffuseMap[splat.data[0].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.r;
+        blendedNormal += (diffuseMap[splat.data[1].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.g;
+        blendedNormal += (diffuseMap[splat.data[2].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.b;
+        blendedNormal += (diffuseMap[splat.data[3].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.a;
+        
+        blendedMetallic += splat.data[0].z * weight.r;
+        blendedMetallic += splat.data[1].z * weight.g;
+        blendedMetallic += splat.data[2].z * weight.b;
+        blendedMetallic += splat.data[3].z * weight.a;
+        
+        blendedSmoothness += splat.data[0].w * weight.r;
+        blendedSmoothness += splat.data[1].w * weight.g;
+        blendedSmoothness += splat.data[2].w * weight.b;
+        blendedSmoothness += splat.data[3].w * weight.a;
+        
+        totalWeight += weight.r + weight.g + weight.b + weight.a;
+
+    }
+    
+    if (totalWeight > 0.0)
+    {
+        color.rgb /= totalWeight;
+        blendedNormal /= totalWeight;
+        blendedMetallic /= totalWeight;
+        blendedSmoothness /= totalWeight;
+    }
+    else
+    {
+        blendedNormal = float3(0, 0, 1);
+    }
+    blendedNormal = normalize(blendedNormal);
+    
+    normal = normalize(mul(blendedNormal, float3x3(tangentWS, bitangentWS, normalWS)));
+    
+    float shadowFactor = CalcShadowFactor(input.ShadowPosH);
+    
+    output.albedo = color;
+    output.normalWS = float4(normal, blendedMetallic);
+    output.positionWS = float4(positionWS, blendedSmoothness);
+    output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
+    
+    return output;
 }

@@ -1,5 +1,13 @@
 #include"Paramiters.hlsl"
 
+cbuffer MaterialData : register(b5)
+{
+    float3 color;
+    float type;
+    
+    int diffuseMapIdx;
+};
+
 struct VS_INPUT
 {
     float3 pos : POSITION;
@@ -12,7 +20,7 @@ struct VS_OUTPUT
     float2 uv : TEXCOORD;
 };
 
-VS_OUTPUT VS_Main(VS_INPUT input)
+VS_OUTPUT VS_Forward(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
 
@@ -22,28 +30,25 @@ VS_OUTPUT VS_Main(VS_INPUT input)
     return output;
 }
 
-float4 PS_Main(VS_OUTPUT input) : SV_Target
+float4 PS_Forward(VS_OUTPUT input) : SV_Target
 {
-    float4 color = float4(1.f, 0.f, 0.f, 1.f);
+    float4 texColor = {1.f,1.f,1.f,1.f};
     
-    if (materialIdx == -1)
-        return color;
-    
-    int idx = materials[materialIdx].diffuseMapIdx;
-    if (idx == -1)
-        return color;
-    
-    color = diffuseMap[idx].Sample(linearWrap, input.uv);
-    
-    int type = materials[materialIdx].normalMapIdx;
-    if (type == -1)
+    if (type == 0)
     {
-        color *= materials[materialIdx].albedo;
+        texColor = diffuseMap[diffuseMapIdx].Sample(anisoWrap, input.uv);
     }
-    else if (type == 0)
+    else if (type == 1)
     {
-        color = color.xxxw;
+        texColor = diffuseMap[diffuseMapIdx].Sample(anisoWrap, input.uv).rrra;
+    }
+    else if (type == 2)
+    {
     }
     
-    return color;
+#ifdef TRANSPARENT_CLIP
+    clip(texColor.a - 0.05f);
+#endif
+    
+    return texColor;
 }

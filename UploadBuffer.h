@@ -6,35 +6,36 @@ enum class CONSTANT_BUFFER_TYPE : UINT {
 	OBJECT,
 	LIGHT,
 	BONE_TRANSFORM,
+	BONE_OFFSET,
+	MATERIAL,
 
 	END
 };
 
 enum class STRUCTED_BUFFER_TYPE : UINT {
-	MATERIAL = static_cast<UINT>(CONSTANT_BUFFER_TYPE::END),
 	END
 };
 
 enum class INSTANCE_BUFFER_TYPE : UINT {
-	BILLBOARD = static_cast<UINT>(STRUCTED_BUFFER_TYPE::END),
+	BILLBOARD,
 	END
 };
 
 enum {
 	UPLOAD_BUFFER_TYPE_COUNT = static_cast<UINT>(INSTANCE_BUFFER_TYPE::END),
 
-	TEXTURE_COUNT = 100,
+	TEXTURE_COUNT = 200,
 	CUBE_MAP_COUNT = 5,
-	MATERIAL_COUNT = 1000,
+	MATERIAL_COUNT = 10,
 	MESH_COUNT = 50,
 	PASS_COUNT = 2,
 	OBJECT_COUNT = 500,
-	BILLBOARD_COUNT = 20000,
+	BILLBOARD_COUNT = 1000,
 	BONE_TRANSFORM_COUNT = 10
 };
 
 
-class CUploadBuffer
+class CStructedBuffer
 {
 protected:
 	ComPtr<ID3D12Resource> buffer{};
@@ -42,45 +43,71 @@ protected:
 	BYTE* mappedData{};
 	UINT rootParamIdx{};
 
+	UINT bufferSize{};
 	UINT dataNum{};
-	UINT byteSize{};
 	UINT dataSize{};
 
 public:
-	CUploadBuffer() {};
-	virtual ~CUploadBuffer();
+	CStructedBuffer() {};
+	~CStructedBuffer();
 
 public:
-	virtual void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1) = 0;
-
-	void CopyData(const void* _data, UINT idx = 0);
-	virtual void UpdateBuffer(UINT idx = 0) {};
-
-	BYTE* GetMappedData() { return mappedData; }
+	void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1);
+	void UpdateBuffer(UINT idx, const void* data);
+	void BindToShader();
 
 protected:
 	void CreateBuffer();
 };
 
-
-class CConstantBuffer : public CUploadBuffer
+class CConstantBuffer
 {
+protected:
+	ComPtr<ID3D12Resource> buffer{};
+
+	BYTE* mappedData{};
+	UINT rootParamIdx{};
+
+	UINT bufferSize{};
+	UINT mNextOffset{};
+
 public:
 	CConstantBuffer() {};
-	virtual ~CConstantBuffer() {};
+	~CConstantBuffer();
 
 public:
-	virtual void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1);
-	virtual void UpdateBuffer(UINT idx = 0);
+	void Initialize(UINT _rootParamIdx, UINT initialSize);
+	UINT AddData(const void* data, UINT dataSize);
+	template<typename T>
+	UINT AddData(const T* data);
+	void UpdateBuffer(UINT offSet, const void* data, UINT dataSize);
+	template<typename T>
+	void UpdateBuffer(UINT offSet, const T* data);
+	void BindToShader(UINT offSet = 0);
+
+protected:
+	void CreateBuffer();
+	void Resize(UINT size);
 };
 
-class CStructedBuffer : public CUploadBuffer
+template<typename T>
+inline UINT CConstantBuffer::AddData(const T* data)
 {
-public:
-	CStructedBuffer() {};
-	virtual ~CStructedBuffer() {};
+	size_t dataSize = sizeof(T);
 
-public:
-	virtual void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1);
-	virtual void UpdateBuffer(UINT idx = 0);
-};
+	UINT currentOffset = mNextOffset;
+	mNextOffset += ALIGNED_SIZE(dataSize);
+	if (mNextOffset >= bufferSize) {
+		Resize(mNextOffset * 1.5f);
+	}
+	memcpy(&mappedData[currentOffset], data, dataSize);
+
+	return currentOffset;
+}
+
+template<typename T>
+inline void CConstantBuffer::UpdateBuffer(UINT offSet, const T* data)
+{
+	size_t dataSize = sizeof(T);
+	memcpy(&mappedData[offSet], data, dataSize);
+}

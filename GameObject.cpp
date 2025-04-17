@@ -12,7 +12,8 @@
 #include"Scene.h"
 #include"Animation.h"
 #include"SkinnedMesh.h"
-#include <unordered_set>
+#include"Renderer.h"
+#include"SkinnedMeshRenderer.h"
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -37,10 +38,13 @@ void CGameObject::Awake()
 		child->Awake();
 	}
 
-	if(!mMeshRenderer)
-		mMeshRenderer = GetComponent<CMeshRenderer>();
-	if (!mCollider)
+	mRenderer = GetComponent<CRenderer>();
+	if (!mRenderer) {
+		mRenderer = GetComponent<CSkinnedMeshRenderer>();
+	}
+	if (!mCollider) {
 		mCollider = GetComponent<CCollider>();
+	}
 }
 
 void CGameObject::Start()
@@ -86,18 +90,17 @@ void CGameObject::LateUpdate()
 	if (!mIsStatic) mTransform->UpdateWorldMatrix();
 }
 
-void CGameObject::Render()
+void CGameObject::Render(std::shared_ptr<CCamera> camera, int pass)
 {
-	if (!mActive) {
-		return;
+	if (!mActive) return;
+	if (mAnimationController) {
+		mAnimationController->BindSkinningMatrix();
 	}
-
-	if (mMeshRenderer) {
-		mMeshRenderer->Render();
+	if (mRenderer) {
+		mRenderer->Render(camera, pass);
 	}
-
 	for (auto& child : mChildren) {
-		child->Render();
+		child->Render(camera, pass);
 	}
 }
 
@@ -113,10 +116,10 @@ void CGameObject::SetStatic(bool isStatic)
 void CGameObject::SetInstancing(bool isInstancing)
 {
 	if (isInstancing) {
-		mTransform->ReturnCBVIndex();
+		mRenderer->ReturnCBVIndex();
 	}
 	else {
-		mTransform->SetCBVIndex();
+		mRenderer->SetCBVIndex();
 	}
 
 	mIsInstancing = isInstancing;
@@ -133,7 +136,9 @@ void CGameObject::SetParent(const std::shared_ptr<CGameObject>& parent)
 
 void CGameObject::ReturnCBVIndex()
 {
-	mTransform->ReturnCBVIndex();
+	if (!mRenderer) return;
+
+	mRenderer->ReturnCBVIndex();
 	for (auto& child : mChildren) {
 		child->ReturnCBVIndex();
 	}
@@ -152,6 +157,15 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
 	instance->mLayerType = original->mLayerType;
+	instance->mRootLocalBS = original->mRootLocalBS;
+	instance->mName = original->mName;
+
+	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
+	if (!instance->mRenderer) {
+		instance->mRenderer = instance->GetComponent<CSkinnedMeshRenderer>();
+	}
+	instance->mCollider = instance->GetComponent<CCollider>();
+	instance->mAnimationController = instance->GetComponent<CAnimationController>();
 
 	if (parentTransform) {
 		instance->mTransform->SetParent(parentTransform);
@@ -179,6 +193,15 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
 	instance->mLayerType = original->mLayerType;
+	instance->mRootLocalBS = original->mRootLocalBS;
+	instance->mName = original->mName;
+
+	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
+	if (!instance->mRenderer) {
+		instance->mRenderer = instance->GetComponent<CSkinnedMeshRenderer>();
+	}
+	instance->mCollider = instance->GetComponent<CCollider>();
+	instance->mAnimationController = instance->GetComponent<CAnimationController>();
 
 	if (parentTransform) {
 		instance->mTransform->SetParent(parentTransform);
@@ -192,7 +215,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 }
 
 
-std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::wstring& tag, Vec2 rtSize, 
+std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& tag, Vec2 rtSize, 
 	float nearPlane, float farPlane, float fovAngle)
 {
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
@@ -211,107 +234,111 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::wstring&
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateRenderObject(const std::wstring& tag, 
-	const std::wstring& meshName, const std::wstring& materialName)
+std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& tag, Vec2 rtSize,
+	float nearPlane, float farPlane, Vec2 size)
 {
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
-	object->mTag = tag;
+	object->SetTag(tag);
 
-	object->mMeshRenderer = std::make_shared<CMeshRenderer>();
-	object->AddComponent(object->mMeshRenderer);
-	object->mMeshRenderer->SetMesh(RESOURCE.Get<CMesh>(meshName));
-	object->mMeshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
+	auto camera = std::make_shared<CCamera>();
+	object->AddComponent(camera);
+	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
+	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
+	camera->GenerateOrthographicProjectionMatrix(nearPlane, farPlane, size.x, size.y);
 
 	object->SetActive(true);
+
+	INSTANCE(CSceneManager).GetCurScene()->AddCamera(camera);
+	INSTANCE(CSceneManager).GetCurScene()->AddObject(object);
 
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::wstring& tag, const std::wstring& materialName, Vec2 pos)
+std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size)
 {
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
-	object->mTag = tag;
+	object->mTag = "UI";
 
-	object->mMeshRenderer = std::make_shared<CMeshRenderer>();
-	object->AddComponent(object->mMeshRenderer);
-	object->mMeshRenderer->SetMesh(RESOURCE.Get<CMesh>(L"Rectangle"));
-	object->mMeshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
+	auto meshRenderer = std::make_shared<CMeshRenderer>();
+	object->mRenderer = meshRenderer;
+	object->AddComponent(object->mRenderer);
+	meshRenderer->SetMesh(RESOURCE.Get<CMesh>("Rectangle"));
+	meshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
 
 	object->GetTransform()->SetLocalPosition({ pos.x, pos.y, 0.f });
+	object->GetTransform()->SetLocalScale({ size.x, size.y, 1.f });
 	object->SetActive(true);
-	object->SetRenderLayer(L"UI");
+	object->SetRenderLayer("UI");
+
+	INSTANCE(CSceneManager).GetCurScene()->AddObject(object);
 
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(const std::wstring& tag, const std::wstring& heightMapName, 
-	UINT width, UINT height, Vec3 scale)
+std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(std::ifstream& ifs)
 {
+	using namespace BinaryReader;
+	std::string name{};
+	ReadDateFromFile(ifs, name);
+		
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
-	object->mTag = tag;
 
-	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(L"HeightMap01"));
-	if (!mesh) {
+	UINT resolution{};
+	Vec3 size{};
+	ReadDateFromFile(ifs, resolution);
+
+	auto material = std::static_pointer_cast<CTerrainMaterial>(RESOURCE.Get<CMaterial>(name + "Material"));
+	if (!material) {
+		material = std::make_shared<CTerrainMaterial>();
+		material->LoadTerrainData(ifs);
+		material->SetName(name + "Material");
+		RESOURCE.Add(material);
+	}
+	size = material->GetSize();
+
+	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(name + "Mesh"));
+	if (!mesh) { 
 		mesh = std::make_shared<CHeightMapGridMesh>();
-		mesh->Initialize(heightMapName, width, height, scale);
-		mesh->SetName(L"HeightMap01");
+		mesh->Initialize(name + "Heightmap", resolution, size);
+		mesh->SetName(name + "Mesh");
 		RESOURCE.Add(mesh);
 	}
-
-	std::shared_ptr<CTerrainMaterial> material = std::make_shared<CTerrainMaterial>();
-	material->mSpecularColor = { 0.0,0.0,0.0,0.001 };
-
-	auto texture = RESOURCE.Get<CTexture>(L"TerrainBase");
-	if (texture) {
-		material->mDiffuseMapIdx = texture->GetSrvIndex();
-	}
-	texture = RESOURCE.Get<CTexture>(L"TerrainDetail");
-	if (texture) {
-		material->mDetailMap1Idx = texture->GetSrvIndex();
-	}
-	texture = RESOURCE.Get<CTexture>(L"TerrainNormal");
-	if (texture) {
-		material->mNormalMapIdx = texture->GetSrvIndex();
-	}
-
 	auto terrain = object->AddComponent<CTerrain>();
 	terrain->SetHeightMapGridMesh(mesh);
 	terrain->SetMaterial(material);
 
+	object->CreateTransformFromFile(ifs);
+
+
 	object->SetActive(true);
 
 	return object;
 }
 
-std::shared_ptr<CModelInfo> CGameObject::CreateObjectFromFile(const std::wstring& tag, const std::wstring& fileName)
+std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs)
 {
-	std::ifstream ifs{ fileName, std::ios::binary };
-	if (!ifs) {
-		return nullptr;
+	std::shared_ptr<CGameObject> root = InitFromFile(ifs, prefabs);
+	if (root) {
+		Vec3 boundingCenter;
+		float radius;
+
+		BinaryReader::ReadDateFromFile(ifs, boundingCenter);
+		BinaryReader::ReadDateFromFile(ifs, radius);
+
+		root->mRootLocalBS = BoundingSphere(boundingCenter, radius);
+		root->SetActive(true);
+
+		float isStatic{};
+		BinaryReader::ReadDateFromFile(ifs, isStatic);
+
+		if (isStatic) {
+			root->SetStatic(true);
+		}
+		else {
+			root->SetStatic(false);
+		}
 	}
-	ifs.seekg(0, std::ios_base::beg);
-
-	std::shared_ptr<CModelInfo> modelInfo = std::make_shared<CModelInfo>();
-	modelInfo->mRootObject->mTag = tag;
-	InitFromFile(modelInfo, ifs);
-
-	Vec3 boundingCenter;
-	float radius;
-
-	BinaryReader::ReadDateFromFile(ifs, boundingCenter);
-	BinaryReader::ReadDateFromFile(ifs, radius);
-
-	modelInfo->mRootObject->mRootLocalBS = BoundingSphere(boundingCenter, radius);
-
-	if (!modelInfo->mRootObject->GetCollider()) {
-		auto collider = std::make_shared<CCollider>();
-		modelInfo->mRootObject->AddComponent(collider);
-		modelInfo->mRootObject->mCollider = collider;
-	}
-
-	
-
-	return modelInfo;
+	return root;
 }
 
 std::shared_ptr<CGameObject> CGameObject::GetSptrFromThis()
@@ -319,113 +346,202 @@ std::shared_ptr<CGameObject> CGameObject::GetSptrFromThis()
 	return shared_from_this();
 }
 
-void CGameObject::InitFromFile(std::shared_ptr<CModelInfo> model, std::ifstream& inFile)
+std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs)
 {
 	using namespace BinaryReader;
 
-	int frameNum{};
-	int textureCnt{};
-	int skinnedMeshCnt{};
+	std::shared_ptr<CGameObject> obj = std::make_shared<CGameObject>();
 
 	std::string token{};
 
 	while (true) {
 		ReadDateFromFile(inFile, token);
-		if (token == "<Hierarchy>") {
-			while (true) {
-				ReadDateFromFile(inFile, token); // </Hierarchy>
-				if (token == "<Frame>:") {
-					std::shared_ptr<CGameObject> root = std::make_shared<CGameObject>();
-					InitHierarchyFromFile(root, inFile, &skinnedMeshCnt);
-					if (root) model->mRootObject->AddChild(root);
-				}
-				else if (token == "</Hierarchy>") {
-					break;
-				}
-			}
-		}
-		else if (token == "<Animation>") {
-			InitAnimationFromFile(model, inFile);
-
-			model->mAnimationSets->mBoneFrameCaches.resize(model->mRootObject->mChildren.size());
-			model->mRootObject->mChildren.front()->CacheFrameHierarchies(model->mAnimationSets->mBoneFrameCaches);
-
-			model->PrepareSkinning(skinnedMeshCnt);
-		}
-		else if (token == "</Animation>") {
-			break;
-		}
-	}
-}
-
-void CGameObject::InitHierarchyFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& inFile, int* skinnedMeshCnt) {
-	using namespace BinaryReader;
-
-	int frameNum{};
-	int textureCnt{};
-
-	std::string token{};
-
-	ReadDateFromFile(inFile, frameNum);
-	ReadDateFromFile(inFile, textureCnt);
-
-	std::string name{};
-
-	ReadDateFromFile(inFile, name);
-	if (name == "ID55inst") {
-		std::cout << "Asdfasdf";
-	}
-	obj->mName = stringToWstring(name);
-
-	while (true) {
-		ReadDateFromFile(inFile, token);
-		if (token == "<Transform>:") {
+		if (token == "<Prefab>:") {
+			std::string prefabName{};
+			ReadDateFromFile(inFile, prefabName);
+			obj = CGameObject::Instantiate(prefabs[prefabName]);
+			obj->SetActive(true);
 			obj->CreateTransformFromFile(inFile);
-			obj->mTransform->SetOwner(obj.get());
+			return obj;
 		}
-		else if (token == "<Mesh>:" || token == "<SkinDeformations>:") {
-			obj->CreateMeshRendererFromFile(inFile, token);
-			obj->mMeshRenderer->SetOwner(obj.get());
-			obj->mCollider->SetOwner(obj.get());
+		if (token == "<Frame>:") {
+			ReadDateFromFile(inFile, obj->mName);
+		}
+		else if (token == "<Tag>:") {
+			ReadDateFromFile(inFile, obj->mTag);
+		}
+		else if (token == "<Transform>:") {
+			obj->CreateTransformFromFile(inFile);
+		}
+		else if (token == "<Renderer>:") {
+			obj->CreateRendererFromFile(inFile);
+		}
+		else if (token == "<Terrain>:") {
+			obj->CreateTerrainFromFile(inFile);
+		}
+		else if (token == "<Collider>:") {
+			Vec3 center{};
+			Vec3 size{};
+			ReadDateFromFile(inFile, center);
+			ReadDateFromFile(inFile, size);
+
+			auto collider = obj->AddComponent<CCollider>();
+			collider->Initialize(center, size);
 		}
 		else if (token == "<Children>:") {
 			int childrenCnt{};
 			ReadDateFromFile(inFile, childrenCnt);
 
 			for (int i = 0; i < childrenCnt; i++) {
-				ReadDateFromFile(inFile, token);
-				if (token == "<Frame>:") {
-					std::shared_ptr<CGameObject> child = std::make_shared<CGameObject>();
-					InitHierarchyFromFile(child, inFile, skinnedMeshCnt);
-					if (child) child->SetParent(obj);
-				}
+				std::shared_ptr<CGameObject> child = InitFromFile(inFile, prefabs);
+				child->SetParent(obj);
 			}
+		}
+		else if (token == "<Animation>:") {
+			std::string animName{};
+			ReadDateFromFile(inFile, animName);
+			animName = animName.substr(0, animName.find('@') + 1) + "anim";
+
+			obj->CreateAnimationFromFile(ANIMATION_PATH(animName));
 		}
 		else if (token == "</Frame>") {
 			break;
 		}
 	}
+	return obj;
 }
-void CGameObject::InitAnimationFromFile(std::shared_ptr<CModelInfo> model, std::ifstream& inFile)
+
+void CGameObject::CreateAnimationFromFile(std::string& fileName)
 {
 	using namespace BinaryReader;
+
+	std::ifstream ifs{ fileName, std::ios::binary};
+	if (!ifs) {
+		return;
+	}
+	
+
+	mAnimationController = AddComponent<CAnimationController>();
 
 	std::string token{};
 	int setsNum{};
 
 	while (true) {
-		ReadDateFromFile(inFile, token);
+		ReadDateFromFile(ifs, token);
 
 		if (token == "<AnimationSets>:") {
-			ReadDateFromFile(inFile, setsNum);
-			model->mAnimationSets = std::make_shared<CAnimationSets>(setsNum);
+			ReadDateFromFile(ifs, setsNum);
+			mAnimationController->mAnimationSets = std::make_shared<CAnimationSets>(setsNum);
 		}
 		else if (token == "<AnimationSet>:") {
-			CreateAnimationSetFromFile(model, inFile);
+			int setNum{};
+			float startTime{};
+			float endTime{};
+			std::string setName;
+
+			ReadDateFromFile(ifs, setNum);
+			ReadDateFromFile(ifs, setName);
+			ReadDateFromFile(ifs, startTime);
+			ReadDateFromFile(ifs, endTime);
+
+			auto animSet = std::make_shared<CAnimationSet>(startTime, endTime, setName);
+			mAnimationController->mAnimationSets->mAnimationSet[setNum] = animSet;
+
+			ReadDateFromFile(ifs, token);
+			if (token == "<AnimationLayers>:") {
+				int layersNum{};
+				ReadDateFromFile(ifs, layersNum);
+
+				animSet->mLayers.resize(layersNum);
+				animSet->mScales.resize(layersNum);
+				animSet->mRotations.resize(layersNum);
+				animSet->mTranslations.resize(layersNum);
+
+				for (int i = 0; i < layersNum; i++) {
+					ReadDateFromFile(ifs, token);
+					if (token == "<AnimationLayer>:") {
+						int layerNum{};
+						ReadDateFromFile(ifs, layerNum);
+
+						animSet->mLayers[i] = std::make_shared<CAnimationLayer>();
+						auto layer = animSet->mLayers[i];
+
+						int cacheNum{};
+						ReadDateFromFile(ifs, cacheNum);
+
+						layer->mBoneNames.resize(cacheNum);
+						layer->mBoneFrameCaches.resize(cacheNum);
+						layer->mAnimationCurves.resize(cacheNum);
+
+						animSet->mScales[i].resize(cacheNum);
+						animSet->mRotations[i].resize(cacheNum);
+						animSet->mTranslations[i].resize(cacheNum);
+
+						ReadDateFromFile(ifs, layer->mWeight);
+
+						for (int j = 0; j < cacheNum; j++)
+						{
+							ReadDateFromFile(ifs, token);
+							if (token == "<AnimationCurve>:") {
+								int curveNude{};
+								ReadDateFromFile(ifs, curveNude); //j
+								ReadDateFromFile(ifs, layer->mBoneNames[j]);
+
+								while (true) {
+									ReadDateFromFile(ifs, token);
+
+									if (token == "<TX>:") layer->LoadKeyValues(j, 0, ifs);
+									else if (token == "<TY>:") layer->LoadKeyValues(j, 1, ifs);
+									else if (token == "<TZ>:") layer->LoadKeyValues(j, 2, ifs);
+									else if (token == "<RX>:") layer->LoadKeyValues(j, 3, ifs);
+									else if (token == "<RY>:") layer->LoadKeyValues(j, 4, ifs);
+									else if (token == "<RZ>:") layer->LoadKeyValues(j, 5, ifs);
+									else if (token == "<SX>:") layer->LoadKeyValues(j, 6, ifs);
+									else if (token == "<SY>:") layer->LoadKeyValues(j, 7, ifs);
+									else if (token == "<SZ>:") layer->LoadKeyValues(j, 8, ifs);
+									else if (token == "</AnimationCurve>")
+									{
+										break;
+									}
+								}
+							}
+						}
+						ReadDateFromFile(ifs, token); //</AnimationLayer>
+					}
+				}
+				ReadDateFromFile(ifs, token); //</AnimationLayers>
+
+				//int64_t commonBoneNum = 0;
+				//std::unordered_map<CTransform*, std::pair<int64_t, int64_t>> global_map;
+				//
+				//for (const auto& layer : animSet->mLayers) {
+				//	std::unordered_map<CTransform*, int> local_count;
+				//	for (const auto& cache : layer->mBoneFrameCaches) {
+				//		local_count[cache.lock().get()]++;
+				//	}
+				//
+				//	for (const auto& [cache, m] : local_count) {
+				//		auto& sums = global_map[cache];
+				//		sums.first += m;
+				//		sums.second += static_cast<int64_t>(m) * m;
+				//	}
+				//}
+				//
+				//for (const auto& [cache, sums] : global_map) {
+				//	int64_t sum_m = sums.first;
+				//	int64_t sum_m2 = sums.second;
+				//	int64_t contrib = (sum_m * sum_m - sum_m2) / 2;
+				//	commonBoneNum += contrib;
+				//}
+				//
+				//if (commonBoneNum) {
+				//	animSet->mBoneFrameCaches.resize(commonBoneNum);
+				//}
+			}
+			ReadDateFromFile(ifs, token); //</AnimationSet>
 		}
 		else if (token == "</AnimationSets>")
 		{
-
 			break;
 		}
 	}
@@ -434,244 +550,98 @@ void CGameObject::InitAnimationFromFile(std::shared_ptr<CModelInfo> model, std::
 void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 {
 	using namespace BinaryReader;
-	ReadDateFromFile(inFile, mTransform->mLocalMat);
-	ReadDateFromFile(inFile, mTransform->mLocalScale);
-	ReadDateFromFile(inFile, mTransform->mLocalEulerAngle);
 	ReadDateFromFile(inFile, mTransform->mLocalPosition);
+	ReadDateFromFile(inFile, mTransform->mLocalEulerAngle);
+	ReadDateFromFile(inFile, mTransform->mLocalScale);
+	ReadDateFromFile(inFile, mTransform->mLocalRotation);
 
-	//std::string token{};
-	//ReadDateFromFile(inFile, token);
-	//if (token == "<TransformMatrix>:") {
-	//	ReadDateFromFile(inFile, mTransform->mLocalMat);
+	ReadDateFromFile(inFile, mTransform->mLocalMat);
+
+	//if (mName == "Premade_Necromancer") {
+	//	std::cout << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
+	//	std::cout << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
+	//	std::cout << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
+	//	std::cout << mTransform->mLocalRotation.x << " " << mTransform->mLocalRotation.y << " " << mTransform->mLocalRotation.z << std::endl;
+	//	std::cout << std::endl;
+	//	PrintMatrix(mTransform->mLocalMat);
+	//	std::cout << "======================" << std::endl;
 	//}
 }
 
-void CGameObject::CreateMeshRendererFromFile(std::ifstream& inFile, std::string& meshType)
+void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 {
 	using namespace BinaryReader;
-
-	mMeshRenderer = std::make_shared<CMeshRenderer>();
-	AddComponent(mMeshRenderer);
-
-	std::shared_ptr<CMesh> mesh;
 	std::string token{};
 
-	if (meshType == "<SkinDeformations>:") {
-		mesh = CSkinnedMesh::CreateSkinnedMeshFromFile(inFile);
-		ReadDateFromFile(inFile, token); // <Mesh>:
-	}
-	mesh = CMesh::CreateMeshFromFile(inFile);
-
-	std::string meshName;
-	BinaryReader::ReadDateFromFile(inFile, meshName);
-	std::wstring meshNameW = BinaryReader::stringToWstring(meshName);
-
-	mesh->SetName(meshNameW);
-	mMeshRenderer->SetMesh(mesh);
-	RESOURCE.Add(mesh);
-
-	mCollider = std::make_shared<CCollider>();
-	AddComponent(mCollider);
-	mCollider->SetLocalOOBB(mesh->oobb);
-
 	ReadDateFromFile(inFile, token);
+	if (token == "<SkinnedMesh>:") {
+		auto skinnedMeshRenderer = AddComponent<CSkinnedMeshRenderer>();
+		mRenderer = skinnedMeshRenderer;
 
-	if (token == "<Materials>:") {
-		int materialCnt{};
-		ReadDateFromFile(inFile, materialCnt);
+		std::string meshName{};
+		ReadDateFromFile(inFile, meshName);
+		skinnedMeshRenderer->SetSkinnedMesh(meshName);
 
-		for (int i = 0; i < materialCnt; i++) {
-			ReadDateFromFile(inFile, token);
-
-			std::shared_ptr<CMaterial> material = CMaterial::CreateMaterialFromFile(inFile);
-
-			mMeshRenderer->AddMaterial(material);
+		UINT boneCount{};
+		ReadDateFromFile(inFile, boneCount);
+		skinnedMeshRenderer->mBoneNames.resize(boneCount);
+		for (UINT i = 0; i < boneCount; i++) {
+			std::string boneName{};
+			ReadDateFromFile(inFile, boneName);
+			skinnedMeshRenderer->mBoneNames[i] = boneName;
 		}
+	}
+	else if (token == "<Mesh>:") {
+		auto meshRenderer = AddComponent<CMeshRenderer>();
+		mRenderer = meshRenderer;
 
-		ReadDateFromFile(inFile, token);
+		std::string meshName{};
+		ReadDateFromFile(inFile, meshName);
+		meshRenderer->SetMesh(meshName);
+	}
+
+	int materialCnt{};
+	std::string materialName{};
+	ReadDateFromFile(inFile, materialCnt);
+	for (int i = 0; i < materialCnt; i++) {
+		ReadDateFromFile(inFile, materialName);
+		mRenderer->AddMaterial(materialName);
 	}
 }
 
-void CGameObject::CreateAnimationSetFromFile(std::shared_ptr<CModelInfo>& model, std::ifstream& inFile)
+void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 {
 	using namespace BinaryReader;
-	
-	int setNum{};
-	float startTime{};
-	float endTime{};
-	std::string token;
+	std::string name{};
+	ReadDateFromFile(inFile, name);
+	UINT resolution{};
+	Vec3 size{};
+	Vec3 offset{};
+	ReadDateFromFile(inFile, resolution);
 
-	ReadDateFromFile(inFile, setNum);
-	ReadDateFromFile(inFile, token); // Animation Set Name
-	ReadDateFromFile(inFile, startTime);
-	ReadDateFromFile(inFile, endTime);
-
-	auto animSet = std::make_shared<CAnimationSet>(startTime, endTime, token);
-	model->mAnimationSets->mAnimationSet[setNum] = animSet;
-
-	ReadDateFromFile(inFile, token);
-	if (token != "<AnimationLayers>:") {
-		int layersNum{};
-		ReadDateFromFile(inFile, layersNum);
-
-		animSet->mLayers.resize(layersNum);
-		animSet->mScales.resize(layersNum);
-		animSet->mRotations.resize(layersNum);
-		animSet->mTranslations.resize(layersNum);
-
-		for (int i = 0; i < layersNum; i++) {
-			CreateAnimationLayerFromFile(model, inFile, animSet, i);
-		}
-
-		ReadDateFromFile(inFile, token); //</AnimationLayers>
-
-		int commonBoneNum = CalculateCommonBoneNum(animSet);
-		if (commonBoneNum) {
-			animSet->mCommonBoneFrameCaches.resize(commonBoneNum);
-		}
-
+	auto material = std::static_pointer_cast<CTerrainMaterial>(RESOURCE.Get<CMaterial>(name + "Material"));
+	if (!material) {
+		material = std::make_shared<CTerrainMaterial>();
+		material->LoadTerrainData(inFile);
+		material->SetName(name + "Material");
+		RESOURCE.Add(material);
 	}
+	size = material->GetSize();
 
-	ReadDateFromFile(inFile, token); //</AnimationSet>
-}
+	ReadDateFromFile(inFile, offset);
 
-void CGameObject::CreateAnimationLayerFromFile(std::shared_ptr<CModelInfo>& model, std::ifstream& inFile, std::shared_ptr<CAnimationSet>& animSet, int layerIndex)
-{
-	using namespace BinaryReader;
-
-	std::string token;
-	ReadDateFromFile(inFile, token);
-	if (token != "<AnimationLayer>:")
-		return;
-
-	int layerNum{};
-	ReadDateFromFile(inFile, layerNum);
-
-	animSet->mLayers[layerIndex] = std::make_shared<CAnimationLayer>();
-	auto layer = animSet->mLayers[layerIndex];
-
-	int cacheNum{};
-	ReadDateFromFile(inFile, cacheNum);
-
-	layer->mBoneFrameCaches.resize(cacheNum);
-	layer->mAnimationCurves.resize(cacheNum);
-
-	animSet->mScales[layerIndex].resize(cacheNum);
-	animSet->mRotations[layerIndex].resize(cacheNum);
-	animSet->mTranslations[layerIndex].resize(cacheNum);
-
-	ReadDateFromFile(inFile, layer->mWeight);
-
-	for (int j = 0; j < cacheNum; j++)
-	{
-		ReadDateFromFile(inFile, token);
-		if (token != "<AnimationCurve>:")
-			break;
-
-		int curveNude{};
-		ReadDateFromFile(inFile, curveNude); //j
-
-		ReadDateFromFile(inFile, token); //Frame Name
-		layer->mBoneFrameCaches[j] = model->mRootObject->FindChildByName(stringToWstring(token));
-
-		CreateAnimationCurvesFromFile(inFile, layer, j);
+	auto mesh = std::static_pointer_cast<CHeightMapGridMesh>(RESOURCE.Get<CMesh>(name + "Mesh"));
+	if (!mesh) {
+		mesh = std::make_shared<CHeightMapGridMesh>();
+		mesh->Initialize(name + "Heightmap", resolution, size, offset);
+		mesh->SetName(name + "Mesh");
+		RESOURCE.Add(mesh);
 	}
+	auto terrain = AddComponent<CTerrain>();
+	terrain->SetHeightMapGridMesh(mesh);
+	terrain->SetMaterial(material);
 
-	ReadDateFromFile(inFile, token); //</AnimationLayer>
-}
-
-void CGameObject::CreateAnimationCurvesFromFile(std::ifstream& inFile, std::shared_ptr<CAnimationLayer>& layer, int curveIndex)
-{
-	using namespace BinaryReader;
-	std::string token;
-
-	while (true) {
-		ReadDateFromFile(inFile, token);
-
-		if (token == "<TX>:") layer->LoadKeyValues(curveIndex, 0, inFile);
-		else if (token == "<TY>:") layer->LoadKeyValues(curveIndex, 1, inFile);
-		else if (token == "<TZ>:") layer->LoadKeyValues(curveIndex, 2, inFile);
-		else if (token == "<RX>:") layer->LoadKeyValues(curveIndex, 3, inFile);
-		else if (token == "<RY>:") layer->LoadKeyValues(curveIndex, 4, inFile);
-		else if (token == "<RZ>:") layer->LoadKeyValues(curveIndex, 5, inFile);
-		else if (token == "<SX>:") layer->LoadKeyValues(curveIndex, 6, inFile);
-		else if (token == "<SY>:") layer->LoadKeyValues(curveIndex, 7, inFile);
-		else if (token == "<SZ>:") layer->LoadKeyValues(curveIndex, 8, inFile);
-		else if (token == "</AnimationCurve>")
-		{
-			break;
-		}
-	}
-}
-
-int CGameObject::CalculateCommonBoneNum(std::shared_ptr<CAnimationSet>& animSet)
-{
-	int64_t commonBoneNum = 0;
-	std::unordered_map<std::shared_ptr<CGameObject>, std::pair<int64_t, int64_t>> global_map;
-
-	for (const auto& layer : animSet->mLayers) {
-		std::unordered_map<std::shared_ptr<CGameObject>, int> local_count;
-		for (const auto& cache : layer->mBoneFrameCaches) {
-			local_count[cache]++;
-		}
-
-		for (const auto& [cache, m] : local_count) {
-			auto& sums = global_map[cache];
-			sums.first += m;
-			sums.second += static_cast<int64_t>(m) * m;
-		}
-	}
-
-	for (const auto& [cache, sums] : global_map) {
-		int64_t sum_m = sums.first;
-		int64_t sum_m2 = sums.second;
-		int64_t contrib = (sum_m * sum_m - sum_m2) / 2;
-		commonBoneNum += contrib;
-	}
-
-	return commonBoneNum;
-}
-
-const BoundingBox& CGameObject::CombineChildrenOOBB()
-{
-	if (!mCollider) {
-		return BoundingBox();
-	}
-
-	BoundingBox result = mCollider->GetAABB();
-
-	for (const auto& child : mChildren) {
-		BoundingBox childAABB = child->CombineChildrenOOBB();
-
-		BoundingBox::CreateMerged(result, result, childAABB);
-	}
-
-	return result;
-}
-
-void CGameObject::CalculateRootOOBB()
-{
-	BoundingBox combinedAABB = CombineChildrenOOBB();
-	BoundingOrientedBox oobb{};
-	BoundingOrientedBox::CreateFromBoundingBox(oobb, combinedAABB);
-
-	mCollider->SetLocalOOBB(oobb);
-}
-
-void CGameObject::UpdateTransform(const Matrix* parent)
-{
-	if (parent) {
-		mTransform->mWorldMat = mTransform->mLocalMat * (*parent);
-	}
-	else {
-		mTransform->mWorldMat = mTransform->mLocalMat;
-	}
-
-	// 필요하다면 여기서 콜라이더나 바운딩볼 갱신
-
-	for (auto& child : mChildren) {
-		child->UpdateTransform(&mTransform->mWorldMat);
-	}
+	INSTANCE(CSceneManager).GetCurScene()->SetTerrain(terrain);
 }
 
 void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches)
@@ -680,20 +650,6 @@ void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>
 
 	for (auto& child : mChildren) {
 		child->CacheFrameHierarchies(boneFrameCaches);
-	}
-}
-
-void CGameObject::Animate(float elapsedTime)
-{
-	//OnPrepareRender();
-	
-	if (mAnimationController) {
-		ResetForAnimationBlending();
-		mAnimationController->AdvanceTime(elapsedTime, shared_from_this());
-	}
-
-	for (auto& child : mChildren) {
-		child->Animate(elapsedTime);
 	}
 }
 
@@ -708,25 +664,35 @@ void CGameObject::ResetForAnimationBlending()
 	}
 }
 
-void CGameObject::FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int skinnedMeshNum)
+void CGameObject::PrepareSkinning()
 {
-	if (mMeshRenderer) {
-		auto mesh = mMeshRenderer->GetMesh();
-		if (mesh) {
-			auto skinned = std::dynamic_pointer_cast<CSkinnedMesh>(mesh);
-			if (skinned) {
-				skinnedMeshes.push_back(skinned);
-				skinnedMeshNum++;
-			}
-		}
-	}
+	mAnimationController->PrepareSkinning();
+}
 
-	for (auto& child : mChildren) {
-		child->FindAndSetSkinnedMesh(skinnedMeshes, skinnedMeshNum);
+void CGameObject::UpdateWorldMatrices()
+{
+	GetTransform()->UpdateWorldMatrix();
+
+	for (auto& child : GetChildren()) {
+		child->UpdateWorldMatrices();
 	}
 }
 
-std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::wstring& name)
+void CGameObject::PrintSRT()
+{
+	std::cout << "S     : " << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
+	std::cout << "Euler : " << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
+	std::cout << "T     : " << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
+	std::cout << "Quat  : " << mTransform->mLocalRotation.x << " " << mTransform->mLocalRotation.y << " " << mTransform->mLocalRotation.z << " " << mTransform->mLocalRotation.w << std::endl;
+	std::cout << std::endl;
+	std::cout << "로컬 변환 행렬" << std::endl;
+	PrintMatrix(mTransform->mLocalMat);
+	std::cout << std::endl;
+	std::cout << "월드 변환 행렬" << std::endl;
+	PrintMatrix(mTransform->mWorldMat);
+}
+
+std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::string& name)
 {
 	std::shared_ptr<CGameObject> obj{ nullptr };
 
@@ -758,15 +724,5 @@ void CGameObject::RemoveChild(std::shared_ptr<CGameObject> child)
 	if (itr != mChildren.end()) {
 		mChildren.erase(itr);
 	}
-}
-
-void CGameObject::SetTrackAnimationSet(int trackIndex, int setIndex)
-{
-	if (mAnimationController) mAnimationController->SetTrackAnimationSet(trackIndex, setIndex);
-}
-
-void CGameObject::SetTrackAnimationPosition(int trackIndex, float position)
-{
-	if (mAnimationController) mAnimationController->SetTrackPosition(trackIndex, position);
 }
 

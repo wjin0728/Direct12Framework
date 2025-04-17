@@ -5,6 +5,7 @@ class CFollowTarget : public CMonoBehaviour
 {
 private:
 	std::shared_ptr<CGameObject> mTarget{};
+	std::shared_ptr<CTerrain> mTerrain{};
 
 public:
 	CFollowTarget();
@@ -21,6 +22,6 @@ public:
 
 public:
 	void SetTarget(const std::shared_ptr<CGameObject>& target) { mTarget = target; }
-
+	void SetTerrain(const std::shared_ptr<CTerrain>& terrain) { mTerrain = terrain; }
 };
 

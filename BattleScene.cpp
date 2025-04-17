@@ -6,17 +6,16 @@
 #include"ResourceManager.h"
 #include"GameObject.h"
 #include"MeshRenderer.h"
-#include"FollowTarget.h"
+#include"ThirdPersonCamera.h"
 #include"Transform.h"
 #include"RigidBody.h"
 #include"Collider.h"
 #include"PlayerController.h"
-#include"AvoidObstacle.h"
 #include"InputManager.h"
 #include"Terrain.h"
 #include"Camera.h"
+#include"Material.h"
 #include"InstancingGroup.h"
-#include"Animation.h"
 
 CBattleScene::CBattleScene()
 {
@@ -24,136 +23,55 @@ CBattleScene::CBattleScene()
 
 void CBattleScene::Initialize()
 {
-	mRenderLayers[L"Opaque"] = ObjectList{};
-	mShaders[L"Opaque"] = RESOURCE.Get<CShader>(L"Forward");
-	mRenderLayers[L"Terrain"] = ObjectList{};
-	mShaders[L"Terrain"] = RESOURCE.Get<CShader>(L"Terrain");
-	mRenderLayers[L"SkyBox"] = ObjectList{};
-	mShaders[L"SkyBox"] = RESOURCE.Get<CShader>(L"SkyBox");
-	mShaders[L"Shadow"] = RESOURCE.Get<CShader>(L"Shadow");
-	mRenderLayers[L"UI"] = ObjectList{};
-	mShaders[L"UI"] = RESOURCE.Get<CShader>(L"Sprite");
+	LoadSceneFromFile(SCENE_PATH(std::string("Lobby")));
+
+
 
 #pragma region Player
 
-	auto Player = CGameObject::CreateObjectFromFile(L"Player", L"Resources\\Models\\dummy.bin");
+	auto Player = FindObjectWithTag("Player");
+	Player->SetStatic(false);
 
-	auto controller = std::make_shared<CAnimationController>(Player->mAnimationSets);
-	Player->mRootObject->mAnimationController = controller;
-	controller->SetTrackAnimationSet(0, 0);
-	controller->SetTrackStartEndTime(0, 0.0f, 2.5f);
-
-	Player->GetRootObject()->SetStatic(false);
-	Player->GetRootObject()->GetTransform()->SetLocalPosition({ 0.f,200.f,0.f });
-	Player->GetRootObject()->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
-	Player->GetRootObject()->CalculateRootOOBB();
-
-	Player->GetRootObject()->AddComponent<CRigidBody>();
-	Player->GetRootObject()->AddComponent<CPlayerController>();
-	Player->GetRootObject()->AddComponent<CAnimationController>();
-
-	/*auto avoidObstacle = std::make_shared<CAvoidObstacle>();
-	Player->AddScript(avoidObstacle);
-	avoidObstacle->SetOwner(Player);*/
-
-	AddObject(L"Opaque", Player->GetRootObject());
+	Player->AddComponent<CRigidBody>();
+	auto playerController = Player->AddComponent<CPlayerController>();
 
 #pragma endregion
-
 
 #pragma region Main Camera
 	{
-		auto playerFollower = std::make_shared<CGameObject>();
-		playerFollower->SetStatic(false);
 
-		auto followTarget = playerFollower->AddComponent<CFollowTarget>();
-		followTarget->SetTarget(Player->GetRootObject());
-		playerFollower->GetTransform()->SetLocalPosition({ 0.f,200.f,0.f });
-
-		auto cameraObj = CGameObject::CreateCameraObject(L"MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
-			1.f, 300.f);
+		auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
+			1.f, 100.f);
 		cameraObj->SetStatic(false);
-		cameraObj->GetTransform()->SetLocalPosition({ 0.f, 4.f, -8.f });
-		cameraObj->GetTransform()->Rotate({ 15.f,0.f,0.f });
-		cameraObj->SetParent(playerFollower);
 
-		AddObject(L"", playerFollower);
+		auto playerFollower = cameraObj->AddComponent<CThirdPersonCamera>();
+		playerFollower->SetTarget(Player);
+
+		AddObject(cameraObj);
+		playerController->SetCamera(cameraObj->GetComponent<CCamera>());
+
+		auto uiCamera = CGameObject::CreateCameraObject("UICamera", INSTANCE(CDX12Manager).GetRenderTargetSize(), 0.f, 100.f, INSTANCE(CDX12Manager).GetRenderTargetSize());
 	}
 #pragma endregion
-
-#pragma region Terrain
-	{
-		auto terrainObj = CGameObject::CreateTerrainObject(L"Terrain", L"Resources\\Textures\\HeightMap.raw", 
-			257, 257, { 8.0f, 1.5f, 8.0f });
-		AddObject(L"", terrainObj);
-
-		mTerrain = terrainObj->GetComponent<CTerrain>();
-
-		auto skyBox = CGameObject::CreateRenderObject(L"SkyBox", L"Cube", L"SkyBox");
-		skyBox->SetStatic(true);
-		skyBox->GetTransform()->SetLocalScale({ 2000.f,2000.f,2000.f });
-
-		AddObject(L"SkyBox", skyBox);
-	}
-#pragma endregion
-
-#pragma region Billboard
-	auto instancingGroup = std::make_shared<CInstancingGroup>();
-	instancingGroup->Initialize(INSTANCE_BUFFER_TYPE::BILLBOARD);
-	instancingGroups.push_back(instancingGroup);
-	
-	
-	
-	for (float i = -10.f; i < 10.f; i+=250.f) {
-		for (float j = -10.f; j < 10.f; j+=250.f) {
-			float width = 50.f;
-			float height = 50.f;
-	
-			float halfWidth = 0.5f * width;
-			float halfHeight = 0.5f * height;
-	
-			auto billboard = CGameObject::CreateRenderObject(L"Billboard", L"", L"Tree2");
-			billboard->SetStatic(true);
-			billboard->SetInstancing(true);
-			billboard->GetTransform()->SetLocalPosition({ i,mTerrain->GetHeight(i, j) + halfHeight,j});
-			billboard->GetTransform()->SetLocalScale({ halfWidth, halfHeight, 1.f });
-	
-			AddObject(L"", billboard);
-			instancingGroup->AddObject(billboard);
-		}
-	}
-
-
-#pragma endregion
-
-	std::shared_ptr<CMaterial> mat = std::make_shared<CMaterial>();
-	mat->SetName(L"ShadowMap");
-	mat->mNormalMapIdx = 0;
-	mat->mDiffuseMapIdx = RESOURCE.Get<CTexture>(L"ShadowMap")->CreateSRV();
-	RESOURCE.Add(mat);
-
-#pragma region UI
-
-#pragma endregion
-
 
 	SetLights();
 
-	auto shadowMap = RESOURCE.Get<CTexture>(L"ShadowMap");
+	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
+	shadowMap->CreateSRV();
 	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
 }
 
 void CBattleScene::Update()
 {
 	if (INPUT.IsKeyDown(KEY_TYPE::ESCAPE)) {
-		INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAIN);
+		::PostQuitMessage(0);
 		return;
 	}
-	if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
-		INSTANCE(CSceneManager).ChangeScene(SCENE_TYPE::MENU);
-		return;
+	else if (INPUT.IsKeyDown(KEY_TYPE::ALT)) {
+		INPUT.ChangeMouseState();
 	}
 	CScene::Update();
+
 }
 
 void CBattleScene::LateUpdate()
@@ -165,8 +83,8 @@ void CBattleScene::LateUpdate()
 	INSTANCE(CResourceManager).UpdateMaterials();
 	lightMgr->Update();
 
-	auto& mainCam = mCameras[L"MainCamera"];
-	auto& camera = mCameras[L"DirectinalLight"];
+	auto& mainCam = mCameras["MainCamera"];
+	auto& camera = mCameras["DirectinalLight"];
 
 	Vec3 corners[8]{};
 	mainCam->mFrustumWorld.GetCorners(corners);
@@ -199,49 +117,36 @@ void CBattleScene::SetLights()
 	lightMgr = std::make_unique<CLightManager>();
 	lightMgr->Initialize();
 
-	Vec4 lightColor = { 1.f,1.f,1.f,1.f };
+	Vec3 lightColor = { 1.f,1.f,1.f};
 	Vec3 strength = { 1.f,1.f,1.f };
-	Vec3 dir = { 1.f,-1.5f,1.f };
+	Vec3 dir = { 0.5f,-1.f,0.5f };
 
 	dirLight = std::make_shared<CDirectionalLight>(lightColor, strength, dir);
 	lightMgr->AddDirectionalLight(dirLight);
 
-	dirLightObj = std::make_shared<CGameObject>();
-	dirLightObj->SetTag(L"DirectinalLight");
-	auto camera = std::make_shared<CCamera>();
-	dirLightObj->AddComponent(camera);
-	camera->SetViewport(0, 0, 4048, 4048);
-	camera->SetScissorRect(0, 0, 4048, 4048);
-
-	auto& mainCam = mCameras[L"MainCamera"];
+	auto& mainCam = mCameras["MainCamera"];
 	Vec3 corners[8]{};
 	mainCam->mFrustumView.GetCorners(corners);
 
-	float fov = mainCam->GetFov();
-	float tanHalfVFov = tanf(XMConvertToRadians(fov / 2.0f));
-	float tanHalfHFov = tanHalfVFov * mainCam->GetAspect();
 
 	Vec3 center{};
 	for (int i = 0; i < 8; ++i) {
 		center += corners[i];
 	}
 	center /= 8.f;
-
 	float max = -FLT_MAX;
 	for (int i = 0; i < 8; ++i) {
 		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
 	}
 	float r = max;
+	
+	Vec2 shadowMapSize = { 4096.f * 3, 4096.f * 3 };
+	float size = r * 2.f;
 
-	camera->GenerateOrthographicProjectionMatrix(1.f, r*2.f, r * 2.f, r * 2.f);
-
-	AddCamera(camera);
-
+	dirLightObj = CGameObject::CreateCameraObject("DirectinalLight", shadowMapSize, 1.f, size, { size, size });
 	auto transform = dirLightObj->GetTransform();
 
 	dir.Normalize();
 	transform->SetLocalPosition(center - (r*dir));
 	transform->LookTo(dir);
-
-	AddObject(dirLightObj);
 }

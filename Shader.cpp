@@ -2,6 +2,8 @@
 #include "Shader.h"
 #include"DX12Manager.h"
 
+std::array<std::string, PASS_TYPE_COUNT> CShader::passName = { "Forward","Deferred","Shadow" };
+
 D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 {
 	D3D12_INPUT_ELEMENT_DESC* desc{};
@@ -9,13 +11,16 @@ D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 
 	switch (mInfo.inputLayoutYype)
 	{
-	case INPUT_LAYOUT_TYPE::DEFAULT: {
-		elementNum = 4;
+	case INPUT_LAYOUT_TYPE::DEFAULT: 
+	case INPUT_LAYOUT_TYPE::TERRAIN:
+	{
+		elementNum = 5;
 		desc = new D3D12_INPUT_ELEMENT_DESC[elementNum];
 		desc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		desc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		desc[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		desc[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[4] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		break;
 	}
 	case INPUT_LAYOUT_TYPE::TEXTURE: {
@@ -55,14 +60,15 @@ D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 		break;
 	}
 	case INPUT_LAYOUT_TYPE::ANIMATION: {
-		elementNum = 6;
+		elementNum = 7;
 		desc = new D3D12_INPUT_ELEMENT_DESC[elementNum];
 		desc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		desc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		desc[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		desc[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-		desc[4] = { "BONEWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }; // »À´ë °¡ÁßÄ¡
-		desc[5] = { "BONEINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, 60, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }; // »À´ë ÀÎµ¦½º
+		desc[4] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		desc[5] = { "BONEWEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }; // »À´ë °¡ÁßÄ¡
+		desc[6] = { "BONEINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 1, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }; // »À´ë ÀÎµ¦½º
 		break;
 	}
 	default:
@@ -217,7 +223,7 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 	return d3dDepthStencilDesc;
 }
 
-D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::wstring& fileName, const std::string& name, const std::string& version)
+D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::string& name, const std::string& fname, const std::string& version)
 {
 	UINT32 compileFlag = 0;
 #ifdef _DEBUG
@@ -225,8 +231,10 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::w
 #endif
 	ComPtr<ID3DBlob> errBlob{};
 
+	std::wstring fileName = L"Resources\\Shaders\\" + BinaryReader::stringToWstring(name) + L".hlsl";
+
 	HRESULT hr = D3DCompileFromFile(fileName.c_str(), NULL,
-		D3D_COMPILE_STANDARD_FILE_INCLUDE, name.c_str(), version.c_str(), compileFlag, 0, &blob, &errBlob);
+		D3D_COMPILE_STANDARD_FILE_INCLUDE, fname.c_str(), version.c_str(), compileFlag, 0, &blob, &errBlob);
 
 	if (FAILED(hr)) {
 		OutputDebugStringA((char*)errBlob->GetBufferPointer());
@@ -240,7 +248,7 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::w
 	return bytecode;
 }
 
-void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
+void CShader::Initialize(const ShaderInfo& info, const std::string& name)
 {
 	mInfo = info;
 	ComPtr<ID3DBlob> vsBlob, psBlob, gsBlob;
@@ -251,17 +259,19 @@ void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 
 	pipelineStateDesc.pRootSignature = INSTANCE(CDX12Manager).GetRootSignature();
 
-	pipelineStateDesc.VS = CreateShader(vsBlob, fileName, "VS_Main", "vs_5_1");
-	pipelineStateDesc.PS = CreateShader(psBlob, fileName, "PS_Main", "ps_5_1");
+	std::string passType = passName[mInfo.shaderType];
+
+	pipelineStateDesc.VS = CreateShader(vsBlob, name, "VS_" + passType, "vs_5_1");
+	pipelineStateDesc.PS = CreateShader(psBlob, name, "PS_" + passType, "ps_5_1");
 
 	if (mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::BILLBOARD || mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::PARTICLE) {
-		pipelineStateDesc.GS = CreateShader(gsBlob, fileName, "GS_Main", "gs_5_1");
+		pipelineStateDesc.GS = CreateShader(gsBlob, name, "GS_" + passType, "gs_5_1");
 	}
-	if (mInfo.shaderType == SHADER_TYPE::TERRAIN) {
-		pipelineStateDesc.HS = CreateShader(hsBlob, fileName, "HS_Main", "hs_5_1");
-		pipelineStateDesc.DS = CreateShader(dsBlob, fileName, "DS_Main", "ds_5_1");
+	if (mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::TERRAIN) {
+		pipelineStateDesc.HS = CreateShader(hsBlob, name, "HS_Forward", "hs_5_1");
+		pipelineStateDesc.DS = CreateShader(dsBlob, name, "DS_Forward", "ds_5_1");
 	}
-	//D3D12_ROOT_PARAMETER
+
 	pipelineStateDesc.RasterizerState = InitRasterizerState();
 	pipelineStateDesc.BlendState = InitBlendState();
 	pipelineStateDesc.DepthStencilState = InitDepthStencilState();
@@ -277,23 +287,23 @@ void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 
 	switch (info.shaderType)
 	{
-	case SHADER_TYPE::DEFERRED:
+	case PASS_TYPE::DEFERRED:
 		pipelineStateDesc.NumRenderTargets = 3;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		pipelineStateDesc.RTVFormats[1] = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		pipelineStateDesc.RTVFormats[2] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		break;
-	case SHADER_TYPE::FORWARD:
+	case PASS_TYPE::FORWARD:
 		pipelineStateDesc.NumRenderTargets = 1;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		break;
-	case SHADER_TYPE::SHADOW:
+	case PASS_TYPE::SHADOW:
 		pipelineStateDesc.NumRenderTargets = 0;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
 
-		pipelineStateDesc.RasterizerState.DepthBias = 100000;
-		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.0f;
-		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
+		pipelineStateDesc.RasterizerState.DepthBias = 10000.f;
+		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.2f;
+		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 2.0f;
 		break;
 	}
 	auto device = INSTANCE(CDX12Manager).GetDevice();
@@ -301,4 +311,6 @@ void CShader::Initialize(const ShaderInfo& info, const std::wstring& fileName)
 
 	if (pipelineStateDesc.InputLayout.pInputElementDescs)
 		delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
+
+	this->name = name + passType;
 }

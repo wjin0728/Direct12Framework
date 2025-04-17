@@ -1,14 +1,15 @@
 #pragma once
-#include"stdafx.h"
-#include"Shader.h"
-#include"LightManager.h"
-#include"Texture.h"
-#include"FrameResource.h"
+#include "stdafx.h"
+#include "Shader.h"
+#include "LightManager.h"
+#include "Texture.h"
+#include "FrameResource.h"
 
 class CCamera;
 class CGameObject;
 class CTerrain;
 class CShader;
+class CTransform;
 
 class CSceneManager;
 
@@ -20,15 +21,16 @@ protected:
 
 	ObjectList mObjects{};
 
-	std::unordered_map<std::wstring, std::shared_ptr<CShader>> mShaders{};
-	std::unordered_map<std::wstring, ObjectList> mRenderLayers{};
+	std::unordered_map<std::string, std::shared_ptr<CShader>> mShaders{};
+	std::unordered_map<std::string, ObjectList> mRenderLayers{};
 	std::vector<std::shared_ptr<class CInstancingGroup>> instancingGroups{};
 
 	std::shared_ptr<CTerrain> mTerrain{};
 	std::unique_ptr<CLightManager> lightMgr{};
 
-	std::unordered_map<std::wstring, std::shared_ptr<CCamera>> mCameras;
-		 
+	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
+	int clientID{ -1 };
+	std::array<std::vector<std::shared_ptr<CGameObject>>, OBJECT_TYPE::end> mObjectTypes;
 public:
 	CScene();
 	virtual ~CScene() = default;
@@ -48,22 +50,30 @@ public:
 	void RenderFinalPass();
 
 public:
-	std::shared_ptr<CGameObject> FindObjectWithTag(const std::wstring& tag);
-	std::shared_ptr<CGameObject> FindObjectWithTag(const std::wstring& renderLayer, const std::wstring& tag);
+	void LoadSceneFromFile(const std::string& fileName);
+	void CreatePrefabs(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 
-	void AddObject(const std::wstring& renderLayer, std::shared_ptr<CGameObject> object);
+	std::shared_ptr<CGameObject> FindObjectWithTag(const std::string& tag);
+	std::shared_ptr<CGameObject> FindObjectWithTag(const std::string& renderLayer, const std::string& tag);
+
+	void AddObject(const std::string& renderLayer, std::shared_ptr<CGameObject> object);
 	void AddObject(std::shared_ptr<CGameObject> object);
 	void RemoveObject(std::shared_ptr<CGameObject> object);
+	void SetTerrain(std::shared_ptr<CTerrain> terrain);
 
 	void AddCamera(std::shared_ptr<CCamera> camera);
-	void RemoveCamera(const std::wstring& tag);
+	void RemoveCamera(const std::string& tag);
 	
-	const std::unordered_map<std::wstring, ObjectList>& GetObjects() const { return mRenderLayers; }
-	ObjectList& GetObjects(const std::wstring& layer) { return mRenderLayers[layer]; }
+	const std::unordered_map<std::string, ObjectList>& GetObjects() const { return mRenderLayers; }
+	ObjectList& GetObjects(const std::string& layer) { return mRenderLayers[layer]; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
+	std::shared_ptr<CGameObject> GetPlayer(int idx) { return mObjectTypes[PLAYER][idx]; }
+
+	std::shared_ptr<CGameObject> GetPlayer(int id) { return mPlayers[id]; }
+	// void SetPlayer(std::shared_ptr<CGameObject> mPlayer, Vec3 position) { mPlayer->GetTransform()->SetLocalPosition(position); };
 
 protected:
-	void RenderForLayer(const std::wstring& layer, bool frustumCulling = true);
-	void RenderTerrain(const std::wstring& layer);
+	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);
+	void RenderTerrain(const std::string& layer);
 	void UpdatePassData();
 };

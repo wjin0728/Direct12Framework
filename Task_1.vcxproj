@@ -73,6 +73,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <AllProjectBMIsArePublic>false</AllProjectBMIsArePublic>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <AllProjectBMIsArePublic>false</AllProjectBMIsArePublic>
@@ -157,10 +159,11 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AvoidObstacle.h" />
+    <ClInclude Include="Animation.h" />
     <ClInclude Include="BattleScene.h" />
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CBData.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Collider.h" />
@@ -168,8 +171,12 @@
     <ClInclude Include="CResource.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingGroup.h" />
-    <ClInclude Include="Animation.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="ServerManager.h" />
     <ClInclude Include="SkinnedMesh.h" />
+    <ClInclude Include="SkinnedMeshRenderer.h" />
+    <ClInclude Include="ThirdPersonCamera.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="DescriptorHeaps.h" />
@@ -190,7 +197,6 @@
     <ClInclude Include="RenderTargetGroup.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="RigidBody.h" />
-    <ClInclude Include="ScrollTexture.h" />
     <ClInclude Include="SimpleMath.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
@@ -209,7 +215,7 @@
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AvoidObstacle.cpp" />
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="BattleScene.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -217,8 +223,12 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
-    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="ServerManager.cpp" />
     <ClCompile Include="SkinnedMesh.cpp" />
+    <ClCompile Include="SkinnedMeshRenderer.cpp" />
+    <ClCompile Include="ThirdPersonCamera.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="DescriptorHeaps.cpp" />
@@ -240,7 +250,6 @@
     <ClCompile Include="RenderTargetGroup.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="RigidBody.cpp" />
-    <ClCompile Include="ScrollTexture.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SimpleMath.cpp" />
     <ClCompile Include="Terrain.cpp" />
@@ -268,7 +277,7 @@
     <None Include="SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\Lighting.hlsl">
+    <None Include="Resources\Shaders\Common.hlsl">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -305,7 +314,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\SkyBox.hlsl">
+    <None Include="Resources\Shaders\Skybox.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
@@ -321,6 +330,21 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\TerrainShadow.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\Triplanar.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\Vegitation.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\Cloud.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

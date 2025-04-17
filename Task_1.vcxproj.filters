@@ -47,6 +47,9 @@
     <Filter Include="GameObject\Component\Scripts">
       <UniqueIdentifier>{941b0b65-03f4-467c-abb5-0b5f6c14555e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{65d97862-5dea-4b36-b05d-f340cfbb281c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Scene.h">
@@ -55,11 +58,11 @@
     <ClInclude Include="GameObject.h">
       <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="GridMesh.h">
+    <ClInclude Include="Mesh.h">
       <Filter>Resources\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>Lights</Filter>
+    <ClInclude Include="GridMesh.h">
+      <Filter>Resources\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Resources\Material</Filter>
@@ -166,14 +169,8 @@
     <ClInclude Include="Collider.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="AvoidObstacle.h">
-      <Filter>GameObject\Component\Scripts</Filter>
-    </ClInclude>
     <ClInclude Include="MenuScene.h">
       <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="ScrollTexture.h">
-      <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
     <ClInclude Include="IndexBuffer.h">
       <Filter>Engine</Filter>
@@ -184,20 +181,36 @@
     <ClInclude Include="Enums.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Animation.h">
-      <Filter>GameObject\Component</Filter>
-    </ClInclude>
     <ClInclude Include="InstancingBuffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="InstancingGroup.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Resources\Mesh</Filter>
+    <ClInclude Include="CBData.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>GameObject\Component</Filter>
     </ClInclude>
     <ClInclude Include="SkinnedMesh.h">
       <Filter>Resources\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedMeshRenderer.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdPersonCamera.h" />
+    <ClInclude Include="ServerManager.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -215,9 +228,6 @@
     </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>Resources\Material</Filter>
-    </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Lights</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Resources\Texture</Filter>
@@ -318,14 +328,8 @@
     <ClCompile Include="Collider.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
-    <ClCompile Include="AvoidObstacle.cpp">
-      <Filter>GameObject\Component\Scripts</Filter>
-    </ClCompile>
     <ClCompile Include="MenuScene.cpp">
       <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="ScrollTexture.cpp">
-      <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
     <ClCompile Include="IndexBuffer.cpp">
       <Filter>Engine</Filter>
@@ -345,13 +349,30 @@
     <ClCompile Include="SkinnedMesh.cpp">
       <Filter>Resources\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedMeshRenderer.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="ThirdPersonCamera.cpp">
+      <Filter>Client</Filter>
+    <ClCompile Include="Player.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManager.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="SimpleMath.inl">
       <Filter>Utility</Filter>
     </None>
-    <None Include="Resources\Shaders\Lighting.hlsl">
+    <None Include="Resources\Shaders\Common.hlsl">
       <Filter>HLSL</Filter>
     </None>
     <None Include="Resources\Shaders\OutLinePS.hlsl">
@@ -372,7 +393,7 @@
     <None Include="Resources\Shaders\Utility.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\SkyBox.hlsl">
+    <None Include="Resources\Shaders\Skybox.hlsl">
       <Filter>HLSL</Filter>
     </None>
     <None Include="Resources\Shaders\Billboard.hlsl">
@@ -382,6 +403,15 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="Resources\Shaders\TerrainShadow.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="Resources\Shaders\Triplanar.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="Resources\Shaders\Vegitation.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="Resources\Shaders\Cloud.hlsl">
       <Filter>HLSL</Filter>
     </None>
     <None Include="Resources\Shaders\Animation.hlsl">

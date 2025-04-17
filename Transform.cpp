@@ -15,7 +15,6 @@ CTransform::CTransform() : CComponent(COMPONENT_TYPE::TRANSFORM), dirtyFramesNum
 
 CTransform::~CTransform()
 {
-	ReturnCBVIndex();
 }
 
 std::shared_ptr<CComponent> CTransform::Clone()
@@ -30,7 +29,7 @@ std::shared_ptr<CComponent> CTransform::Clone()
 	copy->mLocalRotation = mLocalRotation;
 	copy->mWorldMat = mWorldMat;
 	copy->mLocalMat = mLocalMat;
-	copy->dirtyFramesNum = dirtyFramesNum;
+	copy->dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
 	return copy;
 }
@@ -40,13 +39,7 @@ void CTransform::Awake()
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 	mDirtyFlag = true;
 
-	if (owner->mTag == L"Billboard") {
-		std::cout << "";
-	}
-
 	UpdateWorldMatrix();
-
-	if(!owner->mIsInstancing) SetCBVIndex();
 }
 
 void CTransform::Start()
@@ -76,13 +69,6 @@ void CTransform::Reset()
 
 	mDirtyFlag = true;
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
-}
-
-void CTransform::SetCBVIndex()
-{
-	if (mCbvIdx < 0) {
-		mCbvIdx = INSTANCE(CObjectPoolManager).GetTopCBVIndex();
-	}
 }
 
 void CTransform::SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalMat)
@@ -131,15 +117,6 @@ Vec3 CTransform::GetWorldPosition()
 	return Vec3(mWorldMat._41, mWorldMat._42, mWorldMat._43);
 }
 
-void CTransform::ReturnCBVIndex()
-{
-	if (mCbvIdx < 0) {
-		return;
-	}
-	INSTANCE(CObjectPoolManager).ReturnCBVIndex(mCbvIdx);
-	mCbvIdx = -1;
-}
-
 void CTransform::MoveStrafe(float distance)
 {
 	mLocalPosition += (mLocalRight * distance);
@@ -177,7 +154,7 @@ void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
 
 	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, Up);
 	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
-	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 
 	mDirtyFlag = true;
 }
@@ -185,9 +162,8 @@ void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
 void CTransform::LookAt(const Vec3& lookPos, const Vec3& up)
 {
 	Vec3 lookVec = (lookPos - mLocalPosition).GetNormalized();
-	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
-	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
-	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
+	mLocalRotation = Quaternion::LookRotation(lookVec);
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 
 	mDirtyFlag = true;
 }
@@ -195,9 +171,8 @@ void CTransform::LookAt(const Vec3& lookPos, const Vec3& up)
 void CTransform::LookAt(const CTransform& target, const Vec3& up)
 {
 	Vec3 lookVec = (target.mLocalPosition - mLocalPosition).GetNormalized();
-	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, up);
-	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
-	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
+	mLocalRotation = Quaternion::LookRotation(lookVec);
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 
 	mDirtyFlag = true;
 }
@@ -205,7 +180,7 @@ void CTransform::LookAt(const CTransform& target, const Vec3& up)
 void CTransform::Rotate(float pitch, float yaw, float roll)
 {
 	mLocalRotation = SimpleMath::Quaternion::CreateFromYawPitchRoll(
-		XMConvertToRadians(yaw), XMConvertToRadians(pitch), XMConvertToRadians(roll)) * mLocalRotation;
+		yaw * degToRad, pitch * degToRad, roll * degToRad) * mLocalRotation;
 	mLocalEulerAngle.x += pitch; mLocalEulerAngle.y += yaw; mLocalEulerAngle.z += roll;
 
 	mDirtyFlag = true;
@@ -213,7 +188,7 @@ void CTransform::Rotate(float pitch, float yaw, float roll)
 
 void CTransform::Rotate(const Vec3& rotation)
 {
-	Vec3 angles = { XMConvertToRadians(rotation.x), XMConvertToRadians(rotation.y) ,XMConvertToRadians(rotation.z) };
+	Vec3 angles = { rotation.x * degToRad, rotation.y * degToRad ,rotation.z * degToRad };
 	mLocalRotation = Quaternion::CreateFromYawPitchRoll(angles) * mLocalRotation;
 	mLocalEulerAngle += rotation;
 
@@ -222,8 +197,8 @@ void CTransform::Rotate(const Vec3& rotation)
 
 void CTransform::Rotate(const Vec3& axis, float angle)
 {
-	mLocalRotation = Quaternion::CreateFromAxisAngle(axis, angle) * mLocalRotation;
-	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation);
+	mLocalRotation = Quaternion::CreateFromAxisAngle(axis, angle * degToRad) * mLocalRotation;
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 
 	mDirtyFlag = true;
 }
@@ -241,6 +216,20 @@ void CTransform::RotateY(float angle)
 void CTransform::RotateZ(float angle)
 {
 	Rotate(0.f, 0.f, angle);
+}
+
+void CTransform::RotateAround(const Vec3& point, const Vec3& axis, float angle)
+{
+	Vec3 normalizedAxis = axis.GetNormalized();
+
+	Quaternion rot = Quaternion::CreateFromAxisAngle(normalizedAxis, angle);
+	Vec3 dir = mLocalPosition - point;
+	Quaternion dirQuat(dir.x, dir.y, dir.z, 0.0f);
+	Quaternion rotatedQuat = rot * dirQuat * rot.Inverse();
+	Vec3 rotatedDir(rotatedQuat.x, rotatedQuat.y, rotatedQuat.z);
+	mLocalPosition = point + rotatedDir;
+	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
+	mDirtyFlag = true;
 }
 
 const Matrix& CTransform::GetWorldMat(bool update)
@@ -272,7 +261,9 @@ void CTransform::UpdateLocalMatrix()
 
 void CTransform::UpdateWorldMatrix()
 {
-	auto parent = mParent.lock();
+	std::shared_ptr<CTransform> parent{};
+	if (owner->GetName() != "Armature")
+		parent = mParent.lock();
 
 	if (!mDirtyFlag && !parent) {
 		return;
@@ -287,19 +278,47 @@ void CTransform::UpdateWorldMatrix()
 
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
-	auto collider = GetOwner()->GetCollider();
-	auto meshRenderer = GetOwner()->GetMeshRenderer();
-
 	GetOwner()->mRootLocalBS.Transform(GetOwner()->mRootBS, mWorldMat);
-	if (collider) {
-		collider->UpdateOOBB(mWorldMat);
-	}
-	
 }
 
 void CTransform::ApplyBlendedTransform()
 {
-	mLocalScale = mScaleLayerBlending;
-	mLocalEulerAngle = mRotationLayerBlending;
-	mLocalPosition = mPositionLayerBlending;
+	SetLocalScale(mScaleLayerBlending);
+	SetLocalRotation(mRotationLayerBlending);
+	SetLocalPosition(mPositionLayerBlending);
+}
+
+void CTransform::BlendingTransform(const ANIMATION_BLEND_TYPE blendType, const Vec3& scale, const Vec3& rotation, const Vec3& position, float weight)
+{
+	switch (blendType) {
+	case ANIMATION_BLEND_TYPE::ADDITIVE: {
+		mScaleLayerBlending += scale;
+		mRotationLayerBlending += rotation;
+		mPositionLayerBlending += position;
+		break;
+	}
+	case ANIMATION_BLEND_TYPE::OVERRIDE: {
+		mScaleLayerBlending = scale;
+		mRotationLayerBlending = rotation;
+		mPositionLayerBlending = position;
+		break;
+	}
+	case ANIMATION_BLEND_TYPE::OVERRIDE_PASSTHROUGH: {
+		mScaleLayerBlending += scale * weight;
+		mRotationLayerBlending += rotation * weight;
+		mPositionLayerBlending += position * weight;
+		break;
+	}
+	}
+}
+
+void CTransform::PrintSRT()
+{
+	std::cout << mLocalScale.x << " " << mLocalScale.y << " " << mLocalScale.z << std::endl;
+	std::cout << mLocalEulerAngle.x << " " << mLocalEulerAngle.y << " " << mLocalEulerAngle.z << std::endl;
+	std::cout << mLocalPosition.x << " " << mLocalPosition.y << " " << mLocalPosition.z << std::endl;
+	std::cout << mLocalRotation.x << " " << mLocalRotation.y << " " << mLocalRotation.z << " " << mLocalRotation.w << std::endl;
+	std::cout << std::endl;
+	PrintMatrix(mLocalMat);
+	std::cout << "======================" << std::endl;
 }

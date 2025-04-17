@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include"Component.h"
-#include "SkinnedMesh.h"
+#include"Mesh.h"
 
 enum class ANIMATION_TYPE : UINT
 {
@@ -65,7 +65,8 @@ public:
     ANIMATION_BLEND_TYPE mBlendMode = ANIMATION_BLEND_TYPE::OVERRIDE;
 
     std::vector<std::array<std::shared_ptr<CAnimationCurve>, 9>> mAnimationCurves;
-    std::vector<std::shared_ptr<CGameObject>> mBoneFrameCaches;
+    std::vector<std::string> mBoneNames{};
+    std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
 
     void LoadKeyValues(int boneFrame, int curve, std::ifstream& file);
     void GetSRT(const std::array<std::shared_ptr<CAnimationCurve>, 9>& curves, float position, Vec3& scale, Vec3& rotation, Vec3& translation);
@@ -87,7 +88,9 @@ public:
     ANIMATION_TYPE mType = ANIMATION_TYPE::LOOP;
 
     std::vector<std::shared_ptr<CAnimationLayer>> mLayers;
-    std::vector<std::shared_ptr<CGameObject>> mCommonBoneFrameCaches;
+    std::vector<std::string> mBoneNames{};
+    //std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
+
     std::vector<std::vector<Vec3>> mScales;
     std::vector<std::vector<Vec3>> mRotations;
     std::vector<std::vector<Vec3>> mTranslations;
@@ -114,8 +117,7 @@ public:
     ~CAnimationSets();
 
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
-    std::vector<std::shared_ptr<CSkinnedMesh>> mSkinnedMeshes{};
-    std::vector<std::shared_ptr<CGameObject>> mBoneFrameCaches{};
+    std::vector<std::string> mBoneNames{};
 
 public:
     void SetCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr<CCallbackHandler>& callbackHandler);
@@ -133,13 +135,13 @@ public:
     float mPosition = 0.0f;
     float mWeight = 1.0f;
 
-    int mAnimationSetIndex = 0;
+    int mIndex = 0;
 
     float mStartTime = 0.0f;
     float mEndTime = 0.0f;
     float mLength = 0.0f;
 
-    void SetAnimationSet(int index) { mAnimationSetIndex = index; }
+    void SetAnimationSet(int index) { mIndex = index; }
 
     void SetEnable(bool enable) { mEnabled = enable; }
     void SetSpeed(float s) { mSpeed = s; }
@@ -147,22 +149,6 @@ public:
     void SetPosition(float p) { mPosition = p; }
 
     void SetStartEndTime(float start, float end) { mStartTime = start; mEndTime = end; mLength = end - start; }
-};
-
-class CModelInfo
-{
-public:
-    CModelInfo();
-    ~CModelInfo();
-
-public:
-    std::shared_ptr<CGameObject> mRootObject;
-    std::shared_ptr<CAnimationSets> mAnimationSets;
-
-public:
-    std::shared_ptr<CGameObject> GetRootObject() { return mRootObject; }
-    std::shared_ptr<CAnimationSets> GetAnimationSets() { return mAnimationSets; }
-    void PrepareSkinning(int skinnedMeshCount);
 };
 
 class CAnimationController : public CComponent
@@ -179,6 +165,10 @@ public:
 
     std::vector<std::shared_ptr<CAnimationTrack>> mTracks;
     std::shared_ptr<CAnimationSets> mAnimationSets;
+    std::vector<Matrix> mBindPoseBoneOffsets{};
+    std::vector<Matrix> finalTransforms;
+
+    UINT mBoneTransformIdx = -1;
 
     void SetTrackAnimationSet(int trackIndex, int setIndex);
     void SetTrackEnabled(int trackIndex, bool enabled);
@@ -191,6 +181,15 @@ public:
 
     void SetAnimationCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr <CCallbackHandler>& callbackHandler);
 
+public:
+    virtual void Awake();
+    virtual void Start();
+
+    virtual void Update();
+    virtual void LateUpdate();
+
     void AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject);
-    void UpdateShaderVariables();
+    void BindSkinningMatrix();
+    void PrepareSkinning();
+    void UploadBoneOffsets();
 };

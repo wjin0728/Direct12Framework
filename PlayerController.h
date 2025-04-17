@@ -4,16 +4,10 @@
 class CPlayerController : public CMonoBehaviour
 {
 private:
-	float mTurnForce = 3.f;
-	float mForwardForce = 10.f;
-	float mForwardTiltForce = 20.f;
-
-	Vec2 movement = Vec2::Zero;
 
 	std::shared_ptr<class CRigidBody> rigidBody{};
-
-	std::shared_ptr<CTransform> mainRotor{};
-	std::shared_ptr<CTransform> subRotor{};
+	std::weak_ptr<class CCamera> mCamera{};
+	std::shared_ptr<class CTerrain> mTerrain{};
 
 public:
 	CPlayerController() : CMonoBehaviour("PlayerController") {};
@@ -29,7 +23,9 @@ public:
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CPlayerController>(*this); }
 
 public:
+	void SetCamera(const std::shared_ptr<class CCamera>& camera) { mCamera = camera; }
+	void SetTerrain(const std::shared_ptr<class CTerrain>& terrain) { mTerrain = terrain; }
+
 	void OnKeyEvents();
-	void OnMouseEvents();
 };
 

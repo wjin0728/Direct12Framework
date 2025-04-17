@@ -1,6 +1,17 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
+cbuffer MaterialData : register(b5)
+{
+    uint ForwardTexIdx;
+    float3 ForwardColor;
+    
+    uint normalTexIdx;
+    float smoothness;
+    float metallic;
+    float padding;
+};
+
 struct VS_INPUT
 {
     //정점 데이터
@@ -25,13 +36,12 @@ struct GS_OUTPUT
 {
     float4 posH : SV_POSITION;
     float3 posW : POSITION;
-    float3 normal : NORMAL;
     float2 texCoord : TEXCOORD;
     uint matIdx : MATERIAL_IDX;
 };
 
 
-VS_OUTPUT VS_Main(VS_INPUT input)
+VS_OUTPUT VS_Forward(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
     
@@ -44,7 +54,7 @@ VS_OUTPUT VS_Main(VS_INPUT input)
 }
 
 [maxvertexcount(4)]
-void GS_Main(point VS_OUTPUT input[1], inout TriangleStream<GS_OUTPUT> triStream)
+void GS_Forward(point VS_OUTPUT input[1], inout TriangleStream<GS_OUTPUT> triStream)
 {
     float3 up = float3(0.0f, 1.0f, 0.0f);
     
@@ -77,7 +87,6 @@ void GS_Main(point VS_OUTPUT input[1], inout TriangleStream<GS_OUTPUT> triStream
     {
         gout.posH = mul(v[i], viewProjMat);
         gout.posW = v[i].xyz;
-        gout.normal = look;
         gout.texCoord = texC[i];
         gout.matIdx = input[0].matIdx;
 		
@@ -87,34 +96,28 @@ void GS_Main(point VS_OUTPUT input[1], inout TriangleStream<GS_OUTPUT> triStream
 
 #define TRANSPARENT_CLIP
 
-float4 PS_Main(GS_OUTPUT input) : SV_TARGET
+float4 PS_Forward(GS_OUTPUT input) : SV_TARGET
 {
-    float4 color = float4(1.f, 1.f, 1.f, 1.f);
-    Material material = materials[input.matIdx];
-    int diffuseMapIdx = material.diffuseMapIdx;
-    int normalMapIdx = material.normalMapIdx;
+    float3 color = float3(1.f, 1.f, 1.f);
     
-    float4 texColor = diffuseMap[diffuseMapIdx].Sample(anisoWrap, input.texCoord);
-    color = float4(GammaDecoding(texColor.rgb), texColor.a);
-    
+    float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoWrap, input.texCoord);
 #ifdef TRANSPARENT_CLIP
-    clip(color.a - 0.05f);
+    clip(texColor.a - 0.05f);
 #endif
+    color = GammaDecoding(texColor.rgb);
     
-    float3 normal = normalize(input.normal);
+ 
     float3 camDir = (camPos - input.posW.xyz);
     float distToEye = length(camDir);
     camDir /= distToEye;
+
     
-    
-    LightColor finalColor = CalculatePhongLight(input.posW.xyz, normal, camDir, material, float3(1.f,1.f,1.f));
-    
-    color.xyz = GammaEncoding((finalColor.diffuse.xyz * color.xyz) + finalColor.specular.xyz + (0.1 * color.xyz));
+    color = GammaEncoding(color);
     
    #ifdef FOG
 	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
     color = lerp(color, gFogColor, fogAmount);
 #endif
 
-    return float4(color.xyz, 1.f);
+    return float4(color, 1.f);
 }

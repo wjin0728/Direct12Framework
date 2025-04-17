@@ -1,11 +1,12 @@
 #include "stdafx.h"
 #include "GameApplication.h"
-#include"Timer.h"
-#include"DX12Manager.h"
-#include"ResourceManager.h"
-#include"SceneManager.h"
-#include"InputManager.h"
-#include"ObjectPoolManager.h"
+#include "Timer.h"
+#include "DX12Manager.h"
+#include "ResourceManager.h"
+#include "SceneManager.h"
+#include "InputManager.h"
+#include "ObjectPoolManager.h"
+#include "ServerManager.h"
 
 
 bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdShow)
@@ -29,7 +30,9 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CDX12Manager).CloseCommandList();
 
-	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAIN);
+	INSTANCE(ServerManager).Client_Login();
+
+	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAINSTAGE);
 
 
 	TIMER.Reset();
@@ -139,10 +142,11 @@ LRESULT CALLBACK CGameApplication::OnProcessingWindowMessage(HWND hWnd, UINT nMe
 	{
 	case WM_ACTIVATE:
 	{
-		if (LOWORD(wParam) == WA_INACTIVE)
-			INSTANCE(CGameTimer).Stop();
-		else
-			INSTANCE(CGameTimer).Start();
+		//if (LOWORD(wParam) == WA_INACTIVE)
+		//	INSTANCE(CGameTimer).Stop();
+		//else
+		//	INSTANCE(CGameTimer).Start();
+		INSTANCE(CGameTimer).Start();
 		break;
 	}
 	case WM_SIZE:

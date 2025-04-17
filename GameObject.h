@@ -9,20 +9,14 @@ enum class LAYER_TYPE : UINT8
 };
 
 class CMonoBehaviour;
-class CMeshRenderer;
+class CRenderer;
 class CTransform;
 class CCamera;
 class CTerrain;
 class CCollider;
 class CComponent;
-class CSkinnedMesh;
 class CAnimationController;
-class CModelInfo;
-class CAnimationTrack;
-class CAnimationLayer;
-class CAnimationSet;
-class CModelInfo;
-
+class CSkinnedMesh;
 
 class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
@@ -33,20 +27,22 @@ private:
 	std::vector<std::shared_ptr<CComponent>> mComponents{};
 
 	std::shared_ptr<CTransform> mTransform{};
-	std::shared_ptr<CMeshRenderer> mMeshRenderer{};
+	std::shared_ptr<CRenderer> mRenderer{};
 	std::shared_ptr<CCollider> mCollider{};
 
 	std::vector<std::shared_ptr<CGameObject>> mChildren{};
 
 private:
 	bool mActive = true;
-	bool mIsStatic{false};
-	bool mIsInstancing{false};
+	bool mIsStatic{ false };
+	bool mIsInstancing{ false };
 
-	std::wstring mName{};
-	std::wstring mTag{};
-	std::wstring mRenderLayer{};
+	std::string mName{};
+	std::string mTag{};
+	std::string mRenderLayer{};
 	LAYER_TYPE mLayerType{};
+
+	int mID{ -1 };
 
 private:
 	BoundingSphere mRootLocalBS = BoundingSphere();
@@ -62,38 +58,37 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 
-	void Render();
+	void Render(std::shared_ptr<CCamera> camera, int pass = 0);
 
 public:
 	//오브젝트의 복사본을 생성한다.
-	static std::shared_ptr<CGameObject> Instantiate(const std::shared_ptr<CGameObject>& original, 
+	static std::shared_ptr<CGameObject> Instantiate(const std::shared_ptr<CGameObject>& original,
 		const std::shared_ptr<CTransform>& parentTransform = nullptr);
 	//오브젝트의 복사본을 생성한다.
 	static std::shared_ptr<CGameObject> Instantiate(const std::unique_ptr<CGameObject>& original,
 		const std::shared_ptr<CTransform>& parentTransform = nullptr);
 
 	//기본 설정을 가진 카메라 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateCameraObject(const std::wstring& tag, Vec2 rtSize, 
+	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize,
 		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 60.f);
-	//기본 설정을 가진 렌더 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateRenderObject(const std::wstring& tag, 
-		const std::wstring& meshName, const std::wstring& materialName);
-	static std::shared_ptr<CGameObject> CreateUIObject(const std::wstring& tag, const std::wstring& materialName, Vec2 pos);
+	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, float nearPlane, float farPlane, Vec2 size);
+	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size);
 	//기본 설정을 가진 지형 오브젝트를 생성한다.
-	static std::shared_ptr<CGameObject> CreateTerrainObject(const std::wstring& tag, const std::wstring& heightMapName,
-		UINT width, UINT height, Vec3 scale = {1.f,1.f,1.f});
+	static std::shared_ptr<CGameObject> CreateTerrainObject(std::ifstream& ifs);
 	//바이너리 파일을 통해 오브젝트를 생성한다.
-	static std::shared_ptr<CModelInfo> CreateObjectFromFile(const std::wstring& tag, const std::wstring& fileName);
+	static std::shared_ptr<CGameObject> CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
-	std::shared_ptr<CMeshRenderer> GetMeshRenderer() { return mMeshRenderer; }
+	std::shared_ptr<CRenderer> GetRenderer() { return mRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
 	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
-	const std::wstring& GetName() const { return mName; }
-	const std::wstring& GetTag() const { return mTag; }
-	const std::wstring& GetRenderLayer() const { return mRenderLayer; }
+	const std::string& GetName() const { return mName; }
+	const std::string& GetTag() const { return mTag; }
+	const std::string& GetIDString() const { return std::to_string(mID); }
+	const int GetIDInt() const { return mID; }
+	const std::string& GetRenderLayer() const { return mRenderLayer; }
 	bool GetActive() const { return mActive; }
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return mChildren; }
 	BoundingSphere GetRootBoundingSphere() const { return mRootBS; }
@@ -102,16 +97,15 @@ public:
 	void SetStatic(bool isStatic);
 	void SetInstancing(bool isInstancing);
 	void SetLayerType(LAYER_TYPE type) { mLayerType = type; }
-	void SetRenderLayer(const std::wstring& layer) { mRenderLayer = layer; }
-	void SetName(const std::wstring& name) { mName = name; }
-	void SetTag(const std::wstring& tag) { mTag = tag; }
+	void SetRenderLayer(const std::string& layer) { mRenderLayer = layer; }
+	void SetName(const std::string& name) { mName = name; }
+	void SetTag(const std::string& tag) { mTag = tag; }
+	void SetID(int id) { mID = id; }
 	void SetParent(const std::shared_ptr<CGameObject>& parent);
 
 	void ReturnCBVIndex();
-	 
-	void CalculateRootOOBB();
 
-	std::shared_ptr<CGameObject> FindChildByName(const std::wstring& name);
+	std::shared_ptr<CGameObject> FindChildByName(const std::string& name);
 
 	void AddChild(std::shared_ptr<CGameObject> child);
 	void RemoveChild(std::shared_ptr<CGameObject> child);
@@ -122,35 +116,27 @@ public:
 	std::shared_ptr<T> AddComponent(const std::shared_ptr<T>& component);
 	template<typename T>
 	std::shared_ptr<T> GetComponent();
-
-public:
-	void UpdateTransform(const Matrix* parent = nullptr);
-	virtual void Animate(float elapsedTime);
-	void ResetForAnimationBlending();
-	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
-
-	std::shared_ptr<CAnimationController> mAnimationController{};
-
-	void FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int meshNum);
-	
-	void SetTrackAnimationSet(int trackIndex, int setIndex);
-	void SetTrackAnimationPosition(int trackIndex, float position);
+	template<typename T>
+	std::shared_ptr<T> GetComponentFromHierarchy();
 
 private:
 
-	static void InitFromFile(std::shared_ptr<CModelInfo> model, std::ifstream& inFile);
-	static void InitHierarchyFromFile(std::shared_ptr<CGameObject> obj, std::ifstream& inFile, int* skinnedMeshCnt);
-	static void InitAnimationFromFile(std::shared_ptr<CModelInfo> model, std::ifstream& inFile);
-
+	static std::shared_ptr<CGameObject> InitFromFile(std::ifstream& inFile, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 	void CreateTransformFromFile(std::ifstream& inFile);
-	void CreateMeshRendererFromFile(std::ifstream& inFile, std::string& meshType);
+	void CreateRendererFromFile(std::ifstream& inFile);
+	void CreateTerrainFromFile(std::ifstream& inFile);
+	void CreateAnimationFromFile(std::string& fileName);
 
-	static void CreateAnimationSetFromFile(std::shared_ptr<CModelInfo>& model, std::ifstream& inFile);
-	static void CreateAnimationLayerFromFile(std::shared_ptr<CModelInfo>& model, std::ifstream& inFile, std::shared_ptr<CAnimationSet>& animSet, int layerIndex);
-	static void CreateAnimationCurvesFromFile(std::ifstream& inFile, std::shared_ptr<CAnimationLayer>& layer, int curveIndex);
-	static int CalculateCommonBoneNum(std::shared_ptr<CAnimationSet>& animSet);
+public:
+	std::shared_ptr<CAnimationController> mAnimationController{};
 
-	const BoundingBox& CombineChildrenOOBB();
+	void ResetForAnimationBlending();
+	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
+
+	void PrepareSkinning();
+
+	void UpdateWorldMatrices();
+	void PrintSRT();
 };
 
 
@@ -197,5 +183,21 @@ inline std::shared_ptr<T> CGameObject::GetComponent()
 		}
 	}
 
+	return nullptr;
+}
+
+template<typename T>
+inline std::shared_ptr<T> CGameObject::GetComponentFromHierarchy()
+{
+	std::shared_ptr<T> result = GetComponent<T>();
+	if (result) {
+		return result;
+	}
+	for (auto& child : mChildren) {
+		result = child->GetComponentFromHierarchy<T>();
+		if (result) {
+			return result;
+		}
+	}
 	return nullptr;
 }

@@ -28,6 +28,8 @@ void CTerrain::LateUpdate()
 
 void CTerrain::Render(const std::shared_ptr<class CCamera>& camera)
 {
+	mTerrainMaterial->BindShader(FORWARD);
+	mTerrainMaterial->BindDataToShader();
 	mQuadTree->Render(camera);
 }
 
@@ -47,6 +49,12 @@ void CTerrain::SetHeightMapGridMesh(const std::shared_ptr<CHeightMapGridMesh>& m
 void CTerrain::SetMaterial(const std::shared_ptr<CTerrainMaterial>& material)
 {
 	mTerrainMaterial = material;
+
+	if (mTerrainMesh) {
+		material->data.heightMapIdx = mTerrainMesh->GetHeightMapIdx();
+		material->data.yOffset = mTerrainMesh->GetOffset().y;
+		material->data.heightMapResolution = { (float)mTerrainMesh->GetWidth(), (float)mTerrainMesh->GetWidth() };
+	}
 }
 
 float CTerrain::GetHeight(float x, float z)

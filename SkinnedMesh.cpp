@@ -9,78 +9,37 @@ CSkinnedMesh::~CSkinnedMesh()
 {
 }
 
-void CSkinnedMesh::PrepareSkinning(std::shared_ptr<CGameObject>& modelRootObject)
-{
-	for (int i = 0; auto & cashe : mBoneFrameCaches) {
-		cashe = modelRootObject->FindChildByName(mBoneNames[i++]);
-	}
-}
-
-void CSkinnedMesh::UpdateShaderVariables()
-{
-	auto currFrameResource = INSTANCE(CDX12Manager).GetCurFrameResource();
-
-	if (mBoneTransformIndex >= 0) {
-		currFrameResource
-			->GetBuffer((UINT)CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)
-			->UpdateBuffer(mBoneTransformIndex);
-	}
-}
-
 void CSkinnedMesh::ReleaseUploadBuffers()
 {
 	CMesh::ReleaseUploadBuffer();
 	mSkinnedVertexBuffer->ReleaseUploadBuffer();
 }
 
-std::shared_ptr<CSkinnedMesh> CSkinnedMesh::CreateSkinnedMeshFromFile(std::ifstream& inFile)
+std::shared_ptr<CSkinnedMesh> CSkinnedMesh::CreateSkinnedMeshFromFile(const std::string& name)
 {
+	std::ifstream inFile{ MODEL_PATH(name), std::ios::binary };
+	if (!inFile) {
+		return nullptr;
+	}
+
 	std::shared_ptr<CSkinnedMesh> m = std::make_shared<CSkinnedMesh>();
+	m->name = name;
+	m->ReadMeshData(inFile);
+
 	std::string token;
 
 	while (true)
 	{
 		BinaryReader::ReadDateFromFile(inFile, token);
 
-		if (token == "<BoneNames>:")
-		{
-			BinaryReader::ReadDateFromFile(inFile, m->mBoneNum);
-
-			m->mBoneNames.resize(m->mBoneNum);
-			m->mBoneFrameCaches.resize(m->mBoneNum);
-
-			for (int i = 0; i < m->mBoneNum; i++) {
-				std::string name;
-				BinaryReader::ReadDateFromFile(inFile, name);
-				m->mBoneNames[i] = BinaryReader::stringToWstring(name);
-			}
-		}
-		else if (token == "<BoneOffsets>:")
+		if (token == "<BindPoses>:")
 		{
 			BinaryReader::ReadDateFromFile(inFile, m->mBoneNum);
 
 			m->mBindPoseBoneOffsets.resize(m->mBoneNum);
 
 			for (int i = 0; i < m->mBoneNum; i++) {
-				Matrix offset{};
-				BinaryReader::ReadDateFromFile(inFile, offset);
-				m->mBindPoseBoneOffsets[i] = std::make_shared<Matrix>(offset);
-			}
-
-			UINT elementBytes = (((sizeof(XMFLOAT4X4) * SKINNED_ANIMATION_BONES) + 255) & ~255);
-			m->mBindPoseBoneOffsetsBuffer = CreateBufferResource(DEVICE, CMDLIST, m->mBindPoseBoneOffsets.data(), elementBytes, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-		}
-		else if (token == "<BoneIndices>:")
-		{
-			int nVertices{};
-			BinaryReader::ReadDateFromFile(inFile, nVertices);
-
-			m->mSkinnedData.resize(nVertices);
-
-			for (int i = 0; i < nVertices; i++) {
-				m->mSkinnedData[i] = std::make_shared<SkinnedVertex>();
-
-				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i]->BoneIndices);
+				BinaryReader::ReadDateFromFile(inFile, m->mBindPoseBoneOffsets[i]);
 			}
 		}
 		else if (token == "<BoneWeights>:")
@@ -91,10 +50,17 @@ std::shared_ptr<CSkinnedMesh> CSkinnedMesh::CreateSkinnedMeshFromFile(std::ifstr
 			m->mSkinnedData.resize(nVertices);
 
 			for (int i = 0; i < nVertices; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i]->BoneWeights);
+				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i].BoneIndices[0]);
+				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i].BoneWeights.x);
+				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i].BoneIndices[1]);
+				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i].BoneWeights.y);
+				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i].BoneIndices[2]);
+				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i].BoneWeights.z);
+				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i].BoneIndices[3]);
+				BinaryReader::ReadDateFromFile(inFile, m->mSkinnedData[i].BoneWeights.w);
 			}
 		}
-		else if (token == "</SkinDeformations>")
+		else if (token == "</SkinnedMesh>")
 		{
 			break;
 		}

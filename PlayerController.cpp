@@ -8,6 +8,9 @@
 #include"SceneManager.h"
 #include"Scene.h"
 #include"Terrain.h"
+#include"Camera.h"
+#include"SceneManager.h"
+#include "ServerManager.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -15,38 +18,24 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
-	auto mainRotorObj = GetOwner()->FindChildByName(L"Rotar");
-
-	if (mainRotorObj) {
-		mainRotor = mainRotorObj->GetTransform();
-	}
-
-	auto subRotorObj = GetOwner()->FindChildByName(L"HelicopterScrewBack");
-
-	if (subRotorObj) {
-		subRotor = subRotorObj->GetTransform();
-	}
-
 	rigidBody = GetOwner()->GetComponent<CRigidBody>();
 }
 
 void CPlayerController::Start()
 {
+	auto scene = INSTANCE(CSceneManager).GetCurScene();
+	mTerrain = scene->GetTerrain();
 }
 
 void CPlayerController::Update()
 {
 	OnKeyEvents();
-	OnMouseEvents();
+	auto transform = GetTransform();
+	float terrainHeight = mTerrain->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
 
-	float power = DELTA_TIME * 3000;
-
-	if (mainRotor) {
-		mainRotor->Rotate({ 0.f, power , 0.f });
-	}
-	if (subRotor) {
-		subRotor->Rotate({ 0.f, 0.f , power });
-	}
+	Vec3 pos = transform->GetWorldPosition();
+	pos.y = terrainHeight;
+	transform->SetLocalPosition(pos);
 }
 
 void CPlayerController::LateUpdate()
@@ -56,55 +45,48 @@ void CPlayerController::LateUpdate()
 void CPlayerController::OnKeyEvents()
 {
 	auto transform = GetTransform();
+	auto camera = mCamera.lock()->GetTransform();
 	Vec3 moveDir = Vec3::Zero;
+	uint8_t dir = 0;
+
+	Vec3 camForward = camera->GetWorldLook();
+	Vec3 camRight = camera->GetWorldRight();
+	camForward.y = 0.f;
+	camRight.y = 0.f;
+	camForward.Normalize();
+	camRight.Normalize();
 
 	if (INPUT.IsKeyPress(KEY_TYPE::W)) {
-		moveDir += transform->GetLocalLook();
+		moveDir += camForward;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) {
-		moveDir -= transform->GetLocalLook();
+		moveDir -= camForward;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::D)) {
-		moveDir += transform->GetLocalRight();
+		moveDir += camRight;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
-		moveDir -= transform->GetLocalRight();
-	}
-	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) {
-		moveDir += transform->GetLocalUp();
-	}
-	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) {
-		moveDir -= transform->GetLocalUp();
+		moveDir -= camRight;
+
 	}
 
 	Vec3 acccel = Vec3::Zero;
 	bool isDecelerate = true;
 
 	if (moveDir != Vec3::Zero) {
-		acccel = moveDir.GetNormalized() * 20.f;
+		acccel = moveDir.GetNormalized() * 10.f;
 		isDecelerate = false;
 	}
 
 	rigidBody->SetAcceleration(acccel);
 	rigidBody->SetUseFriction(isDecelerate);
 
-	/*Vec3 velocity = rigidBody->GetVelocity();
+	float rotationSpeed = 15.f;
 
-	float val1 = GetTransform()->GetLocalRight().Dot(velocity);
-	float angle1 = val1 * -10.f;
-
-	float val2 = GetTransform()->GetLocalLook().Dot(velocity);
-	float angle2 = val2 * -5.f;
-
-	Vec3 rotation 
-	GetTransform()->SetLocalRotation(angle2, 0.f, angle1);*/
-}
-
-void CPlayerController::OnMouseEvents()
-{
-	Vec2 mouseDelta = INPUT.GetMouseDelta();
-	if (mouseDelta != Vec2::Zero) {
-		GetTransform()->RotateY(mouseDelta.x * DELTA_TIME * 30);
+	if (moveDir.LengthSquared() > 0.001f)
+	{
+		Quaternion targetRot = Quaternion::LookRotation(moveDir);
+		Quaternion rotation = Quaternion::Slerp(transform->GetLocalRotation(), targetRot, rotationSpeed * DELTA_TIME);
+		transform->SetLocalRotation(rotation);
 	}
-
 }

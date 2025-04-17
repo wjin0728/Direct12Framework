@@ -15,13 +15,14 @@ CTexture::~CTexture()
 	}
 }
 
-void CTexture::LoadFromFile(std::wstring_view _fileName)
+void CTexture::LoadFromFile(std::string_view _fileName)
 {
 	if (texResource) {
 		texResource.Reset();
 	}
 
-	std::wstring extension = std::filesystem::path(_fileName).extension();
+	std::wstring fileName = BinaryReader::stringToWstring(_fileName.data());
+	std::wstring extension = std::filesystem::path(fileName).extension();
 	std::unique_ptr<uint8_t[]> ddsData;
 	std::vector<D3D12_SUBRESOURCE_DATA> vSubresources;
 	DDS_ALPHA_MODE ddsAlphaMode = DDS_ALPHA_MODE_UNKNOWN;
@@ -29,13 +30,13 @@ void CTexture::LoadFromFile(std::wstring_view _fileName)
 
 
 	if (extension == L".dds" || extension == L".DDS") {
-		ThrowIfFailed(DirectX::LoadDDSTextureFromFileEx(DEVICE, _fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT,
+		ThrowIfFailed(DirectX::LoadDDSTextureFromFileEx(DEVICE, fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT,
 			texResource.GetAddressOf(), ddsData, vSubresources, &ddsAlphaMode, &bIsCubeMap));
 	}
 	else {
 		vSubresources.push_back(D3D12_SUBRESOURCE_DATA());
 
-		ThrowIfFailed(DirectX::LoadWICTextureFromFileEx(DEVICE, _fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, WIC_LOADER_DEFAULT,
+		ThrowIfFailed(DirectX::LoadWICTextureFromFileEx(DEVICE, fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, WIC_LOADER_DEFAULT,
 			texResource.GetAddressOf(), ddsData, vSubresources[0]));
 	}
 	
@@ -56,6 +57,8 @@ void CTexture::LoadFromFile(std::wstring_view _fileName)
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	
 	CMDLIST->ResourceBarrier(1, &resourceBarrier);
+
+	CreateSRV();
 }
 
 void CTexture::Create2DTexture(DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
@@ -176,7 +179,6 @@ void CTexture::ReleaseUploadBuffer()
 int CTexture::CreateSRV()
 {
 	if (isSR && (srvIdx == -1)) {
-		D3D12_SHADER_RESOURCE_VIEW_DESC desc = GetSRVDesc();
 		auto descriptorHeap = INSTANCE(CDX12Manager).GetDescriptorHeaps();
 
 		if (texType == TEXTURECUBE) {
@@ -197,8 +199,8 @@ void CTexture::CreateUAV()
 
 void CTexture::ChangeResourceState(D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
 {
-	CMDLIST->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(texResource.Get(),
-		before, after));
+	auto transition = CD3DX12_RESOURCE_BARRIER::Transition(texResource.Get(), before, after);
+	CMDLIST->ResourceBarrier(1, &transition);
 }
 
 ComPtr<ID3D12Resource>& CTexture::GetResource()

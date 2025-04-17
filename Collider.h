@@ -5,11 +5,8 @@
 class CCollider : public CComponent
 {
 private:
-	BoundingBox mLocalAabb{};
 	BoundingOrientedBox mLocalOobb = BoundingOrientedBox();
 	BoundingOrientedBox mWorldOOBB = BoundingOrientedBox();
-
-	Vec3 mScale = Vec3::One;
 
 public:
 	CCollider();
@@ -26,11 +23,9 @@ public:
 public:
 
 	void UpdateOOBB(const Matrix& worldMat);
-
-	void SetLocalOOBB(const BoundingOrientedBox& oobb);
-	void SetScale(const Vec3& scale) { mScale = scale; };
+	void Initialize(const Vec3& center, const Vec3& size);
+	void Initialize(const BoundingOrientedBox& oobb);
 
 	const BoundingOrientedBox& GetWorldOOBB() const { return mWorldOOBB; }
-	const BoundingBox& GetAABB() const { return mLocalAabb; }
 };
 

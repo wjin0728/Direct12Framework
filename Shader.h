@@ -2,15 +2,13 @@
 #include"stdafx.h"
 #include"CResource.h"
 
-enum class SHADER_TYPE : UINT8
+enum PASS_TYPE : UINT8
 {
 	FORWARD,
 	DEFERRED,
-	OUTLINE,
-	TERRAIN,
 	SHADOW,
 
-	SHADER_TYPE_COUNT
+	PASS_TYPE_COUNT
 };
 
 enum class INPUT_LAYOUT_TYPE : UINT8
@@ -19,7 +17,8 @@ enum class INPUT_LAYOUT_TYPE : UINT8
 	PARTICLE,
 	DEFAULT,
 	TEXTURE,
-	ANIMATION
+	ANIMATION,
+	TERRAIN
 };
 
 enum class RASTERIZER_TYPE : UINT8
@@ -59,7 +58,7 @@ enum class BLEND_TYPE : UINT8
 
 struct ShaderInfo
 {
-	SHADER_TYPE shaderType = SHADER_TYPE::FORWARD;
+	PASS_TYPE shaderType = PASS_TYPE::FORWARD;
 	INPUT_LAYOUT_TYPE inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 	RASTERIZER_TYPE rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 	DEPTH_STENCIL_TYPE depthStencilType = DEPTH_STENCIL_TYPE::LESS;
@@ -69,6 +68,9 @@ struct ShaderInfo
 
 class CShader : public CResource
 {
+public:
+	static std::array<std::string, PASS_TYPE_COUNT> passName;
+
 protected:
 	ShaderInfo mInfo;
 	ComPtr<ID3D12PipelineState> d3dPiplineState = ComPtr<ID3D12PipelineState>();
@@ -87,12 +89,12 @@ protected:
 	virtual D3D12_DEPTH_STENCIL_DESC InitDepthStencilState();
 
 	D3D12_SHADER_BYTECODE CreateShader(ComPtr<ID3DBlob>& blob, 
-		const std::wstring& fileName, const std::string& name, const std::string& version);
+		const std::string& name, const std::string& fname, const std::string& version);
 
 public:
-	virtual void Initialize(const ShaderInfo& info, const std::wstring& fileName);
+	virtual void Initialize(const ShaderInfo& info, const std::string& name);
 	
 public:
 	void SetPipelineState(ID3D12GraphicsCommandList* cmdList) { cmdList->SetPipelineState(d3dPiplineState.Get()); }
-	SHADER_TYPE GetShaderType() const { return this->mInfo.shaderType; }
+	PASS_TYPE GetShaderType() const { return this->mInfo.shaderType; }
 };

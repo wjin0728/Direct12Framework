@@ -1,30 +1,40 @@
 #pragma once
 
 #define WIN32_LEAN_AND_MEAN		
-#include <windows.h>
+#define _HAS_STD_BYTE 0
+
+#include "../Serverframework/TriumServer/OVER_PLUS.h"
+#include "../Serverframework/TriumServer/protocol.h"
+#include "../Serverframework/TriumServer/ENUM.h"
+#include <Windows.h>
+#include <WS2tcpip.h>
+#include <MSWSock.h>
+#pragma comment(lib, "WS2_32.lib")
+#pragma comment(lib, "MSWSock.lib")
+
 #include <stdlib.h>
 #include <iostream>
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
 #include <math.h>
-#include<vector>
-#include<unordered_map>
-#include<memory>
-#include<fstream>
-#include<filesystem>
-#include<chrono>
-#include<random>
-#include<array>
-#include<queue>
-#include<stack>
-#include<map>
-#include"algorithm"
+#include <vector>
+#include <unordered_map>
+#include <memory>
+#include <fstream>
+#include <filesystem>
+#include <chrono>
+#include <random>
+#include <array>
+#include <queue>
+#include <stack>
+#include <map>
+#include "algorithm"
 #include <Mmsystem.h>
 #include <codecvt>
 
 #include <d3d12.h>
-#include"SimpleMath.h"
+#include "SimpleMath.h"
 #include <dxgi1_4.h>
 #include <wrl.h>
 #include <shellapi.h>
@@ -35,10 +45,10 @@
 #include <D3Dcompiler.h>
 #include <DXGIDebug.h>
 #include <comdef.h>
-#include"d3dx12.h"
-#include"DDSTextureLoader12.h"
-#include"WICTextureLoader12.h"
-#include"BinaryReader.h"
+#include "d3dx12.h"
+#include "DDSTextureLoader12.h"
+#include "WICTextureLoader12.h"
+#include "BinaryReader.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -59,7 +69,8 @@ using SimpleMath::Color;
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
-#include"Enums.h"
+#include "Enums.h"
+#include "CBData.h"
 
 #define _DEBUG
 
@@ -68,8 +79,15 @@ using SimpleMath::Color;
 
 #define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
 
-#define BONE_INDEX_WEIGHT		0x1000
+#define TEXTURE_PATH(name)			"Resources\\Textures\\" + std::string(name) + ".dds"
+#define MODEL_PATH(name)			"Resources\\Models\\" + (name) + ".bin"
+#define SCENE_PATH(name)			"Resources\\Scenes\\" + (name) + ".bin"
+#define ANIMATION_PATH(name)		"Resources\\Animation\\" + (name) + ".bin"
 
+#define ALIGNED_SIZE(size)				((size + 255) & ~255)
+
+template<typename T>
+using StrDic = std::unordered_map<std::string, std::shared_ptr<T>>;
 
 inline XMFLOAT4 GetRandomColor() {
 	std::random_device rd;
@@ -85,6 +103,22 @@ inline std::wstring AnsiToWString(const std::string& str)
 	MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, buffer, 512);
 	return std::wstring(buffer);
 }
+
+inline void PrintDebug(const std::string& str)
+{
+	TCHAR pstrDebug[256] = { 0 };
+
+	std::wstring wtag;
+	int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
+	if (size > 0) {
+		wtag.resize(size);
+		MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wtag[0], size);
+	}
+
+	_stprintf_s(pstrDebug, 256, _T("%s\n"), wtag.c_str());
+	OutputDebugString(pstrDebug);
+}
+
 
 class DxException
 {
@@ -141,7 +175,9 @@ public:							\
 
 #define DEVICE INSTANCE(CDX12Manager).GetDevice()
 #define CMDLIST INSTANCE(CDX12Manager).GetCommandList()
-#define UPLOADBUFFER(T) INSTANCE(CDX12Manager).GetBuffer(static_cast<UINT>(T))
+#define CONSTANTBUFFER(T) INSTANCE(CDX12Manager).GetConstantBuffer(static_cast<UINT>(T))
+#define STRUCTEDBUFFER(T) INSTANCE(CDX12Manager).GetStructedBuffer(static_cast<UINT>(T))
+#define INSTANCINGBUFFER(T) INSTANCE(CDX12Manager).GetInstancingBuffer(static_cast<UINT>(T))
 #define RESOURCE INSTANCE(CResourceManager)
 
 
@@ -155,107 +191,5 @@ findByRawPointer(Container<std::shared_ptr<T>, Alloc>& container, T* rawPtr) {
 ID3D12Resource* CreateBufferResource(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList,
 	void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource** ppd3dUploadBuffer);
 
+void PrintMatrix(const Matrix& mat);
 
-#define DIRECTIONAL_LIGHT 5
-#define POINT_LIGHT 5
-#define SPOT_LIGHT 5
-#define DETAIL_MAP 5
-
-
-struct CBMaterialDate {
-	Color albedoColor{};
-	Color specularColor{};
-	Color emissiveColor{};
-	Vec3 fresnelR0{};
-	int diffuseMapIdx = -1;
-	int normalMapIdx = -1;
-	Vec3 padding1{};
-};
-
-
-struct CBTerrainDate {
-	CBMaterialDate material;
-	Vec3 scale = Vec3::One;
-	int detailMapIdx = -1;
-	int heightMapIdx = -1;
-	Vec3 padding1{};
-};
-
-struct CBPassData
-{
-	Matrix viewProjMat = Matrix::Identity;
-	Matrix shadowTransform = Matrix::Identity;
-
-	Vec4 gFogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-
-	Vec3 camPos = Vec3::Zero;
-	UINT shadowMapIdx{};
-
-	Vec2 renderTargetSize{};
-	Vec2 padding2;
-
-	float deltaTime{};
-	float totalTime{};
-	float gFogStart = 50.0f;
-	float gFogRange = 300.0f;
-
-	CBTerrainDate terrainMat;
-};
-
-struct CBObjectData
-{
-	Matrix worldMAt = Matrix::Identity;
-	Matrix invWorldMAt = Matrix::Identity;
-	Matrix textureMat = Matrix::Identity;
-	int materialIdx = -1;
-	Vec3 padding;
-};
-
-struct CBDirectionalLightInfo
-{
-	Color color;
-	Vec3 strength;
-	float padding1;
-	Vec3 direction;
-	float padding2;
-};
-
-struct CBPointLightInfo
-{
-	Color color;
-	Vec3 strength;
-	float range;
-	Vec3 position;
-	float padding;
-};
-
-struct CBSpotLightInfo
-{
-	Color color;
-	Vec3 strength;
-	float range;
-	Vec3 direction;
-	float fallOffStart;
-	Vec3 position;
-	float fallOffEnd;
-	Vec3 padding;
-	float spotPower;
-};
-
-
-struct CBLightsData
-{
-	CBDirectionalLightInfo dirLights[DIRECTIONAL_LIGHT];
-	CBPointLightInfo pointLights[POINT_LIGHT];
-	CBSpotLightInfo spotLights[SPOT_LIGHT];
-	XMUINT3 lightNum;
-	UINT padding;
-};
-
-struct BillboardData
-{
-	Vec3 position{};
-	Vec2 size{};
-	int materialIdx = -1;
-	Matrix textureMat = Matrix::Identity;
-};

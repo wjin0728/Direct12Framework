@@ -118,135 +118,124 @@ void CMesh::CreateIndexBuffers()
 	}
 }
 
-std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(std::ifstream& inFile)
+std::shared_ptr<CMesh> CMesh::CreateMeshFromFile(const std::string& name)
 {
+	std::ifstream inFile{ MODEL_PATH(name) , std::ios::binary};
+	if (!inFile) {
+		return nullptr;
+	}
 	std::shared_ptr<CMesh> m = std::make_shared<CMesh>();
-
-	std::string name{};
-	BinaryReader::ReadDateFromFile(inFile, name);
-
-	std::string token;
-
-	while (true)
-	{
-		BinaryReader::ReadDateFromFile(inFile, token);
-
-		if (token == "<Bounds>:")
-		{
-			Vec3 boundingCenter, boundingExtent;
-
-			BinaryReader::ReadDateFromFile(inFile, boundingCenter);
-			BinaryReader::ReadDateFromFile(inFile, boundingExtent);
-
-			BoundingOrientedBox::CreateFromBoundingBox(m->oobb, BoundingBox(boundingCenter, boundingExtent));
-			BoundingSphere::CreateFromBoundingBox(m->oobs, m->oobb);
-		}
-		else if (token == "<Positions>:" || token == "<ControlPoints>:")
-		{
-			int nPositions{};
-			BinaryReader::ReadDateFromFile(inFile, nPositions);
-			m->vertices.resize(nPositions);
-
-			for (int i = 0; i < nPositions; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].position);
-		}
-		}
-		else if (token == "<Colors>:")
-		{
-
-		}
-		else if (token == "<Normals>:")
-		{
-			int nNormals{};
-			BinaryReader::ReadDateFromFile(inFile, nNormals);
-
-			for (int i = 0; i < nNormals; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].normal);
-	}
-		}
-		else if (token == "<TextureCoords0>:")
-		{
-			int nTextureCoord{};
-			BinaryReader::ReadDateFromFile(inFile, nTextureCoord);
-
-			for (int i = 0; i < nTextureCoord; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].texCoord);
-			}
-		}
-		else if (token == "<TextureCoords1>:")
-		{
-			int nTextureCoord{};
-			BinaryReader::ReadDateFromFile(inFile, nTextureCoord);
-
-			Vec2 temp;
-			for (int i = 0; i < nTextureCoord; i++) {
-				BinaryReader::ReadDateFromFile(inFile, temp);
-			}
-		}
-		else if (token == "<Tangents>:")
-		{
-			int nTangent{};
-			BinaryReader::ReadDateFromFile(inFile, nTangent);
-
-			for (int i = 0; i < nTangent; i++) {
-				BinaryReader::ReadDateFromFile(inFile, m->vertices[i].tangent);
-			}
-
-		}
-		else if (token == "<BiTangents>:")
-		{
-			int nBiTangent{};
-			Vec3 biTangent{};
-			BinaryReader::ReadDateFromFile(inFile, nBiTangent);
-			for (int i = 0; i < nBiTangent; i++) {
-				BinaryReader::ReadDateFromFile(inFile, biTangent);
-			}
-		}
-		else if (token == "<Indices>:")
-		{
-			int nIndices{};
-			BinaryReader::ReadDateFromFile(inFile, nIndices);
-
-			m->indices.emplace_back(nIndices);
-			inFile.read((char*)&m->indices[0][0], sizeof(UINT) * nIndices);
-		}
-		else if (token == "<SubMeshes>:")
-		{
-			BinaryReader::ReadDateFromFile(inFile, m->subMeshNum);
-
-			if (m->subMeshNum > 0)
-			{
-				m->indices.clear();
-				m->indices.resize(m->subMeshNum);
-
-				for (int i = 0; i < m->subMeshNum; i++)
-				{
-					BinaryReader::ReadDateFromFile(inFile, token);
-					if (token == "<SubMesh>:")
-					{
-						int subMeshIdx = 0;
-						BinaryReader::ReadDateFromFile(inFile, subMeshIdx);
-						int nIndex = 0;
-						BinaryReader::ReadDateFromFile(inFile, nIndex);
-
-						if (nIndex > 0)
-						{
-							m->indices[i].resize(nIndex);
-							inFile.read((char*)&(m->indices[i][0]), sizeof(UINT) * nIndex);
-						}
-					}
-				}
-			}
-		}
-		else if (token == "</Mesh>")
-		{
-			break;
-		}
-	}
-	m->CreateVertexBuffer();
-	m->CreateIndexBuffers();
+	m->name = name;
+	m->ReadMeshData(inFile);
 
 	return m;
+}
+
+std::shared_ptr<CMesh> CMesh::CreateMeshFromFBX(std::string& fileName)
+{
+	std::shared_ptr<CMesh> newMesh = std::make_shared<CMesh>();
+	//FbxManager* manager = FbxManager::Create();
+	//FbxIOSettings* ios = FbxIOSettings::Create(manager, IOSROOT);
+	//manager->SetIOSettings(ios);
+
+	//FbxImporter* importer = FbxImporter::Create(manager, "");
+	//if (!importer->Initialize(fileName.c_str(), -1, manager->GetIOSettings())) {
+	//	std::cerr << "FBX 초기화 실패: " << importer->GetStatus().GetErrorString() << std::endl;
+	//	manager->Destroy();
+
+	//	return nullptr;
+	//}
+
+	//FbxScene* scene = FbxScene::Create(manager, "scene");
+	//importer->Import(scene);
+	//importer->Destroy();
+
+	//
+	//FbxGeometryConverter converter(manager);
+
+
+	//FbxNode* rootNode = scene->GetRootNode();
+	//for (int i = 0; i < rootNode->GetChildCount(); i++) {
+	//	FbxNode* node = rootNode->GetChild(i);
+	//	if (node->GetNodeAttribute() && node->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh) {
+	//		FbxMesh* mesh = node->GetMesh();
+
+	//		bool needTriangulate = false;
+	//		for (int i = 0; i < mesh->GetPolygonCount(); i++) {
+	//			if (mesh->GetPolygonSize(i) > 3) { 
+	//				needTriangulate = true;
+	//			}
+	//		}
+
+	//		if(needTriangulate) converter.Triangulate(mesh, true);
+
+	//		int vertexCount = mesh->GetControlPointsCount();
+	//		FbxVector4* controlPoints = mesh->GetControlPoints();
+	//		newMesh->vertices.resize(vertexCount);
+
+	//		// Position
+	//		for (int j = 0; j < vertexCount; j++) {
+	//			newMesh->vertices[j].position.x = (float)controlPoints[j][0];
+	//			newMesh->vertices[j].position.y = (float)controlPoints[j][1];
+	//			newMesh->vertices[j].position.z = (float)controlPoints[j][2];
+	//		}
+
+	//		// UV (TexCoord)
+	//		FbxGeometryElementUV* uvElement = mesh->GetElementUV(0);
+	//		if (uvElement) {
+	//			for (int j = 0; j < mesh->GetPolygonCount(); j++) {
+	//				for (int k = 0; k < mesh->GetPolygonSize(j); k++) {
+	//					int vertexIndex = mesh->GetPolygonVertex(j, k);
+	//					FbxVector2 uv = uvElement->GetDirectArray().GetAt(vertexIndex);
+	//					newMesh->vertices[vertexIndex].texCoord.x = (float)uv[0];
+	//					newMesh->vertices[vertexIndex].texCoord.y = (float)uv[1];
+	//				}
+	//			}
+	//		}
+
+	//		// Normal
+	//		FbxGeometryElementNormal* normalElement = mesh->GetElementNormal(0);
+	//		if (normalElement) {
+	//			for (int j = 0; j < mesh->GetPolygonCount(); j++) {
+	//				for (int k = 0; k < mesh->GetPolygonSize(j); k++) {
+	//					int vertexIndex = mesh->GetPolygonVertex(j, k);
+	//					FbxVector4 normal = normalElement->GetDirectArray().GetAt(vertexIndex);
+	//					newMesh->vertices[vertexIndex].normal.x = (float)normal[0];
+	//					newMesh->vertices[vertexIndex].normal.y = (float)normal[1];
+	//					newMesh->vertices[vertexIndex].normal.z = (float)normal[2];
+	//				}
+	//			}
+	//		}
+
+	//		// Tangent
+	//		FbxGeometryElementTangent* tangentElement = mesh->GetElementTangent(0);
+	//		if (tangentElement) {
+	//			for (int j = 0; j < mesh->GetPolygonCount(); j++) {
+	//				for (int k = 0; k < mesh->GetPolygonSize(j); k++) {
+	//					int vertexIndex = mesh->GetPolygonVertex(j, k);
+	//					FbxVector4 tangent = tangentElement->GetDirectArray().GetAt(vertexIndex);
+	//					newMesh->vertices[vertexIndex].tangent.x = (float)tangent[0];
+	//					newMesh->vertices[vertexIndex].tangent.y = (float)tangent[1];
+	//					newMesh->vertices[vertexIndex].tangent.z = (float)tangent[2];
+	//				}
+	//			}
+	//		}
+	//		UINT polygonCount = mesh->GetPolygonCount();
+	//		newMesh->indices.push_back(std::vector<UINT>(polygonCount * 3));
+	//		for (int j = 0; j < polygonCount; j++) {
+	//			newMesh->indices[0].push_back(mesh->GetPolygonVertex(j, 0));
+	//			newMesh->indices[0].push_back(mesh->GetPolygonVertex(j, 1));
+	//			newMesh->indices[0].push_back(mesh->GetPolygonVertex(j, 2));
+	//		}
+	//	}
+	//}
+
+	//manager->Destroy();
+
+	//newMesh->CreateVertexBuffer();
+	//newMesh->CreateIndexBuffers();
+
+	return newMesh;
 }
 
 std::shared_ptr<CMesh> CMesh::CreateCubeMesh(Vec3 scale)
@@ -426,6 +415,132 @@ std::shared_ptr<CMesh> CMesh::CreateSphereMesh(float radius, UINT stackCnt, UINT
 	m->CreateOOBBAndOOBS();
 
 	return m;
+}
+
+std::ifstream& CMesh::ReadMeshData(std::ifstream& inFile)
+{
+	std::string token;
+
+	int nvertices{};
+	BinaryReader::ReadDateFromFile(inFile, nvertices);
+
+	vertices.resize(nvertices);
+
+	while (true)
+	{
+		BinaryReader::ReadDateFromFile(inFile, token);
+
+		if (token == "<Bounds>:")
+		{
+			Vec3 boundingCenter, boundingExtent;
+
+			BinaryReader::ReadDateFromFile(inFile, boundingCenter);
+			BinaryReader::ReadDateFromFile(inFile, boundingExtent);
+
+			BoundingOrientedBox::CreateFromBoundingBox(oobb, BoundingBox(boundingCenter, boundingExtent));
+			BoundingSphere::CreateFromBoundingBox(oobs, oobb);
+		}
+		else if (token == "<Positions>:")
+		{
+			int nPositions{};
+			BinaryReader::ReadDateFromFile(inFile, nPositions);
+
+			for (int i = 0; i < nPositions; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].position);
+			}
+		}
+		else if (token == "<Colors>:")
+		{
+			int nColors{};
+			BinaryReader::ReadDateFromFile(inFile, nColors);
+
+			for (int i = 0; i < nColors; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].color);
+			}
+		}
+		else if (token == "<Normals>:")
+		{
+			int nNormals{};
+			BinaryReader::ReadDateFromFile(inFile, nNormals);
+
+			for (int i = 0; i < nNormals; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].normal);
+			}
+		}
+		else if (token == "<TextureCoords0>:")
+		{
+			int nTextureCoord{};
+			BinaryReader::ReadDateFromFile(inFile, nTextureCoord);
+
+			for (int i = 0; i < nTextureCoord; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].texCoord);
+			}
+		}
+		else if (token == "<TextureCoords1>:")
+		{
+			int nTextureCoord{};
+			BinaryReader::ReadDateFromFile(inFile, nTextureCoord);
+
+			Vec2 temp;
+			for (int i = 0; i < nTextureCoord; i++) {
+				BinaryReader::ReadDateFromFile(inFile, temp);
+			}
+		}
+		else if (token == "<Tangents>:")
+		{
+			int nTangent{};
+			BinaryReader::ReadDateFromFile(inFile, nTangent);
+
+			for (int i = 0; i < nTangent; i++) {
+				BinaryReader::ReadDateFromFile(inFile, vertices[i].tangent);
+			}
+
+		}
+		else if (token == "<Indices>:")
+		{
+			int nIndices{};
+			BinaryReader::ReadDateFromFile(inFile, nIndices);
+
+			indices.emplace_back(nIndices);
+			inFile.read((char*)&indices[0][0], sizeof(UINT) * nIndices);
+		}
+		else if (token == "<SubMeshes>:")
+		{
+			BinaryReader::ReadDateFromFile(inFile, subMeshNum);
+
+			if (subMeshNum > 0)
+			{
+				indices.clear();
+				indices.resize(subMeshNum);
+
+				for (int i = 0; i < subMeshNum; i++)
+				{
+					BinaryReader::ReadDateFromFile(inFile, token);
+					if (token == "<SubMesh>:")
+					{
+						int subMeshIdx = 0;
+						BinaryReader::ReadDateFromFile(inFile, subMeshIdx);
+						int nIndex = 0;
+						BinaryReader::ReadDateFromFile(inFile, nIndex);
+
+						if (nIndex > 0)
+						{
+							indices[i].resize(nIndex);
+							inFile.read((char*)&(indices[i][0]), sizeof(UINT) * nIndex);
+						}
+					}
+				}
+			}
+		}
+		else if (token == "</Mesh>")
+		{
+			break;
+		}
+	}
+	CreateVertexBuffer();
+	CreateIndexBuffers();
+
+	return inFile;
 }
 
 void CMesh::CreateOOBBAndOOBS()

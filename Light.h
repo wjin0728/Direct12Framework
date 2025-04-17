@@ -5,17 +5,17 @@
 class CLight
 {
 protected:
-	Color color = { 1.f,1.f,1.f,1.f };
+	Vec3 color = { 1.f,1.f,1.f };
 	Vec3 strength = { 1.f,1.f,1.f };
 	float padding{};
 
 public:
 	CLight() {}
-	CLight(const Color& _color, const Vec3& _strength) : color(_color), strength(_strength) {}
+	CLight(const Vec3& _color, const Vec3& _strength) : color(_color), strength(_strength) {}
 
 public:
 	void SetStrength(const Vec3& _strength) { strength = _strength; }
-	void SetColor(const Color& _color) { color = _color; }
+	void SetColor(const Vec3& _color) { color = _color; }
 
 };
 
@@ -26,12 +26,10 @@ public:
 
 class CDirectionalLight : public CLight
 {
-private:
-
 public:
 	Vec3 direction = Vec3::Zero;
 	CDirectionalLight() = default;
-	CDirectionalLight(const Color& _color, const Vec3& _strength, const Vec3& _direction);
+	CDirectionalLight(const Vec3& _color, const Vec3& _strength, const Vec3& _direction);
 
 public:
 	void SetDirection(const Vec3& _direction);
@@ -53,7 +51,7 @@ private:
 
 public:
 	CPointLight() = default;
-	CPointLight(const Color& _color, const Vec3& _strength, const Vec3& _position, float _range);
+	CPointLight(const Vec3& _color, const Vec3& _strength, const Vec3& _position, float _range);
 
 public:
 	void SetLocalPosition(const Vec3& _position);
@@ -80,7 +78,7 @@ private:
 
 public:
 	CSpotLight() = default;
-	CSpotLight(const Color& _color, const Vec3& _strength, const Vec3& _direction, const Vec3& _position,
+	CSpotLight(const Vec3& _color, const Vec3& _strength, const Vec3& _direction, const Vec3& _position,
 		float _range, float _fallOffStart, float _fallOffEnd, float _spotPower);
 
 public:
