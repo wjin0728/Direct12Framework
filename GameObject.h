@@ -42,6 +42,8 @@ private:
 	std::string mRenderLayer{};
 	LAYER_TYPE mLayerType{};
 
+	int mID{ -1 };
+
 private:
 	BoundingSphere mRootLocalBS = BoundingSphere();
 	BoundingSphere mRootBS = BoundingSphere();
@@ -77,12 +79,15 @@ public:
 	static std::shared_ptr<CGameObject> CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
-	std::shared_ptr<CRenderer> GetMeshRendere() { return mRenderer; }
+	std::shared_ptr<CRenderer> GetRenderer() { return mRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
+	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::string& GetName() const { return mName; }
 	const std::string& GetTag() const { return mTag; }
+	const std::string& GetIDString() const { return std::to_string(mID); }
+	const int GetIDInt() const { return mID; }
 	const std::string& GetRenderLayer() const { return mRenderLayer; }
 	bool GetActive() const { return mActive; }
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return mChildren; }
@@ -95,6 +100,7 @@ public:
 	void SetRenderLayer(const std::string& layer) { mRenderLayer = layer; }
 	void SetName(const std::string& name) { mName = name; }
 	void SetTag(const std::string& tag) { mTag = tag; }
+	void SetID(int id) { mID = id; }
 	void SetParent(const std::shared_ptr<CGameObject>& parent);
 
 	void ReturnCBVIndex();
@@ -110,6 +116,8 @@ public:
 	std::shared_ptr<T> AddComponent(const std::shared_ptr<T>& component);
 	template<typename T>
 	std::shared_ptr<T> GetComponent();
+	template<typename T>
+	std::shared_ptr<T> GetComponentFromHierarchy();
 
 private:
 
@@ -122,12 +130,13 @@ private:
 public:
 	std::shared_ptr<CAnimationController> mAnimationController{};
 
-	void UpdateTransform(const Matrix* parent = nullptr);
 	void ResetForAnimationBlending();
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
 
-	void SetAnimationLayerCache(std::shared_ptr<CGameObject> root);
-	//void FindAndSetSkinnedMesh(std::vector<std::shared_ptr<CSkinnedMesh>>& skinnedMeshes, int meshNum);
+	void PrepareSkinning();
+
+	void UpdateWorldMatrices();
+	void PrintSRT();
 };
 
 
@@ -174,5 +183,21 @@ inline std::shared_ptr<T> CGameObject::GetComponent()
 		}
 	}
 
+	return nullptr;
+}
+
+template<typename T>
+inline std::shared_ptr<T> CGameObject::GetComponentFromHierarchy()
+{
+	std::shared_ptr<T> result = GetComponent<T>();
+	if (result) {
+		return result;
+	}
+	for (auto& child : mChildren) {
+		result = child->GetComponentFromHierarchy<T>();
+		if (result) {
+			return result;
+		}
+	}
 	return nullptr;
 }

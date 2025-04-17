@@ -32,7 +32,6 @@ void CSkinnedMeshRenderer::Update()
 void CSkinnedMeshRenderer::LateUpdate()
 {
     mSkinnedMesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
-
 }
 
 void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
@@ -65,7 +64,7 @@ void CSkinnedMeshRenderer::SetSkinnedMesh(const std::shared_ptr<CSkinnedMesh>& m
 void CSkinnedMeshRenderer::SetSkinnedMesh(const std::string& name)
 {
 	mSkinnedMesh = INSTANCE(CResourceManager).Get<CSkinnedMesh>(name);
-	if (mSkinnedMesh) mWorldBS = mSkinnedMesh->oobs;
+    if (mSkinnedMesh) mWorldBS = mSkinnedMesh->oobs;
 }
 
 void CSkinnedMeshRenderer::AddBone(const std::shared_ptr<CTransform>& bone)

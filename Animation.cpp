@@ -4,13 +4,15 @@
 #include "Transform.h"
 #include "SkinnedMesh.h"
 #include "Timer.h"
+#include "SkinnedMeshRenderer.h"
+#include "ObjectPoolManager.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CAnimationCurve::CAnimationCurve(int keyNum)
 {
-	mKeyTimes.resize(keyNum);
-	mKeyValues.resize(keyNum);
+	mKeyTimes.reserve(keyNum);
+	mKeyValues.reserve(keyNum);
 }
 
 CAnimationCurve::~CAnimationCurve()
@@ -125,46 +127,18 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 {
 	float pos = UpdatePosition(position, start, end);
 
-	int i = 0, j = 0;
 	for (int i = 0;  auto & layer : mLayers) {
 		for (int j = 0; auto & boneFrame : layer->mBoneFrameCaches) {
-			std::shared_ptr<CTransform> transform = boneFrame.lock();
+			auto transform = boneFrame.lock();
 
 			mScales[i][j] = transform->GetLocalScale();
 			mRotations[i][j] = transform->GetLocalEulerAngles();
 			mTranslations[i][j] = transform->GetLocalPosition();
 
 			layer->GetSRT(layer->mAnimationCurves[j], pos, mScales[i][j], mRotations[i][j], mTranslations[i][j]);
-			++j;
-		}
-		++i;
-	}
+			transform->BlendingTransform(layer->mBlendMode, mScales[i][j], mRotations[i][j], mTranslations[i][j], layer->mWeight);
+			transform->ApplyBlendedTransform();
 
-	// 애니메이션 레이어들을 블렌딩한다.
-	for (int i = 0;  auto & layer : mLayers) {
-		for (int j = 0;  auto & boneFrame : layer->mBoneFrameCaches) {
-			std::shared_ptr<CTransform> transform = boneFrame.lock();
-
-			switch (layer->mBlendMode) {
-			case ANIMATION_BLEND_TYPE::ADDITIVE: {
-				transform->GetScaleLayerBlending() += mScales[i][j];
-				transform->GetRotationLayerBlending() += mRotations[i][j];
-				transform->GetPositionLayerBlending() += mTranslations[i][j];
-				break;
-			}
-			case ANIMATION_BLEND_TYPE::OVERRIDE: {
-				transform->GetScaleLayerBlending() = mScales[i][j];
-				transform->GetRotationLayerBlending() = mRotations[i][j];
-				transform->GetPositionLayerBlending() = mTranslations[i][j];
-				break;
-			}
-			case ANIMATION_BLEND_TYPE::OVERRIDE_PASSTHROUGH: {
-				transform->GetScaleLayerBlending() += mScales[i][j] * layer->mWeight;
-				transform->GetRotationLayerBlending() += mRotations[i][j] * layer->mWeight;
-				transform->GetPositionLayerBlending() += mTranslations[i][j] * layer->mWeight;
-				break;
-			}
-			}
 			++j;
 		}
 		++i;
@@ -196,12 +170,14 @@ void CAnimationSets::SetCallbackHandler(std::shared_ptr<CAnimationSet>& animatio
 //
 CAnimationController::CAnimationController() : CComponent(COMPONENT_TYPE::ANIMATION)
 {
+	mTracks.push_back(std::make_shared<CAnimationTrack>());
 }
 
 CAnimationController::CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion) : CComponent(COMPONENT_TYPE::ANIMATION)
 {
 	mApplyRootMotion = applyRootMotion;
 	mAnimationSets = sets;
+	mTracks.push_back(std::make_shared<CAnimationTrack>());
 }
 
 CAnimationController::~CAnimationController()
@@ -215,6 +191,42 @@ void CAnimationController::SetAnimationCallbackHandler(std::shared_ptr<CAnimatio
 
 void CAnimationController::Awake()
 {
+	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
+	if (skinnedMeshRenderer) {
+		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();
+	}
+	auto& boneNames = skinnedMeshRenderer->mBoneNames;
+	mBoneCaches.resize(boneNames.size());
+	finalTransforms.resize(boneNames.size());
+
+	std::unordered_map<std::string, std::weak_ptr<CTransform>> boneMap;
+	for (int i = 0; i < boneNames.size(); ++i) {
+		auto bone = owner->FindChildByName(boneNames[i]);
+		if (bone) {
+			boneMap[boneNames[i]] = bone->GetTransform();
+			mBoneCaches[i] = bone->GetTransform();
+		}
+	}
+
+	for (auto& set : mAnimationSets->mAnimationSet) {
+		for (auto& layer : set->mLayers) {
+			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
+				auto& boneName = layer->mBoneNames[i];
+				if (boneMap.contains(boneName)) cache = boneMap[boneName];
+				else cache = owner->FindChildByName(boneName)->GetTransform();
+				++i;
+			}
+		}
+	}
+
+	if (mBoneTransformIdx == -1) {
+		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
+	}
+
+	SetTrackAnimationSet(0, 0);
+	SetTrackPosition(0, 0.55f);
+	SetTrackSpeed(0, 0.5f);
+	SetTrackWeight(0, 1.0f);
 }
 
 void CAnimationController::Start()
@@ -227,52 +239,41 @@ void CAnimationController::Update()
 
 void CAnimationController::LateUpdate()
 {
-	mTime += DELTA_TIME;
+	float deltaTime = DELTA_TIME;
+	mTime += deltaTime;
 	int nEnabledAnimationTracks = 0;
+	auto& animationSets = mAnimationSets->mAnimationSet;
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled) {
 			nEnabledAnimationTracks++;
-			std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
-			animationSet->Animate(DELTA_TIME * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
+			auto& animationSet = animationSets[track->mIndex];
+			animationSet->Animate(deltaTime * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
 		}
 	}
 
-	//*
-	if (nEnabledAnimationTracks == 1) {
-		for (auto& track : mTracks) {
-			if (track->mEnabled) {
-				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
-
-				for (auto& layer : animationSet->mLayers) {
-					for (auto& cache : layer->mBoneFrameCaches) {
-						cache.lock()->ApplyBlendedTransform();
-					}
-				}
-			}
-		}
-	}
-	else {
-		for (auto& track : mTracks) {
-			if (track->mEnabled) {
-				std::shared_ptr<CAnimationSet> animationSet = mAnimationSets->mAnimationSet[track->mAnimationSetIndex];
-
-				for (auto& layer : animationSet->mLayers) {
-					for (auto& cache : layer->mBoneFrameCaches) {
-						cache.lock()->GetTransform()->ApplyBlendedTransform();
-					}
-				}
-			}
-		}
-	}
-	//*/
-
-	owner->UpdateTransform(nullptr);
+	owner->UpdateWorldMatrices();
 
 	for (auto& track : mTracks) {
-		if (track->mEnabled && mAnimationSets->mAnimationSet.size())
-			mAnimationSets->mAnimationSet[track->mAnimationSetIndex]->HandleCallback();
+		if (track->mEnabled && animationSets.size())
+			animationSets[track->mIndex]->HandleCallback();
 	}
+
+	for (int i = 0; auto & cache : mBoneCaches) {
+		Matrix boneTransform = cache.lock()->GetWorldMat();
+		Matrix bondOffset = Matrix::Identity;
+		bondOffset = mBindPoseBoneOffsets[i];
+
+		finalTransforms[i] = (bondOffset * boneTransform).Transpose();
+		i++;
+	}
+
+	UINT offset = mBoneTransformIdx * ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES);
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->UpdateBuffer(
+		offset,
+		finalTransforms.data(),
+		sizeof(Matrix) * finalTransforms.size()
+	);
 }
 
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
@@ -293,7 +294,7 @@ void CAnimationController::SetTrackEnabled(int trackIndex, bool enabled)
 void CAnimationController::SetTrackPosition(int trackIndex, float position)
 {
 	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetPosition(position);
-	if (mAnimationSets->mAnimationSet.size()) mAnimationSets->mAnimationSet[mTracks[trackIndex]->mAnimationSetIndex]->SetPosition(position);
+	if (mAnimationSets->mAnimationSet.size()) mAnimationSets->mAnimationSet[mTracks[trackIndex]->mIndex]->SetPosition(position);
 }
 
 void CAnimationController::SetTrackSpeed(int trackIndex, float speed)
@@ -316,11 +317,22 @@ void CAnimationController::SetAnimationType(std::shared_ptr<CAnimationSet>& anim
 	animationSet->SetAnimationType(type);
 }
 
-void CAnimationController::UpdateShaderVariables()
-{
-}
-
 void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)
 {
 	
+}
+
+void CAnimationController::BindSkinningMatrix()
+{
+	UINT offset = mBoneTransformIdx * ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES);
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->BindToShader(offset);
+}
+
+void CAnimationController::PrepareSkinning()
+{
+
+}
+
+void CAnimationController::UploadBoneOffsets()
+{
 }

@@ -165,3 +165,13 @@ void CThirdPersonCamera::SetParamsBlended(CameraParams camParams, CameraBlend bl
 
 	SetCameraParams(result);
 }
+
+void CThirdPersonCamera::RaycastObjects()
+{
+	auto transform = GetTransform();
+	Ray ray;
+	ray.position = transform->GetWorldPosition();
+	ray.direction = transform->GetLocalLook();
+
+
+}

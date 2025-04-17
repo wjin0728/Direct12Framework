@@ -1347,11 +1347,11 @@ inline void Vector3::TransformNormal(const Vector3* varray, size_t count, const 
     XMVector3TransformNormalStream(resultArray, sizeof(XMFLOAT3), varray, sizeof(XMFLOAT3), count, M);
 }
 
-inline Vector3 DirectX::SimpleMath::Vector3::GetAngleToQuaternion(const Quaternion& quat) noexcept
+inline Vector3 DirectX::SimpleMath::Vector3::GetAngleToQuaternion(const Quaternion& quaternion) noexcept
 {
     XMFLOAT3 eulerAngles;
 
-    XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(quat);
+    XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(quaternion);
 
     // Pitch (XÃà È¸Àü)
     eulerAngles.x = std::asin(-rotationMatrix.r[2].m128_f32[1]);

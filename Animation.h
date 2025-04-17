@@ -88,8 +88,6 @@ public:
     ANIMATION_TYPE mType = ANIMATION_TYPE::LOOP;
 
     std::vector<std::shared_ptr<CAnimationLayer>> mLayers;
-    std::vector<std::string> mBoneNames{};
-    //std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
 
     std::vector<std::vector<Vec3>> mScales;
     std::vector<std::vector<Vec3>> mRotations;
@@ -117,8 +115,6 @@ public:
     ~CAnimationSets();
 
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
-    std::vector<std::string> mBoneNames{};
-    //std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
 
 public:
     void SetCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr<CCallbackHandler>& callbackHandler);
@@ -136,13 +132,13 @@ public:
     float mPosition = 0.0f;
     float mWeight = 1.0f;
 
-    int mAnimationSetIndex = 0;
+    int mIndex = 0;
 
     float mStartTime = 0.0f;
     float mEndTime = 0.0f;
     float mLength = 0.0f;
 
-    void SetAnimationSet(int index) { mAnimationSetIndex = index; }
+    void SetAnimationSet(int index) { mIndex = index; }
 
     void SetEnable(bool enable) { mEnabled = enable; }
     void SetSpeed(float s) { mSpeed = s; }
@@ -166,6 +162,11 @@ public:
 
     std::vector<std::shared_ptr<CAnimationTrack>> mTracks;
     std::shared_ptr<CAnimationSets> mAnimationSets;
+    std::vector<std::weak_ptr<CTransform>> mBoneCaches{};
+    std::vector<Matrix> mBindPoseBoneOffsets{};
+    std::vector<Matrix> finalTransforms;
+
+    UINT mBoneTransformIdx = -1;
 
     void SetTrackAnimationSet(int trackIndex, int setIndex);
     void SetTrackEnabled(int trackIndex, bool enabled);
@@ -186,5 +187,7 @@ public:
     virtual void LateUpdate();
 
     void AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject);
-    void UpdateShaderVariables();
+    void BindSkinningMatrix();
+    void PrepareSkinning();
+    void UploadBoneOffsets();
 };

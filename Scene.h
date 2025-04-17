@@ -23,12 +23,14 @@ protected:
 	std::unordered_map<std::string, std::shared_ptr<CShader>> mShaders{};
 	std::unordered_map<std::string, ObjectList> mRenderLayers{};
 	std::vector<std::shared_ptr<class CInstancingGroup>> instancingGroups{};
+	std::array<std::vector<std::shared_ptr<CGameObject>>, OBJECT_TYPE::end> mObjectTypes;
 
 	std::shared_ptr<CTerrain> mTerrain{};
 	std::unique_ptr<CLightManager> lightMgr{};
 
 	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
-	std::array<std::shared_ptr<CGameObject>, 3> mPlayers{};
+
+	int clientID{ -1 };
 		 
 public:
 	CScene();
@@ -66,6 +68,7 @@ public:
 	const std::unordered_map<std::string, ObjectList>& GetObjects() const { return mRenderLayers; }
 	ObjectList& GetObjects(const std::string& layer) { return mRenderLayers[layer]; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
+	std::shared_ptr<CGameObject> GetPlayer(int idx) { return mObjectTypes[PLAYER][idx]; }
 
 protected:
 	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);

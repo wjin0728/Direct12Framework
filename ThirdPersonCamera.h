@@ -48,5 +48,7 @@ public:
 
 	CameraBlend ComputeBlendout();
 	void SetParamsBlended(CameraParams camParams, CameraBlend blendout, float progress);
+
+	void RaycastObjects();
 };
 
