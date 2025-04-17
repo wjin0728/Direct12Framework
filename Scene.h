@@ -23,6 +23,7 @@ protected:
 	std::unordered_map<std::string, std::shared_ptr<CShader>> mShaders{};
 	std::unordered_map<std::string, ObjectList> mRenderLayers{};
 	std::vector<std::shared_ptr<class CInstancingGroup>> instancingGroups{};
+	std::array<std::vector<std::shared_ptr<CGameObject>>, OBJECT_TYPE::end> mObjectTypes;
 
 	std::shared_ptr<CTerrain> mTerrain{};
 	std::unique_ptr<CLightManager> lightMgr{};
@@ -30,7 +31,6 @@ protected:
 	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
 
 	int clientID{ -1 };
-	std::array<std::vector<std::shared_ptr<CGameObject>>, OBJECT_TYPE::end> mObjectTypes;
 		 
 public:
 	CScene();

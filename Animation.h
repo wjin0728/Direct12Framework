@@ -88,8 +88,6 @@ public:
     ANIMATION_TYPE mType = ANIMATION_TYPE::LOOP;
 
     std::vector<std::shared_ptr<CAnimationLayer>> mLayers;
-    std::vector<std::string> mBoneNames{};
-    //std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
 
     std::vector<std::vector<Vec3>> mScales;
     std::vector<std::vector<Vec3>> mRotations;
@@ -117,7 +115,6 @@ public:
     ~CAnimationSets();
 
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
-    std::vector<std::string> mBoneNames{};
 
 public:
     void SetCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr<CCallbackHandler>& callbackHandler);
@@ -165,6 +162,7 @@ public:
 
     std::vector<std::shared_ptr<CAnimationTrack>> mTracks;
     std::shared_ptr<CAnimationSets> mAnimationSets;
+    std::vector<std::weak_ptr<CTransform>> mBoneCaches{};
     std::vector<Matrix> mBindPoseBoneOffsets{};
     std::vector<Matrix> finalTransforms;
 

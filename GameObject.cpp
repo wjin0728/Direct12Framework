@@ -464,7 +464,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 						ReadDateFromFile(ifs, layerNum);
 
 						animSet->mLayers[i] = std::make_shared<CAnimationLayer>();
-						auto layer = animSet->mLayers[i];
+						auto& layer = animSet->mLayers[i];
 
 						int cacheNum{};
 						ReadDateFromFile(ifs, cacheNum);
