@@ -113,7 +113,8 @@ public:
 
 public:
    void UpdateLocalMatrix();  
-   void UpdateWorldMatrix();  
+   void UpdateWorldMatrix(bool update = true);
+   void UpdateWorldMatrix(std::shared_ptr<CTransform> parent, bool update = true);
    void ApplyBlendedTransform();  
    void BlendingTransform(const ANIMATION_BLEND_TYPE blendType, const Vec3& scale, const Vec3& rotation, const Vec3& position, float weight);
 

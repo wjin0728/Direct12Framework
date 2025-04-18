@@ -10,7 +10,7 @@ private:
 	Vec3 mVelocity{};
 	Vec3 mAcceleration{};
 
-	float mMaxVelocity = 4.f;
+	float mMaxVelocity = 2.f;
 	float mFriction = 100.0f;
 
 public:

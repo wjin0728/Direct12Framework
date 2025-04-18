@@ -23,7 +23,7 @@ CBattleScene::CBattleScene()
 
 void CBattleScene::Initialize()
 {
-	LoadSceneFromFile(SCENE_PATH(std::string("Lobby")));
+	LoadSceneFromFile(SCENE_PATH(std::string("Lobby1")));
 
 
 

@@ -259,11 +259,9 @@ void CTransform::UpdateLocalMatrix()
 	mLocalLook = Vec3(mLocalMat._31, mLocalMat._32, mLocalMat._33);
 }
 
-void CTransform::UpdateWorldMatrix()
+void CTransform::UpdateWorldMatrix(bool update)
 {
-	std::shared_ptr<CTransform> parent{};
-	if (owner->GetName() != "Armature")
-		parent = mParent.lock();
+	std::shared_ptr<CTransform> parent = mParent.lock();
 
 	if (!mDirtyFlag && !parent) {
 		return;
@@ -274,11 +272,29 @@ void CTransform::UpdateWorldMatrix()
 		mDirtyFlag = false;
 	}
 
-	mWorldMat = parent ? (mLocalMat * parent->GetWorldMat()) : mLocalMat;
+	mWorldMat = parent ? (mLocalMat * parent->GetWorldMat(update)) : mLocalMat;
 
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
-	GetOwner()->mRootLocalBS.Transform(GetOwner()->mRootBS, mWorldMat);
+	owner->mRootLocalBS.Transform(owner->mRootBS, mWorldMat);
+}
+
+void CTransform::UpdateWorldMatrix(std::shared_ptr<CTransform> parent, bool update)
+{
+	if (!mDirtyFlag && !parent) {
+		return;
+	}
+
+	if (mDirtyFlag) {
+		UpdateLocalMatrix();
+		mDirtyFlag = false;
+	}
+
+	mWorldMat = parent ? (mLocalMat * parent->GetWorldMat(update)) : mLocalMat;
+
+	dirtyFramesNum = FRAME_RESOURCE_COUNT;
+
+	owner->mRootLocalBS.Transform(owner->mRootBS, mWorldMat);
 }
 
 void CTransform::ApplyBlendedTransform()

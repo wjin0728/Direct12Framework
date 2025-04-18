@@ -137,7 +137,7 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 
 			layer->GetSRT(layer->mAnimationCurves[j], pos, mScales[i][j], mRotations[i][j], mTranslations[i][j]);
 			transform->BlendingTransform(layer->mBlendMode, mScales[i][j], mRotations[i][j], mTranslations[i][j], layer->mWeight);
-			transform->ApplyBlendedTransform();
+			//transform->ApplyBlendedTransform();
 
 			++j;
 		}
@@ -218,6 +218,8 @@ void CAnimationController::Awake()
 			}
 		}
 	}
+	mRootTransform = mAnimationSets->mAnimationSet[0]->mLayers[0]->mBoneFrameCaches[0].lock()->GetTransform();
+	mRootTransform.lock()->owner->SetStatic(true);
 
 	if (mBoneTransformIdx == -1) {
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
@@ -251,8 +253,7 @@ void CAnimationController::LateUpdate()
 			animationSet->Animate(deltaTime * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
 		}
 	}
-
-	owner->UpdateWorldMatrices();
+	mRootTransform.lock()->owner->UpdateWorldMatrices(nullptr);	
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled && animationSets.size())
@@ -260,7 +261,7 @@ void CAnimationController::LateUpdate()
 	}
 
 	for (int i = 0; auto & cache : mBoneCaches) {
-		Matrix boneTransform = cache.lock()->GetWorldMat();
+		Matrix boneTransform = cache.lock()->GetWorldMat(false);
 		Matrix bondOffset = Matrix::Identity;
 		bondOffset = mBindPoseBoneOffsets[i];
 

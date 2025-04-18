@@ -74,6 +74,7 @@ void CPlayerController::OnKeyEvents()
 		moveDir.Normalize();
 
 		Vec3 currentVelocity = rigidBody->GetVelocity();
+		float currentSpeed = currentVelocity.Length();
 		if (currentVelocity != Vec3::Zero) {
 			Vec3 currentDir = currentVelocity.GetNormalized();
 			float dot = currentDir.Dot(moveDir);
@@ -82,7 +83,8 @@ void CPlayerController::OnKeyEvents()
 				accel = -currentDir * 20.f; 
 			}
 			else {
-				accel = moveDir * 10.f; // 정상 가속
+				rigidBody->SetVelocity(currentSpeed * dot * moveDir);
+				accel = moveDir * 10.f;
 				isDecelerate = false;
 			}
 		}

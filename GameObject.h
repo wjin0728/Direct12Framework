@@ -135,7 +135,7 @@ public:
 
 	void PrepareSkinning();
 
-	void UpdateWorldMatrices();
+	void UpdateWorldMatrices(std::shared_ptr<CTransform> parent);
 	void PrintSRT();
 };
 

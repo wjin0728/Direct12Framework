@@ -178,8 +178,6 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	return instance;
 }
 
-
-
 std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGameObject>& original,
 	const std::shared_ptr<CTransform>& parentTransform)
 {
@@ -213,7 +211,6 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 
 	return instance;
 }
-
 
 std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& tag, Vec2 rtSize, 
 	float nearPlane, float farPlane, float fovAngle)
@@ -400,7 +397,9 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 		else if (token == "<Animation>:") {
 			std::string animName{};
 			ReadDateFromFile(inFile, animName);
-			animName = animName.substr(0, animName.find('@') + 1) + "anim";
+			size_t n = animName.find('@');
+			if (n != std::string::npos) 
+				animName = animName.substr(0, n + 1) + "anim";
 
 			obj->CreateAnimationFromFile(ANIMATION_PATH(animName));
 		}
@@ -669,12 +668,12 @@ void CGameObject::PrepareSkinning()
 	mAnimationController->PrepareSkinning();
 }
 
-void CGameObject::UpdateWorldMatrices()
+void CGameObject::UpdateWorldMatrices(std::shared_ptr<CTransform> parent)
 {
-	GetTransform()->UpdateWorldMatrix();
+	GetTransform()->UpdateWorldMatrix(parent, false);
 
-	for (auto& child : GetChildren()) {
-		child->UpdateWorldMatrices();
+	for (auto& child : mChildren) {
+		child->UpdateWorldMatrices(mTransform);
 	}
 }
 

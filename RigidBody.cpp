@@ -23,15 +23,15 @@ void CRigidBody::Start()
 
 void CRigidBody::Update()
 {
-	if (mAcceleration != Vec3::Zero) {
-		mVelocity += (mAcceleration * DELTA_TIME);
-		mVelocity = Vec3::ClampLength(mVelocity, 0.f, mMaxVelocity);
-	}
 
 	if (mVelocity != Vec3::Zero) {
 		GetTransform()->Move(mVelocity, DELTA_TIME);
 	}
 
+	if (mAcceleration != Vec3::Zero) {
+		mVelocity += (mAcceleration * DELTA_TIME);
+		mVelocity = Vec3::ClampLength(mVelocity, 0.f, mMaxVelocity);
+	}
 	Decelerate();
 }
 
