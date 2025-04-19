@@ -30,7 +30,7 @@ void CPlayerController::Update()
 {
 	OnKeyEvents();
 	auto transform = GetTransform();
-	float terrainHeight = mTerrain->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
+	float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
 
 	Vec3 pos = transform->GetWorldPosition();
 	pos.y = terrainHeight;

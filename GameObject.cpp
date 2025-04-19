@@ -156,7 +156,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 
 	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
-	instance->mLayerType = original->mLayerType;
+	instance->mObjectType = original->mObjectType;
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
 
@@ -190,7 +190,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 
 	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
-	instance->mLayerType = original->mLayerType;
+	instance->mObjectType = original->mObjectType;
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
 
@@ -335,6 +335,17 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(std::ifstream& if
 			root->SetStatic(false);
 		}
 	}
+
+	if (root->mTag == "Obstacle") {
+		root->mObjectType = OBJECT_TYPE::OBSTACLE;
+	}
+	else if (root->mTag == "Player") {
+		root->mObjectType = OBJECT_TYPE::PLAYER;
+	}
+	else if (root->mTag == "Enemy") {
+		root->mObjectType = OBJECT_TYPE::ENEMY;
+	}
+	else root->mObjectType = OBJECT_TYPE::NONE;
 	return root;
 }
 
@@ -359,6 +370,11 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			obj = CGameObject::Instantiate(prefabs[prefabName]);
 			obj->SetActive(true);
 			obj->CreateTransformFromFile(inFile);
+
+			std::string tag{};
+			ReadDateFromFile(inFile, tag);
+			obj->SetTag(tag);
+			
 			return obj;
 		}
 		if (token == "<Frame>:") {
@@ -407,6 +423,9 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			break;
 		}
 	}
+
+	
+
 	return obj;
 }
 

@@ -32,6 +32,7 @@ void CSkinnedMeshRenderer::Update()
 void CSkinnedMeshRenderer::LateUpdate()
 {
     mSkinnedMesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
+	mSkinnedMesh->oobb.Transform(mWorldOOBB, GetTransform()->GetWorldMat());
 }
 
 void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)

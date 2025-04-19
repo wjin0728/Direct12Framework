@@ -62,3 +62,18 @@ float CTerrain::GetHeight(float x, float z)
 	return mTerrainMesh->GetHeight(x, z);
 }
 
+bool CTerrain::Raycast(const Ray& ray, float maxDist, float& distance)
+{
+	float step = 0.1f;
+
+	for (float d = 0.f; d < maxDist; d += step) {
+		Vec3 pos = ray.position + ray.direction * d;
+		float terrainY = GetHeight(pos.x, pos.z);
+		if (pos.y < terrainY) {
+			distance = d;
+			return true;
+		}
+	}
+	return false;
+}
+

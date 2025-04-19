@@ -137,7 +137,7 @@ void CAnimationSet::Animate(float position, float weight, float start, float end
 
 			layer->GetSRT(layer->mAnimationCurves[j], pos, mScales[i][j], mRotations[i][j], mTranslations[i][j]);
 			transform->BlendingTransform(layer->mBlendMode, mScales[i][j], mRotations[i][j], mTranslations[i][j], layer->mWeight);
-			//transform->ApplyBlendedTransform();
+			transform->ApplyBlendedTransform();
 
 			++j;
 		}

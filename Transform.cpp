@@ -254,9 +254,9 @@ void CTransform::UpdateLocalMatrix()
 	mLocalMat._42 = mLocalPosition.y;
 	mLocalMat._43 = mLocalPosition.z;
 
-	mLocalRight = Vec3(mLocalMat._11, mLocalMat._12, mLocalMat._13);
-	mLocalUp = Vec3(mLocalMat._21, mLocalMat._22, mLocalMat._23);
-	mLocalLook = Vec3(mLocalMat._31, mLocalMat._32, mLocalMat._33);
+	mLocalRight = Vec3(mLocalMat._11, mLocalMat._12, mLocalMat._13).GetNormalized();
+	mLocalUp = Vec3(mLocalMat._21, mLocalMat._22, mLocalMat._23).GetNormalized();
+	mLocalLook = Vec3(mLocalMat._31, mLocalMat._32, mLocalMat._33).GetNormalized();
 }
 
 void CTransform::UpdateWorldMatrix(bool update)
@@ -302,6 +302,7 @@ void CTransform::ApplyBlendedTransform()
 	SetLocalScale(mScaleLayerBlending);
 	SetLocalRotation(mRotationLayerBlending);
 	SetLocalPosition(mPositionLayerBlending);
+	mDirtyFlag = true;
 }
 
 void CTransform::BlendingTransform(const ANIMATION_BLEND_TYPE blendType, const Vec3& scale, const Vec3& rotation, const Vec3& position, float weight)

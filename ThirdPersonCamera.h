@@ -21,10 +21,11 @@ class CThirdPersonCamera : public CComponent, public std::enable_shared_from_thi
 private:
 	CameraParams mCameraParams;
 	Vec2 mDeadZoneSize{};
+	Vec3 mOriginalPosition{};
 
 	std::shared_ptr<class CCamera> mCamera;
 	std::shared_ptr<class CGameObject> mTarget;
-	std::shared_ptr<class CTerrain> mTerrain;
+	std::weak_ptr<class CTerrain> mTerrain;
 
 public:
 	CThirdPersonCamera();

@@ -5,6 +5,8 @@ class CScene;
 class CFrameResource;
 class CGameObject;
 
+#define CUR_SCENE INSTANCE(CSceneManager).GetCurScene()
+
 class CSceneManager
 {
 	MAKE_SINGLETON(CSceneManager)

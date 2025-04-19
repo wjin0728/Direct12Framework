@@ -7,7 +7,7 @@ private:
 
 	std::shared_ptr<class CRigidBody> rigidBody{};
 	std::weak_ptr<class CCamera> mCamera{};
-	std::shared_ptr<class CTerrain> mTerrain{};
+	std::weak_ptr<class CTerrain> mTerrain{};
 
 public:
 	CPlayerController() : CMonoBehaviour("PlayerController") {};

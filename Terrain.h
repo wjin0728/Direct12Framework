@@ -36,5 +36,7 @@ public:
 
 	float GetHeight(float x, float z);
 	Vec3 GetScale() const { return mScale; }
+
+	bool Raycast(const Ray& ray, float maxDist, float& distance);
 };
 
