@@ -3,6 +3,9 @@
 #include"GameObject.h"
 #include"Transform.h"
 #include"Timer.h"
+#include"Terrain.h"
+#include"SceneManager.h"
+#include"Scene.h"
 
 CRigidBody::CRigidBody() : CComponent(COMPONENT_TYPE::RIGID_BODY)
 {
@@ -19,13 +22,15 @@ void CRigidBody::Awake()
 
 void CRigidBody::Start()
 {
+	auto scene = INSTANCE(CSceneManager).GetCurScene();
+	mTerrain = scene->GetTerrain();
 }
 
 void CRigidBody::Update()
 {
-
 	if (mVelocity != Vec3::Zero) {
-		GetTransform()->Move(mVelocity, DELTA_TIME);
+		Vec3 pos = GetValidGroundPosition();
+		GetTransform()->SetLocalPosition(pos);
 	}
 
 	if (mAcceleration != Vec3::Zero) {
@@ -38,6 +43,31 @@ void CRigidBody::Update()
 
 void CRigidBody::LateUpdate()
 {
+}
+
+Vec3 CRigidBody::GetValidGroundPosition()
+{
+	auto transform = GetTransform();
+	Vec3 pos = transform->GetWorldPosition();
+	Vec3 prevPos = pos + mVelocity * DELTA_TIME;
+
+	auto terrain = mTerrain.lock();
+	if (terrain && terrain->CanMove(prevPos.x, prevPos.z)) return prevPos;
+
+	Vec3 moveDir = mVelocity.GetNormalized();
+    for (int angle = 1; angle <= 90; angle += 5)
+    {
+		float rad = angle * degToRad;
+        Vec3 rightCheck = Quaternion::CreateFromYawPitchRoll(rad, 0, 0) * mVelocity;
+        Vec3 leftCheck = Quaternion::CreateFromYawPitchRoll(-rad, 0, 0) * mVelocity;
+        Vec3 rPos = pos + rightCheck * DELTA_TIME;
+		Vec3 lPos = pos + leftCheck * DELTA_TIME;
+
+        if (terrain->CanMove(rPos.x, rPos.z)) return rPos;
+        if (terrain->CanMove(lPos.x, lPos.z)) return lPos;
+    }
+
+	return pos;
 }
 
 void CRigidBody::Decelerate()

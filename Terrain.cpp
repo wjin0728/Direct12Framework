@@ -57,10 +57,58 @@ void CTerrain::SetMaterial(const std::shared_ptr<CTerrainMaterial>& material)
 	}
 }
 
+void CTerrain::MakeNavMap(const std::string& fileName, UINT resolution)
+{
+	mNavMapResolution = resolution;
+	std::vector<BYTE> data;
+	std::ifstream file("Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
+	if (!file.is_open()) {
+		return;
+	}
+	UINT navMapSize = resolution * resolution;
+	data.resize(navMapSize);
+	file.read(reinterpret_cast<char*>(data.data()), navMapSize * sizeof(BYTE));
+
+	mNavMapData.resize(navMapSize);
+	for (UINT y = 0; y < resolution; y++)
+	{
+		for (UINT x = 0; x < resolution; x++)
+		{
+			mNavMapData[x + ((resolution - 1 - y) * resolution)] = data[x + (y * resolution)];
+		}
+	}
+}
+
 float CTerrain::GetHeight(float x, float z)
 {
 	return mTerrainMesh->GetHeight(x, z);
 }
+
+bool CTerrain::CanMove(float x, float z)
+{
+	if (mNavMapData.empty()) {
+		return false;
+	}
+	float localX = x - mTerrainMesh->GetOffset().x;
+	float localZ = z - mTerrainMesh->GetOffset().z;
+	if (localX < 0.0f || localZ < 0.0f || localX >= mScale.x || localZ >= mScale.z) {
+		return false;
+	}
+	float xIndex = localX / (mScale.x / (mNavMapResolution));
+	float zIndex = localZ / (mScale.z / (mNavMapResolution));
+	zIndex = mNavMapResolution - zIndex;
+	xIndex = static_cast<int>(xIndex);
+	zIndex = static_cast<int>(zIndex);
+
+	int idx = xIndex + (zIndex * mNavMapResolution);
+	if (mNavMapData[idx] != 0) {
+		return true;
+	}
+
+	return false;
+}
+
+
 
 bool CTerrain::Raycast(const Ray& ray, float maxDist, float& distance)
 {

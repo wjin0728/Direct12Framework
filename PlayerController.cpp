@@ -9,7 +9,6 @@
 #include"Scene.h"
 #include"Terrain.h"
 #include"Camera.h"
-#include"SceneManager.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -96,6 +95,11 @@ void CPlayerController::OnKeyEvents()
 
 	rigidBody->SetAcceleration(accel);
 	rigidBody->SetUseFriction(isDecelerate);
+
+	if (mTerrain.lock()->CanMove(transform->GetWorldPosition().x, transform->GetWorldPosition().z))
+	{
+		rigidBody->SetUseGravity(true);
+	}
 
 	float rotationSpeed = 10.f;
 

@@ -22,6 +22,7 @@ private:
 	CameraParams mCameraParams;
 	Vec2 mDeadZoneSize{};
 	Vec3 mOriginalPosition{};
+	bool mIsHit{ false };
 
 	std::shared_ptr<class CCamera> mCamera;
 	std::shared_ptr<class CGameObject> mTarget;

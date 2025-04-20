@@ -113,6 +113,7 @@ void CThirdPersonCamera::SetCameraParams(CameraParams& params)
 	Vec3 trackingPosition = mTarget->GetTransform()->GetWorldPosition();
 	Quaternion rotation = Quaternion::CreateFromYawPitchRoll(params.yaw * degToRad, params.pitch * degToRad, 0);
 	Vec3 position = trackingPosition - (rotation * localOffset);
+	mOriginalPosition = position;
 
 	transform->SetLocalPosition(position);
 	transform->SetLocalRotation(rotation);
@@ -123,7 +124,7 @@ CameraParams CThirdPersonCamera::GetCameraParams(Vec3 trackingPosition)
 	CameraParams result;
 	auto transform = GetTransform();
 
-	Vec3 position = transform->GetLocalPosition();
+	Vec3 position = mIsHit ? mOriginalPosition : transform->GetWorldPosition();
 	Quaternion rotation = transform->GetLocalRotation();
 
 	result.trackingPosition = trackingPosition;
@@ -195,8 +196,8 @@ void CThirdPersonCamera::RaycastObjects()
 	float targetToCamDist = ray.direction.Length();
 	ray.direction.Normalize();
 	float minDistance = D3D12_FLOAT32_MAX;
-	bool isHit = false;
 
+	mIsHit = false;
 	auto& objectList = CUR_SCENE->GetObjectsForType();
 	auto& obstacles = objectList[OBJECT_TYPE::OBSTACLE];
 	for (auto& obstacle : obstacles) {
@@ -205,13 +206,13 @@ void CThirdPersonCamera::RaycastObjects()
 		if (renderer && renderer->IsIntersect(ray, dist)) {
 			if (dist < targetToCamDist && dist < minDistance) {
 				minDistance = dist;
-				isHit = true;
+				mIsHit = true;
 			}
 		}
 	}
 
-	if (!isHit) return;
+	if (!mIsHit) return;
 
 	Vec3 hitPoint = ray.position + ray.direction * minDistance;
-	transform->SetLocalPosition(hitPoint);
+	//transform->SetLocalPosition(hitPoint);
 }

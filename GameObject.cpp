@@ -658,6 +658,7 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 	auto terrain = AddComponent<CTerrain>();
 	terrain->SetHeightMapGridMesh(mesh);
 	terrain->SetMaterial(material);
+	terrain->MakeNavMap(name + "NavMap", resolution*2);
 
 	INSTANCE(CSceneManager).GetCurScene()->SetTerrain(terrain);
 }
