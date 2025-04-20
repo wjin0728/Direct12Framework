@@ -360,6 +360,7 @@
     </ClCompile>
     <ClCompile Include="ThirdPersonCamera.cpp">
       <Filter>Client</Filter>
+	</ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Server</Filter>
     </ClCompile>
