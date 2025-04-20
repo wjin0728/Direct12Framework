@@ -21,6 +21,8 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 
+	virtual void RenderScene();
+
 private:
 
 	void SetLights();

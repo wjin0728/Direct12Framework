@@ -97,6 +97,16 @@ void CScene::RenderForwardPass()
 
 void CScene::RenderGBufferPass()
 {
+	auto gBuffer = RT_GROUP(RENDER_TARGET_GROUP_TYPE::G_BUFFER);
+	gBuffer->ChangeResourceToTarget(0);
+	gBuffer->SetRenderTarget(0);
+	auto gBufferPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	gBufferPassBuffer->BindToShader(0);
+	auto& camera = mCameras["MainCamera"];
+	if (camera) {
+		RenderForLayer("Opaque", camera);
+	}
+	gBuffer->ChangeTargetToResource(0);
 
 }
 
@@ -262,19 +272,6 @@ void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> c
 		object->Render(camera, pass);
 	}
 }
-
-void CScene::RenderTerrain(const std::string& layer)
-{
-	if (!mTerrain) {
-		return;
-	}
-	if (!mShaders.contains(layer)) {
-		return;
-	}
-	mShaders[layer]->SetPipelineState(CMDLIST);
-	mTerrain->Render(mCameras["MainCamera"]);
-}
-
 void CScene::UpdatePassData()
 {
 	CBPassData passData;
@@ -286,7 +283,6 @@ void CScene::UpdatePassData()
 
 	auto& camera = mCameras["MainCamera"];
 	auto& lightCamera = mCameras["DirectinalLight"];
-
 
 	if (camera) {
 		passData.camPos = camera->GetLocalPosition();
@@ -300,10 +296,6 @@ void CScene::UpdatePassData()
 	passData.deltaTime = DELTA_TIME;
 	passData.totalTime = TIMER.GetTotalTime();
 	passData.renderTargetSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
-
-	passData.gFogRange = 50.f;
-	passData.gFogStart = 20.f;
-	passData.gFogColor = Color(0.2f, 0.2f, 0.2f);
 
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(0, &passData, sizeof(CBPassData));
 

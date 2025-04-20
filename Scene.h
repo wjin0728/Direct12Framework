@@ -20,7 +20,6 @@ protected:
 
 	ObjectList mObjects{};
 
-	std::unordered_map<std::string, std::shared_ptr<CShader>> mShaders{};
 	std::unordered_map<std::string, ObjectList> mRenderLayers{};
 	std::vector<std::shared_ptr<class CInstancingGroup>> instancingGroups{};
 	std::array<ObjectList, OBJECT_TYPE::end> mObjectTypes;
@@ -44,6 +43,7 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 
+	virtual void RenderScene() {};
 	void RenderShadowPass();
 	void RenderForwardPass();
 	void RenderGBufferPass();
@@ -73,6 +73,5 @@ public:
 
 protected:
 	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);
-	void RenderTerrain(const std::string& layer);
 	void UpdatePassData();
 };

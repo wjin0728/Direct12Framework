@@ -230,7 +230,7 @@ void CDX12Manager::InitDepthStencilView()
 	auto shadowMap = INSTANCE(CResourceManager).Create2DTexture
 	(
 		"ShadowMap",
-		DXGI_FORMAT_R24G8_TYPELESS,
+		DXGI_FORMAT_R32_TYPELESS,
 		nullptr, 0,
 		4096.f *3, 4096.f *3,
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
@@ -302,7 +302,7 @@ std::vector<CD3DX12_STATIC_SAMPLER_DESC> CDX12Manager::InitStaticSamplers()
 		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressV
 		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressW
 		0.0f,                               // mipLODBias
-		16,                                 // maxAnisotropy
+		8,                                 // maxAnisotropy
 		D3D12_COMPARISON_FUNC_LESS_EQUAL,
 		D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK);
 
