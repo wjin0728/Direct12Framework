@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "SceneManager.h"
 #include "Scene.h"
+#include"Renderer.h"
 
 
 CThirdPersonCamera::CThirdPersonCamera()
@@ -29,6 +30,9 @@ void CThirdPersonCamera::Awake()
 
 void CThirdPersonCamera::Start()
 {
+	auto scene = INSTANCE(CSceneManager).GetCurScene();
+	mTerrain = scene->GetTerrain();
+
 	mCameraParams.trackingPosition = mTarget->GetTransform()->GetWorldPosition();
 	mCameraParams.distance = 5.f;
 	mCameraParams.framing = Vec2(0.f, -0.4f);
@@ -37,6 +41,7 @@ void CThirdPersonCamera::Start()
 
 	mDeadZoneSize = { -0.05f, 0.05f};
 	SetCameraParams(mCameraParams);
+
 }
 
 void CThirdPersonCamera::Update()
@@ -44,7 +49,7 @@ void CThirdPersonCamera::Update()
 	if (!mTarget || !mCamera) return;
 	float deltaTime = DELTA_TIME;
 	float speed = deltaTime * 5.f;
-
+	
 	Vec2 mouseDelta = INPUT.GetMouseDelta();
 
 	int direction = 0;
@@ -64,15 +69,27 @@ void CThirdPersonCamera::Update()
 
 	float minPitch = -60.f;
 	float maxPitch = 45.f;
+
 	mCameraParams.pitch = std::clamp(mCameraParams.pitch, minPitch, maxPitch);
 	if (mCameraParams.yaw > 180.f) { mCameraParams.yaw -= 360.f; }
 	else if (mCameraParams.yaw < -180.f) { mCameraParams.yaw += 360.f; }
 
 	mCameraParams.trackingPosition = mTarget->GetTransform()->GetWorldPosition();
 	CameraBlend blendout = ComputeBlendout();
-	float progress = deltaTime * 7.f;
+	float progress = deltaTime * 20.f;
 	progress = std::clamp(progress, 0.f, 1.f);
 	SetParamsBlended(mCameraParams, blendout, progress);
+	RaycastObjects();
+
+	auto transform = GetTransform();
+	Vec3 camPos = transform->GetWorldPosition();
+	float terrainHeight = mTerrain.lock()->GetHeight(camPos.x, camPos.z);
+	if (camPos.y < terrainHeight + 0.5f)
+	{
+		camPos.y = terrainHeight + 0.5f;
+		transform->SetLocalPosition(camPos);
+	}
+
 }
 
 void CThirdPersonCamera::LateUpdate()
@@ -96,6 +113,8 @@ void CThirdPersonCamera::SetCameraParams(CameraParams& params)
 	Vec3 trackingPosition = mTarget->GetTransform()->GetWorldPosition();
 	Quaternion rotation = Quaternion::CreateFromYawPitchRoll(params.yaw * degToRad, params.pitch * degToRad, 0);
 	Vec3 position = trackingPosition - (rotation * localOffset);
+	mOriginalPosition = position;
+
 	transform->SetLocalPosition(position);
 	transform->SetLocalRotation(rotation);
 }
@@ -105,7 +124,7 @@ CameraParams CThirdPersonCamera::GetCameraParams(Vec3 trackingPosition)
 	CameraParams result;
 	auto transform = GetTransform();
 
-	Vec3 position = transform->GetLocalPosition();
+	Vec3 position = mIsHit ? mOriginalPosition : transform->GetWorldPosition();
 	Quaternion rotation = transform->GetLocalRotation();
 
 	result.trackingPosition = trackingPosition;
@@ -163,4 +182,37 @@ void CThirdPersonCamera::SetParamsBlended(CameraParams camParams, CameraBlend bl
 	result.distance += multi * blendout.distance;
 
 	SetCameraParams(result);
+}
+
+void CThirdPersonCamera::RaycastObjects()
+{
+	auto transform = GetTransform();
+	Vec3 camPos = transform->GetWorldPosition();
+	Vec3 targetPos = mCameraParams.trackingPosition;
+
+	Ray ray;
+	ray.position = targetPos;
+	ray.direction = camPos - targetPos;
+	float targetToCamDist = ray.direction.Length();
+	ray.direction.Normalize();
+	float minDistance = D3D12_FLOAT32_MAX;
+
+	mIsHit = false;
+	auto& objectList = CUR_SCENE->GetObjectsForType();
+	auto& obstacles = objectList[OBJECT_TYPE::OBSTACLE];
+	for (auto& obstacle : obstacles) {
+		auto renderer = obstacle->GetRenderer();
+		float dist = 0.f;
+		if (renderer && renderer->IsIntersect(ray, dist)) {
+			if (dist < targetToCamDist && dist < minDistance) {
+				minDistance = dist;
+				mIsHit = true;
+			}
+		}
+	}
+
+	if (!mIsHit) return;
+
+	Vec3 hitPoint = ray.position + ray.direction * minDistance;
+	//transform->SetLocalPosition(hitPoint);
 }

@@ -1,12 +1,5 @@
 #pragma once
 
-enum class LAYER_TYPE : UINT8
-{
-	PLAYER,
-	ENEMY,
-	UI,
-	TERRAIN,
-};
 
 class CMonoBehaviour;
 class CRenderer;
@@ -40,7 +33,7 @@ private:
 	std::string mName{};
 	std::string mTag{};
 	std::string mRenderLayer{};
-	LAYER_TYPE mLayerType{};
+	OBJECT_TYPE mObjectType{NONE};
 
 	int mID{ -1 };
 
@@ -90,13 +83,15 @@ public:
 	const int GetIDInt() const { return mID; }
 	const std::string& GetRenderLayer() const { return mRenderLayer; }
 	bool GetActive() const { return mActive; }
+	OBJECT_TYPE GetObjectType() const { return mObjectType; }
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return mChildren; }
 	BoundingSphere GetRootBoundingSphere() const { return mRootBS; }
+
 
 	void SetActive(bool active) { mActive = active; }
 	void SetStatic(bool isStatic);
 	void SetInstancing(bool isInstancing);
-	void SetLayerType(LAYER_TYPE type) { mLayerType = type; }
+	void SetObjectType(OBJECT_TYPE type) { mObjectType = type; }
 	void SetRenderLayer(const std::string& layer) { mRenderLayer = layer; }
 	void SetName(const std::string& name) { mName = name; }
 	void SetTag(const std::string& tag) { mTag = tag; }
@@ -135,7 +130,7 @@ public:
 
 	void PrepareSkinning();
 
-	void UpdateWorldMatrices();
+	void UpdateWorldMatrices(std::shared_ptr<CTransform> parent);
 	void PrintSRT();
 };
 

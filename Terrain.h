@@ -13,7 +13,8 @@ private:
 
 	Vec3 mScale = Vec3::One;
 
-	std::shared_ptr<CTexture> heightMap{};
+	UINT mNavMapResolution{};
+	std::vector<BYTE> mNavMapData{};
 public:
 	CTerrain();
 	~CTerrain();
@@ -31,10 +32,14 @@ public:
 public:
 	void SetHeightMapGridMesh(const std::shared_ptr<CHeightMapGridMesh>& mesh);
 	void SetMaterial(const std::shared_ptr<CTerrainMaterial>& material);
+	void MakeNavMap(const std::string& fileName, UINT resolution);
 
 	std::shared_ptr<CTerrainMaterial> GetMaterial() const { return mTerrainMaterial; }
 
 	float GetHeight(float x, float z);
 	Vec3 GetScale() const { return mScale; }
+	bool CanMove(float x, float z);
+
+	bool Raycast(const Ray& ray, float maxDist, float& distance);
 };
 

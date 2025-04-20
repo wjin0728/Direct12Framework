@@ -9,7 +9,7 @@
 #include"Scene.h"
 #include"Terrain.h"
 #include"Camera.h"
-#include"SceneManager.h"
+
 #include "ServerManager.h"
 
 CPlayerController::~CPlayerController()
@@ -31,7 +31,7 @@ void CPlayerController::Update()
 {
 	OnKeyEvents();
 	auto transform = GetTransform();
-	float terrainHeight = mTerrain->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
+	float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
 
 	Vec3 pos = transform->GetWorldPosition();
 	pos.y = terrainHeight;
@@ -70,18 +70,42 @@ void CPlayerController::OnKeyEvents()
 
 	}
 
-	Vec3 acccel = Vec3::Zero;
+	Vec3 accel = Vec3::Zero;
 	bool isDecelerate = true;
 
 	if (moveDir != Vec3::Zero) {
-		acccel = moveDir.GetNormalized() * 10.f;
-		isDecelerate = false;
+		moveDir.Normalize();
+
+		Vec3 currentVelocity = rigidBody->GetVelocity();
+		float currentSpeed = currentVelocity.Length();
+		if (currentVelocity != Vec3::Zero) {
+			Vec3 currentDir = currentVelocity.GetNormalized();
+			float dot = currentDir.Dot(moveDir);
+
+			if (dot < 0.0f) {
+				accel = -currentDir * 20.f; 
+			}
+			else {
+				rigidBody->SetVelocity(currentSpeed * dot * moveDir);
+				accel = moveDir * 10.f;
+				isDecelerate = false;
+			}
+		}
+		else {
+			accel = moveDir * 10.f; // Á¤Áö »óÅÂ¿¡¼­ °¡¼Ó
+			isDecelerate = false;
+		}
 	}
 
-	rigidBody->SetAcceleration(acccel);
+	rigidBody->SetAcceleration(accel);
 	rigidBody->SetUseFriction(isDecelerate);
 
-	float rotationSpeed = 15.f;
+	if (mTerrain.lock()->CanMove(transform->GetWorldPosition().x, transform->GetWorldPosition().z))
+	{
+		rigidBody->SetUseGravity(true);
+	}
+
+	float rotationSpeed = 10.f;
 
 	if (moveDir.LengthSquared() > 0.001f)
 	{

@@ -156,7 +156,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 
 	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
-	instance->mLayerType = original->mLayerType;
+	instance->mObjectType = original->mObjectType;
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
 
@@ -177,8 +177,6 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 
 	return instance;
 }
-
-
 
 std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGameObject>& original,
 	const std::shared_ptr<CTransform>& parentTransform)
@@ -192,7 +190,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 
 	instance->mTransform = instance->GetComponent<CTransform>();
 	instance->mTag = original->mTag;
-	instance->mLayerType = original->mLayerType;
+	instance->mObjectType = original->mObjectType;
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
 
@@ -213,7 +211,6 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 
 	return instance;
 }
-
 
 std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& tag, Vec2 rtSize, 
 	float nearPlane, float farPlane, float fovAngle)
@@ -338,6 +335,17 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(std::ifstream& if
 			root->SetStatic(false);
 		}
 	}
+
+	if (root->mTag == "Obstacle") {
+		root->mObjectType = OBJECT_TYPE::OBSTACLE;
+	}
+	else if (root->mTag == "Player") {
+		root->mObjectType = OBJECT_TYPE::PLAYER;
+	}
+	else if (root->mTag == "Enemy") {
+		root->mObjectType = OBJECT_TYPE::ENEMY;
+	}
+	else root->mObjectType = OBJECT_TYPE::NONE;
 	return root;
 }
 
@@ -362,6 +370,11 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			obj = CGameObject::Instantiate(prefabs[prefabName]);
 			obj->SetActive(true);
 			obj->CreateTransformFromFile(inFile);
+
+			std::string tag{};
+			ReadDateFromFile(inFile, tag);
+			obj->SetTag(tag);
+			
 			return obj;
 		}
 		if (token == "<Frame>:") {
@@ -400,7 +413,9 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 		else if (token == "<Animation>:") {
 			std::string animName{};
 			ReadDateFromFile(inFile, animName);
-			animName = animName.substr(0, animName.find('@') + 1) + "anim";
+			size_t n = animName.find('@');
+			if (n != std::string::npos) 
+				animName = animName.substr(0, n + 1) + "anim";
 
 			obj->CreateAnimationFromFile(ANIMATION_PATH(animName));
 		}
@@ -408,6 +423,9 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			break;
 		}
 	}
+
+	
+
 	return obj;
 }
 
@@ -464,7 +482,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 						ReadDateFromFile(ifs, layerNum);
 
 						animSet->mLayers[i] = std::make_shared<CAnimationLayer>();
-						auto layer = animSet->mLayers[i];
+						auto& layer = animSet->mLayers[i];
 
 						int cacheNum{};
 						ReadDateFromFile(ifs, cacheNum);
@@ -640,6 +658,7 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 	auto terrain = AddComponent<CTerrain>();
 	terrain->SetHeightMapGridMesh(mesh);
 	terrain->SetMaterial(material);
+	terrain->MakeNavMap(name + "NavMap", resolution*2);
 
 	INSTANCE(CSceneManager).GetCurScene()->SetTerrain(terrain);
 }
@@ -669,12 +688,12 @@ void CGameObject::PrepareSkinning()
 	mAnimationController->PrepareSkinning();
 }
 
-void CGameObject::UpdateWorldMatrices()
+void CGameObject::UpdateWorldMatrices(std::shared_ptr<CTransform> parent)
 {
-	GetTransform()->UpdateWorldMatrix();
+	GetTransform()->UpdateWorldMatrix(parent, false);
 
-	for (auto& child : GetChildren()) {
-		child->UpdateWorldMatrices();
+	for (auto& child : mChildren) {
+		child->UpdateWorldMatrices(mTransform);
 	}
 }
 

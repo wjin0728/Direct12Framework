@@ -185,10 +185,19 @@ void CScene::AddObject(const std::string& renderLayer, std::shared_ptr<CGameObje
 	if (!mRenderLayers.contains(renderLayer)) {
 		mRenderLayers[renderLayer] = ObjectList{};
 	}
-	auto& objectList = mRenderLayers[renderLayer];
 
-	auto itr2 = findByRawPointer(objectList, object.get());
-	if (itr2 == objectList.end()) {
+	auto type = object->GetObjectType();
+	if (type != OBJECT_TYPE::NONE) {
+		itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
+			[object](const std::shared_ptr<CGameObject>& ptr) { return ptr == object; });
+		if (itr == mObjectTypes[type].end()) {
+			mObjectTypes[type].push_back(object);
+		}
+	}
+	
+	auto& objectList = mRenderLayers[renderLayer];
+	itr = findByRawPointer(objectList, object.get());
+	if (itr == objectList.end()) {
 		object->SetRenderLayer(renderLayer);
 		objectList.push_back(object);
 	}

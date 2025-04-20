@@ -9,6 +9,7 @@ protected:
     std::vector<std::shared_ptr<CMaterial>> m_materials;
 
     BoundingSphere mWorldBS{};
+	BoundingOrientedBox mWorldOOBB{};
 
     bool isDirty{};
     int mCbvIdx = -1;
@@ -36,6 +37,24 @@ public:
 public:
     void AddMaterial(const std::shared_ptr<CMaterial>& material);
     void AddMaterial(const std::string& name);
+
+
+    bool IsIntersect(const BoundingOrientedBox& oobb) const
+    {
+        return mWorldOOBB.Intersects(oobb);
+    }
+    bool IsIntersect(const BoundingSphere& sphere) const
+    {
+        return mWorldOOBB.Intersects(sphere);
+    }
+    bool IsIntersect(const Vec3& point) const
+    {
+        return mWorldOOBB.Intersects(point);
+    }
+    bool IsIntersect(const Ray& ray, float& dist) const
+    {
+        return mWorldOOBB.Intersects(ray.position, ray.direction, dist);
+    }
 
     std::shared_ptr<CMaterial> GetMaterial(UINT idx = 0) const { return m_materials[idx]; }
 };

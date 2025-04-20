@@ -96,13 +96,13 @@ public:
    Vec3 GetRotationLayerBlending() const { return mRotationLayerBlending; }  
    Vec3 GetScaleLayerBlending() const { return mScaleLayerBlending; };  
 
-   Vec3 GetWorldLook() const { return mWorldMat.Backward(); };  
-   Vec3 GetWorldUp() const { return mWorldMat.Up(); };  
-   Vec3 GetWorldRight() const { return mWorldMat.Right(); };  
+   Vec3 GetWorldLook() const { return mWorldMat.Backward().GetNormalized(); };  
+   Vec3 GetWorldUp() const { return mWorldMat.Up().GetNormalized(); };
+   Vec3 GetWorldRight() const { return mWorldMat.Right().GetNormalized(); };
 
-   Vec3 GetLocalLook() const { return mLocalMat.Backward(); };  
-   Vec3 GetLocalUp() const { return mLocalMat.Up(); };  
-   Vec3 GetLocalRight() const { return mLocalMat.Right(); };  
+   Vec3 GetLocalLook() const { return mLocalMat.Backward().GetNormalized(); };
+   Vec3 GetLocalUp() const { return mLocalMat.Up().GetNormalized(); };
+   Vec3 GetLocalRight() const { return mLocalMat.Right().GetNormalized(); };
 
    Matrix GetLocalMat() const { return mLocalMat; }  
    Matrix GetWorldMat() const { return mWorldMat; }  
@@ -113,7 +113,8 @@ public:
 
 public:
    void UpdateLocalMatrix();  
-   void UpdateWorldMatrix();  
+   void UpdateWorldMatrix(bool update = true);
+   void UpdateWorldMatrix(std::shared_ptr<CTransform> parent, bool update = true);
    void ApplyBlendedTransform();  
    void BlendingTransform(const ANIMATION_BLEND_TYPE blendType, const Vec3& scale, const Vec3& rotation, const Vec3& position, float weight);
 

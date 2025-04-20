@@ -103,7 +103,8 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float2 uv = input.uv;
     
     float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
-    color = float4(GammaDecoding(texColor.rgb), texColor.a);
+    return texColor;
+    color = float4(GammaEncoding(texColor.rgb), texColor.a);
     
 #ifdef TRANSPARENT_CLIP
     clip(color.a - 0.1);
