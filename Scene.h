@@ -69,7 +69,7 @@ public:
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
 	std::shared_ptr<CGameObject> GetPlayer(int idx) { return mObjectTypes[PLAYER][idx]; }
 
-	std::shared_ptr<CGameObject> GetPlayer(int id) { return mPlayers[id]; }
+	// std::shared_ptr<CGameObject> GetPlayer(int id) { return mPlayers[id]; }
 	// void SetPlayer(std::shared_ptr<CGameObject> mPlayer, Vec3 position) { mPlayer->GetTransform()->SetLocalPosition(position); };
 
 protected:
