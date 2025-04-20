@@ -1,30 +1,40 @@
 #pragma once
 
 #define WIN32_LEAN_AND_MEAN		
-#include <windows.h>
+#define _HAS_STD_BYTE 0
+
+#include "../Serverframework/TriumServer/OVER_PLUS.h"
+#include "../Serverframework/TriumServer/protocol.h"
+// #include "../Serverframework/TriumServer/ENUM.h"
+#include <Windows.h>
+#include <WS2tcpip.h>
+#include <MSWSock.h>
+#pragma comment(lib, "WS2_32.lib")
+#pragma comment(lib, "MSWSock.lib")
+
 #include <stdlib.h>
 #include <iostream>
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
 #include <math.h>
-#include<vector>
-#include<unordered_map>
-#include<memory>
-#include<fstream>
-#include<filesystem>
-#include<chrono>
-#include<random>
-#include<array>
-#include<queue>
-#include<stack>
-#include<map>
-#include"algorithm"
+#include <vector>
+#include <unordered_map>
+#include <memory>
+#include <fstream>
+#include <filesystem>
+#include <chrono>
+#include <random>
+#include <array>
+#include <queue>
+#include <stack>
+#include <map>
+#include "algorithm"
 #include <Mmsystem.h>
 #include <codecvt>
 
 #include <d3d12.h>
-#include"SimpleMath.h"
+#include "SimpleMath.h"
 #include <dxgi1_4.h>
 #include <wrl.h>
 #include <shellapi.h>
@@ -35,10 +45,10 @@
 #include <D3Dcompiler.h>
 #include <DXGIDebug.h>
 #include <comdef.h>
-#include"d3dx12.h"
-#include"DDSTextureLoader12.h"
-#include"WICTextureLoader12.h"
-#include"BinaryReader.h"
+#include "d3dx12.h"
+#include "DDSTextureLoader12.h"
+#include "WICTextureLoader12.h"
+#include "BinaryReader.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -59,8 +69,8 @@ using SimpleMath::Color;
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
-#include"Enums.h"
-#include"CBData.h"
+#include "Enums.h"
+#include "CBData.h"
 
 #define _DEBUG
 

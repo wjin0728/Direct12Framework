@@ -1,11 +1,12 @@
 #include "stdafx.h"
 #include "GameApplication.h"
-#include"Timer.h"
-#include"DX12Manager.h"
-#include"ResourceManager.h"
-#include"SceneManager.h"
-#include"InputManager.h"
-#include"ObjectPoolManager.h"
+#include "Timer.h"
+#include "DX12Manager.h"
+#include "ResourceManager.h"
+#include "SceneManager.h"
+#include "InputManager.h"
+#include "ObjectPoolManager.h"
+#include "ServerManager.h"
 
 
 bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdShow)
@@ -28,6 +29,8 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	INSTANCE(CDX12Manager).OpenCommandList();
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CDX12Manager).CloseCommandList();
+
+	INSTANCE(ServerManager).Client_Login();
 
 	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAINSTAGE);
 

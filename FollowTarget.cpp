@@ -5,6 +5,7 @@
 #include"Timer.h"
 #include"InputManager.h"
 #include"Terrain.h"
+#include "ServerManager.h"
 
 CFollowTarget::CFollowTarget() : CMonoBehaviour("FollowTarget")
 {
@@ -27,46 +28,32 @@ void CFollowTarget::Update()
 	auto targetTrans = mTarget->GetTransform();
 	
 	auto transform = GetTransform();
-	Vec3 moveDir = Vec3::Zero;
+	uint8_t dir = 0;
 
 	if (INPUT.IsKeyPress(KEY_TYPE::W)) {
-		moveDir += transform->GetLocalLook();
-		moveDir.y = 0.f;
-		moveDir.Normalize();
+		dir |= 0x08;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) {
-		moveDir -= transform->GetLocalLook();
-		moveDir.y = 0.f;
-		moveDir.Normalize();
+		dir |= 0x02;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::D)) {
-		moveDir += transform->GetLocalRight();
-		moveDir.y = 0.f;
-		moveDir.Normalize();
+		dir |= 0x01;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
-		moveDir -= transform->GetLocalRight();
-		moveDir.y = 0.f;
-		moveDir.Normalize();
+		dir |= 0x04;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) {
-		moveDir += Vec3::Up;
-
+		dir |= 0x20;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) {
-		moveDir -= Vec3::Up;
+		dir |= 0x10;
 	}
 
-	Vec3 acccel = Vec3::Zero;
-	bool isDecelerate = true;
-
-	if (moveDir != Vec3::Zero) {
-		acccel = moveDir.GetNormalized() * 10.f;
-		isDecelerate = false;
+	if (dir != 0) {
+		INSTANCE(ServerManager).send_cs_move_packet(dir, transform->GetLocalLook());
 	}
 
-	targetTrans->SetLocalPosition(targetTrans->GetLocalPosition() + acccel * DELTA_TIME);
-
+	// targetTrans->SetLocalPosition(targetTrans->GetLocalPosition() + acccel * DELTA_TIME);
 
 	Vec2 mouseDelta = INPUT.GetMouseDelta();
 	Vec3 targetPos = targetTrans->GetWorldPosition();
