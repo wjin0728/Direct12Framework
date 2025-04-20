@@ -212,8 +212,8 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     
     output.albedo = color;
     output.normalWS = float4(normal, metallic);
-    output.positionWS = float4(worldPosition, smoothness);
     output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
+    output.positionWS = float4(worldPosition, smoothness);
     
     return output;
 }
