@@ -68,13 +68,7 @@ void CScene::RenderShadowPass()
 
 void CScene::RenderForwardPass()
 {
-	auto backBuffer = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
-	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
-
-	backBuffer->ChangeResourceToTarget(backBufferIdx);
-	backBuffer->SetRenderTarget(backBufferIdx);
-	backBuffer->ClearRenderTarget(backBufferIdx);
-	backBuffer->ClearDepthStencil();
+	
 
 
 	auto forwardPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
@@ -89,39 +83,58 @@ void CScene::RenderForwardPass()
 		}*/
 		if(mTerrain) mTerrain->Render(camera);
 	}
-	auto& uiCamera = mCameras["UICamera"];
-	//RenderForLayer("UI", uiCamera);
 
-	backBuffer->ChangeTargetToResource(backBufferIdx);
+	
 }
 
 void CScene::RenderGBufferPass()
 {
-	auto gBuffer = RT_GROUP(RENDER_TARGET_GROUP_TYPE::G_BUFFER);
-	gBuffer->ChangeResourceToTarget(0);
-	gBuffer->SetRenderTarget(0);
 	auto gBufferPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
 	gBufferPassBuffer->BindToShader(0);
+	auto gBuffer = RT_GROUP(RENDER_TARGET_GROUP_TYPE::G_BUFFER);
+	gBuffer->ChangeResourcesToTargets();
+	gBuffer->SetRenderTargets();
+	gBuffer->ClearRenderTargets();
+	gBuffer->ClearDepthStencil();
 	auto& camera = mCameras["MainCamera"];
 	if (camera) {
 		RenderForLayer("Opaque", camera);
+		if (mTerrain) mTerrain->Render(camera);
 	}
-	gBuffer->ChangeTargetToResource(0);
+	DEVICE->
 
+	gBuffer->ChangeTargetsToResources();
 }
 
 void CScene::RenderLightingPass()
 {
+	auto lightingPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	lightingPassBuffer->BindToShader(0);
+	auto lightingPass = RT_GROUP(RENDER_TARGET_GROUP_TYPE::LIGHTING_PASS);
+	lightingPass->ChangeResourcesToTargets();
+	lightingPass->SetRenderTargets();
+	lightingPass->ClearRenderTargets();
+	lightingPass->ClearOnlyStencil(0);
+	auto& camera = mCameras["MainCamera"];
+	if (camera) {
+		RenderForLayer("Opaque", camera, LIGHTING);
+	}
+	lightingPass->ChangeTargetsToResources();
 
 }
 
 void CScene::RenderFinalPass()
 {
-	auto finalBuffer = RT_GROUP(RENDER_TARGET_GROUP_TYPE::FINAL_PASS);
-	finalBuffer->ChangeResourceToTarget(0);
-	finalBuffer->SetRenderTarget(0);
+	auto backBuffer = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
+	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
+	backBuffer->ChangeResourceToTarget(backBufferIdx);
+	backBuffer->SetRenderTarget(backBufferIdx);
+	backBuffer->ClearRenderTarget(backBufferIdx);
+	backBuffer->ClearDepthStencil();
 
 	//RenderForLayer("UI", false);
+
+	backBuffer->ChangeTargetToResource(backBufferIdx);
 }
 
 void CScene::LoadSceneFromFile(const std::string& fileName)
@@ -287,6 +300,7 @@ void CScene::UpdatePassData()
 	if (camera) {
 		passData.camPos = camera->GetLocalPosition();
 		passData.viewProjMat = camera->GetViewProjMat().Transpose();
+		passData.viewMat = camera->GetViewMat().Transpose();
 
 		if (lightCamera) {
 			passData.shadowTransform = (lightCamera->GetViewOrthoProjMat() * T).Transpose();
@@ -301,7 +315,29 @@ void CScene::UpdatePassData()
 
 	if (lightCamera) {
 		passData.camPos = lightCamera->GetLocalPosition();
+		passData.viewMat = lightCamera->GetViewMat().Transpose();
 		passData.viewProjMat = lightCamera->GetViewOrthoProjMat().Transpose();
+	}
+	auto gbufferAlbedo = RESOURCE.Get<CTexture>("GBufferAlbedo");
+	if (gbufferAlbedo) {
+		int gbufferAlbedoIdx = gbufferAlbedo->GetSrvIndex();
+		passData.gbufferAlbedoIdx = gbufferAlbedoIdx;
+		passData.gbufferNormalIdx = gbufferAlbedoIdx++;
+		passData.gbufferEmissiveIdx = gbufferAlbedoIdx++;
+		passData.gbufferPosIdx = gbufferAlbedoIdx++;
+		passData.gbufferDepthIdx = gbufferAlbedoIdx++;
+	}
+	auto lightingTarget = RESOURCE.Get<CTexture>("LightingTarget");
+	if (lightingTarget) {
+		passData.lightingTargetIdx = lightingTarget->GetSrvIndex();
+	}
+	auto postProcessTarget = RESOURCE.Get<CTexture>("PostProcessTarget");
+	if (postProcessTarget) {
+		passData.postProcessIdx = postProcessTarget->GetSrvIndex();
+	}
+	auto finalTarget = RESOURCE.Get<CTexture>("FinalTarget");
+	if (finalTarget) {
+		passData.finalTargetIdx = finalTarget->GetSrvIndex();
 	}
 
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(ALIGNED_SIZE(sizeof(CBPassData)), &passData, sizeof(CBPassData));

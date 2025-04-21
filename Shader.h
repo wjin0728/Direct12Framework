@@ -5,9 +5,11 @@
 enum PASS_TYPE : UINT8
 {
 	FORWARD,
-	DEFERRED,
+	G_PASS,
 	SHADOW,
-
+	LIGHTING,
+	POST_PROCESSING,
+	FINAL,
 	PASS_TYPE_COUNT
 };
 
@@ -92,7 +94,7 @@ protected:
 		const std::string& name, const std::string& fname, const std::string& version);
 
 public:
-	virtual void Initialize(const ShaderInfo& info, const std::string& name);
+	virtual bool Initialize(const ShaderInfo& info, const std::string& name);
 	
 public:
 	void SetPipelineState(ID3D12GraphicsCommandList* cmdList) { cmdList->SetPipelineState(d3dPiplineState.Get()); }

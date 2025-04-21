@@ -104,6 +104,26 @@ void CResourceManager::LoadDefaultMeshes()
 
 void CResourceManager::LoadDefaultTexture()
 {
+	auto shadowMap = Get<CTexture>("ShadowMap");
+	shadowMap->CreateSRV();
+	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+	auto albedo = Get<CTexture>("GBufferAlbedo");
+	albedo->CreateSRV();
+	auto normal = Get<CTexture>("GBufferNormal");
+	normal->CreateSRV();
+	auto emissive = Get<CTexture>("GBufferEmissive");
+	emissive->CreateSRV();
+	auto position = Get<CTexture>("GBufferPosition");
+	position->CreateSRV();
+	auto depth = Get<CTexture>("GBufferDepth");
+	depth->CreateSRV();
+	auto lighting = Get<CTexture>("LightingTarget");
+	lighting->CreateSRV();
+	auto postProcess = Get<CTexture>("PostProcessTarget");
+	postProcess->CreateSRV();
+	auto final = Get<CTexture>("FinalTarget");
+	final->CreateSRV();
 }
 
 void CResourceManager::LoadDefaultMaterials()
@@ -114,172 +134,88 @@ void CResourceManager::LoadDefaultShaders()
 {
 	{
 		ShaderInfo info;
-		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Common");
-
-		Add(shader);
+		MakeShadersForAllPass("Common", info);
 	}
 	{
 		ShaderInfo info;
-		info.shaderType = PASS_TYPE::SHADOW;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		MakeShadersForAllPass("Triplanar", info);
 
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Common");
-
-		Add(shader);
 	}
 	{
 		ShaderInfo info;
-		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Triplanar");
-
-		Add(shader);
+		MakeShadersForAllPass("Vegitation", info);
 	}
 	{
 		ShaderInfo info;
-		info.shaderType = PASS_TYPE::SHADOW;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
-		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
-		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Triplanar");
-
-		Add(shader);
-	}
-	{
-		ShaderInfo info;
-		info.shaderType = PASS_TYPE::FORWARD;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
-		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
-		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Vegitation");
-
-		Add(shader);
-	}
-	{
-		ShaderInfo info;
-		info.shaderType = PASS_TYPE::SHADOW;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
-		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
-		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Vegitation");
-
-		Add(shader);
-	}
-	{
-		ShaderInfo info;
-		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Sprite");
-
-		Add(shader);
+		MakeShadersForAllPass("Sprite", info);
 	}
 	{
 		ShaderInfo info;
-		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::TERRAIN;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Terrain");
-
-		Add(shader);
+		MakeShadersForAllPass("Terrain", info);
 	}
 	{
 		ShaderInfo info;
-		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_EQUAL;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Skybox");
-
-		Add(shader);
+		MakeShadersForAllPass("Skybox", info);
 	}
 	{
 		ShaderInfo info;
-		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::BILLBOARD;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_EQUAL;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Billboard");
-
-		Add(shader);
+		MakeShadersForAllPass("Billboard", info);
 	}
 	{
 		ShaderInfo info;
-		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::ANIMATION;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Animation");
-
-		Add(shader);
+		MakeShadersForAllPass("Animation", info);
 	}
-	{
-		ShaderInfo info;
-		info.shaderType = PASS_TYPE::SHADOW;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::ANIMATION;
-		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
-		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+}
 
+void CResourceManager::MakeShadersForAllPass(const std::string& name, ShaderInfo info)
+{
+	for (UINT8 i = 0; i < static_cast<UINT8>(PASS_TYPE::PASS_TYPE_COUNT); i++) {
+		info.shaderType = static_cast<PASS_TYPE>(i);
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		shader->Initialize(info, "Animation");
-
-		Add(shader);
+		if (shader->Initialize(info, name)) Add(shader);
 	}
+
 }
 
 void CResourceManager::ReleaseUploadBuffers()

@@ -6,7 +6,7 @@
 #define POINT_LIGHT 5
 #define SPOT_LIGHT 5
 
-#define TEXTURE_COUNT 200
+#define TEXTURE_COUNT 300
 
 #define TERRAIN_SPLAT_COUNT 2
 
@@ -56,13 +56,21 @@ struct SpotLight
 cbuffer CBPassData : register(b0)
 {
     matrix viewProjMat;
+    matrix viewMat;
     matrix shadowTransform;
     float3 camPos; 
     uint shadowMapIdx; 
     float2 renderTargetSize; 
-    float2 passPadding2;
     float deltaTime; 
     float totalTime;
+    uint gbufferAlbedoIdx;
+    uint gbufferNormalIdx;
+    uint gbufferDepthIdx;
+    uint gbufferPosIdx;
+    uint gbufferEmissiveIdx;
+    uint lightingTargetIdx;
+    uint postProcessIdx;
+    uint finalTargetIdx;
 };
 cbuffer CBObjectData : register(b1)
 {

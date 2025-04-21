@@ -161,6 +161,7 @@ struct PS_GPASS_OUTPUT
     float4 normalWS : SV_Target1;
     float4 emissive : SV_Target2;
     float4 positionWS : SV_Target3;
+    float4 depth : SV_Target4;
 };
 
 VS_OUTPUT VS_GPass(VS_INPUT input)
@@ -209,11 +210,13 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     }
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
+    float depth = mul(input.positionWS, viewMat).z;
     
     output.albedo = color;
     output.normalWS = float4(normal, metallic);
     output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
     output.positionWS = float4(worldPosition, smoothness);
+    output.depth = float4(0.f, 0.f, 0.f, depth);
     
     return output;
 }

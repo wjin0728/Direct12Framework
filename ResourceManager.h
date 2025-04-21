@@ -49,6 +49,8 @@ private:
 	void LoadDefaultMaterials();
 	void LoadDefaultShaders();
 
+	void MakeShadersForAllPass(const std::string& name, ShaderInfo info);
+
 public:
 	void ReleaseUploadBuffers();
 

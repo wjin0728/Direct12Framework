@@ -221,7 +221,51 @@ void CDX12Manager::InitRenderTargetGroups()
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::G_BUFFER)] = std::make_shared<CRenderTargetGroup>();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::G_BUFFER)]->Initialize(renderTargets, dsvHeapHandle);
 	}
+#pragma endregion
 
+#pragma region Lighting Pass
+	{
+		std::vector<RenderTarget> renderTargets(1);
+		renderTargets[0].rt = std::make_shared<CTexture>();
+		renderTargets[0].rt->SetName("LightingTarget");
+		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[0].rt);
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::LIGHTING_PASS)] = std::make_shared<CRenderTargetGroup>();
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::LIGHTING_PASS)]->Initialize(renderTargets, dsvHeapHandle);
+	}
+#pragma endregion
+
+#pragma region Post Process
+	{
+		std::vector<RenderTarget> renderTargets(1);
+		renderTargets[0].rt = std::make_shared<CTexture>();
+		renderTargets[0].rt->SetName("PostProcessTarget");
+		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[0].rt);
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::POST_PROCESSING)] = std::make_shared<CRenderTargetGroup>();
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::POST_PROCESSING)]->Initialize(renderTargets, dsvHeapHandle);
+	}
+#pragma endregion
+
+#pragma region Final
+	{
+		std::vector<RenderTarget> renderTargets(1);
+		renderTargets[0].rt = std::make_shared<CTexture>();
+		renderTargets[0].rt->SetName("FinalTarget");
+		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[0].rt);
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::FINAL_PASS)] = std::make_shared<CRenderTargetGroup>();
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::FINAL_PASS)]->Initialize(renderTargets, dsvHeapHandle);
+	}
 #pragma endregion
 }
 
@@ -525,14 +569,6 @@ void CDX12Manager::PrepareShadowPass()
 
 	swapChainBuffers->SetOnlyDepthStencil();
 	swapChainBuffers->ClearDepthStencil(1.f);
-}
-
-void CDX12Manager::PrepareFinalPass()
-{
-	auto& swapChainBuffers = renderTargetGroups[(UINT)RENDER_TARGET_GROUP_TYPE::FINAL_PASS];
-	swapChainBuffers->ChangeResourceToTarget(0);
-	swapChainBuffers->SetRenderTarget(0);
-	swapChainBuffers->ClearRenderTarget(0);
 }
 
 std::shared_ptr<CConstantBuffer> CDX12Manager::GetConstantBuffer(UINT type)

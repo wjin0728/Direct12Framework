@@ -90,6 +90,15 @@ void CRenderTargetGroup::ClearDepthStencil(float depth, UINT8 stencil)
 	CMDLIST->ClearDepthStencilView(dsVHeapHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, depth, stencil, 0, NULL);
 }
 
+void CRenderTargetGroup::ClearOnlyStencil(UINT8 stencil)
+{
+	CMDLIST->ClearDepthStencilView(dsVHeapHandle, D3D12_CLEAR_FLAG_STENCIL, 0.f, stencil, 0, NULL);
+}
+
+void CRenderTargetGroup::ClearOnlyDepth(float depth)
+{
+	CMDLIST->ClearDepthStencilView(dsVHeapHandle, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, NULL);
+}
 
 void CRenderTargetGroup::ChangeTargetsToResources()
 {

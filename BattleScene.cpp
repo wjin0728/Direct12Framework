@@ -24,9 +24,6 @@ CBattleScene::CBattleScene()
 void CBattleScene::Initialize()
 {
 	LoadSceneFromFile(SCENE_PATH(std::string("Lobby1")));
-
-
-
 #pragma region Player
 
 	auto Player = FindObjectWithTag("Player");
@@ -55,10 +52,6 @@ void CBattleScene::Initialize()
 #pragma endregion
 
 	SetLights();
-
-	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
-	shadowMap->CreateSRV();
-	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
 }
 
 void CBattleScene::Update()

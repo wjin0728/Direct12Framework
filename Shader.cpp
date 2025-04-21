@@ -2,7 +2,7 @@
 #include "Shader.h"
 #include"DX12Manager.h"
 
-std::array<std::string, PASS_TYPE_COUNT> CShader::passName = { "Forward","Deferred","Shadow" };
+std::array<std::string, PASS_TYPE_COUNT> CShader::passName = { "Forward","GPass","Shadow","Lighting", "PostProcessing", "Final" };
 
 D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 {
@@ -238,8 +238,10 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::s
 
 	if (FAILED(hr)) {
 		OutputDebugStringA((char*)errBlob->GetBufferPointer());
-		//MessageBoxA(nullptr, "Shader Create Failed !", nullptr, MB_OK);
-		ThrowIfFailed(hr);
+		MessageBoxA(nullptr, (name + "Shader Create Failed !").c_str(), nullptr, MB_OK);
+		blob->Release();
+		errBlob->Release();
+		return {};
 	}
 	D3D12_SHADER_BYTECODE bytecode{};
 	bytecode.pShaderBytecode = blob->GetBufferPointer();
@@ -248,7 +250,7 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::s
 	return bytecode;
 }
 
-void CShader::Initialize(const ShaderInfo& info, const std::string& name)
+bool CShader::Initialize(const ShaderInfo& info, const std::string& name)
 {
 	mInfo = info;
 	ComPtr<ID3DBlob> vsBlob, psBlob, gsBlob;
@@ -287,11 +289,13 @@ void CShader::Initialize(const ShaderInfo& info, const std::string& name)
 
 	switch (info.shaderType)
 	{
-	case PASS_TYPE::DEFERRED:
-		pipelineStateDesc.NumRenderTargets = 3;
-		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		pipelineStateDesc.RTVFormats[1] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	case PASS_TYPE::G_PASS:
+		pipelineStateDesc.NumRenderTargets = 5;
+		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		pipelineStateDesc.RTVFormats[1] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		pipelineStateDesc.RTVFormats[2] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		pipelineStateDesc.RTVFormats[3] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		pipelineStateDesc.RTVFormats[4] = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		break;
 	case PASS_TYPE::FORWARD:
 		pipelineStateDesc.NumRenderTargets = 1;
@@ -308,10 +312,15 @@ void CShader::Initialize(const ShaderInfo& info, const std::string& name)
 		break;
 	}
 	auto device = INSTANCE(CDX12Manager).GetDevice();
-	ThrowIfFailed(device->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&d3dPiplineState)));
+	HRESULT hr = device->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&d3dPiplineState));
+	if (FAILED(hr)) {
+		OutputDebugStringA((name + passType).c_str());
+		return false;
+	}
 
 	if (pipelineStateDesc.InputLayout.pInputElementDescs)
 		delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
 
 	this->name = name + passType;
+	return true;
 }

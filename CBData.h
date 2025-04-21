@@ -9,16 +9,25 @@ constexpr auto TERRAIN_SPLAT_COUNT = 2;
 struct CBPassData
 {
 	Matrix viewProjMat = Matrix::Identity;
+	Matrix viewMat = Matrix::Identity;
 	Matrix shadowTransform = Matrix::Identity;
 
 	Vec3 camPos = Vec3::Zero;
 	UINT shadowMapIdx{};
 
 	Vec2 renderTargetSize{};
-	Vec2 padding2;
 
 	float deltaTime{};
 	float totalTime{};
+
+	int gbufferAlbedoIdx{};
+	int gbufferNormalIdx{};
+	int gbufferDepthIdx{};
+	int gbufferPosIdx{};
+	int gbufferEmissiveIdx{};
+	int lightingTargetIdx{};
+	int postProcessIdx{};
+	int finalTargetIdx{};
 };
 
 struct CBObjectData

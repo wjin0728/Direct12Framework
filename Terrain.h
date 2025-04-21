@@ -11,8 +11,8 @@ private:
 	std::shared_ptr<CHeightMapGridMesh> mTerrainMesh{};
 	std::shared_ptr<CTerrainMaterial> mTerrainMaterial{};
 
-	Vec3 mScale = Vec3::One;
 
+	Vec3 mScale = Vec3::One;
 	UINT mNavMapResolution{};
 	std::vector<BYTE> mNavMapData{};
 public:

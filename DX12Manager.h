@@ -87,7 +87,6 @@ public:
 	void AfterRender();
 
 	void PrepareShadowPass();
-	void PrepareFinalPass();
 
 public:
 	ID3D12GraphicsCommandList* GetCommandList() const { return cmdList.Get(); }

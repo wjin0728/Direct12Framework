@@ -2,9 +2,10 @@
 #include"stdafx.h"
 #include"Component.h"
 
-class CLight
+class CLight : public CComponent
 {
 protected:
+
 	Vec3 color = { 1.f,1.f,1.f };
 	Vec3 strength = { 1.f,1.f,1.f };
 	float padding{};
