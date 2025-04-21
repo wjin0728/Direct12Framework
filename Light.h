@@ -8,12 +8,45 @@ protected:
 	CBLightsData lightData{};
 
 public:
-	CLight() {}
-	CLight(const Vec3& _color, const Vec3& _strength) : color(_color), strength(_strength) {}
+	CLight() : CComponent(COMPONENT_TYPE::LIGHT) {}
+	CLight(const CBLightsData& data) : CComponent(COMPONENT_TYPE::LIGHT) { lightData = data; }
+
+	CLight(const CLight& other) : CComponent(other)
+	{
+		lightData = other.lightData;
+	}
 
 public:
-	void SetStrength(const Vec3& _strength) { strength = _strength; }
-	void SetColor(const Vec3& _color) { color = _color; }
+	virtual std::shared_ptr<CComponent> Clone() override;
+
+	virtual void Awake() override;
+	virtual void Start() override;
+
+	virtual void Update() override;
+	virtual void LateUpdate() override;
+
+public:
+	void SetStrength(const Vec3& _strength) { lightData.strength = _strength; }
+	void SetColor(const Vec3& _color) { lightData.color = _color; }
+	void SetLightType(LIGHT_TYPE _type) { lightData.type = (UINT8)_type; }
+	void SetRange(float _range) { lightData.range = _range; }
+	void SetFallOffStart(float _fallOffStart) { lightData.fallOffStart = _fallOffStart; }
+	void SetFallOffEnd(float _fallOffEnd) { lightData.fallOffEnd = _fallOffEnd; }
+	void SetSpotPower(float _spotPower) { lightData.spotPower = _spotPower; }
+	void SetPosition(const Vec3& _position) { lightData.position = _position; }
+	void SetDirection(const Vec3& _direction) { lightData.direction = _direction; }
+	void SetLightData(const CBLightsData& data) { lightData = data; }
+
+	CBLightsData GetLightData() const { return lightData; }
+	Vec3 GetColor() const { return lightData.color; }
+	Vec3 GetStrength() const { return lightData.strength; }
+	Vec3 GetPosition() const { return lightData.position; }
+	Vec3 GetDirection() const { return lightData.direction; }
+	float GetRange() const { return lightData.range; }
+	float GetFallOffStart() const { return lightData.fallOffStart; }
+	float GetFallOffEnd() const { return lightData.fallOffEnd; }
+	float GetSpotPower() const { return lightData.spotPower; }
+	LIGHT_TYPE GetLightType() const { return (LIGHT_TYPE)lightData.type; }
 
 };
 
