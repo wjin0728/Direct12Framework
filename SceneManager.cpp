@@ -72,16 +72,7 @@ void CSceneManager::Render()
 	if (!curScene) {
 		return;
 	}
-	curScene->RenderShadowPass();
-
-#ifdef DEFFERD_RENDERING
-	curScene->RenderGBufferPass();
-	curScene->RenderLightingPass();
-	curScene->RenderFinalPass();
-#else
-	curScene->RenderForwardPass();
-#endif 
-
+	curScene->RenderScene();
 }
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)

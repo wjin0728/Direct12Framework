@@ -11,8 +11,6 @@ struct CBPassData
 	Matrix viewProjMat = Matrix::Identity;
 	Matrix shadowTransform = Matrix::Identity;
 
-	Vec4 gFogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-
 	Vec3 camPos = Vec3::Zero;
 	UINT shadowMapIdx{};
 
@@ -21,8 +19,6 @@ struct CBPassData
 
 	float deltaTime{};
 	float totalTime{};
-	float gFogStart = 50.0f;
-	float gFogRange = 300.0f;
 };
 
 struct CBObjectData

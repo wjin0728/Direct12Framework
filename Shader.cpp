@@ -298,12 +298,13 @@ void CShader::Initialize(const ShaderInfo& info, const std::string& name)
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		break;
 	case PASS_TYPE::SHADOW:
+		pipelineStateDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 		pipelineStateDesc.NumRenderTargets = 0;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
 
 		pipelineStateDesc.RasterizerState.DepthBias = 10000.f;
-		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.2f;
-		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 2.0f;
+		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.0f;
+		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
 		break;
 	}
 	auto device = INSTANCE(CDX12Manager).GetDevice();

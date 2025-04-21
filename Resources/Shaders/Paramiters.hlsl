@@ -31,8 +31,6 @@ struct DirectionalLight
     float3 direction;
     float padding3;
 };
-
-
 struct PointLight
 {
     float3 color;
@@ -42,8 +40,6 @@ struct PointLight
     float3 position;
     float padding2;
 };
-
-
 struct SpotLight
 {
     float3 color;
@@ -57,30 +53,23 @@ struct SpotLight
     float spotPower;
     float3 padding2;
 };
-
 cbuffer CBPassData : register(b0)
 {
     matrix viewProjMat;
     matrix shadowTransform;
-    float4 gFogColor;
     float3 camPos; 
     uint shadowMapIdx; 
     float2 renderTargetSize; 
     float2 passPadding2;
     float deltaTime; 
     float totalTime;
-    
-    float gFogStart;
-    float gFogRange;
 };
-
 cbuffer CBObjectData : register(b1)
 {
     matrix worldMat;
     matrix invWorldMat;
     matrix texMat;
 };
-
 cbuffer CBLightsData : register(b2)
 {
     DirectionalLight dirLights[DIRECTIONAL_LIGHT];
@@ -89,7 +78,6 @@ cbuffer CBLightsData : register(b2)
     uint3 lightNum;
     uint lightPadding;
 };
-
 cbuffer CBBoneTransforms : register(b3)
 {
     matrix boneTransforms[SKINNED_ANIMATION_BONES];

@@ -41,7 +41,7 @@ void CBattleScene::Initialize()
 	{
 
 		auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
-			1.f, 100.f);
+			1.f, 50.f);
 		cameraObj->SetStatic(false);
 
 		auto playerFollower = cameraObj->AddComponent<CThirdPersonCamera>();
@@ -110,6 +110,12 @@ void CBattleScene::LateUpdate()
 	camera->GenerateViewMatrix();
 
 	UpdatePassData();
+}
+
+void CBattleScene::RenderScene()
+{
+	CScene::RenderShadowPass();
+	CScene::RenderForwardPass();
 }
 
 void CBattleScene::SetLights()

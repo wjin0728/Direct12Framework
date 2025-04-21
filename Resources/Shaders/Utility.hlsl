@@ -56,6 +56,19 @@ VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS)
     return output;
 }
 
+float4 ComputeScreenPos(float4 clipPos)
+{
+    float4 o = clipPos;
+  
+    o.xy = clipPos.xy / clipPos.w;
+    o.xy = o.xy * 0.5f + 0.5f;
+    
+    o.z = clipPos.z / clipPos.w;
+    o.w = clipPos.w;
+
+    return o;
+}
+
 float3 GammaDecoding(float3 color)
 {
     return pow(color, 2.2f);
@@ -66,6 +79,10 @@ float3 GammaEncoding(float3 color)
     return pow(color, 0.4545f);
 }
 
+float Luminance(float3 color)
+{
+    return dot(color, float3(0.2126, 0.7152, 0.0722));
+}
 
 float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent)
 {
