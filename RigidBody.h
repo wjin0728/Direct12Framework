@@ -10,8 +10,10 @@ private:
 	Vec3 mVelocity{};
 	Vec3 mAcceleration{};
 
-	float mMaxVelocity = 4.f;
+	float mMaxVelocity = 2.f;
 	float mFriction = 100.0f;
+
+	std::weak_ptr<class CTerrain> mTerrain;
 
 public:
 	CRigidBody();
@@ -26,6 +28,7 @@ public:
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CRigidBody>(); }
 
 private:
+	Vec3 GetValidGroundPosition();
 	void Decelerate();
 
 public:

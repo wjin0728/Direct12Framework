@@ -191,19 +191,35 @@ void CAnimationController::SetAnimationCallbackHandler(std::shared_ptr<CAnimatio
 
 void CAnimationController::Awake()
 {
-	for (auto& set : mAnimationSets->mAnimationSet) {
-		for (auto& layer : set->mLayers) {
-			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
-				cache = owner->FindChildByName(layer->mBoneNames[i])->GetTransform();
-				++i;
-			}
-		}
-	}
-
 	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
 	if (skinnedMeshRenderer) {
 		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();
 	}
+	auto& boneNames = skinnedMeshRenderer->mBoneNames;
+	mBoneCaches.resize(boneNames.size());
+	finalTransforms.resize(boneNames.size());
+
+	std::unordered_map<std::string, std::weak_ptr<CTransform>> boneMap;
+	for (int i = 0; i < boneNames.size(); ++i) {
+		auto bone = owner->FindChildByName(boneNames[i]);
+		if (bone) {
+			boneMap[boneNames[i]] = bone->GetTransform();
+			mBoneCaches[i] = bone->GetTransform();
+		}
+	}
+
+	for (auto& set : mAnimationSets->mAnimationSet) {
+		for (auto& layer : set->mLayers) {
+			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
+				auto& boneName = layer->mBoneNames[i];
+				if (boneMap.contains(boneName)) cache = boneMap[boneName];
+				else cache = owner->FindChildByName(boneName)->GetTransform();
+				++i;
+			}
+		}
+	}
+	mRootTransform = mAnimationSets->mAnimationSet[0]->mLayers[0]->mBoneFrameCaches[0].lock()->GetTransform();
+	mRootTransform.lock()->owner->SetStatic(true);
 
 	if (mBoneTransformIdx == -1) {
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
@@ -237,23 +253,19 @@ void CAnimationController::LateUpdate()
 			animationSet->Animate(deltaTime * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
 		}
 	}
-
-	owner->UpdateWorldMatrices();
+	mRootTransform.lock()->owner->UpdateWorldMatrices(nullptr);	
 
 	for (auto& track : mTracks) {
 		if (track->mEnabled && animationSets.size())
 			animationSets[track->mIndex]->HandleCallback();
 	}
 
-	finalTransforms.clear();
-	for (int i = 0; auto & cache : animationSets.front()->mLayers.front()->mBoneFrameCaches) {
-		if (i) {
-			Matrix boneTransform = cache.lock()->GetWorldMat();
-			Matrix bondOffset = Matrix::Identity;
-			bondOffset = mBindPoseBoneOffsets[i-1];
+	for (int i = 0; auto & cache : mBoneCaches) {
+		Matrix boneTransform = cache.lock()->GetWorldMat(false);
+		Matrix bondOffset = Matrix::Identity;
+		bondOffset = mBindPoseBoneOffsets[i];
 
-			finalTransforms.push_back((bondOffset * boneTransform).Transpose());
-		}
+		finalTransforms[i] = (bondOffset * boneTransform).Transpose();
 		i++;
 	}
 

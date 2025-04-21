@@ -136,6 +136,17 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		cout << "로그인 실패!!!!" << endl;
 		break;
 	}
+	case SC_NEW_LOGIN_INFO: {
+		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet_ptr);
+
+		// INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+
+		// 플레이어 생성해야 함
+		// mplayers 에도 넣고 옵젝리스트에도 넣어야 함
+		// INSTANCE(CSceneManager).GetCurScene()->SetPlayer(packet->id, 0, 0, 0);
+
+		break;
+	}
 	case SC_MOVE_OBJECT: {
 		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
 
@@ -148,7 +159,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		//	// obj->GetTransform()->SetLocalRotation({ packet->rot_x, packet->rot_y, packet->rot_z });
 		//}
 
-		INSTANCE(CSceneManager).GetCurScene()->FindObjectWithTag("Player")->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({packet->x, packet->y, packet->z});
 
 		// 여러명을 그려야하고
 		// servermanager에서 player의 정보를 알아야 됨

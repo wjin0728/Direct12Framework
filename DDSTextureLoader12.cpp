@@ -1545,6 +1545,13 @@ namespace
             *outIsCubeMap = isCubeMap;
         }
 
+        if (format == DXGI_FORMAT_BC7_UNORM_SRGB) {
+            format = DXGI_FORMAT_BC7_UNORM;
+        }
+        if (format == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB) {
+            format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        }
+
         // Create the texture
         size_t numberOfResources = (resDim == D3D12_RESOURCE_DIMENSION_TEXTURE3D)
             ? 1 : arraySize;

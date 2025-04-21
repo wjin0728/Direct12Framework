@@ -5,7 +5,7 @@
 
 #include "../Serverframework/TriumServer/OVER_PLUS.h"
 #include "../Serverframework/TriumServer/protocol.h"
-#include "../Serverframework/TriumServer/ENUM.h"
+// #include "../Serverframework/TriumServer/ENUM.h"
 #include <Windows.h>
 #include <WS2tcpip.h>
 #include <MSWSock.h>

@@ -254,16 +254,14 @@ void CTransform::UpdateLocalMatrix()
 	mLocalMat._42 = mLocalPosition.y;
 	mLocalMat._43 = mLocalPosition.z;
 
-	mLocalRight = Vec3(mLocalMat._11, mLocalMat._12, mLocalMat._13);
-	mLocalUp = Vec3(mLocalMat._21, mLocalMat._22, mLocalMat._23);
-	mLocalLook = Vec3(mLocalMat._31, mLocalMat._32, mLocalMat._33);
+	mLocalRight = Vec3(mLocalMat._11, mLocalMat._12, mLocalMat._13).GetNormalized();
+	mLocalUp = Vec3(mLocalMat._21, mLocalMat._22, mLocalMat._23).GetNormalized();
+	mLocalLook = Vec3(mLocalMat._31, mLocalMat._32, mLocalMat._33).GetNormalized();
 }
 
-void CTransform::UpdateWorldMatrix()
+void CTransform::UpdateWorldMatrix(bool update)
 {
-	std::shared_ptr<CTransform> parent{};
-	if (owner->GetName() != "Armature")
-		parent = mParent.lock();
+	std::shared_ptr<CTransform> parent = mParent.lock();
 
 	if (!mDirtyFlag && !parent) {
 		return;
@@ -274,11 +272,29 @@ void CTransform::UpdateWorldMatrix()
 		mDirtyFlag = false;
 	}
 
-	mWorldMat = parent ? (mLocalMat * parent->GetWorldMat()) : mLocalMat;
+	mWorldMat = parent ? (mLocalMat * parent->GetWorldMat(update)) : mLocalMat;
 
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
-	GetOwner()->mRootLocalBS.Transform(GetOwner()->mRootBS, mWorldMat);
+	owner->mRootLocalBS.Transform(owner->mRootBS, mWorldMat);
+}
+
+void CTransform::UpdateWorldMatrix(std::shared_ptr<CTransform> parent, bool update)
+{
+	if (!mDirtyFlag && !parent) {
+		return;
+	}
+
+	if (mDirtyFlag) {
+		UpdateLocalMatrix();
+		mDirtyFlag = false;
+	}
+
+	mWorldMat = parent ? (mLocalMat * parent->GetWorldMat(update)) : mLocalMat;
+
+	dirtyFramesNum = FRAME_RESOURCE_COUNT;
+
+	owner->mRootLocalBS.Transform(owner->mRootBS, mWorldMat);
 }
 
 void CTransform::ApplyBlendedTransform()
@@ -286,6 +302,7 @@ void CTransform::ApplyBlendedTransform()
 	SetLocalScale(mScaleLayerBlending);
 	SetLocalRotation(mRotationLayerBlending);
 	SetLocalPosition(mPositionLayerBlending);
+	mDirtyFlag = true;
 }
 
 void CTransform::BlendingTransform(const ANIMATION_BLEND_TYPE blendType, const Vec3& scale, const Vec3& rotation, const Vec3& position, float weight)
