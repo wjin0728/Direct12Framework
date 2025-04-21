@@ -75,11 +75,15 @@ struct CBSpotLightInfo
 
 struct CBLightsData
 {
-	CBDirectionalLightInfo dirLights[DIRECTIONAL_LIGHT];
-	CBPointLightInfo pointLights[POINT_LIGHT];
-	CBSpotLightInfo spotLights[SPOT_LIGHT];
-	XMUINT3 lightNum;
-	UINT padding;
+	int type;
+	Vec3 color;
+	Vec3 strength;
+	float range;
+	Vec3 direction;
+	float fallOffStart;
+	Vec3 position;
+	float fallOffEnd;
+	float spotPower;
 };
 
 struct BillboardData
