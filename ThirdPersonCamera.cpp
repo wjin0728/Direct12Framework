@@ -83,12 +83,12 @@ void CThirdPersonCamera::Update()
 
 	auto transform = GetTransform();
 	Vec3 camPos = transform->GetWorldPosition();
-	float terrainHeight = mTerrain.lock()->GetHeight(camPos.x, camPos.z);
-	if (camPos.y < terrainHeight + 0.5f)
-	{
-		camPos.y = terrainHeight + 0.5f;
-		transform->SetLocalPosition(camPos);
-	}
+	//float terrainHeight = mTerrain.lock()->GetHeight(camPos.x, camPos.z);
+	//if (camPos.y < terrainHeight + 0.5f)
+	//{
+	//	camPos.y = terrainHeight + 0.5f;
+	//	transform->SetLocalPosition(camPos);
+	//}
 
 }
 
@@ -214,5 +214,5 @@ void CThirdPersonCamera::RaycastObjects()
 	if (!mIsHit) return;
 
 	Vec3 hitPoint = ray.position + ray.direction * minDistance;
-	//transform->SetLocalPosition(hitPoint);
+	transform->SetLocalPosition(hitPoint);
 }

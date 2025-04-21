@@ -30,12 +30,12 @@ void CPlayerController::Start()
 void CPlayerController::Update()
 {
 	OnKeyEvents();
-	auto transform = GetTransform();
-	float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
+	// auto transform = GetTransform();
+	// float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
 
-	Vec3 pos = transform->GetWorldPosition();
-	pos.y = terrainHeight;
-	transform->SetLocalPosition(pos);
+	// Vec3 pos = transform->GetWorldPosition();
+	// pos.y = terrainHeight;
+	// transform->SetLocalPosition(pos);
 }
 
 void CPlayerController::LateUpdate()
@@ -57,20 +57,28 @@ void CPlayerController::OnKeyEvents()
 	camRight.Normalize();
 
 	if (INPUT.IsKeyPress(KEY_TYPE::W)) {
-		moveDir += camForward;
+		dir |= 0x08;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) {
-		moveDir -= camForward;
+		dir |= 0x02;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::D)) {
-		moveDir += camRight;
+		dir |= 0x01;
 	}
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
-		moveDir -= camRight;
-
+		dir |= 0x04;
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) {
+		dir |= 0x20;
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) {
+		dir |= 0x10;
 	}
 
-	Vec3 accel = Vec3::Zero;
+	if (dir == 0) return;
+	INSTANCE(ServerManager).send_cs_move_packet(dir, transform->GetLocalLook());
+
+	/*Vec3 accel = Vec3::Zero;
 	bool isDecelerate = true;
 
 	if (moveDir != Vec3::Zero) {
@@ -112,5 +120,5 @@ void CPlayerController::OnKeyEvents()
 		Quaternion targetRot = Quaternion::LookRotation(moveDir);
 		Quaternion rotation = Quaternion::Slerp(transform->GetLocalRotation(), targetRot, rotationSpeed * DELTA_TIME);
 		transform->SetLocalRotation(rotation);
-	}
+	}*/
 }

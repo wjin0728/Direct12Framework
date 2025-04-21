@@ -136,8 +136,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		cout << "로그인 실패!!!!" << endl;
 		break;
 	}
-	case SC_NEW_LOGIN_INFO: {
-		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet_ptr);
+	case SC_ADD_OBJECT: {
+		SC_ADD_OBJECT_PACKET* packet = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(packet_ptr);
 
 		// INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 
@@ -152,19 +152,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		cout << "SC_MOVE_PACKET" << endl;
 		
-		//INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id);
-
-		//if (obj) {
-		//	obj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-		//	// obj->GetTransform()->SetLocalRotation({ packet->rot_x, packet->rot_y, packet->rot_z });
-		//}
-
 		INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({packet->x, packet->y, packet->z});
-
-		// 여러명을 그려야하고
-		// servermanager에서 player의 정보를 알아야 됨
-		// 그 player를 기반으로 그림이 그려져야 할 듯
-		// or object를 player id로 찾을 수 있으면 best
 
 		break;
 	}
