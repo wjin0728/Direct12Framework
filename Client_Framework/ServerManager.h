@@ -9,7 +9,7 @@ class ServerManager
 	MAKE_SINGLETON(ServerManager)
 public:
 	unordered_map <int, Player>			players;
-	SOCKET								send_socket, server_soket;
+	SOCKET								send_socket, server_socket;
 	WSAOVERLAPPED						wsaover;
 
 	char								SERVER_ADDR[NAME_SIZE]{ "127.0.0.1" };

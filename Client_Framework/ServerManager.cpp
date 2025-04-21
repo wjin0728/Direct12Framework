@@ -18,7 +18,13 @@ void ServerManager::Client_Login()
 		print_error("WSAStartup", WSAGetLastError());
 	}
 
-	server_soket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
+	server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
+	if (server_socket == INVALID_SOCKET) {
+		std::cerr << "WSASocket failed: " << WSAGetLastError() << "\n";
+		WSACleanup();
+		exit(1);
+	}
+
 	SOCKADDR_IN server_addr;
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(PORT_NUM);
@@ -28,7 +34,8 @@ void ServerManager::Client_Login()
 
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 
-	err = connect(server_soket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	std::cout << "Connecting to " << reinterpret_cast<sockaddr*>(&server_addr) << ":" << PORT_NUM << "\n";
+	err = connect(server_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 	if (0 != err) {
 		print_error("connect", WSAGetLastError());
 	}
@@ -61,7 +68,7 @@ void ServerManager::Recv_Packet()
 	}
 	wsaover.hEvent = reinterpret_cast<HANDLE>(this);
 
-	int res = WSARecv(server_soket, &sdata->_wsabuf, 1, 0, &recv_flag, &sdata->_over, recv_callback);
+	int res = WSARecv(server_socket, &sdata->_wsabuf, 1, 0, &recv_flag, &sdata->_over, recv_callback);
 	if (0 != res) {
 		int err_no = WSAGetLastError();
 		// 에러 겹친 i/o 작업을 진행하고 있습니다. 라고 나오는 게 정상임
@@ -69,6 +76,7 @@ void ServerManager::Recv_Packet()
 			print_error("Recv_Packet - WSARecv", WSAGetLastError());
 	}
 }
+
 void CALLBACK ServerManager::recv_callback(DWORD err, DWORD recv_size, LPWSAOVERLAPPED pwsaover, DWORD sendflag)
 {
 	OVER_PLUS* over = reinterpret_cast<OVER_PLUS*>(pwsaover);
@@ -164,7 +172,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 void ServerManager::Send_Packet(void* packet)
 {
 	OVER_PLUS* sdata = new OVER_PLUS{ reinterpret_cast<char*>(packet) };
-	int sed = WSASend(server_soket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, send_callback);
+	int sed = WSASend(server_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, send_callback);
 	if (0 != sed) {
 		int err_no = WSAGetLastError();
 		// 에러 겹친 i/o 작업을 진행하고 있습니다. 라고 나오는 게 정상임
