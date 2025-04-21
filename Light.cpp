@@ -28,3 +28,7 @@ void CLight::Update()
 void CLight::LateUpdate()
 {
 }
+
+void CLight::Render()
+{
+}

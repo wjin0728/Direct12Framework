@@ -206,6 +206,16 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		MakeShadersForAllPass("Animation", info);
 	}
+	{
+		ShaderInfo info;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::ADD_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		MakeShadersForAllPass("SkinnedMesh", info);
+	}
+
 }
 
 void CResourceManager::MakeShadersForAllPass(const std::string& name, ShaderInfo info)

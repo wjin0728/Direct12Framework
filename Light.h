@@ -25,6 +25,8 @@ public:
 	virtual void Update() override;
 	virtual void LateUpdate() override;
 
+	void Render();
+
 public:
 	void SetStrength(const Vec3& _strength) { lightData.strength = _strength; }
 	void SetColor(const Vec3& _color) { lightData.color = _color; }

@@ -101,7 +101,6 @@ void CScene::RenderGBufferPass()
 		RenderForLayer("Opaque", camera);
 		if (mTerrain) mTerrain->Render(camera);
 	}
-	DEVICE->
 
 	gBuffer->ChangeTargetsToResources();
 }

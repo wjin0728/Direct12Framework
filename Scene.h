@@ -9,6 +9,7 @@ class CCamera;
 class CGameObject;
 class CTerrain;
 class CShader;
+class CLight;
 
 class CSceneManager;
 
@@ -25,7 +26,7 @@ protected:
 	std::array<ObjectList, OBJECT_TYPE::end> mObjectTypes;
 
 	std::shared_ptr<CTerrain> mTerrain{};
-	std::unique_ptr<CLightManager> lightMgr{};
+	std::array<std::shared_ptr<CLight>, (UINT)LIGHT_TYPE::END> mLights{};
 
 	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
 
@@ -69,6 +70,7 @@ public:
 	ObjectList& GetObjects(const std::string& layer) { return mRenderLayers[layer]; }
 	std::array<ObjectList, OBJECT_TYPE::end>& GetObjectsForType() { return mObjectTypes; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
+	std::shared_ptr<CLight> GetLight(LIGHT_TYPE type) { return mLights[(UINT)type]; }
 	std::shared_ptr<CGameObject> GetPlayer(int idx) { return mObjectTypes[PLAYER][idx]; }
 
 protected:

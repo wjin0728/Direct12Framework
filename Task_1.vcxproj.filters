@@ -10,9 +10,6 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{2fcdeebc-d9d6-416c-9650-402322505ae2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lights">
-      <UniqueIdentifier>{32833698-8c46-480c-a7eb-0850a6dbe196}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resources\Texture">
       <UniqueIdentifier>{ae7b9f15-a483-4fba-8774-2607f60bbbcc}</UniqueIdentifier>
     </Filter>
