@@ -10,10 +10,10 @@
 GameManager::GameManager()
 {
 	lastTime = std::chrono::high_resolution_clock::now();
-	terrain.SetResolution(513); 
-	terrain.SetNavMapResolution(terrain.GetResolution() * 2); 
-	terrain.SetScale(45, 20, 45); 
-	terrain.LoadHeightMap("LobbyHeightmap"); 
+	terrain.SetScale(45, 20, 45);
+	terrain.SetResolution(513);
+	terrain.SetNavMapResolution(terrain.GetResolution() * 2);
+	terrain.LoadHeightMap("LobbyHeightmap");
 	terrain.LoadNavMap("LobbyTerrainNavMap");
 	cout << "Map loaded.\n";
 
@@ -22,8 +22,15 @@ GameManager::GameManager()
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	server_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (server_socket == INVALID_SOCKET) {
+		std::cerr << "WSASocket failed: " << WSAGetLastError() << "\n";
+		WSACleanup();
+		exit(1);
+	}
 
+	std::cout << "Server socket created.\n";
 	S_Bind_Listen();
+	std::cout << "Server initialized.\n";
 
 	S_Accept();
 
@@ -42,8 +49,23 @@ void GameManager::S_Bind_Listen()
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(PORT_NUM);
 	server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
-	bind(server_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-	listen(server_socket, SOMAXCONN);
+
+	std::cout << "Binding to port " << PORT_NUM << "\n";
+	if (::bind(server_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)) == SOCKET_ERROR) {
+		std::cerr << "Bind failed: " << WSAGetLastError() << "\n";
+		closesocket(server_socket);
+		WSACleanup();
+		exit(1);
+	}
+	std::cout << "Bind successful.\n";
+
+	if (listen(server_socket, SOMAXCONN) == SOCKET_ERROR) {
+		std::cerr << "Listen failed: " << WSAGetLastError() << "\n";
+		closesocket(server_socket);
+		WSACleanup();
+		exit(1);
+	}
+	std::cout << "Listening on port " << PORT_NUM << "\n";
 }
 void GameManager::S_Accept()
 {
@@ -61,10 +83,10 @@ void GameManager::Make_threads()
 	vector <thread> worker_threads;
 	int num_threads = std::thread::hardware_concurrency();
 	for (int i = 0; i < num_threads; ++i)
-		worker_threads.emplace_back( &GameManager::Worker_thread, this );
-		
+		worker_threads.emplace_back(&GameManager::Worker_thread, this);
+
 	for (auto& th : worker_threads)
-		th.join();	
+		th.join();
 }
 
 void GameManager::Worker_thread()
@@ -113,7 +135,7 @@ void GameManager::Worker_thread()
 			}
 			ZeroMemory(&accept_over._over, sizeof(accept_over._over));
 			int addr_size = sizeof(SOCKADDR_IN);
-			AcceptEx(server_socket, client_socket, accept_over._send_buf, 0, addr_size + 16, addr_size + 16, 0, &accept_over._over);			
+			AcceptEx(server_socket, client_socket, accept_over._send_buf, 0, addr_size + 16, addr_size + 16, 0, &accept_over._over);
 			break;
 		}
 		case OP_RECV: {
@@ -140,7 +162,7 @@ void GameManager::Worker_thread()
 			delete ex_over;
 			break;
 		}
-			break;
+					break;
 		}
 	}
 
@@ -194,113 +216,65 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_MOVE: {
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
-		// 이동 방향 계산
 		Vec3 moveDir = Vec3::Zero;
 		Vec3 local_lookDir = Vec3(p->look_x, p->look_y, p->look_z);
-		Vec3 right_dir = local_lookDir.Cross(Vec3::Up);
-		right_dir.y = 0.f;
-		right_dir.Normalize();
 		local_lookDir.y = 0.f;
 		local_lookDir.Normalize();
+		Vec3 right_dir = local_lookDir.Cross(Vec3::Up); 
+		right_dir.y = 0.f;
+		right_dir.Normalize();
 
 		if (p->dir & KEY_FLAG::KEY_W) moveDir += local_lookDir;
 		if (p->dir & KEY_FLAG::KEY_S) moveDir -= local_lookDir;
-		if (p->dir & KEY_FLAG::KEY_D) moveDir += right_dir;
-		if (p->dir & KEY_FLAG::KEY_A) moveDir -= right_dir;
-		if (p->dir & KEY_FLAG::KEY_SHIFT) moveDir += Vec3(0, -1, 0); // 하강
-		if (p->dir & KEY_FLAG::KEY_CTRL) moveDir += Vec3(0, 1, 0);  // 상승
+		if (p->dir & KEY_FLAG::KEY_D) moveDir -= right_dir;
+		if (p->dir & KEY_FLAG::KEY_A) moveDir += right_dir;
+		if (p->dir & KEY_FLAG::KEY_SHIFT) moveDir += Vec3(0, -1, 0); 
+		if (p->dir & KEY_FLAG::KEY_CTRL) moveDir += Vec3(0, 1, 0); 
 
-		// 가속도 및 속도 계산
-		Vec3 accel = Vec3::Zero;
-		bool isDecelerate = true;
+		const float moveSpeed = 5.0f; 
+		Vec3 velocity = Vec3::Zero;
 
 		if (moveDir.LengthSquared() > 0.0001f) {
 			moveDir.Normalize();
-
-			Vec3 currentVelocity = clients[c_id]._velocity;
-			float currentSpeed = currentVelocity.Length();
-			if (currentVelocity.LengthSquared() > 0.0001f) {
-				Vec3 currentDir = currentVelocity.GetNormalized();
-				float dot = currentDir.Dot(moveDir);
-
-				if (dot < 0.0f) {
-					accel = -currentDir * 20.f; // 단항 마이너스 연산자
-				}
-				else {
-					float scale = currentSpeed * dot;
-					clients[c_id]._velocity = moveDir * scale; // 스칼라-벡터 곱셈
-					accel = moveDir * 10.f;
-					isDecelerate = false;
-				}
-			}
-			else {
-				accel = moveDir * 10.f;
-				isDecelerate = false;
-			}
+			velocity = moveDir * moveSpeed;
+		}
+		else {
+			velocity = Vec3::Zero;
+			clients[c_id]._acceleration = Vec3::Zero;
 		}
 
-		// 속도 업데이트
-		Vec3 currentVelocity = clients[c_id]._velocity;
-		currentVelocity += accel * (1.f / 110.f);
-		if (isDecelerate && currentVelocity.LengthSquared() > 0.0001f) {
-			Vec3 friction = -currentVelocity.GetNormalized() * 20.f;
-			currentVelocity += friction * (1.f / 110.f);
-			if (currentVelocity.LengthSquared() < 0.01f) {
-				currentVelocity = Vec3::Zero;
-			}
-		}
-		clients[c_id]._velocity = currentVelocity;
-		clients[c_id]._acceleration = accel;
+		// 위치 업데이트
+		float deltaTime = 1.f / 110.f; 
+		Vec3 newPos = clients[c_id]._pos + velocity * deltaTime;
 
-		// 위치 업데이트 (지형 검사 가정)
-		Vec3 newPos = clients[c_id]._pos + currentVelocity * (1.f / 110.f);			
-		
 		if (CanMove(newPos.x, newPos.z)) {
-			moveDir.Normalize();
-
-			Vec3 currentVelocity = clients[c_id]._velocity;
-			float currentSpeed = currentVelocity.Length();
-			if (currentVelocity != Vec3::Zero) {
-				Vec3 currentDir = currentVelocity.GetNormalized();
-				float dot = currentDir.Dot(moveDir);
-
-				if (dot < 0.0f) {
-					accel = -currentDir * 20.f;
-				}
-				else {
-					clients[c_id]._velocity = (currentSpeed * dot * moveDir);
-					accel = moveDir * 10.f;
-					isDecelerate = false;
-				}
-			}
-			else {
-				accel = moveDir * 10.f; // Á¤Áö »óÅÂ¿¡¼­ °¡¼Ó
-				isDecelerate = false;
-			}
-
-			float rotationSpeed = 10.f; 
-			float deltaTime = GetDeltaTime();
-
-			if (moveDir.LengthSquared() > 0.001f)
-			{
-				Quaternion targetRot = Quaternion::LookRotation(moveDir);
-				Quaternion rotation = Quaternion::Slerp(clients[c_id]._look_rotation, targetRot, rotationSpeed * deltaTime);
-				clients[c_id]._look_rotation = rotation;
-			}
+			clients[c_id]._pos = newPos;
 
 			float terrainHeight = terrain.GetHeight(clients[c_id]._pos.x, clients[c_id]._pos.z);
 			clients[c_id]._pos.y = terrainHeight;
+			cout << "terrain height : " << terrainHeight << endl;
 
-			// 회전 업데이트
 			if (moveDir.LengthSquared() > 0.001f) {
 				clients[c_id]._look_dir = moveDir;
 			}
 
-			// 모든 클라이언트에게 이동 패킷 전송
+			clients[c_id]._velocity = velocity;
+
+			//float rotationSpeed = 10.f;
+			//if (moveDir.LengthSquared() > 0.001f) {
+			//	Quaternion targetRot = Quaternion::LookRotation(moveDir);
+			//	Quaternion rotation = Quaternion::Slerp(clients[c_id]._look_rotation, targetRot, rotationSpeed * deltaTime);
+			//	clients[c_id]._look_rotation = rotation;
+			//}
+
 			for (auto& cl : clients) {
 				if (cl._state != ST_INGAME) continue;
 				cl.send_move_packet(&clients[c_id]);
 			}
+		}
+		else {
+			clients[c_id]._velocity = Vec3::Zero;
+			clients[c_id]._acceleration = Vec3::Zero;
 		}
 
 		break;

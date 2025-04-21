@@ -76,7 +76,7 @@ void CPlayerController::OnKeyEvents()
 	}
 
 	if (dir == 0) return;
-	INSTANCE(ServerManager).send_cs_move_packet(dir, transform->GetLocalLook());
+	INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
 
 	/*Vec3 accel = Vec3::Zero;
 	bool isDecelerate = true;

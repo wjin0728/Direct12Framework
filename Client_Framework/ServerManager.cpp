@@ -161,6 +161,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		cout << "SC_MOVE_PACKET" << endl;
 		
 		INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({packet->x, packet->y, packet->z});
+		INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalRotation({packet->look_x, packet->look_y, packet->look_z});
 
 		break;
 	}

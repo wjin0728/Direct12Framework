@@ -59,7 +59,11 @@ void SESSION::send_move_packet(SESSION* client)
 	p.x = client->_pos.x;
 	p.y = client->_pos.y;
 	p.z = client->_pos.z;
+	//p.look_x = client->_look_dir.x;
+	p.look_y = client->_look_dir.y;
+	//p.look_z = client->_look_dir.z;
+	cout << client->_look_dir.y << std::endl;
 
-	std::cout << "Move client << " << p.id << " : { " << p.x << ", " << p.y << ", " << p.z << " }" << std::endl;
+	// std::cout << "Move client << " << p.id << " : { " << p.x << ", " << p.y << ", " << p.z << " }" << std::endl;
 	do_send(&p);
 }
