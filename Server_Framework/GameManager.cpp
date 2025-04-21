@@ -13,7 +13,7 @@ GameManager::GameManager()
 	terrain.SetScale(45, 20, 45);
 	terrain.SetResolution(513);
 	terrain.SetNavMapResolution(terrain.GetResolution() * 2);
-	terrain.LoadHeightMap("LobbyHeightmap");
+	terrain.LoadHeightMap("LobbyTerrainHeightmap");
 	terrain.LoadNavMap("LobbyTerrainNavMap");
 	cout << "Map loaded.\n";
 
@@ -260,12 +260,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 			clients[c_id]._velocity = velocity;
 
-			//float rotationSpeed = 10.f;
-			//if (moveDir.LengthSquared() > 0.001f) {
-			//	Quaternion targetRot = Quaternion::LookRotation(moveDir);
-			//	Quaternion rotation = Quaternion::Slerp(clients[c_id]._look_rotation, targetRot, rotationSpeed * deltaTime);
-			//	clients[c_id]._look_rotation = rotation;
-			//}
+			//
+
+			float rotationSpeed = 10.f;
+			if (moveDir.LengthSquared() > 0.001f) {
+				Quaternion targetRot = Quaternion::LookRotation(moveDir);
+				Quaternion rotation = clients[c_id]._look_rotation = Quaternion::Slerp(clients[c_id]._look_rotation, targetRot, rotationSpeed * deltaTime);
+				Vec3 angle = Vec3::GetAngleToQuaternion(rotation);
+				clients[c_id]._look_dir.y = angle.y * radToDeg;
+			}
 
 			for (auto& cl : clients) {
 				if (cl._state != ST_INGAME) continue;
