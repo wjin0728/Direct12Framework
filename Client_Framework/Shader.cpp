@@ -231,9 +231,10 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::s
 #endif
 	ComPtr<ID3DBlob> errBlob{};
 
-	std::wstring fileName = L"Resources\\Shaders\\" + BinaryReader::stringToWstring(name) + L".hlsl";
+	std::string fileName = SHADER_PATH(name);
+	std::wstring fileNameW = BinaryReader::stringToWstring(fileName);
 
-	HRESULT hr = D3DCompileFromFile(fileName.c_str(), NULL,
+	HRESULT hr = D3DCompileFromFile(fileNameW.c_str(), NULL,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, fname.c_str(), version.c_str(), compileFlag, 0, &blob, &errBlob);
 
 	if (FAILED(hr)) {

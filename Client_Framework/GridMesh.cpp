@@ -9,7 +9,7 @@ void CHeightMapGridMesh::LoadHeightMap(const std::string& fileName)
 	UINT heightMapSize = resolution * resolution;
 
 	std::vector<float> heightMap;
-	std::ifstream file("Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
+	std::ifstream file("..\\Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
 	if (!file.is_open()) {
 		return;
 	}

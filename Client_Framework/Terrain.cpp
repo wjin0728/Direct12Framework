@@ -61,7 +61,7 @@ void CTerrain::MakeNavMap(const std::string& fileName, UINT resolution)
 {
 	mNavMapResolution = resolution;
 	std::vector<BYTE> data;
-	std::ifstream file("Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
+	std::ifstream file("..\\Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
 	if (!file.is_open()) {
 		return;
 	}

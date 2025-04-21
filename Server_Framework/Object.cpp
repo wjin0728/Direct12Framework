@@ -5,7 +5,7 @@ void Object::LoadHeightMap(const std::string& fileName)
     UINT heightMapSize = resolution * resolution;
 
     std::vector<float> heightMap;
-    std::ifstream file("Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
+    std::ifstream file("..\\Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
     if (!file.is_open()) {
         return;
     }
@@ -28,7 +28,7 @@ void Object::LoadNavMap(const std::string& fileName)
     UINT NavMapSize = navmap_resolution * navmap_resolution;
 
     std::vector<BYTE> NavMap;
-    std::ifstream file("Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
+    std::ifstream file("..\\Resources\\Textures\\" + fileName + ".raw", std::ios::binary);
     if (!file.is_open()) {
         return;
     }
