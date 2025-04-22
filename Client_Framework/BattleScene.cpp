@@ -25,33 +25,33 @@ void CBattleScene::Initialize()
 {
 	LoadSceneFromFile(SCENE_PATH(std::string("Lobby1")));
 
-
-
-#pragma region Player
-
-	auto Player = FindObjectWithTag("Player");
-	Player->SetStatic(false);
-
-	Player->AddComponent<CRigidBody>();
-	auto playerController = Player->AddComponent<CPlayerController>();
-
-#pragma endregion
-
-#pragma region Main Camera
-	{
-
-		auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
-			1.f, 100.f);
-		cameraObj->SetStatic(false);
-
-		auto playerFollower = cameraObj->AddComponent<CThirdPersonCamera>();
-		playerFollower->SetTarget(Player);
-
-		AddObject(cameraObj);
-		playerController->SetCamera(cameraObj->GetComponent<CCamera>());
-
-		auto uiCamera = CGameObject::CreateCameraObject("UICamera", INSTANCE(CDX12Manager).GetRenderTargetSize(), 0.f, 100.f, INSTANCE(CDX12Manager).GetRenderTargetSize());
-	}
+	auto player = CreatePlayer(PLAYER_CLASS::FIGHTER);
+	auto camera = CreatePlayerCamera(player);
+//#pragma region Player
+//
+//	auto Player = FindObjectWithTag("Player");
+//	Player->SetStatic(false);
+//
+//	Player->AddComponent<CRigidBody>();
+//	auto playerController = Player->AddComponent<CPlayerController>();
+//
+//#pragma endregion
+//
+//#pragma region Main Camera
+//	{
+//
+//		auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
+//			1.f, 100.f);
+//		cameraObj->SetStatic(false);
+//
+//		auto playerFollower = cameraObj->AddComponent<CThirdPersonCamera>();
+//		playerFollower->SetTarget(Player);
+//
+//		AddObject(cameraObj);
+//		playerController->SetCamera(cameraObj->GetComponent<CCamera>());
+//
+//		auto uiCamera = CGameObject::CreateCameraObject("UICamera", INSTANCE(CDX12Manager).GetRenderTargetSize(), 0.f, 100.f, INSTANCE(CDX12Manager).GetRenderTargetSize());
+//	}
 #pragma endregion
 
 	SetLights();

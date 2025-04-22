@@ -16,6 +16,8 @@ void CResourceManager::Initialize()
 	LoadDefaultTexture();
 	LoadDefaultShaders();
 	LoadDefaultMaterials();
+
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
 }
 
 std::shared_ptr<CTexture> CResourceManager::Create2DTexture(const std::string& name, DXGI_FORMAT format
@@ -77,6 +79,15 @@ void CResourceManager::LoadSceneResourcesFromFile(std::ifstream& ifs)
 	for (int i = 0; i < materialCount; i++) {
 		Add(CMaterial::CreateMaterialFromFile(ifs));
 	}
+}
+
+void CResourceManager::LoadSceneResourcesFromFile(const std::string& fileName)
+{
+	std::ifstream ifs{ fileName, std::ios::binary };
+	if (!ifs) {
+		return;
+	}
+	LoadSceneResourcesFromFile(ifs);
 }
 
 void CResourceManager::LoadDefaultMeshes()

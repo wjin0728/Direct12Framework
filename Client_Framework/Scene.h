@@ -61,15 +61,20 @@ public:
 	void AddObject(std::shared_ptr<CGameObject> object);
 	void RemoveObject(std::shared_ptr<CGameObject> object);
 	void SetTerrain(std::shared_ptr<CTerrain> terrain);
+	void SetClientID(int id) { clientID = id; }
 
 	void AddCamera(std::shared_ptr<CCamera> camera);
 	void RemoveCamera(const std::string& tag);
+
+	std::shared_ptr<CGameObject> CreatePlayer(PLAYER_CLASS playerClass);
+	std::shared_ptr<CGameObject> CreatePlayerCamera(std::shared_ptr<CGameObject> player);
 	
 	const std::unordered_map<std::string, ObjectList>& GetObjects() const { return mRenderLayers; }
 	ObjectList& GetObjects(const std::string& layer) { return mRenderLayers[layer]; }
 	std::array<ObjectList, OBJECT_TYPE::end>& GetObjectsForType() { return mObjectTypes; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
 	std::shared_ptr<CGameObject> GetPlayer(int idx) { return mObjectTypes[PLAYER][idx]; }
+	int GetClientID() { return clientID; }
 
 	// std::shared_ptr<CGameObject> GetPlayer(int id) { return mPlayers[id]; }
 	// void SetPlayer(std::shared_ptr<CGameObject> mPlayer, Vec3 position) { mPlayer->GetTransform()->SetLocalPosition(position); };

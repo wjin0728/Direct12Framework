@@ -38,3 +38,10 @@ enum OBJECT_TYPE : UINT8
 	end
 };
 
+enum class PLAYER_CLASS : UINT8
+{
+	FIGHTER,
+	ARCHER,
+	MAGE,
+	end
+};

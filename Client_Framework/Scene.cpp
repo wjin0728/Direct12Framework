@@ -10,6 +10,10 @@
 #include"Timer.h"
 #include"Camera.h"
 #include"InstancingGroup.h"
+#include"Transform.h"
+#include"PlayerController.h"
+#include"RigidBody.h"
+#include"ThirdPersonCamera.h"	
 
 
 CScene::CScene()
@@ -120,8 +124,6 @@ void CScene::LoadSceneFromFile(const std::string& fileName)
 	if (!ifs) {
 		return;
 	}
-	//공유 리소스 로드
-	RESOURCE.LoadSceneResourcesFromFile(ifs);
 	//프리팹
 	std::unordered_map<std::string, std::shared_ptr<CGameObject>> prefabs{};
 	CreatePrefabs(ifs, prefabs);
@@ -250,6 +252,41 @@ void CScene::RemoveCamera(const std::string& tag)
 	}
 
 	mCameras.erase(tag);
+}
+
+std::shared_ptr<CGameObject> CScene::CreatePlayer(PLAYER_CLASS playerClass)
+{
+	std::array<std::string, (UINT)PLAYER_CLASS::end> playerClassNames = {"Player_Fighter", "Player_Archer", "Player_Mage"};
+	auto player = CGameObject::CreateObjectFromFile(playerClassNames[(UINT)playerClass]);
+	player->SetTag("Player");
+	player->SetActive(true);
+	player->SetObjectType(OBJECT_TYPE::PLAYER);
+
+	player->SetStatic(false);
+
+	player->AddComponent<CRigidBody>();
+	auto playerController = player->AddComponent<CPlayerController>();
+
+	AddObject("Opaque", player);
+
+	return player;
+}
+
+std::shared_ptr<CGameObject> CScene::CreatePlayerCamera(std::shared_ptr<CGameObject> player)
+{
+	auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
+		1.f, 100.f);
+	cameraObj->SetStatic(false);
+
+	auto playerFollower = cameraObj->AddComponent<CThirdPersonCamera>();
+	playerFollower->SetTarget(player);
+
+	AddObject(cameraObj);
+
+	auto playerController = player->GetComponent<CPlayerController>();
+	playerController->SetCamera(cameraObj->GetComponent<CCamera>());
+
+	return cameraObj;
 }
 
 void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass)

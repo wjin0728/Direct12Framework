@@ -42,6 +42,7 @@ public:
 	void UpdateMaterials();
 
 	void LoadSceneResourcesFromFile(std::ifstream& ifs);
+	void LoadSceneResourcesFromFile(const std::string& fileName);
 
 private:
 	void LoadDefaultMeshes();

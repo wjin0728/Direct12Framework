@@ -349,6 +349,16 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(std::ifstream& if
 	return root;
 }
 
+std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(const std::string& name)
+{
+	std::ifstream ifs{ OBJECT_PATH(name), std::ios::binary };
+	if (!ifs) {
+		return nullptr;
+	}
+	std::unordered_map<std::string, std::shared_ptr<CGameObject>> prefabs{};
+	return CGameObject::CreateObjectFromFile(ifs, prefabs);
+}
+
 std::shared_ptr<CGameObject> CGameObject::GetSptrFromThis()
 {
 	return shared_from_this();

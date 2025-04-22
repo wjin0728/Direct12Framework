@@ -81,6 +81,7 @@ using SimpleMath::Color;
 
 #define TEXTURE_PATH(name)			"..\\Resources\\Textures\\" + std::string(name) + ".dds"
 #define MODEL_PATH(name)			"..\\Resources\\Models\\" + (name) + ".bin"
+#define OBJECT_PATH(name)			"..\\Resources\\Objects\\" + (name) + ".bin"
 #define SCENE_PATH(name)			"..\\Resources\\Scenes\\" + (name) + ".bin"
 #define ANIMATION_PATH(name)		"..\\Resources\\Animation\\" + (name) + ".bin"
 #define SHADER_PATH(name)			"..\\Resources\\Shaders\\" + std::string(name) + ".hlsl"

@@ -70,6 +70,7 @@ public:
 	static std::shared_ptr<CGameObject> CreateTerrainObject(std::ifstream& ifs);
 	//바이너리 파일을 통해 오브젝트를 생성한다.
 	static std::shared_ptr<CGameObject> CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
+	static std::shared_ptr<CGameObject> CreateObjectFromFile(const std::string& name);
 
 	std::shared_ptr<CTransform> GetTransform() { return mTransform; }
 	std::shared_ptr<CRenderer> GetRenderer() { return mRenderer; }
