@@ -37,42 +37,6 @@ struct CBObjectData
 	Matrix textureMat = Matrix::Identity;
 };
 
-
-struct CBDirectionalLightInfo
-{
-	Vec3 color;
-	float padding1;
-	Vec3 strength;
-	float padding2;
-	Vec3 direction;
-	float padding3;
-};
-
-struct CBPointLightInfo
-{
-	Vec3 color;
-	float padding1;
-	Vec3 strength;
-	float range;
-	Vec3 position;
-	float padding2;
-};
-
-struct CBSpotLightInfo
-{
-	Vec3 color;
-	float padding1;
-	Vec3 strength;
-	float range;
-	Vec3 direction;
-	float fallOffStart;
-	Vec3 position;
-	float fallOffEnd;
-	float spotPower;
-	Vec3 padding2;
-};
-
-
 struct CBLightsData
 {
 	int type;

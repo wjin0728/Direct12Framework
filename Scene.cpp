@@ -125,8 +125,11 @@ void CScene::RenderLightingPass()
 		lightingPass->ClearOnlyStencil(0);
 		pointLight->Render(camera);
 	}
-
-
+	//Spot Light
+	for (const auto& spotLight : spotLights) {
+		lightingPass->ClearOnlyStencil(0);
+		spotLight->Render(camera);
+	}
 
 	lightingPass->ChangeTargetsToResources();
 }

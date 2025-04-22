@@ -1,17 +1,9 @@
 #ifndef PARAM_DEFINE
 #define PARAM_DEFINE
 
-
-#define DIRECTIONAL_LIGHT 5
-#define POINT_LIGHT 5
-#define SPOT_LIGHT 5
-
 #define TEXTURE_COUNT 300
-
 #define TERRAIN_SPLAT_COUNT 2
-
 #define CASCADE_COUNT_FLAG 3
-
 #define LIGHTING
 
 //#define FOG
@@ -22,37 +14,6 @@ static const float a0 = 1.f;
 static const float a1 = 0.01f;
 static const float a2 = 0.0001f;
 
-struct DirectionalLight
-{
-    float3 color;
-    float padding1;
-    float3 strength;
-    float padding2;
-    float3 direction;
-    float padding3;
-};
-struct PointLight
-{
-    float3 color;
-    float padding1;
-    float3 strength;
-    float range;
-    float3 position;
-    float padding2;
-};
-struct SpotLight
-{
-    float3 color;
-    float padding1;
-    float3 strength;
-    float range;
-    float3 direction;
-    float fallOffStart;
-    float3 position;
-    float fallOffEnd;
-    float spotPower;
-    float3 padding2;
-};
 cbuffer CBPassData : register(b0)
 {
     matrix viewProjMat;
@@ -80,11 +41,15 @@ cbuffer CBObjectData : register(b1)
 };
 cbuffer CBLightsData : register(b2)
 {
-    DirectionalLight dirLights[DIRECTIONAL_LIGHT];
-    PointLight pointLights[POINT_LIGHT];
-    SpotLight spotLights[SPOT_LIGHT];
-    uint3 lightNum;
-    uint lightPadding;
+    int type;
+    float3 color;
+    float3 strength;
+    float range;
+    float fallOffStart;
+    float fallOffEnd;
+    float spotPower;
+    float padding1;
+    Matrix lightMat;
 };
 cbuffer CBBoneTransforms : register(b3)
 {
