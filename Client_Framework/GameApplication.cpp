@@ -30,9 +30,8 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CDX12Manager).CloseCommandList();
 
-	INSTANCE(ServerManager).Client_Login();
-
 	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAINSTAGE);
+	INSTANCE(ServerManager).Client_Login();
 
 
 	TIMER.Reset();

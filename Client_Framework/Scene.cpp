@@ -26,12 +26,18 @@ void CScene::Awake()
 	for (const auto& object : mObjects) {
 		object->Awake();
 	}
+	for (const auto& player : mPlayers) {
+		if (player) player->Awake();
+	}
 }
 
 void CScene::Start()
 {
 	for (const auto& object : mObjects) {
 		object->Start();
+	}
+	for (const auto& player : mPlayers) {
+		if (player) player->Start();
 	}
 }
 
@@ -40,12 +46,18 @@ void CScene::Update()
 	for (const auto& object : mObjects) {
 		object->Update();
 	}
+	for (const auto& player : mPlayers) {
+		if (player) player->Update();
+	}
 }
 
 void CScene::LateUpdate()
 {
 	for (const auto& object : mObjects) {
 		object->LateUpdate();
+	}
+	for (const auto& player : mPlayers) {
+		if (player) player->LateUpdate();
 	}
 	INSTANCE(CResourceManager).UpdateMaterials();
 	UpdatePassData();
@@ -65,6 +77,9 @@ void CScene::RenderShadowPass()
 	shadowPassBuffer->BindToShader(offset);
 
 	RenderForLayer("Opaque", camera, SHADOW);
+	for (const auto& player : mPlayers) {
+		if (player) player->Render(camera, SHADOW);
+	}
 
 	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
 	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
@@ -87,10 +102,9 @@ void CScene::RenderForwardPass()
 	auto& camera = mCameras["MainCamera"];
 	if (camera) {
 		RenderForLayer("Opaque", camera);
-
-		/*for (const auto& instancingGroup : instancingGroups) {
-			instancingGroup->Render(camera);
-		}*/
+		for (const auto& player : mPlayers) {
+			if(player) player->Render(camera, FORWARD);
+		}
 		if(mTerrain) mTerrain->Render(camera);
 	}
 	auto& uiCamera = mCameras["UICamera"];
@@ -190,7 +204,7 @@ void CScene::AddObject(const std::string& renderLayer, std::shared_ptr<CGameObje
 
 	auto type = object->GetObjectType();
 	if (type != OBJECT_TYPE::NONE) {
-		itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
+		auto itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
 			[object](const std::shared_ptr<CGameObject>& ptr) { return ptr == object; });
 		if (itr == mObjectTypes[type].end()) {
 			mObjectTypes[type].push_back(object);
@@ -198,8 +212,8 @@ void CScene::AddObject(const std::string& renderLayer, std::shared_ptr<CGameObje
 	}
 	
 	auto& objectList = mRenderLayers[renderLayer];
-	itr = findByRawPointer(objectList, object.get());
-	if (itr == objectList.end()) {
+	auto itr1 = findByRawPointer(objectList, object.get());
+	if (itr1 == objectList.end()) {
 		object->SetRenderLayer(renderLayer);
 		objectList.push_back(object);
 	}
@@ -238,9 +252,6 @@ void CScene::SetTerrain(std::shared_ptr<CTerrain> terrain)
 void CScene::AddCamera(std::shared_ptr<CCamera> camera)
 {
 	auto& tag = camera->GetOwner()->GetTag();
-	if (mCameras.contains(tag)) {
-		return;
-	}
 
 	mCameras[tag] = camera;
 }
@@ -254,39 +265,69 @@ void CScene::RemoveCamera(const std::string& tag)
 	mCameras.erase(tag);
 }
 
-std::shared_ptr<CGameObject> CScene::CreatePlayer(PLAYER_CLASS playerClass)
+std::shared_ptr<CGameObject> CScene::CreatePlayer(PLAYER_CLASS playerClass, int id)
 {
+	if (id < 0 || id >= mPlayers.size()) {
+		return nullptr;
+	}
 	std::array<std::string, (UINT)PLAYER_CLASS::end> playerClassNames = {"Player_Fighter", "Player_Archer", "Player_Mage"};
 	auto player = CGameObject::CreateObjectFromFile(playerClassNames[(UINT)playerClass]);
 	player->SetTag("Player");
 	player->SetActive(true);
-	player->SetObjectType(OBJECT_TYPE::PLAYER);
-
 	player->SetStatic(false);
 
 	player->AddComponent<CRigidBody>();
-	auto playerController = player->AddComponent<CPlayerController>();
+	player->AddComponent<CPlayerController>();
 
-	AddObject("Opaque", player);
+	if (player) {
+		player->Awake();
+		player->Start();
+		{
+			//std::lock_guard<std::mutex> lock(mObjectsLock);
+			mPlayers[id] = player;
+		}
+		//mPlayers[id] = player;
+
+	}
 
 	return player;
 }
 
-std::shared_ptr<CGameObject> CScene::CreatePlayerCamera(std::shared_ptr<CGameObject> player)
+std::shared_ptr<CGameObject> CScene::CreatePlayerCamera(std::shared_ptr<CGameObject> target)
 {
 	auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
 		1.f, 100.f);
 	cameraObj->SetStatic(false);
 
 	auto playerFollower = cameraObj->AddComponent<CThirdPersonCamera>();
-	playerFollower->SetTarget(player);
+	playerFollower->SetTarget(target);
+
+
+	cameraObj->Awake();
+	cameraObj->Start();
+
+	auto controller = target->GetComponent<CPlayerController>();
+	if (controller) {
+		controller->SetCamera(cameraObj->GetComponent<CCamera>());
+	}
 
 	AddObject(cameraObj);
-
-	auto playerController = player->GetComponent<CPlayerController>();
-	playerController->SetCamera(cameraObj->GetComponent<CCamera>());
-
 	return cameraObj;
+}
+
+void CScene::SetPlayer(int id, std::shared_ptr<CGameObject> mPlayer, Vec3 position)
+{
+	if (id < 0 || id >= mPlayers.size()) {
+		return;
+	}
+		if (mPlayers[id]) {
+		mPlayers[id]->SetActive(false);
+	}
+
+	if (mPlayer) {
+		mPlayers[id] = mPlayer;
+		mPlayer->GetTransform()->SetLocalPosition(position);
+	}
 }
 
 void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass)

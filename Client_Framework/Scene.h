@@ -20,12 +20,14 @@ protected:
 	using ObjectList = std::vector<std::shared_ptr<CGameObject>>;
 
 	ObjectList mObjects{};
+	std::mutex mObjectsLock{};
 
 	std::unordered_map<std::string, std::shared_ptr<CShader>> mShaders{};
 	std::unordered_map<std::string, ObjectList> mRenderLayers{};
 	std::vector<std::shared_ptr<class CInstancingGroup>> instancingGroups{};
 	std::array<ObjectList, OBJECT_TYPE::end> mObjectTypes;
 
+	std::array<std::shared_ptr<CGameObject>, 3> mPlayers{nullptr};
 	std::shared_ptr<CTerrain> mTerrain{};
 	std::unique_ptr<CLightManager> lightMgr{};
 
@@ -66,18 +68,20 @@ public:
 	void AddCamera(std::shared_ptr<CCamera> camera);
 	void RemoveCamera(const std::string& tag);
 
-	std::shared_ptr<CGameObject> CreatePlayer(PLAYER_CLASS playerClass);
-	std::shared_ptr<CGameObject> CreatePlayerCamera(std::shared_ptr<CGameObject> player);
+	std::shared_ptr<CGameObject> CreatePlayer(PLAYER_CLASS playerClass, int id);
+	std::shared_ptr<CGameObject> CreatePlayerCamera(std::shared_ptr<CGameObject> target);
 	
 	const std::unordered_map<std::string, ObjectList>& GetObjects() const { return mRenderLayers; }
 	ObjectList& GetObjects(const std::string& layer) { return mRenderLayers[layer]; }
 	std::array<ObjectList, OBJECT_TYPE::end>& GetObjectsForType() { return mObjectTypes; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
-	std::shared_ptr<CGameObject> GetPlayer(int idx) { return mObjectTypes[PLAYER][idx]; }
+	std::shared_ptr<CGameObject> GetPlayer(int idx) { return mPlayers[idx]; }
+	std::shared_ptr<CGameObject> GetMyPlayer() { return mPlayers[clientID]; }
+	std::shared_ptr<CCamera> GetCamera(const std::string& tag) { return mCameras[tag]; }
 	int GetClientID() { return clientID; }
 
 	// std::shared_ptr<CGameObject> GetPlayer(int id) { return mPlayers[id]; }
-	// void SetPlayer(std::shared_ptr<CGameObject> mPlayer, Vec3 position) { mPlayer->GetTransform()->SetLocalPosition(position); };
+	void SetPlayer(int id, std::shared_ptr<CGameObject> mPlayer, Vec3 position);
 
 protected:
 	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);

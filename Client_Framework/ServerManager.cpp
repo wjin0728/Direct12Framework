@@ -134,10 +134,15 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		my_info.SetID(packet->id);
 
-		// 플레이어 생성해야 함
-		// mplayers 에도 넣고 옵젝리스트에도 넣어야 함
-		// INSTANCE(CSceneManager).GetCurScene()->SetPlayer(packet->id, 0, 0, 0);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		scene->SetClientID(packet->id);
+		auto player = scene->CreatePlayer(PLAYER_CLASS::FIGHTER, packet->id);
+		auto mainCam = scene->CreatePlayerCamera(player);
 
+		
+
+		//scene->SetPlayer(packet->id, player, { 10, 5, 10 });
+		//player->GetTransform()->SetLocalPosition({ 10, 5, 10 });
 		break;
 	}
 	case SC_LOGIN_FAIL: {

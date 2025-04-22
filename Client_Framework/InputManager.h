@@ -28,6 +28,8 @@ enum class KEY_TYPE
 	E = 'E',
 	Z = 'Z',
 	C = 'C',
+	F = 'F',
+	L = 'L',
 };
 
 enum class KEY_STATE

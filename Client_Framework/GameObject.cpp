@@ -339,9 +339,6 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(std::ifstream& if
 	if (root->mTag == "Obstacle") {
 		root->mObjectType = OBJECT_TYPE::OBSTACLE;
 	}
-	else if (root->mTag == "Player") {
-		root->mObjectType = OBJECT_TYPE::PLAYER;
-	}
 	else if (root->mTag == "Enemy") {
 		root->mObjectType = OBJECT_TYPE::ENEMY;
 	}

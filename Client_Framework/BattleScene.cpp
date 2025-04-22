@@ -16,6 +16,7 @@
 #include"Camera.h"
 #include"Material.h"
 #include"InstancingGroup.h"
+#include"ServerManager.h"
 
 CBattleScene::CBattleScene()
 {
@@ -23,36 +24,11 @@ CBattleScene::CBattleScene()
 
 void CBattleScene::Initialize()
 {
+
+	// Load default resources
 	LoadSceneFromFile(SCENE_PATH(std::string("Lobby1")));
 
-	auto player = CreatePlayer(PLAYER_CLASS::FIGHTER);
-	auto camera = CreatePlayerCamera(player);
-//#pragma region Player
-//
-//	auto Player = FindObjectWithTag("Player");
-//	Player->SetStatic(false);
-//
-//	Player->AddComponent<CRigidBody>();
-//	auto playerController = Player->AddComponent<CPlayerController>();
-//
-//#pragma endregion
-//
-//#pragma region Main Camera
-//	{
-//
-//		auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
-//			1.f, 100.f);
-//		cameraObj->SetStatic(false);
-//
-//		auto playerFollower = cameraObj->AddComponent<CThirdPersonCamera>();
-//		playerFollower->SetTarget(Player);
-//
-//		AddObject(cameraObj);
-//		playerController->SetCamera(cameraObj->GetComponent<CCamera>());
-//
-//		auto uiCamera = CGameObject::CreateCameraObject("UICamera", INSTANCE(CDX12Manager).GetRenderTargetSize(), 0.f, 100.f, INSTANCE(CDX12Manager).GetRenderTargetSize());
-//	}
-#pragma endregion
+	
 
 	SetLights();
 
@@ -70,6 +46,9 @@ void CBattleScene::Update()
 	else if (INPUT.IsKeyDown(KEY_TYPE::ALT)) {
 		INPUT.ChangeMouseState();
 	}
+	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
+		INPUT.ChangeMouseState();
+	}*/
 	CScene::Update();
 
 }
@@ -79,6 +58,9 @@ void CBattleScene::LateUpdate()
 	for (const auto& object : mObjects) {
 		object->LateUpdate();
 	}
+	for (const auto& player : mPlayers) {
+		if (player) player->LateUpdate();
+	}
 
 	INSTANCE(CResourceManager).UpdateMaterials();
 	lightMgr->Update();
@@ -86,28 +68,30 @@ void CBattleScene::LateUpdate()
 	auto& mainCam = mCameras["MainCamera"];
 	auto& camera = mCameras["DirectinalLight"];
 
-	Vec3 corners[8]{};
-	mainCam->mFrustumWorld.GetCorners(corners);
+	if(mainCam && camera){
+		Vec3 corners[8]{};
+		mainCam->mFrustumWorld.GetCorners(corners);
 
-	Vec3 center{};
-	for (int i = 0; i < 8; ++i) {
-		center += corners[i];
+		Vec3 center{};
+		for (int i = 0; i < 8; ++i) {
+			center += corners[i];
+		}
+		center /= 8.f;
+
+		float max = -FLT_MAX;
+		for (int i = 0; i < 8; ++i) {
+			if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
+		}
+		float r = max;
+
+		auto transform = dirLightObj->GetTransform();
+
+		Vec3 dir = dirLight->direction;
+		dir.Normalize();
+		transform->SetLocalPosition(center - (r * dir));
+		transform->LookTo(dir);
+		camera->GenerateViewMatrix();
 	}
-	center /= 8.f;
-
-	float max = -FLT_MAX;
-	for (int i = 0; i < 8; ++i) {
-		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
-	}
-	float r = max;
-
-	auto transform = dirLightObj->GetTransform();
-
-	Vec3 dir = dirLight->direction;
-	dir.Normalize();
-	transform->SetLocalPosition(center - (r * dir));
-	transform->LookTo(dir);
-	camera->GenerateViewMatrix();
 
 	UpdatePassData();
 }
@@ -124,29 +108,13 @@ void CBattleScene::SetLights()
 	dirLight = std::make_shared<CDirectionalLight>(lightColor, strength, dir);
 	lightMgr->AddDirectionalLight(dirLight);
 
-	auto& mainCam = mCameras["MainCamera"];
-	Vec3 corners[8]{};
-	mainCam->mFrustumView.GetCorners(corners);
-
-
-	Vec3 center{};
-	for (int i = 0; i < 8; ++i) {
-		center += corners[i];
-	}
-	center /= 8.f;
-	float max = -FLT_MAX;
-	for (int i = 0; i < 8; ++i) {
-		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
-	}
-	float r = max;
 	
 	Vec2 shadowMapSize = { 4096.f * 3, 4096.f * 3 };
-	float size = r * 2.f;
+	float size = 100.f * 2.f;
 
 	dirLightObj = CGameObject::CreateCameraObject("DirectinalLight", shadowMapSize, 1.f, size, { size, size });
 	auto transform = dirLightObj->GetTransform();
 
 	dir.Normalize();
-	transform->SetLocalPosition(center - (r*dir));
 	transform->LookTo(dir);
 }

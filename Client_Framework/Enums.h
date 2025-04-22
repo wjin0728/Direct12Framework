@@ -27,7 +27,6 @@ enum {
 enum OBJECT_TYPE : UINT8
 {
 	NONE = -1,
-	PLAYER,
 	ENEMY,
 	ITEM,
 	PLAYER_PROJECTILE,

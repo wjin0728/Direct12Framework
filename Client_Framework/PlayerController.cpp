@@ -25,6 +25,7 @@ void CPlayerController::Start()
 {
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mTerrain = scene->GetTerrain();
+	mCamera = scene->GetCamera("MainCamera");
 }
 
 void CPlayerController::Update()
