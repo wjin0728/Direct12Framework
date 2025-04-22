@@ -79,11 +79,11 @@ struct CBLightsData
 	Vec3 color;
 	Vec3 strength;
 	float range;
-	Vec3 direction;
 	float fallOffStart;
-	Vec3 position;
 	float fallOffEnd;
 	float spotPower;
+	float padding1;
+	Matrix worldMat = Matrix::Identity;
 };
 
 struct BillboardData

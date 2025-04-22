@@ -68,9 +68,6 @@ void CScene::RenderShadowPass()
 
 void CScene::RenderForwardPass()
 {
-	
-
-
 	auto forwardPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
 	forwardPassBuffer->BindToShader(0);
 
@@ -113,13 +110,25 @@ void CScene::RenderLightingPass()
 	lightingPass->ChangeResourcesToTargets();
 	lightingPass->SetRenderTargets();
 	lightingPass->ClearRenderTargets();
-	lightingPass->ClearOnlyStencil(0);
-	auto& camera = mCameras["MainCamera"];
-	if (camera) {
-		RenderForLayer("Opaque", camera, LIGHTING);
-	}
-	lightingPass->ChangeTargetsToResources();
 
+	auto& directionalLight = mLights[(UINT)LIGHT_TYPE::DIRECTIONAL][0];
+	auto& pointLights = mLights[(UINT)LIGHT_TYPE::POINT];
+	auto& spotLights = mLights[(UINT)LIGHT_TYPE::SPOT];
+	auto& camera = mCameras["MainCamera"];
+
+	//Directional Light
+	if (directionalLight) {
+		directionalLight->Render();
+	}
+	//Point Light
+	for (const auto& pointLight : pointLights) {
+		lightingPass->ClearOnlyStencil(0);
+		pointLight->Render(camera);
+	}
+
+
+
+	lightingPass->ChangeTargetsToResources();
 }
 
 void CScene::RenderFinalPass()

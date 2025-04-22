@@ -407,5 +407,8 @@
     <None Include="Resources\Shaders\FinalPass.hlsl">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="Resources\Shaders\Lighting.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

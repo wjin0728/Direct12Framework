@@ -12,6 +12,9 @@ void CObjectPoolManager::Initialize()
 	for (UINT i = 0; i < OBJECT_COUNT; i++) { // BONE_TRANSFORM_COUNT = 10
 		boneTransformIdxQueue.push(i);
 	}
+	for (UINT i = 0; i < LIGHT_COUNT; i++) {
+		lightCBVIdx.push(i);
+	}
 }
 
 void CObjectPoolManager::CreatePool(std::unique_ptr<CGameObject>&& original, UINT objCnt)
@@ -79,6 +82,24 @@ void CObjectPoolManager::ReturnBoneTransformIdx(UINT idx)
 		return;
 	}
 	boneTransformIdxQueue.push(idx);
+}
+
+UINT CObjectPoolManager::GetLightCBVIndex()
+{
+	if (lightCBVIdx.empty()) {
+		throw std::runtime_error("No more light CBV indices available");
+	}
+	UINT idx = lightCBVIdx.front();
+	lightCBVIdx.pop();
+	return idx;
+}
+
+void CObjectPoolManager::ReturnLightCBVIndex(UINT idx)
+{
+	if (idx < 0) {
+		return;
+	}
+	lightCBVIdx.push(idx);
 }
 
 void CObjectPoolManager::ClearPool(const std::wstring& key)

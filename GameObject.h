@@ -83,6 +83,7 @@ public:
 	const int GetIDInt() const { return mID; }
 	const std::string& GetRenderLayer() const { return mRenderLayer; }
 	bool GetActive() const { return mActive; }
+	bool GetStatic() const { return mIsStatic; }
 	OBJECT_TYPE GetObjectType() const { return mObjectType; }
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return mChildren; }
 	BoundingSphere GetRootBoundingSphere() const { return mRootBS; }

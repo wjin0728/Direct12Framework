@@ -71,7 +71,7 @@ protected:
 
 	UINT mPoolOffset{};
 
-	std::array<std::shared_ptr<CShader>, PASS_TYPE::PASS_TYPE_COUNT> mShaders{};
+	std::array<std::shared_ptr<CShader>, PASS_TYPE::DIRECT_LIGHTING> mShaders{};
 
 	UINT mDirtyFrames{FRAME_RESOURCE_COUNT};
 

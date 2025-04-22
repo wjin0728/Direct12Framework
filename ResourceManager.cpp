@@ -208,10 +208,11 @@ void CResourceManager::LoadDefaultShaders()
 	}
 	{
 		ShaderInfo info;
+		info.shaderType = PASS_TYPE::DIRECT_LIGHTING;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::ADD_BLEND;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER_EQUAL;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_FRONT;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		MakeShadersForAllPass("SkinnedMesh", info);
 	}

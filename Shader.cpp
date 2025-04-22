@@ -2,7 +2,7 @@
 #include "Shader.h"
 #include"DX12Manager.h"
 
-std::array<std::string, PASS_TYPE_COUNT> CShader::passName = { "Forward","GPass","Shadow","Lighting", "PostProcessing", "Final" };
+std::array<std::string, PASS_TYPE_COUNT> CShader::passName = { "Forward","GPass","Shadow","DirLighting","SpotLighting","PointLighting" , "PostProcessing", "Final"};
 
 D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 {
@@ -220,6 +220,41 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
 	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
 
+	switch (mInfo.shaderType)
+	{
+	case PASS_TYPE::DIRECT_LIGHTING:
+		d3dDepthStencilDesc.DepthEnable = TRUE;
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+		d3dDepthStencilDesc.StencilEnable = TRUE;
+
+		d3dDepthStencilDesc.StencilReadMask = 0xFF;
+		d3dDepthStencilDesc.StencilWriteMask = 0xFF;
+		d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+		break;
+	case PASS_TYPE::SPOT_LIGHTING:
+		break;
+	case PASS_TYPE::POINT_LIGHTING:
+		d3dDepthStencilDesc.DepthEnable = TRUE;
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+		d3dDepthStencilDesc.StencilEnable = TRUE;
+
+		d3dDepthStencilDesc.StencilReadMask = 0xFF;
+		d3dDepthStencilDesc.StencilWriteMask = 0xFF;
+		d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_DECR_SAT;
+		d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+		d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_INCR_SAT;
+		d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+		break;
+	default:
+		break;
+	}
+
 	return d3dDepthStencilDesc;
 }
 
@@ -295,7 +330,7 @@ bool CShader::Initialize(const ShaderInfo& info, const std::string& name)
 		pipelineStateDesc.RTVFormats[1] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		pipelineStateDesc.RTVFormats[2] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		pipelineStateDesc.RTVFormats[3] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		pipelineStateDesc.RTVFormats[4] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		pipelineStateDesc.RTVFormats[4] = DXGI_FORMAT_R32G32B32A32_FLOAT;/
 		break;
 	case PASS_TYPE::FORWARD:
 		pipelineStateDesc.NumRenderTargets = 1;
@@ -310,6 +345,7 @@ bool CShader::Initialize(const ShaderInfo& info, const std::string& name)
 		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.0f;
 		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
 		break;
+	case PASS_TYPE::
 	}
 	auto device = INSTANCE(CDX12Manager).GetDevice();
 	HRESULT hr = device->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&d3dPiplineState));
