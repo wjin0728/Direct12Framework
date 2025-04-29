@@ -266,6 +266,8 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
     float depth = mul(input.positionWS, viewMat).z;
     
+    color.rgb = GammaDecoding(color.rgb);
+    
     output.albedo = color;
     output.normalWS = float4(normal, lerpResult188 + lerpResult195);
     output.positionWS = float4(worldPosition, lerpResult191 + lerpResult190);

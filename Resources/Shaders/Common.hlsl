@@ -81,15 +81,15 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     clip(color.a - 0.1);
 #endif
     
-    float3 camDir = (camPos - worldPosition);
-    float distToEye = length(camDir);
-    camDir /= distToEye;
     
     if (normalTexIdx != -1)
     {
         float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoClamp, uv).rgb;
         normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
     }
+    float3 camDir = (camPos - worldPosition);
+    float distToEye = length(camDir);
+    camDir /= distToEye;
 
     LightingData lightingData = (LightingData)0;
     lightingData.cameraDirection = camDir;

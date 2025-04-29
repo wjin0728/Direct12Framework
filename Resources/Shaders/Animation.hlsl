@@ -211,28 +211,26 @@ VS_OUTPUT VS_GPass(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
     
-    float3 skinnedPosition = float3(0.0, 0.0, 0.0);
-    float3 skinnedNormal = float3(0.0, 0.0, 0.0);
-    float3 skinnedTangent = float3(0.0, 0.0, 0.0);
+    float3 skinnedPosition = float3(0.f, 0.f, 0.f);
+    float3 skinnedNormal = float3(0.f, 0.f, 0.f);
+    float3 skinnedTangent = float3(0.f, 0.f, 0.f);
+    
+    float weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    weights[0] = input.boneWeights.x;
+    weights[1] = input.boneWeights.y;
+    weights[2] = input.boneWeights.z;
+    weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
     
     for (int i = 0; i < MAX_VERTEX_INFLUENCES; ++i)
     {
-        if (input.boneWeights[i] > 0.0)
-        {
-            uint boneIndex = input.boneIndices[i];
-            matrix boneTransform = boneTransforms[boneIndex];
+        uint boneIndex = input.boneIndices[i];
+        matrix boneTransform = boneTransforms[boneIndex];
             
-            float3 localPosition = mul(float4(input.position, 1.0), boneTransform).xyz;
-            skinnedPosition += localPosition * input.boneWeights[i];
-            
-            float3 localNormal = mul(input.normal, (float3x3)boneTransform);
-            skinnedNormal += localNormal * input.boneWeights[i];
-            
-            float3 localTangent = mul(input.tangent, (float3x3)boneTransform);
-            skinnedTangent += localTangent * input.boneWeights[i];
-        }
+        skinnedPosition += weights[i] * mul(float4(input.position, 1.0), boneTransform).xyz;
+        skinnedNormal += weights[i] * mul(input.normal, (float3x3) boneTransform);
+        skinnedTangent += weights[i] * mul(input.tangent, (float3x3) boneTransform);
     }
-
+    
     VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(skinnedNormal, skinnedTangent);
     
@@ -276,6 +274,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
     float depth = mul(input.positionWS, viewMat).z;
+    
     
     output.albedo = color;
     output.normalWS = float4(normal, metallic);

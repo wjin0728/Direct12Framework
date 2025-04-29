@@ -17,21 +17,21 @@ static const float a2 = 0.0001f;
 cbuffer CBPassData : register(b0)
 {
     matrix viewProjMat;
-    matrix viewMat;
     matrix shadowTransform;
+    matrix viewMat;
     float3 camPos; 
     uint shadowMapIdx; 
     float2 renderTargetSize; 
     float deltaTime; 
     float totalTime;
-    uint gbufferAlbedoIdx;
-    uint gbufferNormalIdx;
-    uint gbufferDepthIdx;
-    uint gbufferPosIdx;
-    uint gbufferEmissiveIdx;
-    uint lightingTargetIdx;
-    uint postProcessIdx;
-    uint finalTargetIdx;
+    int gbufferAlbedoIdx;
+    int gbufferNormalIdx;
+    int gbufferDepthIdx;
+    int gbufferPosIdx;
+    int gbufferEmissiveIdx;
+    int lightingTargetIdx;
+    int postProcessIdx;
+    int finalTargetIdx;
 };
 cbuffer CBObjectData : register(b1)
 {
@@ -41,14 +41,12 @@ cbuffer CBObjectData : register(b1)
 };
 cbuffer CBLightsData : register(b2)
 {
-    int type;
-    float3 color;
-    float3 strength;
+    int lightType;
+    float3 lColor;
+    float strength;
     float range;
-    float fallOffStart;
-    float fallOffEnd;
-    float spotPower;
-    float padding1;
+    float spotAngle;
+    float innerSpotAngle;
     Matrix lightMat;
 };
 cbuffer CBBoneTransforms : register(b3)
