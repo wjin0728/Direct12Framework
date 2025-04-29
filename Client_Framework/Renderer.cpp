@@ -23,6 +23,13 @@ void CRenderer::Awake()
 	SetCBVIndex();
 }
 
+void CRenderer::RenderFullscreen()
+{
+	// Implementation for rendering a fullscreen quad
+	CMDLIST->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	CMDLIST->DrawInstanced(3, 1, 0, 0);
+}
+
 void CRenderer::SetCBVIndex()
 {
 	if (mCbvIdx < 0) {

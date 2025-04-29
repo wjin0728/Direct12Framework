@@ -7,7 +7,7 @@
 #include "InputManager.h"
 #include "ObjectPoolManager.h"
 #include "ServerManager.h"
-
+#include"Light.h"
 
 bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdShow)
 {
@@ -29,6 +29,7 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	INSTANCE(CDX12Manager).OpenCommandList();
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CDX12Manager).CloseCommandList();
+	CLight::SetVolumes();
 
 	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAINSTAGE);
 	INSTANCE(ServerManager).Client_Login();
@@ -64,6 +65,8 @@ int CGameApplication::Run()
 		}
 	}
 
+	INSTANCE(CSceneManager).Destroy();
+	INSTANCE(CResourceManager).Destroy();
 	INSTANCE(CDX12Manager).Destroy();
 
 	return (int)msg.wParam;

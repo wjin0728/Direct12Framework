@@ -56,8 +56,11 @@ private:
 
 	//루트 시그니처
 	ComPtr<ID3D12RootSignature> mRootSignature{};
+
+	ComPtr<ID3D12Debug> d3dDebugController{};
 	
-	XMFLOAT2 renderTargetSize{};
+	Vec2 renderTargetSize{};
+	float shadowMapResolution{};
 
 private:
 	void InitDevice();
@@ -77,7 +80,6 @@ public:
 	void ChangeSwapChainState();
 
 	void MoveToNextFrameResource();
-	void UpdateFrameResources();
 	void WaitForGpu();
 
 	void OpenCommandList();
@@ -87,7 +89,6 @@ public:
 	void AfterRender();
 
 	void PrepareShadowPass();
-	void PrepareFinalPass();
 
 public:
 	ID3D12GraphicsCommandList* GetCommandList() const { return cmdList.Get(); }
@@ -103,5 +104,6 @@ public:
 
 	UINT GetCurrBackBufferIdx() const { return curBackBuffIdx; }
 	XMFLOAT2 GetRenderTargetSize() const { return renderTargetSize; }
+	float GetShadowMapResolution() const { return shadowMapResolution; }
 };
 

@@ -17,7 +17,7 @@ CFrameResource::CFrameResource()
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::OBJECT)]->Initialize(1, ALIGNED_SIZE(sizeof(CBObjectData)) * OBJECT_COUNT);
 
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)] = std::make_unique<CConstantBuffer>();
-	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)]->Initialize(2, ALIGNED_SIZE(sizeof(CBLightsData)));
+	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)]->Initialize(2, ALIGNED_SIZE(sizeof(CBLightsData))*LIGHT_COUNT);
 
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)] = std::make_unique<CConstantBuffer>();
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)]->Initialize(3, ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES) * BONE_TRANSFORM_COUNT);
@@ -41,11 +41,5 @@ std::shared_ptr<CInstancingBuffer> CFrameResource::GetInstancingBuffer(UINT type
 {
 	return mInstancingBuffers[type];
 }
-
-void CFrameResource::BindToShader()
-{
-	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::LIGHT)]->BindToShader();
-}
-
 
 

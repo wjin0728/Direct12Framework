@@ -45,11 +45,12 @@ void CMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 
 	CBObjectData objDate;
 	objDate.worldMAt = GetTransform()->mWorldMat.Transpose();
-	objDate.invWorldMAt = objDate.worldMAt.Invert();
+	objDate.invWorldMAt = GetTransform()->mWorldMat.Invert();
 	objDate.textureMat = GetTransform()->mTextureMat.Transpose();
 
-	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->UpdateBuffer(mCbvOffset, &objDate);
-	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->BindToShader(mCbvOffset);
+	auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
+	objectBuffer->UpdateBuffer(mCbvOffset, &objDate);
+	objectBuffer->BindToShader(mCbvOffset);
 
 	int subMeshNum = m_mesh->GetSubMeshNum();
 	for (int i = 0; i < subMeshNum; i++) {

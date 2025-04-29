@@ -152,8 +152,7 @@ void CTransform::LookTo(const Vec3& lookDir, const Vec3& up)
 	Vec3 Up = up.GetNormalized();
 	if (lookDir == Vec3(0.f, -1.f, 0.f) || lookDir == Vec3(0.f, 1.f, 0.f)) Up = Vec3(0.f, 0.f, 1.f);
 
-	Matrix rotateMat = Matrix::CreateWorld(Vec3::Zero, lookVec, Up);
-	mLocalRotation = Quaternion::CreateFromLocalRotationMatrix(rotateMat);
+	mLocalRotation = Quaternion::LookRotation(lookVec);
 	mLocalEulerAngle = Vec3::GetAngleToQuaternion(mLocalRotation) * radToDeg;
 
 	mDirtyFlag = true;

@@ -23,6 +23,7 @@ private:
 
 public:
 	void Initialize();
+	void Destroy();
 
 	template<typename T>
 	std::shared_ptr<T> Load(const std::string& name, std::string_view fileName);
@@ -44,11 +45,14 @@ public:
 	void LoadSceneResourcesFromFile(std::ifstream& ifs);
 	void LoadSceneResourcesFromFile(const std::string& fileName);
 
+
 private:
 	void LoadDefaultMeshes();
 	void LoadDefaultTexture();
 	void LoadDefaultMaterials();
 	void LoadDefaultShaders();
+
+	void MakeShadersForAllPass(const std::string& name, ShaderInfo info);
 
 public:
 	void ReleaseUploadBuffers();

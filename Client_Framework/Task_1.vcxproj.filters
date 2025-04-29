@@ -10,9 +10,6 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{2fcdeebc-d9d6-416c-9650-402322505ae2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lights">
-      <UniqueIdentifier>{32833698-8c46-480c-a7eb-0850a6dbe196}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resources\Texture">
       <UniqueIdentifier>{ae7b9f15-a483-4fba-8774-2607f60bbbcc}</UniqueIdentifier>
     </Filter>
@@ -74,9 +71,6 @@
       <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="ResourceManager.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="LightManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="DDSTextureLoader12.h">
@@ -205,7 +199,6 @@
     <ClInclude Include="Renderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="ThirdPersonCamera.h" />
     <ClInclude Include="ServerManager.h">
       <Filter>Server</Filter>
     </ClInclude>
@@ -236,9 +229,6 @@
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
-      <Filter>Managers</Filter>
-    </ClCompile>
-    <ClCompile Include="LightManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
@@ -358,7 +348,7 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
-    <ClCompile Include="ThirdPersonCamera.cpp">
+    <ClCompile Include="RenderPipeline.cpp">
       <Filter>Client</Filter>
 	</ClCompile>
     <ClCompile Include="Player.cpp">
@@ -367,55 +357,67 @@
     <ClCompile Include="ServerManager.cpp">
       <Filter>Server</Filter>
     </ClCompile>
+    <ClCompile Include="ThirdPersonCamera.cpp">
+      <Filter>GameObject\Component\Scripts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="SimpleMath.inl">
       <Filter>Utility</Filter>
     </None>
-    <None Include="Resources\Shaders\Common.hlsl">
+    <None Include="..\Resources\Shaders\Animation.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\OutLinePS.hlsl">
+    <None Include="..\Resources\Shaders\Billboard.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\OutLineVS.hlsl">
+    <None Include="..\Resources\Shaders\Cloud.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Paramiters.hlsl">
+    <None Include="..\Resources\Shaders\Common.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Sprite.hlsl">
+    <None Include="..\Resources\Shaders\FinalPass.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Terrain.hlsl">
+    <None Include="..\Resources\Shaders\Lighting.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Utility.hlsl">
+    <None Include="..\Resources\Shaders\OutLinePS.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Skybox.hlsl">
+    <None Include="..\Resources\Shaders\OutLineVS.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Billboard.hlsl">
+    <None Include="..\Resources\Shaders\Paramiters.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Shadow.hlsl">
+    <None Include="..\Resources\Shaders\Shadow.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\TerrainShadow.hlsl">
+    <None Include="..\Resources\Shaders\SkyBox.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Triplanar.hlsl">
+    <None Include="..\Resources\Shaders\Sprite.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Vegitation.hlsl">
+    <None Include="..\Resources\Shaders\Terrain.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Cloud.hlsl">
+    <None Include="..\Resources\Shaders\TerrainShadow.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="Resources\Shaders\Animation.hlsl">
+    <None Include="..\Resources\Shaders\Triplanar.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Utility.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Vegitation.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Water.hlsl">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>

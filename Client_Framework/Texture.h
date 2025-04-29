@@ -30,7 +30,7 @@ public:
 
 	void Create2DTexture(DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
 		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags,
-		D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = XMFLOAT4());
+		D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = {1.f,1.f,1.f,1.f});
 	void CreateFromResource(ComPtr<ID3D12Resource> resource);
 
 	virtual void ReleaseUploadBuffer();

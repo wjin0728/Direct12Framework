@@ -30,6 +30,5 @@ public:
 	std::shared_ptr<CStructedBuffer> GetStructedBuffer(UINT type);
 	std::shared_ptr<CConstantBuffer> GetConstantBuffer(UINT type);
 	std::shared_ptr<CInstancingBuffer> GetInstancingBuffer(UINT type);
-	void BindToShader();
 };
 

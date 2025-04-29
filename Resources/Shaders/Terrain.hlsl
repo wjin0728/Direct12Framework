@@ -282,6 +282,7 @@ struct PS_GPASS_OUTPUT
     float4 normalWS : SV_Target1;
     float4 emissive : SV_Target2;
     float4 positionWS : SV_Target3;
+    float4 depth : SV_Target4;
 };
 
 PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
@@ -346,14 +347,17 @@ PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
     }
     blendedNormal = normalize(blendedNormal);
     
+    color.rgb = GammaDecoding(color.rgb);
     normal = normalize(mul(blendedNormal, float3x3(tangentWS, bitangentWS, normalWS)));
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
+    float depth = mul(input.worldPos, viewMat).z;
     
     output.albedo = color;
     output.normalWS = float4(normal, blendedMetallic);
-    output.positionWS = float4(positionWS, blendedSmoothness);
     output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
+    output.positionWS = float4(positionWS, blendedSmoothness);
+    output.depth = input.ShadowPosH;
     
     return output;
 }

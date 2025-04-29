@@ -1,15 +1,11 @@
 #pragma once
 #include"stdafx.h"
 #include"Scene.h"
-#include"LightManager.h"
 #include"FrameResource.h"
 
 class CBattleScene : public CScene
 {
 private:
-	std::shared_ptr<CGameObject> dirLightObj{};
-	std::shared_ptr<CDirectionalLight> dirLight{};
-
 	static constexpr UINT CASCADE_COUNT = 3;
 
 public:
@@ -21,8 +17,8 @@ public:
 	virtual void Update();
 	virtual void LateUpdate();
 
-private:
+	virtual void RenderScene();
 
-	void SetLights();
+private:
 };
 

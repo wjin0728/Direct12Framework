@@ -5,9 +5,13 @@
 enum PASS_TYPE : UINT8
 {
 	FORWARD,
-	DEFERRED,
+	G_PASS,
 	SHADOW,
-
+	STENCIL,
+	DIRECTIONAL,
+	LIGHTING,
+	POST_PROCESSING,
+	FINAL,
 	PASS_TYPE_COUNT
 };
 
@@ -18,7 +22,8 @@ enum class INPUT_LAYOUT_TYPE : UINT8
 	DEFAULT,
 	TEXTURE,
 	ANIMATION,
-	TERRAIN
+	TERRAIN,
+	NONE
 };
 
 enum class RASTERIZER_TYPE : UINT8
@@ -92,7 +97,7 @@ protected:
 		const std::string& name, const std::string& fname, const std::string& version);
 
 public:
-	virtual void Initialize(const ShaderInfo& info, const std::string& name);
+	virtual bool Initialize(const ShaderInfo& info, const std::string& name, bool getPassName = true);
 	
 public:
 	void SetPipelineState(ID3D12GraphicsCommandList* cmdList) { cmdList->SetPipelineState(d3dPiplineState.Get()); }

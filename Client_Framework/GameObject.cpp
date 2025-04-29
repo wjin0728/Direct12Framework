@@ -14,6 +14,7 @@
 #include"SkinnedMesh.h"
 #include"Renderer.h"
 #include"SkinnedMeshRenderer.h"
+#include"Light.h"
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -426,6 +427,10 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 
 			obj->CreateAnimationFromFile(ANIMATION_PATH(animName));
 		}
+		else if (token == "<Light>:") {
+			obj->CreateLightFromFile(inFile);
+
+		}
 		else if (token == "</Frame>") {
 			break;
 		}
@@ -668,6 +673,35 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 	terrain->MakeNavMap(name + "NavMap", resolution*2);
 
 	INSTANCE(CSceneManager).GetCurScene()->SetTerrain(terrain);
+}
+
+void CGameObject::CreateLightFromFile(std::ifstream& inFile)
+{
+	using namespace BinaryReader;
+
+	auto light = AddComponent<CLight>();
+	CBLightsData lightData{};
+	ReadDateFromFile(inFile, lightData.type);
+	Color color{};
+	ReadDateFromFile(inFile, color);
+	lightData.color = color.ToVector3();
+	ReadDateFromFile(inFile, lightData.range);
+	ReadDateFromFile(inFile, lightData.strength);
+	ReadDateFromFile(inFile, lightData.innerSpotAngle);
+	ReadDateFromFile(inFile, lightData.spotAngle);
+	light->SetLightData(lightData);
+
+	if (lightData.type == (UINT)LIGHT_TYPE::DIRECTIONAL) {
+		mTag = "DirectionalLight";	
+		auto camera = AddComponent<CCamera>();
+		float shadowMapResolution = INSTANCE(CDX12Manager).GetShadowMapResolution();
+		camera->SetViewport(0, 0, shadowMapResolution, shadowMapResolution);
+		camera->SetScissorRect(0, 0, shadowMapResolution, shadowMapResolution);
+		light->SetLightCam(camera);
+
+		INSTANCE(CSceneManager).GetCurScene()->AddCamera(camera);
+		INSTANCE(CSceneManager).GetCurScene()->AddLight(light);
+	}
 }
 
 void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches)

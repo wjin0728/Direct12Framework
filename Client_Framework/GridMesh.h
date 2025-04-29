@@ -14,8 +14,8 @@ private:
 	std::vector<float> heightData;
 
 	UINT resolution{};
-	Vec3 scale{};
 	Vec3 offset{};
+	Vec3 scale{};
 
 	std::shared_ptr<class CTexture> heightMapTex;
 
