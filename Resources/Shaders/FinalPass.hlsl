@@ -16,6 +16,6 @@ float4 VS_FinalPass(uint vertexID : SV_VertexID) : SV_Position
 float4 PS_FinalPass(float4 position : SV_Position) : SV_Target
 {
     float2 uv = position.xy / renderTargetSize;
-    float4 color = diffuseMap[gbufferEmissiveIdx].SampleLevel(pointClamp, uv, 0.0);
-    return float4(color.aaa, 1.f);
+    float4 color = diffuseMap[lightingTargetIdx].SampleLevel(pointClamp, uv, 0.0);
+    return float4(color.rgb, 1.f);
 }

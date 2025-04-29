@@ -95,13 +95,18 @@ float CalcShadowFactor(float4 shadowPosH)
 {
     shadowPosH.xyz /= shadowPosH.w;
 
+    if (shadowPosH.x < 0 || shadowPosH.x > 1 ||
+    shadowPosH.y < 0 || shadowPosH.y > 1 ||
+    shadowPosH.z < 0 || shadowPosH.z > 1)
+        return 1.0f; // 그림자 바깥은 항상 밝게 처리
+    
     // Depth in NDC space.
     float depth = shadowPosH.z;
 
     uint width, height, numMips;
     diffuseMap[shadowMapIdx].GetDimensions(0, width, height, numMips);
     
-    float dx = 1.0f / (float) (4096.f * 3);
+    float dx = 1.0f / (float) width;
 
     float percentLit = 0.0f;
     const float2 offsets[9] =
@@ -158,8 +163,9 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float metallic = surfaceData.metallic;
     float smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
     float roughness = 1.0 - smoothness;
-    float3 direction = { 0.62, -0.64, 0.41 };
+    float3 direction = lightMat._13_23_33;
     float3 lightDir = -normalize(direction);
+    
     float3 lightColor = lColor * lightingData.shadowFactor;
 
     float3 F0 = float3(0.04, 0.04, 0.04);
@@ -186,7 +192,8 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * diffuse + specular) * lightColor * NdotL;
-    float3 ambientLight = albedo * 0.3f * ndotUp;
+    float3 ambientLight = albedo * 0.2f * ndotUp;
+    ambientLight += albedo * 0.2f;
     
     return directLight + ambientLight;
 }

@@ -63,7 +63,7 @@ public:
 
 	//기본 설정을 가진 카메라 오브젝트를 생성한다.
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize,
-		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 45.f);
+		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 60.f);
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, float nearPlane, float farPlane, Vec2 size);
 	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size);
 	//기본 설정을 가진 지형 오브젝트를 생성한다.

@@ -361,9 +361,9 @@ bool CShader::Initialize(const ShaderInfo& info, const std::string& name, bool g
 		pipelineStateDesc.NumRenderTargets = 0;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
 
-		pipelineStateDesc.RasterizerState.DepthBias = 10000.f;
+		pipelineStateDesc.RasterizerState.DepthBias = 2000.f;
 		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.0f;
-		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
+		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 3.0f;
 		break;
 	case PASS_TYPE::STENCIL:
 		pipelineStateDesc.NumRenderTargets = 0;

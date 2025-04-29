@@ -43,14 +43,12 @@ float4 PS_Directional(float4 position : SV_Position) : SV_Target
     float3 camDir = (camPos - positionWS);
     float distToEye = length(camDir);
     camDir /= distToEye;
-    
-    float4 shadowPosH = mul(float4(positionWS, 1.f), shadowTransform);
 
     LightingData lightingData = (LightingData) 0;
     lightingData.cameraDirection = camDir;
     lightingData.normalWS = normal;
     lightingData.positionWS = positionWS;
-    lightingData.shadowFactor = CalcShadowFactor(shadowPosH);
+    lightingData.shadowFactor = shadow;
     
     SurfaceData surfaceData = (SurfaceData) 0;
     surfaceData.albedo = color.rgb;
