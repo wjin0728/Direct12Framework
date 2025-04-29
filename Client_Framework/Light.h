@@ -54,6 +54,4 @@ public:
 	float GetSpotAngle() const { return mLightData.spotAngle; }
 	float GetInnerSpotAngle() const { return mLightData.innerSpotAngle; }
 	LIGHT_TYPE GetLightType() const { return (LIGHT_TYPE)mLightData.type; }
-
-	void UpdateLightData(CBSpotLightInfo& data) const;
 };

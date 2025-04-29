@@ -18,8 +18,10 @@ class CResourceManager
 private:
 	using KeyObjMap = std::unordered_map<std::string, std::shared_ptr<CResource>>;
 	std::array<KeyObjMap, RESOURCE_TYPE_COUNT> resources{};
+	std::unordered_map<std::string, std::shared_ptr<class CGameObject>> prefabs{};
 
 	std::queue<UINT> srvIdxQueue{};
+
 
 public:
 	void Initialize();

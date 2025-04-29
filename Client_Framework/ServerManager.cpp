@@ -1,4 +1,3 @@
-
 #include "stdafx.h"
 #include "ServerManager.h"
 #include "SceneManager.h"
@@ -6,8 +5,11 @@
 #include "GameObject.h"
 #include "FollowTarget.h"
 #include "Transform.h"
+#include"Camera.h"
+#include"PlayerController.h"
+#include"ThirdPersonCamera.h"
 
-void ServerManager::Client_Login()
+void ServerManager::Initialize()
 {
 	// ------- 서버 붙이기 -------------------
 	std::wcout.imbue(std::locale("korean")); // 한글로 오류 출력
@@ -24,7 +26,10 @@ void ServerManager::Client_Login()
 		WSACleanup();
 		exit(1);
 	}
+}
 
+void ServerManager::Client_Login()
+{
 	SOCKADDR_IN server_addr;
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(PORT_NUM);
@@ -35,7 +40,7 @@ void ServerManager::Client_Login()
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 
 	std::cout << "Connecting to " << reinterpret_cast<sockaddr*>(&server_addr) << ":" << PORT_NUM << "\n";
-	err = connect(server_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	int err = connect(server_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 	if (0 != err) {
 		print_error("connect", WSAGetLastError());
 	}
@@ -51,6 +56,65 @@ void ServerManager::Client_Login()
 
 	std::thread recv_thread{ [this]() { Recv_Loop(); } };
 	recv_thread.detach();
+}
+
+bool ServerManager::InitPlayerAndCamera()
+{
+	mPlayer = std::make_shared<CGameObject>();
+	mPlayer->SetTag("Player");
+	mPlayer->SetName("Player");
+	mPlayer->SetRenderLayer("Opaque");
+	mPlayer->SetActive(false);
+	mPlayer->SetStatic(false);
+
+	auto playerController = mPlayer->AddComponent<CPlayerController>();
+
+	mMainCamera = std::make_shared<CGameObject>();
+
+	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
+	auto camera = mMainCamera->AddComponent<CCamera>();
+	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
+	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
+	camera->GeneratePerspectiveProjectionMatrix(1.f, 50.f, 60.f);
+	mMainCamera->SetTag("MainCamera");
+	mMainCamera->SetName("MainCamera");
+	mMainCamera->SetActive(false);
+	mMainCamera->SetStatic(false);
+
+	auto playerFollower = mMainCamera->AddComponent<CThirdPersonCamera>();
+	playerFollower->SetTarget(mPlayer);
+	playerController->SetCamera(camera);
+
+	return true;
+}
+
+void ServerManager::RegisterPlayerInScene(class CScene* scene)
+{
+	mPlayer->SetActive(true);
+	mMainCamera->SetActive(true);
+	scene->AddObject(mPlayer);
+	scene->AddObject(mMainCamera);
+
+	auto camera = mMainCamera->GetComponent<CCamera>();
+	scene->AddCamera(camera);
+
+	for (auto& pair : mOtherPlayers) {
+		scene->AddObject(pair.second);
+	}
+}
+
+void ServerManager::AddNewPlayer(int id, Vec3 pos)
+{
+	auto scene = INSTANCE(CSceneManager).GetCurScene();
+	auto player = std::make_shared<CGameObject>();
+	player->SetTag("Player");
+	player->SetName("Player" + std::to_string(id));
+	player->SetRenderLayer("Opaque");
+	player->SetActive(false);
+	player->SetStatic(false);
+	player->GetTransform()->SetLocalPosition(pos);
+
+	mOtherPlayers[id] = player;
 }
 
 void ServerManager::Recv_Packet()
@@ -132,14 +196,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_LOGIN_INFO: {
 		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet_ptr);
 
-		my_info.SetID(packet->id);
-
-		auto scene = INSTANCE(CSceneManager).GetCurScene();
-		scene->SetClientID(packet->id);
-		auto player = scene->CreatePlayer(PLAYER_CLASS::FIGHTER, packet->id);
-		auto mainCam = scene->CreatePlayerCamera(player);
-
-		
+		clientID = packet->id;
 
 		//scene->SetPlayer(packet->id, player, { 10, 5, 10 });
 		//player->GetTransform()->SetLocalPosition({ 10, 5, 10 });
@@ -165,8 +222,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		cout << "SC_MOVE_PACKET" << endl;
 		
-		INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({packet->x, packet->y, packet->z});
-		INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalRotationY(packet->look_y);
+		//INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({packet->x, packet->y, packet->z});
+		//INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalRotationY(packet->look_y);
 
 		break;
 	}

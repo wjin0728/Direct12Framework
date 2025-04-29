@@ -27,18 +27,12 @@ void CScene::Awake()
 	for (const auto& object : mObjects) {
 		object->Awake();
 	}
-	for (const auto& player : mPlayers) {
-		if (player) player->Awake();
-	}
 }
 
 void CScene::Start()
 {
 	for (const auto& object : mObjects) {
 		object->Start();
-	}
-	for (const auto& player : mPlayers) {
-		if (player) player->Start();
 	}
 }
 
@@ -47,18 +41,12 @@ void CScene::Update()
 	for (const auto& object : mObjects) {
 		object->Update();
 	}
-	for (const auto& player : mPlayers) {
-		if (player) player->Update();
-	}
 }
 
 void CScene::LateUpdate()
 {
 	for (const auto& object : mObjects) {
 		object->LateUpdate();
-	}
-	for (const auto& player : mPlayers) {
-		if (player) player->LateUpdate();
 	}
 	INSTANCE(CResourceManager).UpdateMaterials();
 	UpdatePassData();
@@ -94,8 +82,6 @@ void CScene::RenderForwardPass()
 	if (camera) {
 		RenderForLayer("Transparent", camera, FORWARD);
 	}
-
-	
 }
 
 void CScene::RenderGBufferPass()
@@ -348,6 +334,10 @@ std::shared_ptr<CGameObject> CScene::CreatePlayerCamera(std::shared_ptr<CGameObj
 
 	AddObject(cameraObj);
 	return cameraObj;
+}
+
+void CScene::AddLight(std::shared_ptr<CLight> light)
+{
 }
 
 void CScene::SetPlayer(int id, std::shared_ptr<CGameObject> mPlayer, Vec3 position)

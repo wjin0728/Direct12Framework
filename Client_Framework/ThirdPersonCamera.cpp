@@ -32,7 +32,6 @@ void CThirdPersonCamera::Start()
 {
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mTerrain = scene->GetTerrain();
-	//mTarget = scene->GetMyPlayer();
 
 	mCameraParams.trackingPosition = mTarget->GetTransform()->GetWorldPosition();
 	mCameraParams.distance = 5.f;

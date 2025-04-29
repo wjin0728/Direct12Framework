@@ -24,24 +24,8 @@ CBattleScene::CBattleScene()
 
 void CBattleScene::Initialize()
 {
-
 	// Load default resources
 	LoadSceneFromFile(SCENE_PATH(std::string("Lobby1")));
-#pragma region Player
-
-	auto Player = FindObjectWithTag("Player");
-	Player->SetStatic(false);
-
-	Player->AddComponent<CRigidBody>();
-	auto playerController = Player->AddComponent<CPlayerController>();
-
-#pragma endregion
-
-	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
-	shadowMap->CreateSRV();
-	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
-	}
-#pragma endregion
 }
 
 void CBattleScene::Update()
@@ -62,13 +46,7 @@ void CBattleScene::Update()
 
 void CBattleScene::LateUpdate()
 {
-	for (const auto& object : mObjects) {
-		object->LateUpdate();
-	}
-	for (const auto& player : mPlayers) {
-		if (player) player->LateUpdate();
-	}
-	UpdatePassData();
+	CScene::LateUpdate();
 }
 
 void CBattleScene::RenderScene()

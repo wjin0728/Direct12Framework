@@ -7,7 +7,6 @@ class CCamera : public CComponent, std::enable_shared_from_this<CCamera>
 public:
 	CCamera();
 	virtual ~CCamera();
-
 	virtual std::shared_ptr<CComponent> Clone();
 
 private:

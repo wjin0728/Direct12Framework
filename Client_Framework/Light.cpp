@@ -36,11 +36,6 @@ void CLight::Awake()
 {
 }
 
-void CPointLight::SetLocalPosition(const Vec3& _position)
-{
-	position = _position;
-}
-
 void CLight::Start()
 {
 	mLightData.worldMat = owner->GetTransform()->GetWorldMat();
@@ -73,9 +68,6 @@ void CLight::Start()
 
 void CLight::Update()
 {
-	direction = direction.GetNormalized();
-	fallOffStart = cos(XMConvertToRadians(_fallOffStart));
-	fallOffEnd = cos(XMConvertToRadians(_fallOffEnd));
 }
 
 void CLight::LateUpdate()
@@ -125,10 +117,6 @@ void CLight::Render(std::shared_ptr<CRenderTargetGroup> renderTarget)
 		RESOURCE.Get<CShader>("LightingDirectional")->SetPipelineState(CMDLIST);
 		CRenderer::RenderFullscreen();
 	}
-	
-void CSpotLight::SetfallOffStart(float _fallOffStart)
-{
-	fallOffStart = cos(XMConvertToRadians(_fallOffStart));
 }
 
 void CLight::SetVolumes()

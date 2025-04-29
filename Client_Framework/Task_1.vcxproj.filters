@@ -205,6 +205,10 @@
     <ClInclude Include="Player.h">
       <Filter>Server</Filter>
     </ClInclude>
+    <ClInclude Include="RenderPipeline.h" />
+    <ClInclude Include="ThirdPersonCamera.h">
+      <Filter>GameObject\Component\Scripts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -350,7 +354,7 @@
     </ClCompile>
     <ClCompile Include="RenderPipeline.cpp">
       <Filter>Client</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Server</Filter>
     </ClCompile>
