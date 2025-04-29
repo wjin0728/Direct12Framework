@@ -26,6 +26,8 @@ void ServerManager::Initialize()
 		WSACleanup();
 		exit(1);
 	}
+
+	InitPlayerAndCamera();
 }
 
 void ServerManager::Client_Login()
@@ -199,7 +201,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		clientID = packet->id;
 
 		//scene->SetPlayer(packet->id, player, { 10, 5, 10 });
-		//player->GetTransform()->SetLocalPosition({ 10, 5, 10 });
+		mPlayer->GetTransform()->SetLocalPosition({ 10, 5, 10 });
 		break;
 	}
 	case SC_LOGIN_FAIL: {
@@ -219,9 +221,19 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_MOVE_OBJECT: {
 		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
-
 		cout << "SC_MOVE_PACKET" << endl;
-		
+
+		int id = packet->id;
+		if (id == clientID) {
+			mPlayer->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+			mPlayer->GetTransform()->SetLocalRotationY(packet->look_y);
+			break;
+		}
+		auto it = mOtherPlayers.find(id);
+		if (it != mOtherPlayers.end()) {
+			mOtherPlayers[id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+			mOtherPlayers[id]->GetTransform()->SetLocalRotationY(packet->look_y);
+		}
 		//INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({packet->x, packet->y, packet->z});
 		//INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalRotationY(packet->look_y);
 

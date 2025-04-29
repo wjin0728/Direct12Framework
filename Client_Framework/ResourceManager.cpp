@@ -18,6 +18,8 @@ void CResourceManager::Initialize()
 	LoadDefaultMaterials();
 
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
+
+	LoadPlayerObjects();
 }
 
 void CResourceManager::Destroy()
@@ -95,6 +97,32 @@ void CResourceManager::LoadSceneResourcesFromFile(const std::string& fileName)
 		return;
 	}
 	LoadSceneResourcesFromFile(ifs);
+}
+
+void CResourceManager::LoadPlayerObjects()
+{
+	auto archer = CGameObject::CreateObjectFromFile("Player_Archer");
+	if (archer) {
+		archer->SetName("Player_Archer");
+		archer->SetActive(false);
+		archer->SetStatic(false);
+		prefabs["Player_Archer"] = archer;
+	}
+	auto fighter = CGameObject::CreateObjectFromFile("Player_Fighter");
+	if (fighter) {
+		fighter->SetName("Player_Fighter");
+		fighter->SetActive(false);
+		fighter->SetStatic(false);
+		prefabs["Player_Fighter"] = fighter;
+	}
+
+	auto mage = CGameObject::CreateObjectFromFile("Player_Mage");
+	if (mage) {
+		mage->SetName("Player_Mage");
+		mage->SetActive(false);
+		mage->SetStatic(false);
+		prefabs["Player_Mage"] = mage;
+	}
 }
 
 void CResourceManager::LoadDefaultMeshes()

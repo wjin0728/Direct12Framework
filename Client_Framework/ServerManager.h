@@ -40,7 +40,6 @@ public:
 
 	void send_cs_move_packet(uint8_t dir, Vec3 look) {
 		CS_MOVE_PACKET p;
-
 		p.size = sizeof(p);
 		p.type = CS_MOVE;
 		p.id = clientID;

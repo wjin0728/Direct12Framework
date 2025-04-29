@@ -46,7 +46,9 @@ public:
 
 	void LoadSceneResourcesFromFile(std::ifstream& ifs);
 	void LoadSceneResourcesFromFile(const std::string& fileName);
+	void LoadPlayerObjects();
 
+	std::unordered_map<std::string, std::shared_ptr<class CGameObject>>& GetPrefabs() { return prefabs; }
 
 private:
 	void LoadDefaultMeshes();
@@ -61,6 +63,7 @@ public:
 
 	UINT GetTopSRVIndex();
 	UINT GetMaterialSRVIndex();
+
 
 	void ReturnSRVIndex(UINT idx) { srvIdxQueue.push(idx); }
 };

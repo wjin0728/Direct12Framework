@@ -64,9 +64,6 @@ public:
 
 	void AddCamera(std::shared_ptr<CCamera> camera);
 	void RemoveCamera(const std::string& tag);
-
-	std::shared_ptr<CGameObject> CreatePlayer(PLAYER_CLASS playerClass, int id);
-	std::shared_ptr<CGameObject> CreatePlayerCamera(std::shared_ptr<CGameObject> target);
 	
 	void AddLight(std::shared_ptr<CLight> light);
 	
@@ -76,8 +73,6 @@ public:
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
 	std::shared_ptr<CCamera> GetCamera(const std::string& tag) { return mCameras[tag]; }
 
-	// std::shared_ptr<CGameObject> GetPlayer(int id) { return mPlayers[id]; }
-	void SetPlayer(int id, std::shared_ptr<CGameObject> mPlayer, Vec3 position);
 	std::vector <std::shared_ptr<CLight>> GetLight(LIGHT_TYPE type) { return mLights[(UINT)type]; }
 
 protected:

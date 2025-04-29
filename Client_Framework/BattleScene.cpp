@@ -25,7 +25,8 @@ CBattleScene::CBattleScene()
 void CBattleScene::Initialize()
 {
 	// Load default resources
-	LoadSceneFromFile(SCENE_PATH(std::string("Lobby1")));
+	INSTANCE(ServerManager).RegisterPlayerInScene(this);
+	LoadSceneFromFile(SCENE_PATH("Lobby1"));
 }
 
 void CBattleScene::Update()

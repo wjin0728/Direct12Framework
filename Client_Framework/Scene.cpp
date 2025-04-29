@@ -157,7 +157,7 @@ void CScene::LoadSceneFromFile(const std::string& fileName)
 		return;
 	}
 	//ÇÁ¸®ÆÕ
-	std::unordered_map<std::string, std::shared_ptr<CGameObject>> prefabs{};
+	std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs = RESOURCE.GetPrefabs();
 	CreatePrefabs(ifs, prefabs);
 
 	int rootNum{};
@@ -286,73 +286,11 @@ void CScene::RemoveCamera(const std::string& tag)
 	mCameras.erase(tag);
 }
 
-std::shared_ptr<CGameObject> CScene::CreatePlayer(PLAYER_CLASS playerClass, int id)
-{
-	if (id < 0 || id >= mPlayers.size()) {
-		return nullptr;
-	}
-	std::array<std::string, (UINT)PLAYER_CLASS::end> playerClassNames = {"Player_Fighter", "Player_Archer", "Player_Mage"};
-	auto player = CGameObject::CreateObjectFromFile(playerClassNames[(UINT)playerClass]);
-	player->SetTag("Player");
-	player->SetActive(true);
-	player->SetStatic(false);
-
-	player->AddComponent<CRigidBody>();
-	player->AddComponent<CPlayerController>();
-
-	if (player) {
-		player->Awake();
-		player->Start();
-		{
-			//std::lock_guard<std::mutex> lock(mObjectsLock);
-			mPlayers[id] = player;
-		}
-		//mPlayers[id] = player;
-
-	}
-
-	return player;
-}
-
-std::shared_ptr<CGameObject> CScene::CreatePlayerCamera(std::shared_ptr<CGameObject> target)
-{
-	auto cameraObj = CGameObject::CreateCameraObject("MainCamera", INSTANCE(CDX12Manager).GetRenderTargetSize(),
-		1.f, 100.f);
-	cameraObj->SetStatic(false);
-
-	auto playerFollower = cameraObj->AddComponent<CThirdPersonCamera>();
-	playerFollower->SetTarget(target);
-
-
-	cameraObj->Awake();
-	cameraObj->Start();
-
-	auto controller = target->GetComponent<CPlayerController>();
-	if (controller) {
-		controller->SetCamera(cameraObj->GetComponent<CCamera>());
-	}
-
-	AddObject(cameraObj);
-	return cameraObj;
-}
-
 void CScene::AddLight(std::shared_ptr<CLight> light)
 {
-}
-
-void CScene::SetPlayer(int id, std::shared_ptr<CGameObject> mPlayer, Vec3 position)
-{
-	if (id < 0 || id >= mPlayers.size()) {
-		return;
-	}
-		if (mPlayers[id]) {
-		mPlayers[id]->SetActive(false);
-	}
-
-	if (mPlayer) {
-		mPlayers[id] = mPlayer;
-		mPlayer->GetTransform()->SetLocalPosition(position);
-	}
+	auto& tag = light->GetOwner()->GetTag();
+	auto type = light->GetLightType();
+	mLights[(UINT)type].push_back(light);
 }
 
 void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass)

@@ -86,7 +86,13 @@ void CTransform::SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalM
 		if (!parent) {
 			return;
 		}
-		INSTANCE(CSceneManager).GetCurScene()->RemoveObject(ownerObj);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (scene) {
+			scene->RemoveObject(ownerObj);
+		}
+		else {
+			ownerObj->SetActive(false);
+		}
 	}
 	
 	UpdateWorldMatrix();
