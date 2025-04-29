@@ -194,7 +194,7 @@ void CDX12Manager::InitRenderTargetGroups()
 		//emissive + shadow
 		renderTargets[2].rt = std::make_shared<CTexture>();
 		renderTargets[2].rt->SetName("GBufferEmissive");
-		renderTargets[2].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+		renderTargets[2].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);

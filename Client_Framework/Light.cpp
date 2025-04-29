@@ -50,7 +50,7 @@ void CLight::Start()
 	if (!mainCamera || !lightCam) return;
 
 	Vec3 corners[8]{};
-	mainCamera->mFrustumWorld.GetCorners(corners);
+	mainCamera->mFrustumView.GetCorners(corners);
 
 
 	Vec3 center{};
@@ -64,7 +64,7 @@ void CLight::Start()
 	}
 	float r = max;
 	float size = r * 2.f;
-	lightCam->GenerateOrthographicProjectionMatrix(1.f, size, size, size);
+	lightCam->GenerateOrthographicProjectionMatrix(0.1f, size, size, size);
 }
 
 void CLight::Update()
@@ -75,7 +75,7 @@ void CLight::LateUpdate()
 {
 	if (!mLightData.type == (UINT)LIGHT_TYPE::DIRECTIONAL || !mainCamera || !lightCam) return;
 	Vec3 corners[8]{};
-	//mainCamera->GenerateViewMatrix();
+	mainCamera->GenerateViewMatrix();
 	mainCamera->mFrustumView.GetCorners(corners);
 
 	Vec3 center{};

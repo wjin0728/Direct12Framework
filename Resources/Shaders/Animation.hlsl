@@ -280,7 +280,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     output.normalWS = float4(normal, metallic);
     output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
     output.positionWS = float4(worldPosition, smoothness);
-    output.depth = float4(0.f, 0.f, 0.f, depth);
+    output.depth = input.ShadowPosH;
     
     return output;
 }

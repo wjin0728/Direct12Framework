@@ -357,7 +357,7 @@ PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
     output.normalWS = float4(normal, blendedMetallic);
     output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
     output.positionWS = float4(positionWS, blendedSmoothness);
-    output.depth = float4(0.f, 0.f, 0.f, depth);
+    output.depth = input.ShadowPosH;
     
     return output;
 }

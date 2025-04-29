@@ -101,7 +101,7 @@ float CalcShadowFactor(float4 shadowPosH)
     uint width, height, numMips;
     diffuseMap[shadowMapIdx].GetDimensions(0, width, height, numMips);
     
-    float dx = 1.0f / (float) width;
+    float dx = 1.0f / (float) (4096.f * 3);
 
     float percentLit = 0.0f;
     const float2 offsets[9] =
@@ -185,10 +185,10 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
 
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
-    float3 directLight = (kD * diffuse + specular)  * NdotL;
+    float3 directLight = (kD * diffuse + specular) * lightColor * NdotL;
     float3 ambientLight = albedo * 0.3f * ndotUp;
     
-    return directLight;
+    return directLight + ambientLight;
 }
 
 

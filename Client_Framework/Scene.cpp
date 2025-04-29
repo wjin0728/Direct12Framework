@@ -84,13 +84,13 @@ void CScene::RenderForwardPass()
 
 void CScene::RenderGBufferPass()
 {
-	auto gBufferPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-	gBufferPassBuffer->BindToShader(0);
 	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::G_BUFFER);
 	renderTarget->ChangeResourcesToTargets();
 	renderTarget->SetRenderTargets();
 	renderTarget->ClearRenderTargets();
 	renderTarget->ClearDepthStencil();
+	auto gBufferPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	gBufferPassBuffer->BindToShader(0);
 	auto& camera = mCameras["MainCamera"];
 	if (camera) {
 		camera->SetViewportsAndScissorRects(CMDLIST);
@@ -301,6 +301,7 @@ void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> c
 		object->Render(camera, pass);
 	}
 }
+
 void CScene::UpdatePassData()
 {
 	CBPassData passData;
@@ -308,7 +309,8 @@ void CScene::UpdatePassData()
 		0.5f, 0.0f, 0.0f, 0.0f,
 		0.0f, -0.5f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.0f, 1.0f);
+		0.5f, 0.5f, 0.0f, 1.0f
+	);
 
 	auto& camera = mCameras["MainCamera"];
 	auto& lightCamera = mCameras["DirectionalLight"];
@@ -348,6 +350,7 @@ void CScene::UpdatePassData()
 	if (finalTarget) {
 		passData.finalTargetIdx = finalTarget->GetSrvIndex();
 	}
+
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(0, &passData, sizeof(CBPassData));
 
 	if (lightCamera) {

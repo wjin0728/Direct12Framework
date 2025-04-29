@@ -43,12 +43,14 @@ float4 PS_Directional(float4 position : SV_Position) : SV_Target
     float3 camDir = (camPos - positionWS);
     float distToEye = length(camDir);
     camDir /= distToEye;
+    
+    float4 shadowPosH = mul(float4(positionWS, 1.f), shadowTransform);
 
     LightingData lightingData = (LightingData) 0;
     lightingData.cameraDirection = camDir;
     lightingData.normalWS = normal;
     lightingData.positionWS = positionWS;
-    lightingData.shadowFactor = shadow;
+    lightingData.shadowFactor = CalcShadowFactor(shadowPosH);
     
     SurfaceData surfaceData = (SurfaceData) 0;
     surfaceData.albedo = color.rgb;
@@ -57,7 +59,7 @@ float4 PS_Directional(float4 position : SV_Position) : SV_Target
     surfaceData.specular = 0.5f;
     surfaceData.emissive = 0.f;
     
-    float3 finalColor = { 0.f, 0.f, 0.f };
+    float3 finalColor = { 0.f, 0.f, 0.f };                                          
     finalColor = ComputeDirectionalLight(lightingData, surfaceData);
     
     finalColor = GammaEncoding(finalColor);
