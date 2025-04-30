@@ -5,12 +5,16 @@ constexpr int NAME_SIZE = 20;
 constexpr int CHAT_SIZE = 300;
 
 constexpr int MAX_USER = 16;
+constexpr int MAX_ITEM = 5;
 
 // Packet ID
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
 constexpr char CS_CHAT = 2;
 constexpr char CS_MOUSE_VEC2 = 3;
+constexpr char CS_SKILL = 4;
+constexpr char CS_ULTIMATE_SKILL = 5;
+constexpr char CS_000 = 6;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -21,6 +25,7 @@ constexpr char SC_CHAT = 7;
 constexpr char SC_SCENE_CHANGE = 8;
 constexpr char SC_ADD_PLAYER = 9;
 constexpr char SC_REMOVE_PLAYER = 10;
+constexpr char SC_DROP_ITEM = 11;
 
 #pragma pack (push, 1)
 struct PACKET {
@@ -54,6 +59,19 @@ struct CS_MOUSE_VEC2_PACKET : PACKET {
 	float			dir_z;
 };
 
+struct CS_000_PACKET : PACKET {
+	int				id;
+};
+
+struct CS_SKILL_PACKET : PACKET {
+	int				id;
+	char			skill_enum;
+};
+
+struct CS_ULTIMATE_SKILL_PACKET : PACKET {
+	int				id;
+	char			skill_enum;
+};
 
 // ----------------------------------------------------------------------------------
 
@@ -86,6 +104,19 @@ struct SC_MOVE_PACKET : PACKET {
 struct SC_CHAT_PACKET : PACKET {
 	int				id;
 	char			mess[CHAT_SIZE];
+};
+
+struct SC_CHAT_PACKET : PACKET {
+	int				id;
+	char			mess[CHAT_SIZE];
+};
+
+struct SC_DROP_ITEM_PACKET : PACKET {
+	int				id;
+	char			item_enum;
+	float			x;
+	float			y;
+	float			z;
 };
 
 struct SC_LOGIN_FAIL_PACKET : PACKET {

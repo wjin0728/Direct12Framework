@@ -250,6 +250,18 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		break;
 	}
+	case SC_DROP_ITEM: {
+		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+
+		//int			id;
+		//char			item_enum; 
+		//float			x; 
+		//float			y; 
+		//float			z; 
+
+		break;
+	}
 	default:
 		break;
 	}

@@ -44,4 +44,5 @@ public:
 	void send_add_player_packet(SESSION* client);
 	void send_chat_packet(int c_id, const char* mess);
 	void send_move_packet(SESSION* client);
+	void send_drop_item_packet();
 };

@@ -75,45 +75,11 @@ void CPlayerController::OnKeyEvents()
 		dir |= 0x10;
 	}
 
+	if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
+		INSTANCE(ServerManager).send_cs_000_packet();
+	}
+
 	if (dir == 0) return;
 	INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
 
-	/*Vec3 accel = Vec3::Zero;
-	bool isDecelerate = true;
-
-	if (moveDir != Vec3::Zero) {
-		moveDir.Normalize();
-
-		Vec3 currentVelocity = rigidBody->GetVelocity();
-		float currentSpeed = currentVelocity.Length();
-		if (currentVelocity != Vec3::Zero) {
-			Vec3 currentDir = currentVelocity.GetNormalized();
-			float dot = currentDir.Dot(moveDir);
-
-			if (dot < 0.0f) {
-				accel = -currentDir * 20.f; 
-			}
-			else {
-				rigidBody->SetVelocity(currentSpeed * dot * moveDir);
-				accel = moveDir * 10.f;
-				isDecelerate = false;
-			}
-		}
-		else {
-			accel = moveDir * 10.f; // Á¤Áö »óÅÂ¿¡¼­ °¡¼Ó
-			isDecelerate = false;
-		}
-	}
-
-	rigidBody->SetAcceleration(accel);
-	rigidBody->SetUseFriction(isDecelerate);
-
-	float rotationSpeed = 10.f;
-
-	if (moveDir.LengthSquared() > 0.001f)
-	{
-		Quaternion targetRot = Quaternion::LookRotation(moveDir);
-		Quaternion rotation = Quaternion::Slerp(transform->GetLocalRotation(), targetRot, rotationSpeed * DELTA_TIME);
-		transform->SetLocalRotation(rotation);
-	}*/
 }
