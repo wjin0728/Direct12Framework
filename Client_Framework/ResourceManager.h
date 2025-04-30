@@ -63,7 +63,13 @@ public:
 
 	UINT GetTopSRVIndex();
 	UINT GetMaterialSRVIndex();
-
+	std::shared_ptr<class CGameObject> GetPrefab(const std::string& name)
+	{
+		auto itr = prefabs.find(name);
+		if (itr != prefabs.end())
+			return itr->second;
+		return nullptr;
+	}
 
 	void ReturnSRVIndex(UINT idx) { srvIdxQueue.push(idx); }
 };

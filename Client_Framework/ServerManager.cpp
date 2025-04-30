@@ -8,6 +8,8 @@
 #include"Camera.h"
 #include"PlayerController.h"
 #include"ThirdPersonCamera.h"
+#include "DX12Manager.h"
+#include "ResourceManager.h"
 
 void ServerManager::Initialize()
 {
@@ -220,14 +222,25 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_ADD_PLAYER: {
 		SC_ADD_PLAYER_PACKET* packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet_ptr);
+		std::string objName[3] = { "Player_Archer", "Player_Fighter", "Player_Mage" };
+		auto obj = RESOURCE.GetPrefab(objName[packet->player_class]);
+		if (!obj) {
+			std::cout << "obj is nullptr" << std::endl;
+			break;
+		}
 
-		auto scene = INSTANCE(CSceneManager).GetCurScene();
-		auto player = scene->CreatePlayer((PLAYER_CLASS)packet->player_class, packet->id);
-		if (scene->GetClientID() == packet->id) 
-			auto mainCam = scene->CreatePlayerCamera(player);
-
-		scene->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-		scene->GetPlayer(packet->id)->GetTransform()->SetLocalRotationY(packet->look_y);
+		std::shared_ptr<CGameObject> player{};
+		if (clientID == packet->id) {
+			player = mPlayer;
+		}
+		else {
+			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
+			player = mOtherPlayers[packet->id];
+		}
+		CGameObject::Instantiate(obj, player->GetTransform());
+		player->SetActive(true);
+		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		player->GetTransform()->SetLocalRotationY(packet->look_y);
 
 		break;
 	}

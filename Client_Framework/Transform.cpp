@@ -108,7 +108,13 @@ void CTransform::SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalM
 		}
 	}
 	else {
-		INSTANCE(CSceneManager).GetCurScene()->AddObject(GetRoot()->owner->GetRenderLayer(), ownerObj);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (scene) {
+			scene->AddObject(GetRoot()->owner->GetRenderLayer(), ownerObj);
+		}
+		else {
+			ownerObj->SetActive(false);
+		}
 
 		if (isKeepLocalMat) {
 			mLocalMat = mWorldMat;
