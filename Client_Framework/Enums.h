@@ -1,0 +1,55 @@
+#pragma once
+
+enum class LIGHT_TYPE : UINT8
+{
+	DIRECTIONAL,
+	POINT,
+	SPOT,
+	END
+};
+
+enum class SCENE_TYPE : UINT8
+{
+	MENU,
+	MAINSTAGE,
+	MAIN,
+
+	END
+};
+
+enum class RESOURCE_TYPE : UINT8
+{
+	MATERIAL,
+	MESH,
+	SHADER,
+	TEXTURE,
+
+	END
+};
+
+enum {
+	SCENE_TYPE_COUNT = SCENE_TYPE::END,
+	RESOURCE_TYPE_COUNT = RESOURCE_TYPE::END
+};
+
+enum OBJECT_TYPE : UINT8
+{
+	NONE = -1,
+	PLAYER,
+	ENEMY,
+	ITEM,
+	PLAYER_PROJECTILE,
+	ENEMY_PROJECTILE,
+	OBSTACLE,
+	TRIGGER,
+
+	end
+};
+
+enum class PLAYER_CLASS : UINT8
+{
+	FIGHTER,
+	ARCHER,
+	MAGE,
+	end
+};
