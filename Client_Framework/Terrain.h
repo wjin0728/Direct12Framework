@@ -11,8 +11,8 @@ private:
 	std::shared_ptr<CHeightMapGridMesh> mTerrainMesh{};
 	std::shared_ptr<CTerrainMaterial> mTerrainMaterial{};
 
-	Vec3 mScale = Vec3::One;
 
+	Vec3 mScale = Vec3::One;
 	UINT mNavMapResolution{};
 	std::vector<BYTE> mNavMapData{};
 public:
@@ -27,7 +27,7 @@ public:
 
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CTerrain>(); }
 
-	void Render(const std::shared_ptr<class CCamera>& camera);
+	void Render(const std::shared_ptr<class CCamera>& camera, int pass);
 
 public:
 	void SetHeightMapGridMesh(const std::shared_ptr<CHeightMapGridMesh>& mesh);

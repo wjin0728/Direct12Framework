@@ -173,6 +173,7 @@
     <ClInclude Include="InstancingGroup.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RenderPipeline.h" />
     <ClInclude Include="ServerManager.h" />
     <ClInclude Include="SkinnedMesh.h" />
     <ClInclude Include="SkinnedMeshRenderer.h" />
@@ -184,7 +185,6 @@
     <ClInclude Include="FollowTarget.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="InputManager.h" />
-    <ClInclude Include="LightManager.h" />
     <ClInclude Include="MainScene.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MenuScene.h" />
@@ -225,6 +225,7 @@
     <ClCompile Include="InstancingGroup.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderPipeline.cpp" />
     <ClCompile Include="ServerManager.cpp" />
     <ClCompile Include="SkinnedMesh.cpp" />
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
@@ -237,7 +238,6 @@
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Light.cpp" />
-    <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="MainScene.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MenuScene.cpp" />
@@ -277,79 +277,58 @@
     <None Include="SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\Common.hlsl">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="Resources\Shaders\OutLinePS.hlsl">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="Resources\Shaders\OutLineVS.hlsl">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="Resources\Shaders\Paramiters.hlsl">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="Resources\Shaders\Terrain.hlsl">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="Resources\Shaders\Sprite.hlsl">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="Resources\Shaders\Utility.hlsl">
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Shaders\Skybox.hlsl">
+    <None Include="..\Resources\Shaders\Animation.hlsl">
       <FileType>Document</FileType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Shaders\Billboard.hlsl">
+    <None Include="..\Resources\Shaders\Billboard.hlsl">
       <FileType>Document</FileType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Shaders\Shadow.hlsl">
+    <None Include="..\Resources\Shaders\Cloud.hlsl">
       <FileType>Document</FileType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Shaders\TerrainShadow.hlsl">
+    <None Include="..\Resources\Shaders\Common.hlsl">
       <FileType>Document</FileType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Shaders\Triplanar.hlsl">
+    <None Include="..\Resources\Shaders\FinalPass.hlsl">
       <FileType>Document</FileType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Shaders\Vegitation.hlsl">
+    <None Include="..\Resources\Shaders\Lighting.hlsl">
       <FileType>Document</FileType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Shaders\Cloud.hlsl">
+    <None Include="..\Resources\Shaders\OutLinePS.hlsl">
       <FileType>Document</FileType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Shaders\Animation.hlsl">
+    <None Include="..\Resources\Shaders\OutLineVS.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\Paramiters.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\Shadow.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\SkyBox.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\Sprite.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\Terrain.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\TerrainShadow.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\Triplanar.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\Utility.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\Vegitation.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\Resources\Shaders\Water.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

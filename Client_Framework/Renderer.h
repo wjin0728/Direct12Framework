@@ -30,6 +30,8 @@ public:
 
     virtual std::shared_ptr<CComponent> Clone() override = 0;
 
+	static void RenderFullscreen();
+
 public:
     void SetCBVIndex();
     void ReturnCBVIndex();

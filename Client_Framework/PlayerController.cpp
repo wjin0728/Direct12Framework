@@ -25,7 +25,6 @@ void CPlayerController::Start()
 {
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mTerrain = scene->GetTerrain();
-	mCamera = scene->GetCamera("MainCamera");
 }
 
 void CPlayerController::Update()
@@ -108,11 +107,6 @@ void CPlayerController::OnKeyEvents()
 
 	rigidBody->SetAcceleration(accel);
 	rigidBody->SetUseFriction(isDecelerate);
-
-	if (mTerrain.lock()->CanMove(transform->GetWorldPosition().x, transform->GetWorldPosition().z))
-	{
-		rigidBody->SetUseGravity(true);
-	}
 
 	float rotationSpeed = 10.f;
 

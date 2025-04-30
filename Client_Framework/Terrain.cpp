@@ -26,9 +26,9 @@ void CTerrain::LateUpdate()
 {
 }
 
-void CTerrain::Render(const std::shared_ptr<class CCamera>& camera)
+void CTerrain::Render(const std::shared_ptr<class CCamera>& camera, int pass)
 {
-	mTerrainMaterial->BindShader(FORWARD);
+	mTerrainMaterial->BindShader((PASS_TYPE)pass);
 	mTerrainMaterial->BindDataToShader();
 	mQuadTree->Render(camera);
 }

@@ -42,7 +42,7 @@ void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 
     CBObjectData objData;
     objData.worldMAt = GetTransform()->mWorldMat.Transpose();
-    objData.invWorldMAt = objData.worldMAt.Invert();
+    objData.invWorldMAt = GetTransform()->mWorldMat.Invert();
     objData.textureMat = GetTransform()->mTextureMat.Transpose();
 
     CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->UpdateBuffer(mCbvOffset, &objData);

@@ -6,7 +6,9 @@ enum class RENDER_TARGET_GROUP_TYPE : UINT
 {
 	SWAP_CHAIN,
 	G_BUFFER,
+	LIGHTING_PASS,
 	SHADOW_PASS,
+	POST_PROCESSING,
 	FINAL_PASS,
 
 	END
@@ -21,7 +23,7 @@ enum {
 struct RenderTarget
 {
 	std::shared_ptr<CTexture> rt;
-	float clearColor[4] = {0.6f, 0.6f, 0.6f, 1.f};
+	float clearColor[4] = {1.f, 1.f, 1.f, 1.f};
 };
 
 class CRenderTargetGroup
@@ -54,6 +56,8 @@ public:
 	void ClearRenderTarget(UINT idx);
 	void ClearDepthStencil(float depth = 1.0f, UINT8 stencil = 0);
 
+	void ClearOnlyStencil(UINT8 stencil);
+	void ClearOnlyDepth(float depth = 1.0f);
 
 	void ChangeTargetsToResources();
 	void ChangeTargetToResource(UINT idx);

@@ -18,6 +18,7 @@ private:
 	std::vector<std::shared_ptr<CGameObject>> maintainedObjects{};
 
 public:
+	void Destroy();
 
 	void LoadScene(SCENE_TYPE nextScene);
 	void ChangeScene(SCENE_TYPE nextScene);

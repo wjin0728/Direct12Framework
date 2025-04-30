@@ -12,6 +12,12 @@
 //#define DEFFERD_RENDERING
 
 
+void CSceneManager::Destroy()
+{
+	curScene.reset();
+	prevScene.reset();
+}
+
 void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 {
 	INSTANCE(CDX12Manager).OpenCommandList();
@@ -72,16 +78,7 @@ void CSceneManager::Render()
 	if (!curScene) {
 		return;
 	}
-	curScene->RenderShadowPass();
-
-#ifdef DEFFERD_RENDERING
-	curScene->RenderGBufferPass();
-	curScene->RenderLightingPass();
-	curScene->RenderFinalPass();
-#else
-	curScene->RenderForwardPass();
-#endif 
-
+	curScene->RenderScene();
 }
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)

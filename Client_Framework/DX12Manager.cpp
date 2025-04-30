@@ -9,7 +9,7 @@ void CDX12Manager::InitDevice()
 	UINT dXGIFactoryFlags = 0;
 
 #if defined(_DEBUG)
-	ComPtr<ID3D12Debug> d3dDebugController;
+	
 	hResult = D3D12GetDebugInterface(IID_PPV_ARGS(&d3dDebugController));
 	if (d3dDebugController.Get())
 	{
@@ -111,7 +111,7 @@ void CDX12Manager::ChangeSwapChainState()
 	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	dxgiTargetParameters.Width = renderTargetSize.y;
 	dxgiTargetParameters.Height = renderTargetSize.y;
-	dxgiTargetParameters.RefreshRate.Numerator = 144;
+	dxgiTargetParameters.RefreshRate.Numerator = 165;
 	dxgiTargetParameters.RefreshRate.Denominator = 1;
 	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -173,7 +173,7 @@ void CDX12Manager::InitRenderTargetGroups()
 
 #pragma region G Pass
 	{
-		std::vector<RenderTarget> renderTargets(4);
+		std::vector<RenderTarget> renderTargets(5);
 		renderTargets[0].rt = std::make_shared<CTexture>();
 		renderTargets[0].rt->SetName("GBufferAlbedo");
 		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
@@ -182,22 +182,25 @@ void CDX12Manager::InitRenderTargetGroups()
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[0].rt);
 
+		//normal + metallic
 		renderTargets[1].rt = std::make_shared<CTexture>();
 		renderTargets[1].rt->SetName("GBufferNormal");
-		renderTargets[1].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+		renderTargets[1].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[1].rt);
 
+		//emissive + shadow
 		renderTargets[2].rt = std::make_shared<CTexture>();
 		renderTargets[2].rt->SetName("GBufferEmissive");
-		renderTargets[2].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+		renderTargets[2].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[2].rt);
 
+		//position + smoothness
 		renderTargets[3].rt = std::make_shared<CTexture>();
 		renderTargets[3].rt->SetName("GBufferPosition");
 		renderTargets[3].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
@@ -205,10 +208,64 @@ void CDX12Manager::InitRenderTargetGroups()
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[3].rt);
+
+		//depth
+		renderTargets[4].rt = std::make_shared<CTexture>();
+		renderTargets[4].rt->SetName("GBufferDepth");
+		renderTargets[4].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[4].rt);
+
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::G_BUFFER)] = std::make_shared<CRenderTargetGroup>();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::G_BUFFER)]->Initialize(renderTargets, dsvHeapHandle);
 	}
+#pragma endregion
 
+#pragma region Lighting Pass
+	{
+		std::vector<RenderTarget> renderTargets(1);
+		renderTargets[0].rt = std::make_shared<CTexture>();
+		renderTargets[0].rt->SetName("LightingTarget");
+		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[0].rt);
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::LIGHTING_PASS)] = std::make_shared<CRenderTargetGroup>();
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::LIGHTING_PASS)]->Initialize(renderTargets, dsvHeapHandle);
+	}
+#pragma endregion
+
+#pragma region Post Process
+	{
+		std::vector<RenderTarget> renderTargets(1);
+		renderTargets[0].rt = std::make_shared<CTexture>();
+		renderTargets[0].rt->SetName("PostProcessTarget");
+		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[0].rt);
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::POST_PROCESSING)] = std::make_shared<CRenderTargetGroup>();
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::POST_PROCESSING)]->Initialize(renderTargets, dsvHeapHandle);
+	}
+#pragma endregion
+
+#pragma region Final
+	{
+		std::vector<RenderTarget> renderTargets(1);
+		renderTargets[0].rt = std::make_shared<CTexture>();
+		renderTargets[0].rt->SetName("FinalTarget");
+		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
+			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+		RESOURCE.Add(renderTargets[0].rt);
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::FINAL_PASS)] = std::make_shared<CRenderTargetGroup>();
+		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::FINAL_PASS)]->Initialize(renderTargets, dsvHeapHandle);
+	}
 #pragma endregion
 }
 
@@ -227,12 +284,14 @@ void CDX12Manager::InitDepthStencilView()
 	dsBuffer->SetTextureType(DEPTH_STENCIL);
 	descriptorHeaps->CreateDSV(dsBuffer, DS_TYPE::MAIN_BUFFER);
 
+	shadowMapResolution = 4096.f * 2;
+
 	auto shadowMap = INSTANCE(CResourceManager).Create2DTexture
 	(
 		"ShadowMap",
-		DXGI_FORMAT_R24G8_TYPELESS,
+		DXGI_FORMAT_R32_TYPELESS,
 		nullptr, 0,
-		4096.f *3, 4096.f *3,
+		shadowMapResolution, shadowMapResolution,
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
@@ -302,7 +361,7 @@ std::vector<CD3DX12_STATIC_SAMPLER_DESC> CDX12Manager::InitStaticSamplers()
 		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressV
 		D3D12_TEXTURE_ADDRESS_MODE_BORDER,  // addressW
 		0.0f,                               // mipLODBias
-		16,                                 // maxAnisotropy
+		8,                                 // maxAnisotropy
 		D3D12_COMPARISON_FUNC_LESS_EQUAL,
 		D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK);
 
@@ -341,7 +400,7 @@ void CDX12Manager::InitRootSignature()
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[2].Descriptor.ShaderRegister = 2;
 	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//CBBoneTransforms Á¤º¸
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[3].Descriptor.ShaderRegister = 3;
@@ -409,11 +468,11 @@ void CDX12Manager::Destroy()
 	CloseHandle(fenceEvent);
 
 #if defined(_DEBUG)
-	IDXGIDebug1* pdxgiDebug = NULL;
+	/*IDXGIDebug1* pdxgiDebug = NULL;
 	DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pdxgiDebug));
-	/*HRESULT hResult = pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
-		DXGI_DEBUG_RLO_DETAIL);*/
-	pdxgiDebug->Release();
+	HRESULT hResult = pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
+		DXGI_DEBUG_RLO_DETAIL);
+	pdxgiDebug->Release();*/
 #endif
 	mSwapChain->SetFullscreenState(FALSE, NULL);
 }
@@ -470,10 +529,6 @@ void CDX12Manager::MoveToNextFrameResource()
 	}
 }
 
-void CDX12Manager::UpdateFrameResources()
-{
-	mCurFrameResource->BindToShader();
-}
 
 void CDX12Manager::BeforeRender()
 {
@@ -485,7 +540,6 @@ void CDX12Manager::BeforeRender()
 	cmdList->SetGraphicsRootSignature(mRootSignature.Get());
 	descriptorHeaps->SetSRVDescriptorHeap();
 	RESOURCE.UpdateMaterials();
-	mCurFrameResource->BindToShader();
 }
 
 void CDX12Manager::AfterRender()
@@ -512,14 +566,6 @@ void CDX12Manager::PrepareShadowPass()
 
 	swapChainBuffers->SetOnlyDepthStencil();
 	swapChainBuffers->ClearDepthStencil(1.f);
-}
-
-void CDX12Manager::PrepareFinalPass()
-{
-	auto& swapChainBuffers = renderTargetGroups[(UINT)RENDER_TARGET_GROUP_TYPE::FINAL_PASS];
-	swapChainBuffers->ChangeResourceToTarget(0);
-	swapChainBuffers->SetRenderTarget(0);
-	swapChainBuffers->ClearRenderTarget(0);
 }
 
 std::shared_ptr<CConstantBuffer> CDX12Manager::GetConstantBuffer(UINT type)

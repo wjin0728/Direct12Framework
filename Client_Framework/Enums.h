@@ -1,5 +1,13 @@
 #pragma once
 
+enum class LIGHT_TYPE : UINT8
+{
+	DIRECTIONAL,
+	POINT,
+	SPOT,
+	END
+};
+
 enum class SCENE_TYPE : UINT8
 {
 	MENU,
@@ -27,6 +35,7 @@ enum {
 enum OBJECT_TYPE : UINT8
 {
 	NONE = -1,
+	PLAYER,
 	ENEMY,
 	ITEM,
 	PLAYER_PROJECTILE,

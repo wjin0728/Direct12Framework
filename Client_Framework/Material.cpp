@@ -23,7 +23,7 @@ void CMaterial::Initialize(void* data, UINT dataSize)
 
 void CMaterial::SetShader(const std::string& name)
 {
-	for (int type = PASS_TYPE::FORWARD; type < PASS_TYPE::PASS_TYPE_COUNT; type++) {
+	for (int type = PASS_TYPE::FORWARD; type < PASS_TYPE::STENCIL; type++) {
 		std::string passType = CShader::passName[type];
 		mShaders[type] = RESOURCE.Get<CShader>(name + passType);
 	}

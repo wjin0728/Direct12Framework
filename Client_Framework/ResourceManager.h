@@ -18,11 +18,14 @@ class CResourceManager
 private:
 	using KeyObjMap = std::unordered_map<std::string, std::shared_ptr<CResource>>;
 	std::array<KeyObjMap, RESOURCE_TYPE_COUNT> resources{};
+	std::unordered_map<std::string, std::shared_ptr<class CGameObject>> prefabs{};
 
 	std::queue<UINT> srvIdxQueue{};
 
+
 public:
 	void Initialize();
+	void Destroy();
 
 	template<typename T>
 	std::shared_ptr<T> Load(const std::string& name, std::string_view fileName);
@@ -43,6 +46,9 @@ public:
 
 	void LoadSceneResourcesFromFile(std::ifstream& ifs);
 	void LoadSceneResourcesFromFile(const std::string& fileName);
+	void LoadPlayerObjects();
+
+	std::unordered_map<std::string, std::shared_ptr<class CGameObject>>& GetPrefabs() { return prefabs; }
 
 private:
 	void LoadDefaultMeshes();
@@ -50,11 +56,14 @@ private:
 	void LoadDefaultMaterials();
 	void LoadDefaultShaders();
 
+	void MakeShadersForAllPass(const std::string& name, ShaderInfo info);
+
 public:
 	void ReleaseUploadBuffers();
 
 	UINT GetTopSRVIndex();
 	UINT GetMaterialSRVIndex();
+
 
 	void ReturnSRVIndex(UINT idx) { srvIdxQueue.push(idx); }
 };
