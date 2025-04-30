@@ -191,8 +191,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 {
 	switch (packet[2]) {
 	case CS_LOGIN: {
-		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
-		{
+		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet); {
 			lock_guard<mutex> ll{ clients[c_id]._s_lock };
 			clients[c_id]._state = ST_INGAME;
 		}
@@ -298,6 +297,28 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[c_id]._acceleration = Vec3::Zero;
 		}
 
+		break;
+	}
+	case CS_SKILL: {
+		CS_SKILL_PACKET* p = reinterpret_cast<CS_SKILL_PACKET*>(packet);
+
+		
+		break;
+	}
+	case CS_ULTIMATE_SKILL: {
+		CS_ULTIMATE_SKILL_PACKET* p = reinterpret_cast<CS_ULTIMATE_SKILL_PACKET*>(packet);
+		break;
+	}
+	case CS_000: {
+		CS_000_PACKET* p = reinterpret_cast<CS_000_PACKET*>(packet);
+
+		items[item_cnt++].SetPosition(clients[c_id]._pos.x + 10, clients[c_id]._pos.y, clients[c_id]._pos.z);
+		if (item_cnt >= MAX_ITEM) item_cnt = 0;
+
+		for (auto& cl : clients) {
+			if (cl._state != ST_INGAME) continue;
+			cl.send_drop_item_packet();
+		}
 		break;
 	}
 	}
