@@ -191,6 +191,11 @@ void CAnimationController::SetAnimationCallbackHandler(std::shared_ptr<CAnimatio
 
 void CAnimationController::Awake()
 {
+	
+}
+
+void CAnimationController::Start()
+{
 	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
 	if (skinnedMeshRenderer) {
 		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();
@@ -210,7 +215,7 @@ void CAnimationController::Awake()
 
 	for (auto& set : mAnimationSets->mAnimationSet) {
 		for (auto& layer : set->mLayers) {
-			for (int i = 0; auto& cache : layer->mBoneFrameCaches) {
+			for (int i = 0; auto & cache : layer->mBoneFrameCaches) {
 				auto& boneName = layer->mBoneNames[i];
 				if (boneMap.contains(boneName)) cache = boneMap[boneName];
 				else cache = owner->FindChildByName(boneName)->GetTransform();
@@ -229,10 +234,6 @@ void CAnimationController::Awake()
 	SetTrackPosition(0, 0.55f);
 	SetTrackSpeed(0, 0.5f);
 	SetTrackWeight(0, 1.0f);
-}
-
-void CAnimationController::Start()
-{
 }
 
 void CAnimationController::Update()

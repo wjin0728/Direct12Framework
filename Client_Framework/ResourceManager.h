@@ -47,6 +47,9 @@ public:
 	void LoadSceneResourcesFromFile(std::ifstream& ifs);
 	void LoadSceneResourcesFromFile(const std::string& fileName);
 	void LoadPlayerObjects();
+	void LoadSkillObjects();
+
+	void LoadPrefabFromFile(const std::string& name);
 
 	std::unordered_map<std::string, std::shared_ptr<class CGameObject>>& GetPrefabs() { return prefabs; }
 

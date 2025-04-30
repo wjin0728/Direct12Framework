@@ -9,7 +9,7 @@ public:
 	Quaternion rotation;
 	S_OBJECT_TYPE type;
 
-	Object() : position(Vec3::Zero), velocity(Vec3::Zero), rotation(Quaternion::Identity), look_dir(Vec3::Zero), type(S_OBJECT_TYPE::S_PLAYER) {};
+	Object() : position(Vec3::Zero), velocity(Vec3::Zero), rotation(Quaternion::Identity), type(S_OBJECT_TYPE::S_PLAYER) {};
 	~Object() {};
 
 	void SetPosition(float x, float y, float z) { position = Vec3(x, y, z); };

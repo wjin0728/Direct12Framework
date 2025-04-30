@@ -273,6 +273,25 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		//float			y; 
 		//float			z; 
 
+		std::string objName[3] = { "Item_Skill1", "Item_Skill1", "Item_Skill3" };
+		auto item = RESOURCE.GetPrefab(objName[(int)packet->item_enum]);
+		if (!item) {
+			std::cout << "item is nullptr" << std::endl;
+			break;
+		}
+		auto itemObj = CGameObject::Instantiate(item);
+		itemObj->SetTag("Item");
+		itemObj->SetRenderLayer("Opaque");
+		itemObj->SetObjectType(OBJECT_TYPE::ITEM);
+		itemObj->SetActive(true);
+		itemObj->SetStatic(false);
+		itemObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		itemObj->Awake();
+		itemObj->Start();
+
+
+		scene->AddObject(itemObj);
+
 		break;
 	}
 	default:

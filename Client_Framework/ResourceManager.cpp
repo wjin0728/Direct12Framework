@@ -20,6 +20,7 @@ void CResourceManager::Initialize()
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
 
 	LoadPlayerObjects();
+	LoadSkillObjects();
 }
 
 void CResourceManager::Destroy()
@@ -101,27 +102,26 @@ void CResourceManager::LoadSceneResourcesFromFile(const std::string& fileName)
 
 void CResourceManager::LoadPlayerObjects()
 {
-	auto archer = CGameObject::CreateObjectFromFile("Player_Archer");
-	if (archer) {
-		archer->SetName("Player_Archer");
-		archer->SetActive(false);
-		archer->SetStatic(false);
-		prefabs["Player_Archer"] = archer;
-	}
-	auto fighter = CGameObject::CreateObjectFromFile("Player_Fighter");
-	if (fighter) {
-		fighter->SetName("Player_Fighter");
-		fighter->SetActive(false);
-		fighter->SetStatic(false);
-		prefabs["Player_Fighter"] = fighter;
-	}
+	LoadPrefabFromFile("Player_Archer");
+	LoadPrefabFromFile("Player_Fighter");
+	LoadPrefabFromFile("Player_Mage");
+}
 
-	auto mage = CGameObject::CreateObjectFromFile("Player_Mage");
-	if (mage) {
-		mage->SetName("Player_Mage");
-		mage->SetActive(false);
-		mage->SetStatic(false);
-		prefabs["Player_Mage"] = mage;
+void CResourceManager::LoadSkillObjects()
+{
+	LoadPrefabFromFile("Item_Skill1");
+	LoadPrefabFromFile("Item_Skill2");
+	LoadPrefabFromFile("Item_Skill3");
+}
+
+void CResourceManager::LoadPrefabFromFile(const std::string& name)
+{
+	auto skill = CGameObject::CreateObjectFromFile(name);
+	if (skill) {
+		skill->SetName(name);
+		skill->SetActive(false);
+		skill->SetStatic(false);
+		prefabs[name] = skill;
 	}
 }
 

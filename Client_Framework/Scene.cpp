@@ -299,6 +299,9 @@ void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> c
 		return;
 	}
 	for (const auto& object : mRenderLayers[layer]) {
+		if (object->GetName() == "Item_Skill1") {
+			int a{};
+		}
 		object->Render(camera, pass);
 	}
 }

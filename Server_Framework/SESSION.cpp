@@ -80,7 +80,7 @@ void SESSION::send_drop_item_packet()
 
 	p.item_enum = 1;
 
-	p.x = _pos.x + 10;
+	p.x = _pos.x + 5;
 	p.y = _pos.y;
 	p.z = _pos.z;
 

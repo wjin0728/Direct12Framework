@@ -106,11 +106,6 @@ struct SC_CHAT_PACKET : PACKET {
 	char			mess[CHAT_SIZE];
 };
 
-struct SC_CHAT_PACKET : PACKET {
-	int				id;
-	char			mess[CHAT_SIZE];
-};
-
 struct SC_DROP_ITEM_PACKET : PACKET {
 	int				id;
 	char			item_enum;
