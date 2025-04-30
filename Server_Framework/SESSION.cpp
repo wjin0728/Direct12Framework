@@ -32,21 +32,26 @@ void SESSION::send_login_info_packet()
 
 void SESSION::send_add_player_packet(SESSION* client)
 {
-	SC_ADD_OBJECT_PACKET add_packet;
-	add_packet.id = client->_id;
-	add_packet.size = sizeof(add_packet);
-	add_packet.type = SC_ADD_OBJECT;
-	do_send(&add_packet);
+	SC_ADD_PLAYER_PACKET p;
+	p.id = client->_id;
+	p.size = sizeof(p);
+	p.type = SC_ADD_PLAYER;
+	p.player_class = client->_class;
+	p.x = client->_pos.x;
+	p.y = client->_pos.y;
+	p.z = client->_pos.z;
+	p.look_y = client->_look_dir.y;
+	do_send(&p);
 }
 
 void SESSION::send_chat_packet(int c_id, const char* mess) 
 {
-	SC_CHAT_PACKET chat_packet;
-	chat_packet.id = c_id;
-	strcpy_s(chat_packet.mess, mess);
-	chat_packet.type = SC_CHAT;
-	chat_packet.size = sizeof(chat_packet);
-	do_send(&chat_packet);
+	SC_CHAT_PACKET p;
+	p.id = c_id;
+	strcpy_s(p.mess, mess);
+	p.type = SC_CHAT;
+	p.size = sizeof(p);
+	do_send(&p);
 }
 
 void SESSION::send_move_packet(SESSION* client)

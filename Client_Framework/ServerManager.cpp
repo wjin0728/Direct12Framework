@@ -132,17 +132,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_LOGIN_INFO: {
 		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet_ptr);
 
-		my_info.SetID(packet->id);
-
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		scene->SetClientID(packet->id);
-		auto player = scene->CreatePlayer(PLAYER_CLASS::FIGHTER, packet->id);
-		auto mainCam = scene->CreatePlayerCamera(player);
 
-		
-
-		//scene->SetPlayer(packet->id, player, { 10, 5, 10 });
-		//player->GetTransform()->SetLocalPosition({ 10, 5, 10 });
 		break;
 	}
 	case SC_LOGIN_FAIL: {
@@ -160,13 +152,25 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		break;
 	}
+	case SC_ADD_PLAYER: {
+		SC_ADD_PLAYER_PACKET* packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet_ptr);
+
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		auto player = scene->CreatePlayer((PLAYER_CLASS)packet->player_class, packet->id);
+		if (scene->GetClientID() == packet->id) 
+			auto mainCam = scene->CreatePlayerCamera(player);
+
+		scene->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		scene->GetPlayer(packet->id)->GetTransform()->SetLocalRotationY(packet->look_y);
+
+		break;
+	}
 	case SC_MOVE_OBJECT: {
 		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
 
-		cout << "SC_MOVE_PACKET" << endl;
-		
-		INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({packet->x, packet->y, packet->z});
-		INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalRotationY(packet->look_y);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		scene->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({packet->x, packet->y, packet->z});
+		scene->GetPlayer(packet->id)->GetTransform()->SetLocalRotationY(packet->look_y);
 
 		break;
 	}

@@ -45,3 +45,42 @@ void Object::LoadNavMap(const std::string& fileName)
 
 	cout << mNavMapData.size() << endl;
 }
+
+float Object::GetHeight(float fx, float fz)
+{
+	float localX = fx - Offset.x;
+	float localZ = fz - Offset.z;
+
+	if (localX < 0.0f || localZ < 0.0f || localX >= scale.x || localZ >= scale.z) {
+		return 0.0f;
+	}
+
+	float xIndex = localX / (scale.x / (resolution));
+	float zIndex = localZ / (scale.z / (resolution));
+	zIndex = resolution - zIndex;
+
+
+	int x = static_cast<int>(xIndex);
+	int z = static_cast<int>(zIndex);
+
+	float fxPercent = xIndex - x;
+	float fzPercent = zIndex - z;
+
+	float fBottomLeft = heightData[x + (z * resolution)] * scale.y;
+	float fBottomRight = heightData[(x + 1) + (z * resolution)] * scale.y;
+	float fTopLeft = heightData[x + ((z + 1) * resolution)] * scale.y;
+	float fTopRight = heightData[(x + 1) + ((z + 1) * resolution)] * scale.y;
+
+	if (fzPercent >= fxPercent) {
+		fBottomRight = fBottomLeft + (fTopRight - fTopLeft);
+	}
+	else {
+		fTopLeft = fTopRight + (fBottomLeft - fBottomRight);
+	}
+
+	float fTopHeight = SimpleMath::Flerp(fTopLeft, fTopRight, fxPercent);
+	float fBottomHeight = SimpleMath::Flerp(fBottomLeft, fBottomRight, fxPercent);
+	float fHeight = SimpleMath::Flerp(fBottomHeight, fTopHeight, fzPercent);
+
+	return fHeight;
+}
