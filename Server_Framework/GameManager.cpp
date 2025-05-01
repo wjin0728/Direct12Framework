@@ -312,7 +312,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_000: {
 		CS_000_PACKET* p = reinterpret_cast<CS_000_PACKET*>(packet);
 
-		items[item_cnt++].SetPosition(clients[c_id]._pos.x + 5, clients[c_id]._pos.y, clients[c_id]._pos.z);
+		items[item_cnt++].SetPosition(clients[c_id]._pos.x, clients[c_id]._pos.y, clients[c_id]._pos.z);
 		if (item_cnt >= MAX_ITEM) item_cnt = 0;
 
 		for (auto& cl : clients) {

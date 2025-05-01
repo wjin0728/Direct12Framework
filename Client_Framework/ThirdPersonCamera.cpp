@@ -50,29 +50,31 @@ void CThirdPersonCamera::Update()
 	float deltaTime = DELTA_TIME;
 	float speed = deltaTime * 5.f;
 	
-	Vec2 mouseDelta = INPUT.GetMouseDelta();
+	if(mCanRotate){
+		Vec2 mouseDelta = INPUT.GetMouseDelta();
 
-	int direction = 0;
-	if (INPUT.IsKeyPress(KEY_TYPE::D)) {
-		direction += 1;
+		int direction = 0;
+		if (INPUT.IsKeyPress(KEY_TYPE::D)) {
+			direction += 1;
+		}
+		if (INPUT.IsKeyPress(KEY_TYPE::A)) {
+			direction -= 1;
+		}
+
+		float yawOffsetSmooth = std::lerp(0.f, direction * 10.f, speed);
+		mCameraParams.yaw += yawOffsetSmooth;
+
+		float sensitivity = 0.5f;
+		mCameraParams.yaw += mouseDelta.x * sensitivity;
+		mCameraParams.pitch += mouseDelta.y * sensitivity;
+
+		float minPitch = -60.f;
+		float maxPitch = 45.f;
+
+		mCameraParams.pitch = std::clamp(mCameraParams.pitch, minPitch, maxPitch);
+		if (mCameraParams.yaw > 180.f) { mCameraParams.yaw -= 360.f; }
+		else if (mCameraParams.yaw < -180.f) { mCameraParams.yaw += 360.f; }
 	}
-	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
-		direction -= 1;
-	}
-
-	float yawOffsetSmooth = std::lerp(0.f, direction * 10.f, speed);
-	mCameraParams.yaw += yawOffsetSmooth;
-
-	float sensitivity = 0.5f;
-	mCameraParams.yaw += mouseDelta.x * sensitivity;
-	mCameraParams.pitch += mouseDelta.y * sensitivity;
-
-	float minPitch = -60.f;
-	float maxPitch = 45.f;
-
-	mCameraParams.pitch = std::clamp(mCameraParams.pitch, minPitch, maxPitch);
-	if (mCameraParams.yaw > 180.f) { mCameraParams.yaw -= 360.f; }
-	else if (mCameraParams.yaw < -180.f) { mCameraParams.yaw += 360.f; }
 
 	mCameraParams.trackingPosition = mTarget->GetTransform()->GetWorldPosition();
 	CameraBlend blendout = ComputeBlendout();
