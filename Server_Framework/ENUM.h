@@ -25,3 +25,11 @@ enum S_OBJECT_TYPE : UINT8
 
 	S_end
 };
+
+enum class S_PLAYER_CLASS : UINT8
+{
+	FIGHTER,
+	ARCHER,
+	MAGE,
+	end
+};

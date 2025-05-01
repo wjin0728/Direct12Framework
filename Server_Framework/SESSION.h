@@ -23,6 +23,7 @@ public:
 	Vec3				_velocity;     // 추가: 속도
 	Vec3				_acceleration; // 추가: 가속도
 	Quaternion			_look_rotation;
+	uint8_t			    _class;
 
 	SESSION() : 
 		_state(SESSION_STATE::ST_FREE), 
