@@ -209,7 +209,6 @@
     <ClInclude Include="ThirdPersonCamera.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
-    <ClInclude Include="MiniGame.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -364,9 +363,6 @@
     </ClCompile>
     <ClCompile Include="ThirdPersonCamera.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
-    </ClCompile>
-    <ClCompile Include="MiniGame.cpp">
-      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

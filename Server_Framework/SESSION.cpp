@@ -80,8 +80,8 @@ void SESSION::send_drop_item_packet()
 
 	p.item_enum = 1;
 
-	p.x = _pos.x;
-	p.y = _pos.y + 2;
+	p.x = _pos.x + 5;
+	p.y = _pos.y;
 	p.z = _pos.z;
 
 	// 지금 코드는 3명이 접속해있으면 3명 모두의 앞에 한 개씩 생김 (무조건 자기 앞 기준 1개 생성함)
