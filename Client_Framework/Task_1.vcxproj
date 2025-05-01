@@ -171,6 +171,7 @@
     <ClInclude Include="CResource.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingGroup.h" />
+    <ClInclude Include="MiniGame.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderPipeline.h" />
@@ -223,6 +224,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
+    <ClCompile Include="MiniGame.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderPipeline.cpp" />
