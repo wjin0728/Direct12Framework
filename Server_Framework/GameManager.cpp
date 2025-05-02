@@ -191,20 +191,22 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		//clients[c_id]._player._class = p->name[0];
 		if (0 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
+			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::MAGE;
 		else if (1 == c_id)
 			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::ARCHER;
 		else if (2 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::MAGE;
+			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
 		clients[c_id]._player._pos = Vec3(20, 20, 20);
 
 		clients[c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;
 
+		// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
 		for (auto& cl : clients) {
 			if (cl._state != ST_INGAME) continue;
 			cl.send_add_player_packet(&clients[c_id]);
 		}
+		// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
 		for (auto& cl : clients) {
 			if (cl._state != ST_INGAME) continue;
 			if (cl._id == c_id) continue;

@@ -67,6 +67,7 @@ enum ITEM_TYPE : UINT8
 	GRASS_PIECE,
 
 	item_end
+};
 	
 enum class PLAYER_STATE : UINT8
 {
@@ -105,3 +106,4 @@ enum class ARCHER_ANIMATION : UINT8
 	__STATIC_POSE,
 
 	end
+};

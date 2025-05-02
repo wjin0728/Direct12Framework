@@ -126,7 +126,7 @@ void ServerManager::Recv_Packet()
 	DWORD recv_flag = 0;
 
 	OVER_PLUS* sdata = new OVER_PLUS();
-	sdata->_over.hEvent = reinterpret_cast<HANDLE>(this);  // hEvent�� OVER_PLUS �����͸� ����
+	sdata->_over.hEvent = reinterpret_cast<HANDLE>(this);
 
 	wsaover.hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	if (wsaover.hEvent == nullptr) {
@@ -137,7 +137,6 @@ void ServerManager::Recv_Packet()
 	int res = WSARecv(server_socket, &sdata->_wsabuf, 1, 0, &recv_flag, &sdata->_over, recv_callback);
 	if (0 != res) {
 		int err_no = WSAGetLastError();
-		// ���� ��ģ i/o �۾��� �����ϰ� �ֽ��ϴ�. ��� ������ �� ������
 		if (WSA_IO_PENDING != err_no)
 			print_error("Recv_Packet - WSARecv", WSAGetLastError());
 	}
@@ -187,7 +186,7 @@ void ServerManager::Recv_Loop()
 	while (1) {
 		Recv_Packet();
 
-		SleepEx(16, true);
+		SleepEx(10, true);
 	}
 }
 
@@ -279,7 +278,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		itemObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		itemObj->Awake();
 		itemObj->Start();
-
 
 		scene->AddObject(itemObj);
 
