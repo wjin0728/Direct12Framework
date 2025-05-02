@@ -9,7 +9,7 @@
 #include"Scene.h"
 #include"Terrain.h"
 #include"Camera.h"
-
+#include"Animation.h"
 #include "ServerManager.h"
 
 CPlayerController::~CPlayerController()
@@ -40,6 +40,16 @@ void CPlayerController::Update()
 
 void CPlayerController::LateUpdate()
 {
+}
+
+void CPlayerController::SetChildAnimationController()
+{
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+}
+
+void CPlayerController::SetState(PLAYER_STATE state)
+{
+
 }
 
 void CPlayerController::OnKeyEvents()

@@ -230,9 +230,8 @@ void CAnimationController::Start()
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
 	}
 
-	SetTrackAnimationSet(0, 0);
-	SetTrackPosition(0, 0.55f);
-	SetTrackSpeed(0, 0.5f);
+	SetTrackAnimationSet(0, 1);
+	SetTrackSpeed(0, 1.0f);
 	SetTrackWeight(0, 1.0f);
 }
 
@@ -280,7 +279,7 @@ void CAnimationController::LateUpdate()
 
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
 {
-	if (trackIndex < mTracks.size()) {
+	if (trackIndex < mTracks.size() && mTracks[trackIndex]->mIndex != setIndex) {
 		mTracks[trackIndex]->SetAnimationSet(setIndex);
 		mTracks[trackIndex]->SetStartEndTime(mAnimationSets->mAnimationSet[setIndex]->mStartTime, mAnimationSets->mAnimationSet[setIndex]->mEndTime);
 	}

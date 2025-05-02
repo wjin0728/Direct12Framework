@@ -234,6 +234,13 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
 
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (scene && clientID != packet->id) {
+			player->Awake();
+			player->Start();
+			scene->AddObject(player);
+		}
+
 		break;
 	}
 	case SC_MOVE_OBJECT: {
