@@ -262,7 +262,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 			float terrainHeight = terrain.GetHeight(clients[c_id]._player._pos.x, clients[c_id]._player._pos.z);
 			clients[c_id]._player._pos.y = terrainHeight;
-			cout << "terrain height : " << terrainHeight << endl;
+			// cout << "terrain height : " << terrainHeight << endl;
 
 			if (moveDir.LengthSquared() > 0.001f) {
 				clients[c_id]._player._look_dir = moveDir;
@@ -278,7 +278,24 @@ void GameManager::Process_packet(int c_id, char* packet)
 				clients[c_id]._player._look_dir.y = angle.y * radToDeg;
 			}
 
-			// 충돌해야되는곳...?
+			clients[c_id]._player.LocalTransform();
+			if (!items.empty()) {
+				for (auto& it : items) {
+					if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
+						it.second.LocalTransform();
+					//cout << "player bounding box center\t" 
+					//	<< clients[c_id]._player._boundingbox.Center.x << " "
+					//	<< clients[c_id]._player._boundingbox.Center.y << " "
+					//	<< clients[c_id]._player._boundingbox.Center.z << endl;
+					//cout << "item bounding box center\t" 
+					//	<< it.second._boundingbox.Center.x << " "
+					//	<< it.second._boundingbox.Center.y << " "
+					//	<< it.second._boundingbox.Center.z << endl;
+					if (clients[c_id]._player._boundingbox.Intersects(it.second._boundingbox))
+						cout << "cl : " << c_id << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
+				}
+			}
+			clients[c_id]._player._boundingbox = clients[c_id]._player._orignalboundingbox;
 
 			for (auto& cl : clients) {
 				if (cl._state != ST_INGAME) continue;
@@ -305,9 +322,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_000: {
 		CS_000_PACKET* p = reinterpret_cast<CS_000_PACKET*>(packet);
 
-		items[item_cnt++].SetPosition(clients[c_id]._player._pos.x, clients[c_id]._player._pos.y, clients[c_id]._player._pos.z);
-
-		if (item_cnt >= MAX_ITEM) item_cnt = 0;
+		items[item_cnt].SetPosition(clients[c_id]._player._pos.x + 2, clients[c_id]._player._pos.y, clients[c_id]._player._pos.z);
+		items[item_cnt].SetItemType(S_ITEM_TYPE::S_FIRE_ENCHANT);
+		items[item_cnt++].LocalTransform();
+		//if (item_cnt >= MAX_ITEM) item_cnt = 0;
 
 		for (auto& cl : clients) {
 			if (cl._state != ST_INGAME) continue;

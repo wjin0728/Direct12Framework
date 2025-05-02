@@ -80,10 +80,9 @@ void SESSION::send_drop_item_packet()
 
 	p.item_enum = 1;
 
-	p.x = _player._pos.x;
-	p.y = _player._pos.y + 2;
+	p.x = _player._pos.x + 2;
+	p.y = _player._pos.y;
 	p.z = _player._pos.z;
 
-	// ���� �ڵ�� 3���� ������������ 3�� ����� �տ� �� ���� ���� (������ �ڱ� �� ���� 1�� ������)
 	do_send(&p);
 }

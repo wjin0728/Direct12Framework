@@ -29,3 +29,4 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Vec3 = SimpleMath::Vector3;
 using SimpleMath::Quaternion;
+using SimpleMath::Matrix;

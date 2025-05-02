@@ -210,12 +210,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_ADD_OBJECT: {
 		SC_ADD_OBJECT_PACKET* packet = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(packet_ptr);
 
-		// INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-
-		// �÷��̾� �����ؾ� ��
-		// mplayers ���� �ְ� ��������Ʈ���� �־�� ��
-		// INSTANCE(CSceneManager).GetCurScene()->SetPlayer(packet->id, 0, 0, 0);
-
 		break;
 	}
 	case SC_ADD_PLAYER: {
@@ -245,8 +239,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_MOVE_OBJECT: {
 		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
 
-		cout << "SC_MOVE_PACKET" << endl;
-
 		int id = packet->id;
 		if (id == clientID) {
 			mPlayer->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
@@ -264,12 +256,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_DROP_ITEM: {
 		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
-
-		//int			id;
-		//char			item_enum; 
-		//float			x; 
-		//float			y; 
-		//float			z; 
 
 		std::string objName[3] = { "Item_Skill1", "Item_Skill1", "Item_Skill3" };
 		auto item = RESOURCE.GetPrefab(objName[(int)packet->item_enum]);

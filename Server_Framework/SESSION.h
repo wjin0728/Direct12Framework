@@ -23,13 +23,6 @@ public:
 
 	PlayerCharacter		_player;
 
-	//Vec3				_pos;	
-	//Vec3				_look_dir; // 캐릭터가 보고있는 방향
-	//Vec3				_velocity;     // 추가: 속도
-	//Vec3				_acceleration; // 추가: 가속도
-	//Quaternion			_look_rotation;
-	//uint8_t			    _class;
-
 	SESSION() : 
 		_state(SESSION_STATE::ST_FREE), 
 		_id(0), 
