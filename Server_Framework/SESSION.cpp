@@ -36,11 +36,11 @@ void SESSION::send_add_player_packet(SESSION* client)
 	p.id = client->_id;
 	p.size = sizeof(p);
 	p.type = SC_ADD_PLAYER;
-	p.player_class = client->_class;
-	p.x = client->_pos.x;
-	p.y = client->_pos.y;
-	p.z = client->_pos.z;
-	p.look_y = client->_look_dir.y;
+	p.player_class = client->_player._class;
+	p.x = client->_player._pos.x;
+	p.y = client->_player._pos.y;
+	p.z = client->_player._pos.z;
+	p.look_y = client->_player._look_dir.y;
 	do_send(&p);
 }
 
@@ -62,11 +62,11 @@ void SESSION::send_move_packet(SESSION* client)
 	p.type = SC_MOVE_OBJECT;
 	p.size = sizeof(p);
 
-	p.x = client->_pos.x;
-	p.y = client->_pos.y;
-	p.z = client->_pos.z;
+	p.x = client->_player._pos.x;
+	p.y = client->_player._pos.y;
+	p.z = client->_player._pos.z;
 
-	p.look_y = client->_look_dir.y;
+	p.look_y = client->_player._look_dir.y;
 
 	do_send(&p);
 }
@@ -80,9 +80,9 @@ void SESSION::send_drop_item_packet()
 
 	p.item_enum = 1;
 
-	p.x = _pos.x + 5;
-	p.y = _pos.y;
-	p.z = _pos.z;
+	p.x = _player._pos.x + 5;
+	p.y = _player._pos.y;
+	p.z = _player._pos.z;
 
 	// 지금 코드는 3명이 접속해있으면 3명 모두의 앞에 한 개씩 생김 (무조건 자기 앞 기준 1개 생성함)
 	do_send(&p);

@@ -1,12 +1,5 @@
 ﻿#include "GameManager.h"
 
-
-//#include <DirectXMath.h>
-//#include "../../Direct12Framework/SimpleMath.h"
-//#include "../../Direct12Framework/Timer.h"
-//using namespace DirectX;
-//using Vec3 = SimpleMath::Vector3;
-
 GameManager::GameManager()
 {
 	lastTime = std::chrono::high_resolution_clock::now();
@@ -196,14 +189,14 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[c_id]._state = ST_INGAME;
 		}
 
-		//clients[c_id]._class = p->name[0];
+		//clients[c_id]._player._class = p->name[0];
 		if (0 == c_id)
-			clients[c_id]._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
+			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
 		else if (1 == c_id)
-			clients[c_id]._class = (uint8_t)S_PLAYER_CLASS::ARCHER;
+			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::ARCHER;
 		else if (2 == c_id)
-			clients[c_id]._class = (uint8_t)S_PLAYER_CLASS::MAGE;
-		clients[c_id]._pos = Vec3(20, 20, 20);
+			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::MAGE;
+		clients[c_id]._player._pos = Vec3(20, 20, 20);
 
 		clients[c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;
@@ -257,35 +250,35 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		else {
 			velocity = Vec3::Zero;
-			clients[c_id]._acceleration = Vec3::Zero;
+			clients[c_id]._player._acceleration = Vec3::Zero;
 		}
 
 		// 위치 업데이트
 		float deltaTime = 1.f / 110.f; 
-		Vec3 newPos = clients[c_id]._pos + velocity * deltaTime;
+		Vec3 newPos = clients[c_id]._player._pos + velocity * deltaTime;
 
 		if (CanMove(newPos.x, newPos.z)) {
-			clients[c_id]._pos = newPos;
+			clients[c_id]._player._pos = newPos;
 
-			float terrainHeight = terrain.GetHeight(clients[c_id]._pos.x, clients[c_id]._pos.z);
-			clients[c_id]._pos.y = terrainHeight;
+			float terrainHeight = terrain.GetHeight(clients[c_id]._player._pos.x, clients[c_id]._player._pos.z);
+			clients[c_id]._player._pos.y = terrainHeight;
 			cout << "terrain height : " << terrainHeight << endl;
 
 			if (moveDir.LengthSquared() > 0.001f) {
-				clients[c_id]._look_dir = moveDir;
+				clients[c_id]._player._look_dir = moveDir;
 			}
 
-			clients[c_id]._velocity = velocity;
-
-			//
+			clients[c_id]._player._velocity = velocity;
 
 			float rotationSpeed = 10.f;
 			if (moveDir.LengthSquared() > 0.001f) {
 				Quaternion targetRot = Quaternion::LookRotation(moveDir);
-				Quaternion rotation = clients[c_id]._look_rotation = Quaternion::Slerp(clients[c_id]._look_rotation, targetRot, rotationSpeed * deltaTime);
+				Quaternion rotation = clients[c_id]._player._rotation = Quaternion::Slerp(clients[c_id]._player._rotation, targetRot, rotationSpeed * deltaTime);
 				Vec3 angle = Vec3::GetAngleToQuaternion(rotation);
-				clients[c_id]._look_dir.y = angle.y * radToDeg;
+				clients[c_id]._player._look_dir.y = angle.y * radToDeg;
 			}
+
+			// 충돌해야되는곳...?
 
 			for (auto& cl : clients) {
 				if (cl._state != ST_INGAME) continue;
@@ -293,8 +286,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 			}
 		}
 		else {
-			clients[c_id]._velocity = Vec3::Zero;
-			clients[c_id]._acceleration = Vec3::Zero;
+			clients[c_id]._player._velocity = Vec3::Zero;
+			clients[c_id]._player._acceleration = Vec3::Zero;
 		}
 
 		break;
@@ -312,7 +305,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_000: {
 		CS_000_PACKET* p = reinterpret_cast<CS_000_PACKET*>(packet);
 
-		items[item_cnt++].SetPosition(clients[c_id]._pos.x + 5, clients[c_id]._pos.y, clients[c_id]._pos.z);
+		items[item_cnt++].SetPosition(clients[c_id]._player._pos.x + 5, clients[c_id]._player._pos.y, clients[c_id]._player._pos.z);
 		if (item_cnt >= MAX_ITEM) item_cnt = 0;
 
 		for (auto& cl : clients) {

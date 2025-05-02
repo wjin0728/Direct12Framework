@@ -22,6 +22,7 @@
     <ClCompile Include="..\Client_Framework\SimpleMath.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="PlayerCharacter.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="OVER_PLUS.cpp" />
     <ClCompile Include="SESSION.cpp" />
@@ -31,6 +32,7 @@
     <ClInclude Include="ENUM.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="PlayerCharacter.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="OVER_PLUS.h" />
     <ClInclude Include="protocol.h" />

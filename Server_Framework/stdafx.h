@@ -21,6 +21,7 @@
 
 #include <DirectXMath.h>
 #include "../Client_Framework/SimpleMath.h"
+#include <DirectXCollision.h>
 
 using namespace std;
 
