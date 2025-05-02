@@ -36,11 +36,11 @@ void SESSION::send_add_player_packet(SESSION* client)
 	p.id = client->_id;
 	p.size = sizeof(p);
 	p.type = SC_ADD_PLAYER;
-	p.player_class = client->_class;
-	p.x = client->_pos.x;
-	p.y = client->_pos.y;
-	p.z = client->_pos.z;
-	p.look_y = client->_look_dir.y;
+	p.player_class = client->_player._class;
+	p.x = client->_player._pos.x;
+	p.y = client->_player._pos.y;
+	p.z = client->_player._pos.z;
+	p.look_y = client->_player._look_dir.y;
 	do_send(&p);
 }
 
@@ -62,11 +62,11 @@ void SESSION::send_move_packet(SESSION* client)
 	p.type = SC_MOVE_OBJECT;
 	p.size = sizeof(p);
 
-	p.x = client->_pos.x;
-	p.y = client->_pos.y;
-	p.z = client->_pos.z;
+	p.x = client->_player._pos.x;
+	p.y = client->_player._pos.y;
+	p.z = client->_player._pos.z;
 
-	p.look_y = client->_look_dir.y;
+	p.look_y = client->_player._look_dir.y;
 
 	do_send(&p);
 }
@@ -80,10 +80,10 @@ void SESSION::send_drop_item_packet()
 
 	p.item_enum = 1;
 
-	p.x = _pos.x;
-	p.y = _pos.y + 2;
-	p.z = _pos.z;
+	p.x = _player._pos.x;
+	p.y = _player._pos.y + 2;
+	p.z = _player._pos.z;
 
-	// Áö±Ý ÄÚµå´Â 3¸íÀÌ Á¢¼ÓÇØÀÖÀ¸¸é 3¸í ¸ðµÎÀÇ ¾Õ¿¡ ÇÑ °³¾¿ »ý±è (¹«Á¶°Ç ÀÚ±â ¾Õ ±âÁØ 1°³ »ý¼ºÇÔ)
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ï¿½ 3ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 3ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Õ¿ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ú±ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
 	do_send(&p);
 }

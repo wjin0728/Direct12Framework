@@ -128,10 +128,8 @@ void ServerManager::Recv_Packet()
 	OVER_PLUS* sdata = new OVER_PLUS();
 	sdata->_over.hEvent = reinterpret_cast<HANDLE>(this);  // hEvent�� OVER_PLUS �����͸� ����
 
-	// hEvent�� �ùٸ��� �ʱ�ȭ
 	wsaover.hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	if (wsaover.hEvent == nullptr) {
-		// ���� ó��
 		print_error("CreateEvent failed", GetLastError());
 	}
 	wsaover.hEvent = reinterpret_cast<HANDLE>(this);

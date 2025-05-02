@@ -26,6 +26,7 @@ constexpr char SC_SCENE_CHANGE = 8;
 constexpr char SC_ADD_PLAYER = 9;
 constexpr char SC_REMOVE_PLAYER = 10;
 constexpr char SC_DROP_ITEM = 11;
+constexpr char SC_REMOVE_ITEM = 13;
 
 #pragma pack (push, 1)
 struct PACKET {
@@ -89,6 +90,10 @@ struct SC_ADD_PLAYER_PACKET : PACKET {
 	float			look_y;
 };
 
+struct SC_REMOVE_PLAYER_PACKET : PACKET {
+	int				id;
+};
+
 struct SC_ADD_OBJECT_PACKET : PACKET {
 	int				id;
 };
@@ -112,6 +117,10 @@ struct SC_DROP_ITEM_PACKET : PACKET {
 	float			x;
 	float			y;
 	float			z;
+};
+
+struct SC_REMOVE_ITEM_PACKET : PACKET {
+	int				id;
 };
 
 struct SC_LOGIN_FAIL_PACKET : PACKET {
