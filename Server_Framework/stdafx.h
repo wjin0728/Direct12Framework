@@ -20,6 +20,7 @@
 #include "protocol.h"
 
 #include <DirectXMath.h>
+#include <DirectXCollision.h>
 #include "../Client_Framework/SimpleMath.h"
 
 using namespace std;

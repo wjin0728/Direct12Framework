@@ -206,7 +206,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		clients[c_id]._pos = Vec3(20, 20, 20);
 
 		clients[c_id].send_login_info_packet();
-		cout << "login : " << c_id << endl;
+		//cout << "login : " << c_id << endl;
 
 		for (auto& cl : clients) {
 			if (cl._state != ST_INGAME) continue;
@@ -227,7 +227,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			cl.send_chat_packet(c_id, p->mess);
 		}
 
-		std::cout << p->mess << std::endl;
+		//std::cout << p->mess << std::endl;
 		break;
 	}
 	case CS_MOVE: {
@@ -269,7 +269,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 			float terrainHeight = terrain.GetHeight(clients[c_id]._pos.x, clients[c_id]._pos.z);
 			clients[c_id]._pos.y = terrainHeight;
-			cout << "terrain height : " << terrainHeight << endl;
+			//cout << "terrain height : " << terrainHeight << endl;
 
 			if (moveDir.LengthSquared() > 0.001f) {
 				clients[c_id]._look_dir = moveDir;

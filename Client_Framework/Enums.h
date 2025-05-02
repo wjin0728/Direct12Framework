@@ -54,6 +54,20 @@ enum class PLAYER_CLASS : UINT8
 	end
 };
 
+enum class PLAYER_STATE : UINT8
+{
+	IDLE,
+	RUN,
+	ATTACK,
+	MOVE_ATTACK,
+	GETHIT,
+	DEATH,
+	JUMP,
+	SKILL,
+
+	end
+};
+
 enum class ARCHER_ANIMATION : UINT8
 {
 	WALKFAST,

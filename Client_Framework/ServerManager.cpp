@@ -242,12 +242,19 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
 
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (scene && clientID != packet->id) {
+			player->Awake();
+			player->Start();
+			scene->AddObject(player);
+		}
+
 		break;
 	}
 	case SC_MOVE_OBJECT: {
 		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
 
-		cout << "SC_MOVE_PACKET" << endl;
+		//cout << "SC_MOVE_PACKET" << endl;
 
 		int id = packet->id;
 		if (id == clientID) {
