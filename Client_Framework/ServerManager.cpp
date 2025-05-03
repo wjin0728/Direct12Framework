@@ -279,6 +279,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		itemObj->Awake();
 		itemObj->Start();
 
+		mItems[packet->id] = itemObj;
 		scene->AddObject(itemObj);
 
 		break;

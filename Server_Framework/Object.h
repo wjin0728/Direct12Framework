@@ -37,7 +37,7 @@ public:
 		mLocalMat._41 = _pos.x;
 		mLocalMat._42 = _pos.y;
 		mLocalMat._43 = _pos.z;
-		_boundingbox.Transform(_boundingbox, mLocalMat);
+		_orignalboundingbox.Transform(_boundingbox, mLocalMat);
 	};
 };
 

@@ -17,6 +17,8 @@ class CScene
 protected:
 	friend class CSceneManager;
 	using ObjectList = std::vector<std::shared_ptr<CGameObject>>;
+	using ObjectMap = std::unordered_map<UINT, std::shared_ptr<CGameObject>>;
+	std::array<UINT, OBJECT_TYPE::end> mObjectCount{};
 
 	ObjectList mObjects{};
 	std::mutex mObjectsLock{};
