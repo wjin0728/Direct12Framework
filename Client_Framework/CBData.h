@@ -56,3 +56,16 @@ struct BillboardData
 	int materialIdx = -1;
 	Matrix textureMat = Matrix::Identity;
 };
+
+struct CBUIData
+{
+	Vec3 color{};
+	float padding{};
+	Vec2 size{};
+	Vec2 position{};
+	Vec2 scale{};
+	Vec2 uvOffset;  
+	Vec2 uvScale;   
+	float type{ 0 };
+	int textureIdx = -1;
+};

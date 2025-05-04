@@ -59,7 +59,7 @@ int CGameApplication::Run()
 		{
 			INSTANCE(ServerManager).Recv_Packet();
 			SleepEx(1, true);
-			timer.Tick(0.f);
+			timer.Tick(60.f);
 			Update();
 			Render();
 			ShowFPS();

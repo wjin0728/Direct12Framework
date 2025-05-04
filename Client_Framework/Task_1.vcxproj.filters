@@ -211,6 +211,9 @@
     </ClInclude>
     <ClInclude Include="MiniGame.h" />
     <ClInclude Include="ContinuousRotation.h" />
+    <ClInclude Include="UIRenderer.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -371,6 +374,9 @@
     </ClCompile>
     <ClCompile Include="ContinuousRotation.cpp">
       <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="UIRenderer.cpp">
+      <Filter>GameObject\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

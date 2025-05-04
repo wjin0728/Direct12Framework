@@ -199,7 +199,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet_ptr);
 
 		clientID = packet->id;
-		mPlayer->GetTransform()->SetLocalPosition({ 10, 5, 10 });
 		cout << clientID << endl;
 
 		break;

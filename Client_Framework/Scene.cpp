@@ -333,6 +333,13 @@ void CScene::UpdatePassData()
 	passData.totalTime = TIMER.GetTotalTime();
 	passData.renderTargetSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
 
+	UIProjectionMatrix = XMMatrixOrthographicOffCenterLH(
+		0.f, passData.renderTargetSize.x,
+		passData.renderTargetSize.y, 0.f,
+		0.f, 1.f
+	);
+	passData.uiTransform = UIProjectionMatrix.Transpose();
+
 	auto gbufferAlbedo = RESOURCE.Get<CTexture>("GBufferAlbedo");
 	if (gbufferAlbedo) {
 		int gbufferAlbedoIdx = gbufferAlbedo->GetSrvIndex();

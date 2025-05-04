@@ -5,6 +5,7 @@
 #include"SkinnedMesh.h"
 #include"Material.h"
 #include"Shader.h"
+#include"UIRenderer.h"
 
 
 void CResourceManager::Initialize()
@@ -139,6 +140,7 @@ void CResourceManager::LoadDefaultMeshes()
 		m->SetName("Rectangle");
 		m->SetType(RESOURCE_TYPE::MESH);
 		Add(m);
+		CUIRenderer::mQuad = m;
 	}
 
 

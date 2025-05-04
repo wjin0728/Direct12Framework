@@ -26,6 +26,7 @@ void CMeshRenderer::Awake()
 
 void CMeshRenderer::Start()
 {
+	CRenderer::Start();
 }
 
 void CMeshRenderer::Update()

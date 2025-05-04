@@ -21,7 +21,6 @@ protected:
 	std::array<UINT, OBJECT_TYPE::end> mObjectCount{};
 
 	ObjectList mObjects{};
-	std::mutex mObjectsLock{};
 
 	std::unordered_map<std::string, ObjectList> mRenderLayers{};
 	std::vector<std::shared_ptr<class CInstancingGroup>> instancingGroups{};
@@ -31,6 +30,8 @@ protected:
 	std::array<std::vector<std::shared_ptr<CLight>>, (UINT)LIGHT_TYPE::END> mLights{};
 
 	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
+
+	Matrix UIProjectionMatrix{};
   
 public:
 	CScene();

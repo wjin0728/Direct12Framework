@@ -180,6 +180,7 @@
     <ClInclude Include="SkinnedMesh.h" />
     <ClInclude Include="SkinnedMeshRenderer.h" />
     <ClInclude Include="ThirdPersonCamera.h" />
+    <ClInclude Include="UIRenderer.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="DescriptorHeaps.h" />
@@ -234,6 +235,7 @@
     <ClCompile Include="SkinnedMesh.cpp" />
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
     <ClCompile Include="ThirdPersonCamera.cpp" />
+    <ClCompile Include="UIRenderer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="DescriptorHeaps.cpp" />
