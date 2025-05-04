@@ -7,194 +7,113 @@
 #include "SkinnedMeshRenderer.h"
 #include "ObjectPoolManager.h"
 
-CAnimationSet::CAnimationSet(float fLength, int nFramesPerSecond, int nKeyFrames, int nAnimatedBones, char* pstrName)
+CAnimationSet::CAnimationSet(float length, int framesPerSecond, int keyFrameNum, int boneNum, string name)
 {
-	m_fLength = fLength;
-	m_nFramesPerSecond = nFramesPerSecond;
-	m_nKeyFrames = nKeyFrames;
+	mLength = length;
+	mFramesPerSecond = framesPerSecond;
+	mKeyFrames = keyFrameNum;
 
-	strcpy_s(m_pstrAnimationSetName, 64, pstrName);
+	mAnimationSetName = name;
 
-#ifdef _WITH_ANIMATION_SRT
-	m_nKeyFrameTranslations = nKeyFrames;
-	m_pfKeyFrameTranslationTimes = new float[m_nKeyFrameTranslations];
-	m_ppxmf3KeyFrameTranslations = new XMFLOAT3 * [m_nKeyFrameTranslations];
-	for (int i = 0; i < m_nKeyFrameTranslations; i++) m_ppxmf3KeyFrameTranslations[i] = new XMFLOAT4X4[nAnimatedBones];
-
-	m_nKeyFrameScales = nKeyFrames;
-	m_pfKeyFrameScaleTimes = new float[m_nKeyFrameScales];
-	m_ppxmf3KeyFrameScales = new XMFLOAT3 * [m_nKeyFrameScales];
-	for (int i = 0; i < m_nKeyFrameScales; i++) m_ppxmf3KeyFrameScales[i] = new XMFLOAT4X4[nAnimatedBones];
-
-	m_nKeyFrameRotations = nKeyFrames;
-	m_pfKeyFrameRotationTimes = new float[m_nKeyFrameRotations];
-	m_ppxmf4KeyFrameRotations = new XMFLOAT3 * [m_nKeyFrameRotations];
-	for (int i = 0; i < m_nKeyFrameRotations; i++) m_ppxmf4KeyFrameRotations[i] = new XMFLOAT4X4[nAnimatedBones];
-#else
-	m_pfKeyFrameTimes = new float[nKeyFrames];
-	m_ppxmf4x4KeyFrameTransforms = new XMFLOAT4X4 * [nKeyFrames];
-	for (int i = 0; i < nKeyFrames; i++) m_ppxmf4x4KeyFrameTransforms[i] = new XMFLOAT4X4[nAnimatedBones];
-#endif
+	mKeyFrameTimes.resize(keyFrameNum);
+	mKeyFrameTransforms.resize(keyFrameNum);
+	for (auto& frame : mKeyFrameTransforms) frame.resize(boneNum);
 }
 
 CAnimationSet::~CAnimationSet()
 {
-#ifdef _WITH_ANIMATION_SRT
-	if (m_pfKeyFrameTranslationTimes) delete[] m_pfKeyFrameTranslationTimes;
-	for (int j = 0; j < m_nKeyFrameTranslations; j++) if (m_ppxmf3KeyFrameTranslations[j]) delete[] m_ppxmf3KeyFrameTranslations[j];
-	if (m_ppxmf3KeyFrameTranslations) delete[] m_ppxmf3KeyFrameTranslations;
-
-	if (m_pfKeyFrameScaleTimes) delete[] m_pfKeyFrameScaleTimes;
-	for (int j = 0; j < m_nKeyFrameScales; j++) if (m_ppxmf3KeyFrameScales[j]) delete[] m_ppxmf3KeyFrameScales[j];
-	if (m_ppxmf3KeyFrameScales) delete[] m_ppxmf3KeyFrameScales;
-
-	if (m_pfKeyFrameRotationTimes) delete[] m_pfKeyFrameRotationTimes;
-	for (int j = 0; j < m_nKeyFrameRotations; j++) if (m_ppxmf4KeyFrameRotations[j]) delete[] m_ppxmf4KeyFrameRotations[j];
-	if (m_ppxmf4KeyFrameRotations) delete[] m_ppxmf4KeyFrameRotations;
-#else
-	if (m_pfKeyFrameTimes) delete[] m_pfKeyFrameTimes;
-	for (int j = 0; j < m_nKeyFrames; j++) if (m_ppxmf4x4KeyFrameTransforms[j]) delete[] m_ppxmf4x4KeyFrameTransforms[j];
-	if (m_ppxmf4x4KeyFrameTransforms) delete[] m_ppxmf4x4KeyFrameTransforms;
-#endif
 }
 
-XMFLOAT4X4 CAnimationSet::GetSRT(int nBone, float fPosition)
+Matrix CAnimationSet::GetSRT(int boneIndex, float position)
 {
-	XMFLOAT4X4 xmf4x4Transform = Matrix::Identity;
-#ifdef _WITH_ANIMATION_SRT
-	XMVECTOR S, R, T;
-	for (int i = 0; i < (m_nKeyFrameTranslations - 1); i++)
+	Matrix transform = Matrix::Identity;
+	for (int i = 0; i < (mKeyFrames - 1); i++)
 	{
-		if ((m_pfKeyFrameTranslationTimes[i] <= fPosition) && (fPosition <= m_pfKeyFrameTranslationTimes[i + 1]))
+		if ((mKeyFrameTimes[i] <= position) && (position < mKeyFrameTimes[i + 1]))
 		{
-			float t = (fPosition - m_pfKeyFrameTranslationTimes[i]) / (m_pfKeyFrameTranslationTimes[i + 1] - m_pfKeyFrameTranslationTimes[i]);
-			T = XMVectorLerp(XMLoadFloat3(&m_ppxmf3KeyFrameTranslations[i][nBone]), XMLoadFloat3(&m_ppxmf3KeyFrameTranslations[i + 1][nBone]), t);
+			float t = (position - mKeyFrameTimes[i]) / (mKeyFrameTimes[i + 1] - mKeyFrameTimes[i]);
+			transform = Matrix::Interpolate(mKeyFrameTransforms[i][boneIndex], mKeyFrameTransforms[i + 1][boneIndex], t);
 			break;
 		}
 	}
-	for (UINT i = 0; i < (m_nKeyFrameScales - 1); i++)
-	{
-		if ((m_pfKeyFrameScaleTimes[i] <= fPosition) && (fPosition <= m_pfKeyFrameScaleTimes[i + 1]))
-		{
-			float t = (fPosition - m_pfKeyFrameScaleTimes[i]) / (m_pfKeyFrameScaleTimes[i + 1] - m_pfKeyFrameScaleTimes[i]);
-			S = XMVectorLerp(XMLoadFloat3(&m_ppxmf3KeyFrameScales[i][nBone]), XMLoadFloat3(&m_ppxmf3KeyFrameScales[i + 1][nBone]), t);
-			break;
-		}
-	}
-	for (UINT i = 0; i < (m_nKeyFrameRotations - 1); i++)
-	{
-		if ((m_pfKeyFrameRotationTimes[i] <= fPosition) && (fPosition <= m_pfKeyFrameRotationTimes[i + 1]))
-		{
-			float t = (m_fPosition - m_pfKeyFrameRotationTimes[i]) / (m_pfKeyFrameRotationTimes[i + 1] - m_pfKeyFrameRotationTimes[i]);
-			R = XMQuaternionSlerp(XMQuaternionConjugate(XMLoadFloat4(&m_ppxmf4KeyFrameRotations[i][nBone])), XMQuaternionConjugate(XMLoadFloat4(&m_ppxmf4KeyFrameRotations[i + 1][nBone])), t);
-			break;
-		}
-	}
+	if (position >= mKeyFrameTimes[mKeyFrames - 1]) transform = mKeyFrameTransforms[mKeyFrames - 1][boneIndex];
 
-	XMStoreFloat4x4(&xmf4x4Transform, XMMatrixAffineTransformation(S, XMVectorZero(), R, T));
-#else   
-	for (int i = 0; i < (m_nKeyFrames - 1); i++)
-	{
-		if ((m_pfKeyFrameTimes[i] <= fPosition) && (fPosition < m_pfKeyFrameTimes[i + 1]))
-		{
-			float t = (fPosition - m_pfKeyFrameTimes[i]) / (m_pfKeyFrameTimes[i + 1] - m_pfKeyFrameTimes[i]);
-			xmf4x4Transform = Matrix::Interpolate(m_ppxmf4x4KeyFrameTransforms[i][nBone], m_ppxmf4x4KeyFrameTransforms[i + 1][nBone], t);
-			break;
-		}
-	}
-	if (fPosition >= m_pfKeyFrameTimes[m_nKeyFrames - 1]) xmf4x4Transform = m_ppxmf4x4KeyFrameTransforms[m_nKeyFrames - 1][nBone];
-
-#endif
-	return(xmf4x4Transform);
+	return(transform);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CAnimationSets::CAnimationSets(int nAnimationSets)
+CAnimationSets::CAnimationSets(int setNum)
 {
-	m_nAnimationSets = nAnimationSets;
-	m_pAnimationSets = new CAnimationSet * [nAnimationSets];
+	mAnimationSets.resize(setNum);
+	for (auto& set : mAnimationSets) set = std::make_shared<CAnimationSet>();
 }
 
 CAnimationSets::~CAnimationSets()
 {
-	for (int i = 0; i < m_nAnimationSets; i++) if (m_pAnimationSets[i]) delete m_pAnimationSets[i];
-	if (m_pAnimationSets) delete[] m_pAnimationSets;
-
-	if (m_ppBoneFrameCaches) delete[] m_ppBoneFrameCaches;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CAnimationTrack::~CAnimationTrack()
 {
-	if (m_pCallbackKeys) delete[] m_pCallbackKeys;
-	if (m_pAnimationCallbackHandler) delete m_pAnimationCallbackHandler;
 }
 
-void CAnimationTrack::SetCallbackKeys(int nCallbackKeys)
+void CAnimationTrack::SetCallbackKeys(int num)
 {
-	m_nCallbackKeys = nCallbackKeys;
-	m_pCallbackKeys = new CALLBACKKEY[nCallbackKeys];
+	mCallbackKeys.resize(num);
 }
 
-void CAnimationTrack::SetCallbackKey(int nKeyIndex, float fKeyTime, void* pData)
+void CAnimationTrack::SetCallbackKey(int index, float keyTime, void* data)
 {
-	m_pCallbackKeys[nKeyIndex].m_fTime = fKeyTime;
-	m_pCallbackKeys[nKeyIndex].m_pCallbackData = pData;
+	mCallbackKeys[index].mTime = keyTime;
+	mCallbackKeys[index].mCallbackData = data;
 }
 
-void CAnimationTrack::SetAnimationCallbackHandler(CAnimationCallbackHandler* pCallbackHandler)
+void CAnimationTrack::SetAnimationCallbackHandler(std::shared_ptr<CAnimationCallbackHandler> callbackHandler)
 {
-	m_pAnimationCallbackHandler = pCallbackHandler;
+	mAnimationCallbackHandler = callbackHandler;
 }
 
 void CAnimationTrack::HandleCallback()
 {
-	if (m_pAnimationCallbackHandler)
-	{
-		for (int i = 0; i < m_nCallbackKeys; i++)
-		{
-			if (SimpleMath::IsEqual(m_pCallbackKeys[i].m_fTime, m_fPosition, ANIMATION_CALLBACK_EPSILON))
-			{
-				if (m_pCallbackKeys[i].m_pCallbackData) m_pAnimationCallbackHandler->HandleCallback(m_pCallbackKeys[i].m_pCallbackData, m_fPosition);
+	if (mAnimationCallbackHandler) {
+		for (auto& key : mCallbackKeys) {
+			if (SimpleMath::IsEqual(key.mTime, mPosition, ANIMATION_CALLBACK_EPSILON) && key.mCallbackData) {
+				mAnimationCallbackHandler->HandleCallback(key.mCallbackData, mPosition);
 				break;
 			}
 		}
 	}
 }
 
-float CAnimationTrack::UpdatePosition(float fTrackPosition, float fElapsedTime, float fAnimationLength)
+float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, float animationLength)
 {
-	float fTrackElapsedTime = fElapsedTime * m_fSpeed;
-	switch (m_nType)
-	{
-	case ANIMATION_TYPE::LOOP:
-	{
-		if (m_fPosition < 0.0f) m_fPosition = 0.0f;
-		else
-		{
-			m_fPosition = fTrackPosition + fTrackElapsedTime;
-			if (m_fPosition > fAnimationLength)
-			{
-				m_fPosition = -ANIMATION_CALLBACK_EPSILON;
-				return(fAnimationLength);
+	float trackElapsedTime = elapsedTime * mSpeed;
+	switch (mType) {
+	case ANIMATION_TYPE::LOOP: {
+		if (mPosition < 0.0f) mPosition = 0.0f;
+		else {
+			mPosition = trackPosition + trackElapsedTime;
+			if (mPosition > animationLength) {
+				mPosition = -ANIMATION_CALLBACK_EPSILON;
+				return(animationLength);
 			}
 		}
-		//			m_fPosition = fmod(fTrackPosition, m_pfKeyFrameTimes[m_nKeyFrames-1]); // m_fPosition = fTrackPosition - int(fTrackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
-		//			m_fPosition = fmod(fTrackPosition, m_fLength); //if (m_fPosition < 0) m_fPosition += m_fLength;
-		//			m_fPosition = fTrackPosition - int(fTrackPosition / m_fLength) * m_fLength;
+		//			mPosition = fmod(trackPosition, m_pfKeyFrameTimes[m_nKeyFrames-1]); // mPosition = trackPosition - int(trackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
+		//			mPosition = fmod(trackPosition, m_fLength); //if (mPosition < 0) mPosition += m_fLength;
+		//			mPosition = trackPosition - int(trackPosition / m_fLength) * m_fLength;
 		break;
 	}
 	case ANIMATION_TYPE::ONCE:
-		m_fPosition = fTrackPosition + fTrackElapsedTime;
-		if (m_fPosition > fAnimationLength) m_fPosition = fAnimationLength;
+		mPosition = trackPosition + trackElapsedTime;
+		if (mPosition > animationLength) mPosition = animationLength;
 		break;
 	case ANIMATION_TYPE::PINGPONG:
 		break;
 	}
 
-	return(m_fPosition);
+	return(mPosition);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -215,7 +134,7 @@ CAnimationController::~CAnimationController()
 {
 }
 
-void CAnimationController::SetAnimationCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr <CCallbackHandler>& callbackHandler)
+void CAnimationController::SetAnimationCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr <CAnimationCallbackHandler>& callbackHandler)
 {
 	animationSet->SetCallbackHandler(callbackHandler);
 }

@@ -2816,6 +2816,18 @@ inline Matrix Matrix::Transform(const Matrix& M, const Quaternion& rotation) noe
     return result;
 }
 
+inline Matrix Matrix::Interpolate(Matrix& M1, Matrix& M2, float t)
+{
+    Matrix result;
+    XMVECTOR S0, R0, T0, S1, R1, T1;
+    XMMatrixDecompose(&S0, &R0, &T0, XMLoadFloat4x4(&M1));
+    XMMatrixDecompose(&S1, &R1, &T1, XMLoadFloat4x4(&M2));
+    XMVECTOR S = XMVectorLerp(S0, S1, t);
+    XMVECTOR T = XMVectorLerp(T0, T1, t);
+    XMVECTOR R = XMQuaternionSlerp(R0, R1, t);
+    XMStoreFloat4x4(&result, XMMatrixAffineTransformation(S, XMVectorZero(), R, T));
+    return(result);
+}
 
 /****************************************************************************
  *

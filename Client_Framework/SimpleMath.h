@@ -600,6 +600,8 @@ namespace DirectX
             static void Transform(const Matrix& M, const Quaternion& rotation, Matrix& result) noexcept;
             static Matrix Transform(const Matrix& M, const Quaternion& rotation) noexcept;
 
+            static Matrix Matrix::Interpolate(Matrix& M1, Matrix& M2, float t);
+
             // Constants
             static const Matrix Identity;
         };

@@ -23,8 +23,8 @@ enum class ANIMATION_BLEND_TYPE : UINT
 
 struct CALLBACKKEY
 {
-    float  							m_fTime = 0.0f;
-    void* m_pCallbackData = NULL;
+    float  							mTime = 0.0f;
+    void* mCallbackData = NULL;
 };
 
 #define _WITH_ANIMATION_INTERPOLATION
@@ -42,33 +42,21 @@ public:
 class CAnimationSet
 {
 public:
-    CAnimationSet(float fLength, int nFramesPerSecond, int nKeyFrameTransforms, int nSkinningBones, char* pstrName);
+    CAnimationSet(float fLength, int nFramesPerSecond, int nKeyFrameTransforms, int nSkinningBones, string pstrName);
     ~CAnimationSet();
 
 public:
-    char							m_pstrAnimationSetName[64];
+    string							mAnimationSetName;
 
-    float							m_fLength = 0.0f;
-    int								m_nFramesPerSecond = 0; //m_fTicksPerSecond
+    float							mLength = 0.0f;
+    int								mFramesPerSecond = 0; //m_fTicksPerSecond
 
-    int								m_nKeyFrames = 0;
-    float* m_pfKeyFrameTimes = NULL;
-    XMFLOAT4X4** m_ppxmf4x4KeyFrameTransforms = NULL;
-
-#ifdef _WITH_ANIMATION_SRT
-    int								m_nKeyFrameScales = 0;
-    float* m_pfKeyFrameScaleTimes = NULL;
-    XMFLOAT3** m_ppxmf3KeyFrameScales = NULL;
-    int								m_nKeyFrameRotations = 0;
-    float* m_pfKeyFrameRotationTimes = NULL;
-    XMFLOAT4** m_ppxmf4KeyFrameRotations = NULL;
-    int								m_nKeyFrameTranslations = 0;
-    float* m_pfKeyFrameTranslationTimes = NULL;
-    XMFLOAT3** m_ppxmf3KeyFrameTranslations = NULL;
-#endif
+    int								mKeyFrames = 0;
+    std::vector<float> mKeyFrameTimes{};
+    std::vector<std::vector<Matrix>> mKeyFrameTransforms{};
 
 public:
-    XMFLOAT4X4 GetSRT(int nBone, float fPosition);
+    Matrix GetSRT(int nBone, float fPosition);
 };
 
 class CAnimationSets
@@ -78,18 +66,15 @@ public:
     ~CAnimationSets();
 
 private:
-    int								m_nReferences = 0;
+    int								mReferences = 0;
 
 public:
-    void AddRef() { m_nReferences++; }
-    void Release() { if (--m_nReferences <= 0) delete this; }
+    void AddRef() { mReferences++; }
+    void Release() { if (--mReferences <= 0) delete this; }
 
 public:
-    int								m_nAnimationSets = 0;
-    CAnimationSet** m_pAnimationSets = NULL;
-
-    int								m_nBoneFrames = 0;
-    CGameObject** m_ppBoneFrameCaches = NULL; //[m_nBoneFrames]
+    std::vector<std::shared_ptr<CAnimationSet>> mAnimationSets{};
+    std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
 };
 
 class CAnimationTrack
@@ -99,33 +84,32 @@ public:
     ~CAnimationTrack();
 
 public:
-    BOOL 							m_bEnable = true;
-    float 							m_fSpeed = 1.0f;
-    float 							m_fPosition = -ANIMATION_CALLBACK_EPSILON;
-    float 							m_fWeight = 1.0f;
+    BOOL 							mEnable = true;
+    float 							mSpeed = 1.0f;
+    float 							mPosition = -ANIMATION_CALLBACK_EPSILON;
+    float 							mWeight = 1.0f;
 
-    int 							m_nAnimationSet = 0; //AnimationSet Index
+    int 							mSetIndex = 0; //AnimationSet Index
 
-    ANIMATION_TYPE					m_nType = ANIMATION_TYPE::LOOP; //Once, Loop, PingPong
+    ANIMATION_TYPE					mType = ANIMATION_TYPE::LOOP; //Once, Loop, PingPong
 
-    int 							m_nCallbackKeys = 0;
-    CALLBACKKEY* m_pCallbackKeys = NULL;
+    std::vector<CALLBACKKEY> mCallbackKeys{};
 
-    CAnimationCallbackHandler* m_pAnimationCallbackHandler = NULL;
+    std::shared_ptr<CAnimationCallbackHandler> mAnimationCallbackHandler = NULL;
 
 public:
-    void SetAnimationSet(int nAnimationSet) { m_nAnimationSet = nAnimationSet; }
+    void SetAnimationSet(int nAnimationSet) { mSetIndex = nAnimationSet; }
 
-    void SetEnable(bool bEnable) { m_bEnable = bEnable; }
-    void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
-    void SetWeight(float fWeight) { m_fWeight = fWeight; }
+    void SetEnable(bool bEnable) { mEnable = bEnable; }
+    void SetSpeed(float fSpeed) { mSpeed = fSpeed; }
+    void SetWeight(float fWeight) { mWeight = fWeight; }
 
-    void SetPosition(float fPosition) { m_fPosition = fPosition; }
+    void SetPosition(float fPosition) { mPosition = fPosition; }
     float UpdatePosition(float fTrackPosition, float fTrackElapsedTime, float fAnimationLength);
 
     void SetCallbackKeys(int nCallbackKeys);
     void SetCallbackKey(int nKeyIndex, float fTime, void* pData);
-    void SetAnimationCallbackHandler(CAnimationCallbackHandler* pCallbackHandler);
+    void SetAnimationCallbackHandler(std::shared_ptr<CAnimationCallbackHandler> pCallbackHandler);
 
     void HandleCallback();
 };
@@ -152,11 +136,15 @@ public:
     UINT mBoneTransformIdx = -1;
 
     void SetTrackAnimationSet(int trackIndex, int setIndex);
+
     void SetTrackEnabled(int trackIndex, bool enabled);
     void SetTrackPosition(int trackIndex, float position);
     void SetTrackSpeed(int trackIndex, float speed);
     void SetTrackWeight(int trackIndex, float weight);
-    void SetTrackStartEndTime(int trackIndex, float start, float end);
+
+    void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
+    void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);
+    void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler* pCallbackHandler);
 
     void SetAnimationType(std::shared_ptr<CAnimationSet>& animationSet, ANIMATION_TYPE type);
 
