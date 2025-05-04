@@ -19,7 +19,6 @@ public:
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mItems{};
 
 	int clientID{ -1 };
-	bool RenderOK{ 0 };
 
 	size_t save_data_size = 0;
 	size_t one_packet_size = 0;

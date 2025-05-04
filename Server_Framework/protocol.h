@@ -4,7 +4,7 @@ constexpr int PORT_NUM = 4000;
 constexpr int NAME_SIZE = 20;
 constexpr int CHAT_SIZE = 300;
 
-constexpr int MAX_USER = 3;
+constexpr int MAX_USER = 16;
 constexpr int MAX_ITEM = 5;
 
 // Packet ID
@@ -26,7 +26,7 @@ constexpr char SC_SCENE_CHANGE = 8;
 constexpr char SC_ADD_PLAYER = 9;
 constexpr char SC_REMOVE_PLAYER = 10;
 constexpr char SC_DROP_ITEM = 11;
-constexpr char SC_REMOVE_ITEM = 12;
+constexpr char SC_REMOVE_ITEM = 13;
 
 #pragma pack (push, 1)
 struct PACKET {
@@ -112,7 +112,7 @@ struct SC_CHAT_PACKET : PACKET {
 };
 
 struct SC_DROP_ITEM_PACKET : PACKET {
-	int				item_id;
+	int				id;
 	char			item_enum;
 	float			x;
 	float			y;
@@ -120,10 +120,7 @@ struct SC_DROP_ITEM_PACKET : PACKET {
 };
 
 struct SC_REMOVE_ITEM_PACKET : PACKET {
-	int				item_id;
-	char			player_id; 
-					// -1이면 단순 삭제, 
-					// or player_id 플레이어가 아이템 획득
+	int				id;
 };
 
 struct SC_LOGIN_FAIL_PACKET : PACKET {

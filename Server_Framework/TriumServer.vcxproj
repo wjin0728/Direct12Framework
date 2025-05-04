@@ -24,7 +24,6 @@
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PlayerCharacter.cpp" />
-    <ClCompile Include="SkillObject.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="OVER_PLUS.cpp" />
     <ClCompile Include="SESSION.cpp" />
@@ -36,7 +35,6 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="PlayerCharacter.h" />
-    <ClInclude Include="SkillObject.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="OVER_PLUS.h" />
     <ClInclude Include="protocol.h" />

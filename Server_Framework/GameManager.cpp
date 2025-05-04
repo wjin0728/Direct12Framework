@@ -296,13 +296,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 					//	<< it.second._boundingbox.Center.x << " "
 					//	<< it.second._boundingbox.Center.y << " "
 					//	<< it.second._boundingbox.Center.z << endl;
-					if (clients[c_id]._player._boundingbox.Intersects(it.second._boundingbox)) {
-						for (auto& cl : clients) {
-							if (cl._state != ST_INGAME) continue;
-							cl.send_remove_item_packet(it.first, c_id);
-						}
+					if (clients[c_id]._player._boundingbox.Intersects(it.second._boundingbox))
 						cout << "cl : " << c_id << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
-					}
 				}
 			}
 
@@ -331,17 +326,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_000: {
 		CS_000_PACKET* p = reinterpret_cast<CS_000_PACKET*>(packet);
 
-		items[item_cnt].SetPosition(clients[c_id]._player._pos.x + 3, 
-			clients[c_id]._player._pos.y + 0.3, clients[c_id]._player._pos.z);
+		items[item_cnt].SetPosition(clients[c_id]._player._pos.x + 2, clients[c_id]._player._pos.y, clients[c_id]._player._pos.z);
 		items[item_cnt].SetItemType(S_ITEM_TYPE::S_FIRE_ENCHANT);
-		items[item_cnt].LocalTransform();
+		items[item_cnt++].LocalTransform();
+		//if (item_cnt >= MAX_ITEM) item_cnt = 0;
 
 		for (auto& cl : clients) {
 			if (cl._state != ST_INGAME) continue;
-			cl.send_drop_item_packet(items[item_cnt], item_cnt);
+			cl.send_drop_item_packet();
 		}
-
-		item_cnt++;
 		break;
 	}
 	}
