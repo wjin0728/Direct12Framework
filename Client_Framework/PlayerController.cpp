@@ -66,24 +66,20 @@ void CPlayerController::OnKeyEvents()
 	camForward.Normalize();
 	camRight.Normalize();
 
-	if (INPUT.IsKeyPress(KEY_TYPE::W)) {
-		dir |= 0x08;
-	}
-	if (INPUT.IsKeyPress(KEY_TYPE::S)) {
-		dir |= 0x02;
-	}
-	if (INPUT.IsKeyPress(KEY_TYPE::D)) {
-		dir |= 0x01;
-	}
-	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
-		dir |= 0x04;
-	}
-	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) {
-		dir |= 0x20;
-	}
-	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) {
-		dir |= 0x10;
-	}
+	if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
+	if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
+	if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
+	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
+	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) dir |= 0x20;
+	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) dir |= 0x10;
+
+	//if (INPUT.IsKeyDown(KEY_TYPE::W)) dir |= 0x08;
+	//if (INPUT.IsKeyDown(KEY_TYPE::S)) dir |= 0x02;
+	//if (INPUT.IsKeyDown(KEY_TYPE::D)) dir |= 0x01;
+	//if (INPUT.IsKeyDown(KEY_TYPE::A)) dir |= 0x04;
+	//if (INPUT.IsKeyDown(KEY_TYPE::SHIFT)) dir |= 0x20;
+	//if (INPUT.IsKeyDown(KEY_TYPE::CTRL)) dir |= 0x10;
+
 
 	if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
 		INSTANCE(ServerManager).send_cs_000_packet();
@@ -92,4 +88,10 @@ void CPlayerController::OnKeyEvents()
 	if (dir == 0) return;
 	INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
 
+	//if (INPUT.IsKeyUp(KEY_TYPE::W)) dir |= 0x08;
+	//if (INPUT.IsKeyUp(KEY_TYPE::S)) dir |= 0x02;
+	//if (INPUT.IsKeyUp(KEY_TYPE::D)) dir |= 0x01;
+	//if (INPUT.IsKeyUp(KEY_TYPE::A)) dir |= 0x04;
+	//if (INPUT.IsKeyUp(KEY_TYPE::SHIFT)) dir |= 0x20;
+	//if (INPUT.IsKeyUp(KEY_TYPE::CTRL)) dir |= 0x10;
 }

@@ -1,5 +1,5 @@
 #include "SESSION.h"
-
+#include "Item.h"
 
 
 
@@ -71,18 +71,30 @@ void SESSION::send_move_packet(SESSION* client)
 	do_send(&p);
 }
 
-void SESSION::send_drop_item_packet()
+void SESSION::send_drop_item_packet(Item& it, int item_id)
 {
 	SC_DROP_ITEM_PACKET p;
-	p.id = _id;
 	p.type = SC_DROP_ITEM;
 	p.size = sizeof(p);
 
-	p.item_enum = 1;
+	p.item_id = item_id;
 
-	p.x = _player._pos.x + 2;
-	p.y = _player._pos.y;
-	p.z = _player._pos.z;
+	p.item_enum = it._item_type;
+
+	p.x = it._pos.x;
+	p.y = it._pos.y;
+	p.z = it._pos.z;
 
 	do_send(&p);
+}
+
+void SESSION::send_remove_item_packet(int item_id, int player_id)
+{
+	SC_REMOVE_ITEM_PACKET p;
+	p.type = SC_REMOVE_ITEM;
+	p.size = sizeof(p);
+	p.item_id = item_id;
+	p.player_id = player_id;
+	do_send(&p);
+	cout << "sssssssssssssssssssssssssssss";
 }
