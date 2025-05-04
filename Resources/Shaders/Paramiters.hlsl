@@ -19,6 +19,7 @@ cbuffer CBPassData : register(b0)
     matrix viewProjMat;
     matrix shadowTransform;
     matrix viewMat;
+    matrix UIProjMat;
     float3 camPos; 
     uint shadowMapIdx; 
     float2 renderTargetSize; 
