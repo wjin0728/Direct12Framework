@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "FollowTarget.h"
-#include"GameObject.h"
-#include"Transform.h"
-#include"Timer.h"
-#include"InputManager.h"
-#include"Terrain.h"
+#include "GameObject.h"
+#include "Transform.h"
+#include "Timer.h"
+#include "InputManager.h"
+#include "Terrain.h"
 #include "ServerManager.h"
 
 CFollowTarget::CFollowTarget() : CMonoBehaviour("FollowTarget")

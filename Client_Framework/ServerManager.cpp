@@ -14,7 +14,7 @@
 void ServerManager::Initialize()
 {
 	// ------- ���� ���̱� -------------------
-	std::wcout.imbue(std::locale("korean")); // �ѱ۷� ���� ���
+	std::wcout.imbue(std::locale("korean"));
 
 	WSADATA WSAData{};
 	int err = WSAStartup(MAKEWORD(2, 2), &WSAData);
@@ -58,8 +58,9 @@ void ServerManager::Client_Login()
 
 	Send_Packet(&p);
 
-	std::thread recv_thread{ [this]() { Recv_Loop(); } };
-	recv_thread.detach();
+	Recv_Loop();
+	//std::thread recv_thread{ [this]() { Recv_Loop(); } };
+	//recv_thread.detach();
 }
 
 bool ServerManager::InitPlayerAndCamera()
@@ -154,7 +155,7 @@ void CALLBACK ServerManager::recv_callback(DWORD err, DWORD recv_size, LPWSAOVER
 	char* buf = over->_wsabuf.buf;
 	char recv_buf[CHAT_SIZE * 2];
 
-	if (sm->save_data_size > 0) { // ���� �߷��� �����ص� ��Ŷ�� ������ �װź��� �ϱ�
+	if (sm->save_data_size > 0) { 
 		memcpy(recv_buf, sm->save_buf, sm->save_data_size);
 		memcpy(&recv_buf[sm->save_data_size], buf, sm->one_packet_size - sm->save_data_size);
 		buf += sm->one_packet_size - sm->save_data_size;
@@ -164,10 +165,10 @@ void CALLBACK ServerManager::recv_callback(DWORD err, DWORD recv_size, LPWSAOVER
 	}
 
 	while (1) {
-		if (recv_size == 0) break; // ���� �����Ͱ� ������ ��
+		if (recv_size == 0) break; 
 		WORD* byte = reinterpret_cast<WORD*>(buf);
-		sm->one_packet_size = *byte; // ��Ŷ �ϳ� ������ ����ϱ�
-		if (sm->one_packet_size > recv_size) { // ��Ŷ �ϳ� ������� ���� ���� ũ�Ⱑ �� ������ �߸��Ŵϱ� save�ϱ�
+		sm->one_packet_size = *byte; 
+		if (sm->one_packet_size > recv_size) { 
 			memcpy(sm->save_buf, buf, recv_size);
 			sm->save_data_size = recv_size;
 			break;
@@ -183,10 +184,10 @@ void CALLBACK ServerManager::recv_callback(DWORD err, DWORD recv_size, LPWSAOVER
 
 void ServerManager::Recv_Loop()
 {
-	while (1) {
+	while (!RenderOK) {
 		Recv_Packet();
 
-		SleepEx(10, true);
+		SleepEx(1, true);
 	}
 }
 
@@ -199,11 +200,12 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		clientID = packet->id;
 		mPlayer->GetTransform()->SetLocalPosition({ 10, 5, 10 });
+		cout << clientID << endl;
 
 		break;
 	}
 	case SC_LOGIN_FAIL: {
-		cout << "�α��� ����!!!!" << endl;
+		cout << "Login Fail--!!!!" << endl;
 		break;
 	}
 	case SC_ADD_OBJECT: {
@@ -223,6 +225,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		std::shared_ptr<CGameObject> player{};
 		if (clientID == packet->id) {
 			player = mPlayer;
+			RenderOK = 1;
 		}
 		else {
 			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
@@ -279,8 +282,21 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		itemObj->Awake();
 		itemObj->Start();
 
-		mItems[packet->id] = itemObj;
+		mItems[packet->item_id] = itemObj;
 		scene->AddObject(itemObj);
+
+		break;
+	}
+	case SC_REMOVE_ITEM: {
+		SC_REMOVE_ITEM_PACKET* packet = reinterpret_cast<SC_REMOVE_ITEM_PACKET*>(packet_ptr);
+
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		scene->RemoveObject(mItems[packet->item_id]);
+		cout << "삭제!";
+
+		if (packet->player_id == -1) break; // 단순 삭제면 바로 넘기기
+
+		// 플레이어가 스킬 아이템 먹은 정보 처리 필요
 
 		break;
 	}

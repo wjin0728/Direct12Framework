@@ -51,8 +51,11 @@
     <ClCompile Include="PlayerCharacter.cpp">
       <Filter>Object Class</Filter>
     </ClCompile>
+    <ClCompile Include="SkillObject.cpp">
+      <Filter>Object Class</Filter>
+    </ClCompile>
     <ClCompile Include="Item.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Object Class</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -83,8 +86,11 @@
     <ClInclude Include="PlayerCharacter.h">
       <Filter>Object Class</Filter>
     </ClInclude>
+    <ClInclude Include="SkillObject.h">
+      <Filter>Object Class</Filter>
+    </ClInclude>
     <ClInclude Include="Item.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Object Class</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
