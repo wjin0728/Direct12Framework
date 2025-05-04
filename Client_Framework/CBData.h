@@ -10,6 +10,7 @@ struct CBPassData
 	Matrix viewProjMat = Matrix::Identity;
 	Matrix shadowTransform = Matrix::Identity;
 	Matrix viewMat = Matrix::Identity;
+	Matrix uiTransform = Matrix::Identity;
 
 	Vec3 camPos = Vec3::Zero;
 	UINT shadowMapIdx{};

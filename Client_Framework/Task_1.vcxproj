@@ -164,6 +164,7 @@
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CBData.h" />
+    <ClInclude Include="ContinuousRotation.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Collider.h" />
@@ -219,6 +220,7 @@
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="BattleScene.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ContinuousRotation.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="Component.cpp" />

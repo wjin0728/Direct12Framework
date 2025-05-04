@@ -79,7 +79,7 @@ bool ServerManager::InitPlayerAndCamera()
 	auto camera = mMainCamera->AddComponent<CCamera>();
 	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
-	camera->GeneratePerspectiveProjectionMatrix(1.f, 50.f, 60.f);
+	camera->GeneratePerspectiveProjectionMatrix(1.f, 100.f, 60.f);
 	mMainCamera->SetTag("MainCamera");
 	mMainCamera->SetName("MainCamera");
 	mMainCamera->SetActive(false);

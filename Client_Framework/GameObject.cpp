@@ -15,6 +15,7 @@
 #include"Renderer.h"
 #include"SkinnedMeshRenderer.h"
 #include"Light.h"
+#include"ContinuousRotation.h"
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -387,6 +388,12 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 		}
 		if (token == "<Frame>:") {
 			ReadDateFromFile(inFile, obj->mName);
+			if (obj->mName == "SM_Bld_Windmill_01_Blades_01") {
+				auto rotator = obj->AddComponent<CContinuousRotation>();
+				//z축으로 회전
+				rotator->SetRotationSpeed({ 0.f, 0.f, 10.f });
+				rotator->SetRotationAxis({ 0.f, 0.f, 1.f });
+			}
 		}
 		else if (token == "<Tag>:") {
 			ReadDateFromFile(inFile, obj->mTag);

@@ -28,7 +28,7 @@ public:
 	void Destroy();
 
 	template<typename T>
-	std::shared_ptr<T> Load(const std::string& name, std::string_view fileName);
+	std::shared_ptr<T> Load(const std::string& name, const std::string& fileName);
 
 	template<typename T>
 	bool Add(const std::shared_ptr<T>& resource);
@@ -78,7 +78,7 @@ public:
 };
 
 template<typename T>
-inline std::shared_ptr<T> CResourceManager::Load(const std::string& name, std::string_view fileName)
+inline std::shared_ptr<T> CResourceManager::Load(const std::string& name, const std::string& fileName)
 {
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
 	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(resourceType)];

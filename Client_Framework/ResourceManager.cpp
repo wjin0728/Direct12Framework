@@ -18,6 +18,7 @@ void CResourceManager::Initialize()
 	LoadDefaultMaterials();
 
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
 
 	LoadPlayerObjects();
 	LoadSkillObjects();

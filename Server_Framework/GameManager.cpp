@@ -3,11 +3,14 @@
 GameManager::GameManager()
 {
 	lastTime = std::chrono::high_resolution_clock::now();
-	terrain.SetScale(45, 20, 45);
+	//terrain.SetScale(45, 20, 45);
+	terrain.SetScale(64, 598.9f, 64);
 	terrain.SetResolution(513);
 	terrain.SetNavMapResolution(terrain.GetResolution() * 2);
-	terrain.LoadHeightMap("LobbyTerrainHeightmap");
-	terrain.LoadNavMap("LobbyTerrainNavMap");
+	//terrain.LoadHeightMap("LobbyTerrainHeightmap");
+	//terrain.LoadNavMap("LobbyTerrainNavMap");
+	terrain.LoadHeightMap("Battle1TerrainHeightmap");
+	terrain.LoadNavMap("Battle1TerrainNavMask");
 	cout << "Map loaded.\n";
 
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -196,7 +199,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::ARCHER;
 		else if (2 == c_id)
 			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
-		clients[c_id]._player._pos = Vec3(20, 20, 20);
+		clients[c_id]._player._pos = Vec3(27, 6, 22);
 
 		clients[c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;

@@ -81,7 +81,7 @@ void CThirdPersonCamera::Update()
 	float progress = deltaTime * 20.f;
 	progress = std::clamp(progress, 0.f, 1.f);
 	SetParamsBlended(mCameraParams, blendout, progress);
-	RaycastObjects();
+	//RaycastObjects();
 
 	auto transform = GetTransform();
 	Vec3 camPos = transform->GetWorldPosition();

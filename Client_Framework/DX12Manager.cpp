@@ -284,7 +284,7 @@ void CDX12Manager::InitDepthStencilView()
 	dsBuffer->SetTextureType(DEPTH_STENCIL);
 	descriptorHeaps->CreateDSV(dsBuffer, DS_TYPE::MAIN_BUFFER);
 
-	shadowMapResolution = 4096.f * 2;
+	shadowMapResolution = 4096.f * 4;
 
 	auto shadowMap = INSTANCE(CResourceManager).Create2DTexture
 	(

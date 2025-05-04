@@ -34,12 +34,15 @@ void CMeshRenderer::Update()
 
 void CMeshRenderer::LateUpdate()
 {
+	if (!m_mesh) return;
 	m_mesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
 	m_mesh->oobb.Transform(mWorldOOBB, GetTransform()->GetWorldMat());
 }
 
 void CMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 {
+	if (!m_mesh) return;
+	if (!m_materials[0]) return;
 	if (!m_materials[0]->GetShader((PASS_TYPE)pass)) return;
 	if (camera && !camera->IsInFrustum(mWorldBS)) return;
 
