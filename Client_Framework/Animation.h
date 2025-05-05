@@ -23,7 +23,7 @@ enum class ANIMATION_BLEND_TYPE : UINT
 
 struct CALLBACKKEY
 {
-    float  							mTime = 0.0f;
+    float mTime = 0.0f;
     void* mCallbackData = NULL;
 };
 
@@ -46,14 +46,14 @@ public:
     ~CAnimationSet();
 
 public:
-    string							mAnimationSetName;
+    string						    	mAnimationSetName;
 
-    float							mLength = 0.0f;
-    int								mFramesPerSecond = 0; //m_fTicksPerSecond
+    float						    	mLength = 0.0f;
+    int						    		mFramesPerSecond = 0; //m_fTicksPerSecond
 
-    int								mKeyFrames = 0;
-    std::vector<float> mKeyFrameTimes{};
-    std::vector<std::vector<Matrix>> mKeyFrameTransforms{};
+    int								    mKeyFrames = 0;
+    std::vector<float>                  mKeyFrameTimes{};
+    std::vector<std::vector<Matrix>>    mKeyFrameTransforms{};
 
 public:
     Matrix GetSRT(int nBone, float fPosition);
@@ -73,8 +73,9 @@ public:
     void Release() { if (--mReferences <= 0) delete this; }
 
 public:
-    std::vector<std::shared_ptr<CAnimationSet>> mAnimationSets{};
-    std::vector<std::weak_ptr<CTransform>> mBoneFrameCaches{};
+    std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
+    std::vector<std::weak_ptr<CTransform>>      mBoneFrameCaches{};
+    std::vector<string>                         mBoneNames{};
 };
 
 class CAnimationTrack
@@ -93,7 +94,7 @@ public:
 
     ANIMATION_TYPE					mType = ANIMATION_TYPE::LOOP; //Once, Loop, PingPong
 
-    std::vector<CALLBACKKEY> mCallbackKeys{};
+    std::vector<CALLBACKKEY>        mCallbackKeys{};
 
     std::shared_ptr<CAnimationCallbackHandler> mAnimationCallbackHandler = NULL;
 
@@ -124,16 +125,14 @@ public:
     virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CAnimationController>(*this); }
 
     float mTime = 0.0f;
-    bool mApplyRootMotion = false;
 
-    std::vector<std::shared_ptr<CAnimationTrack>> mTracks;
-    std::shared_ptr<CAnimationSets> mAnimationSets;
-    std::vector<std::weak_ptr<CTransform>> mBoneCaches{};
-	std::weak_ptr<CTransform> mRootTransform{};
-    std::vector<Matrix> mBindPoseBoneOffsets{};
-    std::vector<Matrix> finalTransforms;
+    std::vector<std::shared_ptr<CAnimationTrack>>   mTracks;
+    std::shared_ptr<CAnimationSets>                 mAnimationSets;
+     std::vector<Matrix>                            mBindPoseBoneOffsets{};
+   std::vector<std::weak_ptr<CTransform>>           mSkinningBoneTransforms{};
+    std::vector<Matrix>                             finalTransforms;
 
-    UINT mBoneTransformIdx = -1;
+    UINT                                            mBoneTransformIdx = -1;
 
     void SetTrackAnimationSet(int trackIndex, int setIndex);
 
@@ -144,11 +143,7 @@ public:
 
     void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
     void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);
-    void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler* pCallbackHandler);
-
-    void SetAnimationType(std::shared_ptr<CAnimationSet>& animationSet, ANIMATION_TYPE type);
-
-    void SetAnimationCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr <CAnimationCallbackHandler>& callbackHandler);
+    void SetAnimationCallbackHandler(int nAnimationTrack, std::shared_ptr<CAnimationCallbackHandler> pCallbackHandler);
 
 public:
     virtual void Awake();
@@ -161,4 +156,17 @@ public:
     void BindSkinningMatrix();
     void PrepareSkinning();
     void UploadBoneOffsets();
+
+public:
+    bool                        mApplyRootMotion = false;
+    std::weak_ptr<CTransform>   mModelRootObject;
+
+    std::weak_ptr<CTransform>   mRootMotionObject;
+    Vec3                        mFirstRootMotionPosition = Vec3(0.0f, 0.0f, 0.0f);
+
+    void SetRootMotion(bool bRootMotion) { mApplyRootMotion = bRootMotion; }
+
+    virtual void OnRootMotion(std::weak_ptr<CTransform> pRootGameObject) {}
+    virtual void OnAnimationIK(std::weak_ptr<CTransform> pRootGameObject) {}
+
 };
