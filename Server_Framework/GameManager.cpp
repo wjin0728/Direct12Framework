@@ -243,8 +243,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 		if (p->dir & KEY_FLAG::KEY_S) moveDir -= local_lookDir;
 		if (p->dir & KEY_FLAG::KEY_D) moveDir -= right_dir;
 		if (p->dir & KEY_FLAG::KEY_A) moveDir += right_dir;
-		if (p->dir & KEY_FLAG::KEY_SHIFT) moveDir += Vec3(0, -1, 0); 
-		if (p->dir & KEY_FLAG::KEY_CTRL) moveDir += Vec3(0, 1, 0); 
 
 		const float moveSpeed = 5.0f; 
 		Vec3 velocity = Vec3::Zero;
@@ -259,7 +257,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		// 위치 업데이트
-		float deltaTime = 1.f / 110.f; 
+		float deltaTime = 1.f / 60.f; 
 		Vec3 newPos = clients[c_id]._player._pos + velocity * deltaTime;
 
 		if (CanMove(newPos.x, newPos.z)) {
@@ -267,7 +265,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 			float terrainHeight = terrain.GetHeight(clients[c_id]._player._pos.x, clients[c_id]._player._pos.z);
 			clients[c_id]._player._pos.y = terrainHeight;
-			// cout << "terrain height : " << terrainHeight << endl;
 
 			if (moveDir.LengthSquared() > 0.001f) {
 				clients[c_id]._player._look_dir = moveDir;
@@ -283,27 +280,22 @@ void GameManager::Process_packet(int c_id, char* packet)
 				clients[c_id]._player._look_dir.y = angle.y * radToDeg;
 			}
 
-			clients[c_id]._player.LocalTransform();
-			if (!items.empty()) {
-				for (auto& it : items) {
-					if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
-						it.second.LocalTransform();
-					//cout << "player bounding box center\t" 
-					//	<< clients[c_id]._player._boundingbox.Center.x << " "
-					//	<< clients[c_id]._player._boundingbox.Center.y << " "
-					//	<< clients[c_id]._player._boundingbox.Center.z << endl;
-					//cout << "item bounding box center\t" 
-					//	<< it.second._boundingbox.Center.x << " "
-					//	<< it.second._boundingbox.Center.y << " "
-					//	<< it.second._boundingbox.Center.z << endl;
-					if (clients[c_id]._player._boundingbox.Intersects(it.second._boundingbox)) {
-						for (auto& cl : clients) {
-							if (cl._state != ST_INGAME) continue;
-							cl.send_remove_item_packet(it.first, c_id);
+			// 플레이어 - 아이템 충돌 체크
+			{
+				clients[c_id]._player.LocalTransform();
+				if (!items.empty()) {
+					for (auto& it : items) {
+						if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
+							it.second.LocalTransform();
+						if (clients[c_id]._player._boundingbox.Intersects(it.second._boundingbox)) {
+							for (auto& cl : clients) {
+								if (cl._state != ST_INGAME) continue;
+								cl.send_remove_item_packet(it.first, c_id);
+							}
+							cout << "cl : " << c_id << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
+							items.erase(it.first);
+							break;
 						}
-						cout << "cl : " << c_id << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
-						items.erase(it.first);
-						break;
 					}
 				}
 			}

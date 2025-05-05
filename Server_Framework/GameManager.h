@@ -36,12 +36,5 @@ public:
 	void Process_packet(int c_id, char* packet);
 	int Get_new_Client_id();
 
-	float GetDeltaTime() {
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastTime).count();
-		lastTime = currentTime;
-		return duration / 1'000'000.0f; // 초 단위
-	}
-
 	bool CanMove(float x, float z); // 지형 검사
 };
