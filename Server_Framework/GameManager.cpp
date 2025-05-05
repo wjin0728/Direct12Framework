@@ -302,6 +302,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 							cl.send_remove_item_packet(it.first, c_id);
 						}
 						cout << "cl : " << c_id << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
+						items.erase(it.first);
+						break;
 					}
 				}
 			}

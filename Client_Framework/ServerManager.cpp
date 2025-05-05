@@ -292,6 +292,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		scene->RemoveObject(mItems[packet->item_id]);
+		mItems.erase(packet->item_id);
 		cout << "삭제!";
 
 		if (packet->player_id == -1) break; // 단순 삭제면 바로 넘기기

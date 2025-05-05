@@ -3,6 +3,7 @@
 #include "OVER_PLUS.h"
 #include "Object.h"
 #include "PlayerCharacter.h"
+#include "Item.h"
 
 //#include "../../Direct12Framework/SimpleMath.h"
 //
