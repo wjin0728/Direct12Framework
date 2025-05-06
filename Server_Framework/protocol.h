@@ -12,9 +12,10 @@ constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
 constexpr char CS_CHAT = 2;
 constexpr char CS_MOUSE_VEC2 = 3;
-constexpr char CS_SKILL = 4;
-constexpr char CS_ULTIMATE_SKILL = 5;
-constexpr char CS_000 = 6;
+constexpr char CS_SKILL_TARGET = 4;
+constexpr char CS_SKILL_NONTARGET = 5;
+constexpr char CS_ULTIMATE_SKILL = 6;
+constexpr char CS_000 = 7;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -64,14 +65,21 @@ struct CS_000_PACKET : PACKET {
 	int				id;
 };
 
-struct CS_SKILL_PACKET : PACKET {
+struct CS_SKILL_TARGET_PACKET : PACKET {
 	int				id;
-	char			skill_enum;
+	uint8_t			skill_enum;
+	int				target_id;
+};
+
+struct CS_SKILL_NONTARGET_PACKET : PACKET {
+	int				id;
+	uint8_t			skill_enum;
 };
 
 struct CS_ULTIMATE_SKILL_PACKET : PACKET {
 	int				id;
-	char			skill_enum;
+	uint8_t			skill_enum;
+	int				target_id;
 };
 
 // ----------------------------------------------------------------------------------
@@ -128,5 +136,16 @@ struct SC_REMOVE_ITEM_PACKET : PACKET {
 
 struct SC_LOGIN_FAIL_PACKET : PACKET {
 };
+
+
+#define MAX_HP_FIGHTER 1500
+#define MAX_HP_ARCHER_MAGE 1200
+
+//#define FIRE_ENCHANT 1200
+//#define FIRE_EXPLOSION 1200
+#define WATER_HEAL_AMT 1200
+#define WATER_SHIELD_AMT 2
+//#define GRASS_VINE 1200
+//#define GRASS_WEAKEN 1200
 
 #pragma pack (pop)

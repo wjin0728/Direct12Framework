@@ -1,21 +1,53 @@
 #pragma once
 #include "Object.h"
+
 class PlayerCharacter : public Object
 {
 public:
 	Vec3				_look_dir; // 캐릭터가 보고있는 방향
 	Vec3				_acceleration; // 추가: 가속도
-	uint8_t			    _class;
+
+	S_PLAYER_CLASS	    _class;
+	int					_hp;
+	int					_barrier;
+	bool				_on_FireEnchant;
+	bool				_on_GrassWeaken;
 
 	PlayerCharacter() :
 		Object(S_OBJECT_TYPE::S_PLAYER),
 		_look_dir(Vec3::Zero), 
 		_acceleration(Vec3::Zero), 
-		_class(0) {};
+		_class(S_PLAYER_CLASS::end),
+		_on_FireEnchant(false),
+		_barrier(0) {};
 	~PlayerCharacter() {};
+
+	void SetClass(S_PLAYER_CLASS class_type) {
+		_class = class_type;
+		if (S_PLAYER_CLASS::FIGHTER == _class) {
+			_hp = MAX_HP_FIGHTER;
+		}
+		else if (S_PLAYER_CLASS::ARCHER == _class) {
+			_hp = MAX_HP_ARCHER_MAGE;
+		}
+		else if (S_PLAYER_CLASS::MAGE == _class) {
+			_hp = MAX_HP_ARCHER_MAGE;
+		}
+	};
+	int PlayerMaxHp() {
+		if (S_PLAYER_CLASS::FIGHTER == _class)
+			return MAX_HP_FIGHTER;
+		else return MAX_HP_ARCHER_MAGE;
+	}
 
 	void SetLookDir(float x, float y, float z) { _look_dir = Vec3(x, y, z); };
 	void SetAcceleration(float x, float y, float z) { _acceleration = Vec3(x, y, z); };
-	void SetClass(uint8_t player_class) { _class = player_class; };
-};
+	void SetClass(uint8_t player_class) { _class = (S_PLAYER_CLASS)player_class; };
 
+	void OnSkillFireEnchant();
+	void OnSkillFireExplosion();
+	void OnSkillWaterHeal();
+	void OnSkillWaterShield();
+	void OnSkillGrassWeaken();
+	void OnSkillGrassVine();
+};

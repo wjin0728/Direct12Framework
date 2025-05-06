@@ -193,12 +193,13 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		//clients[c_id]._player._class = p->name[0];
-		if (0 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
-		else if (1 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::ARCHER;
-		else if (2 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
+		if (0 == c_id) 
+			clients[c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
+		else if (1 == c_id) 
+			clients[c_id]._player.SetClass(S_PLAYER_CLASS::ARCHER);
+		else if (2 == c_id) 
+			clients[c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
+
 		clients[c_id]._player._pos = Vec3(27, 6, 22);
 
 		clients[c_id].send_login_info_packet();
@@ -256,7 +257,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[c_id]._player._acceleration = Vec3::Zero;
 		}
 
-		// 위치 업데이트
+		// 위치 업데이트 60프레임 기준.
 		float deltaTime = 1.f / 60.f; 
 		Vec3 newPos = clients[c_id]._player._pos + velocity * deltaTime;
 
@@ -312,10 +313,30 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		break;
 	}
-	case CS_SKILL: {
-		CS_SKILL_PACKET* p = reinterpret_cast<CS_SKILL_PACKET*>(packet);
+	case CS_SKILL_TARGET: {
+		CS_SKILL_TARGET_PACKET* p = reinterpret_cast<CS_SKILL_TARGET_PACKET*>(packet);
 
-		
+		if (S_FIRE_EXPLOSION == p->skill_enum) {}
+		else if (S_GRASS_VINE == p->skill_enum) {}
+		break;
+	}
+	case CS_SKILL_NONTARGET: {
+		CS_SKILL_NONTARGET_PACKET* p = reinterpret_cast<CS_SKILL_NONTARGET_PACKET*>(packet);
+
+		if (S_FIRE_ENCHANT == p->skill_enum) {
+			clients[c_id]._player._on_FireEnchant = true;
+		}
+		else if (S_WATER_HEAL == p->skill_enum) {
+			for (auto& cl : clients)
+				cl._player._hp = min((cl._player._hp + WATER_HEAL_AMT), cl._player.PlayerMaxHp());
+		}
+		else if (S_WATER_SHIELD == p->skill_enum) {
+			for (auto& cl : clients)
+				cl._player._barrier = 2;
+		}
+		else if (S_GRASS_WEAKEN == p->skill_enum) {
+			clients[c_id]._player._on_GrassWeaken = true;
+		}
 		break;
 	}
 	case CS_ULTIMATE_SKILL: {

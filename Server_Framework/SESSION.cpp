@@ -36,7 +36,7 @@ void SESSION::send_add_player_packet(SESSION* client)
 	p.id = client->_id;
 	p.size = sizeof(p);
 	p.type = SC_ADD_PLAYER;
-	p.player_class = client->_player._class;
+	p.player_class = (uint8_t)client->_player._class;
 	p.x = client->_player._pos.x;
 	p.y = client->_player._pos.y;
 	p.z = client->_player._pos.z;
