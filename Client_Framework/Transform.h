@@ -29,12 +29,14 @@ private:
    friend class CCamera;  
    friend class CMeshRenderer;  
    friend class CSkinnedMeshRenderer;  
+   friend class CUIRenderer;
+   friend class CRenderer;
 
-   bool mDirtyFlag{};  
 
    std::weak_ptr<CTransform> mParent{};  
 
 public:  
+   bool mDirtyFlag{};  
    int dirtyFramesNum{};  
    CTransform();  
    ~CTransform();  

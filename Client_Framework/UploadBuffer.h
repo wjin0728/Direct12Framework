@@ -9,7 +9,6 @@ enum class CONSTANT_BUFFER_TYPE : UINT {
 	BONE_OFFSET,
 	MATERIAL,
 	
-
 	END
 };
 

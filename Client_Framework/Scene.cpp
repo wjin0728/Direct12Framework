@@ -77,6 +77,8 @@ void CScene::RenderForwardPass()
 {
 	auto forwardPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
 	forwardPassBuffer->BindToShader(0);
+	auto& directionalLight = mLights[(UINT)LIGHT_TYPE::DIRECTIONAL][0];
+	directionalLight->BindLightDataToShader();
 
 	auto& camera = mCameras["MainCamera"];
 	if (camera) {
@@ -147,6 +149,8 @@ void CScene::RenderFinalPass()
 	auto finalShader = RESOURCE.Get<CShader>("FinalPass");
 	finalShader->SetPipelineState(CMDLIST);
 	CRenderer::RenderFullscreen();
+	RenderForLayer("UI", camera);
+
 	renderTarget->ChangeTargetToResource(backBufferIdx);
 }
 
@@ -166,7 +170,7 @@ void CScene::LoadSceneFromFile(const std::string& fileName)
 		auto object = CGameObject::CreateObjectFromFile(ifs, prefabs);
 		auto& tag = object->GetTag();
 		if(tag == "Water") AddObject("Transparent", object);
-		else if (tag == "Ui") AddObject("Ui", object);
+		else if (tag == "UI") AddObject("UI", object);
 		else AddObject("Opaque", object);
 	}
 }
@@ -299,9 +303,6 @@ void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> c
 		return;
 	}
 	for (const auto& object : mRenderLayers[layer]) {
-		if (object->GetName() == "Item_Skill1") {
-			int a{};
-		}
 		object->Render(camera, pass);
 	}
 }

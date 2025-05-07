@@ -27,7 +27,9 @@ void CTexture::LoadFromFile(const std::string& _fileName)
 	std::vector<D3D12_SUBRESOURCE_DATA> vSubresources;
 	DDS_ALPHA_MODE ddsAlphaMode = DDS_ALPHA_MODE_UNKNOWN;
 	bool bIsCubeMap = false;
-
+	if (_fileName == "..\\Resources\\Textures\\None.dds") {
+		int i{};
+	}
 
 	if (extension == L".dds" || extension == L".DDS") {
 		HRESULT hr = DirectX::LoadDDSTextureFromFileEx(DEVICE, fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT,

@@ -25,8 +25,8 @@ CFrameResource::CFrameResource()
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)] = std::make_unique<CConstantBuffer>();
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)]->Initialize(4, ALIGNED_SIZE(100) * 70);
 
-	/*mStructedBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::UI)] = std::make_unique<CStructedBuffer>();
-	mStructedBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::UI)]->Initialize(5, sizeof(CBUIData) * 100);*/
+	mStructedBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::UI)] = std::make_unique<CStructedBuffer>();
+	mStructedBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::UI)]->Initialize(5, sizeof(CBUIData), 20);
 }
 
 
@@ -43,6 +43,15 @@ std::shared_ptr<CConstantBuffer> CFrameResource::GetConstantBuffer(UINT type)
 std::shared_ptr<CInstancingBuffer> CFrameResource::GetInstancingBuffer(UINT type)
 {
 	return mInstancingBuffers[type];
+}
+
+void CFrameResource::BindStructedBuffers()
+{
+	for (int i = 0; i < (UINT)STRUCTED_BUFFER_TYPE::END; i++) {
+		if (mStructedBuffers[i]) {
+			mStructedBuffers[i]->BindToShader();
+		}
+	}
 }
 
 

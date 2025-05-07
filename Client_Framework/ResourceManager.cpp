@@ -304,6 +304,18 @@ void CResourceManager::LoadDefaultShaders()
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize(info, "FinalPass", false)) Add(shader);
 	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::UI;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::ALPHA_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize(info, "Sprite", false)) Add(shader);
+	}
 }
 
 void CResourceManager::MakeShadersForAllPass(const std::string& name, ShaderInfo info)

@@ -1,5 +1,9 @@
 #pragma once
 
+enum {
+	FRAME_RESOURCE_COUNT = 2
+};
+
 enum class LIGHT_TYPE : UINT8
 {
 	DIRECTIONAL,

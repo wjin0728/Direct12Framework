@@ -15,18 +15,21 @@ protected:
     int mCbvIdx = -1;
     UINT mCbvOffset{};
 
+    UINT mDirtyFrame = FRAME_RESOURCE_COUNT + 1;
+
 public:
     CRenderer();
     CRenderer(const CRenderer& other) : m_materials(other.m_materials), CComponent(other) {}
     virtual ~CRenderer();
 
     virtual void Awake() override;
-    virtual void Start() override {}
+    virtual void Start() override;
 
     virtual void Update() override {}
     virtual void LateUpdate() override {}
 
     virtual void Render(std::shared_ptr<CCamera> camera, int pass = 0) = 0;
+	virtual void UpdataObjectDataToShader();
 
     virtual std::shared_ptr<CComponent> Clone() override = 0;
 

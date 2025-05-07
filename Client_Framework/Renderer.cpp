@@ -23,6 +23,28 @@ void CRenderer::Awake()
 	SetCBVIndex();
 }
 
+void CRenderer::Start()
+{
+	
+}
+
+void CRenderer::UpdataObjectDataToShader()
+{
+	if (GetTransform()->mDirtyFlag) {
+		mDirtyFrame = FRAME_RESOURCE_COUNT;
+	}
+	if(mDirtyFrame > 0){
+		CBObjectData objDate;
+		objDate.worldMAt = GetTransform()->mWorldMat.Transpose();
+		objDate.invWorldMAt = GetTransform()->mWorldMat.Invert();
+		objDate.textureMat = GetTransform()->mTextureMat.Transpose();
+
+		auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
+		objectBuffer->UpdateBuffer(mCbvOffset, &objDate);
+		mDirtyFrame--;
+	}
+}
+
 void CRenderer::RenderFullscreen()
 {
 	// Implementation for rendering a fullscreen quad

@@ -35,6 +35,10 @@ struct CBObjectData
 	Matrix worldMAt = Matrix::Identity;
 	Matrix invWorldMAt = Matrix::Identity;
 	Matrix textureMat = Matrix::Identity;
+	int idx0{};
+	int idx1{};
+	int idx2{};
+	int idx3{};
 };
 
 struct CBLightsData
@@ -60,12 +64,33 @@ struct BillboardData
 struct CBUIData
 {
 	Vec3 color{};
-	float padding{};
+	float depth{ 0 };
 	Vec2 size{};
-	Vec2 position{};
-	Vec2 scale{};
 	Vec2 uvOffset;  
 	Vec2 uvScale;   
 	float type{ 0 };
 	int textureIdx = -1;
+
+	float floatData0{ 0 };
+	float floatData1{ 0 };
+	float floatData2{ 0 };
+	float floatData3{ 0 };
+
+	int intData0{ 0 };
+	int intData1{ 0 };
+	int intData2{ 0 };
+	int intData3{ 0 };
+
+	Vec2 pos{};
+	Vec2 vec2Data1{};
+	Vec2 vec2Data2{};
+	Vec2 vec2Data3{};
+
+	Vec3 vec3Data0{};
+	float padding1{ 0 };
+	Vec3 vec3Data1{};
+	float padding2{ 0 };
+
+	Vec4 vec4Data0{};
+	Vec4 vec4Data1{};
 };

@@ -214,6 +214,7 @@
     <ClInclude Include="UIRenderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
+    <ClInclude Include="CEntityState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -377,6 +378,9 @@
     </ClCompile>
     <ClCompile Include="UIRenderer.cpp">
       <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="CEntityState.cpp">
+      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

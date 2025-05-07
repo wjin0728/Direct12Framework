@@ -413,9 +413,9 @@ void CDX12Manager::InitRootSignature()
 	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//UI 정보
-	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 6;
-	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 0;
+	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 3;
 	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//텍스쳐 정보
 	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -546,6 +546,7 @@ void CDX12Manager::BeforeRender()
 	cmdList->SetGraphicsRootSignature(mRootSignature.Get());
 	descriptorHeaps->SetSRVDescriptorHeap();
 	RESOURCE.UpdateMaterials();
+	mCurFrameResource->BindStructedBuffers();
 }
 
 void CDX12Manager::AfterRender()
@@ -581,12 +582,12 @@ std::shared_ptr<CConstantBuffer> CDX12Manager::GetConstantBuffer(UINT type)
 
 std::shared_ptr<CStructedBuffer> CDX12Manager::GetStructedBuffer(UINT type)
 {
-	return std::shared_ptr<CStructedBuffer>();
+	return mCurFrameResource->GetStructedBuffer(type);
 }
 
 std::shared_ptr<CInstancingBuffer> CDX12Manager::GetInstancingBuffer(UINT type)
 {
-	return std::shared_ptr<CInstancingBuffer>();
+	return mCurFrameResource->GetInstancingBuffer(type);
 }
 
 

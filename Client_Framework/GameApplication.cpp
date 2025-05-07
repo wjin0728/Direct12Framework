@@ -30,6 +30,7 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	INSTANCE(CDX12Manager).OpenCommandList();
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CDX12Manager).CloseCommandList();
+	INSTANCE(CResourceManager).ReleaseUploadBuffers();
 	CLight::SetVolumes();
 
 	INSTANCE(ServerManager).Client_Login();

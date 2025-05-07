@@ -16,6 +16,7 @@
 #include"SkinnedMeshRenderer.h"
 #include"Light.h"
 #include"ContinuousRotation.h"
+#include"UIRenderer.h"
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -253,19 +254,21 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& 
 	return object;
 }
 
-std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size)
+std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& shader, const std::string& texture, Vec2 pos, Vec2 size, float depth)
 {
 	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
 	object->mTag = "UI";
+	auto uiRenderer = object->AddComponent<CUIRenderer>();
+	object->mRenderer = uiRenderer;
+	uiRenderer->SetShader(RESOURCE.Get<CShader>(shader));
+	uiRenderer->SetTexture(texture);
+	uiRenderer->SetSize(size);
+	uiRenderer->SetUVOffset({ 0.f, 0.f });
+	uiRenderer->SetUVScale({ 1.f, 1.f });
+	uiRenderer->SetDepth(depth);
+	uiRenderer->SetType(0);
+	uiRenderer->SetColor({ 1.f, 1.f, 1.f });
 
-	auto meshRenderer = std::make_shared<CMeshRenderer>();
-	object->mRenderer = meshRenderer;
-	object->AddComponent(object->mRenderer);
-	meshRenderer->SetMesh(RESOURCE.Get<CMesh>("Rectangle"));
-	meshRenderer->AddMaterial(RESOURCE.Get<CMaterial>(materialName));
-
-	object->GetTransform()->SetLocalPosition({ pos.x, pos.y, 0.f });
-	object->GetTransform()->SetLocalScale({ size.x, size.y, 1.f });
 	object->SetActive(true);
 	object->SetRenderLayer("UI");
 
@@ -438,6 +441,10 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			obj->CreateLightFromFile(inFile);
 
 		}
+		else if (token == "<Image>:") {
+			obj->CreateUIrendererFromFile(inFile);
+
+		}
 		else if (token == "</Frame>") {
 			break;
 		}
@@ -582,6 +589,30 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 			break;
 		}
 	}
+}
+
+void CGameObject::CreateUIrendererFromFile(std::ifstream& inFile)
+{
+	using namespace BinaryReader;
+	std::string textureName{};
+	ReadDateFromFile(inFile, textureName);
+	Color color{};
+	ReadDateFromFile(inFile, color);
+	Vec2 size{};
+	ReadDateFromFile(inFile, size);
+	Vec2 pos{};
+	ReadDateFromFile(inFile, pos);
+
+	auto uiRenderer = AddComponent<CUIRenderer>();
+	mRenderer = uiRenderer;
+	auto name = TEXTURE_PATH(textureName);
+	auto texture = RESOURCE.Load<CTexture>(textureName, name);
+	uiRenderer->SetTexture(texture);
+	uiRenderer->SetSize(size);
+	uiRenderer->SetType(0);
+	uiRenderer->SetColor(color.ToVector3());
+	uiRenderer->SetPosition(pos);
+	uiRenderer->SetShader("Sprite");
 }
 
 void CGameObject::CreateTransformFromFile(std::ifstream& inFile)

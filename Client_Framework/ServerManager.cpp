@@ -73,6 +73,7 @@ bool ServerManager::InitPlayerAndCamera()
 	mPlayer->SetStatic(false);
 
 	auto playerController = mPlayer->AddComponent<CPlayerController>();
+	mPlayer->SetPlayerController(playerController);
 
 	mMainCamera = std::make_shared<CGameObject>();
 

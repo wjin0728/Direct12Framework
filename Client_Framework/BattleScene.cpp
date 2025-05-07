@@ -55,7 +55,7 @@ void CBattleScene::RenderScene()
 	CScene::RenderShadowPass();
 	CScene::RenderGBufferPass();
 	CScene::RenderLightingPass();
-	//CScene::RenderForwardPass();
+	CScene::RenderForwardPass();
 	CScene::RenderFinalPass();
 }
 
