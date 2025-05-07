@@ -1,7 +1,9 @@
 #pragma once
 #include "stdafx.h"
 #include "SESSION.h"
+#include "Terrain.h"
 #include "Object.h"
+#include "Item.h"
 #include <chrono>
 	//#include "OVER_PLUS.h"
 
@@ -12,7 +14,11 @@ public:
 	HANDLE h_iocp;
 	OVER_PLUS accept_over;
 	array<SESSION, MAX_USER> clients;
-	Object terrain; // 지형 데이터
+
+	Terrain terrain; // 지형 데이터
+
+	unordered_map<int, Item> items; // 아이템 id, 아이템 객체
+	int item_cnt = 0; // 아이템 id
 
 private:
 	std::chrono::high_resolution_clock::time_point lastTime;

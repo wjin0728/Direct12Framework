@@ -26,6 +26,8 @@ void CMeshRenderer::Awake()
 
 void CMeshRenderer::Start()
 {
+	CRenderer::Start();
+	UpdataObjectDataToShader();
 }
 
 void CMeshRenderer::Update()
@@ -34,22 +36,20 @@ void CMeshRenderer::Update()
 
 void CMeshRenderer::LateUpdate()
 {
+	if (!m_mesh) return;
 	m_mesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
 	m_mesh->oobb.Transform(mWorldOOBB, GetTransform()->GetWorldMat());
 }
 
 void CMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 {
+	if (!m_mesh) return;
+	if (!m_materials[0]) return;
 	if (!m_materials[0]->GetShader((PASS_TYPE)pass)) return;
 	if (camera && !camera->IsInFrustum(mWorldBS)) return;
 
-	CBObjectData objDate;
-	objDate.worldMAt = GetTransform()->mWorldMat.Transpose();
-	objDate.invWorldMAt = GetTransform()->mWorldMat.Invert();
-	objDate.textureMat = GetTransform()->mTextureMat.Transpose();
-
 	auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
-	objectBuffer->UpdateBuffer(mCbvOffset, &objDate);
+	UpdataObjectDataToShader();
 	objectBuffer->BindToShader(mCbvOffset);
 
 	int subMeshNum = m_mesh->GetSubMeshNum();

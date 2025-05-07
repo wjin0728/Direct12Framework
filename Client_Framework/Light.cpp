@@ -98,10 +98,7 @@ void CLight::Render(std::shared_ptr<CRenderTargetGroup> renderTarget)
 {
 	if (mLightIndex < 0) return;
 	if (!volumes[mLightData.type]) return;
-	mLightData.worldMat = GetTransform()->GetWorldMat(false);
-	auto lightBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::LIGHT);
-	lightBuffer->UpdateBuffer(mCbvOffset, &mLightData);
-	lightBuffer->BindToShader(mCbvOffset);
+	BindLightDataToShader();
 
 	if (mLightData.type == (UINT)LIGHT_TYPE::POINT || mLightData.type == (UINT)LIGHT_TYPE::SPOT) {
 		RESOURCE.Get<CShader>("LightingStencil")->SetPipelineState(CMDLIST);
@@ -117,6 +114,14 @@ void CLight::Render(std::shared_ptr<CRenderTargetGroup> renderTarget)
 		RESOURCE.Get<CShader>("LightingDirectional")->SetPipelineState(CMDLIST);
 		CRenderer::RenderFullscreen();
 	}
+}
+
+void CLight::BindLightDataToShader()
+{
+	mLightData.worldMat = GetTransform()->GetWorldMat(false);
+	auto lightBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::LIGHT);
+	lightBuffer->UpdateBuffer(mCbvOffset, &mLightData);
+	lightBuffer->BindToShader(mCbvOffset);
 }
 
 void CLight::SetVolumes()

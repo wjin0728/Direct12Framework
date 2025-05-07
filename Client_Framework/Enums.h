@@ -1,5 +1,9 @@
 #pragma once
 
+enum {
+	FRAME_RESOURCE_COUNT = 2
+};
+
 enum class LIGHT_TYPE : UINT8
 {
 	DIRECTIONAL,
@@ -51,6 +55,35 @@ enum class PLAYER_CLASS : UINT8
 	FIGHTER,
 	ARCHER,
 	MAGE,
+	end
+};
+
+enum ITEM_TYPE : UINT8
+{
+	FIRE_ENCHANT,
+	FIRE_EXPLOSION,
+	WATER_HEAL,
+	WATER_SHIELD,
+	GRASS_VINE,
+	GRASS_WEAKEN,
+	FIRE_PIECE,
+	WATER_PIECE,
+	GRASS_PIECE,
+
+	item_end
+};
+	
+enum class PLAYER_STATE : UINT8
+{
+	IDLE,
+	RUN,
+	ATTACK,
+	MOVE_ATTACK,
+	GETHIT,
+	DEATH,
+	JUMP,
+	SKILL,
+
 	end
 };
 

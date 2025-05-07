@@ -15,7 +15,11 @@ public:
 	std::shared_ptr<class CGameObject> mMainCamera{ nullptr };
 
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mOtherPlayers{};
+	std::unordered_map<int, std::shared_ptr<class CGameObject>> mEnemies{};
+	std::unordered_map<int, std::shared_ptr<class CGameObject>> mItems{};
+
 	int clientID{ -1 };
+	bool RenderOK{ 0 };
 
 	size_t save_data_size = 0;
 	size_t one_packet_size = 0;
@@ -37,6 +41,14 @@ public:
 	static void CALLBACK send_callback(DWORD err, DWORD sent_size, LPWSAOVERLAPPED pwsaover, DWORD sendflag);
 	void Using_Packet(char* packet_ptr);
 	void print_error(const char* msg, int err_no);
+
+	void send_cs_000_packet() {
+		CS_000_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_000;
+		p.id = clientID;
+		Send_Packet(&p);
+	}
 
 	void send_cs_move_packet(uint8_t dir, Vec3 look) {
 		CS_MOVE_PACKET p;

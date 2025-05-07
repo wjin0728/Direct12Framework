@@ -33,6 +33,8 @@ public:
 
 	void Render(std::shared_ptr<class CRenderTargetGroup> renderTarget);
 
+	void BindLightDataToShader();
+
 public:
 	static void SetVolumes();
 

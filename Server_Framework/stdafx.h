@@ -20,7 +20,9 @@
 #include "protocol.h"
 
 #include <DirectXMath.h>
+#include <DirectXCollision.h>
 #include "../Client_Framework/SimpleMath.h"
+#include <DirectXCollision.h>
 
 using namespace std;
 
@@ -28,3 +30,4 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Vec3 = SimpleMath::Vector3;
 using SimpleMath::Quaternion;
+using SimpleMath::Matrix;

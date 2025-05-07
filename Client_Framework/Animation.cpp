@@ -139,6 +139,11 @@ CAnimationController::~CAnimationController()
 
 void CAnimationController::Awake()
 {
+	
+}
+
+void CAnimationController::Start()
+{
 	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
 	if (skinnedMeshRenderer)
 		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();
@@ -163,9 +168,6 @@ void CAnimationController::Awake()
 		++i;
 	}
 
-	mRootMotionObject = mAnimationSets->mBoneFrameCaches[0].lock()->GetTransform();
-	mRootMotionObject.lock()->owner->SetStatic(true);
-
 	if (mBoneTransformIdx == -1) {
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
 	}
@@ -173,10 +175,6 @@ void CAnimationController::Awake()
 	SetTrackAnimationSet(0, 1);
 	SetTrackSpeed(0, 1.0f);
 	SetTrackWeight(0, 1.0f);
-}
-
-void CAnimationController::Start()
-{
 }
 
 void CAnimationController::Update()
