@@ -419,13 +419,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			}
 		}
 		else if (token == "<Animation>:") {
-			std::string animName{};
-			ReadDateFromFile(inFile, animName);
-			size_t n = animName.find('@');
-			if (n != std::string::npos) 
-				animName = animName.substr(0, n + 1) + "anim";
-
-			obj->CreateAnimationFromFile(ANIMATION_PATH(animName));
+			obj->CreateAnimationFromFile(inFile);
 		}
 		else if (token == "<Light>:") {
 			obj->CreateLightFromFile(inFile);
@@ -441,15 +435,9 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 	return obj;
 }
 
-void CGameObject::CreateAnimationFromFile(std::string& fileName)
+void CGameObject::CreateAnimationFromFile(std::ifstream& inFile)
 {
 	using namespace BinaryReader;
-
-	std::ifstream ifs{ fileName, std::ios::binary};
-	if (!ifs) {
-		return;
-	}
-	
 
 	mAnimationController = AddComponent<CAnimationController>();
 
@@ -457,118 +445,54 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 	int setsNum{};
 
 	while (true) {
-		ReadDateFromFile(ifs, token);
+		ReadDateFromFile(inFile, token);
 
 		if (token == "<AnimationSets>:") {
-			ReadDateFromFile(ifs, setsNum);
+			ReadDateFromFile(inFile, setsNum);
 			mAnimationController->mAnimationSets = std::make_shared<CAnimationSets>(setsNum);
 		}
+		else if (token == "<FrameNames>:") {
+			int cacheNum{};
+			ReadDateFromFile(inFile, cacheNum);
+
+			auto& sets = mAnimationController->mAnimationSets;
+			sets->mBoneFrameCaches.resize(cacheNum);
+			sets->mBoneNames.resize(cacheNum);
+
+			for (int i = 0; i < cacheNum; i++) {
+				ReadDateFromFile(inFile, sets->mBoneNames[i]);
+			}
+		}
 		else if (token == "<AnimationSet>:") {
-			int setNum{};
-			float startTime{};
-			float endTime{};
+			int setNum{}, framesPerSecondNum{}, keyFrameNum{};
+			float length{};
 			std::string setName;
 
-			ReadDateFromFile(ifs, setNum);
-			ReadDateFromFile(ifs, setName);
-			ReadDateFromFile(ifs, startTime);
-			ReadDateFromFile(ifs, endTime);
+			ReadDateFromFile(inFile, setNum);
+			ReadDateFromFile(inFile, setName);
+			ReadDateFromFile(inFile, length);
+			ReadDateFromFile(inFile, framesPerSecondNum);
+			ReadDateFromFile(inFile, keyFrameNum);
 
-			auto animSet = std::make_shared<CAnimationSet>(startTime, endTime, setName);
-			mAnimationController->mAnimationSets->mAnimationSet[setNum] = animSet;
+			mAnimationController->mAnimationSets->mAnimationSet[setNum] = std::make_shared<CAnimationSet>(length, framesPerSecondNum, keyFrameNum, mAnimationController->mAnimationSets->mBoneNames.size(), setName);
 
-			ReadDateFromFile(ifs, token);
-			if (token == "<AnimationLayers>:") {
-				int layersNum{};
-				ReadDateFromFile(ifs, layersNum);
+			for (int i = 0; i < keyFrameNum; i++) {
+				ReadDateFromFile(inFile, token);
+				if (token == "<Transform>:") {
+					auto& animSet = mAnimationController->mAnimationSets->mAnimationSet[setNum];
+					int keyNum{};
+					float keyTime{};
 
-				animSet->mLayers.resize(layersNum);
-				animSet->mScales.resize(layersNum);
-				animSet->mRotations.resize(layersNum);
-				animSet->mTranslations.resize(layersNum);
+					ReadDateFromFile(inFile, keyNum);
+					ReadDateFromFile(inFile, keyTime);
 
-				for (int i = 0; i < layersNum; i++) {
-					ReadDateFromFile(ifs, token);
-					if (token == "<AnimationLayer>:") {
-						int layerNum{};
-						ReadDateFromFile(ifs, layerNum);
+					animSet->mKeyFrameTimes[i] = keyTime;
 
-						animSet->mLayers[i] = std::make_shared<CAnimationLayer>();
-						auto& layer = animSet->mLayers[i];
-
-						int cacheNum{};
-						ReadDateFromFile(ifs, cacheNum);
-
-						layer->mBoneNames.resize(cacheNum);
-						layer->mBoneFrameCaches.resize(cacheNum);
-						layer->mAnimationCurves.resize(cacheNum);
-
-						animSet->mScales[i].resize(cacheNum);
-						animSet->mRotations[i].resize(cacheNum);
-						animSet->mTranslations[i].resize(cacheNum);
-
-						ReadDateFromFile(ifs, layer->mWeight);
-
-						for (int j = 0; j < cacheNum; j++)
-						{
-							ReadDateFromFile(ifs, token);
-							if (token == "<AnimationCurve>:") {
-								int curveNude{};
-								ReadDateFromFile(ifs, curveNude); //j
-								ReadDateFromFile(ifs, layer->mBoneNames[j]);
-
-								while (true) {
-									ReadDateFromFile(ifs, token);
-
-									if (token == "<TX>:") layer->LoadKeyValues(j, 0, ifs);
-									else if (token == "<TY>:") layer->LoadKeyValues(j, 1, ifs);
-									else if (token == "<TZ>:") layer->LoadKeyValues(j, 2, ifs);
-									else if (token == "<RX>:") layer->LoadKeyValues(j, 3, ifs);
-									else if (token == "<RY>:") layer->LoadKeyValues(j, 4, ifs);
-									else if (token == "<RZ>:") layer->LoadKeyValues(j, 5, ifs);
-									else if (token == "<SX>:") layer->LoadKeyValues(j, 6, ifs);
-									else if (token == "<SY>:") layer->LoadKeyValues(j, 7, ifs);
-									else if (token == "<SZ>:") layer->LoadKeyValues(j, 8, ifs);
-									else if (token == "</AnimationCurve>")
-									{
-										break;
-									}
-								}
-							}
-						}
-						ReadDateFromFile(ifs, token); //</AnimationLayer>
+					for (int j = 0; j < mAnimationController->mAnimationSets->mBoneNames.size(); ++j) {
+						ReadDateFromFile(inFile, animSet->mKeyFrameTransforms[i][j]);
 					}
 				}
-				ReadDateFromFile(ifs, token); //</AnimationLayers>
-
-				//int64_t commonBoneNum = 0;
-				//std::unordered_map<CTransform*, std::pair<int64_t, int64_t>> global_map;
-				//
-				//for (const auto& layer : animSet->mLayers) {
-				//	std::unordered_map<CTransform*, int> local_count;
-				//	for (const auto& cache : layer->mBoneFrameCaches) {
-				//		local_count[cache.lock().get()]++;
-				//	}
-				//
-				//	for (const auto& [cache, m] : local_count) {
-				//		auto& sums = global_map[cache];
-				//		sums.first += m;
-				//		sums.second += static_cast<int64_t>(m) * m;
-				//	}
-				//}
-				//
-				//for (const auto& [cache, sums] : global_map) {
-				//	int64_t sum_m = sums.first;
-				//	int64_t sum_m2 = sums.second;
-				//	int64_t contrib = (sum_m * sum_m - sum_m2) / 2;
-				//	commonBoneNum += contrib;
-				//}
-				//
-				//if (commonBoneNum) {
-				//	animSet->mBoneFrameCaches.resize(commonBoneNum);
-				//}
 			}
-			ReadDateFromFile(ifs, token); //</AnimationSet>
 		}
 		else if (token == "</AnimationSets>")
 		{

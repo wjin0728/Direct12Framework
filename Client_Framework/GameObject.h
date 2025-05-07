@@ -123,7 +123,7 @@ private:
 	void CreateRendererFromFile(std::ifstream& inFile);
 	void CreateTerrainFromFile(std::ifstream& inFile);
 	void CreateLightFromFile(std::ifstream& inFile);
-	void CreateAnimationFromFile(std::string& fileName);
+	void CreateAnimationFromFile(std::ifstream& inFile);
 
 public:
 	std::shared_ptr<CAnimationController> mAnimationController{};

@@ -69,10 +69,6 @@ private:
     int								mReferences = 0;
 
 public:
-    void AddRef() { mReferences++; }
-    void Release() { if (--mReferences <= 0) delete this; }
-
-public:
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
     std::vector<std::weak_ptr<CTransform>>      mBoneFrameCaches{};
     std::vector<string>                         mBoneNames{};
@@ -119,7 +115,7 @@ class CAnimationController : public CComponent
 {
 public:
     CAnimationController();
-    CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion = false);
+    CAnimationController(int nAnimationTracks, std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion = false);
     virtual ~CAnimationController();
 
     virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CAnimationController>(*this); }
@@ -128,8 +124,8 @@ public:
 
     std::vector<std::shared_ptr<CAnimationTrack>>   mTracks;
     std::shared_ptr<CAnimationSets>                 mAnimationSets;
-     std::vector<Matrix>                            mBindPoseBoneOffsets{};
-   std::vector<std::weak_ptr<CTransform>>           mSkinningBoneTransforms{};
+    std::vector<Matrix>                            mBindPoseBoneOffsets{};
+    std::vector<std::weak_ptr<CTransform>>           mSkinningBoneTransforms{};
     std::vector<Matrix>                             finalTransforms;
 
     UINT                                            mBoneTransformIdx = -1;
