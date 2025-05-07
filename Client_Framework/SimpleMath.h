@@ -600,7 +600,7 @@ namespace DirectX
             static void Transform(const Matrix& M, const Quaternion& rotation, Matrix& result) noexcept;
             static Matrix Transform(const Matrix& M, const Quaternion& rotation) noexcept;
 
-            static Matrix Matrix::Interpolate(Matrix& M1, Matrix& M2, float t);
+            static Matrix Interpolate(Matrix& M1, Matrix& M2, float t);
 
             // Constants
             static const Matrix Identity;
@@ -967,7 +967,7 @@ namespace DirectX
         }
 
         inline bool IsZero(float fValue, float fEpsilon) { return((fabsf(fValue) < fEpsilon)); }
-        inline bool IsEqual(float fA, float fB, float fEpsilon) { return(::IsZero(fA - fB, fEpsilon)); }
+        inline bool IsEqual(float fA, float fB, float fEpsilon) { return(IsZero(fA - fB, fEpsilon)); }
 
         inline float InverseSqrt(float fValue) {
             return 1.0f / sqrtf(fValue);

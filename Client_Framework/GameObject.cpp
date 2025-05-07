@@ -419,7 +419,13 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			}
 		}
 		else if (token == "<Animation>:") {
-			obj->CreateAnimationFromFile(inFile);
+			std::string animName{};
+			ReadDateFromFile(inFile, animName);
+			size_t n = animName.find('@');
+			if (n != std::string::npos)
+				animName = animName.substr(0, n + 1) + "anim";
+
+			obj->CreateAnimationFromFile(ANIMATION_PATH(animName));
 		}
 		else if (token == "<Light>:") {
 			obj->CreateLightFromFile(inFile);
@@ -435,9 +441,14 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 	return obj;
 }
 
-void CGameObject::CreateAnimationFromFile(std::ifstream& inFile)
+void CGameObject::CreateAnimationFromFile(std::string& fileName)
 {
 	using namespace BinaryReader;
+
+	std::ifstream ifs{ fileName, std::ios::binary };
+	if (!ifs) {
+		return;
+	}
 
 	mAnimationController = AddComponent<CAnimationController>();
 
@@ -445,22 +456,22 @@ void CGameObject::CreateAnimationFromFile(std::ifstream& inFile)
 	int setsNum{};
 
 	while (true) {
-		ReadDateFromFile(inFile, token);
+		ReadDateFromFile(ifs, token);
 
 		if (token == "<AnimationSets>:") {
-			ReadDateFromFile(inFile, setsNum);
+			ReadDateFromFile(ifs, setsNum);
 			mAnimationController->mAnimationSets = std::make_shared<CAnimationSets>(setsNum);
 		}
 		else if (token == "<FrameNames>:") {
 			int cacheNum{};
-			ReadDateFromFile(inFile, cacheNum);
+			ReadDateFromFile(ifs, cacheNum);
 
 			auto& sets = mAnimationController->mAnimationSets;
 			sets->mBoneFrameCaches.resize(cacheNum);
 			sets->mBoneNames.resize(cacheNum);
 
 			for (int i = 0; i < cacheNum; i++) {
-				ReadDateFromFile(inFile, sets->mBoneNames[i]);
+				ReadDateFromFile(ifs, sets->mBoneNames[i]);
 			}
 		}
 		else if (token == "<AnimationSet>:") {
@@ -468,28 +479,28 @@ void CGameObject::CreateAnimationFromFile(std::ifstream& inFile)
 			float length{};
 			std::string setName;
 
-			ReadDateFromFile(inFile, setNum);
-			ReadDateFromFile(inFile, setName);
-			ReadDateFromFile(inFile, length);
-			ReadDateFromFile(inFile, framesPerSecondNum);
-			ReadDateFromFile(inFile, keyFrameNum);
+			ReadDateFromFile(ifs, setNum);
+			ReadDateFromFile(ifs, setName);
+			ReadDateFromFile(ifs, length);
+			ReadDateFromFile(ifs, framesPerSecondNum);
+			ReadDateFromFile(ifs, keyFrameNum);
 
 			mAnimationController->mAnimationSets->mAnimationSet[setNum] = std::make_shared<CAnimationSet>(length, framesPerSecondNum, keyFrameNum, mAnimationController->mAnimationSets->mBoneNames.size(), setName);
 
 			for (int i = 0; i < keyFrameNum; i++) {
-				ReadDateFromFile(inFile, token);
+				ReadDateFromFile(ifs, token);
 				if (token == "<Transform>:") {
 					auto& animSet = mAnimationController->mAnimationSets->mAnimationSet[setNum];
 					int keyNum{};
 					float keyTime{};
 
-					ReadDateFromFile(inFile, keyNum);
-					ReadDateFromFile(inFile, keyTime);
+					ReadDateFromFile(ifs, keyNum);
+					ReadDateFromFile(ifs, keyTime);
 
 					animSet->mKeyFrameTimes[i] = keyTime;
 
 					for (int j = 0; j < mAnimationController->mAnimationSets->mBoneNames.size(); ++j) {
-						ReadDateFromFile(inFile, animSet->mKeyFrameTransforms[i][j]);
+						ReadDateFromFile(ifs, animSet->mKeyFrameTransforms[i][j]);
 					}
 				}
 			}

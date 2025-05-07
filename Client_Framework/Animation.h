@@ -42,6 +42,7 @@ public:
 class CAnimationSet
 {
 public:
+    CAnimationSet() {}
     CAnimationSet(float fLength, int nFramesPerSecond, int nKeyFrameTransforms, int nSkinningBones, string pstrName);
     ~CAnimationSet();
 
@@ -62,6 +63,7 @@ public:
 class CAnimationSets
 {
 public:
+    CAnimationSets() {}
     CAnimationSets(int nAnimationSets);
     ~CAnimationSets();
 
