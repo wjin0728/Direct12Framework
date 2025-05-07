@@ -10,6 +10,7 @@ class CCollider;
 class CComponent;
 class CAnimationController;
 class CSkinnedMesh;
+class CPlayerController;
 
 class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
@@ -22,6 +23,7 @@ private:
 	std::shared_ptr<CTransform> mTransform{};
 	std::shared_ptr<CRenderer> mRenderer{};
 	std::shared_ptr<CCollider> mCollider{};
+	std::shared_ptr<CPlayerController> mPlayerController{};
 
 	std::vector<std::shared_ptr<CGameObject>> mChildren{};
 
@@ -76,7 +78,8 @@ public:
 	std::shared_ptr<CRenderer> GetRenderer() { return mRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
 	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
-
+	std::shared_ptr<CPlayerController> GetPlayerController() { return mPlayerController; }
+	
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::string& GetName() const { return mName; }
 	const std::string& GetTag() const { return mTag; }
@@ -99,6 +102,8 @@ public:
 	void SetTag(const std::string& tag) { mTag = tag; }
 	void SetID(int id) { mID = id; }
 	void SetParent(const std::shared_ptr<CGameObject>& parent);
+	void SetPlayerController(const std::shared_ptr<CPlayerController>& playerController) 
+							{ mPlayerController = playerController; }
 
 	void ReturnCBVIndex();
 

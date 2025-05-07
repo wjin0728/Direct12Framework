@@ -158,7 +158,6 @@ void GameManager::Worker_thread()
 			delete ex_over;
 			break;
 		}
-					break;
 		}
 	}
 
@@ -291,7 +290,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 						if (clients[c_id]._player._boundingbox.Intersects(it.second._boundingbox)) {
 							for (auto& cl : clients) {
 								if (cl._state != ST_INGAME) continue;
-								cl.send_remove_item_packet(it.first, c_id);
+								cl.send_remove_item_packet(it.first, c_id, it.second._item_type);
 							}
 							cout << "cl : " << c_id << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
 							items.erase(it.first);

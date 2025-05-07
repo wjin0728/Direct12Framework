@@ -88,13 +88,22 @@ void SESSION::send_drop_item_packet(Item& it, int item_id)
 	do_send(&p);
 }
 
-void SESSION::send_remove_item_packet(int item_id, int player_id)
+void SESSION::send_remove_item_packet(int item_id, int player_id, uint8_t item_type)
 {
 	SC_REMOVE_ITEM_PACKET p;
 	p.type = SC_REMOVE_ITEM;
 	p.size = sizeof(p);
 	p.item_id = item_id;
 	p.player_id = player_id;
+	p.item_type = item_type;
 	do_send(&p);
-	cout << "sssssssssssssssssssssssssssss";
+}
+
+void SESSION::send_use_skill_packet(S_ITEM_TYPE skill_type, int player_id)
+{
+	SC_USE_SKILL_PACKET p;
+	p.type = SC_USE_SKILL;
+	p.size = sizeof(p);
+	p.player_id = player_id;
+	p.skill_type = skill_type;
 }

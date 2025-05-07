@@ -6,6 +6,7 @@ class CPlayerController : public CMonoBehaviour
 {
 private:
 	PLAYER_STATE mState = PLAYER_STATE::IDLE;
+	ITEM_TYPE mSkill = ITEM_TYPE::item_end;
 
 	std::shared_ptr<class CAnimationController> mAnimationController{};
 	std::shared_ptr<class CRigidBody> rigidBody{};
@@ -31,6 +32,7 @@ public:
 	void SetRigidBody(const std::shared_ptr<class CRigidBody>& rigidBody) { this->rigidBody = rigidBody; }
 	void SetCamera(const std::shared_ptr<class CCamera>& camera) { mCamera = camera; }
 	void SetTerrain(const std::shared_ptr<class CTerrain>& terrain) { mTerrain = terrain; }
+	void SetSkill(ITEM_TYPE skill) { mSkill = skill; };
 
 	void SetState(PLAYER_STATE state);
 

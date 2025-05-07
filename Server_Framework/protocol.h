@@ -28,6 +28,7 @@ constexpr char SC_ADD_PLAYER = 9;
 constexpr char SC_REMOVE_PLAYER = 10;
 constexpr char SC_DROP_ITEM = 11;
 constexpr char SC_REMOVE_ITEM = 12;
+constexpr char SC_USE_SKILL = 13;
 
 #pragma pack (push, 1)
 struct PACKET {
@@ -121,7 +122,7 @@ struct SC_CHAT_PACKET : PACKET {
 
 struct SC_DROP_ITEM_PACKET : PACKET {
 	int				item_id;
-	char			item_enum;
+	uint8_t			item_enum;
 	float			x;
 	float			y;
 	float			z;
@@ -129,9 +130,15 @@ struct SC_DROP_ITEM_PACKET : PACKET {
 
 struct SC_REMOVE_ITEM_PACKET : PACKET {
 	int				item_id;
-	char			player_id; 
+	char			player_id;
 					// -1이면 단순 삭제, 
 					// or player_id 플레이어가 아이템 획득
+	uint8_t			item_type;
+};
+
+struct SC_USE_SKILL_PACKET : PACKET {
+	int				player_id;
+	uint8_t			skill_type;
 };
 
 struct SC_LOGIN_FAIL_PACKET : PACKET {

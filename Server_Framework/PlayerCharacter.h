@@ -9,6 +9,8 @@ public:
 
 	S_PLAYER_CLASS	    _class;
 	int					_hp;
+	S_ITEM_TYPE			_skill;
+
 	int					_barrier;
 	bool				_on_FireEnchant;
 	bool				_on_GrassWeaken;

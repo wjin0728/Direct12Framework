@@ -199,7 +199,11 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet_ptr);
 
 		clientID = packet->id;
+
+		auto playerController = mPlayer->AddComponent<CPlayerController>();
+		mPlayer->SetPlayerController(playerController);
 		mPlayer->GetTransform()->SetLocalPosition({ 10, 5, 10 });
+
 		cout << clientID << endl;
 
 		break;
@@ -290,14 +294,20 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_REMOVE_ITEM: {
 		SC_REMOVE_ITEM_PACKET* packet = reinterpret_cast<SC_REMOVE_ITEM_PACKET*>(packet_ptr);
 
+		if (packet->player_id == -1) {} // 단순 삭제면 바로 넘기기
+		else mPlayer->GetPlayerController()->SetSkill((ITEM_TYPE)packet->item_type);
+
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		scene->RemoveObject(mItems[packet->item_id]);
 		mItems.erase(packet->item_id);
 		cout << "삭제!";
 
-		if (packet->player_id == -1) break; // 단순 삭제면 바로 넘기기
+		break;
+	}
+	case SC_USE_SKILL: {
+		SC_USE_SKILL_PACKET* packet = reinterpret_cast<SC_USE_SKILL_PACKET*>(packet_ptr);
+		
 
-		// 플레이어가 스킬 아이템 먹은 정보 처리 필요
 
 		break;
 	}
@@ -319,7 +329,6 @@ void ServerManager::Send_Packet(void* packet)
 }
 void CALLBACK ServerManager::send_callback(DWORD err, DWORD sent_size, LPWSAOVERLAPPED pwsaover, DWORD sendflag)
 {
-	cout << "Send_Packet" << endl;
 	OVER_PLUS* over = reinterpret_cast<OVER_PLUS*>(pwsaover);
 	delete over;
 }
