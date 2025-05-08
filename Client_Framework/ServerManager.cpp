@@ -249,21 +249,24 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		break;
 	}
-	case SC_MOVE_OBJECT: {
-		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
+	case SC_ALL_PLAYERS_POS: {
+		SC_ALL_PLAYERS_POS_PACKET* packet = reinterpret_cast<SC_ALL_PLAYERS_POS_PACKET*>(packet_ptr);
 
-		int id = packet->id;
-		if (id == clientID) {
-			mPlayer->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-			mPlayer->GetTransform()->SetLocalRotationY(packet->look_y);
-			break;
+		for (int i = 0; i < 3; i++) {
+			if (packet->clientId[i] == -1) break;
+			if (clientID == packet->clientId[i]) {
+				mPlayer->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
+				mPlayer->GetTransform()->SetLocalRotationY(packet->look_y[i]);
+				cout << packet->clientId[i] << " " << packet->x[i] << " " << packet->y[i] << " " << packet->z[i] << endl;
+			}
+			else {
+				auto it = mOtherPlayers.find(packet->clientId[i]);
+				if (it != mOtherPlayers.end()) {
+					mOtherPlayers[packet->clientId[i]]->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
+					mOtherPlayers[packet->clientId[i]]->GetTransform()->SetLocalRotationY(packet->look_y[i]);
+				}
+			}
 		}
-		auto it = mOtherPlayers.find(id);
-		if (it != mOtherPlayers.end()) {
-			mOtherPlayers[id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-			mOtherPlayers[id]->GetTransform()->SetLocalRotationY(packet->look_y);
-		}
-
 		break;
 	}
 	case SC_DROP_ITEM: {
@@ -307,7 +310,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_USE_SKILL: {
 		SC_USE_SKILL_PACKET* packet = reinterpret_cast<SC_USE_SKILL_PACKET*>(packet_ptr);
 		
-
 
 		break;
 	}

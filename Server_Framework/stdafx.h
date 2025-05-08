@@ -33,4 +33,4 @@ using SimpleMath::Quaternion;
 using SimpleMath::Matrix;
 
 // 고정 틱 간격 (60Hz)
-const float TICK_INTERVAL = 1.0f / 60.0f; // 약 0.016667초
+constexpr float TICK_INTERVAL = 1.0f / 60.0f; // 약 0.016667초

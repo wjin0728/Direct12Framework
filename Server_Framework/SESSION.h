@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SESSION_H
+#define SESSION_H
+
 #include "stdafx.h"
 #include "OVER_PLUS.h"
 #include "Object.h"
@@ -37,8 +39,9 @@ public:
 	void send_login_info_packet();
 	void send_add_player_packet(SESSION* client);
 	void send_chat_packet(int c_id, const char* mess);
-	void send_move_packet(SESSION* client);
 	void send_drop_item_packet(Item& it, int item_id);
 	void send_remove_item_packet(int item_id, int player_id, uint8_t item_type);
 	void send_use_skill_packet(S_ITEM_TYPE skill_type, int player_id);
 };
+
+#endif

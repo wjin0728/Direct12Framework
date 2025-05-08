@@ -1,37 +1,37 @@
 #include "MonsterState.h"
 #include "Monster.h"
 
-// IdleState 구현         =========================================================================
+// MonsterState::IdleState 구현         =========================================================================
 
 
 
-IdleState& IdleState::GetInstance() { static IdleState instance; return instance; }
+MonsterState::IdleState& MonsterState::IdleState::GetInstance() { static MonsterState::IdleState instance; return instance; }
 
-void IdleState::Enter(Monster* monster) {
+void MonsterState::IdleState::Enter(Monster* monster) {
     monster->SetVelocity(0, 0, 0); // 속도 0
 }
 
-void IdleState::Update(Monster* monster) {
+void MonsterState::IdleState::Update(Monster* monster) {
     if (monster->IsPlayerInRange()) {
-        monster->SetState(&RunState::GetInstance());
+        monster->SetState(&MonsterState::RunState::GetInstance());
     }
 }
 
-void IdleState::Exit(Monster* monster) {}
+void MonsterState::IdleState::Exit(Monster* monster) {}
 
 
 
-// RunState 구현          =========================================================================
+// MonsterState::RunState 구현          =========================================================================
 
 
 
-RunState& RunState::GetInstance() { static RunState instance; return instance; }
+MonsterState::RunState& MonsterState::RunState::GetInstance() { static MonsterState::RunState instance; return instance; }
 
-void RunState::Enter(Monster* monster) {
+void MonsterState::RunState::Enter(Monster* monster) {
     // 이동 시작
 }
 
-void RunState::Update(Monster* monster) {
+void MonsterState::RunState::Update(Monster* monster) {
     Vec3 playerPos = monster->GetPlayerPosition();
     Vec3 direction = playerPos - monster->_pos;
     direction.Normalize();
@@ -43,82 +43,82 @@ void RunState::Update(Monster* monster) {
         monster->_pos.z + monster->_velocity.z * TICK_INTERVAL
     );
     if (monster->IsCloseToPlayer()) {
-        monster->SetState(&BasicAttackState::GetInstance());
+        monster->SetState(&MonsterState::BasicAttackState::GetInstance());
     }
 }
 
-void RunState::Exit(Monster* monster) {}
+void MonsterState::RunState::Exit(Monster* monster) {}
 
 
 
-// BasicAttackState 구현  =========================================================================
+// MonsterState::BasicAttackState 구현  =========================================================================
 
 
 
-BasicAttackState& BasicAttackState::GetInstance() { static BasicAttackState instance; return instance; }
+MonsterState::BasicAttackState& MonsterState::BasicAttackState::GetInstance() { static MonsterState::BasicAttackState instance; return instance; }
 
-void BasicAttackState::Enter(Monster* monster) {
+void MonsterState::BasicAttackState::Enter(Monster* monster) {
     attackTimer = 1.0f; // 공격 지속 시간
 }
 
-void BasicAttackState::Update(Monster* monster) {
+void MonsterState::BasicAttackState::Update(Monster* monster) {
     attackTimer -= TICK_INTERVAL;
     if (attackTimer <= 0) {
-        monster->SetState(&IdleState::GetInstance());
+        monster->SetState(&MonsterState::IdleState::GetInstance());
     }
 }
 
-void BasicAttackState::Exit(Monster* monster) {}
+void MonsterState::BasicAttackState::Exit(Monster* monster) {}
 
 
 
-// SkillAttackState 구현  =========================================================================
+// MonsterState::SkillAttackState 구현  =========================================================================
 
 
 
-SkillAttackState& SkillAttackState::GetInstance() { static SkillAttackState instance; return instance; }
+MonsterState::SkillAttackState& MonsterState::SkillAttackState::GetInstance() { static MonsterState::SkillAttackState instance; return instance; }
 
-void SkillAttackState::Enter(Monster* monster) {
+void MonsterState::SkillAttackState::Enter(Monster* monster) {
     skillTimer = 2.0f; // 스킬 지속 시간
 }
 
-void SkillAttackState::Update(Monster* monster) {
+void MonsterState::SkillAttackState::Update(Monster* monster) {
     skillTimer -= TICK_INTERVAL;
     if (skillTimer <= 0) {
-        monster->SetState(&IdleState::GetInstance());
+        monster->SetState(&MonsterState::IdleState::GetInstance());
     }
 }
 
-void SkillAttackState::Exit(Monster* monster) {}
+void MonsterState::SkillAttackState::Exit(Monster* monster) {}
 
 
 
-// HitState 구현          =========================================================================
+// MonsterState::HitState 구현          =========================================================================
 
 
 
-HitState& HitState::GetInstance() { static HitState instance; return instance; }
+MonsterState::HitState& MonsterState::HitState::GetInstance() { static MonsterState::HitState instance; return instance; }
 
-void HitState::Enter(Monster* monster) {
+void MonsterState::HitState::Enter(Monster* monster) {
     // hitTimer = 0.5f; // 피격 상태 애니메이션 시간 받아서 느야할듯?
     monster->SetVelocity(0, 0, 0); // 이동 멈춤
 
 }
 
-void HitState::Update(Monster* monster) {
+void MonsterState::HitState::Update(Monster* monster) {
     hitTimer -= TICK_INTERVAL;
     if (hitTimer <= 0) {
         // 이전 상태 또는 상황에 따라 복귀
         if (monster->IsPlayerInRange() && !monster->IsCloseToPlayer()) {
-            monster->SetState(&RunState::GetInstance());
+            monster->SetState(&MonsterState::RunState::GetInstance());
         }
         else if (monster->IsCloseToPlayer()) {
-            monster->SetState(&BasicAttackState::GetInstance());
+            monster->SetState(&MonsterState::BasicAttackState::GetInstance());
         }
         else {
-            monster->SetState(&IdleState::GetInstance());
+            monster->SetState(&MonsterState::IdleState::GetInstance());
         }
     }
 }
 
-void HitState::Exit(Monster* monster) {}
+void MonsterState::HitState::Exit(Monster* monster) {}

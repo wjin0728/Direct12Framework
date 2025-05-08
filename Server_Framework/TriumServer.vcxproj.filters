@@ -25,6 +25,9 @@
     <Filter Include="Object Class">
       <UniqueIdentifier>{1573bee7-e839-40d8-b6d4-5590c25b922b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="StateMachine">
+      <UniqueIdentifier>{abe76411-217b-4c79-ba98-278e6e500736}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tem_server.cpp">
@@ -58,7 +61,13 @@
       <Filter>Object Class</Filter>
     </ClCompile>
     <ClCompile Include="Monster.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Object Class</Filter>
+    </ClCompile>
+    <ClCompile Include="MonsterState.cpp">
+      <Filter>StateMachine</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerState.cpp">
+      <Filter>StateMachine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -96,7 +105,13 @@
       <Filter>Object Class</Filter>
     </ClInclude>
     <ClInclude Include="Monster.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Object Class</Filter>
+    </ClInclude>
+    <ClInclude Include="MonsterState.h">
+      <Filter>StateMachine</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerState.h">
+      <Filter>StateMachine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

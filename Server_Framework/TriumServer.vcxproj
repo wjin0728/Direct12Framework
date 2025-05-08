@@ -23,8 +23,10 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="MonsterState.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PlayerCharacter.cpp" />
+    <ClCompile Include="PlayerState.cpp" />
     <ClCompile Include="SkillObject.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="OVER_PLUS.cpp" />
@@ -36,8 +38,10 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Monster.h" />
+    <ClInclude Include="MonsterState.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="PlayerCharacter.h" />
+    <ClInclude Include="PlayerState.h" />
     <ClInclude Include="SkillObject.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="OVER_PLUS.h" />

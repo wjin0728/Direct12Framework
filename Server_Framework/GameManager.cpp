@@ -2,7 +2,6 @@
 
 GameManager::GameManager()
 {
-	lastTime = std::chrono::high_resolution_clock::now();
 	//terrain.SetScale(45, 20, 45);
 	terrain.SetScale(64, 598.9f, 64);
 	terrain.SetResolution(513);
@@ -29,13 +28,14 @@ GameManager::GameManager()
 	std::cout << "Server initialized.\n";
 
 	S_Accept();
-
-	Make_threads();
 }
 GameManager::~GameManager()
 {
 	closesocket(server_socket);
 	WSACleanup();
+	for (auto& th : workerThreads) {
+		if (th.joinable()) th.join();
+	}
 }
 
 void GameManager::S_Bind_Listen()
@@ -53,15 +53,12 @@ void GameManager::S_Bind_Listen()
 		WSACleanup();
 		exit(1);
 	}
-	std::cout << "Bind successful.\n";
-
 	if (listen(server_socket, SOMAXCONN) == SOCKET_ERROR) {
 		std::cerr << "Listen failed: " << WSAGetLastError() << "\n";
 		closesocket(server_socket);
 		WSACleanup();
 		exit(1);
 	}
-	std::cout << "Listening on port " << PORT_NUM << "\n";
 }
 void GameManager::S_Accept()
 {
@@ -74,17 +71,78 @@ void GameManager::S_Accept()
 	AcceptEx(server_socket, client_socket, accept_over._send_buf, 0, addr_size + 16, addr_size + 16, 0, &accept_over._over);
 }
 
-void GameManager::Make_threads()
-{
-	vector <thread> worker_threads;
+void GameManager::StartWorkerThreads() {
 	int num_threads = std::thread::hardware_concurrency();
-	for (int i = 0; i < num_threads; ++i)
-		worker_threads.emplace_back(&GameManager::Worker_thread, this);
-
-	for (auto& th : worker_threads)
-		th.join();
+	for (int i = 0; i < num_threads; ++i) {
+		workerThreads.emplace_back(&GameManager::Worker_thread, this);
+	}
 }
 
+void GameManager::SendAllPlayersPosPacket() {
+	SC_ALL_PLAYERS_POS_PACKET packet;
+	packet.size = sizeof(SC_ALL_PLAYERS_POS_PACKET);
+	packet.type = SC_ALL_PLAYERS_POS;
+	int cnt = 0;
+	for (auto& cl : clients) {
+		if (cl.second._state != ST_INGAME) { continue; }
+		auto& player = cl.second._player;
+		
+		packet.clientId[cnt] = cl.second._id;
+		packet.x[cnt] = player._pos.x;
+		packet.y[cnt] = player._pos.y;
+		packet.z[cnt] = player._pos.z;
+		packet.look_y[cnt] = player._look_dir.y;
+
+		cnt++;
+	}
+	for (int i = 0; i < 3; i++) {
+		if (packet.clientId[i] == -1) {
+			packet.x[i] = 0;
+			packet.y[i] = 0;
+			packet.z[i] = 0;
+			packet.look_y[i] = 0;
+		}
+	}
+	for (auto& cl : clients) {
+		if (cl.second._state != ST_INGAME) continue;
+		cl.second.do_send(&packet);
+		cout << "Send All Players Pos Packet to " << cl.second._id << "\n";
+	}
+}
+
+void GameManager::SendAllMonstersPosPacket() {
+	SC_MONSTER_POS_PACKET packet;
+	packet.size = sizeof(SC_MONSTER_POS_PACKET);
+	packet.type = SC_MONSTER_POS;
+	for (auto& ms : Monsters) {
+		packet.monsterId = ms.first;
+		packet.x = ms.second._pos.x;
+		packet.y = ms.second._pos.y;
+		packet.z = ms.second._pos.z;
+		packet.look_y = ms.second._look_dir.y;
+
+		for (auto& cl : clients) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.do_send(&packet);
+		}
+	}
+}
+
+void GameManager::SendAllItemsPosPacket() {
+	for (auto& it : items) {
+		SC_ITEM_POS_PACKET packet;
+		packet.size = sizeof(SC_ITEM_POS_PACKET);
+		packet.type = SC_ITEM_POS;
+		packet.itemId = it.first;
+		packet.x = it.second._pos.x;
+		packet.y = it.second._pos.y;
+		packet.z = it.second._pos.z;
+		for (auto& cl : clients) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.do_send(&packet);
+		}
+	}
+}
 void GameManager::Worker_thread()
 {
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -206,14 +264,14 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
 		for (auto& cl : clients) {
-			if (cl._state != ST_INGAME) continue;
-			cl.send_add_player_packet(&clients[c_id]);
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.send_add_player_packet(&clients[c_id]);
 		}
 		// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
 		for (auto& cl : clients) {
-			if (cl._state != ST_INGAME) continue;
-			if (cl._id == c_id) continue;
-			clients[c_id].send_add_player_packet(&cl);
+			if (cl.second._state != ST_INGAME) continue;
+			if (cl.second._id == c_id) continue;
+			clients[c_id].send_add_player_packet(&cl.second);
 		}
 		break;
 	}
@@ -221,8 +279,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 		CS_CHAT_PACKET* p = reinterpret_cast<CS_CHAT_PACKET*>(packet);
 
 		for (auto& cl : clients) {
-			if (cl._state != ST_INGAME) continue;
-			cl.send_chat_packet(c_id, p->mess);
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.send_chat_packet(c_id, p->mess);
 		}
 
 		std::cout << p->mess << std::endl;
@@ -289,8 +347,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 							it.second.LocalTransform();
 						if (clients[c_id]._player._boundingbox.Intersects(it.second._boundingbox)) {
 							for (auto& cl : clients) {
-								if (cl._state != ST_INGAME) continue;
-								cl.send_remove_item_packet(it.first, c_id, it.second._item_type);
+								if (cl.second._state != ST_INGAME) continue;
+								cl.second.send_remove_item_packet(it.first, c_id, it.second._item_type);
 							}
 							cout << "cl : " << c_id << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
 							items.erase(it.first);
@@ -298,11 +356,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 						}
 					}
 				}
-			}
-
-			for (auto& cl : clients) {
-				if (cl._state != ST_INGAME) continue;
-				cl.send_move_packet(&clients[c_id]);
 			}
 		}
 		else {
@@ -327,11 +380,11 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		else if (S_WATER_HEAL == p->skill_enum) {
 			for (auto& cl : clients)
-				cl._player._hp = min((cl._player._hp + WATER_HEAL_AMT), cl._player.PlayerMaxHp());
+				cl.second._player._hp = min((cl.second._player._hp + WATER_HEAL_AMT), cl.second._player.PlayerMaxHp());
 		}
 		else if (S_WATER_SHIELD == p->skill_enum) {
 			for (auto& cl : clients)
-				cl._player._barrier = 2;
+				cl.second._player._barrier = 2;
 		}
 		else if (S_GRASS_WEAKEN == p->skill_enum) {
 			clients[c_id]._player._on_GrassWeaken = true;
@@ -351,8 +404,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 		items[item_cnt].LocalTransform();
 
 		for (auto& cl : clients) {
-			if (cl._state != ST_INGAME) continue;
-			cl.send_drop_item_packet(items[item_cnt], item_cnt);
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.send_drop_item_packet(items[item_cnt], item_cnt);
 		}
 
 		item_cnt++;

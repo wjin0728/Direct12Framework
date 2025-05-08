@@ -54,23 +54,6 @@ void SESSION::send_chat_packet(int c_id, const char* mess)
 	do_send(&p);
 }
 
-void SESSION::send_move_packet(SESSION* client)
-{
-	SC_MOVE_PACKET p;
-
-	p.id = client->_id;
-	p.type = SC_MOVE_OBJECT;
-	p.size = sizeof(p);
-
-	p.x = client->_player._pos.x;
-	p.y = client->_player._pos.y;
-	p.z = client->_player._pos.z;
-
-	p.look_y = client->_player._look_dir.y;
-
-	do_send(&p);
-}
-
 void SESSION::send_drop_item_packet(Item& it, int item_id)
 {
 	SC_DROP_ITEM_PACKET p;
