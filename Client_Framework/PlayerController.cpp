@@ -91,6 +91,15 @@ void CPlayerController::OnKeyEvents()
 		}
 	}
 
-	if (dir == 0) return;
+	if (dir == 0) {
+		if (moveKeyPressed == true) {
+			moveKeyPressed = false;
+			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+		}
+		return;
+	}
+	else if (moveKeyPressed == false) {
+		moveKeyPressed = true;
+	}
 	INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
 }

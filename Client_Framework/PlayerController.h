@@ -13,6 +13,8 @@ private:
 	std::weak_ptr<class CCamera> mCamera{};
 	std::weak_ptr<class CTerrain> mTerrain{};
 
+	bool moveKeyPressed = false;
+
 public:
 	CPlayerController() : CMonoBehaviour("PlayerController") {};
 	CPlayerController(const CPlayerController& other) : CMonoBehaviour(other) {}
