@@ -5,13 +5,15 @@
 PlayerState::IdleState& PlayerState::IdleState::GetInstance() { static PlayerState::IdleState instance; return instance; }
 
 void PlayerState::IdleState::Enter(PlayerCharacter* player) {
+    cout << "Idle 들어왔다리!" << endl;
     player->SetVelocity(0, 0, 0); // 속도 0으로 설정
 }
 
 void PlayerState::IdleState::Update(PlayerCharacter* player) {
-    //if (player->HasMoveInput()) {
-    //    player->SetState(&PlayerState::RunState::GetInstance());
-    //}
+    cout << "IDLE 업데이트 중!" << endl;
+    if (player->HasMoveInput()) {
+        player->SetState(&PlayerState::RunState::GetInstance());
+    }
     //else if (player->HasAttackInput()) {
     //    player->SetState(&PlayerState::BasicAttackState::GetInstance());
     //}
@@ -30,24 +32,13 @@ void PlayerState::RunState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::RunState::Update(PlayerCharacter* player) {
-    //if (!player->HasMoveInput()) {
-    //    player->SetState(&PlayerState::IdleState::GetInstance());
-    //    return;
-    //}
-    //Vec3 moveInput = player->GetMoveInput();
-    //float speed = player->GetMoveSpeed(); // 클래스별 속도
-    //player->SetVelocity(moveInput.x * speed, moveInput.y * speed, moveInput.z * speed);
-    //player->SetPosition(
-    //    player->GetPosition().x + player->GetVelocity().x * TICK_INTERVAL,
-    //    player->GetPosition().y + player->GetVelocity().y * TICK_INTERVAL,
-    //    player->GetPosition().z + player->GetVelocity().z * TICK_INTERVAL
-    //);
-    //if (player->HasAttackInput()) {
-    //    player->SetState(&PlayerState::BasicAttackState::GetInstance());
-    //}
-    //else if (player->HasSkillInput()) {
-    //    player->SetState(&PlayerState::SkillState::GetInstance());
-    //}
+    cout << "RUN 업데이트 중!" << endl;
+    if (!player->HasMoveInput()) {
+        player->SetState(&PlayerState::IdleState::GetInstance());
+        return;
+    }
+
+    player->_pos += (player->_velocity * TICK_INTERVAL);
 }
 
 void PlayerState::RunState::Exit(PlayerCharacter* player) {}

@@ -6,7 +6,6 @@ class PlayerCharacter : public Object
 {
 public:
 	Vec3				_look_dir; // 캐릭터가 보고있는 방향
-	Vec3				_acceleration; // 추가: 가속도
 
 	S_PLAYER_CLASS	    _class;
 	int					_hp;
@@ -22,7 +21,6 @@ public:
 	PlayerCharacter() :
 		Object(S_OBJECT_TYPE::S_PLAYER),
 		_look_dir(Vec3::Zero), 
-		_acceleration(Vec3::Zero), 
 		_class(S_PLAYER_CLASS::end),
 		_barrier(0),
 		_on_FireEnchant(false),	
@@ -50,7 +48,6 @@ public:
 	}
 
 	void SetLookDir(float x, float y, float z) { _look_dir = Vec3(x, y, z); };
-	void SetAcceleration(float x, float y, float z) { _acceleration = Vec3(x, y, z); };
 
 	void OnSkillFireEnchant();
 	void OnSkillFireExplosion();
@@ -60,6 +57,10 @@ public:
 	void OnSkillGrassVine();
 
 	void SetState(PlayerStateMachine* newState);
+
+	bool HasMoveInput() {
+		return (_velocity.x != 0 || _velocity.y != 0 || _velocity.z != 0);
+	}
 	void Update();
 	void TakeDamage(int damage);
 };

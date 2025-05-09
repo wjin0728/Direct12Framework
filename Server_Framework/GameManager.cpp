@@ -78,71 +78,6 @@ void GameManager::StartWorkerThreads() {
 	}
 }
 
-void GameManager::SendAllPlayersPosPacket() {
-	SC_ALL_PLAYERS_POS_PACKET packet;
-	packet.size = sizeof(SC_ALL_PLAYERS_POS_PACKET);
-	packet.type = SC_ALL_PLAYERS_POS;
-	int cnt = 0;
-	for (auto& cl : clients) {
-		if (cl.second._state != ST_INGAME) { continue; }
-		auto& player = cl.second._player;
-		
-		packet.clientId[cnt] = cl.second._id;
-		packet.x[cnt] = player._pos.x;
-		packet.y[cnt] = player._pos.y;
-		packet.z[cnt] = player._pos.z;
-		packet.look_y[cnt] = player._look_dir.y;
-
-		cnt++;
-	}
-	for (int i = 0; i < 3; i++) {
-		if (packet.clientId[i] == -1) {
-			packet.x[i] = 0;
-			packet.y[i] = 0;
-			packet.z[i] = 0;
-			packet.look_y[i] = 0;
-		}
-	}
-	for (auto& cl : clients) {
-		if (cl.second._state != ST_INGAME) continue;
-		cl.second.do_send(&packet);
-		cout << "Send All Players Pos Packet to " << cl.second._id << "\n";
-	}
-}
-
-void GameManager::SendAllMonstersPosPacket() {
-	SC_MONSTER_POS_PACKET packet;
-	packet.size = sizeof(SC_MONSTER_POS_PACKET);
-	packet.type = SC_MONSTER_POS;
-	for (auto& ms : Monsters) {
-		packet.monsterId = ms.first;
-		packet.x = ms.second._pos.x;
-		packet.y = ms.second._pos.y;
-		packet.z = ms.second._pos.z;
-		packet.look_y = ms.second._look_dir.y;
-
-		for (auto& cl : clients) {
-			if (cl.second._state != ST_INGAME) continue;
-			cl.second.do_send(&packet);
-		}
-	}
-}
-
-void GameManager::SendAllItemsPosPacket() {
-	for (auto& it : items) {
-		SC_ITEM_POS_PACKET packet;
-		packet.size = sizeof(SC_ITEM_POS_PACKET);
-		packet.type = SC_ITEM_POS;
-		packet.itemId = it.first;
-		packet.x = it.second._pos.x;
-		packet.y = it.second._pos.y;
-		packet.z = it.second._pos.z;
-		for (auto& cl : clients) {
-			if (cl.second._state != ST_INGAME) continue;
-			cl.second.do_send(&packet);
-		}
-	}
-}
 void GameManager::Worker_thread()
 {
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -302,65 +237,12 @@ void GameManager::Process_packet(int c_id, char* packet)
 		if (p->dir & KEY_FLAG::KEY_D) moveDir -= right_dir;
 		if (p->dir & KEY_FLAG::KEY_A) moveDir += right_dir;
 
-		const float moveSpeed = 5.0f; 
-		Vec3 velocity = Vec3::Zero;
-
 		if (moveDir.LengthSquared() > 0.0001f) {
 			moveDir.Normalize();
-			velocity = moveDir * moveSpeed;
-		}
-		else {
-			velocity = Vec3::Zero;
-			clients[c_id]._player._acceleration = Vec3::Zero;
-		}
-
-		// 위치 업데이트 60프레임 기준.
-		float deltaTime = 1.f / 60.f; 
-		Vec3 newPos = clients[c_id]._player._pos + velocity * deltaTime;
-
-		if (CanMove(newPos.x, newPos.z)) {
-			clients[c_id]._player._pos = newPos;
-
-			float terrainHeight = terrain.GetHeight(clients[c_id]._player._pos.x, clients[c_id]._player._pos.z);
-			clients[c_id]._player._pos.y = terrainHeight;
-
-			if (moveDir.LengthSquared() > 0.001f) {
-				clients[c_id]._player._look_dir = moveDir;
-			}
-
-			clients[c_id]._player._velocity = velocity;
-
-			float rotationSpeed = 10.f;
-			if (moveDir.LengthSquared() > 0.001f) {
-				Quaternion targetRot = Quaternion::LookRotation(moveDir);
-				Quaternion rotation = clients[c_id]._player._rotation = Quaternion::Slerp(clients[c_id]._player._rotation, targetRot, rotationSpeed * deltaTime);
-				Vec3 angle = Vec3::GetAngleToQuaternion(rotation);
-				clients[c_id]._player._look_dir.y = angle.y * radToDeg;
-			}
-
-			// 플레이어 - 아이템 충돌 체크
-			{
-				clients[c_id]._player.LocalTransform();
-				if (!items.empty()) {
-					for (auto& it : items) {
-						if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
-							it.second.LocalTransform();
-						if (clients[c_id]._player._boundingbox.Intersects(it.second._boundingbox)) {
-							for (auto& cl : clients) {
-								if (cl.second._state != ST_INGAME) continue;
-								cl.second.send_remove_item_packet(it.first, c_id, it.second._item_type);
-							}
-							cout << "cl : " << c_id << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
-							items.erase(it.first);
-							break;
-						}
-					}
-				}
-			}
+			clients[c_id]._player._velocity = moveDir;
 		}
 		else {
 			clients[c_id]._player._velocity = Vec3::Zero;
-			clients[c_id]._player._acceleration = Vec3::Zero;
 		}
 
 		break;
@@ -436,4 +318,67 @@ bool GameManager::CanMove(float x, float z)
 	}
 
 	return false;
+}
+
+void GameManager::SendAllPlayersPosPacket() {
+	SC_ALL_PLAYERS_POS_PACKET packet;
+	packet.size = sizeof(SC_ALL_PLAYERS_POS_PACKET);
+	packet.type = SC_ALL_PLAYERS_POS;
+	int cnt = 0;
+	for (auto& cl : clients) {
+		if (cl.second._state != ST_INGAME) { continue; }
+		auto& player = cl.second._player;
+
+		packet.clientId[cnt] = cl.second._id;
+		packet.x[cnt] = player._pos.x;
+		packet.y[cnt] = player._pos.y;
+		packet.z[cnt] = player._pos.z;
+		packet.look_y[cnt] = player._look_dir.y;
+
+		cnt++;
+	}
+	for (int i = 0; i < 3; i++) {
+		if (packet.clientId[i] == -1) {
+			packet.x[i] = 0;
+			packet.y[i] = 0;
+			packet.z[i] = 0;
+			packet.look_y[i] = 0;
+		}
+	}
+	for (auto& cl : clients) {
+		if (cl.second._state != ST_INGAME) continue;
+		cl.second.do_send(&packet);
+	}
+}
+void GameManager::SendAllMonstersPosPacket() {
+	SC_MONSTER_POS_PACKET packet;
+	packet.size = sizeof(SC_MONSTER_POS_PACKET);
+	packet.type = SC_MONSTER_POS;
+	for (auto& ms : Monsters) {
+		packet.monsterId = ms.first;
+		packet.x = ms.second._pos.x;
+		packet.y = ms.second._pos.y;
+		packet.z = ms.second._pos.z;
+		packet.look_y = ms.second._look_dir.y;
+
+		for (auto& cl : clients) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.do_send(&packet);
+		}
+	}
+}
+void GameManager::SendAllItemsPosPacket() {
+	for (auto& it : items) {
+		SC_ITEM_POS_PACKET packet;
+		packet.size = sizeof(SC_ITEM_POS_PACKET);
+		packet.type = SC_ITEM_POS;
+		packet.itemId = it.first;
+		packet.x = it.second._pos.x;
+		packet.y = it.second._pos.y;
+		packet.z = it.second._pos.z;
+		for (auto& cl : clients) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.do_send(&packet);
+		}
+	}
 }
