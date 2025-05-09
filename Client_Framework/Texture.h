@@ -26,7 +26,7 @@ protected:
 	INT srvIdx = -1;
 
 public:
-	virtual void LoadFromFile(const std::string& _fileName) override;
+	virtual void LoadFromFile(std::string_view _fileName) override;
 
 	void Create2DTexture(DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
 		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags,

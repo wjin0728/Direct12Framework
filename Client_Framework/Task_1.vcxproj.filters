@@ -209,12 +209,6 @@
     <ClInclude Include="ThirdPersonCamera.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
-    <ClInclude Include="MiniGame.h" />
-    <ClInclude Include="ContinuousRotation.h" />
-    <ClInclude Include="UIRenderer.h">
-      <Filter>GameObject\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="CEntityState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -369,18 +363,6 @@
     </ClCompile>
     <ClCompile Include="ThirdPersonCamera.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
-    </ClCompile>
-    <ClCompile Include="MiniGame.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
-    <ClCompile Include="ContinuousRotation.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
-    <ClCompile Include="UIRenderer.cpp">
-      <Filter>GameObject\Component</Filter>
-    </ClCompile>
-    <ClCompile Include="CEntityState.cpp">
-      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

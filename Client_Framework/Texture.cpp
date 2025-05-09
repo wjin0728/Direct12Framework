@@ -15,7 +15,7 @@ CTexture::~CTexture()
 	}
 }
 
-void CTexture::LoadFromFile(const std::string& _fileName)
+void CTexture::LoadFromFile(std::string_view _fileName)
 {
 	if (texResource) {
 		texResource.Reset();
@@ -27,26 +27,17 @@ void CTexture::LoadFromFile(const std::string& _fileName)
 	std::vector<D3D12_SUBRESOURCE_DATA> vSubresources;
 	DDS_ALPHA_MODE ddsAlphaMode = DDS_ALPHA_MODE_UNKNOWN;
 	bool bIsCubeMap = false;
-	if (_fileName == "..\\Resources\\Textures\\None.dds") {
-		int i{};
-	}
+
 
 	if (extension == L".dds" || extension == L".DDS") {
-		HRESULT hr = DirectX::LoadDDSTextureFromFileEx(DEVICE, fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT,
-			texResource.GetAddressOf(), ddsData, vSubresources, &ddsAlphaMode, &bIsCubeMap);
-		if (hr < 0) {
-			MessageBoxA(nullptr, (_fileName + "don't exist in file!").c_str(), nullptr, MB_OK);
-		}
-		ThrowIfFailed(hr);
+		ThrowIfFailed(DirectX::LoadDDSTextureFromFileEx(DEVICE, fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT,
+			texResource.GetAddressOf(), ddsData, vSubresources, &ddsAlphaMode, &bIsCubeMap));
 	}
 	else {
 		vSubresources.push_back(D3D12_SUBRESOURCE_DATA());
-		HRESULT hr = DirectX::LoadWICTextureFromFileEx(DEVICE, fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, WIC_LOADER_DEFAULT,
-			texResource.GetAddressOf(), ddsData, vSubresources[0]);
-		if (hr < 0) {
-			MessageBoxA(nullptr, (_fileName + "don't exist in file!").c_str(), nullptr, MB_OK);
-		}
-		ThrowIfFailed(hr);
+
+		ThrowIfFailed(DirectX::LoadWICTextureFromFileEx(DEVICE, fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, WIC_LOADER_DEFAULT,
+			texResource.GetAddressOf(), ddsData, vSubresources[0]));
 	}
 	
 

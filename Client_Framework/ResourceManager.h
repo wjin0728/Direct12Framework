@@ -28,7 +28,7 @@ public:
 	void Destroy();
 
 	template<typename T>
-	std::shared_ptr<T> Load(const std::string& name, const std::string& fileName);
+	std::shared_ptr<T> Load(const std::string& name, std::string_view fileName);
 
 	template<typename T>
 	bool Add(const std::shared_ptr<T>& resource);
@@ -47,9 +47,6 @@ public:
 	void LoadSceneResourcesFromFile(std::ifstream& ifs);
 	void LoadSceneResourcesFromFile(const std::string& fileName);
 	void LoadPlayerObjects();
-	void LoadSkillObjects();
-
-	void LoadPrefabFromFile(const std::string& name);
 
 	std::unordered_map<std::string, std::shared_ptr<class CGameObject>>& GetPrefabs() { return prefabs; }
 
@@ -66,19 +63,13 @@ public:
 
 	UINT GetTopSRVIndex();
 	UINT GetMaterialSRVIndex();
-	std::shared_ptr<class CGameObject> GetPrefab(const std::string& name)
-	{
-		auto itr = prefabs.find(name);
-		if (itr != prefabs.end())
-			return itr->second;
-		return nullptr;
-	}
+
 
 	void ReturnSRVIndex(UINT idx) { srvIdxQueue.push(idx); }
 };
 
 template<typename T>
-inline std::shared_ptr<T> CResourceManager::Load(const std::string& name, const std::string& fileName)
+inline std::shared_ptr<T> CResourceManager::Load(const std::string& name, std::string_view fileName)
 {
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
 	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(resourceType)];

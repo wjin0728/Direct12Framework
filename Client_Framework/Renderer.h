@@ -9,27 +9,24 @@ protected:
     std::vector<std::shared_ptr<CMaterial>> m_materials;
 
     BoundingSphere mWorldBS{};
-    BoundingOrientedBox mWorldOOBB{};
+	BoundingOrientedBox mWorldOOBB{};
 
     bool isDirty{};
     int mCbvIdx = -1;
     UINT mCbvOffset{};
-
-    UINT mDirtyFrame = FRAME_RESOURCE_COUNT + 1;
 
 public:
     CRenderer();
     CRenderer(const CRenderer& other) : m_materials(other.m_materials), CComponent(other) {}
     virtual ~CRenderer();
 
-    virtual void Awake() override;
-    virtual void Start() override;
+    virtual void Awake();
+    virtual void Start() override {}
 
     virtual void Update() override {}
     virtual void LateUpdate() override {}
 
     virtual void Render(std::shared_ptr<CCamera> camera, int pass = 0) = 0;
-	virtual void UpdataObjectDataToShader();
 
     virtual std::shared_ptr<CComponent> Clone() override = 0;
 
@@ -43,7 +40,7 @@ public:
     void AddMaterial(const std::shared_ptr<CMaterial>& material);
     void AddMaterial(const std::string& name);
 
-public:
+
     bool IsIntersect(const BoundingOrientedBox& oobb) const
     {
         return mWorldOOBB.Intersects(oobb);
@@ -60,7 +57,6 @@ public:
     {
         return mWorldOOBB.Intersects(ray.position, ray.direction, dist);
     }
-    
 
     std::shared_ptr<CMaterial> GetMaterial(UINT idx = 0) const { return m_materials[idx]; }
 };

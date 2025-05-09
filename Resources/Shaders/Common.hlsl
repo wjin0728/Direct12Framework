@@ -197,14 +197,12 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float3 worldBitangent = input.bitangentWS;
     float2 uv = input.uv;
     
-    if (ForwardTexIdx != -1)
-    {
-        float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
-        color = float4(GammaDecoding(texColor.rgb), texColor.a);
-    }
-    else color = float4(ForwardColor.rgb, 1.f);
+    float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
+    color = float4(GammaDecoding(texColor.rgb), texColor.a);
     
-    
+#ifdef TRANSPARENT_CLIP
+    clip(color.a - 0.1);
+#endif
     if (normalTexIdx != -1)
     {
         float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoClamp, uv).rgb;

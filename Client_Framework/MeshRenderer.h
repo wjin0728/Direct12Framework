@@ -32,7 +32,5 @@ public:
 	void SetMesh(const std::string& name);
 
 	std::shared_ptr<CMesh> GetMesh() const { return m_mesh; }
-
-
 };
 

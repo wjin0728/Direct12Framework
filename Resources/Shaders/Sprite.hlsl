@@ -1,5 +1,13 @@
 #include"Paramiters.hlsl"
 
+cbuffer MaterialData : register(b5)
+{
+    float3 color;
+    float type;
+    
+    int diffuseMapIdx;
+};
+
 struct VS_INPUT
 {
     float3 pos : POSITION;
@@ -12,32 +20,35 @@ struct VS_OUTPUT
     float2 uv : TEXCOORD;
 };
 
-VS_OUTPUT VS_Sprite(VS_INPUT input)
+VS_OUTPUT VS_Forward(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
 
-    CBUIData uiData = UIData[idx0];
-    float2 uvOffset = uiData.uvOffset;
-    float2 uvScale = uiData.uvScale;
-    float2 uv = input.uv * uvScale + uvOffset;
-    float2 pos = uiData.pos.xy;
-    float2 size = uiData.size / renderTargetSize;
-    
-    output.pos = float4(input.pos.x * size.x + pos.x, input.pos.y * size.y + pos.y, 0.f, 1.f);
-    //output.pos = float4(input.pos, 1.f);
-    output.uv = input.uv;
+    output.pos = mul(float4(input.pos, 1.f), worldMat);
+    output.uv = mul(float4(input.uv, 0.f, 1.f), texMat).xy;
 
     return output;
 }
 
-//#define TRANSPARENT_CLIP
-float4 PS_Sprite(VS_OUTPUT input) : SV_Target
+float4 PS_Forward(VS_OUTPUT input) : SV_Target
 {
     float4 texColor = {1.f,1.f,1.f,1.f};
     
-    CBUIData uiData = UIData[idx0];
-    float3 color = uiData.color;
-    texColor = diffuseMap[uiData.textureIdx].SampleLevel(linearClamp, input.uv, 0);
-    texColor.a = pow(texColor.a, 0.57f);
+    if (type == 0)
+    {
+        texColor = diffuseMap[diffuseMapIdx].Sample(anisoWrap, input.uv);
+    }
+    else if (type == 1)
+    {
+        texColor = diffuseMap[diffuseMapIdx].Sample(anisoWrap, input.uv).rrra;
+    }
+    else if (type == 2)
+    {
+    }
+    
+#ifdef TRANSPARENT_CLIP
+    clip(texColor.a - 0.05f);
+#endif
+    
     return texColor;
 }

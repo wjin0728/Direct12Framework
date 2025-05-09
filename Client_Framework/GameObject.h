@@ -10,7 +10,6 @@ class CCollider;
 class CComponent;
 class CAnimationController;
 class CSkinnedMesh;
-class CPlayerController;
 
 class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
@@ -23,7 +22,6 @@ private:
 	std::shared_ptr<CTransform> mTransform{};
 	std::shared_ptr<CRenderer> mRenderer{};
 	std::shared_ptr<CCollider> mCollider{};
-	std::shared_ptr<CPlayerController> mPlayerController{};
 
 	std::vector<std::shared_ptr<CGameObject>> mChildren{};
 
@@ -67,7 +65,7 @@ public:
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize,
 		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 60.f);
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, float nearPlane, float farPlane, Vec2 size);
-	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& shader, const std::string& texture, Vec2 pos, Vec2 size, float depth = 1.f);
+	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& materialName, Vec2 pos, Vec2 size);
 	//기본 설정을 가진 지형 오브젝트를 생성한다.
 	static std::shared_ptr<CGameObject> CreateTerrainObject(std::ifstream& ifs);
 	//바이너리 파일을 통해 오브젝트를 생성한다.
@@ -78,7 +76,6 @@ public:
 	std::shared_ptr<CRenderer> GetRenderer() { return mRenderer; }
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
 	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
-	std::shared_ptr<CPlayerController> GetPlayerController() { return mPlayerController; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::string& GetName() const { return mName; }
@@ -102,7 +99,6 @@ public:
 	void SetTag(const std::string& tag) { mTag = tag; }
 	void SetID(int id) { mID = id; }
 	void SetParent(const std::shared_ptr<CGameObject>& parent);
-	void SetPlayerController(const std::shared_ptr<CPlayerController>& playerController) { mPlayerController = playerController; }
 
 	void ReturnCBVIndex();
 
@@ -128,7 +124,6 @@ private:
 	void CreateTerrainFromFile(std::ifstream& inFile);
 	void CreateLightFromFile(std::ifstream& inFile);
 	void CreateAnimationFromFile(std::string& fileName);
-	void CreateUIrendererFromFile(std::ifstream& inFile);
 
 public:
 	std::shared_ptr<CAnimationController> mAnimationController{};

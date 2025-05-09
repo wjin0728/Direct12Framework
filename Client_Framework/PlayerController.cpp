@@ -9,7 +9,7 @@
 #include"Scene.h"
 #include"Terrain.h"
 #include"Camera.h"
-#include"Animation.h"
+
 #include "ServerManager.h"
 
 CPlayerController::~CPlayerController()
@@ -42,16 +42,6 @@ void CPlayerController::LateUpdate()
 {
 }
 
-void CPlayerController::SetChildAnimationController()
-{
-	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
-}
-
-void CPlayerController::SetState(PLAYER_STATE state)
-{
-
-}
-
 void CPlayerController::OnKeyEvents()
 {
 	auto transform = GetTransform();
@@ -66,32 +56,64 @@ void CPlayerController::OnKeyEvents()
 	camForward.Normalize();
 	camRight.Normalize();
 
-	if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
-	if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
-	if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
-	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
-	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) dir |= 0x20;
-	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) dir |= 0x10;
-
-	//if (INPUT.IsKeyDown(KEY_TYPE::W)) dir |= 0x08;
-	//if (INPUT.IsKeyDown(KEY_TYPE::S)) dir |= 0x02;
-	//if (INPUT.IsKeyDown(KEY_TYPE::D)) dir |= 0x01;
-	//if (INPUT.IsKeyDown(KEY_TYPE::A)) dir |= 0x04;
-	//if (INPUT.IsKeyDown(KEY_TYPE::SHIFT)) dir |= 0x20;
-	//if (INPUT.IsKeyDown(KEY_TYPE::CTRL)) dir |= 0x10;
-
-
-	if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
-		INSTANCE(ServerManager).send_cs_000_packet();
+	if (INPUT.IsKeyPress(KEY_TYPE::W)) {
+		dir |= 0x08;
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::S)) {
+		dir |= 0x02;
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::D)) {
+		dir |= 0x01;
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::A)) {
+		dir |= 0x04;
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) {
+		dir |= 0x20;
+	}
+	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) {
+		dir |= 0x10;
 	}
 
 	if (dir == 0) return;
 	INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
 
-	//if (INPUT.IsKeyUp(KEY_TYPE::W)) dir |= 0x08;
-	//if (INPUT.IsKeyUp(KEY_TYPE::S)) dir |= 0x02;
-	//if (INPUT.IsKeyUp(KEY_TYPE::D)) dir |= 0x01;
-	//if (INPUT.IsKeyUp(KEY_TYPE::A)) dir |= 0x04;
-	//if (INPUT.IsKeyUp(KEY_TYPE::SHIFT)) dir |= 0x20;
-	//if (INPUT.IsKeyUp(KEY_TYPE::CTRL)) dir |= 0x10;
+	/*Vec3 accel = Vec3::Zero;
+	bool isDecelerate = true;
+
+	if (moveDir != Vec3::Zero) {
+		moveDir.Normalize();
+
+		Vec3 currentVelocity = rigidBody->GetVelocity();
+		float currentSpeed = currentVelocity.Length();
+		if (currentVelocity != Vec3::Zero) {
+			Vec3 currentDir = currentVelocity.GetNormalized();
+			float dot = currentDir.Dot(moveDir);
+
+			if (dot < 0.0f) {
+				accel = -currentDir * 20.f; 
+			}
+			else {
+				rigidBody->SetVelocity(currentSpeed * dot * moveDir);
+				accel = moveDir * 10.f;
+				isDecelerate = false;
+			}
+		}
+		else {
+			accel = moveDir * 10.f; // Á¤Áö »óÅÂ¿¡¼­ °¡¼Ó
+			isDecelerate = false;
+		}
+	}
+
+	rigidBody->SetAcceleration(accel);
+	rigidBody->SetUseFriction(isDecelerate);
+
+	float rotationSpeed = 10.f;
+
+	if (moveDir.LengthSquared() > 0.001f)
+	{
+		Quaternion targetRot = Quaternion::LookRotation(moveDir);
+		Quaternion rotation = Quaternion::Slerp(transform->GetLocalRotation(), targetRot, rotationSpeed * DELTA_TIME);
+		transform->SetLocalRotation(rotation);
+	}*/
 }

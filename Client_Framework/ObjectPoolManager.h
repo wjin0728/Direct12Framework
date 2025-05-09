@@ -16,7 +16,6 @@ private:
 	std::queue<UINT> cbvIdxQueue;
 	std::queue<UINT> boneTransformIdxQueue; // Ãß°¡: »À ¿ÀÇÁ¼Â ÀÎµ¦½º Å¥
 	std::queue<UINT> lightCBVIdx;
-	std::queue<UINT> UICBVIdx;
 
 public:
 	void Initialize();
@@ -34,9 +33,6 @@ public:
 
 	UINT GetLightCBVIndex();
 	void ReturnLightCBVIndex(UINT idx);
-
-	UINT GetUICBVIndex();
-	void ReturnUICBVIndex(UINT idx);
 
 	void ClearPool(const std::wstring& key);
 	void ClearPools();

@@ -58,11 +58,11 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 
 	ReadDateFromFile(inFile, token);
 	std::string name = token;
-	if (name == "Tree_Mat_01") {
-		int i{};
-	}
 
-	std::shared_ptr<CMaterial> material{};
+	std::shared_ptr<CMaterial> material = RESOURCE.Get<CMaterial>(name);
+	if (material) {
+		return material;
+	}
 
 	material = std::make_shared<CMaterial>();
 	material->SetName(name);
@@ -146,6 +146,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 				break;
 			}
 		}
+		
 	}
 	else if (token == "SyntyStudios/VegitationShader" || token == "SyntyStudios/VegitationShader_Basic") {
 		material->SetShader("Vegitation");
@@ -247,13 +248,8 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		return nullptr;
 	}
 
-	if (RESOURCE.Get<CMaterial>(name)) 
-		return nullptr;
-	//if (!matData) return nullptr;
-	//if (dataSize == 0) return nullptr;
-
-
 	material->Initialize(matData.get(), dataSize);
+	RESOURCE.Add(material);
 
 	return material;
 }

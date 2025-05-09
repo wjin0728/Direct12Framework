@@ -26,7 +26,7 @@ void CBattleScene::Initialize()
 {
 	// Load default resources
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
-	LoadSceneFromFile(SCENE_PATH("Battle1"));
+	LoadSceneFromFile(SCENE_PATH("Scene"));
 }
 
 void CBattleScene::Update()
@@ -55,7 +55,7 @@ void CBattleScene::RenderScene()
 	CScene::RenderShadowPass();
 	CScene::RenderGBufferPass();
 	CScene::RenderLightingPass();
-	CScene::RenderForwardPass();
+	//CScene::RenderForwardPass();
 	CScene::RenderFinalPass();
 }
 

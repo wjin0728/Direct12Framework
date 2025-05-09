@@ -29,13 +29,12 @@ private:
 	friend class CCamera;
 	friend class CMeshRenderer;
 	friend class CSkinnedMeshRenderer;
-	friend class CUIRenderer;
-	friend class CRenderer;
+
+	bool mDirtyFlag{};
 
 	std::weak_ptr<CTransform> mParent{};
 
 public:
-	bool mDirtyFlag{};
 	int dirtyFramesNum{};
 	CTransform();
 	~CTransform();
@@ -69,7 +68,6 @@ public:
 	void RotateAround(const Vec3& point, const Vec3& axis, float angle);
 
 	//첫 번째 인자에 nullptr를 넣을 시 부모와 분리되어 씬의 오브젝트 컨테이너에 합류됨  
-	void SetParentInScene(std::shared_ptr<CTransform> parent, bool isKeepLocalMat = false);
 	void SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalMat = false);
 
 	void SetLocalPosition(const Vec3& position) { mLocalPosition = position; mDirtyFlag = true; };

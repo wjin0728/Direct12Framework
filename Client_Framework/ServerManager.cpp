@@ -8,13 +8,11 @@
 #include"Camera.h"
 #include"PlayerController.h"
 #include"ThirdPersonCamera.h"
-#include "DX12Manager.h"
-#include "ResourceManager.h"
 
 void ServerManager::Initialize()
 {
 	// ------- ���� ���̱� -------------------
-	std::wcout.imbue(std::locale("korean"));
+	std::wcout.imbue(std::locale("korean")); // �ѱ۷� ���� ���
 
 	WSADATA WSAData{};
 	int err = WSAStartup(MAKEWORD(2, 2), &WSAData);
@@ -58,9 +56,8 @@ void ServerManager::Client_Login()
 
 	Send_Packet(&p);
 
-	Recv_Loop();
-	//std::thread recv_thread{ [this]() { Recv_Loop(); } };
-	//recv_thread.detach();
+	std::thread recv_thread{ [this]() { Recv_Loop(); } };
+	recv_thread.detach();
 }
 
 bool ServerManager::InitPlayerAndCamera()
@@ -73,7 +70,6 @@ bool ServerManager::InitPlayerAndCamera()
 	mPlayer->SetStatic(false);
 
 	auto playerController = mPlayer->AddComponent<CPlayerController>();
-	mPlayer->SetPlayerController(playerController);
 
 	mMainCamera = std::make_shared<CGameObject>();
 
@@ -81,7 +77,7 @@ bool ServerManager::InitPlayerAndCamera()
 	auto camera = mMainCamera->AddComponent<CCamera>();
 	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
-	camera->GeneratePerspectiveProjectionMatrix(1.f, 100.f, 60.f);
+	camera->GeneratePerspectiveProjectionMatrix(1.f, 50.f, 60.f);
 	mMainCamera->SetTag("MainCamera");
 	mMainCamera->SetName("MainCamera");
 	mMainCamera->SetActive(false);
@@ -128,10 +124,12 @@ void ServerManager::Recv_Packet()
 	DWORD recv_flag = 0;
 
 	OVER_PLUS* sdata = new OVER_PLUS();
-	sdata->_over.hEvent = reinterpret_cast<HANDLE>(this);
+	sdata->_over.hEvent = reinterpret_cast<HANDLE>(this);  // hEvent�� OVER_PLUS �����͸� ����
 
+	// hEvent�� �ùٸ��� �ʱ�ȭ
 	wsaover.hEvent = CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	if (wsaover.hEvent == nullptr) {
+		// ���� ó��
 		print_error("CreateEvent failed", GetLastError());
 	}
 	wsaover.hEvent = reinterpret_cast<HANDLE>(this);
@@ -139,6 +137,7 @@ void ServerManager::Recv_Packet()
 	int res = WSARecv(server_socket, &sdata->_wsabuf, 1, 0, &recv_flag, &sdata->_over, recv_callback);
 	if (0 != res) {
 		int err_no = WSAGetLastError();
+		// ���� ��ģ i/o �۾��� �����ϰ� �ֽ��ϴ�. ��� ������ �� ������
 		if (WSA_IO_PENDING != err_no)
 			print_error("Recv_Packet - WSARecv", WSAGetLastError());
 	}
@@ -156,7 +155,7 @@ void CALLBACK ServerManager::recv_callback(DWORD err, DWORD recv_size, LPWSAOVER
 	char* buf = over->_wsabuf.buf;
 	char recv_buf[CHAT_SIZE * 2];
 
-	if (sm->save_data_size > 0) { 
+	if (sm->save_data_size > 0) { // ���� �߷��� �����ص� ��Ŷ�� ������ �װź��� �ϱ�
 		memcpy(recv_buf, sm->save_buf, sm->save_data_size);
 		memcpy(&recv_buf[sm->save_data_size], buf, sm->one_packet_size - sm->save_data_size);
 		buf += sm->one_packet_size - sm->save_data_size;
@@ -166,10 +165,10 @@ void CALLBACK ServerManager::recv_callback(DWORD err, DWORD recv_size, LPWSAOVER
 	}
 
 	while (1) {
-		if (recv_size == 0) break; 
+		if (recv_size == 0) break; // ���� �����Ͱ� ������ ��
 		WORD* byte = reinterpret_cast<WORD*>(buf);
-		sm->one_packet_size = *byte; 
-		if (sm->one_packet_size > recv_size) { 
+		sm->one_packet_size = *byte; // ��Ŷ �ϳ� ������ ����ϱ�
+		if (sm->one_packet_size > recv_size) { // ��Ŷ �ϳ� ������� ���� ���� ũ�Ⱑ �� ������ �߸��Ŵϱ� save�ϱ�
 			memcpy(sm->save_buf, buf, recv_size);
 			sm->save_data_size = recv_size;
 			break;
@@ -185,10 +184,10 @@ void CALLBACK ServerManager::recv_callback(DWORD err, DWORD recv_size, LPWSAOVER
 
 void ServerManager::Recv_Loop()
 {
-	while (!RenderOK) {
+	while (1) {
 		Recv_Packet();
 
-		SleepEx(1, true);
+		SleepEx(16, true);
 	}
 }
 
@@ -200,53 +199,42 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet_ptr);
 
 		clientID = packet->id;
-		cout << clientID << endl;
+		mPlayer->GetTransform()->SetLocalPosition({ 10, 5, 10 });
 
 		break;
 	}
 	case SC_LOGIN_FAIL: {
-		cout << "Login Fail--!!!!" << endl;
+		cout << "�α��� ����!!!!" << endl;
 		break;
 	}
 	case SC_ADD_OBJECT: {
 		SC_ADD_OBJECT_PACKET* packet = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(packet_ptr);
 
+		// INSTANCE(CSceneManager).GetCurScene()->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+
+		// �÷��̾� �����ؾ� ��
+		// mplayers ���� �ְ� ��������Ʈ���� �־�� ��
+		// INSTANCE(CSceneManager).GetCurScene()->SetPlayer(packet->id, 0, 0, 0);
+
 		break;
 	}
 	case SC_ADD_PLAYER: {
 		SC_ADD_PLAYER_PACKET* packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet_ptr);
-		std::string objName[3] = { "Player_Archer", "Player_Fighter", "Player_Mage" };
-		auto obj = RESOURCE.GetPrefab(objName[packet->player_class]);
-		if (!obj) {
-			std::cout << "obj is nullptr" << std::endl;
-			break;
-		}
-
-		std::shared_ptr<CGameObject> player{};
-		if (clientID == packet->id) {
-			player = mPlayer;
-			RenderOK = 1;
-		}
-		else {
-			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
-			player = mOtherPlayers[packet->id];
-		}
-		CGameObject::Instantiate(obj, player->GetTransform());
-		player->SetActive(true);
-		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-		player->GetTransform()->SetLocalRotationY(packet->look_y);
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
-		if (scene && clientID != packet->id) {
-			player->Awake();
-			player->Start();
-			scene->AddObject(player);
-		}
+		auto player = scene->CreatePlayer((PLAYER_CLASS)packet->player_class, packet->id);
+		if (scene->GetClientID() == packet->id) 
+			auto mainCam = scene->CreatePlayerCamera(player);
+
+		scene->GetPlayer(packet->id)->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		scene->GetPlayer(packet->id)->GetTransform()->SetLocalRotationY(packet->look_y);
 
 		break;
 	}
 	case SC_MOVE_OBJECT: {
 		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
+
+		cout << "SC_MOVE_PACKET" << endl;
 
 		int id = packet->id;
 		if (id == clientID) {
@@ -259,44 +247,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			mOtherPlayers[id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 			mOtherPlayers[id]->GetTransform()->SetLocalRotationY(packet->look_y);
 		}
-
-		break;
-	}
-	case SC_DROP_ITEM: {
-		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
-		auto scene = INSTANCE(CSceneManager).GetCurScene();
-
-		std::string objName[3] = { "Item_Skill1", "Item_Skill1", "Item_Skill3" };
-		auto item = RESOURCE.GetPrefab(objName[(int)packet->item_enum]);
-		if (!item) {
-			std::cout << "item is nullptr" << std::endl;
-			break;
-		}
-		auto itemObj = CGameObject::Instantiate(item);
-		itemObj->SetTag("Item");
-		itemObj->SetRenderLayer("Opaque");
-		itemObj->SetObjectType(OBJECT_TYPE::ITEM);
-		itemObj->SetActive(true);
-		itemObj->SetStatic(false);
-		itemObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-		itemObj->Awake();
-		itemObj->Start();
-
-		mItems[packet->item_id] = itemObj;
-		scene->AddObject(itemObj);
-
-		break;
-	}
-	case SC_REMOVE_ITEM: {
-		SC_REMOVE_ITEM_PACKET* packet = reinterpret_cast<SC_REMOVE_ITEM_PACKET*>(packet_ptr);
-
-		auto scene = INSTANCE(CSceneManager).GetCurScene();
-		scene->RemoveObject(mItems[packet->item_id]);
-		cout << "삭제!";
-
-		if (packet->player_id == -1) break; // 단순 삭제면 바로 넘기기
-
-		// 플레이어가 스킬 아이템 먹은 정보 처리 필요
 
 		break;
 	}

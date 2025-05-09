@@ -1,5 +1,5 @@
 #include "SESSION.h"
-#include "Item.h"
+
 
 
 
@@ -36,11 +36,11 @@ void SESSION::send_add_player_packet(SESSION* client)
 	p.id = client->_id;
 	p.size = sizeof(p);
 	p.type = SC_ADD_PLAYER;
-	p.player_class = client->_player._class;
-	p.x = client->_player._pos.x;
-	p.y = client->_player._pos.y;
-	p.z = client->_player._pos.z;
-	p.look_y = client->_player._look_dir.y;
+	p.player_class = client->_class;
+	p.x = client->_pos.x;
+	p.y = client->_pos.y;
+	p.z = client->_pos.z;
+	p.look_y = client->_look_dir.y;
 	do_send(&p);
 }
 
@@ -61,40 +61,14 @@ void SESSION::send_move_packet(SESSION* client)
 	p.id = client->_id;
 	p.type = SC_MOVE_OBJECT;
 	p.size = sizeof(p);
+	p.x = client->_pos.x;
+	p.y = client->_pos.y;
+	p.z = client->_pos.z;
+	//p.look_x = client->_look_dir.x;
+	p.look_y = client->_look_dir.y;
+	//p.look_z = client->_look_dir.z;
+	cout << client->_look_dir.y << std::endl;
 
-	p.x = client->_player._pos.x;
-	p.y = client->_player._pos.y;
-	p.z = client->_player._pos.z;
-
-	p.look_y = client->_player._look_dir.y;
-
+	// std::cout << "Move client << " << p.id << " : { " << p.x << ", " << p.y << ", " << p.z << " }" << std::endl;
 	do_send(&p);
-}
-
-void SESSION::send_drop_item_packet(Item& it, int item_id)
-{
-	SC_DROP_ITEM_PACKET p;
-	p.type = SC_DROP_ITEM;
-	p.size = sizeof(p);
-
-	p.item_id = item_id;
-
-	p.item_enum = it._item_type;
-
-	p.x = it._pos.x;
-	p.y = it._pos.y;
-	p.z = it._pos.z;
-
-	do_send(&p);
-}
-
-void SESSION::send_remove_item_packet(int item_id, int player_id)
-{
-	SC_REMOVE_ITEM_PACKET p;
-	p.type = SC_REMOVE_ITEM;
-	p.size = sizeof(p);
-	p.item_id = item_id;
-	p.player_id = player_id;
-	do_send(&p);
-	cout << "sssssssssssssssssssssssssssss";
 }

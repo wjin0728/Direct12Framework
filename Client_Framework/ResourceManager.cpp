@@ -5,7 +5,6 @@
 #include"SkinnedMesh.h"
 #include"Material.h"
 #include"Shader.h"
-#include"UIRenderer.h"
 
 
 void CResourceManager::Initialize()
@@ -19,10 +18,8 @@ void CResourceManager::Initialize()
 	LoadDefaultMaterials();
 
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
-	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
 
 	LoadPlayerObjects();
-	LoadSkillObjects();
 }
 
 void CResourceManager::Destroy()
@@ -104,26 +101,27 @@ void CResourceManager::LoadSceneResourcesFromFile(const std::string& fileName)
 
 void CResourceManager::LoadPlayerObjects()
 {
-	LoadPrefabFromFile("Player_Archer");
-	LoadPrefabFromFile("Player_Fighter");
-	LoadPrefabFromFile("Player_Mage");
-}
+	auto archer = CGameObject::CreateObjectFromFile("Player_Archer");
+	if (archer) {
+		archer->SetName("Player_Archer");
+		archer->SetActive(false);
+		archer->SetStatic(false);
+		prefabs["Player_Archer"] = archer;
+	}
+	auto fighter = CGameObject::CreateObjectFromFile("Player_Fighter");
+	if (fighter) {
+		fighter->SetName("Player_Fighter");
+		fighter->SetActive(false);
+		fighter->SetStatic(false);
+		prefabs["Player_Fighter"] = fighter;
+	}
 
-void CResourceManager::LoadSkillObjects()
-{
-	LoadPrefabFromFile("Item_Skill1");
-	LoadPrefabFromFile("Item_Skill2");
-	LoadPrefabFromFile("Item_Skill3");
-}
-
-void CResourceManager::LoadPrefabFromFile(const std::string& name)
-{
-	auto skill = CGameObject::CreateObjectFromFile(name);
-	if (skill) {
-		skill->SetName(name);
-		skill->SetActive(false);
-		skill->SetStatic(false);
-		prefabs[name] = skill;
+	auto mage = CGameObject::CreateObjectFromFile("Player_Mage");
+	if (mage) {
+		mage->SetName("Player_Mage");
+		mage->SetActive(false);
+		mage->SetStatic(false);
+		prefabs["Player_Mage"] = mage;
 	}
 }
 
@@ -140,7 +138,6 @@ void CResourceManager::LoadDefaultMeshes()
 		m->SetName("Rectangle");
 		m->SetType(RESOURCE_TYPE::MESH);
 		Add(m);
-		CUIRenderer::mQuad = m;
 	}
 
 
@@ -303,18 +300,6 @@ void CResourceManager::LoadDefaultShaders()
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize(info, "FinalPass", false)) Add(shader);
-	}
-	{
-		ShaderInfo info;
-		info.shaderType = PASS_TYPE::UI;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
-		info.blendType = BLEND_TYPE::ALPHA_BLEND;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
-		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		if (shader->Initialize(info, "Sprite", false)) Add(shader);
 	}
 }
 

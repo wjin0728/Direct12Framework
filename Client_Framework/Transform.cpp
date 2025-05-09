@@ -44,7 +44,6 @@ void CTransform::Awake()
 
 void CTransform::Start()
 {
-	UpdateWorldMatrix();
 }
 
 void CTransform::Update()
@@ -72,7 +71,7 @@ void CTransform::Reset()
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 }
 
-void CTransform::SetParentInScene(std::shared_ptr<CTransform> parent, bool isKeepLocalMat)
+void CTransform::SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalMat)
 {
 	auto curParent = mParent.lock();
 	auto ownerObj = owner->GetSptrFromThis();
@@ -95,7 +94,7 @@ void CTransform::SetParentInScene(std::shared_ptr<CTransform> parent, bool isKee
 			ownerObj->SetActive(false);
 		}
 	}
-
+	
 	UpdateWorldMatrix();
 
 	mParent = parent;
@@ -109,42 +108,10 @@ void CTransform::SetParentInScene(std::shared_ptr<CTransform> parent, bool isKee
 		}
 	}
 	else {
-		auto scene = INSTANCE(CSceneManager).GetCurScene();
-		if (scene) {
-			scene->AddObject(GetRoot()->owner->GetRenderLayer(), ownerObj);
-		}
-		else {
-			ownerObj->SetActive(false);
-		}
+		INSTANCE(CSceneManager).GetCurScene()->AddObject(GetRoot()->owner->GetRenderLayer(), ownerObj);
 
 		if (isKeepLocalMat) {
 			mLocalMat = mWorldMat;
-			mDirtyFlag = true;
-		}
-	}
-}
-
-void CTransform::SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalMat)
-{
-	auto curParent = mParent.lock();
-	auto ownerObj = owner->GetSptrFromThis();
-
-	if (curParent) {
-		if (curParent.get() == parent.get()) {
-			return;
-		}
-		curParent->GetOwner()->RemoveChild(ownerObj);
-	}
-	
-	UpdateWorldMatrix();
-
-	mParent = parent;
-
-	if (parent) {
-		parent->GetOwner()->AddChild(ownerObj);
-
-		if (isKeepLocalMat) {
-			mLocalMat = mWorldMat * parent->GetWorldMat().Invert();
 			mDirtyFlag = true;
 		}
 	}

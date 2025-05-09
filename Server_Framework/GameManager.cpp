@@ -1,16 +1,20 @@
 ﻿#include "GameManager.h"
 
+
+//#include <DirectXMath.h>
+//#include "../../Direct12Framework/SimpleMath.h"
+//#include "../../Direct12Framework/Timer.h"
+//using namespace DirectX;
+//using Vec3 = SimpleMath::Vector3;
+
 GameManager::GameManager()
 {
 	lastTime = std::chrono::high_resolution_clock::now();
-	//terrain.SetScale(45, 20, 45);
-	terrain.SetScale(64, 598.9f, 64);
+	terrain.SetScale(45, 20, 45);
 	terrain.SetResolution(513);
 	terrain.SetNavMapResolution(terrain.GetResolution() * 2);
-	//terrain.LoadHeightMap("LobbyTerrainHeightmap");
-	//terrain.LoadNavMap("LobbyTerrainNavMap");
-	terrain.LoadHeightMap("Battle1TerrainHeightmap");
-	terrain.LoadNavMap("Battle1TerrainNavMask");
+	terrain.LoadHeightMap("LobbyTerrainHeightmap");
+	terrain.LoadNavMap("LobbyTerrainNavMap");
 	cout << "Map loaded.\n";
 
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -187,29 +191,28 @@ void GameManager::Process_packet(int c_id, char* packet)
 {
 	switch (packet[2]) {
 	case CS_LOGIN: {
-		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet); {
+		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
+		{
 			lock_guard<mutex> ll{ clients[c_id]._s_lock };
 			clients[c_id]._state = ST_INGAME;
 		}
 
-		//clients[c_id]._player._class = p->name[0];
+		//clients[c_id]._class = p->name[0];
 		if (0 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
+			clients[c_id]._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
 		else if (1 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::ARCHER;
+			clients[c_id]._class = (uint8_t)S_PLAYER_CLASS::ARCHER;
 		else if (2 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
-		clients[c_id]._player._pos = Vec3(27, 6, 22);
+			clients[c_id]._class = (uint8_t)S_PLAYER_CLASS::MAGE;
+		clients[c_id]._pos = Vec3(20, 20, 20);
 
 		clients[c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;
 
-		// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
 		for (auto& cl : clients) {
 			if (cl._state != ST_INGAME) continue;
 			cl.send_add_player_packet(&clients[c_id]);
 		}
-		// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
 		for (auto& cl : clients) {
 			if (cl._state != ST_INGAME) continue;
 			if (cl._id == c_id) continue;
@@ -255,55 +258,34 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		else {
 			velocity = Vec3::Zero;
-			clients[c_id]._player._acceleration = Vec3::Zero;
+			clients[c_id]._acceleration = Vec3::Zero;
 		}
 
 		// 위치 업데이트
 		float deltaTime = 1.f / 110.f; 
-		Vec3 newPos = clients[c_id]._player._pos + velocity * deltaTime;
+		Vec3 newPos = clients[c_id]._pos + velocity * deltaTime;
 
 		if (CanMove(newPos.x, newPos.z)) {
-			clients[c_id]._player._pos = newPos;
+			clients[c_id]._pos = newPos;
 
-			float terrainHeight = terrain.GetHeight(clients[c_id]._player._pos.x, clients[c_id]._player._pos.z);
-			clients[c_id]._player._pos.y = terrainHeight;
-			// cout << "terrain height : " << terrainHeight << endl;
+			float terrainHeight = terrain.GetHeight(clients[c_id]._pos.x, clients[c_id]._pos.z);
+			clients[c_id]._pos.y = terrainHeight;
+			cout << "terrain height : " << terrainHeight << endl;
 
 			if (moveDir.LengthSquared() > 0.001f) {
-				clients[c_id]._player._look_dir = moveDir;
+				clients[c_id]._look_dir = moveDir;
 			}
 
-			clients[c_id]._player._velocity = velocity;
+			clients[c_id]._velocity = velocity;
+
+			//
 
 			float rotationSpeed = 10.f;
 			if (moveDir.LengthSquared() > 0.001f) {
 				Quaternion targetRot = Quaternion::LookRotation(moveDir);
-				Quaternion rotation = clients[c_id]._player._rotation = Quaternion::Slerp(clients[c_id]._player._rotation, targetRot, rotationSpeed * deltaTime);
+				Quaternion rotation = clients[c_id]._look_rotation = Quaternion::Slerp(clients[c_id]._look_rotation, targetRot, rotationSpeed * deltaTime);
 				Vec3 angle = Vec3::GetAngleToQuaternion(rotation);
-				clients[c_id]._player._look_dir.y = angle.y * radToDeg;
-			}
-
-			clients[c_id]._player.LocalTransform();
-			if (!items.empty()) {
-				for (auto& it : items) {
-					if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
-						it.second.LocalTransform();
-					//cout << "player bounding box center\t" 
-					//	<< clients[c_id]._player._boundingbox.Center.x << " "
-					//	<< clients[c_id]._player._boundingbox.Center.y << " "
-					//	<< clients[c_id]._player._boundingbox.Center.z << endl;
-					//cout << "item bounding box center\t" 
-					//	<< it.second._boundingbox.Center.x << " "
-					//	<< it.second._boundingbox.Center.y << " "
-					//	<< it.second._boundingbox.Center.z << endl;
-					if (clients[c_id]._player._boundingbox.Intersects(it.second._boundingbox)) {
-						for (auto& cl : clients) {
-							if (cl._state != ST_INGAME) continue;
-							cl.send_remove_item_packet(it.first, c_id);
-						}
-						cout << "cl : " << c_id << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
-					}
-				}
+				clients[c_id]._look_dir.y = angle.y * radToDeg;
 			}
 
 			for (auto& cl : clients) {
@@ -312,36 +294,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 			}
 		}
 		else {
-			clients[c_id]._player._velocity = Vec3::Zero;
-			clients[c_id]._player._acceleration = Vec3::Zero;
+			clients[c_id]._velocity = Vec3::Zero;
+			clients[c_id]._acceleration = Vec3::Zero;
 		}
 
-		break;
-	}
-	case CS_SKILL: {
-		CS_SKILL_PACKET* p = reinterpret_cast<CS_SKILL_PACKET*>(packet);
-
-		
-		break;
-	}
-	case CS_ULTIMATE_SKILL: {
-		CS_ULTIMATE_SKILL_PACKET* p = reinterpret_cast<CS_ULTIMATE_SKILL_PACKET*>(packet);
-		break;
-	}
-	case CS_000: {
-		CS_000_PACKET* p = reinterpret_cast<CS_000_PACKET*>(packet);
-
-		items[item_cnt].SetPosition(clients[c_id]._player._pos.x + 3, 
-			clients[c_id]._player._pos.y + 0.3, clients[c_id]._player._pos.z);
-		items[item_cnt].SetItemType(S_ITEM_TYPE::S_FIRE_ENCHANT);
-		items[item_cnt].LocalTransform();
-
-		for (auto& cl : clients) {
-			if (cl._state != ST_INGAME) continue;
-			cl.send_drop_item_packet(items[item_cnt], item_cnt);
-		}
-
-		item_cnt++;
 		break;
 	}
 	}

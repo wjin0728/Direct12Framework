@@ -20,7 +20,7 @@ namespace BinaryReader
 	{
 		if (!inFile) return;
 
-		char strLen = 0;
+		int strLen = 0;
 
 		inFile.read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
 

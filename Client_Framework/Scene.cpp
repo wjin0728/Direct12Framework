@@ -77,8 +77,6 @@ void CScene::RenderForwardPass()
 {
 	auto forwardPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
 	forwardPassBuffer->BindToShader(0);
-	auto& directionalLight = mLights[(UINT)LIGHT_TYPE::DIRECTIONAL][0];
-	directionalLight->BindLightDataToShader();
 
 	auto& camera = mCameras["MainCamera"];
 	if (camera) {
@@ -149,8 +147,6 @@ void CScene::RenderFinalPass()
 	auto finalShader = RESOURCE.Get<CShader>("FinalPass");
 	finalShader->SetPipelineState(CMDLIST);
 	CRenderer::RenderFullscreen();
-	RenderForLayer("UI", camera);
-
 	renderTarget->ChangeTargetToResource(backBufferIdx);
 }
 
@@ -170,7 +166,7 @@ void CScene::LoadSceneFromFile(const std::string& fileName)
 		auto object = CGameObject::CreateObjectFromFile(ifs, prefabs);
 		auto& tag = object->GetTag();
 		if(tag == "Water") AddObject("Transparent", object);
-		else if (tag == "UI") AddObject("UI", object);
+		else if (tag == "Ui") AddObject("Ui", object);
 		else AddObject("Opaque", object);
 	}
 }
@@ -333,13 +329,6 @@ void CScene::UpdatePassData()
 	passData.deltaTime = DELTA_TIME;
 	passData.totalTime = TIMER.GetTotalTime();
 	passData.renderTargetSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
-
-	UIProjectionMatrix = XMMatrixOrthographicOffCenterLH(
-		0.f, passData.renderTargetSize.x,
-		passData.renderTargetSize.y, 0.f,
-		0.f, 1.f
-	);
-	passData.uiTransform = UIProjectionMatrix.Transpose();
 
 	auto gbufferAlbedo = RESOURCE.Get<CTexture>("GBufferAlbedo");
 	if (gbufferAlbedo) {

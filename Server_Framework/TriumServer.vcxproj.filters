@@ -22,9 +22,6 @@
     <Filter Include="Utility">
       <UniqueIdentifier>{eef34143-f8f5-4a45-bca2-cc0587dd015f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object Class">
-      <UniqueIdentifier>{1573bee7-e839-40d8-b6d4-5590c25b922b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tem_server.cpp">
@@ -39,23 +36,11 @@
     <ClCompile Include="SESSION.cpp">
       <Filter>Class</Filter>
     </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Class</Filter>
+    </ClCompile>
     <ClCompile Include="..\Client_Framework\SimpleMath.cpp">
       <Filter>Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Object Class</Filter>
-    </ClCompile>
-    <ClCompile Include="Terrain.cpp">
-      <Filter>Object Class</Filter>
-    </ClCompile>
-    <ClCompile Include="PlayerCharacter.cpp">
-      <Filter>Object Class</Filter>
-    </ClCompile>
-    <ClCompile Include="SkillObject.cpp">
-      <Filter>Object Class</Filter>
-    </ClCompile>
-    <ClCompile Include="Item.cpp">
-      <Filter>Object Class</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,19 +63,7 @@
       <Filter>Class</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
-      <Filter>Object Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Terrain.h">
-      <Filter>Object Class</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerCharacter.h">
-      <Filter>Object Class</Filter>
-    </ClInclude>
-    <ClInclude Include="SkillObject.h">
-      <Filter>Object Class</Filter>
-    </ClInclude>
-    <ClInclude Include="Item.h">
-      <Filter>Object Class</Filter>
+      <Filter>Class</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
