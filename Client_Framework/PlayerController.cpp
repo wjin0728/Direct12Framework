@@ -12,6 +12,7 @@
 #include"Animation.h"
 #include "ServerManager.h"
 #include "AnimationEnums.h"
+#include "ObjectState.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -83,6 +84,7 @@ void CPlayerController::OnKeyEvents()
 
 	if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
 		INSTANCE(ServerManager).send_cs_mouse_vec3_packet(camForward);
+		mStateMachine->SetState(PLAYER_STATE::ATTACK);
 	}
 
 	if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
@@ -91,9 +93,11 @@ void CPlayerController::OnKeyEvents()
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
 
 	if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
+		mStateMachine->SetState(PLAYER_STATE::JUMP);
 		INSTANCE(ServerManager).send_cs_000_packet();
 	}
 	if (INPUT.IsKeyDown(KEY_TYPE::E)) {
+		mStateMachine->SetState(PLAYER_STATE::SKILL);
 		switch (mSkill)
 		{
 		case FIRE_ENCHANT:
@@ -113,6 +117,7 @@ void CPlayerController::OnKeyEvents()
 		if (moveKeyPressed == true) {
 			moveKeyPressed = false;
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+			mStateMachine->SetState(PLAYER_STATE::IDLE);
 		}
 		return;
 	}
@@ -120,4 +125,5 @@ void CPlayerController::OnKeyEvents()
 		moveKeyPressed = true;
 	}
 	INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
+	if (mStateMachine->GetState() == PLAYER_STATE::IDLE) mStateMachine->SetState(PLAYER_STATE::RUN);
 }

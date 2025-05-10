@@ -11,6 +11,7 @@
 #include "DX12Manager.h"
 #include "ResourceManager.h"
 #include"ItemMovement.h"
+#include "ObjectState.h"
 
 void ServerManager::Initialize()
 {
@@ -73,7 +74,11 @@ bool ServerManager::InitPlayerAndCamera()
 	mPlayer->SetActive(false);
 	mPlayer->SetStatic(false);
 
+	auto stateMachine = mPlayer->AddComponent<CObjectStateMachine>();
+	mPlayer->SetStateMachine(stateMachine);
+
 	auto playerController = mPlayer->AddComponent<CPlayerController>();
+	playerController->SetStateMachine(stateMachine);
 	mPlayer->SetPlayerController(playerController);
 
 	mMainCamera = std::make_shared<CGameObject>();

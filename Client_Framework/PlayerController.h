@@ -10,6 +10,7 @@ private:
 	PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
 
 	std::shared_ptr<class CAnimationController> mAnimationController{};
+	std::shared_ptr<class CObjectStateMachine> mStateMachine{};
 	std::shared_ptr<class CRigidBody> rigidBody{};
 	std::weak_ptr<class CCamera> mCamera{};
 	std::weak_ptr<class CTerrain> mTerrain{};
@@ -34,6 +35,7 @@ public:
 	uint8_t GetAnimationIndexFromState(PLAYER_STATE state);
 
 	void SetAnimationController(const std::shared_ptr<class CAnimationController>& animationController) { mAnimationController = animationController; }
+	void SetStateMachine(const std::shared_ptr<class CObjectStateMachine>& StateMachine) { mStateMachine = StateMachine; }
 	void SetChildAnimationController();
 	void SetRigidBody(const std::shared_ptr<class CRigidBody>& rigidBody) { this->rigidBody = rigidBody; }
 	void SetCamera(const std::shared_ptr<class CCamera>& camera) { mCamera = camera; }
