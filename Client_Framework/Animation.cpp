@@ -27,10 +27,8 @@ CAnimationSet::~CAnimationSet()
 Matrix CAnimationSet::GetSRT(int boneIndex, float position)
 {
 	Matrix transform = Matrix::Identity;
-	for (int i = 0; i < (mKeyFrames - 1); i++)
-	{
-		if ((mKeyFrameTimes[i] <= position) && (position < mKeyFrameTimes[i + 1]))
-		{
+	for (int i = 0; i < (mKeyFrames - 1); i++) {
+		if ((mKeyFrameTimes[i] <= position) && (position < mKeyFrameTimes[i + 1])) {
 			float t = (position - mKeyFrameTimes[i]) / (mKeyFrameTimes[i + 1] - mKeyFrameTimes[i]);
 			transform = Matrix::Interpolate(mKeyFrameTransforms[i][boneIndex], mKeyFrameTransforms[i + 1][boneIndex], t);
 			break;
@@ -139,10 +137,15 @@ CAnimationController::~CAnimationController()
 
 void CAnimationController::Awake()
 {
+
+}
+
+void CAnimationController::Start()
+{
 	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
 	if (skinnedMeshRenderer)
 		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();
-	
+
 	auto& boneNames = skinnedMeshRenderer->mBoneNames;
 	mSkinningBoneTransforms.resize(boneNames.size());
 	finalTransforms.resize(boneNames.size());
@@ -163,9 +166,6 @@ void CAnimationController::Awake()
 		++i;
 	}
 
-	mRootMotionObject = mAnimationSets->mBoneFrameCaches[0].lock()->GetTransform();
-	mRootMotionObject.lock()->owner->SetStatic(true);
-
 	if (mBoneTransformIdx == -1) {
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
 	}
@@ -173,10 +173,6 @@ void CAnimationController::Awake()
 	SetTrackAnimationSet(0, 1);
 	SetTrackSpeed(0, 1.0f);
 	SetTrackWeight(0, 1.0f);
-}
-
-void CAnimationController::Start()
-{
 }
 
 void CAnimationController::Update()

@@ -25,6 +25,8 @@ struct CALLBACKKEY
 {
     float mTime = 0.0f;
     void* mCallbackData = NULL;
+
+    void SetCallbackKey(float time, void* data) { mTime = time; mCallbackData = data; }
 };
 
 #define _WITH_ANIMATION_INTERPOLATION
@@ -47,7 +49,7 @@ public:
     ~CAnimationSet();
 
 public:
-    string						    	mAnimationSetName;
+    std::string						    	mAnimationSetName;
 
     float						    	mLength = 0.0f;
     int						    		mFramesPerSecond = 0; //m_fTicksPerSecond
@@ -73,7 +75,7 @@ private:
 public:
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
     std::vector<std::weak_ptr<CTransform>>      mBoneFrameCaches{};
-    std::vector<string>                         mBoneNames{};
+    std::vector<std::string>                         mBoneNames{};
 };
 
 class CAnimationTrack

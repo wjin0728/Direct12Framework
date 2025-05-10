@@ -489,7 +489,7 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 
 			for (int i = 0; i < keyFrameNum; i++) {
 				ReadDateFromFile(ifs, token);
-				if (token == "<Transform>:") {
+				if (token == "<Transforms>:") {
 					auto& animSet = mAnimationController->mAnimationSets->mAnimationSet[setNum];
 					int keyNum{};
 					float keyTime{};
