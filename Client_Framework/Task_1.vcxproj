@@ -176,6 +176,7 @@
     <ClInclude Include="InstancingGroup.h" />
     <ClInclude Include="ItemMovement.h" />
     <ClInclude Include="MiniGame.h" />
+    <ClInclude Include="ObjectState.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderPipeline.h" />
@@ -233,6 +234,7 @@
     <ClCompile Include="InstancingGroup.cpp" />
     <ClCompile Include="ItemMovement.cpp" />
     <ClCompile Include="MiniGame.cpp" />
+    <ClCompile Include="ObjectState.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderPipeline.cpp" />
