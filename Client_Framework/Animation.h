@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include"Component.h"
 #include"Mesh.h"
+#include"AnimationEnums.h"
 
 enum class ANIMATION_TYPE : UINT
 {
@@ -151,6 +152,11 @@ public:
 class CAnimationController : public CComponent
 {
 public:
+    static std::unordered_map<PLAYER_STATE, ARCHER_ANIMATION> ARCHER_MAP;
+	static std::unordered_map<PLAYER_STATE, FIGHTER_ANIMATION> FIGHTER_MAP;
+	static std::unordered_map<PLAYER_STATE, MAGE_ANIMATION> MAGE_MAP;
+
+public:
     CAnimationController();
     CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion = false);
     virtual ~CAnimationController();
@@ -191,4 +197,5 @@ public:
     void BindSkinningMatrix();
     void PrepareSkinning();
     void UploadBoneOffsets();
+
 };

@@ -58,9 +58,9 @@ UINT8 CPlayerController::GetAnimationIndexFromState(PLAYER_STATE state)
 	switch (mClass)
 	{
 	case PLAYER_CLASS::ARCHER:
-		return (UINT8)ARCHER_MAP.at(state);
+		return (UINT8)CAnimationController::ARCHER_MAP.at(state);
 	case PLAYER_CLASS::FIGHTER:
-		return (UINT8)FIGHTER_MAP.at(state);
+		return (UINT8)CAnimationController::FIGHTER_MAP.at(state);
 	//case PLAYER_CLASS::MAGE:
 	//	return (UINT8)MAGE_MAP.at(state);
 	default:
