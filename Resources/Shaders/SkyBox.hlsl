@@ -51,8 +51,6 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 }
 
 
-//#define TRANSPARENT_CLIP
-
 //«»ºø ºŒ¿Ã¥ı
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 {

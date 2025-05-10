@@ -165,6 +165,7 @@
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CBData.h" />
+    <ClInclude Include="CEntityState.h" />
     <ClInclude Include="ContinuousRotation.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="IndexBuffer.h" />
@@ -173,6 +174,7 @@
     <ClInclude Include="CResource.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingGroup.h" />
+    <ClInclude Include="ItemMovement.h" />
     <ClInclude Include="MiniGame.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Renderer.h" />
@@ -181,6 +183,7 @@
     <ClInclude Include="SkinnedMesh.h" />
     <ClInclude Include="SkinnedMeshRenderer.h" />
     <ClInclude Include="ThirdPersonCamera.h" />
+    <ClInclude Include="UIRenderer.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="DescriptorHeaps.h" />
@@ -221,12 +224,14 @@
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="BattleScene.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CEntityState.cpp" />
     <ClCompile Include="ContinuousRotation.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
+    <ClCompile Include="ItemMovement.cpp" />
     <ClCompile Include="MiniGame.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -235,6 +240,7 @@
     <ClCompile Include="SkinnedMesh.cpp" />
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
     <ClCompile Include="ThirdPersonCamera.cpp" />
+    <ClCompile Include="UIRenderer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="DescriptorHeaps.cpp" />
@@ -300,16 +306,7 @@
     <None Include="..\Resources\Shaders\Lighting.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="..\Resources\Shaders\OutLinePS.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="..\Resources\Shaders\OutLineVS.hlsl">
-      <FileType>Document</FileType>
-    </None>
     <None Include="..\Resources\Shaders\Paramiters.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="..\Resources\Shaders\Shadow.hlsl">
       <FileType>Document</FileType>
     </None>
     <None Include="..\Resources\Shaders\SkyBox.hlsl">
@@ -319,9 +316,6 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\Resources\Shaders\Terrain.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="..\Resources\Shaders\TerrainShadow.hlsl">
       <FileType>Document</FileType>
     </None>
     <None Include="..\Resources\Shaders\Triplanar.hlsl">
@@ -334,6 +328,11 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\Resources\Shaders\Water.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Shaders\Lit.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

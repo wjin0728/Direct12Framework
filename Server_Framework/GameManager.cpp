@@ -3,7 +3,7 @@
 GameManager::GameManager()
 {
 	//terrain.SetScale(45, 20, 45);
-	terrain.SetScale(64, 598.9f, 64);
+	terrain.SetScale(100.f, 598.9f, 100.f);
 	terrain.SetResolution(513);
 	terrain.SetNavMapResolution(terrain.GetResolution() * 2);
 	//terrain.LoadHeightMap("LobbyTerrainHeightmap");
@@ -185,14 +185,13 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		//clients[c_id]._player._class = p->name[0];
-		if (0 == c_id) 
-			clients[c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
-		else if (1 == c_id) 
-			clients[c_id]._player.SetClass(S_PLAYER_CLASS::ARCHER);
-		else if (2 == c_id) 
-			clients[c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
-
-		clients[c_id]._player._pos = Vec3(27, 6, 22);
+		if (0 == c_id)
+			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
+		else if (1 == c_id)
+			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::ARCHER;
+		else if (2 == c_id)
+			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
+		clients[c_id]._player._pos = Vec3(45.2, 4.1, 42);
 
 		clients[c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;

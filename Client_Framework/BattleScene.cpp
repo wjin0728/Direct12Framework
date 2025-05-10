@@ -38,6 +38,14 @@ void CBattleScene::Update()
 	else if (INPUT.IsKeyDown(KEY_TYPE::ALT)) {
 		INPUT.ChangeMouseState();
 	}
+	for (int i = 0; i < 7; i++) {
+		int key = (int)KEY_TYPE::ONE + i;
+		if (INPUT.IsKeyDown((KEY_TYPE)key))
+		{
+			if (renderTargetIndices.size() > i)
+				renderPasstype = i;
+		}
+	}
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();
 	}*/
@@ -55,7 +63,7 @@ void CBattleScene::RenderScene()
 	CScene::RenderShadowPass();
 	CScene::RenderGBufferPass();
 	CScene::RenderLightingPass();
-	//CScene::RenderForwardPass();
+	CScene::RenderForwardPass();
 	CScene::RenderFinalPass();
 }
 

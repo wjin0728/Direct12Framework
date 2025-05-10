@@ -10,6 +10,7 @@
 #include"ThirdPersonCamera.h"
 #include "DX12Manager.h"
 #include "ResourceManager.h"
+#include"ItemMovement.h"
 
 void ServerManager::Initialize()
 {
@@ -73,6 +74,7 @@ bool ServerManager::InitPlayerAndCamera()
 	mPlayer->SetStatic(false);
 
 	auto playerController = mPlayer->AddComponent<CPlayerController>();
+	mPlayer->SetPlayerController(playerController);
 
 	mMainCamera = std::make_shared<CGameObject>();
 
@@ -199,11 +201,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet_ptr);
 
 		clientID = packet->id;
-
-		auto playerController = mPlayer->AddComponent<CPlayerController>();
-		mPlayer->SetPlayerController(playerController);
-		mPlayer->GetTransform()->SetLocalPosition({ 10, 5, 10 });
-
 		cout << clientID << endl;
 
 		break;
@@ -280,11 +277,17 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		auto itemObj = CGameObject::Instantiate(item);
 		itemObj->SetTag("Item");
-		itemObj->SetRenderLayer("Opaque");
+		itemObj->SetRenderLayer("Transparent");
 		itemObj->SetObjectType(OBJECT_TYPE::ITEM);
 		itemObj->SetActive(true);
 		itemObj->SetStatic(false);
 		itemObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		auto movement = itemObj->AddComponent<CItemMovement>();
+		movement->SetAmplitude(0.2f);
+		movement->SetFrequency(1.f);
+		movement->SetDirection({ 0.f, 1.f, 0.f });
+		movement->SetTargetObject(mMainCamera);
+
 		itemObj->Awake();
 		itemObj->Start();
 

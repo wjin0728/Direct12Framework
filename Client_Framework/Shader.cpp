@@ -133,6 +133,13 @@ D3D12_BLEND_DESC CShader::InitBlendState()
 	blendDesc.IndependentBlendEnable = FALSE;
 
 	D3D12_RENDER_TARGET_BLEND_DESC& renderTarget = blendDesc.RenderTarget[0];
+	renderTarget.LogicOpEnable = FALSE;
+	renderTarget.LogicOp = D3D12_LOGIC_OP_NOOP;
+	renderTarget.SrcBlendAlpha = D3D12_BLEND_ONE;
+	renderTarget.DestBlendAlpha = D3D12_BLEND_ZERO;
+	renderTarget.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	renderTarget.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
 
 	switch (mInfo.blendType)
 	{
@@ -144,10 +151,13 @@ D3D12_BLEND_DESC CShader::InitBlendState()
 		
 		break;
 	case BLEND_TYPE::ALPHA_BLEND:
+		blendDesc.AlphaToCoverageEnable = FALSE;
 		renderTarget.BlendEnable = TRUE;
 		renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
 		renderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
 		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
+
+
 		break;
 	case BLEND_TYPE::ADD_BLEND:
 		renderTarget.BlendEnable = TRUE;
@@ -170,12 +180,7 @@ D3D12_BLEND_DESC CShader::InitBlendState()
 	default:
 		break;
 	}
-	renderTarget.LogicOpEnable = FALSE;
-	renderTarget.LogicOp = D3D12_LOGIC_OP_NOOP;
-	renderTarget.SrcBlendAlpha = D3D12_BLEND_ONE;
-	renderTarget.DestBlendAlpha = D3D12_BLEND_ZERO;
-	renderTarget.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	renderTarget.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	
 
 	if (mInfo.shaderType == PASS_TYPE::LIGHTING) {
 		renderTarget.BlendEnable = TRUE;
@@ -281,10 +286,23 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::s
 #endif
 	ComPtr<ID3DBlob> errBlob{};
 
+	std::vector<D3D_SHADER_MACRO> macros;
+	if (mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::ANIMATION)
+		macros.push_back({ "USE_SKINNING", "1" });
+	if (mInfo.blendType != BLEND_TYPE::ALPHA_BLEND)
+		macros.push_back({ "TRANSPARENT_CLIP", "1" });
+	macros.push_back({ nullptr, nullptr });
+
+	/*D3D_SHADER_MACRO macros[] = {
+	{ "USE_SKINNING", mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::ANIMATION ? "1" : "0"},
+	{ "TRANSPARENT_CLIP", mInfo.blendType == BLEND_TYPE::ALPHA_BLEND ? "0" : "1"},
+	{ nullptr, nullptr }
+	};*/
+
 	std::string fileName = SHADER_PATH(name);
 	std::wstring fileNameW = BinaryReader::stringToWstring(fileName);
 
-	HRESULT hr = D3DCompileFromFile(fileNameW.c_str(), NULL,
+	HRESULT hr = D3DCompileFromFile(fileNameW.c_str(), macros.data(),
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, fname.c_str(), version.c_str(), compileFlag, 0, &blob, &errBlob);
 
 	if (FAILED(hr)) {
@@ -302,7 +320,7 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::s
 	return bytecode;
 }
 
-bool CShader::Initialize(const ShaderInfo& info, const std::string& name, bool getPassName)
+bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, const std::string& name, bool getPassName)
 {
 	mInfo = info;
 	ComPtr<ID3DBlob> vsBlob, psBlob, gsBlob;
@@ -312,19 +330,18 @@ bool CShader::Initialize(const ShaderInfo& info, const std::string& name, bool g
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
 
 	pipelineStateDesc.pRootSignature = INSTANCE(CDX12Manager).GetRootSignature();
-
 	std::string passType = passName[mInfo.shaderType];
-	std::string shaderName = name;
+	std::string sName = name;
 
 	if (getPassName) {
-		shaderName = passType;
+		sName = passType;
 	}
 
-	pipelineStateDesc.VS = CreateShader(vsBlob, name, "VS_" + shaderName, "vs_5_1");
-	pipelineStateDesc.PS = CreateShader(psBlob, name, "PS_" + shaderName, "ps_5_1");
+	pipelineStateDesc.VS = CreateShader(vsBlob, name, "VS_" + sName, "vs_5_1");
+	pipelineStateDesc.PS = CreateShader(psBlob, name, "PS_" + sName, "ps_5_1");
 
 	if (mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::BILLBOARD || mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::PARTICLE) {
-		pipelineStateDesc.GS = CreateShader(gsBlob, name, "GS_" + shaderName, "gs_5_1");
+		pipelineStateDesc.GS = CreateShader(gsBlob, name, "GS_" + sName, "gs_5_1");
 	}
 	if (mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::TERRAIN) {
 		pipelineStateDesc.HS = CreateShader(hsBlob, name, "HS_Forward", "hs_5_1");
@@ -347,7 +364,7 @@ bool CShader::Initialize(const ShaderInfo& info, const std::string& name, bool g
 	{
 	case PASS_TYPE::G_PASS:
 		pipelineStateDesc.NumRenderTargets = 5;
-		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
 		pipelineStateDesc.RTVFormats[1] = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		pipelineStateDesc.RTVFormats[2] = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		pipelineStateDesc.RTVFormats[3] = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -382,7 +399,7 @@ bool CShader::Initialize(const ShaderInfo& info, const std::string& name, bool g
 	if (pipelineStateDesc.InputLayout.pInputElementDescs)
 		delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
 
-	if(getPassName) this->name = name + passType;
-	else this->name = name;
+	if(getPassName) this->name = shaderName + passType;
+	else this->name = shaderName;
 	return true;
 }

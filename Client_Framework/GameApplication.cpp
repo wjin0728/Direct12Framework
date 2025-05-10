@@ -15,12 +15,12 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	clientWidth = FRAMEBUFFER_WIDTH;
 	clientHeight = FRAMEBUFFER_HEIGHT;
 	
-	//À©µµ¿ì ÃÊ±âÈ­
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
 	if (!InitWindow(wndProc, cmdShow)) {
 		return false;
 	}
 
-	//¸Å´ÏÀú ÃÊ±âÈ­
+	//ï¿½Å´ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
 	INSTANCE(CDX12Manager).Initialize(mHwnd);
 	INSTANCE(CObjectPoolManager).Initialize();
 	INSTANCE(ServerManager).Initialize();
@@ -30,6 +30,7 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	INSTANCE(CDX12Manager).OpenCommandList();
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CDX12Manager).CloseCommandList();
+	INSTANCE(CResourceManager).ReleaseUploadBuffers();
 	CLight::SetVolumes();
 
 	INSTANCE(ServerManager).Client_Login();

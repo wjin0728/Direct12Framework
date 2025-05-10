@@ -14,12 +14,14 @@ private:
 	std::vector<std::string> mBoneNames{};
 	std::vector<std::weak_ptr<CTransform>> mBoneTransforms{};
 
+
 public:
     CSkinnedMeshRenderer();
     CSkinnedMeshRenderer(const CSkinnedMeshRenderer& other) : mSkinnedMesh(other.mSkinnedMesh), mBoneNames(other.mBoneNames), CRenderer(other) {}
     ~CSkinnedMeshRenderer();
 
     virtual void Awake() override;
+	virtual void Start() override;
     virtual void Update() override;
     virtual void LateUpdate() override;
 

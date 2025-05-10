@@ -12,6 +12,7 @@ enum PASS_TYPE : UINT8
 	LIGHTING,
 	POST_PROCESSING,
 	FINAL,
+	UI,
 	PASS_TYPE_COUNT
 };
 
@@ -97,7 +98,7 @@ protected:
 		const std::string& name, const std::string& fname, const std::string& version);
 
 public:
-	virtual bool Initialize(const ShaderInfo& info, const std::string& name, bool getPassName = true);
+	virtual bool Initialize(const std::string& shaderName, const ShaderInfo& info, const std::string& name, bool getPassName = true);
 	
 public:
 	void SetPipelineState(ID3D12GraphicsCommandList* cmdList) { cmdList->SetPipelineState(d3dPiplineState.Get()); }

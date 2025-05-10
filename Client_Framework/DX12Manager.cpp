@@ -111,7 +111,7 @@ void CDX12Manager::ChangeSwapChainState()
 	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	dxgiTargetParameters.Width = renderTargetSize.y;
 	dxgiTargetParameters.Height = renderTargetSize.y;
-	dxgiTargetParameters.RefreshRate.Numerator = 165;
+	dxgiTargetParameters.RefreshRate.Numerator = 60;
 	dxgiTargetParameters.RefreshRate.Denominator = 1;
 	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -176,7 +176,7 @@ void CDX12Manager::InitRenderTargetGroups()
 		std::vector<RenderTarget> renderTargets(5);
 		renderTargets[0].rt = std::make_shared<CTexture>();
 		renderTargets[0].rt->SetName("GBufferAlbedo");
-		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
@@ -385,42 +385,48 @@ void CDX12Manager::InitRootSignature()
 	cubeMapTable.RegisterSpace = 2;
 	cubeMapTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[8];
 	//렌더 패스 정보
-	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[0].Descriptor.ShaderRegister = 0;
-	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	UINT parameterIndex = 0;
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 0;
+	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//오브젝트 정보
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[1].Descriptor.ShaderRegister = 1;
-	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 1;
+	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//조명 정보
-	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[2].Descriptor.ShaderRegister = 2;
-	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 2;
+	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//CBBoneTransforms 정보
-	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[3].Descriptor.ShaderRegister = 3;
-	pd3dRootParameters[3].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 3;
+	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//재질 정보
-	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[4].Descriptor.ShaderRegister = 5;
-	pd3dRootParameters[4].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 5;
+	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	//UI 정보
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 0;
+	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 3;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//텍스쳐 정보
-	pd3dRootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &textureTable;
-	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[parameterIndex].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[parameterIndex].DescriptorTable.pDescriptorRanges = &textureTable;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//큐브맵 정보
-	pd3dRootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &cubeMapTable;
-	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[parameterIndex].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[parameterIndex].DescriptorTable.pDescriptorRanges = &cubeMapTable;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
@@ -540,6 +546,7 @@ void CDX12Manager::BeforeRender()
 	cmdList->SetGraphicsRootSignature(mRootSignature.Get());
 	descriptorHeaps->SetSRVDescriptorHeap();
 	RESOURCE.UpdateMaterials();
+	mCurFrameResource->BindStructedBuffers();
 }
 
 void CDX12Manager::AfterRender()
@@ -575,12 +582,12 @@ std::shared_ptr<CConstantBuffer> CDX12Manager::GetConstantBuffer(UINT type)
 
 std::shared_ptr<CStructedBuffer> CDX12Manager::GetStructedBuffer(UINT type)
 {
-	return std::shared_ptr<CStructedBuffer>();
+	return mCurFrameResource->GetStructedBuffer(type);
 }
 
 std::shared_ptr<CInstancingBuffer> CDX12Manager::GetInstancingBuffer(UINT type)
 {
-	return std::shared_ptr<CInstancingBuffer>();
+	return mCurFrameResource->GetInstancingBuffer(type);
 }
 
 

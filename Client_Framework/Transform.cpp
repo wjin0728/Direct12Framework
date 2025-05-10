@@ -44,6 +44,7 @@ void CTransform::Awake()
 
 void CTransform::Start()
 {
+	UpdateWorldMatrix();
 }
 
 void CTransform::Update()

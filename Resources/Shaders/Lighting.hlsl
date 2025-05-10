@@ -55,10 +55,10 @@ float4 PS_Directional(float4 position : SV_Position) : SV_Target
     surfaceData.metallic = metallic;
     surfaceData.smoothness = smoothness;
     surfaceData.specular = 0.5f;
-    surfaceData.emissive = 0.f;
+    surfaceData.emissive = emissive;
     
     float3 finalColor = { 0.f, 0.f, 0.f };                                          
-    finalColor = ComputeDirectionalLight(lightingData, surfaceData);
+    finalColor = ComputeDirectionalLight(lightingData, surfaceData, lights[idx0]);
     
     finalColor = GammaEncoding(finalColor);
     
@@ -108,13 +108,14 @@ float4 PS_Lighting(VS_OUTPUT output) : SV_Target
     surfaceData.emissive = 0.f;
     
     float3 finalColor = { 0.f, 0.f, 0.f };
-    if (lightType == 1)
+    CBLightsData lightData = lights[idx0];
+    if (lightData.lightType == 1)
     {
-        finalColor = ComputePointLight(lightingData, surfaceData);
+        finalColor = ComputePointLight(lightingData, surfaceData, lightData);
     }
-    else if (lightType == 2)
+    else if (lightData.lightType == 2)
     {
-        finalColor = ComputeSpotLight(lightingData, surfaceData);
+        finalColor = ComputeSpotLight(lightingData, surfaceData, lightData);
     }
     else
     {
@@ -129,7 +130,8 @@ float4 PS_Lighting(VS_OUTPUT output) : SV_Target
 VS_OUTPUT VS_Stencil(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
-    if (lightType == 0)
+    CBLightsData lightData = lights[idx0];
+    if (lightData.lightType == 0)
     {
         output.position = float4(input.position.x, input.position.y, 0.0f, 1.0f);
     }

@@ -5,6 +5,9 @@
 #include"SkinnedMesh.h"
 #include"Material.h"
 #include"Shader.h"
+#include"UIRenderer.h"
+#include"GameObject.h"
+#include"ItemMovement.h"
 
 
 void CResourceManager::Initialize()
@@ -17,7 +20,7 @@ void CResourceManager::Initialize()
 	LoadDefaultShaders();
 	LoadDefaultMaterials();
 
-	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
+	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
 
 	LoadPlayerObjects();
@@ -117,11 +120,45 @@ void CResourceManager::LoadSkillObjects()
 
 void CResourceManager::LoadPrefabFromFile(const std::string& name)
 {
-	auto skill = CGameObject::CreateObjectFromFile(name);
+	std::ifstream ifs{ OBJECT_PATH(name), std::ios::binary };
+	if (!ifs) {
+		return;
+	}
+	using namespace BinaryReader;
+	std::string token{};
+
+	int meshCount{};
+	ReadDateFromFile(ifs, meshCount);
+	for (int i = 0; i < meshCount; i++) {
+		std::string meshName;
+		ReadDateFromFile(ifs, meshName);
+		if (!Get<CMesh>(meshName)) {
+			Add(CMesh::CreateMeshFromFile(meshName));
+		}
+	}
+	int skinnedMeshCount{};
+	ReadDateFromFile(ifs, skinnedMeshCount);
+	for (int i = 0; i < skinnedMeshCount; i++) {
+		std::string meshName;
+		ReadDateFromFile(ifs, meshName);
+		if (!Get<CSkinnedMesh>(meshName)) {
+			Add(CSkinnedMesh::CreateSkinnedMeshFromFile(meshName));
+		}
+	}
+
+	int materialCount{};
+	ReadDateFromFile(ifs, materialCount);
+	for (int i = 0; i < materialCount; i++) {
+		Add(CMaterial::CreateMaterialFromFile(ifs));
+	}
+	auto skill = CGameObject::CreateObjectFromFile(ifs, prefabs);
 	if (skill) {
 		skill->SetName(name);
 		skill->SetActive(false);
 		skill->SetStatic(false);
+		skill->SetInstancing(false);
+		skill->SetObjectType(OBJECT_TYPE::ITEM);
+
 		prefabs[name] = skill;
 	}
 }
@@ -139,6 +176,7 @@ void CResourceManager::LoadDefaultMeshes()
 		m->SetName("Rectangle");
 		m->SetType(RESOURCE_TYPE::MESH);
 		Add(m);
+		CUIRenderer::mQuad = m;
 	}
 
 
@@ -188,7 +226,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
-		MakeShadersForAllPass("Common", info);
+		MakeShadersForAllPass("Common", "Common", info);
 	}
 	{
 		ShaderInfo info;
@@ -197,7 +235,27 @@ void CResourceManager::LoadDefaultShaders()
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		MakeShadersForAllPass("Triplanar", info);
+
+		MakeShadersForAllPass("LitOpaque", "Lit", info);
+	}
+	{
+		ShaderInfo info;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::ALPHA_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		MakeShadersForAllPass("LitTransparent", "Lit", info);
+	}
+	{
+		ShaderInfo info;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		MakeShadersForAllPass("Triplanar", "Triplanar", info);
 
 	}
 	{
@@ -207,16 +265,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		MakeShadersForAllPass("Vegitation", info);
-	}
-	{
-		ShaderInfo info;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
-		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
-		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		MakeShadersForAllPass("Sprite", info);
+		MakeShadersForAllPass("Vegitation", "Vegitation", info);
 	}
 	{
 		ShaderInfo info;
@@ -225,7 +274,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
-		MakeShadersForAllPass("Terrain", info);
+		MakeShadersForAllPass("Terrain", "Terrain", info);
 	}
 	{
 		ShaderInfo info;
@@ -234,16 +283,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_EQUAL;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		MakeShadersForAllPass("Skybox", info);
-	}
-	{
-		ShaderInfo info;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::BILLBOARD;
-		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_EQUAL;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
-		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-		MakeShadersForAllPass("Billboard", info);
+		MakeShadersForAllPass("Skybox", "Skybox", info);
 	}
 	{
 		ShaderInfo info;
@@ -252,7 +292,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		MakeShadersForAllPass("Animation", info);
+		MakeShadersForAllPass("LitOpaqueAnimation", "Lit", info);
 	}
 	{
 		ShaderInfo info;
@@ -264,7 +304,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		if (shader->Initialize(info, "Lighting")) Add(shader);
+		if (shader->Initialize("Lighting", info, "Lighting")) Add(shader);
 	}
 	{
 		ShaderInfo info;
@@ -276,7 +316,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		if (shader->Initialize(info, "Lighting")) Add(shader);
+		if (shader->Initialize("Lighting", info, "Lighting")) Add(shader);
 	}
 	{
 		ShaderInfo info;
@@ -288,7 +328,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		if (shader->Initialize(info, "Lighting")) Add(shader);
+		if (shader->Initialize("Lighting", info, "Lighting")) Add(shader);
 	}
 	{
 		ShaderInfo info;
@@ -300,16 +340,28 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		if (shader->Initialize(info, "FinalPass", false)) Add(shader);
+		if (shader->Initialize("FinalPass", info, "FinalPass", false)) Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::UI;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::ALPHA_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize("Sprite", info, "Sprite", false)) Add(shader);
 	}
 }
 
-void CResourceManager::MakeShadersForAllPass(const std::string& name, ShaderInfo info)
+void CResourceManager::MakeShadersForAllPass(const std::string& shaderName, const std::string& name, ShaderInfo info)
 {
 	for (UINT8 i = 0; i < static_cast<UINT8>(PASS_TYPE::STENCIL); i++) {
 		info.shaderType = static_cast<PASS_TYPE>(i);
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		if (shader->Initialize(info, name)) Add(shader);
+		if (shader->Initialize(shaderName, info, name)) Add(shader);
 	}
 
 }

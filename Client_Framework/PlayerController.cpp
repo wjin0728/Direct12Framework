@@ -86,7 +86,6 @@ void CPlayerController::OnKeyEvents()
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
 	if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
-	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) dir |= 0x10;
 
 	if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
 		INSTANCE(ServerManager).send_cs_000_packet();
@@ -102,7 +101,7 @@ void CPlayerController::OnKeyEvents()
 			break;
 		case FIRE_EXPLOSION:
 		case GRASS_VINE:
-			//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Å¸°Ùid);
+			//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Å¸ï¿½ï¿½id);
 			break;
 		}
 	}

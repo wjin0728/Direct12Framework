@@ -211,9 +211,11 @@
     </ClInclude>
     <ClInclude Include="MiniGame.h" />
     <ClInclude Include="ContinuousRotation.h" />
-    <ClInclude Include="AnimationEnums.h">
-      <Filter>Utility</Filter>
+    <ClInclude Include="UIRenderer.h">
+      <Filter>GameObject\Component</Filter>
     </ClInclude>
+    <ClInclude Include="CEntityState.h" />
+    <ClInclude Include="ItemMovement.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -375,6 +377,15 @@
     <ClCompile Include="ContinuousRotation.cpp">
       <Filter>Client</Filter>
     </ClCompile>
+    <ClCompile Include="UIRenderer.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="CEntityState.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemMovement.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -399,16 +410,7 @@
     <None Include="..\Resources\Shaders\Lighting.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="..\Resources\Shaders\OutLinePS.hlsl">
-      <Filter>HLSL</Filter>
-    </None>
-    <None Include="..\Resources\Shaders\OutLineVS.hlsl">
-      <Filter>HLSL</Filter>
-    </None>
     <None Include="..\Resources\Shaders\Paramiters.hlsl">
-      <Filter>HLSL</Filter>
-    </None>
-    <None Include="..\Resources\Shaders\Shadow.hlsl">
       <Filter>HLSL</Filter>
     </None>
     <None Include="..\Resources\Shaders\SkyBox.hlsl">
@@ -418,9 +420,6 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="..\Resources\Shaders\Terrain.hlsl">
-      <Filter>HLSL</Filter>
-    </None>
-    <None Include="..\Resources\Shaders\TerrainShadow.hlsl">
       <Filter>HLSL</Filter>
     </None>
     <None Include="..\Resources\Shaders\Triplanar.hlsl">
@@ -433,6 +432,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="..\Resources\Shaders\Water.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Lit.hlsl">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>

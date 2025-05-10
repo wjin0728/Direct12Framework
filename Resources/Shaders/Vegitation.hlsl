@@ -70,8 +70,6 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 }
 
 
-#define TRANSPARENT_CLIP
-
 //«»ºø ºŒ¿Ã¥ı
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 {
@@ -272,7 +270,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     output.normalWS = float4(normal, lerpResult188 + lerpResult195);
     output.positionWS = float4(worldPosition, lerpResult191 + lerpResult190);
     output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
-    output.depth = input.ShadowPosH;
+    output.depth = float4(0.f, 0.f, 0.f, depth);
     
     return output;
 }
