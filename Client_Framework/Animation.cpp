@@ -230,7 +230,7 @@ void CAnimationController::Start()
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
 	}
 
-	SetTrackAnimationSet(0, 1);
+	SetTrackAnimationSet(0, 0);
 	SetTrackSpeed(0, 1.0f);
 	SetTrackWeight(0, 1.0f);
 }
