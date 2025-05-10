@@ -55,7 +55,7 @@ float4 PS_Directional(float4 position : SV_Position) : SV_Target
     surfaceData.metallic = metallic;
     surfaceData.smoothness = smoothness;
     surfaceData.specular = 0.5f;
-    surfaceData.emissive = 0.f;
+    surfaceData.emissive = emissive;
     
     float3 finalColor = { 0.f, 0.f, 0.f };                                          
     finalColor = ComputeDirectionalLight(lightingData, surfaceData, lights[idx0]);

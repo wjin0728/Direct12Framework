@@ -161,6 +161,7 @@ void CScene::RenderLightingPass()
 		spotLight->Render(renderTarget);
 	}
 	if (camera) {
+		RenderForLayer("Sky", camera, FORWARD);
 		RenderForLayer("Transparent", camera, FORWARD);
 	}
 	renderTarget->ChangeTargetsToResources();
@@ -179,7 +180,7 @@ void CScene::RenderFinalPass()
 	auto finalShader = RESOURCE.Get<CShader>("FinalPass");
 	finalShader->SetPipelineState(CMDLIST);
 	CRenderer::RenderFullscreen();
-	//RenderForLayer("UI", camera);
+	RenderForLayer("UI", camera);
 
 	renderTarget->ChangeTargetToResource(backBufferIdx);
 }
@@ -199,8 +200,9 @@ void CScene::LoadSceneFromFile(const std::string& fileName)
 	for (int i = 0; i < rootNum; i++) {
 		auto object = CGameObject::CreateObjectFromFile(ifs, prefabs);
 		auto& tag = object->GetTag();
-		if(tag == "Water") AddObject("Transparent", object);
+		if (tag == "Water") AddObject("Transparent", object);
 		else if (tag == "UI") AddObject("UI", object);
+		else if (tag == "SkyDome") AddObject("Sky", object);
 		else AddObject("Opaque", object);
 	}
 }

@@ -38,6 +38,5 @@ float4 PS_Sprite(VS_OUTPUT input) : SV_Target
     CBUIData uiData = UIData[idx0];
     float3 color = uiData.color;
     texColor = diffuseMap[uiData.textureIdx].SampleLevel(linearClamp, input.uv, 0);
-    texColor.a = pow(texColor.a, 0.57f);
     return texColor;
 }

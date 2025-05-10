@@ -131,8 +131,13 @@ float CalcShadowFactor(float4 shadowPosH)
         percentLit += diffuseMap[shadowMapIdx].SampleCmpLevelZero(shadowSam,
             shadowPosH.xy + offsets[i], depth ).r;
     }
+    float shadowFactor = percentLit / 9.0f;
+    if (shadowFactor < 0.3f)
+        shadowFactor = 0.3f;
+    else if (shadowFactor > 1.0f)
+        shadowFactor = 1.0f;
     
-    return percentLit / 9.0f;
+    return shadowFactor;
 }
 
 float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
@@ -175,7 +180,7 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 direction = light.directionWS;
     float3 lightDir = -normalize(direction);
     
-    float3 lightColor = light.lColor * lightingData.shadowFactor;
+    float3 lightColor = light.lColor;
 
     float3 F0 = float3(0.04, 0.04, 0.04);
     F0 = lerp(F0, albedo, metallic);
@@ -201,10 +206,10 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * albedo / 3.1415f + specular) * lightColor * NdotL;
-    float3 ambientLight = albedo * 0.2f * ndotUp;
-    ambientLight += albedo * 0.1f;
+    float3 ambientLight = albedo * 0.3f * ndotUp;
+    ambientLight += albedo * 0.2f;
     
-    return directLight + ambientLight;
+    return (directLight + ambientLight) * lightingData.shadowFactor + surfaceData.emissive;
 }
 
 
@@ -310,6 +315,7 @@ float3 ComputeSpotLight(LightingData lightingData, SurfaceData surfaceData, CBLi
 float3 CalculatePhongLight(LightingData lightingData, SurfaceData surfaceData)
 {   
     float3 finalColor = float3(0.0, 0.0, 0.0);
+    [unroll]
     for (int i = 0; i < lightCount; i++)
     {
         int lightType = lights[i].lightType;

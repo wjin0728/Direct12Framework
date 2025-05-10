@@ -140,6 +140,7 @@ D3D12_BLEND_DESC CShader::InitBlendState()
 	renderTarget.BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	renderTarget.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
+
 	switch (mInfo.blendType)
 	{
 	case BLEND_TYPE::DEFAULT:
@@ -150,6 +151,7 @@ D3D12_BLEND_DESC CShader::InitBlendState()
 		
 		break;
 	case BLEND_TYPE::ALPHA_BLEND:
+		blendDesc.AlphaToCoverageEnable = FALSE;
 		renderTarget.BlendEnable = TRUE;
 		renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
 		renderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;

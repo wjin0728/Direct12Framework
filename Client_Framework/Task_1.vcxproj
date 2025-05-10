@@ -317,9 +317,6 @@
     <None Include="..\Resources\Shaders\Terrain.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="..\Resources\Shaders\TerrainShadow.hlsl">
-      <FileType>Document</FileType>
-    </None>
     <None Include="..\Resources\Shaders\Triplanar.hlsl">
       <FileType>Document</FileType>
     </None>

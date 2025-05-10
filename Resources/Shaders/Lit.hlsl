@@ -128,7 +128,9 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
         float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
         color *= float4(GammaDecoding(texColor.rgb), texColor.a);
     }
-    
+    #ifdef TRANSPARENT_CLIP
+    clip(color.a - 0.5);
+    #endif
     
     if (normalTexIdx != -1)
     {
@@ -171,7 +173,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     color = lerp(color, gFogColor, fogAmount);
 #endif
 
-    return float4(1.f, 1.f, 1.f, 0.5f);
+    return color;
 }
 
 //

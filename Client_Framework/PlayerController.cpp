@@ -70,8 +70,6 @@ void CPlayerController::OnKeyEvents()
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
 	if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
-	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) dir |= 0x20;
-	if (INPUT.IsKeyPress(KEY_TYPE::CTRL)) dir |= 0x10;
 
 	//if (INPUT.IsKeyDown(KEY_TYPE::W)) dir |= 0x08;
 	//if (INPUT.IsKeyDown(KEY_TYPE::S)) dir |= 0x02;

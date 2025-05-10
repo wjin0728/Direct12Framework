@@ -243,8 +243,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 		if (p->dir & KEY_FLAG::KEY_S) moveDir -= local_lookDir;
 		if (p->dir & KEY_FLAG::KEY_D) moveDir -= right_dir;
 		if (p->dir & KEY_FLAG::KEY_A) moveDir += right_dir;
-		if (p->dir & KEY_FLAG::KEY_SHIFT) moveDir += Vec3(0, -1, 0); 
-		if (p->dir & KEY_FLAG::KEY_CTRL) moveDir += Vec3(0, 1, 0); 
 
 		const float moveSpeed = 5.0f; 
 		Vec3 velocity = Vec3::Zero;
