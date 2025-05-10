@@ -19,7 +19,7 @@ constexpr int WATER_SHIELD_AMT = 2;
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
 constexpr char CS_CHAT = 2;
-constexpr char CS_MOUSE_VEC2 = 3;
+constexpr char CS_MOUSE_VEC3 = 3;
 constexpr char CS_SKILL_TARGET = 4;
 constexpr char CS_SKILL_NONTARGET = 5;
 constexpr char CS_ULTIMATE_SKILL = 6;
@@ -66,9 +66,10 @@ struct CS_MOVE_PACKET : PACKET {
 	float			look_z;
 };
 
-struct CS_MOUSE_VEC2_PACKET : PACKET {
+struct CS_MOUSE_VEC3_PACKET : PACKET {
 	int				id;
 	float			dir_x;
+	float			dir_y;
 	float			dir_z;
 };
 

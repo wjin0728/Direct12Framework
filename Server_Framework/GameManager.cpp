@@ -186,11 +186,11 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		//clients[c_id]._player._class = p->name[0];
 		if (0 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
+			clients[c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
 		else if (1 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::ARCHER;
+			clients[c_id]._player._class = S_PLAYER_CLASS::ARCHER;
 		else if (2 == c_id)
-			clients[c_id]._player._class = (uint8_t)S_PLAYER_CLASS::FIGHTER;
+			clients[c_id]._player._class = S_PLAYER_CLASS::MAGE;
 		clients[c_id]._player._pos = Vec3(45.2, 4.1, 42);
 
 		clients[c_id].send_login_info_packet();
@@ -244,6 +244,12 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[c_id]._player._velocity = Vec3::Zero;
 		}
 
+		break;
+	}
+	case CS_MOUSE_VEC3: {
+		CS_MOUSE_VEC3_PACKET* p = reinterpret_cast<CS_MOUSE_VEC3_PACKET*>(packet);
+		Vec3 local_lookDir = Vec3(p->dir_x, p->dir_y, p->dir_z);
+		cout << "dir : " << local_lookDir.x << ", " << local_lookDir.y << ", " << local_lookDir.z << endl;
 		break;
 	}
 	case CS_SKILL_TARGET: {

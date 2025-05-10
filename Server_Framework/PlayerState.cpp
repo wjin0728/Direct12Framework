@@ -5,7 +5,7 @@
 PlayerState::IdleState& PlayerState::IdleState::GetInstance() { static PlayerState::IdleState instance; return instance; }
 
 void PlayerState::IdleState::Enter(PlayerCharacter* player) {
-    cout << "Idle 들어왔다리!" << endl;
+    //cout << "Idle 들어왔다리!" << endl;
     player->SetVelocity(0, 0, 0); // 속도 0으로 설정
 }
 
@@ -29,6 +29,7 @@ PlayerState::RunState& PlayerState::RunState::GetInstance() { static PlayerState
 
 void PlayerState::RunState::Enter(PlayerCharacter* player) {
     // 이동 애니메이션 시작 (가정)
+	cout << "RUN 들어왔다리!" << endl;
 }
 
 void PlayerState::RunState::Update(PlayerCharacter* player) {
@@ -49,6 +50,7 @@ PlayerState::BasicAttackState& PlayerState::BasicAttackState::GetInstance() { st
 void PlayerState::BasicAttackState::Enter(PlayerCharacter* player) {
     attackTimer = 1.0f; // 공격 지속 시간 (1초)
     player->SetVelocity(0, 0, 0); // 공격 중 이동 멈춤
+	cout << "BasicAttack 들어왔다리!" << endl;
     // 공격 애니메이션 시작 (가정)
 }
 

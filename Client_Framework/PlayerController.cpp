@@ -61,8 +61,8 @@ UINT8 CPlayerController::GetAnimationIndexFromState(PLAYER_STATE state)
 		return (UINT8)CAnimationController::ARCHER_MAP.at(state);
 	case PLAYER_CLASS::FIGHTER:
 		return (UINT8)CAnimationController::FIGHTER_MAP.at(state);
-	//case PLAYER_CLASS::MAGE:
-	//	return (UINT8)MAGE_MAP.at(state);
+	case PLAYER_CLASS::MAGE:
+		return (UINT8)CAnimationController::MAGE_MAP.at(state);
 	default:
 		return 0;
 	}
@@ -72,7 +72,6 @@ void CPlayerController::OnKeyEvents()
 {
 	auto transform = GetTransform();
 	auto camera = mCamera.lock()->GetTransform();
-	Vec3 moveDir = Vec3::Zero;
 	uint8_t dir = 0;
 
 	Vec3 camForward = camera->GetWorldLook();
@@ -81,6 +80,10 @@ void CPlayerController::OnKeyEvents()
 	camRight.y = 0.f;
 	camForward.Normalize();
 	camRight.Normalize();
+
+	if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
+		INSTANCE(ServerManager).send_cs_mouse_vec3_packet(camForward);
+	}
 
 	if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
