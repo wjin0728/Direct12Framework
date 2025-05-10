@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationEnums.h" />
     <ClInclude Include="BattleScene.h" />
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />

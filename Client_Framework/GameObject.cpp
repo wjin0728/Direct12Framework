@@ -593,16 +593,6 @@ void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 	ReadDateFromFile(inFile, mTransform->mLocalRotation);
 
 	ReadDateFromFile(inFile, mTransform->mLocalMat);
-
-	//if (mName == "Premade_Necromancer") {
-	//	std::cout << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
-	//	std::cout << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
-	//	std::cout << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
-	//	std::cout << mTransform->mLocalRotation.x << " " << mTransform->mLocalRotation.y << " " << mTransform->mLocalRotation.z << std::endl;
-	//	std::cout << std::endl;
-	//	PrintMatrix(mTransform->mLocalMat);
-	//	std::cout << "======================" << std::endl;
-	//}
 }
 
 void CGameObject::CreateRendererFromFile(std::ifstream& inFile)

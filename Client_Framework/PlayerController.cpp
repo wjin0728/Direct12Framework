@@ -11,6 +11,7 @@
 #include"Camera.h"
 #include"Animation.h"
 #include "ServerManager.h"
+#include "AnimationEnums.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -50,6 +51,21 @@ void CPlayerController::SetChildAnimationController()
 void CPlayerController::SetState(PLAYER_STATE state)
 {
 
+}
+
+UINT8 CPlayerController::GetAnimationIndexFromState(PLAYER_STATE state)
+{
+	switch (mClass)
+	{
+	case PLAYER_CLASS::ARCHER:
+		return (UINT8)ARCHER_MAP.at(state);
+	case PLAYER_CLASS::FIGHTER:
+		return (UINT8)FIGHTER_MAP.at(state);
+	//case PLAYER_CLASS::MAGE:
+	//	return (UINT8)MAGE_MAP.at(state);
+	default:
+		return 0;
+	}
 }
 
 void CPlayerController::OnKeyEvents()
