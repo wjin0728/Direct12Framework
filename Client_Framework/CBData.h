@@ -49,8 +49,16 @@ struct CBLightsData
 	float range;
 	float spotAngle;
 	float innerSpotAngle;
-	Matrix worldMat = Matrix::Identity;
+	Vec3 position;
+	float padding0;
+	Vec3 direction;
+	float padding1;
+};
 
+struct AllLightData {
+	CBLightsData lights[10];
+	int lightCount = 0;
+	Vec3 padding0{};
 };
 
 struct BillboardData
@@ -87,9 +95,7 @@ struct CBUIData
 	Vec2 vec2Data3{};
 
 	Vec3 vec3Data0{};
-	float padding1{ 0 };
 	Vec3 vec3Data1{};
-	float padding2{ 0 };
 
 	Vec4 vec4Data0{};
 	Vec4 vec4Data1{};

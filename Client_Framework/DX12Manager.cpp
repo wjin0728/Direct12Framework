@@ -111,7 +111,7 @@ void CDX12Manager::ChangeSwapChainState()
 	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	dxgiTargetParameters.Width = renderTargetSize.y;
 	dxgiTargetParameters.Height = renderTargetSize.y;
-	dxgiTargetParameters.RefreshRate.Numerator = 165;
+	dxgiTargetParameters.RefreshRate.Numerator = 60;
 	dxgiTargetParameters.RefreshRate.Denominator = 1;
 	dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -176,7 +176,7 @@ void CDX12Manager::InitRenderTargetGroups()
 		std::vector<RenderTarget> renderTargets(5);
 		renderTargets[0].rt = std::make_shared<CTexture>();
 		renderTargets[0].rt->SetName("GBufferAlbedo");
-		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);

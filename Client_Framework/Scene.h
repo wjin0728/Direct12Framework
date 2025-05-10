@@ -31,6 +31,9 @@ protected:
 
 	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
 
+	std::vector<int> renderTargetIndices{};
+	int renderPasstype{};
+
 	Matrix UIProjectionMatrix{};
   
 public:

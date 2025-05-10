@@ -19,6 +19,8 @@ public:
 		if (_item_type <= S_ITEM_TYPE::S_GRASS_WEAKEN) {
 			_boundingbox.Center = XMFLOAT3(-0.02260171f, 0.01106288f, -0.005101735f);
 			_boundingbox.Extents = XMFLOAT3(0.806778f, 0.7830477f, 0.8548302f);
+			_orignalboundingbox.Center = XMFLOAT3(-0.02260171f, 0.01106288f, -0.005101735f);
+			_orignalboundingbox.Extents = XMFLOAT3(0.806778f, 0.7830477f, 0.8548302f);
 		}
 		else {
 			//_boundingbox.Extents = XMFLOAT3(0.806778f, 0.7830477f, 0.8548302f);

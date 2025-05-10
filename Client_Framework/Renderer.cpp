@@ -33,7 +33,8 @@ void CRenderer::UpdataObjectDataToShader()
 	if (GetTransform()->mDirtyFlag) {
 		mDirtyFrame = FRAME_RESOURCE_COUNT;
 	}
-	if(mDirtyFrame > 0){
+	mDirtyFrame = FRAME_RESOURCE_COUNT;
+	if(mDirtyFrame > 0) {
 		CBObjectData objDate;
 		objDate.worldMAt = GetTransform()->mWorldMat.Transpose();
 		objDate.invWorldMAt = GetTransform()->mWorldMat.Invert();

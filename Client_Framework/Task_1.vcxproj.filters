@@ -215,6 +215,7 @@
       <Filter>GameObject\Component</Filter>
     </ClInclude>
     <ClInclude Include="CEntityState.h" />
+    <ClInclude Include="ItemMovement.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -382,6 +383,9 @@
     <ClCompile Include="CEntityState.cpp">
       <Filter>Client</Filter>
     </ClCompile>
+    <ClCompile Include="ItemMovement.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -406,16 +410,7 @@
     <None Include="..\Resources\Shaders\Lighting.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="..\Resources\Shaders\OutLinePS.hlsl">
-      <Filter>HLSL</Filter>
-    </None>
-    <None Include="..\Resources\Shaders\OutLineVS.hlsl">
-      <Filter>HLSL</Filter>
-    </None>
     <None Include="..\Resources\Shaders\Paramiters.hlsl">
-      <Filter>HLSL</Filter>
-    </None>
-    <None Include="..\Resources\Shaders\Shadow.hlsl">
       <Filter>HLSL</Filter>
     </None>
     <None Include="..\Resources\Shaders\SkyBox.hlsl">
@@ -440,6 +435,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="..\Resources\Shaders\Water.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Lit.hlsl">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>

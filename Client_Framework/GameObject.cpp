@@ -118,17 +118,19 @@ void CGameObject::SetStatic(bool isStatic)
 
 void CGameObject::SetInstancing(bool isInstancing)
 {
-	if (isInstancing) {
-		mRenderer->ReturnCBVIndex();
-	}
-	else {
-		mRenderer->SetCBVIndex();
+	if(mRenderer) {
+		if (isInstancing) {
+			mRenderer->ReturnCBVIndex();
+		}
+		else {
+			mRenderer->SetCBVIndex();
+		}
 	}
 
 	mIsInstancing = isInstancing;
 
 	for (auto& child : mChildren) {
-		child->SetStatic(isInstancing);
+		child->SetInstancing(isInstancing);
 	}
 }
 
@@ -341,7 +343,7 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(std::ifstream& if
 		}
 	}
 
-	if (root->mTag == "Obstacle") {
+	if (root->mTag == "Obstacle" || root->mTag == "Environment") {
 		root->mObjectType = OBJECT_TYPE::OBSTACLE;
 	}
 	else if (root->mTag == "Enemy") {
@@ -391,12 +393,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 		}
 		if (token == "<Frame>:") {
 			ReadDateFromFile(inFile, obj->mName);
-			if (obj->mName == "SM_Bld_Windmill_01_Blades_01") {
-				auto rotator = obj->AddComponent<CContinuousRotation>();
-				//z축으로 회전
-				rotator->SetRotationSpeed({ 0.f, 0.f, 10.f });
-				rotator->SetRotationAxis({ 0.f, 0.f, 1.f });
-			}
+			obj->InitByObjectName();
 		}
 		else if (token == "<Tag>:") {
 			ReadDateFromFile(inFile, obj->mTag);
@@ -453,6 +450,19 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 	
 
 	return obj;
+}
+
+void CGameObject::InitByObjectName()
+{
+	if (mName == "SM_Bld_Windmill_01_Blades_01") {
+		auto rotator = AddComponent<CContinuousRotation>();
+		//z축으로 회전
+		rotator->SetRotationSpeed({ 0.f, 0.f, 10.f });
+		rotator->SetRotationAxis({ 0.f, 0.f, 1.f });
+	}
+	else if (mName.contains("Env")) {
+		mIsInstancing = true;
+	}
 }
 
 void CGameObject::CreateAnimationFromFile(std::string& fileName)

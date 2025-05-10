@@ -88,6 +88,7 @@ public:
 	const std::string& GetRenderLayer() const { return mRenderLayer; }
 	bool GetActive() const { return mActive; }
 	bool GetStatic() const { return mIsStatic; }
+	bool GetInstancing() const { return mIsInstancing; }
 	OBJECT_TYPE GetObjectType() const { return mObjectType; }
 	std::vector<std::shared_ptr<CGameObject>>& GetChildren() { return mChildren; }
 	BoundingSphere GetRootBoundingSphere() const { return mRootBS; }
@@ -123,6 +124,7 @@ public:
 private:
 
 	static std::shared_ptr<CGameObject> InitFromFile(std::ifstream& inFile, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
+	void InitByObjectName();
 	void CreateTransformFromFile(std::ifstream& inFile);
 	void CreateRendererFromFile(std::ifstream& inFile);
 	void CreateTerrainFromFile(std::ifstream& inFile);

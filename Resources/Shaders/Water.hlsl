@@ -262,8 +262,6 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 }
 
 
-#define TRANSPARENT_CLIP
-
 //픽셀 셰이더
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 {
@@ -303,10 +301,6 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 
 // 최종 Albedo에 파도 거품 추가
     float4 waterAlbedo = colorWithFoam + waveCrestFoam;
-    
-    #ifdef TRANSPARENT_CLIP
-    clip(color.a - 0.5);
-    #endif
     
     
     

@@ -10,6 +10,7 @@
 #include"ThirdPersonCamera.h"
 #include "DX12Manager.h"
 #include "ResourceManager.h"
+#include"ItemMovement.h"
 
 void ServerManager::Initialize()
 {
@@ -274,11 +275,17 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		auto itemObj = CGameObject::Instantiate(item);
 		itemObj->SetTag("Item");
-		itemObj->SetRenderLayer("Opaque");
+		itemObj->SetRenderLayer("Transparent");
 		itemObj->SetObjectType(OBJECT_TYPE::ITEM);
 		itemObj->SetActive(true);
 		itemObj->SetStatic(false);
 		itemObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		auto movement = itemObj->AddComponent<CItemMovement>();
+		movement->SetAmplitude(0.2f);
+		movement->SetFrequency(1.f);
+		movement->SetDirection({ 0.f, 1.f, 0.f });
+		movement->SetTargetObject(mMainCamera);
+
 		itemObj->Awake();
 		itemObj->Start();
 

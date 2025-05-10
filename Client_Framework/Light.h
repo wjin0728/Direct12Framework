@@ -7,7 +7,10 @@ class CLight : public CComponent
 protected:
 	CBLightsData mLightData{};
 	int mLightIndex = -1;
-	UINT mCbvOffset = 0;
+	int mCbvIdx = -1;
+	UINT mCbvOffset{};
+
+	UINT mDirtyFrame = FRAME_RESOURCE_COUNT + 1;
 	
 	std::shared_ptr<CCamera> mainCamera{};
 	std::shared_ptr<CCamera> lightCam{};
@@ -45,15 +48,19 @@ public:
 	void SetRange(float _range) { mLightData.range = _range; }
 	void SetSpotAngle(float _spotAngle) { mLightData.spotAngle = _spotAngle; }
 	void SetInnerSpotAngle(float _innerSpotAngle) { mLightData.innerSpotAngle = _innerSpotAngle; }
+	void SetPosition(const Vec3& _position) { mLightData.position = _position; }
+	void SetDirection(const Vec3& _direction) { mLightData.direction = _direction; }
 	void SetLightData(const CBLightsData& data) { mLightData = data; }
 
 	CBLightsData GetLightData() const { return mLightData; }
 	Vec3 GetColor() const { return mLightData.color; }
 	float GetStrength() const { return mLightData.strength; }
-	Vec3 GetPosition() const;
-	Vec3 GetDirection() const;
 	float GetRange() const { return mLightData.range; }
 	float GetSpotAngle() const { return mLightData.spotAngle; }
 	float GetInnerSpotAngle() const { return mLightData.innerSpotAngle; }
+	Vec3 GetWorldPosition() const { return mLightData.position; }
+	Vec3 GetWorldDirection() const { return mLightData.direction; }
 	LIGHT_TYPE GetLightType() const { return (LIGHT_TYPE)mLightData.type; }
+
+
 };

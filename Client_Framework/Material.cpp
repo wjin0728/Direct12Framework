@@ -23,6 +23,7 @@ void CMaterial::Initialize(void* data, UINT dataSize)
 
 void CMaterial::SetShader(const std::string& name)
 {
+	mShaderName = name;
 	for (int type = PASS_TYPE::FORWARD; type < PASS_TYPE::STENCIL; type++) {
 		std::string passType = CShader::passName[type];
 		mShaders[type] = RESOURCE.Get<CShader>(name + passType);
@@ -71,9 +72,8 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	size_t dataSize{};
 
 	ReadDateFromFile(inFile, token);
-	if (token == "SyntyStudios/Basic_LOD_Shader" || token == "Universal_Render_Pipeline/Lit") {
-		if(token == "SyntyStudios/Basic_LOD_Shader") material->SetShader("Common");
-		else if (token == "Universal_Render_Pipeline/Lit") material->SetShader("Animation");
+	if (token == "SyntyStudios/Basic_LOD_Shader") {
+		material->SetShader("Common");
 		
 		matData = std::make_unique<BYTE[]>(sizeof(CommonProperties));
 		CommonProperties* data = reinterpret_cast<CommonProperties*>(matData.get());
@@ -103,6 +103,56 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			else if (token == "<NormalMap>:")
 			{
 				data->normalTexIdx = GetTextureIdx(inFile);
+			}
+			else if (token == "</Material>") {
+				break;
+			}
+		}
+	}
+	else if (token == "Universal_Render_Pipeline/Lit") {
+		matData = std::make_unique<BYTE[]>(sizeof(LitProperties));
+		LitProperties* data = reinterpret_cast<LitProperties*>(matData.get());
+		dataSize = sizeof(LitProperties);
+
+		while (true) {
+			ReadDateFromFile(inFile, token);
+			if (token == "<RenderMode>:") {
+				float mode{};
+				ReadDateFromFile(inFile, mode);
+				if (mode == 0) material->SetShader("LitOpaque");
+				else if (mode == 1) material->SetShader("LitTransparent");
+			}
+			if (token == "<AlbedoMap>:")
+			{
+				data->mainTexIdx = GetTextureIdx(inFile);
+			}
+			else if (token == "<AlbedoColor>:")
+			{
+				Color color{};
+				ReadDateFromFile(inFile, color);
+				data->mainColor = color;
+			}
+			else if (token == "<Smoothness>:")
+			{
+				ReadDateFromFile(inFile, data->smoothness);
+			}
+			else if (token == "<Metallic>:")
+			{
+				ReadDateFromFile(inFile, data->metallic);
+			}
+			else if (token == "<NormalMap>:")
+			{
+				data->normalTexIdx = GetTextureIdx(inFile);
+			}
+			else if (token == "<EmissionMap>:")
+			{
+				data->emissiveTexIdx = GetTextureIdx(inFile);
+			}
+			else if (token == "<EmissionColor>:")
+			{
+				Color color{};
+				ReadDateFromFile(inFile, color);
+				data->emissiveColor = color.ToVector3();
 			}
 			else if (token == "</Material>") {
 				break;

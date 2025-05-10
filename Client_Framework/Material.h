@@ -15,6 +15,18 @@ struct CommonProperties
 	float padding{};
 };
 
+struct LitProperties
+{
+	Vec4 mainColor{};
+	int mainTexIdx = -1;
+
+	int normalTexIdx = -1;
+	float smoothness{};
+	float metallic{};
+	int emissiveTexIdx = -1;
+	Vec3 emissiveColor{};
+};
+
 struct TriplanarProperties
 {
 	float fallOff{};
@@ -76,6 +88,7 @@ protected:
 	UINT mDirtyFrames{FRAME_RESOURCE_COUNT};
 
 public:
+	std::string mShaderName{};
 	CMaterial() = default;
 	CMaterial(void* data, UINT dataSize);
 	static std::shared_ptr<CMaterial> CreateMaterialFromFile(std::ifstream& inFile);

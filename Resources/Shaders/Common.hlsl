@@ -17,6 +17,31 @@ cbuffer MaterialData : register(b5)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
+#ifdef USE_SKINNING
+struct VS_INPUT
+{
+    float3 position : POSITION;
+    float2 uv : TEXCOORD;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float4 boneWeights : BONEWEIGHTS;
+    uint4 boneIndices : BONEINDICES;
+};
+
+struct VS_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float4 positionWS : TEXCOORD0;
+    float3 normalWS : TEXCOORD1;
+    float3 tangentWS : TEXCOORD2;
+    float3 bitangentWS : TEXCOORD3;
+    float4 ShadowPosH : TEXCOORD4;
+    float4 boneWeights : BONEWEIGHTS;
+    uint4 boneIndices : BONEINDICES;
+    
+    float2 uv : TEXCOORD5;
+};
+#else
 struct VS_INPUT
 {
     float3 position : POSITION;
@@ -36,6 +61,7 @@ struct VS_OUTPUT
     
     float2 uv : TEXCOORD5;
 };
+#endif
 
 //¡§¡° ºŒ¿Ã¥ı
 VS_OUTPUT VS_Forward(VS_INPUT input)
@@ -59,8 +85,6 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     return output;
 }
 
-
-#define TRANSPARENT_CLIP
 
 //«»ºø ºŒ¿Ã¥ı
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
@@ -124,6 +148,20 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 //Shadow Cast
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+#ifdef USE_SKINNING
+struct VS_SHADOW_INPUT
+{
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+    float4 boneWeights : BONEWEIGHTS;
+    uint4 boneIndices : BONEINDICES;
+};
+
+struct VS_SHADOW_OUTPUT
+{
+    float4 position : SV_POSITION;
+};
+#else
 struct VS_SHADOW_INPUT
 {
     float3 position : POSITION;
@@ -134,6 +172,7 @@ struct VS_SHADOW_OUTPUT
 {
     float4 position : SV_POSITION;
 };
+#endif
 
 VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
 {

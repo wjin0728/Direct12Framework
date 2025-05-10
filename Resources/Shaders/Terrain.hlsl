@@ -168,7 +168,6 @@ DS_OUTPUT DS_Forward(TessFactor tessFactors, float2 uv : SV_DomainLocation, cons
     return dout;
 }
 
-#define TRANSPARENT_CLIP
 
 //«»ºø ºŒ¿Ã¥ı
 float4 PS_Forward(DS_OUTPUT input) : SV_TARGET
@@ -292,7 +291,7 @@ PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
     float4 color = float4(0.f, 0.f, 0.f, 1.f);
     float2 uv = input.uv;
     float3 positionWS = input.worldPos.xyz;
-    float2 diffuseUV = input.uv * 15.f;
+    float2 diffuseUV = input.uv * 20.f;
     
     VertexNormalInputs normalInputs = CalculateTerrainNormal(uv, diffuseMap[heightMapIdx]);
     float3 normalWS = normalInputs.normalWS;

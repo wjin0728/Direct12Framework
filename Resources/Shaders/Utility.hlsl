@@ -20,6 +20,7 @@ struct VertexNormalInputs
 
 struct LightingData
 {
+    float3 lightPos;
     float3 positionWS;
     float3 normalWS;
     float3 cameraDirection;
@@ -84,6 +85,12 @@ float Luminance(float3 color)
     return dot(color, float3(0.2126, 0.7152, 0.0722));
 }
 
+float3 ChangeLuminace(float3 color, float luminance)
+{
+    float luminanceColor = Luminance(color);
+    return color * (luminance / luminanceColor);
+}
+
 float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent)
 {
     float3 normalT = 2.0f * normalMapSample - 1.0f;
@@ -130,7 +137,7 @@ float CalcShadowFactor(float4 shadowPosH)
 
 float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
 {
-    return F0 + (max(1.0 - roughness, F0) - F0) * pow(1.0 - cosTheta, 5.0);
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 float DistributionGGX(float3 N, float3 H, float roughness)
@@ -157,7 +164,7 @@ float GeometrySmith(float3 N, float3 V, float3 L, float roughness)
     return GeometrySchlickGGX(NdotV, roughness) * GeometrySchlickGGX(NdotL, roughness);
 }
 
-float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceData)
+float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceData, CBLightsData light)
 {
     float3 normal = normalize(lightingData.normalWS);
     float3 camDir = normalize(lightingData.cameraDirection);
@@ -165,17 +172,17 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float metallic = surfaceData.metallic;
     float smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
     float roughness = 1.0 - smoothness;
-    float3 direction = lightMat._13_23_33;
+    float3 direction = light.directionWS;
     float3 lightDir = -normalize(direction);
     
-    float3 lightColor = lColor * lightingData.shadowFactor;
+    float3 lightColor = light.lColor * lightingData.shadowFactor;
 
     float3 F0 = float3(0.04, 0.04, 0.04);
     F0 = lerp(F0, albedo, metallic);
 
     float3 halfV = normalize(camDir + lightDir);
     if (all(halfV == 0)) halfV = camDir;
-    float NdotL = max((dot(normal, lightDir) * 0.5f) + 0.5f, 0.0);
+    float NdotL = max((dot(normal, lightDir)), 0.0);
     float NdotV = max(dot(normal, camDir), 0.0);
     float VdotH = max(dot(camDir, halfV), 0.0);
 
@@ -188,20 +195,20 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 specular = numerator / denominator;
 
     float3 kS = F;
-    float3 kD = max(1.0 - kS, 0.0) * (1.0 - metallic);
+    float3 kD = max(float3(1.f,1.f,1.f) - kS, 0.0) * (1.0 - metallic);
     float3 diffuse = albedo;
 
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
-    float3 directLight = (kD * diffuse + specular) * lightColor * NdotL;
+    float3 directLight = (kD * albedo / 3.1415f + specular) * lightColor * NdotL;
     float3 ambientLight = albedo * 0.2f * ndotUp;
-    ambientLight += albedo * 0.2f;
+    ambientLight += albedo * 0.1f;
     
     return directLight + ambientLight;
 }
 
 
-float3 ComputePointLight(LightingData lightingData, SurfaceData surfaceData)
+float3 ComputePointLight(LightingData lightingData, SurfaceData surfaceData, CBLightsData light)
 {
     float3 normal = lightingData.normalWS;
     float3 position = lightingData.positionWS;
@@ -210,13 +217,13 @@ float3 ComputePointLight(LightingData lightingData, SurfaceData surfaceData)
     float3 specular = surfaceData.specular;
     float metallic = surfaceData.metallic;
     float smoothness = surfaceData.smoothness;
-    float3 lightDir = lightMat._41_42_43 - position;
-    float3 lightColor = lColor * strength;
+    float3 lightDir = light.positionWS - position;
+    float3 lightColor = light.lColor * light.strength;
     float distance = length(lightDir);
     
     lightDir = normalize(lightDir);
     
-    if (distance > range)
+    if (distance > light.range)
         return float3(0.f, 0.f, 0.f);
     
     smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
@@ -247,7 +254,7 @@ float3 ComputePointLight(LightingData lightingData, SurfaceData surfaceData)
 }
 
 
-float3 ComputeSpotLight(LightingData lightingData, SurfaceData surfaceData)
+float3 ComputeSpotLight(LightingData lightingData, SurfaceData surfaceData, CBLightsData light)
 {
     float3 normal = lightingData.normalWS;
     float3 position = lightingData.positionWS;
@@ -256,16 +263,16 @@ float3 ComputeSpotLight(LightingData lightingData, SurfaceData surfaceData)
     float3 specular = surfaceData.specular;
     float metallic = surfaceData.metallic;
     float smoothness = surfaceData.smoothness;
-    float3 lightDir = lightMat._41_42_43 - position;
-    float3 direction = lightMat._31_32_33;
-    float3 lightColor = lColor * strength;
+    float3 lightDir = light.positionWS - position;
+    float3 direction = light.directionWS;
+    float3 lightColor = light.lColor * light.strength;
     float distanceSqr = dot(lightDir, lightDir);
 
 // 거리 감쇠 계산
     
     lightDir = normalize(lightDir);
     
-    if (distanceSqr > range * range)
+    if (distanceSqr > light.range * light.range)
         return float3(0.f, 0.f, 0.f);
     
     smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
@@ -292,9 +299,9 @@ float3 ComputeSpotLight(LightingData lightingData, SurfaceData surfaceData)
     kD *= 1.0 - metallic;
     float3 diffuse = albedo / 3.14159;
     
-    float distanceAttenuation = saturate(1.0 - distanceSqr / (range * range));
+    float distanceAttenuation = saturate(1.0 - distanceSqr / (light.range * light.range));
     float fRho = dot(-lightDir, direction);
-    float spotAtten = smoothstep(cos(spotAngle), cos(innerSpotAngle), fRho);
+    float spotAtten = smoothstep(cos(light.spotAngle), cos(light.innerSpotAngle), fRho);
     float spotFactor = saturate(distanceAttenuation * spotAtten);
     
     return (kD * diffuse + specular) * lightColor * NdotL * spotFactor;
@@ -302,7 +309,24 @@ float3 ComputeSpotLight(LightingData lightingData, SurfaceData surfaceData)
 
 float3 CalculatePhongLight(LightingData lightingData, SurfaceData surfaceData)
 {   
-    return surfaceData.albedo;
+    float3 finalColor = float3(0.0, 0.0, 0.0);
+    for (int i = 0; i < lightCount; i++)
+    {
+        int lightType = lights[i].lightType;
+        if (lightType == 0)
+        {
+            finalColor += ComputeDirectionalLight(lightingData, surfaceData, lights[i]);
+        }
+        else if (lightType == 1)
+        {
+            finalColor += ComputePointLight(lightingData, surfaceData, lights[i]);
+        }
+        else if (lightType == 2)
+        {
+            finalColor += ComputeSpotLight(lightingData, surfaceData, lights[i]);
+        }
+    }
+    return finalColor;
 }
 
 #endif

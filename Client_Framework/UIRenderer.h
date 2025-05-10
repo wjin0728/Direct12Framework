@@ -53,7 +53,5 @@ public:
 	Vec2 GetUVScale() const { return mUIData.uvScale; }
 	int GetTextureIdx() const { return mUIData.textureIdx; }
 	int GetType() const { return mUIData.type; }
-
-
 };
 

@@ -39,6 +39,7 @@ void CMeshRenderer::LateUpdate()
 	if (!m_mesh) return;
 	m_mesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
 	m_mesh->oobb.Transform(mWorldOOBB, GetTransform()->GetWorldMat());
+	UpdataObjectDataToShader();
 }
 
 void CMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
@@ -49,7 +50,7 @@ void CMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 	if (camera && !camera->IsInFrustum(mWorldBS)) return;
 
 	auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
-	UpdataObjectDataToShader();
+	
 	objectBuffer->BindToShader(mCbvOffset);
 
 	int subMeshNum = m_mesh->GetSubMeshNum();

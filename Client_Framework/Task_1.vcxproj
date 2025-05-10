@@ -173,6 +173,7 @@
     <ClInclude Include="CResource.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingGroup.h" />
+    <ClInclude Include="ItemMovement.h" />
     <ClInclude Include="MiniGame.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Renderer.h" />
@@ -229,6 +230,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
+    <ClCompile Include="ItemMovement.cpp" />
     <ClCompile Include="MiniGame.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -303,16 +305,7 @@
     <None Include="..\Resources\Shaders\Lighting.hlsl">
       <FileType>Document</FileType>
     </None>
-    <None Include="..\Resources\Shaders\OutLinePS.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="..\Resources\Shaders\OutLineVS.hlsl">
-      <FileType>Document</FileType>
-    </None>
     <None Include="..\Resources\Shaders\Paramiters.hlsl">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="..\Resources\Shaders\Shadow.hlsl">
       <FileType>Document</FileType>
     </None>
     <None Include="..\Resources\Shaders\SkyBox.hlsl">
@@ -337,6 +330,11 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\Resources\Shaders\Water.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Shaders\Lit.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

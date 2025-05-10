@@ -19,7 +19,32 @@
 
 CScene::CScene()
 {
-
+	auto gbufferAlbedo = RESOURCE.Get<CTexture>("GBufferAlbedo");
+	if (gbufferAlbedo) {
+		int gbufferAlbedoIdx = gbufferAlbedo->GetSrvIndex();
+		renderTargetIndices.push_back(gbufferAlbedoIdx++);
+		renderTargetIndices.push_back(gbufferAlbedoIdx++);
+		renderTargetIndices.push_back(gbufferAlbedoIdx++);
+		renderTargetIndices.push_back(gbufferAlbedoIdx++);
+		renderTargetIndices.push_back(gbufferAlbedoIdx++);
+	}
+	auto lightingTarget = RESOURCE.Get<CTexture>("LightingTarget");
+	if (lightingTarget) {
+		int lightingTargetIdx = lightingTarget->GetSrvIndex();
+		renderTargetIndices.push_back(lightingTargetIdx);
+		renderPasstype = renderTargetIndices.size() - 1;
+	}
+	auto postProcessTarget = RESOURCE.Get<CTexture>("PostProcessTarget");
+	if (postProcessTarget) {
+		int postProcessTargetIdx = postProcessTarget->GetSrvIndex();
+		renderTargetIndices.push_back(postProcessTargetIdx);
+	}
+	auto finalTarget = RESOURCE.Get<CTexture>("FinalTarget");
+	if (finalTarget) {
+		int finalTargetIdx = finalTarget->GetSrvIndex();
+		renderTargetIndices.push_back(finalTargetIdx);
+	}
+	
 }
 
 void CScene::Awake()
@@ -67,7 +92,7 @@ void CScene::RenderShadowPass()
 	shadowPassBuffer->BindToShader(offset);
 
 	lightCamera->SetViewportsAndScissorRects(CMDLIST);
-	RenderForLayer("Opaque", lightCamera, SHADOW);
+	RenderForLayer("Opaque", mainCamera, SHADOW);
 
 	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
 	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
@@ -75,15 +100,13 @@ void CScene::RenderShadowPass()
 
 void CScene::RenderForwardPass()
 {
-	auto forwardPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	/*auto forwardPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
 	forwardPassBuffer->BindToShader(0);
-	auto& directionalLight = mLights[(UINT)LIGHT_TYPE::DIRECTIONAL][0];
-	directionalLight->BindLightDataToShader();
 
 	auto& camera = mCameras["MainCamera"];
 	if (camera) {
 		RenderForLayer("Transparent", camera, FORWARD);
-	}
+	}*/
 }
 
 void CScene::RenderGBufferPass()
@@ -119,6 +142,10 @@ void CScene::RenderLightingPass()
 	auto& spotLights = mLights[(UINT)LIGHT_TYPE::SPOT];
 	auto& camera = mCameras["MainCamera"];
 
+	UINT lightCount = 1 + pointLights.size() + spotLights.size();
+	auto lightBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::LIGHT);
+	lightBuffer->UpdateBuffer(sizeof(CBLightsData) * 10, &lightCount);
+	lightBuffer->BindToShader(0);
 	camera->SetViewportsAndScissorRects(CMDLIST);
 	//Directional Light
 	if (directionalLight) {
@@ -132,6 +159,9 @@ void CScene::RenderLightingPass()
 	//Spot Light
 	for (const auto& spotLight : spotLights) {
 		spotLight->Render(renderTarget);
+	}
+	if (camera) {
+		RenderForLayer("Transparent", camera, FORWARD);
 	}
 	renderTarget->ChangeTargetsToResources();
 }
@@ -149,7 +179,7 @@ void CScene::RenderFinalPass()
 	auto finalShader = RESOURCE.Get<CShader>("FinalPass");
 	finalShader->SetPipelineState(CMDLIST);
 	CRenderer::RenderFullscreen();
-	RenderForLayer("UI", camera);
+	//RenderForLayer("UI", camera);
 
 	renderTarget->ChangeTargetToResource(backBufferIdx);
 }
@@ -352,7 +382,7 @@ void CScene::UpdatePassData()
 	}
 	auto lightingTarget = RESOURCE.Get<CTexture>("LightingTarget");
 	if (lightingTarget) {
-		passData.lightingTargetIdx = lightingTarget->GetSrvIndex();
+		passData.lightingTargetIdx = renderTargetIndices[renderPasstype];
 	}
 	auto postProcessTarget = RESOURCE.Get<CTexture>("PostProcessTarget");
 	if (postProcessTarget) {

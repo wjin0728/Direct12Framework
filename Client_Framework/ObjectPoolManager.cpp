@@ -9,7 +9,7 @@ void CObjectPoolManager::Initialize()
 	for (UINT i = 0; i < OBJECT_COUNT; i++) {
 		cbvIdxQueue.push(i);
 	}
-	for (UINT i = 0; i < OBJECT_COUNT; i++) { // BONE_TRANSFORM_COUNT = 10
+	for (UINT i = 0; i < BONE_TRANSFORM_COUNT; i++) { // BONE_TRANSFORM_COUNT = 10
 		boneTransformIdxQueue.push(i);
 	}
 	for (UINT i = 0; i < LIGHT_COUNT; i++) {

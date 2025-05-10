@@ -11,6 +11,8 @@ cbuffer MaterialData : register(b5)
     uint normalTexIdx;
     float smoothness;
     float metallic;
+    uint emissionMapIdx;
+    float3 emissionColor;
     float padding;
 };
 
@@ -38,8 +40,6 @@ struct VS_OUTPUT
     float3 tangentWS : TEXCOORD2;
     float3 bitangentWS : TEXCOORD3;
     float4 ShadowPosH : TEXCOORD4;
-    float4 boneWeights : BONEWEIGHTS;
-    uint4 boneIndices : BONEINDICES;
     
     float2 uv : TEXCOORD5;
 };
@@ -80,15 +80,11 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     output.bitangentWS = normalInputs.bitangentWS;
     
     output.ShadowPosH = mul(output.positionWS, shadowTransform);
-    output.boneIndices = input.boneIndices;
-    output.boneWeights = input.boneWeights;
     output.uv = input.uv;
     
     return output;
 }
 
-
-#define TRANSPARENT_CLIP
 
 //«»ºø ºŒ¿Ã¥ı
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
@@ -271,6 +267,12 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
         float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoClamp, uv).rgb;
         normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
     }
+    float3 _emissionColor = emissionColor;
+    if (emissionMapIdx != -1)
+    {
+        float4 emissionColorSample = diffuseMap[emissionMapIdx].Sample(anisoClamp, uv);
+        _emissionColor *= float4(GammaDecoding(emissionColorSample.rgb), emissionColorSample.a).rgb;
+    }
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
     float depth = mul(input.positionWS, viewMat).z;
@@ -278,7 +280,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     
     output.albedo = color;
     output.normalWS = float4(normal, metallic);
-    output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
+    output.emissive = float4(_emissionColor, shadowFactor);
     output.positionWS = float4(worldPosition, smoothness);
     output.depth = input.ShadowPosH;
     
