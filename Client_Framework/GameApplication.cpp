@@ -25,14 +25,14 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	//clientWidth = FRAMEBUFFER_WIDTH;
 	//clientHeight = FRAMEBUFFER_HEIGHT;
 	
-	//¿©µµøÏ √ ±‚»≠
+	//ÏúàÎèÑÏö∞ Ï¥àÍ∏∞Ìôî
 	if (!InitWindow(wndProc, cmdShow)) {
 		return false;
 	}
 	SetWindowLongPtr(mHwnd, GWL_STYLE, WS_POPUP);
 	SetWindowPos(mHwnd, HWND_TOPMOST, 0, 0, clientWidth, clientHeight,SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 
-	//∏≈¥œ¿˙ √ ±‚»≠
+	//Îß§ÎãàÏ†Ä Ï¥àÍ∏∞Ìôî
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CObjectPoolManager).Initialize();
 	INSTANCE(CDX12Manager).Initialize(mHwnd);
@@ -67,7 +67,7 @@ int CGameApplication::Run()
 		else
 		{
 			INSTANCE(ServerManager).Recv_Packet();
-			SleepEx(1, true);
+			SleepEx(0, true);
 			timer.Tick(60.f);
 			Update();
 			Render();

@@ -11,6 +11,8 @@
 #include"Camera.h"
 #include"Animation.h"
 #include "ServerManager.h"
+#include "AnimationEnums.h"
+#include "ObjectState.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -19,12 +21,14 @@ CPlayerController::~CPlayerController()
 void CPlayerController::Awake()
 {
 	rigidBody = GetOwner()->GetComponent<CRigidBody>();
+	mStateMachine = owner->GetComponentFromHierarchy<CObjectStateMachine>();
 }
 
 void CPlayerController::Start()
 {
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mTerrain = scene->GetTerrain();
+	SetClass(mStateMachine->GetClass());
 }
 
 void CPlayerController::Update()
@@ -52,11 +56,25 @@ void CPlayerController::SetState(PLAYER_STATE state)
 
 }
 
+UINT8 CPlayerController::GetAnimationIndexFromState(PLAYER_STATE state)
+{
+	switch (mClass)
+	{
+	case PLAYER_CLASS::ARCHER:
+		return (UINT8)CAnimationController::ARCHER_MAP.at(state);
+	case PLAYER_CLASS::FIGHTER:
+		return (UINT8)CAnimationController::FIGHTER_MAP.at(state);
+	case PLAYER_CLASS::MAGE:
+		return (UINT8)CAnimationController::MAGE_MAP.at(state);
+	default:
+		return 0;
+	}
+}
+
 void CPlayerController::OnKeyEvents()
 {
 	auto transform = GetTransform();
 	auto camera = mCamera.lock()->GetTransform();
-	Vec3 moveDir = Vec3::Zero;
 	uint8_t dir = 0;
 
 	Vec3 camForward = camera->GetWorldLook();
@@ -66,30 +84,48 @@ void CPlayerController::OnKeyEvents()
 	camForward.Normalize();
 	camRight.Normalize();
 
+	if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
+		INSTANCE(ServerManager).send_cs_mouse_vec3_packet(camForward);
+		mStateMachine->SetState(PLAYER_STATE::ATTACK);
+	}
+
 	if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
 	if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
 
-	//if (INPUT.IsKeyDown(KEY_TYPE::W)) dir |= 0x08;
-	//if (INPUT.IsKeyDown(KEY_TYPE::S)) dir |= 0x02;
-	//if (INPUT.IsKeyDown(KEY_TYPE::D)) dir |= 0x01;
-	//if (INPUT.IsKeyDown(KEY_TYPE::A)) dir |= 0x04;
-	//if (INPUT.IsKeyDown(KEY_TYPE::SHIFT)) dir |= 0x20;
-	//if (INPUT.IsKeyDown(KEY_TYPE::CTRL)) dir |= 0x10;
-
-
 	if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
+		mStateMachine->SetState(PLAYER_STATE::JUMP);
 		INSTANCE(ServerManager).send_cs_000_packet();
 	}
+	if (INPUT.IsKeyDown(KEY_TYPE::E)) {
+		mStateMachine->SetState(PLAYER_STATE::SKILL);
+		switch (mSkill)
+		{
+		case FIRE_ENCHANT:
+		case WATER_HEAL:
+		case WATER_SHIELD:
+		case GRASS_WEAKEN:
+			INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
+			break;
+		case FIRE_EXPLOSION:
+		case GRASS_VINE:
+			//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Ÿ��id);
+			break;
+		}
+	}
 
-	if (dir == 0) return;
+	if (dir == 0) {
+		if (moveKeyPressed == true) {
+			moveKeyPressed = false;
+			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+			mStateMachine->SetState(PLAYER_STATE::IDLE);
+		}
+		return;
+	}
+	else if (moveKeyPressed == false) {
+		moveKeyPressed = true;
+	}
 	INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
-
-	//if (INPUT.IsKeyUp(KEY_TYPE::W)) dir |= 0x08;
-	//if (INPUT.IsKeyUp(KEY_TYPE::S)) dir |= 0x02;
-	//if (INPUT.IsKeyUp(KEY_TYPE::D)) dir |= 0x01;
-	//if (INPUT.IsKeyUp(KEY_TYPE::A)) dir |= 0x04;
-	//if (INPUT.IsKeyUp(KEY_TYPE::SHIFT)) dir |= 0x20;
-	//if (INPUT.IsKeyUp(KEY_TYPE::CTRL)) dir |= 0x10;
+	if (mStateMachine->GetState() == PLAYER_STATE::IDLE) mStateMachine->SetState(PLAYER_STATE::RUN);
 }

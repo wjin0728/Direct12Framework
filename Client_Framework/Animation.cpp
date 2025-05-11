@@ -6,6 +6,40 @@
 #include "Timer.h"
 #include "SkinnedMeshRenderer.h"
 #include "ObjectPoolManager.h"
+#include"AnimationEnums.h"
+
+std::unordered_map<PLAYER_STATE, ARCHER_ANIMATION> CAnimationController::ARCHER_MAP = {
+	{ PLAYER_STATE::IDLE, ARCHER_ANIMATION::COMBATIDLE },
+	{ PLAYER_STATE::RUN, ARCHER_ANIMATION::RUN },
+	{ PLAYER_STATE::ATTACK, ARCHER_ANIMATION::ATTACK },
+	{ PLAYER_STATE::MOVE_ATTACK, ARCHER_ANIMATION::RUNATTACK },
+	{ PLAYER_STATE::GETHIT, ARCHER_ANIMATION::GETHIT },
+	{ PLAYER_STATE::DEATH, ARCHER_ANIMATION::DEATH },
+	{ PLAYER_STATE::JUMP, ARCHER_ANIMATION::JUMP },
+	{ PLAYER_STATE::SKILL, ARCHER_ANIMATION::SKILLATTACK }
+};
+
+std::unordered_map<PLAYER_STATE, FIGHTER_ANIMATION> CAnimationController::FIGHTER_MAP = {
+	{ PLAYER_STATE::IDLE, FIGHTER_ANIMATION::IDLE },
+	{ PLAYER_STATE::RUN, FIGHTER_ANIMATION::RUN },
+	{ PLAYER_STATE::ATTACK, FIGHTER_ANIMATION::ATTACK },
+	{ PLAYER_STATE::MOVE_ATTACK, FIGHTER_ANIMATION::RUNATTACK },
+	{ PLAYER_STATE::GETHIT, FIGHTER_ANIMATION::GETHIT },
+	{ PLAYER_STATE::DEATH, FIGHTER_ANIMATION::DEATH },
+	{ PLAYER_STATE::JUMP, FIGHTER_ANIMATION::JUMP },
+	{ PLAYER_STATE::SKILL, FIGHTER_ANIMATION::SKILLATTACK }
+};
+
+std::unordered_map<PLAYER_STATE, MAGE_ANIMATION> CAnimationController::MAGE_MAP = {
+	{ PLAYER_STATE::IDLE, MAGE_ANIMATION::IDLE },
+	{ PLAYER_STATE::RUN, MAGE_ANIMATION::RUN },
+	{ PLAYER_STATE::ATTACK, MAGE_ANIMATION::ATTACK },
+	{ PLAYER_STATE::MOVE_ATTACK, MAGE_ANIMATION::RUNATTACK },
+	{ PLAYER_STATE::GETHIT, MAGE_ANIMATION::GETHIT },
+	{ PLAYER_STATE::DEATH, MAGE_ANIMATION::DEATH },
+	{ PLAYER_STATE::JUMP, MAGE_ANIMATION::JUMP },
+	{ PLAYER_STATE::SKILL, MAGE_ANIMATION::SKILLATTACK }
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -113,7 +147,10 @@ float CAnimationSet::UpdatePosition(float position, float start, float end)
 	case ANIMATION_TYPE::ONCE: {
 		mPosition += position;
 		if (mPosition < start) mPosition = start;
-		if (mPosition > end) mPosition = end;
+		if (mPosition > end) {
+			mPosition = start;
+			mType = ANIMATION_TYPE::END;
+		}
 		break;
 	}
 	case ANIMATION_TYPE::PINGPONG:
@@ -242,7 +279,7 @@ void CAnimationController::Start()
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
 	}
 
-	SetTrackAnimationSet(0, 1);
+	SetTrackAnimationSet(0, (int)ARCHER_ANIMATION::COMBATIDLE);
 	SetTrackSpeed(0, 1.0f);
 	SetTrackWeight(0, 1.0f);
 }
@@ -328,6 +365,11 @@ void CAnimationController::SetTrackStartEndTime(int trackIndex, float start, flo
 void CAnimationController::SetAnimationType(std::shared_ptr<CAnimationSet>& animationSet, ANIMATION_TYPE type)
 {
 	animationSet->SetAnimationType(type);
+}
+
+void CAnimationController::SetAnimationType(int trackIndex, ANIMATION_TYPE type)
+{
+	if (trackIndex < mTracks.size()) mAnimationSets->mAnimationSet[mTracks[trackIndex]->mIndex]->SetAnimationType(type);
 }
 
 void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)

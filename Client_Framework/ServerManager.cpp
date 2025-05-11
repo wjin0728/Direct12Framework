@@ -11,6 +11,7 @@
 #include "DX12Manager.h"
 #include "ResourceManager.h"
 #include"ItemMovement.h"
+#include "ObjectState.h"
 
 void ServerManager::Initialize()
 {
@@ -239,6 +240,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		player->SetActive(true);
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
+		auto stateMachine = player->AddComponent<CObjectStateMachine>(packet->player_class);
+		player->SetStateMachine(stateMachine);
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (scene && clientID != packet->id) {
@@ -249,21 +252,23 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		break;
 	}
-	case SC_MOVE_OBJECT: {
-		SC_MOVE_PACKET* packet = reinterpret_cast<SC_MOVE_PACKET*>(packet_ptr);
+	case SC_ALL_PLAYERS_POS: {
+		SC_ALL_PLAYERS_POS_PACKET* packet = reinterpret_cast<SC_ALL_PLAYERS_POS_PACKET*>(packet_ptr);
 
-		int id = packet->id;
-		if (id == clientID) {
-			mPlayer->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-			mPlayer->GetTransform()->SetLocalRotationY(packet->look_y);
-			break;
+		for (int i = 0; i < 3; i++) {
+			if (packet->clientId[i] == -1) break;
+			if (clientID == packet->clientId[i]) {
+				mPlayer->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
+				mPlayer->GetTransform()->SetLocalRotationY(packet->look_y[i]);
+			}
+			else {
+				auto it = mOtherPlayers.find(packet->clientId[i]);
+				if (it != mOtherPlayers.end()) {
+					mOtherPlayers[packet->clientId[i]]->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
+					mOtherPlayers[packet->clientId[i]]->GetTransform()->SetLocalRotationY(packet->look_y[i]);
+				}
+			}
 		}
-		auto it = mOtherPlayers.find(id);
-		if (it != mOtherPlayers.end()) {
-			mOtherPlayers[id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-			mOtherPlayers[id]->GetTransform()->SetLocalRotationY(packet->look_y);
-		}
-
 		break;
 	}
 	case SC_DROP_ITEM: {
@@ -300,13 +305,19 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_REMOVE_ITEM: {
 		SC_REMOVE_ITEM_PACKET* packet = reinterpret_cast<SC_REMOVE_ITEM_PACKET*>(packet_ptr);
 
+		if (packet->player_id == -1) {} // 단순 삭제면 바로 넘기기
+		else mPlayer->GetPlayerController()->SetSkill((ITEM_TYPE)packet->item_type);
+
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		scene->RemoveObject(mItems[packet->item_id]);
+		mItems.erase(packet->item_id);
 		cout << "삭제!";
 
-		if (packet->player_id == -1) break; // 단순 삭제면 바로 넘기기
-
-		// 플레이어가 스킬 아이템 먹은 정보 처리 필요
+		break;
+	}
+	case SC_USE_SKILL: {
+		SC_USE_SKILL_PACKET* packet = reinterpret_cast<SC_USE_SKILL_PACKET*>(packet_ptr);
+		
 
 		break;
 	}
@@ -328,7 +339,6 @@ void ServerManager::Send_Packet(void* packet)
 }
 void CALLBACK ServerManager::send_callback(DWORD err, DWORD sent_size, LPWSAOVERLAPPED pwsaover, DWORD sendflag)
 {
-	cout << "Send_Packet" << endl;
 	OVER_PLUS* over = reinterpret_cast<OVER_PLUS*>(pwsaover);
 	delete over;
 }

@@ -6,11 +6,16 @@ class CPlayerController : public CMonoBehaviour
 {
 private:
 	PLAYER_STATE mState = PLAYER_STATE::IDLE;
+	ITEM_TYPE mSkill = ITEM_TYPE::item_end;
+	PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
 
 	std::shared_ptr<class CAnimationController> mAnimationController{};
+	std::shared_ptr<class CObjectStateMachine> mStateMachine{};
 	std::shared_ptr<class CRigidBody> rigidBody{};
 	std::weak_ptr<class CCamera> mCamera{};
 	std::weak_ptr<class CTerrain> mTerrain{};
+
+	bool moveKeyPressed = false;
 
 public:
 	CPlayerController() : CMonoBehaviour("PlayerController") {};
@@ -26,11 +31,17 @@ public:
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CPlayerController>(*this); }
 
 public:
+	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
+	uint8_t GetAnimationIndexFromState(PLAYER_STATE state);
+
 	void SetAnimationController(const std::shared_ptr<class CAnimationController>& animationController) { mAnimationController = animationController; }
+	void SetStateMachine(const std::shared_ptr<class CObjectStateMachine>& StateMachine) { mStateMachine = StateMachine; }
 	void SetChildAnimationController();
 	void SetRigidBody(const std::shared_ptr<class CRigidBody>& rigidBody) { this->rigidBody = rigidBody; }
 	void SetCamera(const std::shared_ptr<class CCamera>& camera) { mCamera = camera; }
 	void SetTerrain(const std::shared_ptr<class CTerrain>& terrain) { mTerrain = terrain; }
+	void SetSkill(ITEM_TYPE skill) { mSkill = skill; };
+	void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; };
 
 	void SetState(PLAYER_STATE state);
 

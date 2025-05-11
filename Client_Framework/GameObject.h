@@ -1,6 +1,5 @@
 #pragma once
 
-
 class CMonoBehaviour;
 class CRenderer;
 class CTransform;
@@ -11,6 +10,7 @@ class CComponent;
 class CAnimationController;
 class CSkinnedMesh;
 class CPlayerController;
+class CObjectStateMachine;
 
 class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
@@ -24,6 +24,7 @@ private:
 	std::shared_ptr<CRenderer> mRenderer{};
 	std::shared_ptr<CCollider> mCollider{};
 	std::shared_ptr<CPlayerController> mPlayerController{};
+	std::shared_ptr<CObjectStateMachine> mStateMachine{};
 
 	std::vector<std::shared_ptr<CGameObject>> mChildren{};
 
@@ -35,7 +36,7 @@ private:
 	std::string mName{};
 	std::string mTag{};
 	std::string mRenderLayer{};
-	OBJECT_TYPE mObjectType{NONE};
+	OBJECT_TYPE mObjectType{ NONE };
 
 	int mID{ -1 };
 
@@ -56,21 +57,21 @@ public:
 	void Render(std::shared_ptr<CCamera> camera, int pass = 0);
 
 public:
-	//¿ÀºêÁ§Æ®ÀÇ º¹»çº»À» »ý¼ºÇÑ´Ù.
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½çº»ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 	static std::shared_ptr<CGameObject> Instantiate(const std::shared_ptr<CGameObject>& original,
 		const std::shared_ptr<CTransform>& parentTransform = nullptr);
-	//¿ÀºêÁ§Æ®ÀÇ º¹»çº»À» »ý¼ºÇÑ´Ù.
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½çº»ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 	static std::shared_ptr<CGameObject> Instantiate(const std::unique_ptr<CGameObject>& original,
 		const std::shared_ptr<CTransform>& parentTransform = nullptr);
 
-	//±âº» ¼³Á¤À» °¡Áø Ä«¸Þ¶ó ¿ÀºêÁ§Æ®¸¦ »ý¼ºÇÑ´Ù.
+	//ï¿½âº» ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize,
 		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 60.f);
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, float nearPlane, float farPlane, Vec2 size);
 	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& shader, const std::string& texture, Vec2 pos, Vec2 size, float depth = 1.f);
-	//±âº» ¼³Á¤À» °¡Áø ÁöÇü ¿ÀºêÁ§Æ®¸¦ »ý¼ºÇÑ´Ù.
+	//ï¿½âº» ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 	static std::shared_ptr<CGameObject> CreateTerrainObject(std::ifstream& ifs);
-	//¹ÙÀÌ³Ê¸® ÆÄÀÏÀ» ÅëÇØ ¿ÀºêÁ§Æ®¸¦ »ý¼ºÇÑ´Ù.
+	//ï¿½ï¿½ï¿½Ì³Ê¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
 	static std::shared_ptr<CGameObject> CreateObjectFromFile(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 	static std::shared_ptr<CGameObject> CreateObjectFromFile(const std::string& name);
 
@@ -79,6 +80,7 @@ public:
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
 	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
 	std::shared_ptr<CPlayerController> GetPlayerController() { return mPlayerController; }
+	std::shared_ptr<CObjectStateMachine> GetStateMachine() { return mStateMachine; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::string& GetName() const { return mName; }
@@ -104,6 +106,7 @@ public:
 	void SetID(int id) { mID = id; }
 	void SetParent(const std::shared_ptr<CGameObject>& parent);
 	void SetPlayerController(const std::shared_ptr<CPlayerController>& playerController) { mPlayerController = playerController; }
+	void SetStateMachine(const std::shared_ptr<CObjectStateMachine>& stateMachine) { mStateMachine = stateMachine; }
 
 	void ReturnCBVIndex();
 

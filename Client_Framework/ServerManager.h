@@ -50,7 +50,6 @@ public:
 		p.id = clientID;
 		Send_Packet(&p);
 	}
-
 	void send_cs_move_packet(uint8_t dir, Vec3 look) {
 		CS_MOVE_PACKET p;
 		p.size = sizeof(p);
@@ -61,6 +60,31 @@ public:
 		p.look_y = look.y;
 		p.look_z = look.z;
 
+		Send_Packet(&p);
+	}
+	void send_cS_skill_target_packet(uint8_t skill, int target_id) {
+		CS_SKILL_TARGET_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_SKILL_TARGET;
+		p.id = clientID;
+		p.skill_enum = skill;
+		p.target_id = target_id;
+	}
+	void send_cS_skill_nontarget_packet(uint8_t skill) {
+		CS_SKILL_TARGET_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_SKILL_TARGET;
+		p.id = clientID;
+		p.skill_enum = skill;
+	}
+	void send_cs_mouse_vec3_packet(Vec3 dir) {
+		CS_MOUSE_VEC3_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_MOUSE_VEC3;
+		p.id = clientID;
+		p.dir_x = dir.x;
+		p.dir_y = dir.y;
+		p.dir_z = dir.z;
 		Send_Packet(&p);
 	}
 };

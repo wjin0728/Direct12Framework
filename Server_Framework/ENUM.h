@@ -48,3 +48,8 @@ enum S_ITEM_TYPE : UINT8
 
 	S_item_end
 };
+
+enum S_MONSTER_TYPE : UINT8
+{
+	s_end
+};

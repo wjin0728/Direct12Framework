@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationEnums.h" />
     <ClInclude Include="BattleScene.h" />
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
@@ -177,6 +178,7 @@
     <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="LoadScene.h" />
     <ClInclude Include="MiniGame.h" />
+    <ClInclude Include="ObjectState.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderPipeline.h" />
@@ -236,6 +238,7 @@
     <ClCompile Include="LoadingScreen.cpp" />
     <ClCompile Include="LoadScene.cpp" />
     <ClCompile Include="MiniGame.cpp" />
+    <ClCompile Include="ObjectState.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderPipeline.cpp" />

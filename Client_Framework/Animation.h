@@ -2,14 +2,16 @@
 #include "stdafx.h"
 #include"Component.h"
 #include"Mesh.h"
+#include"AnimationEnums.h"
 
 enum class ANIMATION_TYPE : UINT
 {
     ONCE,
     LOOP,
     PINGPONG,
+    END,
 
-    END
+    end
 };
 
 enum class ANIMATION_BLEND_TYPE : UINT
@@ -18,7 +20,7 @@ enum class ANIMATION_BLEND_TYPE : UINT
     OVERRIDE,
     OVERRIDE_PASSTHROUGH,
 
-    END
+    end
 };
 
 struct CallbackKey 
@@ -154,6 +156,11 @@ public:
 class CAnimationController : public CComponent
 {
 public:
+    static std::unordered_map<PLAYER_STATE, ARCHER_ANIMATION> ARCHER_MAP;
+	static std::unordered_map<PLAYER_STATE, FIGHTER_ANIMATION> FIGHTER_MAP;
+	static std::unordered_map<PLAYER_STATE, MAGE_ANIMATION> MAGE_MAP;
+
+public:
     CAnimationController();
     CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion = false);
 	CAnimationController(const CAnimationController& other);
@@ -181,6 +188,7 @@ public:
     void SetTrackStartEndTime(int trackIndex, float start, float end);
 
     void SetAnimationType(std::shared_ptr<CAnimationSet>& animationSet, ANIMATION_TYPE type);
+    void SetAnimationType(int trackIndex, ANIMATION_TYPE type);
 
     void SetAnimationCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr <CCallbackHandler>& callbackHandler);
 
@@ -195,4 +203,5 @@ public:
     void BindSkinningMatrix();
     void PrepareSkinning();
     void UploadBoneOffsets();
+
 };
