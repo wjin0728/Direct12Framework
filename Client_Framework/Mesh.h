@@ -72,6 +72,7 @@ protected:
 	virtual void CalculateNormal();
 
 public:
+	virtual void CreateGPUResource();
 	virtual void ReleaseUploadBuffer();
 
 	int CheckRayIntersection(const Ray& ray, float& nearHitDistance);

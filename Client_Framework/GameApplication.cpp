@@ -21,19 +21,15 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	}
 
 	//매니저 초기화
-	INSTANCE(CDX12Manager).Initialize(mHwnd);
+	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CObjectPoolManager).Initialize();
+	INSTANCE(CDX12Manager).Initialize(mHwnd);
 	INSTANCE(ServerManager).Initialize();
 	TIMER.Initilaize();
 	INPUT.Initialize(mHwnd);
 
-	INSTANCE(CDX12Manager).OpenCommandList();
-	INSTANCE(CResourceManager).Initialize();
-	INSTANCE(CDX12Manager).CloseCommandList();
-	INSTANCE(CResourceManager).ReleaseUploadBuffers();
+	RESOURCE.BackgroundLoadingThread();
 	CLight::SetVolumes();
-
-	INSTANCE(ServerManager).Client_Login();
 	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAINSTAGE);
 
 	TIMER.Reset();

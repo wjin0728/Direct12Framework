@@ -15,16 +15,9 @@ void CResourceManager::Initialize()
 	for (UINT i = 0; i < TEXTURE_COUNT; i++) {
 		srvIdxQueue.push(i);
 	}
-	LoadDefaultMeshes();
-	LoadDefaultTexture();
-	LoadDefaultShaders();
-	LoadDefaultMaterials();
-
 	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
-	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
 
-	LoadPlayerObjects();
-	LoadSkillObjects();
+	
 }
 
 void CResourceManager::Destroy()
@@ -34,23 +27,6 @@ void CResourceManager::Destroy()
 	}
 }
 
-std::shared_ptr<CTexture> CResourceManager::Create2DTexture(const std::string& name, DXGI_FORMAT format
-	, void* data, size_t dataSize, UINT width, UINT height,
-	const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor)
-{
-	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(RESOURCE_TYPE::TEXTURE)];
-
-	auto itr = keyObjMap.find(name);
-	if (itr != keyObjMap.end())
-		return std::static_pointer_cast<CTexture>(itr->second);
-
-	std::shared_ptr<CTexture> m = std::make_shared<CTexture>();
-	m->Create2DTexture(format, data, dataSize, width, height, heapProperty, heapFlags, resFlags, clearColor);
-
-	keyObjMap[name] = m;
-
-	return m;
-}
 
 void CResourceManager::UpdateMaterials()
 {
@@ -178,38 +154,21 @@ void CResourceManager::LoadDefaultMeshes()
 		Add(m);
 		CUIRenderer::mQuad = m;
 	}
-
-
-	auto& meshes = resources[static_cast<UINT>(RESOURCE_TYPE::MESH)];
-
-	for (auto& mesh : meshes) {
-		static_pointer_cast<CMesh>(mesh.second)->CreateVertexBuffer();
-		static_pointer_cast<CMesh>(mesh.second)->CreateIndexBuffers();
-	}
 }
 
 void CResourceManager::LoadDefaultTexture()
 {
-	auto shadowMap = Get<CTexture>("ShadowMap");
-	shadowMap->CreateSRV();
-	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
+	auto& textures = resources[static_cast<UINT>(RESOURCE_TYPE::TEXTURE)];
+	for (auto& texture : textures) {
+		auto tex = static_pointer_cast<CTexture>(texture.second);
+		tex->AssignedSRVIndex();
+		tex->CreateSRV();
+	}
 
-	auto albedo = Get<CTexture>("GBufferAlbedo");
-	albedo->CreateSRV();
-	auto normal = Get<CTexture>("GBufferNormal");
-	normal->CreateSRV();
-	auto emissive = Get<CTexture>("GBufferEmissive");
-	emissive->CreateSRV();
-	auto position = Get<CTexture>("GBufferPosition");
-	position->CreateSRV();
-	auto depth = Get<CTexture>("GBufferDepth");
-	depth->CreateSRV();
-	auto lighting = Get<CTexture>("LightingTarget");
-	lighting->CreateSRV();
-	auto postProcess = Get<CTexture>("PostProcessTarget");
-	postProcess->CreateSRV();
-	auto final = Get<CTexture>("FinalTarget");
-	final->CreateSRV();
+	auto shadowMap = Get<CTexture>("ShadowMap");
+	INSTANCE(CDX12Manager).OpenCommandList();
+	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
+	INSTANCE(CDX12Manager).CloseCommandList();
 }
 
 void CResourceManager::LoadDefaultMaterials()
@@ -342,6 +301,11 @@ void CResourceManager::LoadDefaultShaders()
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("FinalPass", info, "FinalPass", false)) Add(shader);
 	}
+	
+}
+
+void CResourceManager::LoadLoadingScreen()
+{
 	{
 		ShaderInfo info;
 		info.shaderType = PASS_TYPE::UI;
@@ -353,6 +317,10 @@ void CResourceManager::LoadDefaultShaders()
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("Sprite", info, "Sprite", false)) Add(shader);
+	}
+	{
+		std::shared_ptr<CTexture> loadingScreen = std::make_shared<CTexture>("LoadingScreen", TEXTURE_PATH("LoadingScreen"));
+		Add(loadingScreen);
 	}
 }
 
@@ -387,6 +355,61 @@ UINT CResourceManager::GetMaterialSRVIndex()
 {
 	UINT idx = resources[static_cast<UINT8>(RESOURCE_TYPE::MATERIAL)].size();
 	return idx;
+}
+
+void CResourceManager::BackgroundLoadingThread()
+{
+	LoadDefaultMeshes();
+	LoadDefaultTexture();
+	LoadDefaultShaders();
+	LoadDefaultMaterials();
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
+
+	LoadPlayerObjects();
+	LoadSkillObjects();
+}
+
+void CResourceManager::EnqueueRequest(CResource* req)
+{
+	{
+		std::lock_guard<std::mutex> lock(mQueueMutex);
+		mGPULoadQueue.push(req);
+	}
+}
+
+void CResourceManager::ProcessGPULoadImmediate(CResource* req)
+{
+	INSTANCE(CDX12Manager).OpenCommandList();
+	req->CreateGPUResource();
+	INSTANCE(CDX12Manager).CloseCommandList();
+	req->ReleaseUploadBuffer();
+}
+
+void CResourceManager::ProcessGPULoadQueue(int maxPerFrame)
+{
+	std::vector<CResource*> resourcesToLoad{};
+	{
+		std::lock_guard<std::mutex> lock(mQueueMutex);
+		int count = 0;
+		int maxCount = maxPerFrame ? maxPerFrame : mGPULoadQueue.size();
+
+		while (!mGPULoadQueue.empty() && count < maxCount)
+		{
+			auto req = mGPULoadQueue.front();
+			mGPULoadQueue.pop();
+			resourcesToLoad.push_back(req);
+			count++;
+		}
+	}
+
+	INSTANCE(CDX12Manager).OpenCommandList();
+	for (auto& req : resourcesToLoad) {
+		req->CreateGPUResource();
+	}
+	INSTANCE(CDX12Manager).CloseCommandList();
+	for (auto& req : resourcesToLoad) {
+		req->ReleaseUploadBuffer();
+	}
 }
 
 

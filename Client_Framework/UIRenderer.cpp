@@ -51,7 +51,7 @@ void CUIRenderer::LateUpdate()
 
 void CUIRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 {
-	mShader->SetPipelineState(CMDLIST);
+	/*mShader->SetPipelineState(CMDLIST);
 
 	UpdataObjectDataToShader();
 	auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
@@ -59,7 +59,7 @@ void CUIRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 
 	objectBuffer->BindToShader(mCbvOffset);
 	UpdateUIDataToShader();
-	mQuad->Render(CMDLIST);
+	mQuad->Render(CMDLIST);*/
 }
 
 void CUIRenderer::UpdataObjectDataToShader()

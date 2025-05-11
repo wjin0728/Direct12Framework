@@ -98,6 +98,7 @@ public:
 	virtual void Update();
 	virtual bool BindShader(PASS_TYPE passType);
 	virtual void BindDataToShader();
+	virtual void CreateGPUResource();
 	virtual void ReleaseUploadBuffer() {}
 
 	std::shared_ptr<CShader> GetShader(PASS_TYPE passType) const

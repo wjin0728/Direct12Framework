@@ -79,13 +79,21 @@ public:
 
 protected:
 	ShaderInfo mInfo;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
 	ComPtr<ID3D12PipelineState> d3dPiplineState = ComPtr<ID3D12PipelineState>();
+
+	ComPtr<ID3DBlob> vsBlob{};
+	ComPtr<ID3DBlob> psBlob{};
+	ComPtr<ID3DBlob> gsBlob{};
+	ComPtr<ID3DBlob> hsBlob{};
+	ComPtr<ID3DBlob> dsBlob{};
 
 private:
 
 public:
 	CShader() = default;
 	virtual ~CShader() {};
+	virtual void CreateGPUResource();
 	virtual void ReleaseUploadBuffer() {}
 
 protected:

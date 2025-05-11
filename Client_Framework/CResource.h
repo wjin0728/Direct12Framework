@@ -3,6 +3,8 @@
 
 class CResource
 {
+public:
+	bool isLoaded{ false };
 protected:
 	std::string name;
 	RESOURCE_TYPE type;
@@ -12,6 +14,7 @@ protected:
 
 	virtual void LoadFromFile(const std::string& _fileName) {};
 	virtual void Save(const std::string& _fileName) {};
+	virtual void CreateGPUResource() {};
 	virtual void ReleaseUploadBuffer() {}
 
 public:

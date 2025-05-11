@@ -8,6 +8,32 @@ CTexture::CTexture(bool isSR, TEXTURE_TYPE texType) : isSR(isSR), texType(texTyp
 {
 }
 
+CTexture::CTexture(const std::string& name, const std::string& _fileName, bool isSR, TEXTURE_TYPE texType) : isSR(isSR), texType(texType)
+{
+	this->name = name;
+	fileName = _fileName;
+	texResource = nullptr;
+	uploadBuffer = nullptr;
+	srvIdx = -1;
+}
+CTexture::CTexture(const std::string& name, DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height, const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor)
+{
+	this->name = name;
+	texResource = nullptr;
+	uploadBuffer = nullptr;
+	srvIdx = -1;
+	desc = CD3DX12_RESOURCE_DESC::Tex2D(format, width, height);
+	desc.Flags = resFlags;
+	this->width = width;
+	this->height = height;
+	this->dataSize = dataSize;
+	this->heapProperty = heapProperty;
+	this->heapFlags = heapFlags;
+
+	if(data) ddsData = (BYTE*)data;
+
+	isSR = true;
+}
 CTexture::~CTexture()
 {
 	if (srvIdx != -1) {
@@ -27,9 +53,6 @@ void CTexture::LoadFromFile(const std::string& _fileName)
 	std::vector<D3D12_SUBRESOURCE_DATA> vSubresources;
 	DDS_ALPHA_MODE ddsAlphaMode = DDS_ALPHA_MODE_UNKNOWN;
 	bool bIsCubeMap = false;
-	if (_fileName == "..\\Resources\\Textures\\None.dds") {
-		int i{};
-	}
 
 	if (extension == L".dds" || extension == L".DDS") {
 		HRESULT hr = DirectX::LoadDDSTextureFromFileEx(DEVICE, fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT,
@@ -70,40 +93,33 @@ void CTexture::LoadFromFile(const std::string& _fileName)
 	CreateSRV();
 }
 
-void CTexture::Create2DTexture(DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
-	const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor)
+void CTexture::Create2DTexture()
 {
-	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Tex2D(format, width, height);
-	desc.Flags = resFlags;
-
 	D3D12_CLEAR_VALUE* optimizedClearValue = NULL;
 	D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
 
-	isSR = true;
-
-	if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)
+	if (desc.Flags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)
 	{
 		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
 		DXGI_FORMAT clearFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		if (format == DXGI_FORMAT_R32_TYPELESS) {
+		if (desc.Format == DXGI_FORMAT_R32_TYPELESS) {
 			clearFormat = DXGI_FORMAT_D32_FLOAT;
 		}
 		optimizedClearValue = new CD3DX12_CLEAR_VALUE(clearFormat, 1.0f, 0);
 	}
-	else if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
+	else if (desc.Flags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
 	{
 		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-		float arrFloat[4] = { clearColor.x, clearColor.y, clearColor.z, clearColor.w };
-		optimizedClearValue = new CD3DX12_CLEAR_VALUE(format, arrFloat);
-		isSR = true;
+		float arrFloat[4] = { 1.f,1.f,1.f,1.f };
+		optimizedClearValue = new CD3DX12_CLEAR_VALUE(desc.Format, arrFloat);
 	}
 
 	ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperty, heapFlags, &desc, resourceStates, optimizedClearValue, IID_PPV_ARGS(&texResource)));
 
 	if (optimizedClearValue) delete optimizedClearValue;
 
-	if (data) {
+	if (ddsData) {
 		const UINT num2DSubresources = desc.DepthOrArraySize * 1;
 		const UINT64 uploadBufferSize = GetRequiredIntermediateSize(texResource.Get(), 0, num2DSubresources);
 
@@ -123,7 +139,7 @@ void CTexture::Create2DTexture(DXGI_FORMAT format, void* data, size_t dataSize, 
 		);
 
 		D3D12_SUBRESOURCE_DATA textureData = {};
-		textureData.pData = data;
+		textureData.pData = ddsData;
 		textureData.RowPitch = rowPitch;
 		textureData.SlicePitch = rowPitch * height;
 
@@ -157,6 +173,9 @@ void CTexture::Create2DTexture(DXGI_FORMAT format, void* data, size_t dataSize, 
 	default:
 		break;
 	}
+	if (resourceStates == D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE) {
+		texType = TEXTURE_TYPE::DEPTH_STENCIL;
+	}
 }
 
 void CTexture::CreateFromResource(ComPtr<ID3D12Resource> resource)
@@ -177,6 +196,14 @@ void CTexture::CreateFromResource(ComPtr<ID3D12Resource> resource)
 }
 
 
+void CTexture::CreateGPUResource()
+{
+	if (isLoaded) return;
+	if (fileName.empty()) Create2DTexture();
+	else LoadFromFile(fileName);
+	isLoaded = true;
+}
+
 void CTexture::ReleaseUploadBuffer()
 {
 	if (uploadBuffer)
@@ -185,16 +212,22 @@ void CTexture::ReleaseUploadBuffer()
 	}
 }
 
+void CTexture::AssignedSRVIndex()
+{
+	if (isSR && srvIdx == -1) {
+		srvIdx = INSTANCE(CResourceManager).GetTopSRVIndex();
+	}
+}
+
 int CTexture::CreateSRV()
 {
-	if (isSR && (srvIdx == -1)) {
+	if ((srvIdx != -1)) {
 		auto descriptorHeap = INSTANCE(CDX12Manager).GetDescriptorHeaps();
 
 		if (texType == TEXTURECUBE) {
 			descriptorHeap->CreateCubeMap(shared_from_this(), 0);
 		}
 		else {
-			srvIdx = INSTANCE(CResourceManager).GetTopSRVIndex();
 			descriptorHeap->CreateSRV(shared_from_this(), srvIdx);
 		}
 	}
@@ -215,6 +248,12 @@ void CTexture::ChangeResourceState(D3D12_RESOURCE_STATES before, D3D12_RESOURCE_
 ComPtr<ID3D12Resource>& CTexture::GetResource()
 {
 	return texResource;
+}
+
+UINT CTexture::GetSrvIndex()
+{
+	AssignedSRVIndex();
+	return srvIdx;
 }
 
 D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetSRVDesc()

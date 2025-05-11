@@ -5,6 +5,7 @@
 #include"MainScene.h"
 #include"BattleScene.h"
 #include"MenuScene.h"
+#include"LoadScene.h"
 #include"ResourceManager.h"
 #include"GameObject.h"
 #include"MeshRenderer.h"
@@ -20,12 +21,13 @@ void CSceneManager::Destroy()
 
 void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 {
-	INSTANCE(CDX12Manager).OpenCommandList();
-
 	switch (nextScene)
 	{
 	case SCENE_TYPE::MAIN:
 		curScene = std::make_shared<CMainScene>();
+		break;
+	case SCENE_TYPE::LOADING:
+		curScene = std::make_shared<CLoadScene>();
 		break;
 	case SCENE_TYPE::MENU:
 		curScene = std::make_shared<CMenuScene>();
@@ -41,9 +43,7 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 	curScene->Initialize();
 	curScene->Awake();
 	curScene->Start();
-
-	INSTANCE(CDX12Manager).CloseCommandList();
-	INSTANCE(CResourceManager).ReleaseUploadBuffers();
+	INSTANCE(CResourceManager).ProcessGPULoadQueue();
 }
 
 void CSceneManager::ChangeScene(SCENE_TYPE nextScene)

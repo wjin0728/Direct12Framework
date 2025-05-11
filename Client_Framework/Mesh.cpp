@@ -537,8 +537,6 @@ std::ifstream& CMesh::ReadMeshData(std::ifstream& inFile)
 			break;
 		}
 	}
-	CreateVertexBuffer();
-	CreateIndexBuffers();
 
 	return inFile;
 }
@@ -584,6 +582,14 @@ void CMesh::CalculateNormal()
 		vertices[v1Idx].normal = (vertices[v1Idx].normal + normal).GetNormalized();
 		vertices[v2Idx].normal = (vertices[v2Idx].normal + normal).GetNormalized();
 	}
+}
+
+void CMesh::CreateGPUResource()
+{
+	if (isLoaded) return;
+	CreateVertexBuffer();
+	CreateIndexBuffers();
+	isLoaded = true;
 }
 
 void CMesh::ReleaseUploadBuffer()

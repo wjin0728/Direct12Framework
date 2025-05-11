@@ -9,6 +9,14 @@ CSkinnedMesh::~CSkinnedMesh()
 {
 }
 
+void CSkinnedMesh::CreateGPUResource()
+{
+	if (isLoaded) return;
+	CMesh::CreateGPUResource();
+	CreateSkinnedVertexBuffer();
+	isLoaded = true;
+}
+
 void CSkinnedMesh::ReleaseUploadBuffers()
 {
 	CMesh::ReleaseUploadBuffer();
@@ -65,7 +73,6 @@ std::shared_ptr<CSkinnedMesh> CSkinnedMesh::CreateSkinnedMeshFromFile(const std:
 			break;
 		}
 	}
-	m->CreateSkinnedVertexBuffer();
 
 	return m;
 }

@@ -15,6 +15,7 @@ enum class LIGHT_TYPE : UINT8
 enum class SCENE_TYPE : UINT8
 {
 	MENU,
+	LOADING,
 	MAINSTAGE,
 	MAIN,
 

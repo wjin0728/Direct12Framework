@@ -180,6 +180,18 @@ CAnimationController::CAnimationController(std::shared_ptr<CAnimationSets>& sets
 	mTracks.push_back(std::make_shared<CAnimationTrack>());
 }
 
+CAnimationController::CAnimationController(const CAnimationController& other) : CComponent(other)
+{
+	mApplyRootMotion = other.mApplyRootMotion;
+	mAnimationSets = other.mAnimationSets;
+	mTracks = other.mTracks;
+	mBoneCaches = other.mBoneCaches;
+	mBindPoseBoneOffsets = other.mBindPoseBoneOffsets;
+	mRootTransform = other.mRootTransform;
+	mBoneTransformIdx = other.mBoneTransformIdx;
+	finalTransforms = other.finalTransforms;
+}
+
 CAnimationController::~CAnimationController()
 {
 }
@@ -230,7 +242,7 @@ void CAnimationController::Start()
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
 	}
 
-	SetTrackAnimationSet(0, 0);
+	SetTrackAnimationSet(0, 1);
 	SetTrackSpeed(0, 1.0f);
 	SetTrackWeight(0, 1.0f);
 }

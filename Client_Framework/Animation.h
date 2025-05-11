@@ -59,6 +59,7 @@ class CAnimationLayer
 {
 public:
     CAnimationLayer();
+	CAnimationLayer(const CAnimationLayer& other) = default;
     ~CAnimationLayer();
 
     float mWeight = 1.0f;
@@ -112,6 +113,7 @@ class CAnimationSets
 {
 public:
     CAnimationSets(int setsNum);
+	CAnimationSets(const CAnimationSets& other) = default;
     ~CAnimationSets();
 
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
@@ -124,6 +126,7 @@ class CAnimationTrack
 {
 public:
     CAnimationTrack() {}
+	CAnimationTrack(const CAnimationTrack& other) = default;
     ~CAnimationTrack() {}
 
 public:
@@ -153,6 +156,7 @@ class CAnimationController : public CComponent
 public:
     CAnimationController();
     CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion = false);
+	CAnimationController(const CAnimationController& other);
     virtual ~CAnimationController();
 
     virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CAnimationController>(*this); }

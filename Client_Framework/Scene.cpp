@@ -20,13 +20,17 @@
 CScene::CScene()
 {
 	auto gbufferAlbedo = RESOURCE.Get<CTexture>("GBufferAlbedo");
+	auto gbufferNormal = RESOURCE.Get<CTexture>("GBufferNormal");
+	auto gbufferDepth = RESOURCE.Get<CTexture>("GBufferDepth");
+	auto gbufferEmissive = RESOURCE.Get<CTexture>("GBufferEmissive");
+	auto gbufferPos = RESOURCE.Get<CTexture>("GBufferPosition");
+
 	if (gbufferAlbedo) {
-		int gbufferAlbedoIdx = gbufferAlbedo->GetSrvIndex();
-		renderTargetIndices.push_back(gbufferAlbedoIdx++);
-		renderTargetIndices.push_back(gbufferAlbedoIdx++);
-		renderTargetIndices.push_back(gbufferAlbedoIdx++);
-		renderTargetIndices.push_back(gbufferAlbedoIdx++);
-		renderTargetIndices.push_back(gbufferAlbedoIdx++);
+		renderTargetIndices.push_back(gbufferAlbedo->GetSrvIndex());
+		renderTargetIndices.push_back(gbufferNormal->GetSrvIndex());
+		renderTargetIndices.push_back(gbufferEmissive->GetSrvIndex());
+		renderTargetIndices.push_back(gbufferPos->GetSrvIndex());
+		renderTargetIndices.push_back(gbufferDepth->GetSrvIndex());
 	}
 	auto lightingTarget = RESOURCE.Get<CTexture>("LightingTarget");
 	if (lightingTarget) {
@@ -372,19 +376,16 @@ void CScene::UpdatePassData()
 		0.f, 1.f
 	);
 	passData.uiTransform = UIProjectionMatrix.Transpose();
-
-	auto gbufferAlbedo = RESOURCE.Get<CTexture>("GBufferAlbedo");
-	if (gbufferAlbedo) {
-		int gbufferAlbedoIdx = gbufferAlbedo->GetSrvIndex();
-		passData.gbufferAlbedoIdx = gbufferAlbedoIdx++;
-		passData.gbufferNormalIdx = gbufferAlbedoIdx++;
-		passData.gbufferEmissiveIdx = gbufferAlbedoIdx++;
-		passData.gbufferPosIdx = gbufferAlbedoIdx++;
-		passData.gbufferDepthIdx = gbufferAlbedoIdx++;
-	}
+	
+	int idx = 0;
+	passData.gbufferAlbedoIdx = renderTargetIndices[idx++];
+	passData.gbufferNormalIdx = renderTargetIndices[idx++];
+	passData.gbufferEmissiveIdx = renderTargetIndices[idx++];
+	passData.gbufferPosIdx = renderTargetIndices[idx++];
+	passData.gbufferDepthIdx = renderTargetIndices[idx++];
 	auto lightingTarget = RESOURCE.Get<CTexture>("LightingTarget");
 	if (lightingTarget) {
-		passData.lightingTargetIdx = renderTargetIndices[renderPasstype];
+		passData.lightingTargetIdx = lightingTarget->GetSrvIndex();
 	}
 	auto postProcessTarget = RESOURCE.Get<CTexture>("PostProcessTarget");
 	if (postProcessTarget) {

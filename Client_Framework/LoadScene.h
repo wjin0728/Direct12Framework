@@ -8,8 +8,12 @@ public:
 	CLoadScene();
 	~CLoadScene() = default;
 	void Initialize() override;
+	void Start() override;
+
 	void Update() override;
 	void LateUpdate() override;
 	void RenderScene() override;
+
+public:
 };
 

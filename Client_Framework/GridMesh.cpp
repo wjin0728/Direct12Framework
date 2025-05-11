@@ -25,11 +25,15 @@ void CHeightMapGridMesh::LoadHeightMap(const std::string& fileName)
 		}
 	}
 
-	heightMapTex = RESOURCE.Create2DTexture(fileName, DXGI_FORMAT_R32_FLOAT, heightData.data(), sizeof(float), resolution, resolution,
+	heightMapTex = std::make_shared<CTexture>(fileName, DXGI_FORMAT_R32_FLOAT, heightData.data(), sizeof(float), resolution, resolution,
 		CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		D3D12_RESOURCE_FLAG_NONE
 	);
+	heightMapTex->SetTextureType(TEXTURE2D);
+	RESOURCE.ProcessGPULoadImmediate(heightMapTex.get());
+	RESOURCE.Add(heightMapTex);
+	heightMapTex->AssignedSRVIndex();
 	heightMapTex->CreateSRV();
 }
 
@@ -137,8 +141,6 @@ void CHeightMapGridMesh::Initialize(const std::string& fileName, UINT _resoultio
 	}
 	CalculateNormal();
 	CalculateTextureCoord();
-
-	CreateVertexBuffer();
 }
 
 float CHeightMapGridMesh::GetHeight(float fx, float fz)

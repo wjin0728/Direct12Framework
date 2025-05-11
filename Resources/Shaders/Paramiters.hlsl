@@ -30,11 +30,11 @@ cbuffer CBPassData : register(b0)
     //normal + metallic
     int gbufferNormalIdx;
     //depth
+    int gbufferEmissiveIdx;
+    int gbufferPosIdx;
     int gbufferDepthIdx;
     //world position + smoothness
-    int gbufferPosIdx;
     //emissive + shadow
-    int gbufferEmissiveIdx;
     int lightingTargetIdx;
     int postProcessIdx;
     int finalTargetIdx;

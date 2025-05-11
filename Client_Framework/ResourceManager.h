@@ -11,6 +11,12 @@
 class CMaterial;
 class CShader;
 
+struct ResourceRequest
+{
+	enum Type { Texture, Mesh, Shader, Material } type;
+	std::string filepath;
+};
+
 class CResourceManager
 {
 	MAKE_SINGLETON(CResourceManager)
@@ -22,13 +28,13 @@ private:
 
 	std::queue<UINT> srvIdxQueue{};
 
+	std::thread mLoadThread;
+	std::queue<CResource*> mGPULoadQueue;
+	std::mutex mQueueMutex;
 
 public:
 	void Initialize();
 	void Destroy();
-
-	template<typename T>
-	std::shared_ptr<T> Load(const std::string& name, const std::string& fileName);
 
 	template<typename T>
 	bool Add(const std::shared_ptr<T>& resource);
@@ -40,8 +46,6 @@ public:
 	RESOURCE_TYPE GetResourceType();
 
 public:
-	std::shared_ptr<CTexture> Create2DTexture(const std::string& name, DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
-		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = XMFLOAT4());
 	void UpdateMaterials();
 
 	void LoadSceneResourcesFromFile(std::ifstream& ifs);
@@ -59,6 +63,7 @@ private:
 	void LoadDefaultMaterials();
 	void LoadDefaultShaders();
 
+	void LoadLoadingScreen();
 
 	void MakeShadersForAllPass(const std::string& shaderName, const std::string& name, ShaderInfo info);
 
@@ -76,28 +81,12 @@ public:
 	}
 
 	void ReturnSRVIndex(UINT idx) { srvIdxQueue.push(idx); }
+
+	void BackgroundLoadingThread();
+	void EnqueueRequest(CResource* req);
+	void ProcessGPULoadImmediate(CResource* req); // 즉시 처리
+	void ProcessGPULoadQueue(int maxPerFrame = 0); // 매 프레임 호출
 };
-
-template<typename T>
-inline std::shared_ptr<T> CResourceManager::Load(const std::string& name, const std::string& fileName)
-{
-	RESOURCE_TYPE resourceType = GetResourceType<T>();
-	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(resourceType)];
-
-	auto itr = keyObjMap.find(name);
-	if (itr != keyObjMap.end())
-		return std::static_pointer_cast<T>(itr->second);
-
-	std::shared_ptr<T> resource = std::make_shared<T>();
-	resource->LoadFromFile(fileName);
-	keyObjMap[name] = resource;
-
-	if (resourceType == RESOURCE_TYPE::TEXTURE) {
-
-	}
-
-	return resource;
-}
 
 template<typename T>
 inline bool CResourceManager::Add(const std::shared_ptr<T>& resource)
@@ -114,6 +103,7 @@ inline bool CResourceManager::Add(const std::shared_ptr<T>& resource)
 		return false;
 
 	keyObjMap[key] = resource;
+	if (!resource->isLoaded) EnqueueRequest(resource.get());
 
 	return true;
 }

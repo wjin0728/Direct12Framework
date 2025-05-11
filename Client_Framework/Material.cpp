@@ -16,8 +16,10 @@ CMaterial::CMaterial(void* data, UINT dataSize) : matData(new BYTE[dataSize]), d
 void CMaterial::Initialize(void* data, UINT dataSize)
 {
 	this->dataSize = dataSize;
-	matData.reset(new BYTE[dataSize]);
-	std::memcpy(matData.get(), data, dataSize);
+	if (!matData) {
+		matData.reset(new BYTE[dataSize]);
+		std::memcpy(matData.get(), data, dataSize);
+	}
 	mPoolOffset = CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->AddData(matData.get(), dataSize);
 }
 
@@ -52,6 +54,13 @@ void CMaterial::BindDataToShader()
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->BindToShader(mPoolOffset);
 }
 
+void CMaterial::CreateGPUResource()
+{
+	if (isLoaded) return;
+	Initialize(matData.get(), dataSize);
+	isLoaded = true;
+}
+
 std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFile)
 {
 	using namespace BinaryReader;
@@ -68,16 +77,13 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	material = std::make_shared<CMaterial>();
 	material->SetName(name);
 
-	std::unique_ptr<BYTE[]> matData{};
-	size_t dataSize{};
-
 	ReadDateFromFile(inFile, token);
 	if (token == "SyntyStudios/Basic_LOD_Shader") {
 		material->SetShader("Common");
 		
-		matData = std::make_unique<BYTE[]>(sizeof(CommonProperties));
-		CommonProperties* data = reinterpret_cast<CommonProperties*>(matData.get());
-		dataSize = sizeof(CommonProperties);
+		material->matData = std::make_unique<BYTE[]>(sizeof(CommonProperties));
+		CommonProperties* data = reinterpret_cast<CommonProperties*>(material->matData.get());
+		material->dataSize = sizeof(CommonProperties);
 
 		while (true) {
 			ReadDateFromFile(inFile, token);
@@ -110,9 +116,9 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		}
 	}
 	else if (token == "Universal_Render_Pipeline/Lit") {
-		matData = std::make_unique<BYTE[]>(sizeof(LitProperties));
-		LitProperties* data = reinterpret_cast<LitProperties*>(matData.get());
-		dataSize = sizeof(LitProperties);
+		material->matData = std::make_unique<BYTE[]>(sizeof(LitProperties));
+		LitProperties* data = reinterpret_cast<LitProperties*>(material->matData.get());
+		material->dataSize = sizeof(LitProperties);
 
 		while (true) {
 			ReadDateFromFile(inFile, token);
@@ -161,9 +167,9 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	}
 	else if (token == "SyntyStudios/Triplanar01" || token == "SyntyStudios/TriplanarBasic") {
 		material->SetShader("Triplanar");
-		matData = std::make_unique<BYTE[]>(sizeof(TriplanarProperties));
-		TriplanarProperties* data = reinterpret_cast<TriplanarProperties*>(matData.get());
-		dataSize = sizeof(TriplanarProperties);
+		material->matData = std::make_unique<BYTE[]>(sizeof(TriplanarProperties));
+		TriplanarProperties* data = reinterpret_cast<TriplanarProperties*>(material->matData.get());
+		material->dataSize = sizeof(TriplanarProperties);
 
 		while (true) {
 			ReadDateFromFile(inFile, token);
@@ -199,9 +205,9 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	}
 	else if (token == "SyntyStudios/VegitationShader" || token == "SyntyStudios/VegitationShader_Basic") {
 		material->SetShader("Vegitation");
-		matData = std::make_unique<BYTE[]>(sizeof(VegitationProperties));
-		VegitationProperties* data = reinterpret_cast<VegitationProperties*>(matData.get());
-		dataSize = sizeof(VegitationProperties);
+		material->matData = std::make_unique<BYTE[]>(sizeof(VegitationProperties));
+		VegitationProperties* data = reinterpret_cast<VegitationProperties*>(material->matData.get());
+		material->dataSize = sizeof(VegitationProperties);
 
 		while (true) {
 			ReadDateFromFile(inFile, token);
@@ -257,9 +263,9 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	}
 	else if (token == "SyntyStudios/SkyboxUnlit") {
 		material->SetShader("Skybox");
-		matData = std::make_unique<BYTE[]>(sizeof(SkyboxProperties));
-		SkyboxProperties* data = reinterpret_cast<SkyboxProperties*>(matData.get());
-		dataSize = sizeof(SkyboxProperties);
+		material->matData = std::make_unique<BYTE[]>(sizeof(SkyboxProperties));
+		SkyboxProperties* data = reinterpret_cast<SkyboxProperties*>(material->matData.get());
+		material->dataSize = sizeof(SkyboxProperties);
 
 		while (true) {
 			ReadDateFromFile(inFile, token);
@@ -301,10 +307,6 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		return nullptr;
 	//if (!matData) return nullptr;
 	//if (dataSize == 0) return nullptr;
-
-
-	material->Initialize(matData.get(), dataSize);
-
 	return material;
 }
 
@@ -313,12 +315,17 @@ int CMaterial::GetTextureIdx(std::ifstream& inFile)
 	std::string name{};
 	BinaryReader::ReadDateFromFile(inFile, name);
 
-	if (name == "null") return -1;
+	if (name == "null") 
+		return -1;
 
+	if (RESOURCE.Get<CTexture>(name)) {
+		return RESOURCE.Get<CTexture>(name)->GetSrvIndex();
+	}
 	std::string path = TEXTURE_PATH(name);
-	auto mainTex = RESOURCE.Load<CTexture>(name, path);
+	auto mainTex = std::make_shared<CTexture>(name, path);
+	RESOURCE.Add(mainTex);
 
-	return mainTex->GetSrvIndex();;
+	return mainTex->GetSrvIndex();
 }
 
 void CTerrainMaterial::Update()

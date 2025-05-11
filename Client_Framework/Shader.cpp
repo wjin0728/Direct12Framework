@@ -4,6 +4,22 @@
 
 std::array<std::string, PASS_TYPE_COUNT> CShader::passName = { "Forward","GPass","Shadow","Stencil","Directional", "Lighting", "PostProcessing", "Final"};
 
+void CShader::CreateGPUResource()
+{
+	if (d3dPiplineState) return;
+	if (isLoaded) return;
+	auto device = INSTANCE(CDX12Manager).GetDevice();
+	HRESULT hr = device->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&d3dPiplineState));
+	if (FAILED(hr)) {
+		OutputDebugStringA((name).c_str());
+		return;
+	}
+	if (pipelineStateDesc.InputLayout.pInputElementDescs)
+		delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
+
+	isLoaded = true;
+}
+
 D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 {
 	D3D12_INPUT_ELEMENT_DESC* desc{};
@@ -323,11 +339,6 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::s
 bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, const std::string& name, bool getPassName)
 {
 	mInfo = info;
-	ComPtr<ID3DBlob> vsBlob, psBlob, gsBlob;
-
-	ComPtr<ID3DBlob> hsBlob{}, dsBlob{};
-
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
 
 	pipelineStateDesc.pRootSignature = INSTANCE(CDX12Manager).GetRootSignature();
 	std::string passType = passName[mInfo.shaderType];
@@ -339,6 +350,11 @@ bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, 
 
 	pipelineStateDesc.VS = CreateShader(vsBlob, name, "VS_" + sName, "vs_5_1");
 	pipelineStateDesc.PS = CreateShader(psBlob, name, "PS_" + sName, "ps_5_1");
+
+	if (!vsBlob || !psBlob) {
+		OutputDebugStringA((name + "Shader Create Failed !").c_str());
+		return false;
+	}
 
 	if (mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::BILLBOARD || mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::PARTICLE) {
 		pipelineStateDesc.GS = CreateShader(gsBlob, name, "GS_" + sName, "gs_5_1");
@@ -389,15 +405,6 @@ bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, 
 		pipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		break;
 	}
-	auto device = INSTANCE(CDX12Manager).GetDevice();
-	HRESULT hr = device->CreateGraphicsPipelineState(&pipelineStateDesc, IID_PPV_ARGS(&d3dPiplineState));
-	if (FAILED(hr)) {
-		OutputDebugStringA((name + passType).c_str());
-		return false;
-	}
-
-	if (pipelineStateDesc.InputLayout.pInputElementDescs)
-		delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
 
 	if(getPassName) this->name = shaderName + passType;
 	else this->name = shaderName;

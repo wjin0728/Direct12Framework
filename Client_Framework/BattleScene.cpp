@@ -25,6 +25,7 @@ CBattleScene::CBattleScene()
 void CBattleScene::Initialize()
 {
 	// Load default resources
+	INSTANCE(ServerManager).Client_Login();
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
 	LoadSceneFromFile(SCENE_PATH("Battle1"));
 }

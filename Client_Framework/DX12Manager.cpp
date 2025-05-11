@@ -152,6 +152,8 @@ void CDX12Manager::InitRenderTargetGroups()
 			renderTargets[i].rt->SetName("SwapChainTarget_" + std::to_string(i));
 
 			mSwapChain->GetBuffer(i, IID_PPV_ARGS(&renderTargets[i].rt->GetResource()));
+			renderTargets[i].rt->isLoaded = true;
+			renderTargets[i].rt->isSR = false;
 			RESOURCE.Add(renderTargets[i].rt);
 		}
 
@@ -174,49 +176,41 @@ void CDX12Manager::InitRenderTargetGroups()
 #pragma region G Pass
 	{
 		std::vector<RenderTarget> renderTargets(5);
-		renderTargets[0].rt = std::make_shared<CTexture>();
-		renderTargets[0].rt->SetName("GBufferAlbedo");
-		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr, 0,
+		renderTargets[0].rt = std::make_shared<CTexture>("GBufferAlbedo", DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[0].rt);
 
 		//normal + metallic
-		renderTargets[1].rt = std::make_shared<CTexture>();
-		renderTargets[1].rt->SetName("GBufferNormal");
-		renderTargets[1].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
+		renderTargets[1].rt = std::make_shared<CTexture>("GBufferNormal", DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[1].rt);
 
+
 		//emissive + shadow
-		renderTargets[2].rt = std::make_shared<CTexture>();
-		renderTargets[2].rt->SetName("GBufferEmissive");
-		renderTargets[2].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
+		renderTargets[2].rt = std::make_shared<CTexture>("GBufferEmissive", DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[2].rt);
-
 		//position + smoothness
-		renderTargets[3].rt = std::make_shared<CTexture>();
-		renderTargets[3].rt->SetName("GBufferPosition");
-		renderTargets[3].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
+		renderTargets[3].rt = std::make_shared<CTexture>("GBufferPosition", DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[3].rt);
 
 		//depth
-		renderTargets[4].rt = std::make_shared<CTexture>();
-		renderTargets[4].rt->SetName("GBufferDepth");
-		renderTargets[4].rt->Create2DTexture(DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
+		renderTargets[4].rt = std::make_shared<CTexture>("GBufferDepth", DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[4].rt);
+
+		RESOURCE.ProcessGPULoadQueue();
 
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::G_BUFFER)] = std::make_shared<CRenderTargetGroup>();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::G_BUFFER)]->Initialize(renderTargets, dsvHeapHandle);
@@ -226,13 +220,12 @@ void CDX12Manager::InitRenderTargetGroups()
 #pragma region Lighting Pass
 	{
 		std::vector<RenderTarget> renderTargets(1);
-		renderTargets[0].rt = std::make_shared<CTexture>();
-		renderTargets[0].rt->SetName("LightingTarget");
-		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+		renderTargets[0].rt = std::make_shared<CTexture>("LightingTarget", DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[0].rt);
+		RESOURCE.ProcessGPULoadQueue();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::LIGHTING_PASS)] = std::make_shared<CRenderTargetGroup>();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::LIGHTING_PASS)]->Initialize(renderTargets, dsvHeapHandle);
 	}
@@ -241,13 +234,12 @@ void CDX12Manager::InitRenderTargetGroups()
 #pragma region Post Process
 	{
 		std::vector<RenderTarget> renderTargets(1);
-		renderTargets[0].rt = std::make_shared<CTexture>();
-		renderTargets[0].rt->SetName("PostProcessTarget");
-		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+		renderTargets[0].rt = std::make_shared<CTexture>("PostProcessTarget", DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[0].rt);
+		RESOURCE.ProcessGPULoadQueue();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::POST_PROCESSING)] = std::make_shared<CRenderTargetGroup>();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::POST_PROCESSING)]->Initialize(renderTargets, dsvHeapHandle);
 	}
@@ -256,13 +248,12 @@ void CDX12Manager::InitRenderTargetGroups()
 #pragma region Final
 	{
 		std::vector<RenderTarget> renderTargets(1);
-		renderTargets[0].rt = std::make_shared<CTexture>();
-		renderTargets[0].rt->SetName("FinalTarget");
-		renderTargets[0].rt->Create2DTexture(DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
+		renderTargets[0].rt = std::make_shared<CTexture>("FinalTarget", DXGI_FORMAT_R8G8B8A8_UNORM, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[0].rt);
+		RESOURCE.ProcessGPULoadQueue();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::FINAL_PASS)] = std::make_shared<CRenderTargetGroup>();
 		renderTargetGroups[static_cast<UINT>(RENDER_TARGET_GROUP_TYPE::FINAL_PASS)]->Initialize(renderTargets, dsvHeapHandle);
 	}
@@ -271,7 +262,7 @@ void CDX12Manager::InitRenderTargetGroups()
 
 void CDX12Manager::InitDepthStencilView()
 {
-	auto dsBuffer = INSTANCE(CResourceManager).Create2DTexture
+	auto dsBuffer = std::make_shared<CTexture>
 	(
 		"DepthStencil", 
 		DXGI_FORMAT_R24G8_TYPELESS,
@@ -282,11 +273,12 @@ void CDX12Manager::InitDepthStencilView()
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
 	);
 	dsBuffer->SetTextureType(DEPTH_STENCIL);
-	descriptorHeaps->CreateDSV(dsBuffer, DS_TYPE::MAIN_BUFFER);
+	dsBuffer->isSR = false;
+	RESOURCE.Add(dsBuffer);
 
 	shadowMapResolution = 4096.f * 4;
 
-	auto shadowMap = INSTANCE(CResourceManager).Create2DTexture
+	auto shadowMap = std::make_shared<CTexture>
 	(
 		"ShadowMap",
 		DXGI_FORMAT_R32_TYPELESS,
@@ -297,6 +289,10 @@ void CDX12Manager::InitDepthStencilView()
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
 	);
 	shadowMap->SetTextureType(DEPTH_STENCIL);
+	RESOURCE.Add(shadowMap);
+
+	RESOURCE.ProcessGPULoadQueue();
+	descriptorHeaps->CreateDSV(dsBuffer, DS_TYPE::MAIN_BUFFER);
 	descriptorHeaps->CreateDSV(shadowMap, DS_TYPE::SHADOW_MAP);
 }
 

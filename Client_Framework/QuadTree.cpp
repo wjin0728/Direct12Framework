@@ -3,6 +3,7 @@
 #include"DX12Manager.h"
 #include"GameObject.h"
 #include"Camera.h"
+#include"ResourceManager.h"
 
 
 CQuadTree::~CQuadTree()
@@ -173,6 +174,9 @@ void CQuadTree::CreateGridMesh(std::shared_ptr<Node>& node)
 	node->mVertices[CORNER_BR] = terrainVertices[node->mCorners[CORNER_BR]];
 
 	node->mVertexBuffer = std::make_shared<CVertexBuffer>();
+
+	INSTANCE(CDX12Manager).OpenCommandList();
 	node->mVertexBuffer->CreateBuffer(node->mVertices);
+	INSTANCE(CDX12Manager).CloseCommandList();
 }
 

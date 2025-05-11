@@ -615,9 +615,10 @@ void CGameObject::CreateUIrendererFromFile(std::ifstream& inFile)
 
 	auto uiRenderer = AddComponent<CUIRenderer>();
 	mRenderer = uiRenderer;
-	auto name = TEXTURE_PATH(textureName);
-	auto texture = RESOURCE.Load<CTexture>(textureName, name);
-	uiRenderer->SetTexture(texture);
+	std::string path = TEXTURE_PATH(textureName);
+	auto mainTex = std::make_shared<CTexture>(textureName, path);
+	RESOURCE.Add(mainTex);
+	uiRenderer->SetTexture(mainTex);
 	uiRenderer->SetSize(size);
 	uiRenderer->SetType(0);
 	uiRenderer->SetColor(color.ToVector3());

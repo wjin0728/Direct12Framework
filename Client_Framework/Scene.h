@@ -42,8 +42,8 @@ public:
 
 	virtual void Initialize() {};
 
-	void Awake();
-	void Start();
+	virtual void Awake();
+	virtual void Start();
 
 	virtual void Update();
 	virtual void LateUpdate();

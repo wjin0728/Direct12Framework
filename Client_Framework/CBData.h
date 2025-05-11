@@ -22,9 +22,9 @@ struct CBPassData
 	int gbufferAlbedoIdx{};
 	
 	int gbufferNormalIdx{};
-	int gbufferDepthIdx{};
-	int gbufferPosIdx{};
 	int gbufferEmissiveIdx{};
+	int gbufferPosIdx{};
+	int gbufferDepthIdx{};
 	int lightingTargetIdx{};
 	int postProcessIdx{};
 	int finalTargetIdx{};

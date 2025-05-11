@@ -39,6 +39,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* cmdList, int idx);
 	virtual void Render(D3D12_VERTEX_BUFFER_VIEW ibv, UINT instancingNum, int idx);
 
+	virtual void CreateGPUResource() override;
 	virtual void ReleaseUploadBuffers();
 
 public:
