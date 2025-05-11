@@ -23,6 +23,7 @@ private:
 	Vec2 mDeadZoneSize{};
 	Vec3 mOriginalPosition{};
 	bool mIsHit{ false };
+	bool mCanRotate{ true };
 
 	std::shared_ptr<class CCamera> mCamera;
 	std::shared_ptr<class CGameObject> mTarget;
@@ -43,6 +44,7 @@ public:
 public:
 	void SetTarget(const std::shared_ptr<CGameObject>& target) { mTarget = target; }
 	void SetTerrain(const std::shared_ptr<CTerrain>& terrain) { mTerrain = terrain; }
+	void SetCanRotate(bool canRotate) { mCanRotate = canRotate; }
 	CameraParams GetCameraParams() const { return mCameraParams; }
 
 	void SetCameraParams(CameraParams& params);

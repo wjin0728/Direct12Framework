@@ -49,7 +49,7 @@ public:
     ~CAnimationSet();
 
 public:
-    std::string						    	mAnimationSetName;
+    string						    	mAnimationSetName;
 
     float						    	mLength = 0.0f;
     int						    		mFramesPerSecond = 0; //m_fTicksPerSecond
@@ -75,7 +75,7 @@ private:
 public:
     std::vector<std::shared_ptr<CAnimationSet>> mAnimationSet{};
     std::vector<std::weak_ptr<CTransform>>      mBoneFrameCaches{};
-    std::vector<std::string>                         mBoneNames{};
+    std::vector<string>                         mBoneNames{};
 };
 
 class CAnimationTrack

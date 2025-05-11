@@ -3,9 +3,6 @@
 #include"UploadBuffer.h"
 
 
-enum {
-	FRAME_RESOURCE_COUNT = 2
-};
 
 class CInstancingBuffer;
 
@@ -30,5 +27,8 @@ public:
 	std::shared_ptr<CStructedBuffer> GetStructedBuffer(UINT type);
 	std::shared_ptr<CConstantBuffer> GetConstantBuffer(UINT type);
 	std::shared_ptr<CInstancingBuffer> GetInstancingBuffer(UINT type);
+
+public:
+	void BindStructedBuffers();
 };
 

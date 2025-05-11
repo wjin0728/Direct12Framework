@@ -977,7 +977,13 @@ namespace DirectX
             return ((1.f - t) * a + t * b);
         }
 
-        
+        inline float NormalizeAngle360(float angle)
+        {
+            angle = fmodf(angle, 360.0f);
+            if (angle < 0.0f)
+                angle += 360.0f;
+            return angle;
+        }
 
 #include "SimpleMath.inl"
 

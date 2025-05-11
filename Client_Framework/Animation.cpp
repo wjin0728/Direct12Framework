@@ -137,7 +137,7 @@ CAnimationController::~CAnimationController()
 
 void CAnimationController::Awake()
 {
-
+	
 }
 
 void CAnimationController::Start()
@@ -145,7 +145,7 @@ void CAnimationController::Start()
 	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
 	if (skinnedMeshRenderer)
 		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();
-
+	
 	auto& boneNames = skinnedMeshRenderer->mBoneNames;
 	mSkinningBoneTransforms.resize(boneNames.size());
 	finalTransforms.resize(boneNames.size());
