@@ -307,6 +307,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 		item_cnt++;
 		break;
 	}
+	case CS_CHANGE_SCENE: {
+		CS_CHANGE_SCENE_PACKET* p = reinterpret_cast<CS_CHANGE_SCENE_PACKET*>(packet);
+
+		for (auto& cl : clients) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.send_change_scene_packet(p->change_scene);
+		}
+		break;
+	}
 	}
 }
 

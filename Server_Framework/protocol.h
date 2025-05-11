@@ -94,6 +94,11 @@ struct CS_ULTIMATE_SKILL_PACKET : PACKET {
 	int				target_id;
 };
 
+
+struct CS_CHANGE_SCENE_PACKET : PACKET {
+	uint8_t			change_scene;
+};
+
 // ----------------------------------------------------------------------------------
 
 
@@ -165,4 +170,7 @@ struct SC_USE_SKILL_PACKET : PACKET {
 struct SC_LOGIN_FAIL_PACKET : PACKET {
 };
 
+struct SC_CHANGE_SCENE_PACKET : PACKET {
+	uint8_t			change_scene;
+};
 #pragma pack (pop)
