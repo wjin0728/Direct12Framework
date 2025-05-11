@@ -24,6 +24,7 @@ constexpr char CS_SKILL_TARGET = 4;
 constexpr char CS_SKILL_NONTARGET = 5;
 constexpr char CS_ULTIMATE_SKILL = 6;
 constexpr char CS_000 = 7;
+constexpr char CS_SCENE_CHANGE = 8;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;

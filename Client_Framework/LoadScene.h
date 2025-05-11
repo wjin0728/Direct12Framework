@@ -11,6 +11,7 @@ public:
 	CLoadScene();
 	~CLoadScene() = default;
 	void Initialize() override;
+	void Awake() override;
 	void Start() override;
 
 	void Update() override;

@@ -16,7 +16,7 @@ CLoadScene::CLoadScene()
 
 void CLoadScene::Initialize()
 {
-	INSTANCE(ServerManager).RegisterPlayerInScene(this);
+	//INSTANCE(ServerManager).RegisterPlayerInScene(this);
 	RESOURCE.LoadLoadingScreen();
 
 	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
@@ -30,6 +30,11 @@ void CLoadScene::Initialize()
 		loadingScreenMoving->AddLoadingScreenTextureIdx(loadingScreen->GetSrvIndex());
 	}
 	mLoadingScreen = loadingScreenMoving;
+}
+
+void CLoadScene::Awake()
+{
+	CScene::Awake();
 }
 
 void CLoadScene::Start()
@@ -66,6 +71,23 @@ void CLoadScene::LateUpdate()
 
 void CLoadScene::RenderScene()
 {
-	CScene::RenderFinalPass();
+	auto finalPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	finalPassBuffer->BindToShader(0);
+	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
+	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
+	renderTarget->ChangeResourceToTarget(backBufferIdx);
+	renderTarget->SetRenderTarget(backBufferIdx);
+	renderTarget->ClearRenderTarget(backBufferIdx);
+
+	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
+
+	D3D12_VIEWPORT mViewport = {0.f,0.f,rtSize.x, rtSize.y};
+	D3D12_RECT mScissorRect = { 0.f,0.f,rtSize.x, rtSize.y };
+
+	CMDLIST->RSSetViewports(1, &mViewport);
+	CMDLIST->RSSetScissorRects(1, &mScissorRect);
+	RenderForLayer("UI", nullptr);
+
+	renderTarget->ChangeTargetToResource(backBufferIdx);
 }
 

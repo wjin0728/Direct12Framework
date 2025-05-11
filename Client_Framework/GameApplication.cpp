@@ -30,7 +30,7 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 		return false;
 	}
 	SetWindowLongPtr(mHwnd, GWL_STYLE, WS_POPUP);
-	SetWindowPos(mHwnd, HWND_TOPMOST, 0, 0, clientWidth, clientHeight,SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+	SetWindowPos(mHwnd, HWND_TOP, 0, 0, clientWidth, clientHeight, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 
 	//매니저 초기화
 	INSTANCE(CResourceManager).Initialize();
