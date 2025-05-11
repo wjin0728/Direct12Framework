@@ -6,13 +6,15 @@ class CObjectStateMachine : public CComponent
 {
 protected:
     PLAYER_STATE currentState;
+    PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
 
 public:
     CObjectStateMachine() : CComponent(COMPONENT_TYPE::STATE), currentState(PLAYER_STATE::IDLE) {}
+    CObjectStateMachine(uint8_t playerClass) : CComponent(COMPONENT_TYPE::STATE), currentState(PLAYER_STATE::IDLE) { mClass = (PLAYER_CLASS)playerClass; }
     CObjectStateMachine(const CObjectStateMachine& other) : CComponent(other) {}
     virtual ~CObjectStateMachine() = default;
 
-    virtual void Awake() override {}
+    virtual void Awake() override;
     virtual void Update() override;
     virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CObjectStateMachine>(); }
 
@@ -23,8 +25,10 @@ public:
             OnEnterState(currentState);
         }
     }
+    void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; };
 
     PLAYER_STATE GetState() const { return currentState; }
+    PLAYER_CLASS GetClass() const { return mClass; }
 
 protected:
     virtual void OnEnterState(PLAYER_STATE state);

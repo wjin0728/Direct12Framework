@@ -21,12 +21,14 @@ CPlayerController::~CPlayerController()
 void CPlayerController::Awake()
 {
 	rigidBody = GetOwner()->GetComponent<CRigidBody>();
+	mStateMachine = owner->GetComponentFromHierarchy<CObjectStateMachine>();
 }
 
 void CPlayerController::Start()
 {
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mTerrain = scene->GetTerrain();
+	SetClass(mStateMachine->GetClass());
 }
 
 void CPlayerController::Update()

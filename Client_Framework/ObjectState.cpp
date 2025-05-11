@@ -3,6 +3,11 @@
 #include "PlayerController.h"
 #include "Animation.h"
 
+void CObjectStateMachine::Awake()
+{
+
+}
+
 void CObjectStateMachine::Update()
 {
 	auto& controller = owner->GetComponentFromHierarchy<CAnimationController>();
@@ -29,9 +34,23 @@ void CObjectStateMachine::OnEnterState(PLAYER_STATE state)
 {
 	auto& controller = owner->GetComponentFromHierarchy<CAnimationController>();
 
-	controller->SetTrackAnimationSet(0, (int)CAnimationController::ARCHER_MAP[state]);
+	switch (mClass) {
+	case PLAYER_CLASS::ARCHER:
+		controller->SetTrackAnimationSet(0, (int)CAnimationController::ARCHER_MAP[state]);
+		break;
+	case PLAYER_CLASS::FIGHTER:
+		controller->SetTrackAnimationSet(0, (int)CAnimationController::FIGHTER_MAP[state]);
+		break;
+	case PLAYER_CLASS::MAGE:
+		controller->SetTrackAnimationSet(0, (int)CAnimationController::MAGE_MAP[state]);
+		break;
+	default:
+		break;
+	}
+
 	controller->SetTrackSpeed(0, 1.0f);
 	controller->SetTrackWeight(0, 1.0f);
+	controller->SetTrackPosition(0, 0.0f);
 
 	switch (state) {
 	case PLAYER_STATE::IDLE:
