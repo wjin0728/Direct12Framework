@@ -24,7 +24,7 @@ constexpr char CS_SKILL_TARGET = 4;
 constexpr char CS_SKILL_NONTARGET = 5;
 constexpr char CS_ULTIMATE_SKILL = 6;
 constexpr char CS_000 = 7;
-constexpr char CS_SCENE_CHANGE = 8;
+constexpr char CS_CHANGE_SCENE = 8;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -40,6 +40,8 @@ constexpr char SC_REMOVE_ITEM = 12;
 constexpr char SC_USE_SKILL = 13;
 constexpr char SC_MONSTER_POS = 14;
 constexpr char SC_ITEM_POS = 15;
+constexpr char SC_CHANGE_SCENE = 16;
+
 
 #pragma pack (push, 1)
 struct PACKET {

@@ -96,6 +96,8 @@ void CPlayerController::OnKeyEvents()
 
 	if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
 		mStateMachine->SetState(PLAYER_STATE::JUMP);
+	}
+	if (INPUT.IsKeyDown(KEY_TYPE::F)) {
 		INSTANCE(ServerManager).send_cs_000_packet();
 	}
 	if (INPUT.IsKeyDown(KEY_TYPE::E)) {

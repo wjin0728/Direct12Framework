@@ -53,3 +53,12 @@ enum S_MONSTER_TYPE : UINT8
 {
 	s_end
 };
+
+enum class S_SCENE_TYPE : UINT8
+{
+	MENU,
+	MAINSTAGE,
+	MAIN,
+
+	END
+};
