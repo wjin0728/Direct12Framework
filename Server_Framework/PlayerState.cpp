@@ -5,12 +5,12 @@
 PlayerState::IdleState& PlayerState::IdleState::GetInstance() { static PlayerState::IdleState instance; return instance; }
 
 void PlayerState::IdleState::Enter(PlayerCharacter* player) {
-    //cout << "Idle 들어왔다리!" << endl;
+    cout << "Idle 들어왔다리!" << endl;
     player->SetVelocity(0, 0, 0); // 속도 0으로 설정
 }
 
 void PlayerState::IdleState::Update(PlayerCharacter* player) {
-    cout << "IDLE 업데이트 중!" << endl;
+    //cout << "IDLE 업데이트 중!" << endl;
     if (player->HasMoveInput()) {
         player->SetState(&PlayerState::RunState::GetInstance());
     }
@@ -28,12 +28,11 @@ void PlayerState::IdleState::Exit(PlayerCharacter* player) {}
 PlayerState::RunState& PlayerState::RunState::GetInstance() { static PlayerState::RunState instance; return instance; }
 
 void PlayerState::RunState::Enter(PlayerCharacter* player) {
-    // 이동 애니메이션 시작 (가정)
 	cout << "RUN 들어왔다리!" << endl;
 }
 
 void PlayerState::RunState::Update(PlayerCharacter* player) {
-    cout << "RUN 업데이트 중!" << endl;
+    //cout << "RUN 업데이트 중!" << endl;
     if (!player->HasMoveInput()) {
         player->SetState(&PlayerState::IdleState::GetInstance());
         return;
@@ -74,6 +73,7 @@ PlayerState::SkillState& PlayerState::SkillState::GetInstance() { static PlayerS
 void PlayerState::SkillState::Enter(PlayerCharacter* player) {
     skillTimer = 2.0f; // 스킬 지속 시간 (2초)
     player->SetVelocity(0, 0, 0); // 스킬 중 이동 멈춤
+	cout << "Skill 들어왔다리!" << endl;
     // 스킬별 동작 호출
     //switch (player->GetSkill()) {
     //case S_ITEM_TYPE::FIRE_ENCHANT: player->OnSkillFireEnchant(); break;
@@ -101,7 +101,8 @@ PlayerState::HitState& PlayerState::HitState::GetInstance() { static PlayerState
 void PlayerState::HitState::Enter(PlayerCharacter* player) {
     hitTimer = 0.5f; // 피격 상태 지속 시간 (0.5초)
     player->SetVelocity(0, 0, 0); // 이동 멈춤
-    // 피격 애니메이션 시작 (가정)
+	cout << "Hit 들어왔다리!" << endl;
+
 }
 
 void PlayerState::HitState::Update(PlayerCharacter* player) {
@@ -117,5 +118,5 @@ void PlayerState::HitState::Update(PlayerCharacter* player) {
 }
 
 void PlayerState::HitState::Exit(PlayerCharacter* player) {
-    // 피격 애니메이션 종료 (가정)
+
 }

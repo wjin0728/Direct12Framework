@@ -9,7 +9,7 @@
 #include"AnimationEnums.h"
 
 std::unordered_map<PLAYER_STATE, ARCHER_ANIMATION> CAnimationController::ARCHER_MAP = {
-	{ PLAYER_STATE::IDLE, ARCHER_ANIMATION::IDLE },
+	{ PLAYER_STATE::IDLE, ARCHER_ANIMATION::COMBATIDLE },
 	{ PLAYER_STATE::RUN, ARCHER_ANIMATION::RUN },
 	{ PLAYER_STATE::ATTACK, ARCHER_ANIMATION::ATTACK },
 	{ PLAYER_STATE::MOVE_ATTACK, ARCHER_ANIMATION::RUNATTACK },
@@ -147,7 +147,10 @@ float CAnimationSet::UpdatePosition(float position, float start, float end)
 	case ANIMATION_TYPE::ONCE: {
 		mPosition += position;
 		if (mPosition < start) mPosition = start;
-		if (mPosition > end) mPosition = end;
+		if (mPosition > end) {
+			mPosition = start;
+			mType = ANIMATION_TYPE::END;
+		}
 		break;
 	}
 	case ANIMATION_TYPE::PINGPONG:
@@ -350,6 +353,11 @@ void CAnimationController::SetTrackStartEndTime(int trackIndex, float start, flo
 void CAnimationController::SetAnimationType(std::shared_ptr<CAnimationSet>& animationSet, ANIMATION_TYPE type)
 {
 	animationSet->SetAnimationType(type);
+}
+
+void CAnimationController::SetAnimationType(int trackIndex, ANIMATION_TYPE type)
+{
+	if (trackIndex < mTracks.size()) mAnimationSets->mAnimationSet[mTracks[trackIndex]->mIndex]->SetAnimationType(type);
 }
 
 void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)

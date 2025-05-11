@@ -9,8 +9,9 @@ enum class ANIMATION_TYPE : UINT
     ONCE,
     LOOP,
     PINGPONG,
+    END,
 
-    END
+    end
 };
 
 enum class ANIMATION_BLEND_TYPE : UINT
@@ -19,7 +20,7 @@ enum class ANIMATION_BLEND_TYPE : UINT
     OVERRIDE,
     OVERRIDE_PASSTHROUGH,
 
-    END
+    end
 };
 
 struct CallbackKey 
@@ -183,6 +184,7 @@ public:
     void SetTrackStartEndTime(int trackIndex, float start, float end);
 
     void SetAnimationType(std::shared_ptr<CAnimationSet>& animationSet, ANIMATION_TYPE type);
+    void SetAnimationType(int trackIndex, ANIMATION_TYPE type);
 
     void SetAnimationCallbackHandler(std::shared_ptr<CAnimationSet>& animationSet, std::shared_ptr <CCallbackHandler>& callbackHandler);
 

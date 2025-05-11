@@ -20,7 +20,7 @@ public:
 
 	PlayerCharacter() :
 		Object(S_OBJECT_TYPE::S_PLAYER),
-		_look_dir(Vec3::Zero), 
+		_look_dir(Vec3(1, 1, 1)), 
 		_class(S_PLAYER_CLASS::end),
 		_barrier(0),
 		_on_FireEnchant(false),	
@@ -61,7 +61,10 @@ public:
 	bool HasMoveInput() {
 		return (_velocity.x != 0 || _velocity.y != 0 || _velocity.z != 0);
 	}
+
 	void Update();
 	void TakeDamage(int damage);
+
+	bool OnFighterBasicAttack(BoundingOrientedBox& monster_box);
 };
 

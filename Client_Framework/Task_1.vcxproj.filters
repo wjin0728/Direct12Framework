@@ -216,6 +216,10 @@
     </ClInclude>
     <ClInclude Include="CEntityState.h" />
     <ClInclude Include="ItemMovement.h" />
+    <ClInclude Include="AnimationEnums.h" />
+    <ClInclude Include="ObjectState.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -385,6 +389,9 @@
     </ClCompile>
     <ClCompile Include="ItemMovement.cpp">
       <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectState.cpp">
+      <Filter>GameObject\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

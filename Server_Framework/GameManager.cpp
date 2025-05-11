@@ -207,6 +207,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 			if (cl.second._id == c_id) continue;
 			clients[c_id].send_add_player_packet(&cl.second);
 		}
+
+		clients[c_id]._player.SetState(&PlayerState::IdleState::GetInstance());
 		break;
 	}
 	case CS_CHAT: {
@@ -250,6 +252,13 @@ void GameManager::Process_packet(int c_id, char* packet)
 		CS_MOUSE_VEC3_PACKET* p = reinterpret_cast<CS_MOUSE_VEC3_PACKET*>(packet);
 		Vec3 local_lookDir = Vec3(p->dir_x, p->dir_y, p->dir_z);
 		cout << "dir : " << local_lookDir.x << ", " << local_lookDir.y << ", " << local_lookDir.z << endl;
+		
+		for (auto& cl : clients) {
+			if (cl.second._state != ST_INGAME) continue;
+			if (cl.second._id == c_id) continue;
+			cl.second._player.LocalTransform();
+			clients[c_id]._player.OnFighterBasicAttack(cl.second._player._boundingbox);
+		}
 		break;
 	}
 	case CS_SKILL_TARGET: {
