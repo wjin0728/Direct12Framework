@@ -90,7 +90,7 @@ void CLight::LateUpdate()
 	if (!mLightData.type == (UINT)LIGHT_TYPE::DIRECTIONAL || !mainCamera || !lightCam) return;
 	Vec3 corners[8]{};
 	mainCamera->GenerateViewMatrix();
-	mainCamera->mFrustumView.GetCorners(corners);
+	mainCamera->mFrustumWorld.GetCorners(corners);
 
 	Vec3 center{};
 	for (int i = 0; i < 8; ++i) {

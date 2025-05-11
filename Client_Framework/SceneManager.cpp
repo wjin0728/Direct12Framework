@@ -46,9 +46,16 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 	INSTANCE(CResourceManager).ProcessGPULoadQueue();
 }
 
-void CSceneManager::ChangeScene(SCENE_TYPE nextScene)
+void CSceneManager::ChangeScene(SCENE_TYPE nextScene, bool savePrevScene)
 {
-	prevScene = curScene;
+	if (savePrevScene) {
+		if (curScene) {
+			prevScene = curScene;
+		}
+	}
+	else {
+		prevScene.reset();
+	}
 	LoadScene(nextScene);
 }
 

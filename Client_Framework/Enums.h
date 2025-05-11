@@ -1,7 +1,7 @@
 #pragma once
 
 enum {
-	FRAME_RESOURCE_COUNT = 2
+	FRAME_RESOURCE_COUNT = 1
 };
 
 enum class LIGHT_TYPE : UINT8

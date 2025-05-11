@@ -217,6 +217,7 @@
     <ClInclude Include="CEntityState.h" />
     <ClInclude Include="ItemMovement.h" />
     <ClInclude Include="LoadScene.h" />
+    <ClInclude Include="LoadingScreen.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -388,6 +389,9 @@
       <Filter>Client</Filter>
     </ClCompile>
     <ClCompile Include="LoadScene.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadingScreen.cpp">
       <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>

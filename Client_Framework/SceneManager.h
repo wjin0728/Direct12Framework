@@ -21,7 +21,7 @@ public:
 	void Destroy();
 
 	void LoadScene(SCENE_TYPE nextScene);
-	void ChangeScene(SCENE_TYPE nextScene);
+	void ChangeScene(SCENE_TYPE nextScene, bool savePrevScene = false);
 	void ReturnPrevScene();
 
 public:

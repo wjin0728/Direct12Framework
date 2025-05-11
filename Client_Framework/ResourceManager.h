@@ -32,6 +32,9 @@ private:
 	std::queue<CResource*> mGPULoadQueue;
 	std::mutex mQueueMutex;
 
+	bool mThreadRunning = false;
+	bool mLoadFinished = false;
+
 public:
 	void Initialize();
 	void Destroy();
@@ -48,22 +51,22 @@ public:
 public:
 	void UpdateMaterials();
 
-	void LoadSceneResourcesFromFile(std::ifstream& ifs);
-	void LoadSceneResourcesFromFile(const std::string& fileName);
-	void LoadPlayerObjects();
-	void LoadSkillObjects();
+	bool LoadSceneResourcesFromFile(std::ifstream& ifs);
+	bool LoadSceneResourcesFromFile(const std::string& fileName);
+	bool LoadPlayerObjects();
+	bool LoadSkillObjects();
+	bool LoadLoadingScreen();
 
 	void LoadPrefabFromFile(const std::string& name);
 
 	std::unordered_map<std::string, std::shared_ptr<class CGameObject>>& GetPrefabs() { return prefabs; }
 
-private:
+public:
 	void LoadDefaultMeshes();
 	void LoadDefaultTexture();
 	void LoadDefaultMaterials();
 	void LoadDefaultShaders();
 
-	void LoadLoadingScreen();
 
 	void MakeShadersForAllPass(const std::string& shaderName, const std::string& name, ShaderInfo info);
 
@@ -86,6 +89,9 @@ public:
 	void EnqueueRequest(CResource* req);
 	void ProcessGPULoadImmediate(CResource* req); // 즉시 처리
 	void ProcessGPULoadQueue(int maxPerFrame = 0); // 매 프레임 호출
+	void RequestLoad();
+	bool IsLoadFinished() const;
+	bool IsGPULoadQueueEmpty() const { return mGPULoadQueue.empty(); }
 };
 
 template<typename T>

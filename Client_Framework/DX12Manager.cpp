@@ -105,11 +105,12 @@ void CDX12Manager::ChangeSwapChainState()
 
 	BOOL bFullScreenState = FALSE;
 	ThrowIfFailed(mSwapChain->GetFullscreenState(&bFullScreenState, NULL));
-	ThrowIfFailed(mSwapChain->SetFullscreenState(!bFullScreenState, NULL));
+	ThrowIfFailed(mSwapChain->SetFullscreenState(!bFullScreenState, NULL)); // 전체화면 전환
 
+	// 전체화면 해상도 설정
 	DXGI_MODE_DESC dxgiTargetParameters{};
 	dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	dxgiTargetParameters.Width = renderTargetSize.y;
+	dxgiTargetParameters.Width = renderTargetSize.x;
 	dxgiTargetParameters.Height = renderTargetSize.y;
 	dxgiTargetParameters.RefreshRate.Numerator = 60;
 	dxgiTargetParameters.RefreshRate.Denominator = 1;
@@ -118,16 +119,19 @@ void CDX12Manager::ChangeSwapChainState()
 
 	ThrowIfFailed(mSwapChain->ResizeTarget(&dxgiTargetParameters));
 
-	for (int i = 0; i < SWAP_CHAIN_COUNT; i++) {
-		auto target = INSTANCE(CResourceManager).Get<CTexture>("SwapChainTarget_" + std::to_string(i));
-	}
-
+	// 스왑체인 버퍼 리사이즈
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc{};
 	ThrowIfFailed(mSwapChain->GetDesc(&dxgiSwapChainDesc));
-	ThrowIfFailed(mSwapChain->ResizeBuffers(swapChainBufferNum, renderTargetSize.y,
-		renderTargetSize.y, dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags));
+	ThrowIfFailed(mSwapChain->ResizeBuffers(
+		swapChainBufferNum,
+		renderTargetSize.x,
+		renderTargetSize.y,
+		dxgiSwapChainDesc.BufferDesc.Format,
+		dxgiSwapChainDesc.Flags
+	));
 	curBackBuffIdx = mSwapChain->GetCurrentBackBufferIndex();
 
+	InitRenderTargetGroups();
 	InitDepthStencilView();
 }
 

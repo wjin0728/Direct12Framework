@@ -123,9 +123,10 @@ void CScene::RenderGBufferPass()
 	auto gBufferPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
 	gBufferPassBuffer->BindToShader(0);
 	auto& camera = mCameras["MainCamera"];
+	auto& lightCamera = mCameras["DirectionalLight"];
 	if (camera) {
 		camera->SetViewportsAndScissorRects(CMDLIST);
-		RenderForLayer("Opaque", camera, G_PASS);
+		RenderForLayer("Opaque", lightCamera, G_PASS);
 		if (mTerrain) mTerrain->Render(camera, G_PASS);
 	}
 
@@ -173,6 +174,8 @@ void CScene::RenderLightingPass()
 
 void CScene::RenderFinalPass()
 {
+	auto finalPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	finalPassBuffer->BindToShader(0);
 	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
 	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
 	renderTarget->ChangeResourceToTarget(backBufferIdx);
@@ -182,8 +185,10 @@ void CScene::RenderFinalPass()
 	auto& camera = mCameras["MainCamera"];
 	camera->SetViewportsAndScissorRects(CMDLIST);
 	auto finalShader = RESOURCE.Get<CShader>("FinalPass");
-	finalShader->SetPipelineState(CMDLIST);
-	CRenderer::RenderFullscreen();
+	if(finalShader) {
+		finalShader->SetPipelineState(CMDLIST);
+		CRenderer::RenderFullscreen();
+	}
 	RenderForLayer("UI", camera);
 
 	renderTarget->ChangeTargetToResource(backBufferIdx);
@@ -385,7 +390,7 @@ void CScene::UpdatePassData()
 	passData.gbufferDepthIdx = renderTargetIndices[idx++];
 	auto lightingTarget = RESOURCE.Get<CTexture>("LightingTarget");
 	if (lightingTarget) {
-		passData.lightingTargetIdx = lightingTarget->GetSrvIndex();
+		passData.lightingTargetIdx = renderTargetIndices[renderPasstype];
 	}
 	auto postProcessTarget = RESOURCE.Get<CTexture>("PostProcessTarget");
 	if (postProcessTarget) {

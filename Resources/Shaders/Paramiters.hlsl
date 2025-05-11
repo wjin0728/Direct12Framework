@@ -77,8 +77,7 @@ cbuffer CBBoneTransforms : register(b3)
 
 struct CBUIData
 {
-    float3 color;
-    float depth;
+    float4 color;
     float2 size;
     float2 uvOffset;
     float2 uvScale;

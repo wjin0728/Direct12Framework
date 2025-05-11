@@ -15,15 +15,16 @@ void CResourceManager::Initialize()
 	for (UINT i = 0; i < TEXTURE_COUNT; i++) {
 		srvIdxQueue.push(i);
 	}
-	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
-
-	
 }
 
 void CResourceManager::Destroy()
 {
 	for (auto& map : resources) {
 		map.clear();
+	}
+	if (mLoadThread.joinable())
+	{
+		mLoadThread.join(); // 스레드 종료 대기
 	}
 }
 
@@ -37,7 +38,7 @@ void CResourceManager::UpdateMaterials()
 	}
 }
 
-void CResourceManager::LoadSceneResourcesFromFile(std::ifstream& ifs)
+bool CResourceManager::LoadSceneResourcesFromFile(std::ifstream& ifs)
 {
 	using namespace BinaryReader;
 
@@ -69,29 +70,35 @@ void CResourceManager::LoadSceneResourcesFromFile(std::ifstream& ifs)
 	for (int i = 0; i < materialCount; i++) {
 		Add(CMaterial::CreateMaterialFromFile(ifs));
 	}
+
+	return true;
 }
 
-void CResourceManager::LoadSceneResourcesFromFile(const std::string& fileName)
+bool CResourceManager::LoadSceneResourcesFromFile(const std::string& fileName)
 {
 	std::ifstream ifs{ fileName, std::ios::binary };
 	if (!ifs) {
-		return;
+		return false;
 	}
-	LoadSceneResourcesFromFile(ifs);
+	return LoadSceneResourcesFromFile(ifs);
 }
 
-void CResourceManager::LoadPlayerObjects()
+bool CResourceManager::LoadPlayerObjects()
 {
 	LoadPrefabFromFile("Player_Archer");
 	LoadPrefabFromFile("Player_Fighter");
 	LoadPrefabFromFile("Player_Mage");
+
+	return true;
 }
 
-void CResourceManager::LoadSkillObjects()
+bool CResourceManager::LoadSkillObjects()
 {
 	LoadPrefabFromFile("Item_Skill1");
 	LoadPrefabFromFile("Item_Skill2");
 	LoadPrefabFromFile("Item_Skill3");
+
+	return true;
 }
 
 void CResourceManager::LoadPrefabFromFile(const std::string& name)
@@ -146,13 +153,6 @@ void CResourceManager::LoadDefaultMeshes()
 		m->SetName("Cube");
 		m->SetType(RESOURCE_TYPE::MESH);
 		Add(m);
-	}
-	{
-		std::shared_ptr<CMesh> m = CMesh::CreateRectangleMesh({2.f,2.f});
-		m->SetName("Rectangle");
-		m->SetType(RESOURCE_TYPE::MESH);
-		Add(m);
-		CUIRenderer::mQuad = m;
 	}
 }
 
@@ -304,8 +304,15 @@ void CResourceManager::LoadDefaultShaders()
 	
 }
 
-void CResourceManager::LoadLoadingScreen()
+bool CResourceManager::LoadLoadingScreen()
 {
+	{
+		std::shared_ptr<CMesh> m = CMesh::CreateRectangleMesh({ 2.f,2.f });
+		m->SetName("Rectangle");
+		m->SetType(RESOURCE_TYPE::MESH);
+		Add(m);
+		CUIRenderer::mQuad = m;
+	}
 	{
 		ShaderInfo info;
 		info.shaderType = PASS_TYPE::UI;
@@ -318,10 +325,14 @@ void CResourceManager::LoadLoadingScreen()
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("Sprite", info, "Sprite", false)) Add(shader);
 	}
-	{
-		std::shared_ptr<CTexture> loadingScreen = std::make_shared<CTexture>("LoadingScreen", TEXTURE_PATH("LoadingScreen"));
+	for (int i = 0; i < 16;i++) {
+		auto name = "Loading" + std::to_string(i);
+		std::shared_ptr<CTexture> loadingScreen = std::make_shared<CTexture>(name, TEXTURE_PATH(name));
+		loadingScreen->AssignedSRVIndex();
 		Add(loadingScreen);
 	}
+
+	return true;
 }
 
 void CResourceManager::MakeShadersForAllPass(const std::string& shaderName, const std::string& name, ShaderInfo info)
@@ -360,13 +371,14 @@ UINT CResourceManager::GetMaterialSRVIndex()
 void CResourceManager::BackgroundLoadingThread()
 {
 	LoadDefaultMeshes();
-	LoadDefaultTexture();
 	LoadDefaultShaders();
 	LoadDefaultMaterials();
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
-
 	LoadPlayerObjects();
 	LoadSkillObjects();
+
+	mLoadFinished = true;
+	mThreadRunning = false;
 }
 
 void CResourceManager::EnqueueRequest(CResource* req)
@@ -412,5 +424,14 @@ void CResourceManager::ProcessGPULoadQueue(int maxPerFrame)
 	}
 }
 
+void CResourceManager::RequestLoad()
+{
+	mLoadFinished = false;
+	mThreadRunning = true;
+	mLoadThread = std::thread(&CResourceManager::BackgroundLoadingThread, this);
+}
 
-
+bool CResourceManager::IsLoadFinished() const
+{
+	return mLoadFinished;
+}

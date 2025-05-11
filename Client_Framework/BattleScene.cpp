@@ -17,8 +17,9 @@
 #include"Material.h"
 #include"InstancingGroup.h"
 #include"ServerManager.h"
+#include"Light.h"
 
-CBattleScene::CBattleScene()
+CBattleScene::CBattleScene() : CScene()
 {
 }
 
@@ -28,6 +29,7 @@ void CBattleScene::Initialize()
 	INSTANCE(ServerManager).Client_Login();
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
 	LoadSceneFromFile(SCENE_PATH("Battle1"));
+	CLight::SetVolumes();
 }
 
 void CBattleScene::Update()

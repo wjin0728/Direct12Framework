@@ -267,9 +267,8 @@ std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& shad
 	uiRenderer->SetSize(size);
 	uiRenderer->SetUVOffset({ 0.f, 0.f });
 	uiRenderer->SetUVScale({ 1.f, 1.f });
-	uiRenderer->SetDepth(depth);
 	uiRenderer->SetType(0);
-	uiRenderer->SetColor({ 1.f, 1.f, 1.f });
+	uiRenderer->SetPosition(pos);
 
 	object->SetActive(true);
 	object->SetRenderLayer("UI");
@@ -621,7 +620,7 @@ void CGameObject::CreateUIrendererFromFile(std::ifstream& inFile)
 	uiRenderer->SetTexture(mainTex);
 	uiRenderer->SetSize(size);
 	uiRenderer->SetType(0);
-	uiRenderer->SetColor(color.ToVector3());
+	uiRenderer->SetColor(color);
 	uiRenderer->SetPosition(pos);
 	uiRenderer->SetShader("Sprite");
 }

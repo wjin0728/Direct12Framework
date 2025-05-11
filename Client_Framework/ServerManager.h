@@ -29,6 +29,7 @@ public:
 
 public:
 	void Initialize();
+	void Connect();
 	void Client_Login();
 	bool InitPlayerAndCamera();
 	void RegisterPlayerInScene(class CScene* scene);

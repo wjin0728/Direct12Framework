@@ -180,7 +180,7 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 direction = light.directionWS;
     float3 lightDir = -normalize(direction);
     
-    float3 lightColor = light.lColor;
+    float3 lightColor = light.lColor * light.strength;
 
     float3 F0 = float3(0.04, 0.04, 0.04);
     F0 = lerp(F0, albedo, metallic);
@@ -206,8 +206,8 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * albedo / 3.1415f + specular) * lightColor * NdotL;
-    float3 ambientLight = albedo * 0.3f * ndotUp;
-    ambientLight += albedo * 0.2f;
+    float3 ambientLight = albedo * 0.4f * ndotUp;
+    ambientLight += albedo * 0.4f;
     
     return (directLight + ambientLight) * lightingData.shadowFactor + surfaceData.emissive;
 }

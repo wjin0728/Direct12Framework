@@ -12,13 +12,25 @@
 bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdShow)
 {
 	mHInstance = hInstance;
-	clientWidth = FRAMEBUFFER_WIDTH;
-	clientHeight = FRAMEBUFFER_HEIGHT;
+
+	DEVMODE devMode = {};
+	devMode.dmSize = sizeof(DEVMODE);
+	if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+	{
+		clientWidth = devMode.dmPelsWidth;
+		clientHeight = devMode.dmPelsHeight;
+	}
+
+
+	//clientWidth = FRAMEBUFFER_WIDTH;
+	//clientHeight = FRAMEBUFFER_HEIGHT;
 	
 	//윈도우 초기화
 	if (!InitWindow(wndProc, cmdShow)) {
 		return false;
 	}
+	SetWindowLongPtr(mHwnd, GWL_STYLE, WS_POPUP);
+	SetWindowPos(mHwnd, HWND_TOPMOST, 0, 0, clientWidth, clientHeight,SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 
 	//매니저 초기화
 	INSTANCE(CResourceManager).Initialize();
@@ -28,9 +40,9 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	TIMER.Initilaize();
 	INPUT.Initialize(mHwnd);
 
-	RESOURCE.BackgroundLoadingThread();
-	CLight::SetVolumes();
-	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAINSTAGE);
+	RESOURCE.LoadDefaultTexture();
+	INSTANCE(ServerManager).Connect();
+	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::LOADING);
 
 	TIMER.Reset();
 
@@ -211,8 +223,10 @@ bool CGameApplication::InitWindow(WNDPROC wndProc, int cmdShow)
 		return false;
 	}
 
-	ShowWindow(mHwnd, cmdShow);
+	ShowWindow(mHwnd, SW_SHOWMAXIMIZED);
 	UpdateWindow(mHwnd);
+	SetForegroundWindow(mHwnd);
+	SetFocus(mHwnd);
 
 	return true;
 }

@@ -111,7 +111,7 @@ void CTexture::Create2DTexture()
 	else if (desc.Flags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
 	{
 		resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-		float arrFloat[4] = { 1.f,1.f,1.f,1.f };
+		float arrFloat[4] = { 0.f,0.f,0.f,0.f };
 		optimizedClearValue = new CD3DX12_CLEAR_VALUE(desc.Format, arrFloat);
 	}
 

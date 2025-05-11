@@ -109,6 +109,6 @@ public:
 	virtual bool Initialize(const std::string& shaderName, const ShaderInfo& info, const std::string& name, bool getPassName = true);
 	
 public:
-	void SetPipelineState(ID3D12GraphicsCommandList* cmdList) { cmdList->SetPipelineState(d3dPiplineState.Get()); }
+	void SetPipelineState(ID3D12GraphicsCommandList* cmdList) { if(d3dPiplineState) cmdList->SetPipelineState(d3dPiplineState.Get()); }
 	PASS_TYPE GetShaderType() const { return this->mInfo.shaderType; }
 };

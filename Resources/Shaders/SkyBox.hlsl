@@ -54,7 +54,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 //«»ºø ºŒ¿Ã¥ı
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 {
-    float3 color = float3(0.4f, 0.4f, 0.4f);
+    float3 color = float3(0.5f, 0.5f, 0.5f);
     
     float3 worldPosition = input.positionWS.xyz;
     
@@ -67,5 +67,5 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     
     float3 staticSwitch20 = lerpResult18;
 
-    return float4(staticSwitch20, 1.f);
+    return float4(color + staticSwitch20, 1.f);
 }

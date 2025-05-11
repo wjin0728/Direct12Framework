@@ -33,7 +33,7 @@ void ServerManager::Initialize()
 	InitPlayerAndCamera();
 }
 
-void ServerManager::Client_Login()
+void ServerManager::Connect()
 {
 	SOCKADDR_IN server_addr;
 	server_addr.sin_family = AF_INET;
@@ -52,7 +52,10 @@ void ServerManager::Client_Login()
 
 	WSAOVERLAPPED wsaover;
 	ZeroMemory(&wsaover, sizeof(wsaover));
+}
 
+void ServerManager::Client_Login()
+{
 	CS_LOGIN_PACKET p;
 	p.size = sizeof(p);
 	p.type = CS_LOGIN;

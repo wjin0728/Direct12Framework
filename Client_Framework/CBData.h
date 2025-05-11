@@ -71,8 +71,7 @@ struct BillboardData
 
 struct CBUIData
 {
-	Vec3 color{};
-	float depth{ 0 };
+	Vec4 color = Vec4::One;
 	Vec2 size{};
 	Vec2 uvOffset;  
 	Vec2 uvScale;   

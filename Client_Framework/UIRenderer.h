@@ -7,7 +7,7 @@ class CUIRenderer : public CRenderer
 public:
 	static std::shared_ptr<class CMesh> mQuad;
 private:
-	CBUIData mUIData{};
+	CBUIData mUIData;
 	std::shared_ptr<class CShader> mShader{};
 
 	int mUIdataIdx = -1;
@@ -35,7 +35,8 @@ public:
 	void SetShader(const std::shared_ptr<CShader>& shader) { mShader = shader; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetShader(const std::string& name);
 	void SetUIData(const CBUIData& data) { mUIData = data; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
-	void SetColor(const Vec3& color) { mUIData.color = color; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
+	void SetColor(const Vec4& color) { mUIData.color = color; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
+	void SetAlpha(float alpha) { mUIData.color.w = alpha; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetType(int type) { mUIData.type = type; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetTextureIdx(int idx) { mUIData.textureIdx = idx; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetTexture(const std::string& name);
@@ -44,10 +45,9 @@ public:
 	void SetSize(const Vec2& size) { mUIData.size = size; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetUVOffset(const Vec2& uvOffset) { mUIData.uvOffset = uvOffset; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetUVScale(const Vec2& uvScale) { mUIData.uvScale = uvScale; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
-	void SetDepth(float depth) { mUIData.depth = depth; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 
 	CBUIData GetUIData() const { return mUIData; }
-	Vec3 GetColor() const { return mUIData.color; }
+	Vec4 GetColor() const { return mUIData.color; }
 	Vec2 GetSize() const { return mUIData.size; }
 	Vec2 GetUVOffset() const { return mUIData.uvOffset; }
 	Vec2 GetUVScale() const { return mUIData.uvScale; }

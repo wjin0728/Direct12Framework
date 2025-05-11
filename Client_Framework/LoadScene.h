@@ -4,6 +4,9 @@
 
 class CLoadScene : public CScene
 {
+private:
+	std::shared_ptr<class CLoadingScreen> mLoadingScreen{ nullptr };
+
 public:
 	CLoadScene();
 	~CLoadScene() = default;
@@ -14,6 +17,5 @@ public:
 	void LateUpdate() override;
 	void RenderScene() override;
 
-public:
 };
 

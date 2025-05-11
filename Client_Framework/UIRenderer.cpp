@@ -19,6 +19,13 @@ std::shared_ptr<class CMesh> CUIRenderer::mQuad = nullptr;
 
 CUIRenderer::CUIRenderer()
 {
+	type = COMPONENT_TYPE::RENDERER;
+	mUIData.type = 0;
+	mUIData.color = Vec4(1.f, 1.f, 1.f, 1.f);
+	mUIData.pos = Vec2(0.f, 0.f);
+	mUIData.size = Vec2(1.f, 1.f);
+	mUIData.uvOffset = Vec2(0.f, 0.f);
+	mUIData.uvScale = Vec2(1.f, 1.f);
 }
 
 CUIRenderer::~CUIRenderer()
@@ -51,7 +58,7 @@ void CUIRenderer::LateUpdate()
 
 void CUIRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 {
-	/*mShader->SetPipelineState(CMDLIST);
+	mShader->SetPipelineState(CMDLIST);
 
 	UpdataObjectDataToShader();
 	auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
@@ -59,7 +66,7 @@ void CUIRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 
 	objectBuffer->BindToShader(mCbvOffset);
 	UpdateUIDataToShader();
-	mQuad->Render(CMDLIST);*/
+	mQuad->Render(CMDLIST);
 }
 
 void CUIRenderer::UpdataObjectDataToShader()

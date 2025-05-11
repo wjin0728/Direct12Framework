@@ -62,7 +62,7 @@ float4 PS_Directional(float4 position : SV_Position) : SV_Target
     
     finalColor = GammaEncoding(finalColor);
     
-    return float4(finalColor, 1.f);
+    return float4(finalColor.rgb, 1.f);
 }
 
 VS_OUTPUT VS_Lighting(VS_INPUT input)
