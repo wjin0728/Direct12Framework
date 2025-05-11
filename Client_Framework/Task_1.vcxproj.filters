@@ -209,18 +209,22 @@
     <ClInclude Include="ThirdPersonCamera.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
-    <ClInclude Include="MiniGame.h" />
     <ClInclude Include="ContinuousRotation.h" />
     <ClInclude Include="UIRenderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
     <ClInclude Include="CEntityState.h" />
     <ClInclude Include="ItemMovement.h" />
-    <ClInclude Include="LoadScene.h" />
     <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="AnimationEnums.h" />
     <ClInclude Include="ObjectState.h">
       <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="MiniGame.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadScene.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -377,9 +381,6 @@
     <ClCompile Include="ThirdPersonCamera.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
-    <ClCompile Include="MiniGame.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="ContinuousRotation.cpp">
       <Filter>Client</Filter>
     </ClCompile>
@@ -392,14 +393,17 @@
     <ClCompile Include="ItemMovement.cpp">
       <Filter>Client</Filter>
     </ClCompile>
-    <ClCompile Include="LoadScene.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="LoadingScreen.cpp">
       <Filter>Client</Filter>
     </ClCompile>
     <ClCompile Include="ObjectState.cpp">
       <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniGame.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -191,7 +191,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[c_id]._player._class = S_PLAYER_CLASS::ARCHER;
 		else if (2 == c_id)
 			clients[c_id]._player._class = S_PLAYER_CLASS::MAGE;
-		clients[c_id]._player._pos = Vec3(45.2, 4.1, 42);
+		clients[c_id]._player._pos = Vec3(45.2, 4.2, 42);
 
 		clients[c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;

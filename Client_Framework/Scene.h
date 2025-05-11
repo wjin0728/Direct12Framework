@@ -35,8 +35,9 @@ protected:
 	int renderPasstype{};
 
 	Matrix UIProjectionMatrix{};
-  
+
 public:
+	bool mIsActive{ false };
 	CScene();
 	virtual ~CScene() = default;
 

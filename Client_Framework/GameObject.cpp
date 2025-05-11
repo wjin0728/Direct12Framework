@@ -425,6 +425,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			}
 		}
 		else if (token == "<Animation>:") {
+			obj->mAnimationController = obj->AddComponent<CAnimationController>();
 			std::string animName{};
 			ReadDateFromFile(inFile, animName);
 			size_t n = animName.find('@');
@@ -472,9 +473,6 @@ void CGameObject::CreateAnimationFromFile(std::string& fileName)
 	if (!ifs) {
 		return;
 	}
-	
-
-	mAnimationController = AddComponent<CAnimationController>();
 
 	std::string token{};
 	int setsNum{};

@@ -36,7 +36,10 @@ void CLoadingScreen::Update()
 		mFadeOutTime -= TIMER.GetDeltaTime();
 		renderer->SetAlpha(mFadeOutTime);
 
-		if (mFadeOutTime <= 0.f) mFadeOutTime = 0.f;
+		if (mFadeOutTime <= 0.f) {
+			mFadeOutTime = 0.f;
+			INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MAINSTAGE, false);
+		}
 	}
 }
 

@@ -18,7 +18,7 @@ public:
 	CTexture(const std::string& name, const std::string& _fileName, bool isSR = true, TEXTURE_TYPE texType = TEXTURE2D);
 	CTexture(const std::string& name, DXGI_FORMAT format, void* data, size_t dataSize, UINT width, UINT height,
 		const D3D12_HEAP_PROPERTIES& heapProperty, D3D12_HEAP_FLAGS heapFlags,
-		D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = { 0.f,0.f,0.f,0.f });
+		D3D12_RESOURCE_FLAGS resFlags, XMFLOAT4 clearColor = { 0.f,0.f,0.f,1.f });
 
 	~CTexture();
 

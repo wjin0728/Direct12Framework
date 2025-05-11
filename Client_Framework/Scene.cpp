@@ -79,6 +79,8 @@ void CScene::LateUpdate()
 	}
 	INSTANCE(CResourceManager).UpdateMaterials();
 	UpdatePassData();
+
+	INSTANCE(CSceneManager).ProcessSceneChangeQueue();
 }
 
 void CScene::RenderShadowPass()

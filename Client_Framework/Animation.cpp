@@ -261,27 +261,32 @@ void CAnimationController::Start()
 			mBoneCaches[i] = bone->GetTransform();
 		}
 	}
-
-	for (auto& set : mAnimationSets->mAnimationSet) {
-		for (auto& layer : set->mLayers) {
-			for (int i = 0; auto & cache : layer->mBoneFrameCaches) {
-				auto& boneName = layer->mBoneNames[i];
-				if (boneMap.contains(boneName)) cache = boneMap[boneName];
-				else cache = owner->FindChildByName(boneName)->GetTransform();
-				++i;
-			}
-		}
-	}
-	mRootTransform = mAnimationSets->mAnimationSet[0]->mLayers[0]->mBoneFrameCaches[0].lock()->GetTransform();
-	mRootTransform.lock()->owner->SetStatic(true);
+	mRootTransform = boneMap[boneNames[0]];
 
 	if (mBoneTransformIdx == -1) {
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
 	}
 
-	SetTrackAnimationSet(0, (int)ARCHER_ANIMATION::COMBATIDLE);
-	SetTrackSpeed(0, 1.0f);
-	SetTrackWeight(0, 1.0f);
+	if(mAnimationSets) {
+		for (auto& set : mAnimationSets->mAnimationSet) {
+			for (auto& layer : set->mLayers) {
+				for (int i = 0; auto & cache : layer->mBoneFrameCaches) {
+					auto& boneName = layer->mBoneNames[i];
+					if (boneMap.contains(boneName)) cache = boneMap[boneName];
+					else cache = owner->FindChildByName(boneName)->GetTransform();
+					++i;
+				}
+			}
+		}
+
+		mRootTransform = mAnimationSets->mAnimationSet[0]->mLayers[0]->mBoneFrameCaches[0].lock()->GetTransform();
+
+		SetTrackAnimationSet(0, (int)ARCHER_ANIMATION::COMBATIDLE);
+		SetTrackSpeed(0, 1.0f);
+		SetTrackWeight(0, 1.0f);
+	}
+
+	mRootTransform.lock()->owner->SetStatic(true);
 }
 
 void CAnimationController::Update()
@@ -293,23 +298,27 @@ void CAnimationController::LateUpdate()
 	float deltaTime = DELTA_TIME;
 	mTime += deltaTime;
 	int nEnabledAnimationTracks = 0;
-	auto& animationSets = mAnimationSets->mAnimationSet;
 
-	for (auto& track : mTracks) {
-		if (track->mEnabled) {
-			nEnabledAnimationTracks++;
-			auto& animationSet = animationSets[track->mIndex];
-			animationSet->Animate(deltaTime * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
+	if (mAnimationSets) {
+		auto& animationSets = mAnimationSets->mAnimationSet;
+
+		for (auto& track : mTracks) {
+			if (track->mEnabled) {
+				nEnabledAnimationTracks++;
+				auto& animationSet = animationSets[track->mIndex];
+				animationSet->Animate(deltaTime * track->mSpeed, track->mWeight, track->mStartTime, track->mEndTime, track == mTracks.front());
+			}
+		}
+		for (auto& track : mTracks) {
+			if (track->mEnabled && animationSets.size())
+				animationSets[track->mIndex]->HandleCallback();
 		}
 	}
+
 	mRootTransform.lock()->owner->UpdateWorldMatrices(nullptr);	
 
-	for (auto& track : mTracks) {
-		if (track->mEnabled && animationSets.size())
-			animationSets[track->mIndex]->HandleCallback();
-	}
-
 	for (int i = 0; auto & cache : mBoneCaches) {
+
 		Matrix boneTransform = cache.lock()->GetWorldMat(false);
 		Matrix bondOffset = Matrix::Identity;
 		bondOffset = mBindPoseBoneOffsets[i];

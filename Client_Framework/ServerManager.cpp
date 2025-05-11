@@ -244,7 +244,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		player->SetStateMachine(stateMachine);
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
-		if (scene && clientID != packet->id) {
+		if (scene && scene->mIsActive && clientID != packet->id) {
 			player->Awake();
 			player->Start();
 			scene->AddObject(player);

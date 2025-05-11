@@ -53,11 +53,6 @@ void CLoadScene::Update()
 		if (resourceMgr.IsGPULoadQueueEmpty())
 		{
 			mLoadingScreen->SetIsLoading(false);
-
-			if (mLoadingScreen->GetFadeOutTime() <= 0.f) {
-				INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MAINSTAGE);
-				return;
-			}
 		}
 
 	}

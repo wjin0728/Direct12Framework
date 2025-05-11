@@ -43,6 +43,7 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 	curScene->Initialize();
 	curScene->Awake();
 	curScene->Start();
+	curScene->mIsActive = true;
 	INSTANCE(CResourceManager).ProcessGPULoadQueue();
 }
 
@@ -59,12 +60,41 @@ void CSceneManager::ChangeScene(SCENE_TYPE nextScene, bool savePrevScene)
 	LoadScene(nextScene);
 }
 
+void CSceneManager::ChangeScene(SceneChangeReq req)
+{
+	if (req.savePrevScene) {
+		if (curScene) {
+			prevScene = curScene;
+		}
+	}
+	else {
+		prevScene.reset();
+	}
+	LoadScene(req.changeScene);
+}
+
 void CSceneManager::ReturnPrevScene()
 {
 	if (!prevScene) {
 		return;
 	}
 	curScene = prevScene;
+}
+
+void CSceneManager::RequestSceneChange(SCENE_TYPE nextScene, bool savePrevScene)
+{
+	SceneChangeReq req(nextScene, savePrevScene);
+	sceneChangeQueue.push(req);
+}
+
+void CSceneManager::ProcessSceneChangeQueue()
+{
+	if (sceneChangeQueue.empty()) {
+		return;
+	}
+	SceneChangeReq req = sceneChangeQueue.front();
+	sceneChangeQueue.pop();
+	ChangeScene(req);
 }
 
 void CSceneManager::InitCurrentScene()
