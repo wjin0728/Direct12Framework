@@ -1,8 +1,6 @@
 #include "SESSION.h"
 #include "Item.h"
 
-
-
 SESSION::~SESSION() {}
 
 void SESSION::do_recv()
@@ -89,4 +87,13 @@ void SESSION::send_use_skill_packet(S_ITEM_TYPE skill_type, int player_id)
 	p.size = sizeof(p);
 	p.player_id = player_id;
 	p.skill_type = skill_type;
+}
+
+void SESSION::send_change_scene_packet(uint8_t scene)
+{
+	SC_CHANGE_SCENE_PACKET p;
+	p.type = SC_CHANGE_SCENE;
+	p.size = sizeof(p);
+	p.change_scene = scene;
+	do_send(&p);
 }

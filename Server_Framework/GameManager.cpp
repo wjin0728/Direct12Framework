@@ -204,8 +204,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 		// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
 		for (auto& cl : clients) {
 			if (cl.second._state != ST_INGAME) continue;
-			if (cl.second._id == c_id) continue;
+			if (cl.first == c_id) continue;
 			clients[c_id].send_add_player_packet(&cl.second);
+			cout << "Send add player " << c_id << " 에게 " << cl.first << endl;
 		}
 
 		clients[c_id]._player.SetState(&PlayerState::IdleState::GetInstance());
@@ -307,7 +308,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		item_cnt++;
 		break;
 	}
-	case CS_SCENE_CHANGE: {
+	case CS_CHANGE_SCENE: {
 		CS_CHANGE_SCENE_PACKET* p = reinterpret_cast<CS_CHANGE_SCENE_PACKET*>(packet);
 
 		for (auto& cl : clients) {

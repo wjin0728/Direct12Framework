@@ -42,6 +42,7 @@ public:
 	void send_drop_item_packet(Item& it, int item_id);
 	void send_remove_item_packet(int item_id, int player_id, uint8_t item_type);
 	void send_use_skill_packet(S_ITEM_TYPE skill_type, int player_id);
+	void send_change_scene_packet(uint8_t scene);
 };
 
 #endif
