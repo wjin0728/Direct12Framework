@@ -10,16 +10,10 @@ void PlayerState::IdleState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::IdleState::Update(PlayerCharacter* player) {
-    //cout << "IDLE 업데이트 중!" << endl;
+    cout << "IDLE 업데이트 중!" << endl;
     if (player->HasMoveInput()) {
         player->SetState(&PlayerState::RunState::GetInstance());
     }
-    //else if (player->HasAttackInput()) {
-    //    player->SetState(&PlayerState::BasicAttackState::GetInstance());
-    //}
-    //else if (player->HasSkillInput()) {
-    //    player->SetState(&PlayerState::SkillState::GetInstance());
-    //}
 }
 
 void PlayerState::IdleState::Exit(PlayerCharacter* player) {}
@@ -32,7 +26,7 @@ void PlayerState::RunState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::RunState::Update(PlayerCharacter* player) {
-    //cout << "RUN 업데이트 중!" << endl;
+    cout << "RUN 업데이트 중!" << endl;
     if (!player->HasMoveInput()) {
         player->SetState(&PlayerState::IdleState::GetInstance());
         return;
@@ -54,18 +48,46 @@ void PlayerState::BasicAttackState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::BasicAttackState::Update(PlayerCharacter* player) {
-    attackTimer -= TICK_INTERVAL;
-    if (attackTimer <= 0) {
-        //if (player->HasMoveInput()) {
-        //    player->SetState(&PlayerState::RunState::GetInstance());
-        //}
-        //else {
-        //    player->SetState(&PlayerState::IdleState::GetInstance());
-        //}
-    }
+	cout << "BasicAttack 업데이트 중!" << endl;
 }
 
 void PlayerState::BasicAttackState::Exit(PlayerCharacter* player) {}
+
+
+// PlayerState::RunAttackState 구현
+PlayerState::RunAttackState& PlayerState::RunAttackState::GetInstance() { static PlayerState::RunAttackState instance; return instance; }
+
+void PlayerState::RunAttackState::Enter(PlayerCharacter* player) {
+    cout << "RunAttack 들어왔다리!" << endl;
+}
+
+void PlayerState::RunAttackState::Update(PlayerCharacter* player) {
+	cout << "RunAttack 업데이트 중!" << endl;
+
+    if (!player->HasMoveInput()) {
+        player->SetState(&PlayerState::IdleState::GetInstance());
+        return;
+    }
+
+    player->_pos += (player->_velocity * TICK_INTERVAL);
+}
+
+void PlayerState::RunAttackState::Exit(PlayerCharacter* player) {}
+
+// PlayerState::JumpState 구현
+PlayerState::JumpState& PlayerState::JumpState::GetInstance() { static PlayerState::JumpState instance; return instance; }
+
+void PlayerState::JumpState::Enter(PlayerCharacter* player) {
+    cout << "Jump 들어왔다리!" << endl;
+}
+
+void PlayerState::JumpState::Update(PlayerCharacter* player) {
+	cout << "Jump 업데이트 중!" << endl;
+    player->_pos += (player->_velocity * TICK_INTERVAL);
+}
+
+void PlayerState::JumpState::Exit(PlayerCharacter* player) {}
+
 
 // PlayerState::SkillState 구현
 PlayerState::SkillState& PlayerState::SkillState::GetInstance() { static PlayerState::SkillState instance; return instance; }
@@ -87,10 +109,7 @@ void PlayerState::SkillState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::SkillState::Update(PlayerCharacter* player) {
-    skillTimer -= TICK_INTERVAL;
-    if (skillTimer <= 0) {
-        player->SetState(&PlayerState::IdleState::GetInstance());
-    }
+	cout << "Skill 업데이트 중!" << endl;
 }
 
 void PlayerState::SkillState::Exit(PlayerCharacter* player) {}
@@ -99,22 +118,12 @@ void PlayerState::SkillState::Exit(PlayerCharacter* player) {}
 PlayerState::HitState& PlayerState::HitState::GetInstance() { static PlayerState::HitState instance; return instance; }
 
 void PlayerState::HitState::Enter(PlayerCharacter* player) {
-    hitTimer = 0.5f; // 피격 상태 지속 시간 (0.5초)
-    player->SetVelocity(0, 0, 0); // 이동 멈춤
 	cout << "Hit 들어왔다리!" << endl;
 
 }
 
 void PlayerState::HitState::Update(PlayerCharacter* player) {
-    hitTimer -= TICK_INTERVAL;
-    if (hitTimer <= 0) {
-        //if (player->HasMoveInput()) {
-        //    player->SetState(&PlayerState::RunState::GetInstance());
-        //}
-        //else {
-        //    player->SetState(&PlayerState::IdleState::GetInstance());
-        //}
-    }
+	cout << "Hit 업데이트 중!" << endl;
 }
 
 void PlayerState::HitState::Exit(PlayerCharacter* player) {

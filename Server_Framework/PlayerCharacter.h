@@ -57,6 +57,40 @@ public:
 	void OnSkillGrassVine();
 
 	void SetState(PlayerStateMachine* newState);
+	void SetState(uint8_t newState) {
+		switch (newState) {
+		case (uint8_t)S_PLAYER_STATE::IDLE:
+			SetState(&PlayerState::IdleState::GetInstance());
+			break;
+		case (uint8_t)S_PLAYER_STATE::RUN:
+			SetState(&PlayerState::RunState::GetInstance());
+			break;
+		case (uint8_t)S_PLAYER_STATE::ATTACK:
+			SetState(&PlayerState::BasicAttackState::GetInstance());
+			break;
+		case (uint8_t)S_PLAYER_STATE::MOVE_ATTACK:
+			SetState(&PlayerState::RunAttackState::GetInstance());
+			break;
+		case (uint8_t)S_PLAYER_STATE::JUMP:
+			SetState(&PlayerState::JumpState::GetInstance());
+			break;
+		case (uint8_t)S_PLAYER_STATE::SKILL:
+			SetState(&PlayerState::SkillState::GetInstance());
+			break;
+		default:
+			break;
+		}
+	}
+
+	uint8_t GetStateEnum() {
+		if (currentState == &PlayerState::IdleState::GetInstance()) return (uint8_t)S_PLAYER_STATE::IDLE;
+		else if (currentState == &PlayerState::RunState::GetInstance()) return (uint8_t)S_PLAYER_STATE::RUN;
+		else if (currentState == &PlayerState::BasicAttackState::GetInstance()) return (uint8_t)S_PLAYER_STATE::ATTACK;
+		else if (currentState == &PlayerState::RunAttackState::GetInstance()) return (uint8_t)S_PLAYER_STATE::MOVE_ATTACK;
+		else if (currentState == &PlayerState::JumpState::GetInstance()) return (uint8_t)S_PLAYER_STATE::JUMP;
+		else if (currentState == &PlayerState::SkillState::GetInstance()) return (uint8_t)S_PLAYER_STATE::SKILL;
+		return 0;
+	}
 
 	bool HasMoveInput() {
 		return (_velocity.x != 0 || _velocity.y != 0 || _velocity.z != 0);

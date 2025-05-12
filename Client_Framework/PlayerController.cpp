@@ -84,24 +84,27 @@ void CPlayerController::OnKeyEvents()
 	camForward.Normalize();
 	camRight.Normalize();
 
-	if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-		INSTANCE(ServerManager).send_cs_mouse_vec3_packet(camForward);
-		mStateMachine->SetState(PLAYER_STATE::ATTACK);
-	}
-
 	if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 	if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
 	if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
 
+	if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
+		INSTANCE(ServerManager).send_cs_mouse_vec3_packet(camForward);
+		mStateMachine->SetState(PLAYER_STATE::ATTACK);
+		INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
+	}
+
 	if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
 		mStateMachine->SetState(PLAYER_STATE::JUMP);
+		INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::JUMP);
 	}
 	if (INPUT.IsKeyDown(KEY_TYPE::F)) {
 		INSTANCE(ServerManager).send_cs_000_packet();
 	}
 	if (INPUT.IsKeyDown(KEY_TYPE::E)) {
 		mStateMachine->SetState(PLAYER_STATE::SKILL);
+		INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
 		switch (mSkill)
 		{
 		case FIRE_ENCHANT:
@@ -122,6 +125,7 @@ void CPlayerController::OnKeyEvents()
 			moveKeyPressed = false;
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
 			mStateMachine->SetState(PLAYER_STATE::IDLE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
 		}
 		return;
 	}
@@ -129,5 +133,8 @@ void CPlayerController::OnKeyEvents()
 		moveKeyPressed = true;
 	}
 	INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
-	if (mStateMachine->GetState() == PLAYER_STATE::IDLE) mStateMachine->SetState(PLAYER_STATE::RUN);
+	if (mStateMachine->GetState() == PLAYER_STATE::IDLE) {
+		mStateMachine->SetState(PLAYER_STATE::RUN);
+		INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
+	}
 }

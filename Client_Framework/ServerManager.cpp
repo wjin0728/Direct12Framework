@@ -260,12 +260,16 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			if (clientID == packet->clientId[i]) {
 				mPlayer->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
 				mPlayer->GetTransform()->SetLocalRotationY(packet->look_y[i]);
+				if (mPlayer->GetStateMachine()->GetState() != (PLAYER_STATE)packet->state[i])
+					mPlayer->GetStateMachine()->SetState((PLAYER_STATE)packet->state[i]);
 			}
 			else {
 				auto it = mOtherPlayers.find(packet->clientId[i]);
 				if (it != mOtherPlayers.end()) {
 					mOtherPlayers[packet->clientId[i]]->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
 					mOtherPlayers[packet->clientId[i]]->GetTransform()->SetLocalRotationY(packet->look_y[i]);
+					if (mOtherPlayers[packet->clientId[i]]->GetStateMachine()->GetState() != (PLAYER_STATE)packet->state[i])
+						mOtherPlayers[packet->clientId[i]]->GetStateMachine()->SetState((PLAYER_STATE)packet->state[i]);
 				}
 			}
 		}
@@ -311,8 +315,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		scene->RemoveObject(mItems[packet->item_id]);
 		mItems.erase(packet->item_id);
-		cout << "삭제!";
 
+		cout << "삭제!";
 		break;
 	}
 	case SC_USE_SKILL: {

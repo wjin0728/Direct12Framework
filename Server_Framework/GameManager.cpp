@@ -317,6 +317,12 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		break;
 	}
+	case CS_CHANGE_STATE: {
+		CS_CHANGE_STATE_PACKET* p = reinterpret_cast<CS_CHANGE_STATE_PACKET*>(packet);
+
+		clients[p->id]._player.SetState(p->state);
+		break;
+	}
 	}
 }
 
@@ -358,6 +364,7 @@ void GameManager::SendAllPlayersPosPacket() {
 		packet.y[cnt] = player._pos.y;
 		packet.z[cnt] = player._pos.z;
 		packet.look_y[cnt] = player._look_dir.y;
+		packet.state[cnt] = player.GetStateEnum();
 
 		cnt++;
 	}
