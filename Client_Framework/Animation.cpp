@@ -319,7 +319,7 @@ void CAnimationController::LateUpdate()
 
 	for (int i = 0; auto & cache : mBoneCaches) {
 
-		Matrix boneTransform = cache.lock()->GetWorldMat(false);
+		Matrix boneTransform = mAnimationSets ? cache.lock()->GetWorldMat(false) : Matrix::Identity;
 		Matrix bondOffset = Matrix::Identity;
 		bondOffset = mBindPoseBoneOffsets[i];
 

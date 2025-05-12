@@ -432,6 +432,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			if (n != std::string::npos) 
 				animName = animName.substr(0, n + 1) + "anim";
 
+
 			obj->CreateAnimationFromFile(ANIMATION_PATH(animName));
 		}
 		else if (token == "<Light>:") {
