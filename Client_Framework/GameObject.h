@@ -132,7 +132,7 @@ private:
 	void CreateRendererFromFile(std::ifstream& inFile);
 	void CreateTerrainFromFile(std::ifstream& inFile);
 	void CreateLightFromFile(std::ifstream& inFile);
-	void CreateAnimationFromFile(std::string& fileName);
+	void CreateAnimationFromFile(const std::string& fileName);
 	void CreateUIrendererFromFile(std::ifstream& inFile);
 
 public:

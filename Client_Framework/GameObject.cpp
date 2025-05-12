@@ -465,7 +465,7 @@ void CGameObject::InitByObjectName()
 	}
 }
 
-void CGameObject::CreateAnimationFromFile(std::string& fileName)
+void CGameObject::CreateAnimationFromFile(const std::string& fileName)
 {
 	using namespace BinaryReader;
 

@@ -10,7 +10,7 @@ void CObjectStateMachine::Awake()
 
 void CObjectStateMachine::Update()
 {
-	auto& controller = owner->GetComponentFromHierarchy<CAnimationController>();
+	auto controller = owner->GetComponentFromHierarchy<CAnimationController>();
 	if (controller->mAnimationSets->mAnimationSet[controller->mTracks[0]->mIndex]->mType == ANIMATION_TYPE::END) {
 		switch (currentState) {
 		case PLAYER_STATE::IDLE:
@@ -32,7 +32,7 @@ void CObjectStateMachine::Update()
 
 void CObjectStateMachine::OnEnterState(PLAYER_STATE state)
 {
-	auto& controller = owner->GetComponentFromHierarchy<CAnimationController>();
+	auto controller = owner->GetComponentFromHierarchy<CAnimationController>();
 
 	switch (mClass) {
 	case PLAYER_CLASS::ARCHER:
@@ -72,7 +72,7 @@ void CObjectStateMachine::OnEnterState(PLAYER_STATE state)
 
 void CObjectStateMachine::OnExitState(PLAYER_STATE state)
 {
-	auto& controller = owner->GetComponentFromHierarchy<CAnimationController>();
+	auto controller = owner->GetComponentFromHierarchy<CAnimationController>();
 
 	switch (state) {
 	case PLAYER_STATE::IDLE:
