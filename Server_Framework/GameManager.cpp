@@ -364,7 +364,6 @@ void GameManager::SendAllPlayersPosPacket() {
 		packet.y[cnt] = player._pos.y;
 		packet.z[cnt] = player._pos.z;
 		packet.look_y[cnt] = player._look_dir.y;
-		packet.state[cnt] = player.GetStateEnum();
 
 		cnt++;
 	}
@@ -375,6 +374,8 @@ void GameManager::SendAllPlayersPosPacket() {
 			packet.z[i] = 0;
 			packet.look_y[i] = 0;
 		}
+		else
+			packet.state[i] = clients[i]._player.GetStateEnum();
 	}
 	for (auto& cl : clients) {
 		if (cl.second._state != ST_INGAME) continue;
