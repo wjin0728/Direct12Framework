@@ -8,6 +8,8 @@ protected:
     PLAYER_STATE currentState;
     PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
 
+	std::weak_ptr<CAnimationController> mAnimationController{};
+
 public:
     CObjectStateMachine() : CComponent(COMPONENT_TYPE::STATE), currentState(PLAYER_STATE::IDLE) {}
     CObjectStateMachine(uint8_t playerClass) : CComponent(COMPONENT_TYPE::STATE), currentState(PLAYER_STATE::IDLE) { mClass = (PLAYER_CLASS)playerClass; }
@@ -15,6 +17,7 @@ public:
     virtual ~CObjectStateMachine() = default;
 
     virtual void Awake() override;
+    virtual void Start() override;
     virtual void Update() override;
     virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CObjectStateMachine>(); }
 

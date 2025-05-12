@@ -18,7 +18,7 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
 	{
 		clientWidth = devMode.dmPelsWidth;
-		clientHeight = devMode.dmPelsHeight;
+		clientHeight = devMode.dmPelsHeight + 200;
 	}
 
 
