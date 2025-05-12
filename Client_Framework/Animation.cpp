@@ -158,11 +158,18 @@ void CAnimationController::Start()
 			mSkinningBoneTransforms[i] = bone->GetTransform();
 		}
 	}
-
+	
+	std::vector<std::string> names{};
 	for (int i = 0; auto & cache : mAnimationSets->mBoneFrameCaches) {
 		auto& boneName = mAnimationSets->mBoneNames[i];
 		if (boneMap.contains(boneName)) cache = boneMap[boneName];
-		else cache = owner->FindChildByName(boneName)->GetTransform();
+		else {
+			auto object = owner->FindChildByName(boneName);
+			if (object)
+				cache = object->GetTransform();
+			else
+				names.push_back(boneName);
+		}
 		++i;
 	}
 
