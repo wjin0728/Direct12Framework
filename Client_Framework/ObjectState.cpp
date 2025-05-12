@@ -2,6 +2,7 @@
 #include "ObjectState.h"
 #include "PlayerController.h"
 #include "Animation.h"
+#include "ServerManager.h"
 
 void CObjectStateMachine::Awake()
 {
@@ -28,6 +29,7 @@ void CObjectStateMachine::Update()
 		case PLAYER_STATE::JUMP:
 		case PLAYER_STATE::SKILL:
 			SetState(PLAYER_STATE::IDLE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			break;
 		default:
 			break;

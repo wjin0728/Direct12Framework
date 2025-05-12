@@ -9,7 +9,7 @@ public:
 	SOCKET								send_socket, server_socket;
 	WSAOVERLAPPED						wsaover;
 
-	char								SERVER_ADDR[NAME_SIZE]{ "127.0.0.1" };
+	char								SERVER_ADDR[NAME_SIZE]{ "1.242.205.234" };
 
 	std::shared_ptr<class CGameObject> mPlayer{ nullptr };
 	std::shared_ptr<class CGameObject> mMainCamera{ nullptr };
@@ -85,6 +85,14 @@ public:
 		p.dir_x = dir.x;
 		p.dir_y = dir.y;
 		p.dir_z = dir.z;
+		Send_Packet(&p);
+	}
+	void send_cs_change_state_packet(uint8_t state) {
+		CS_CHANGE_STATE_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_CHANGE_STATE;
+		p.id = clientID;
+		p.state = state;
 		Send_Packet(&p);
 	}
 };

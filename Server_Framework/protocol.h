@@ -25,6 +25,7 @@ constexpr char CS_SKILL_NONTARGET = 5;
 constexpr char CS_ULTIMATE_SKILL = 6;
 constexpr char CS_000 = 7;
 constexpr char CS_CHANGE_SCENE = 8;
+constexpr char CS_CHANGE_STATE = 9;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -102,6 +103,11 @@ struct CS_CHANGE_SCENE_PACKET : PACKET {
 	uint8_t			change_scene;
 };
 
+struct CS_CHANGE_STATE_PACKET : PACKET {
+	int				id;
+	uint8_t			state;
+};
+
 // ----------------------------------------------------------------------------------
 
 
@@ -130,6 +136,7 @@ struct SC_ALL_PLAYERS_POS_PACKET : PACKET {
 	int clientId[3]{ -1, -1, -1 };
 	float x[3], y[3], z[3];
 	float look_y[3];
+	float state[3]{ 0, 0, 0 };
 };
 
 struct SC_MONSTER_POS_PACKET : PACKET {

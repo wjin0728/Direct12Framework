@@ -52,6 +52,30 @@ namespace PlayerState
         float attackTimer;
     };
 
+    // RunAttack 상태
+    class RunAttackState : public PlayerStateMachine {
+    public:
+        static RunAttackState& GetInstance();
+        void Enter(PlayerCharacter* player) override;
+        void Update(PlayerCharacter* player) override;
+        void Exit(PlayerCharacter* player) override;
+    private:
+        RunAttackState() {}
+        float attackTimer;
+    };
+
+    // Jump 상태
+    class JumpState : public PlayerStateMachine {
+    public:
+        static JumpState& GetInstance();
+        void Enter(PlayerCharacter* player) override;
+        void Update(PlayerCharacter* player) override;
+        void Exit(PlayerCharacter* player) override;
+    private:
+        JumpState() {}
+        float attackTimer;
+    };
+
     // Skill 상태
     class SkillState : public PlayerStateMachine {
     public:

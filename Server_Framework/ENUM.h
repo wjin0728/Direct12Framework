@@ -62,3 +62,17 @@ enum class S_SCENE_TYPE : UINT8
 
 	END
 };
+
+enum class S_PLAYER_STATE : UINT8
+{
+	IDLE,
+	RUN,
+	ATTACK,
+	MOVE_ATTACK,
+	GETHIT,
+	DEATH,
+	JUMP,
+	SKILL,
+
+	end
+};
