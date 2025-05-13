@@ -9,7 +9,8 @@ public:
 	SOCKET								send_socket, server_socket;
 	WSAOVERLAPPED						wsaover;
 
-	char								SERVER_ADDR[NAME_SIZE]{ "1.242.205.234" };
+	//char								SERVER_ADDR[NAME_SIZE]{ "1.242.205.234" };
+	char								SERVER_ADDR[NAME_SIZE]{ "127.0.0.1" };
 
 	std::shared_ptr<class CGameObject> mPlayer{ nullptr };
 	std::shared_ptr<class CGameObject> mMainCamera{ nullptr };
