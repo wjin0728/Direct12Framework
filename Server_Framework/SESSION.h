@@ -19,15 +19,14 @@ class SESSION
 
 public:
 	mutex				_s_lock;
-	SESSION_STATE		_state;
+	SESSION_STATE		_state = ST_FREE;
 	int					_id;
 	SOCKET				_socket;
 	int					_prev_remain;
 
 	PlayerCharacter		_player;
 
-	SESSION() : 
-		_state(SESSION_STATE::ST_FREE), 
+	SESSION() :
 		_id(0), 
 		_prev_remain(0) {};
 

@@ -320,7 +320,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_CHANGE_STATE: {
 		CS_CHANGE_STATE_PACKET* p = reinterpret_cast<CS_CHANGE_STATE_PACKET*>(packet);
 
-		clients[p->id]._player.SetState(p->state);
+		if (p->state != (uint8_t)clients[p->id]._player._state)
+			clients[p->id]._player.SetState(p->state);
 		break;
 	}
 	}
@@ -375,7 +376,7 @@ void GameManager::SendAllPlayersPosPacket() {
 			packet.look_y[i] = 0;
 		}
 		else
-			packet.state[cnt] = clients[i]._player.GetStateEnum();
+			packet.state[cnt] = (uint8_t)clients[i]._player._state;
 	}
 	for (auto& cl : clients) {
 		if (cl.second._state != ST_INGAME) continue;
