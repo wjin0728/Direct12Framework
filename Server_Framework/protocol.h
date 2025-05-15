@@ -136,7 +136,7 @@ struct SC_ALL_PLAYERS_POS_PACKET : PACKET {
 	int clientId[3]{ -1, -1, -1 };
 	float x[3], y[3], z[3];
 	float look_y[3];
-	float state[3]{ 0, 0, 0 };
+	uint8_t state[3]{ 0, 0, 0 };
 };
 
 struct SC_MONSTER_POS_PACKET : PACKET {

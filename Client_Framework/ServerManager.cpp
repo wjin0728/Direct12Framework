@@ -262,9 +262,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 				mPlayer->GetTransform()->SetLocalRotationY(packet->look_y[i]);
 				if (mPlayer->GetStateMachine()->GetState() != (PLAYER_STATE)packet->state[i])
 					mPlayer->GetStateMachine()->SetState((PLAYER_STATE)packet->state[i]);
-				cout << packet->x[i] << " " << packet->y[i] << " " << packet->z[i] << endl;
-				cout << packet->look_y[i] << endl;
-				cout << packet->state << endl;
 			}
 			else {
 				auto it = mOtherPlayers.find(packet->clientId[i]);

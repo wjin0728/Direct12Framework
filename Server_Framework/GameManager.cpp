@@ -376,10 +376,15 @@ void GameManager::SendAllPlayersPosPacket() {
 			packet.look_y[i] = 0;
 		}
 		else
-			packet.state[cnt] = (uint8_t)clients[i]._player._state;
+			packet.state[i] = (uint8_t)clients[i]._player._state;
 	}
 	for (auto& cl : clients) {
 		if (cl.second._state != ST_INGAME) continue;
+
+		cout << packet.x[0] << " " << packet.y[0] << " " << packet.z[0] << endl;
+		cout << packet.look_y[0] << endl;
+		cout << (int)packet.state[0] << endl;
+
 		cl.second.do_send(&packet);
 	}
 }
