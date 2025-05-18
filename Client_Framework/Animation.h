@@ -169,4 +169,5 @@ public:
     virtual void OnRootMotion(std::weak_ptr<CTransform> pRootGameObject) {}
     virtual void OnAnimationIK(std::weak_ptr<CTransform> pRootGameObject) {}
 
+    void PrintMatrix(const Matrix& mat);
 };

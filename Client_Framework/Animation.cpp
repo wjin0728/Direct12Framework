@@ -168,10 +168,13 @@ void CAnimationController::Start()
 			if (object)
 				cache = object->GetTransform();
 			else
-				names.push_back(boneName);
+				cache = GetOwner()->GetTransform();
 		}
 		++i;
 	}
+
+	mRootMotionObject = mAnimationSets->mBoneFrameCaches.front().lock()->GetTransform();
+	mRootMotionObject.lock()->owner->SetStatic(true);
 
 	if (mBoneTransformIdx == -1) {
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
@@ -190,36 +193,40 @@ void CAnimationController::LateUpdate()
 {
 	float deltaTime = DELTA_TIME;
 	mTime += deltaTime;
-	if (mTracks.size()) {
-		for (auto& cache : mAnimationSets->mBoneFrameCaches) { cache.lock()->SetLocalMatZero(); }
 
+	if (mTracks.size()) {
+		//for (auto& cache : mAnimationSets->mBoneFrameCaches) { cache.lock()->SetLocalMatZero(); }
+	
 		for (auto& track : mTracks) {
 			if (track->mEnable) {
 				auto& set = mAnimationSets->mAnimationSet[track->mSetIndex];
-				float fPosition = track->UpdatePosition(track->mPosition, deltaTime, set->mLength);
-
+				float position = track->UpdatePosition(track->mPosition, deltaTime, set->mLength);
+	
 				for (int i = 0; auto & cache : mAnimationSets->mBoneFrameCaches) {
-					Matrix trackTransform = set->GetSRT(i, fPosition);
-					cache.lock()->mLocalMat += trackTransform * track->mWeight;
+					Matrix trackTransform = set->GetSRT(i, position);
+					//cache.lock()->mLocalMat += trackTransform * track->mWeight;
 					++i;
 				}
-
+	
 				track->HandleCallback();
 			}
 		}
-
+	
 		mRootMotionObject.lock()->owner->UpdateWorldMatrices(nullptr);
-
+	
 		OnRootMotion(mRootMotionObject);
 		OnAnimationIK(mRootMotionObject);
 	}
 
 	for (int i = 0; auto & cache : mSkinningBoneTransforms) {
 		Matrix boneTransform = cache.lock()->GetWorldMat(false);
-		Matrix bondOffset = Matrix::Identity;
-		bondOffset = mBindPoseBoneOffsets[i];
+		Matrix bondOffset = mBindPoseBoneOffsets[i];
 
 		finalTransforms[i] = (bondOffset * boneTransform).Transpose();
+		
+		if (cache.lock()->GetOwner()->GetName() == "Root.001")
+			PrintMatrix(finalTransforms[i]);
+
 		i++;
 	}
 
@@ -291,4 +298,15 @@ void CAnimationController::PrepareSkinning()
 
 void CAnimationController::UploadBoneOffsets()
 {
+}
+
+void CAnimationController::PrintMatrix(const Matrix& mat)
+{
+	for (int row = 0; row < 4; ++row) {
+		for (int col = 0; col < 4; ++col) {
+			std::cout << mat.m[row][col] << "\t";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
 }
