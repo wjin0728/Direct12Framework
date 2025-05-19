@@ -19,6 +19,7 @@ enum class STRUCTED_BUFFER_TYPE : UINT {
 };
 
 enum class INSTANCE_BUFFER_TYPE : UINT {
+	OBJECT,
 	BILLBOARD,
 	END
 };

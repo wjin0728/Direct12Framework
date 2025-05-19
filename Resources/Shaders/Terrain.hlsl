@@ -141,7 +141,8 @@ struct DS_OUTPUT
 {
     float4 position : SV_POSITION;
     float4 worldPos : POSITION;
-    float2 uv : TEXCOORD;
+    float4 positionCS : TEXCOORD0;
+    float2 uv : TEXCOORD1;
     float4 ShadowPosH : TEXCOORD2;
 };
 
@@ -163,6 +164,7 @@ DS_OUTPUT DS_Forward(TessFactor tessFactors, float2 uv : SV_DomainLocation, cons
     
     dout.worldPos = float4(p, 1.0f);
     dout.position = mul(dout.worldPos, viewProjMat);
+    dout.positionCS = dout.position;
     dout.ShadowPosH = mul(dout.worldPos, shadowTransform);
 	
     return dout;
@@ -350,13 +352,13 @@ PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
     normal = normalize(mul(blendedNormal, float3x3(tangentWS, bitangentWS, normalWS)));
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
-    float depth = mul(input.worldPos, viewMat).z;
+    float depth = input.positionCS.z / input.positionCS.w;
     
     output.albedo = color;
     output.normalWS = float4(normal, blendedMetallic);
     output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
     output.positionWS = float4(positionWS, blendedSmoothness);
-    output.depth = input.ShadowPosH;
+    output.depth = float4(0.f, 0.f, 0.f, depth);
     
     return output;
 }

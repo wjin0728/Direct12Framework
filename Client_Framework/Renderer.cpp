@@ -20,6 +20,7 @@ CRenderer::~CRenderer()
 
 void CRenderer::Awake()
 {
+	if (owner->GetInstancing()) return;
 	SetCBVIndex();
 }
 
@@ -30,6 +31,7 @@ void CRenderer::Start()
 
 void CRenderer::UpdataObjectDataToShader()
 {
+	if (mCbvOffset == -1) return;
 	if (GetTransform()->mDirtyFlag) {
 		mDirtyFrame = FRAME_RESOURCE_COUNT;
 	}

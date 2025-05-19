@@ -46,14 +46,14 @@ struct VegitationProperties
 	float leafMetallic{};
 	int leafTexIdx = -1;
 	int leafNormalIdx = -1;
-	float padding0{};
+	float leafNormalScale{};
 
 	Vec3 trunkColor{};
 	float trunkSmoothness{};
 	float trunkMetallic{};
 	int trunkTexIdx = -1;
 	int trunkNormalIdx = -1;
-	float padding1{};
+	float trunkNormalScale{};
 };
 
 struct SkyboxProperties
@@ -65,6 +65,42 @@ struct SkyboxProperties
 
 	Vec3 padding1;
 	float falloff;
+};
+
+struct WaterProperties
+{
+	Vec4 foamColor;
+	Vec4 shallowColor;
+	Vec4 deepColor;
+	Vec4 veryDeepColor;
+	float waveSpeed;
+	float smoothness;
+	float foamSmoothness;
+	float reflectionPower;
+	float opacityFalloff;
+	float normalScale;
+	float normalTiling2;
+	float waveFoamOpacity;
+	float rippleSpeed;
+	float waveNoiseScale;
+	float waveNoiseAmount;
+	float waveDirection;
+	float waveWavelength;
+	float waveAmplitude;
+	float depth;
+	float overallFalloff;
+	float shallowFalloff;
+	float foamSpread;
+	float foamShoreline;
+	float foamFalloff;
+	float opacityMin;
+	float normalTiling;
+	float opacity;
+	int waveMaskIdx;
+	int foamMaskIdx;
+	int ripplesNormalIdx;
+	int ripplesNormal2Idx;
+	float padding;
 };
 
 struct UIProperties

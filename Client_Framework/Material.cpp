@@ -220,6 +220,10 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			{
 				data->leafNormalIdx = GetTextureIdx(inFile);
 			}
+			else if (token == "<LeafNormalScale>:")
+			{
+				ReadDateFromFile(inFile, data->leafNormalScale);
+			}
 			else if (token == "<LeafAlbedoColor>:")
 			{
 				Color color{};
@@ -241,6 +245,10 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			else if (token == "<TrunkNormalMap>:")
 			{
 				data->trunkNormalIdx = GetTextureIdx(inFile);
+			}
+			else if (token == "<TrunkNormalScale>:")
+			{
+				ReadDateFromFile(inFile, data->trunkNormalScale);
 			}
 			else if (token == "<TrunkAlbedoColor>:")
 			{
@@ -294,6 +302,66 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			{
 				ReadDateFromFile(inFile, data->offset);
 			}
+			else if (token == "</Material>") {
+				break;
+			}
+		}
+	}
+	else if (token == "SyntyStudios/WaterShader") {
+		material->SetShader("Water");
+		material->matData = std::make_unique<BYTE[]>(sizeof(WaterProperties));
+		WaterProperties* data = reinterpret_cast<WaterProperties*>(material->matData.get());
+		material->dataSize = sizeof(WaterProperties);
+
+		while (true) {
+			ReadDateFromFile(inFile, token);
+
+			if (token == "<ShallowColour>:")
+			{
+				ReadDateFromFile(inFile, data->shallowColor);
+			}
+			else if (token == "<DeepColour>:")
+			{
+				ReadDateFromFile(inFile, data->deepColor);
+			}
+			else if (token == "<VeryDeepColour>:")
+			{
+				ReadDateFromFile(inFile, data->veryDeepColor);
+			}
+			else if (token == "<FoamColor>:")
+			{
+				ReadDateFromFile(inFile, data->foamColor);
+			}
+			else if (token == "<Opacity>:")            ReadDateFromFile(inFile, data->opacity);
+			else if (token == "<Smoothness>:")         ReadDateFromFile(inFile, data->smoothness);
+			else if (token == "<FoamSmoothness>:")     ReadDateFromFile(inFile, data->foamSmoothness);
+			else if (token == "<FoamShoreline>:")      ReadDateFromFile(inFile, data->foamShoreline);
+			else if (token == "<FoamFalloff>:")        ReadDateFromFile(inFile, data->foamFalloff);
+			else if (token == "<FoamSpread>:")         ReadDateFromFile(inFile, data->foamSpread);
+			else if (token == "<OpacityFalloff>:")     ReadDateFromFile(inFile, data->opacityFalloff);
+			else if (token == "<OpacityMin>:")         ReadDateFromFile(inFile, data->opacityMin);
+			else if (token == "<ReflectionPower>:")    ReadDateFromFile(inFile, data->reflectionPower);
+			else if (token == "<Depth>:")              ReadDateFromFile(inFile, data->depth);
+			else if (token == "<NormalScale>:")        ReadDateFromFile(inFile, data->normalScale);
+			else if (token == "<NormalTiling>:")       ReadDateFromFile(inFile, data->normalTiling);
+			else if (token == "<NormalTiling2>:")      ReadDateFromFile(inFile, data->normalTiling2);
+			else if (token == "<RippleSpeed>:")        ReadDateFromFile(inFile, data->rippleSpeed);
+			else if (token == "<WaveDirection>:")      ReadDateFromFile(inFile, data->waveDirection);
+			else if (token == "<WaveWavelength>:")     ReadDateFromFile(inFile, data->waveWavelength);
+			else if (token == "<WaveAmplitude>:")      ReadDateFromFile(inFile, data->waveAmplitude);
+			else if (token == "<WaveSpeed>:")          ReadDateFromFile(inFile, data->waveSpeed);
+			else if (token == "<WaveFoamOpacity>:")    ReadDateFromFile(inFile, data->waveFoamOpacity);
+			else if (token == "<WaveFoamSpeed>:")      ReadDateFromFile(inFile, data->waveSpeed);
+			else if (token == "<WaveNoiseAmount>:")    ReadDateFromFile(inFile, data->waveNoiseAmount);
+			else if (token == "<WaveNoiseScale>:")     ReadDateFromFile(inFile, data->waveNoiseScale);
+			else if (token == "<RipplesNormal>:")      data->ripplesNormalIdx = GetTextureIdx(inFile);
+			else if (token == "<RipplesNormal2>:")     data->ripplesNormal2Idx = GetTextureIdx(inFile);
+			else if (token == "<WaveMask>:")           data->waveMaskIdx = GetTextureIdx(inFile);
+			else if (token == "<FoamMask>:")           data->foamMaskIdx = GetTextureIdx(inFile);
+			else if (token == "<OverallFalloff>:")     ReadDateFromFile(inFile, data->overallFalloff);
+			else if (token == "<ShallowFalloff>:")     ReadDateFromFile(inFile, data->shallowFalloff);
+			else if (token == "<NormalTiling2>:")      ReadDateFromFile(inFile, data->normalTiling2);
+			else if (token == "<OpacityFalloff>:")     ReadDateFromFile(inFile, data->opacityFalloff);
 			else if (token == "</Material>") {
 				break;
 			}

@@ -257,21 +257,17 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		for (int i = 0; i < 3; i++) {
 			if (packet->clientId[i] == -1) break;
-			if (clientID == packet->clientId[i]) {
-				mPlayer->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
-				mPlayer->GetTransform()->SetLocalRotationY(packet->look_y[i]);
-				if (mPlayer->GetStateMachine()->GetState() != (PLAYER_STATE)packet->state[i])
-					mPlayer->GetStateMachine()->SetState((PLAYER_STATE)packet->state[i]);
-			}
+			std::shared_ptr<CGameObject> player{};
+			if (clientID == packet->clientId[i]) player = mPlayer;
 			else {
 				auto it = mOtherPlayers.find(packet->clientId[i]);
-				if (it != mOtherPlayers.end()) {
-					mOtherPlayers[packet->clientId[i]]->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
-					mOtherPlayers[packet->clientId[i]]->GetTransform()->SetLocalRotationY(packet->look_y[i]);
-					if (mOtherPlayers[packet->clientId[i]]->GetStateMachine()->GetState() != (PLAYER_STATE)packet->state[i])
-						mOtherPlayers[packet->clientId[i]]->GetStateMachine()->SetState((PLAYER_STATE)packet->state[i]);
-				}
+				if (it != mOtherPlayers.end()) player = it->second;
 			}
+			if (!player) continue;
+			player->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
+			player->GetTransform()->SetLocalRotationY(packet->look_y[i]);
+			if (player->GetStateMachine() && player->GetStateMachine()->GetState() != (PLAYER_STATE)packet->state[i])
+				player->GetStateMachine()->SetState((PLAYER_STATE)packet->state[i]);
 		}
 		break;
 	}

@@ -205,16 +205,12 @@
     <ClInclude Include="Player.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="RenderPipeline.h" />
     <ClInclude Include="ThirdPersonCamera.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
-    <ClInclude Include="ContinuousRotation.h" />
     <ClInclude Include="UIRenderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="CEntityState.h" />
-    <ClInclude Include="ItemMovement.h" />
     <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="AnimationEnums.h" />
     <ClInclude Include="ObjectState.h">
@@ -226,6 +222,19 @@
     <ClInclude Include="LoadScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="ItemMovement.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPipeline.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="ContinuousRotation.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="CEntityState.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -381,17 +390,8 @@
     <ClCompile Include="ThirdPersonCamera.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
-    <ClCompile Include="ContinuousRotation.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="UIRenderer.cpp">
       <Filter>GameObject\Component</Filter>
-    </ClCompile>
-    <ClCompile Include="CEntityState.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
-    <ClCompile Include="ItemMovement.cpp">
-      <Filter>Client</Filter>
     </ClCompile>
     <ClCompile Include="LoadingScreen.cpp">
       <Filter>Client</Filter>
@@ -405,14 +405,23 @@
     <ClCompile Include="MiniGame.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="CEntityState.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemMovement.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="ContinuousRotation.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancingManager.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="SimpleMath.inl">
       <Filter>Utility</Filter>
-    </None>
-    <None Include="..\Resources\Shaders\Animation.hlsl">
-      <Filter>HLSL</Filter>
     </None>
     <None Include="..\Resources\Shaders\Billboard.hlsl">
       <Filter>HLSL</Filter>

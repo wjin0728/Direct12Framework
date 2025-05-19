@@ -19,12 +19,12 @@ void CResourceManager::Initialize()
 
 void CResourceManager::Destroy()
 {
-	for (auto& map : resources) {
-		map.clear();
-	}
 	if (mLoadThread.joinable())
 	{
 		mLoadThread.join(); // 스레드 종료 대기
+	}
+	for (auto& map : resources) {
+		map.clear();
 	}
 }
 
@@ -222,7 +222,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		MakeShadersForAllPass("Vegitation", "Vegitation", info);
 	}
@@ -264,18 +264,29 @@ void CResourceManager::LoadDefaultShaders()
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("Lighting", info, "Lighting")) Add(shader);
-	}
-	{
+	} {
 		ShaderInfo info;
-		info.shaderType = PASS_TYPE::STENCIL;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.shaderType = PASS_TYPE::DIRECTIONAL;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::NONE;
 		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_NO_WRITE;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("Lighting", info, "Lighting")) Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::ALPHA_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize("Water", info, "Water")) Add(shader);
 	}
 	{
 		ShaderInfo info;

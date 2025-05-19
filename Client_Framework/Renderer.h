@@ -13,7 +13,7 @@ protected:
 
     bool isDirty{};
     int mCbvIdx = -1;
-    UINT mCbvOffset{};
+    UINT mCbvOffset{ -1 };
 
     UINT mDirtyFrame = FRAME_RESOURCE_COUNT + 1;
 

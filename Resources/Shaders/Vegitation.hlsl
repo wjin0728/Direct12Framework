@@ -8,14 +8,14 @@ cbuffer MaterialData : register(b5)
     float leafMetallic;
     int leafTexIdx;
     int leafNormalIdx;
-    float padding0;
+    float leafNormalScale;  
 
     float3 trunkColor;
     float trunkSmoothness;
     float trunkMetallic;
     int trunkTexIdx = -1;
     int trunkNormalIdx = -1;
-    float padding1;
+    float trunkNormalScale;
 };
 
 
@@ -31,23 +31,33 @@ struct VS_INPUT
     float3 tangent : TANGENT;
     float2 uv : TEXCOORD;
     float4 color : COLOR;
+#ifdef USE_INSTANCING
+    matrix worldMat : TRANSFORM;
+	matrix invWorldMat : INVTRANSFORM;
+	int idx0 : INDEX;
+#endif
 };
 
 struct VS_OUTPUT
 {
     float4 position : SV_POSITION;
     float4 positionWS : TEXCOORD0;
-    float3 normalWS : TEXCOORD1;
-    float3 tangentWS : TEXCOORD2;
-    float3 bitangentWS : TEXCOORD3;
-    float4 ShadowPosH : TEXCOORD4;
+    float4 positionCS : TEXCOORD1;
+    float3 normalWS : TEXCOORD2;
+    float3 tangentWS : TEXCOORD3;
+    float3 bitangentWS : TEXCOORD4;
+    float4 ShadowPosH : TEXCOORD5;
     
     float4 color : COLOR;
-    float2 uv : TEXCOORD5;
+    float2 uv : TEXCOORD6;
 };
 
 //Á¤Á¡ ¼ÎÀÌ´õ
-VS_OUTPUT VS_Forward(VS_INPUT input)
+VS_OUTPUT VS_Forward(VS_INPUT input
+#ifdef USE_INSTANCING
+    , uint instanceId : SV_InstanceID
+#endif
+)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     
@@ -56,6 +66,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
+    output.positionCS = positionInputs.positionCS;
     
     output.normalWS = normalInputs.normalWS;
     output.tangentWS = normalInputs.tangentWS;
@@ -94,12 +105,12 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     if (input.color.b > 0.5 && leafNormalIdx != -1)
     {
         float3 normalMapSample = diffuseMap[leafNormalIdx].Sample(anisoClamp, uvLeaf).rgb;
-        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
+        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent, leafNormalScale);
     }
     else if (input.color.b <= 0.5 && trunkNormalIdx != -1)
     {
         float3 normalMapSample = diffuseMap[trunkNormalIdx].Sample(anisoClamp, uvTrunk).rgb;
-        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
+        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent, trunkNormalScale);
     }
     
     float3 camDir = (camPos - worldPosition);
@@ -160,7 +171,11 @@ struct VS_SHADOW_OUTPUT
     float4 color : COLOR;
 };
 
-VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
+VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input
+#ifdef USE_INSTANCING
+    , uint instanceId : SV_InstanceID
+#endif
+)
 {
     VS_SHADOW_OUTPUT output = (VS_SHADOW_OUTPUT) 0;
     
@@ -192,7 +207,11 @@ void PS_Shadow(VS_SHADOW_OUTPUT input)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-VS_OUTPUT VS_GPass(VS_INPUT input)
+VS_OUTPUT VS_GPass(VS_INPUT input
+#ifdef USE_INSTANCING
+    , uint instanceId : SV_InstanceID
+#endif
+)
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
     
@@ -201,6 +220,7 @@ VS_OUTPUT VS_GPass(VS_INPUT input)
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
+    output.positionCS = positionInputs.positionCS;
     
     output.normalWS = normalInputs.normalWS;
     output.tangentWS = normalInputs.tangentWS;
@@ -262,7 +282,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float lerpResult190 = lerp(trunkSmoothness, 0.0, input.color.b);
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
-    float depth = mul(input.positionWS, viewMat).z;
+    float depth = input.positionCS.z / input.positionCS.w;
     
     color.rgb = GammaDecoding(color.rgb);
     

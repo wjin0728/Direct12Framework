@@ -22,15 +22,15 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	}
 
 
-	//clientWidth = FRAMEBUFFER_WIDTH;
-	//clientHeight = FRAMEBUFFER_HEIGHT;
+	clientWidth = FRAMEBUFFER_WIDTH;
+	clientHeight = FRAMEBUFFER_HEIGHT;
 	
 	//윈도우 초기화
 	if (!InitWindow(wndProc, cmdShow)) {
 		return false;
 	}
-	SetWindowLongPtr(mHwnd, GWL_STYLE, WS_POPUP);
-	SetWindowPos(mHwnd, HWND_TOP, 0, 0, clientWidth, clientHeight, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+	/*SetWindowLongPtr(mHwnd, GWL_STYLE, WS_POPUP);
+	SetWindowPos(mHwnd, HWND_TOP, 0, 0, clientWidth, clientHeight, SWP_FRAMECHANGED | SWP_SHOWWINDOW);*/
 
 	//매니저 초기화
 	INSTANCE(CResourceManager).Initialize();
@@ -85,8 +85,8 @@ int CGameApplication::Run()
 
 void CGameApplication::Update()
 {
-	INPUT.Update();
 	INSTANCE(CDX12Manager).MoveToNextFrameResource();
+	INPUT.Update();
 	INSTANCE(CSceneManager).Update();
 }
 

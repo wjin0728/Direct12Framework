@@ -42,6 +42,7 @@ void CSkinnedMeshRenderer::LateUpdate()
     mSkinnedMesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
 	mSkinnedMesh->oobb.Transform(mWorldOOBB, GetTransform()->GetWorldMat());
 
+    if (mCbvOffset == -1) return;
     CBObjectData objData;
     objData.worldMAt = GetTransform()->mWorldMat.Transpose();
     objData.invWorldMAt = GetTransform()->mWorldMat.Invert();

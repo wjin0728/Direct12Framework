@@ -3,15 +3,11 @@
 
 cbuffer MaterialData : register(b5)
 {
-    float4 _BaseColor;
     float4 _FoamColor;
-    float4 _FoamEmitColour;
+    float4 _ShallowColour;
+    float4 _DeepColour;
     float4 _VeryDeepColour;
-    float _GlowDepth;
-    float _GlowFalloff;
-    float _FoamGlowMultiplier;
     float _WaveSpeed;
-    float _Specular;
     float _Smoothness;
     float _FoamSmoothness;
     float _ReflectionPower;
@@ -28,9 +24,6 @@ cbuffer MaterialData : register(b5)
     float _Depth;
     float _OverallFalloff;
     float _ShallowFalloff;
-    float _DistortionSpeed;
-    float _DistortionTiling;
-    float _Distortion;
     float _FoamSpread;
     float _FoamShoreline;
     float _FoamFalloff;
@@ -41,7 +34,7 @@ cbuffer MaterialData : register(b5)
     int _FoamMaskIdx;
     int _RipplesNormalIdx;
     int _RipplesNormal2Idx;
-    float2 padding;
+    float padding;
 };
 
 float3 mod2D289(float3 x)
@@ -80,18 +73,7 @@ float snoise(float2 v)
     g.yz = a0.yz * x12.xz + h.yz * x12.yw;
     return 130.0 * dot(m, g);
 }
-			
-float4 ComputeGrabScreenPos(float4 pos)
-{
-    float scale = 1.f; 
-
-    float4 o = pos;
-    o.y = pos.w * 0.5f;
-    o.y = (pos.y - o.y) * scale + o.y;
-
-    return o;
-}
-			
+						
 float3 mod3D289(float3 x)
 {
     return x - floor(x / 289.0) * 289.0;
@@ -122,9 +104,9 @@ float snoise(float3 v)
     float3 x3 = x0 - 0.5;
     i = mod3D289(i);
     float4 p = permute(permute(permute(i.z + float4(0.0, i1.z, i2.z, 1.0)) + i.y + float4(0.0, i1.y, i2.y, 1.0)) + i.x + float4(0.0, i1.x, i2.x, 1.0));
-    float4 j = p - 49.0 * floor(p / 49.0); // mod(p,7*7)
+    float4 j = p - 49.0 * floor(p / 49.0);
     float4 x_ = floor(j / 7.0);
-    float4 y_ = floor(j - 7.0 * x_); // mod(j,N)
+    float4 y_ = floor(j - 7.0 * x_);
     float4 x = (x_ * 2.0 + 0.5) / 7.0 - 1.0;
     float4 y = (y_ * 2.0 + 0.5) / 7.0 - 1.0;
     float4 h = 1.0 - abs(x) - abs(y);
@@ -210,13 +192,11 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
     float4 position : SV_POSITION;
-    float4 positionWS : TEXCOORD0;
-    float3 normalWS : TEXCOORD1;
-    float3 tangentWS : TEXCOORD2;
-    float3 bitangentWS : TEXCOORD3;
+    float4 positionCS : TEXCOORD0;
+    float4 normalWS : TEXCOORD1;
+    float4 tangentWS : TEXCOORD2;
+    float4 bitangentWS : TEXCOORD3;
     float4 ShadowPosH : TEXCOORD4;
-    
-    float4 color : COLOR;
     float2 uv : TEXCOORD5;
 };
 
@@ -224,10 +204,10 @@ struct VS_OUTPUT
 VS_OUTPUT VS_Forward(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
-    float3 ase_worldPos = mul(float4(input.position, 1.0f), worldMat);
+    float3 ase_worldPos = mul(float4(input.position, 1.0f), worldMat).xyz;
     
     float2 temp_cast_0 = (_WaveSpeed).xx;
-    float mulTime307 = deltaTime * 0.001;
+    float mulTime307 = totalTime * 0.001;
     float2 temp_cast_1 = (mulTime307).xx;
     float2 texCoord312 = input.uv.xy * float2(1, 1) + temp_cast_1;
     float simplePerlin2D320 = snoise(texCoord312 * _WaveNoiseScale);
@@ -236,26 +216,29 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     float sin302 = sin(_WaveDirection);
     float2 rotator302 = mul(((simplePerlin2D320 * _WaveNoiseAmount) + appendResult59) - float2(0, 0), float2x2(cos302, -sin302, sin302, cos302)) + float2(0, 0);
     float2 temp_output_60_0 = (rotator302 * _WaveWavelength);
-    float2 panner127 = (1.0 * _Time.y * temp_cast_0 + temp_output_60_0);
+    float2 panner127 = (totalTime * temp_cast_0 + temp_output_60_0);
     float4 temp_cast_2 = 0;
     float4 lerpResult149 = lerp(diffuseMap[_WaveMask].SampleLevel(linearWrap, panner127, 0), temp_cast_2, (1.0 - _WaveAmplitude));
     float4 waveCrestVertoffset153 = lerpResult149;
     float grayscale298 = Luminance(waveCrestVertoffset153.rgb);
     float4 appendResult301 = (float4(0.0, grayscale298, 0.0, 0.0));
     
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(appendResult301.xyz);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position + appendResult301.xyz);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
     
-    output.positionWS = positionInputs.positionWS;
+    float4 positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
+    output.positionCS = positionInputs.positionCS;
     
-    output.normalWS = normalInputs.normalWS;
-    output.tangentWS = normalInputs.tangentWS;
-    output.bitangentWS = normalInputs.bitangentWS;
+    output.normalWS.xyz = normalInputs.normalWS;
+    output.normalWS.w = positionWS.x;
+    output.tangentWS.xyz = normalInputs.tangentWS;
+    output.tangentWS.w = positionWS.y;
+    output.bitangentWS.xyz = normalInputs.bitangentWS;
+    output.bitangentWS.w = positionWS.z;
     
-    output.ShadowPosH = mul(output.positionWS, shadowTransform);
+    output.ShadowPosH = mul(positionWS, shadowTransform);
         
-    output.color = input.color;
     output.uv = input.uv;
     
     return output;
@@ -266,50 +249,99 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 {
     float4 color = float4(1.f, 1.f, 1.f, 1.f);
-    float3 worldPosition = input.positionWS.xyz;
-    float3 worldNormal = normalize(input.normalWS);
+    float3 worldPosition = float3(input.normalWS.w, input.tangentWS.w, input.bitangentWS.w);
+    float3 worldNormal = normalize(input.normalWS.xyz);
     float3 normal = worldNormal;
-    float3 worldTangent = input.tangentWS;
-    float3 worldBitangent = input.bitangentWS;
+    float3 worldTangent = input.tangentWS.xyz;
+    float3 worldBitangent = input.bitangentWS.xyz;
     float2 uv = input.uv;   
 
-    // Shoreline foam
-    float foam62 = saturate(pow(distanceDepth170 + _FoamShoreline, _FoamFalloff));
+// 카메라 방향 벡터 계산
+    float3 viewDir = normalize(camPos.xyz - worldPosition);
 
-// Perlin 기반의 얕은 수면 거품
+// 클립 및 스크린 좌표 계산
+    float4 clipPos = input.positionCS;
+    float4 screenPos = ComputeScreenPos(clipPos);
+    float2 uvSS = GetNormalizedScreenSpaceUV(clipPos);
+    
+    float4 screenPosNorm = screenPos / screenPos.w;
+    screenPosNorm.z = screenPosNorm.z * 0.5 + 0.5;
+    
+    float sceneDepth = GetNormalizedSceneDepth(screenPosNorm.xy);
+    float linearSceneDepth = GetCameraDepth(sceneDepth);
+    float linearFragmentDepth = GetCameraDepth(screenPosNorm.z);
+    
+    float depthDiff = abs((linearSceneDepth - linearFragmentDepth) / _Depth);
+    float baseFalloff = pow(depthDiff, _OverallFalloff);
+    float depthFactor = baseFalloff + _ShallowFalloff;
+    
+    float4 shallowBlend = lerp(_ShallowColour, _DeepColour, depthFactor);
+    float4 deepBlend = lerp(_DeepColour, _VeryDeepColour, saturate(baseFalloff - 1.0));
+    float4 waterColor = (depthFactor < 1.0f) ? shallowBlend : deepBlend;
+    
+    return float4(_ShallowColour.rgb, 1.f);
+    
+    // 월드 XZ 기준으로 팬 UV 생성
+    float2 mainPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * _NormalTiling);
+    float2 detailPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * _NormalTiling2);
+
+// 노말 맵 샘플링
+    float3 mainNormalTS = diffuseMap[_RipplesNormalIdx].Sample(linearWrap, mainPannerUV).rgb;
+    float3 detailNormalTS = diffuseMap[_RipplesNormal2Idx].Sample(linearWrap, detailPannerUV).rgb;
+    mainNormalTS = UnpackNormal(mainNormalTS);
+    detailNormalTS = UnpackNormal(detailNormalTS);
+    float3 blendedNormalTS = normalize(mainNormalTS + detailNormalTS);
+    blendedNormalTS = normalize(blendedNormalTS * _NormalScale);
+    blendedNormalTS.z = lerp(1, blendedNormalTS.z, saturate(_NormalScale));
+    normal = UnpackedNormalSampleToWorldSpace(blendedNormalTS, worldNormal, worldTangent, worldBitangent);
+    
+    // Shoreline foam
+    float foamDepthMask = saturate(pow(depthDiff + _FoamShoreline, _FoamFalloff));
+    
     float2 panner166 = (0.1 * totalTime * float2(1, 0) + worldPosition.xz);
     float2 panner22 = (0.1 * totalTime * float2(-1, 0) + worldPosition.xz);
-    float noise1 = snoise(float3(panner166 * 1.5, 0.0));
-    float noise2 = snoise(float3(panner22 * 3.0, 0.0));
-    float foamNoiseMask = 1.0 - step((noise1 + noise2), (distanceDepth170 * _FoamSpread));
-    float4 foamColorCombined = saturate((_FoamColor * foamNoiseMask) + (_FoamColor * foam62));
-
-// 거품을 포함한 색상
-    float4 colorWithFoam = lerp(_BaseColor, float4(1, 1, 1, 0), foamColorCombined);
-
-// 파도 꼭대기 거품
-    float2 panner70 = (1.0 * totalTime * _WaveSpeed.xx + (worldPosition.xz * _WaveWavelength));
+    float perlin1 = snoise(float3((panner166 * 1.5), 0.0));
+    float perlin2 = snoise(float3((panner22 * 3.0), 0.0));
+    float perlinSum = perlin1 + perlin2;
+    float maskPerlinFoam = 1.0 - step(perlinSum, depthDiff * _FoamSpread);
+    float4 foamColorCombined = saturate((_FoamColor * maskPerlinFoam) + (_FoamColor * foamDepthMask));
+    
+    float4 colorWithFoam = lerp(waterColor, float4(1, 1, 1, 0), foamColorCombined);
+    
+    float mulTime307 = totalTime * 0.001;
+    float2 temp_cast_6 = (mulTime307).xx;
+    float2 texCoord312 = uv + temp_cast_6;
+    float2 waveBase = float2(worldPosition.x, worldPosition.z);
+    float2 waveNoiseUV = waveBase + snoise(texCoord312 * _WaveNoiseScale) * _WaveNoiseAmount;
+    float2x2 rot = float2x2(cos(_WaveDirection), -sin(_WaveDirection), sin(_WaveDirection), cos(_WaveDirection));
+    waveNoiseUV = mul(waveNoiseUV, rot);
+    
+    float2 crestPannerUV = waveNoiseUV * _WaveWavelength + (totalTime * _WaveSpeed.xx);
+    
     float crestNoise1 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(1, 0)) * 2, 0.0));
     float crestNoise2 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(-1, 0)) * 0.8, 0.0));
-    float crestFoamMask = step((crestNoise1 + crestNoise2), 0.0);
-    float4 crestFoamTex = diffuseMap[_FoamMaskIdx].SampleLevel(linearWrap, panner70, 0);
-    float4 crestFoamColor = lerp(float4(0, 0, 0, 0), crestFoamTex, crestFoamMask);
-    float4 waveCrestFoam = lerp(float4(0, 0, 0, 0), crestFoamColor, _WaveFoamOpacity);
+    float crestFoamMask1 = step(crestNoise1 + crestNoise2, 0.0);
+    float4 crestFoamTex = diffuseMap[_FoamMaskIdx].SampleLevel(linearWrap, crestPannerUV, 0);
     
-    float specular = lerp(_Specular, 0.0, foam62);
-    float smoothness = lerp(_Smoothness, _FoamSmoothness, foam62) * _ReflectionPower;
-
-// 최종 Albedo에 파도 거품 추가
+    float crestNoise3 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(1, 0)) * 0.05, 0.0));
+    float crestNoise4 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(-1, 0)) * 0.08, 0.0));
+    float crestFoamMask2 = step(crestNoise3 + crestNoise4, 0.0);
+    
+    float4 waveCrestFoam = lerp(0, crestFoamTex, crestFoamMask1);
+    waveCrestFoam = lerp(0, waveCrestFoam, crestFoamMask2);
+    waveCrestFoam = lerp(0, waveCrestFoam, _WaveFoamOpacity);
+    
     float4 waterAlbedo = colorWithFoam + waveCrestFoam;
     
+    float distanceDepth = abs(linearSceneDepth - linearFragmentDepth);
+    float waterOpacity = (_OpacityMin + (saturate(distanceDepth / _OpacityFalloff) * (1.0 - _OpacityMin)) * _Opacity);
     
-    
-    float3 camDir = (camPos - worldPosition);
-    float distToEye = length(camDir);
-    camDir /= distToEye;
+    float smoothness = lerp(_Smoothness, _FoamSmoothness, foamDepthMask) * _ReflectionPower;
+
+// 최종 Albedo에 파도 거품 추가
 
     LightingData lightingData = (LightingData) 0;
-    lightingData.cameraDirection = camDir;
+    lightingData.cameraDirection = viewDir;
     lightingData.normalWS = normal;
     lightingData.positionWS = worldPosition;
     lightingData.shadowFactor = CalcShadowFactor(input.ShadowPosH);
@@ -327,140 +359,21 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 finalColor = color.rgb;
 #endif
     
-    color.xyz = GammaEncoding(finalColor);
-    
 #ifdef FOG
 	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
     color = lerp(color, gFogColor, fogAmount);
 #endif
 
-    return float4(color.rgb, 1.f);
+    //return float4(1.f,1.f,1.f,1.f);
+    return float4(waterAlbedo.rgb, waterOpacity);
 }
 
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Shadow Cast
-struct VS_SHADOW_INPUT
-{
-    float3 position : POSITION;
-    float3 normal : NORMAL;
-    float2 uv : TEXCOORD;
-    float4 color : COLOR;
-};
-
-struct VS_SHADOW_OUTPUT
-{
-    float4 position : SV_POSITION;
-    float2 uv : TEXCOORD;
-    float4 color : COLOR;
-};
-
-VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
-{
-    VS_SHADOW_OUTPUT output = (VS_SHADOW_OUTPUT) 0;
-    
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
-    
-    output.position = positionInputs.positionCS;
-    output.uv = input.uv;
-    output.color = input.color;
-    
-    return output;
-}
-
-void PS_Shadow(VS_SHADOW_OUTPUT input)
-{
-    float2 uvLeaf = input.uv;
-    float2 uvTrunk = input.uv;
-    
-    float4 texColor = (input.color.b > 0.5) ? diffuseMap[leafTexIdx].Sample(anisoClamp, uvLeaf) : diffuseMap[trunkTexIdx].Sample(anisoClamp, uvTrunk);
-    float4 color = max(texColor, float4(leafColor, 0.f));
-    
-#ifdef TRANSPARENT_CLIP
-    clip(color.a - 0.5);
-#endif
-}
 
 
 //
 //G Pass
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-
-VS_OUTPUT VS_GPass(VS_INPUT input)
-{
-    VS_OUTPUT output = (VS_OUTPUT) 0;
-    
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
-    
-    output.positionWS = positionInputs.positionWS;
-    output.position = positionInputs.positionCS;
-    
-    output.normalWS = normalInputs.normalWS;
-    output.tangentWS = normalInputs.tangentWS;
-    output.bitangentWS = normalInputs.bitangentWS;
-    
-    output.ShadowPosH = mul(output.positionWS, shadowTransform);
-        
-    output.color = input.color;
-    output.uv = input.uv;
-    
-    return output;
-}
-
-struct PS_GPASS_OUTPUT
-{
-    float4 albedo : SV_Target0;
-    float4 normalWS : SV_Target1;
-    float4 emissive : SV_Target2;
-    float4 positionWS : SV_Target3;
-};
-
-PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
-{
-    PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
-    
-    float4 color = float4(1.f, 1.f, 1.f, 1.f);
-    float3 worldPosition = input.positionWS.xyz;
-    float3 worldNormal = normalize(input.normalWS);
-    float3 normal = worldNormal;
-    float3 worldTangent = input.tangentWS;
-    float3 worldBitangent = input.bitangentWS;
-    float2 uvLeaf = input.uv;
-    float2 uvTrunk = input.uv;
-
-    float4 texColor = (input.color.b > 0.5) ? diffuseMap[leafTexIdx].Sample(anisoClamp, uvLeaf) : diffuseMap[trunkTexIdx].Sample(anisoClamp, uvTrunk);
-    
-    color = max(texColor, float4(0.f, 0.f, 0.f, 0.f));
-    
-#ifdef TRANSPARENT_CLIP
-    clip(color.a - 0.5);
-#endif
-    
-    if (input.color.b > 0.5 && leafNormalIdx != -1)
-    {
-        float3 normalMapSample = diffuseMap[leafNormalIdx].Sample(anisoClamp, uvLeaf).rgb;
-        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
-    }
-    else if (input.color.b <= 0.5 && trunkNormalIdx != -1)
-    {
-        float3 normalMapSample = diffuseMap[trunkNormalIdx].Sample(anisoClamp, uvTrunk).rgb;
-        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
-    }
-    float temp = (1.0 - input.color.b);
-    float lerpResult188 = lerp(leafMetallic, 0.0, temp);
-    float lerpResult195 = lerp(trunkMetallic, 0.0, input.color.b);
-				
-    float lerpResult191 = lerp(leafSmoothness, 0.0, temp);
-    float lerpResult190 = lerp(trunkSmoothness, 0.0, input.color.b);
-    
-    float shadowFactor = CalcShadowFactor(input.ShadowPosH);
-    
-    output.albedo = color;
-    output.normalWS = float4(normal, lerpResult188 + lerpResult195);
-    output.positionWS = float4(worldPosition, lerpResult191 + lerpResult190);
-    output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
-    
-    return output;
-}

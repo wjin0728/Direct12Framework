@@ -10,6 +10,9 @@ private:
 	std::shared_ptr<class CVertexBuffer> mVertexBuffer{};
 
 	INSTANCE_BUFFER_TYPE mType;
+	UINT mMaxInstanceNum{};
+	UINT mInstancingCnt{};
+	UINT mInstancingBufferOffset{};
 
 public:
 	CInstancingGroup() = default;

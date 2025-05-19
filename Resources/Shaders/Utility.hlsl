@@ -59,15 +59,37 @@ VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS)
 
 float4 ComputeScreenPos(float4 clipPos)
 {
-    float4 o = clipPos;
-  
-    o.xy = clipPos.xy / clipPos.w;
-    o.xy = o.xy * 0.5f + 0.5f;
-    
-    o.z = clipPos.z / clipPos.w;
-    o.w = clipPos.w;
+    float4 o = clipPos * 0.5f;
+    o.xy = float2(o.x, o.y) + o.w / renderTargetSize;
 
+    o.zw = clipPos.zw;
     return o;
+}
+
+float2 GetNormalizedScreenSpaceUV(float4 screenPos)
+{
+    float2 uv = screenPos.xy / renderTargetSize;
+    return uv;
+}
+
+float GetNormalizedSceneDepth(float2 screenPos)
+{
+    float depth = diffuseMap[gbufferDepthIdx].SampleLevel(pointClamp, screenPos, 0).r;
+    return depth;
+}
+
+float GetLinear01Depth(float z)
+{
+    float near = projectionParams.x;
+    float far = projectionParams.y;
+    return 1.0 / (1.0 / near + z * (1.0 / far - 1.0 / near));
+}
+
+float GetCameraDepth(float z)
+{
+    float near = projectionParams.x;
+    float far = projectionParams.y;
+    return 1.0 / ((1.0 / near - 1.0 / far) * z + 1.0 / far);
 }
 
 float3 GammaDecoding(float3 color)
@@ -91,14 +113,33 @@ float3 ChangeLuminace(float3 color, float luminance)
     return color * (luminance / luminanceColor);
 }
 
-float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent)
+float3 UnpackNormal(float3 normalMapSample, float scale = 1.f)
+{
+    float3 normal = 2.0f * normalMapSample - 1.0f;
+    normal *= scale;
+    return normalize(normal);
+}
+
+float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent, float scale = 1.f)
 {
     float3 normalT = 2.0f * normalMapSample - 1.0f;
+    normalT *= scale;
+    normalT = normalize(normalT);
 
     float3x3 TBN = float3x3(tangent, bitangent, normal);
 
     return mul(normalT, TBN);
 }
+
+float3 UnpackedNormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent, float scale = 1.f)
+{
+    normalMapSample *= scale;
+    normalMapSample = normalize(normalMapSample);
+    float3x3 TBN = float3x3(tangent, bitangent, normal);
+    
+    return mul(normalMapSample, TBN);
+}
+
 
 float CalcShadowFactor(float4 shadowPosH)
 {

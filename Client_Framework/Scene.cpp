@@ -211,7 +211,8 @@ void CScene::LoadSceneFromFile(const std::string& fileName)
 	for (int i = 0; i < rootNum; i++) {
 		auto object = CGameObject::CreateObjectFromFile(ifs, prefabs);
 		auto& tag = object->GetTag();
-		if (tag == "Water") AddObject("Transparent", object);
+		if (tag == "Water") 
+			AddObject("Transparent", object);
 		else if (tag == "UI") AddObject("UI", object);
 		else if (tag == "SkyDome") AddObject("Sky", object);
 		else AddObject("Opaque", object);
@@ -372,6 +373,7 @@ void CScene::UpdatePassData()
 			passData.shadowTransform = (lightCamera->GetViewOrthoProjMat() * T).Transpose();
 			passData.shadowMapIdx = RESOURCE.Get<CTexture>("ShadowMap")->GetSrvIndex();
 		}
+		passData.projectionParams = Vec4(camera->GetNear(), camera->GetFar(), camera->GetFov(), camera->GetAspect());
 	}
 	passData.deltaTime = DELTA_TIME;
 	passData.totalTime = TIMER.GetTotalTime();
@@ -382,7 +384,6 @@ void CScene::UpdatePassData()
 		passData.renderTargetSize.y, 0.f,
 		0.f, 1.f
 	);
-	passData.uiTransform = UIProjectionMatrix.Transpose();
 	
 	int idx = 0;
 	passData.gbufferAlbedoIdx = renderTargetIndices[idx++];

@@ -18,52 +18,42 @@ cbuffer MaterialData : register(b5)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-#ifdef USE_SKINNING
 struct VS_INPUT
 {
     float3 position : POSITION;
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
+#ifdef USE_SKINNING
     float4 boneWeights : BONEWEIGHTS;
     uint4 boneIndices : BONEINDICES;
-};
-
-struct VS_OUTPUT
-{
-    float4 position : SV_POSITION;
-    float4 positionWS : TEXCOORD0;
-    float3 normalWS : TEXCOORD1;
-    float3 tangentWS : TEXCOORD2;
-    float3 bitangentWS : TEXCOORD3;
-    float4 ShadowPosH : TEXCOORD4;
-    
-    float2 uv : TEXCOORD5;
-};
-#else
-struct VS_INPUT
-{
-    float3 position : POSITION;
-    float2 uv : TEXCOORD;
-    float3 normal : NORMAL;
-    float3 tangent : TANGENT;
-};
-
-struct VS_OUTPUT
-{
-    float4 position : SV_POSITION;
-    float4 positionWS : TEXCOORD0;
-    float3 normalWS : TEXCOORD1;
-    float3 tangentWS : TEXCOORD2;
-    float3 bitangentWS : TEXCOORD3;
-    float4 ShadowPosH : TEXCOORD4;
-    
-    float2 uv : TEXCOORD5;
-};
 #endif
+#ifdef USE_INSTANCING
+    matrix worldMat : TRANSFORM;
+	matrix invWorldMat : INVTRANSFORM;
+	int idx0 : INDEX;
+#endif
+};
+
+struct VS_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float4 positionWS : TEXCOORD0;
+    float4 positionCS : TEXCOORD1;
+    float3 normalWS : TEXCOORD2;
+    float3 tangentWS : TEXCOORD3;
+    float3 bitangentWS : TEXCOORD4;
+    float4 ShadowPosH : TEXCOORD5;
+    
+    float2 uv : TEXCOORD6;
+};
 
 //¡§¡° ºŒ¿Ã¥ı
-VS_OUTPUT VS_Forward(VS_INPUT input)
+VS_OUTPUT VS_Forward(VS_INPUT input
+#ifdef USE_INSTANCING
+    , uint instanceId : SV_InstanceID
+#endif
+)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     
@@ -98,7 +88,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
-    
+    output.positionCS = positionInputs.positionCS;
     output.normalWS = normalInputs.normalWS;
     output.tangentWS = normalInputs.tangentWS;
     output.bitangentWS = normalInputs.bitangentWS;
@@ -206,7 +196,11 @@ struct VS_SHADOW_OUTPUT
 };
 #endif
 
-VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
+VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input
+#ifdef USE_INSTANCING
+    , uint instanceId : SV_InstanceID
+#endif
+)
 {
     VS_SHADOW_OUTPUT output = (VS_SHADOW_OUTPUT) 0;
     
@@ -250,7 +244,11 @@ struct PS_GPASS_OUTPUT
     float4 depth : SV_Target4;
 };
 
-VS_OUTPUT VS_GPass(VS_INPUT input)
+VS_OUTPUT VS_GPass(VS_INPUT input
+#ifdef USE_INSTANCING
+    , uint instanceId : SV_InstanceID
+#endif
+)
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
     
@@ -285,6 +283,7 @@ VS_OUTPUT VS_GPass(VS_INPUT input)
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
+    output.positionCS = positionInputs.positionCS;
     
     output.normalWS = normalInputs.normalWS;
     output.tangentWS = normalInputs.tangentWS;
@@ -330,7 +329,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     }
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
-    float depth = mul(input.positionWS, viewMat).z;
+    float depth = input.positionCS.z / input.positionCS.w;
     
     output.albedo = color;
     output.normalWS = float4(normal, metallic);

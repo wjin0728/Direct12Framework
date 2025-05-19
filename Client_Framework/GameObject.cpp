@@ -462,7 +462,7 @@ void CGameObject::InitByObjectName()
 		rotator->SetRotationAxis({ 0.f, 0.f, 1.f });
 	}
 	else if (mName.contains("Env")) {
-		mIsInstancing = true;
+		SetInstancing(true);
 	}
 }
 
@@ -670,6 +670,8 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 	int materialCnt{};
 	std::string materialName{};
 	ReadDateFromFile(inFile, materialCnt);
+	if(mName == "SM_Env_Water_Plane_01")
+		materialCnt = 1;
 	for (int i = 0; i < materialCnt; i++) {
 		ReadDateFromFile(inFile, materialName);
 		mRenderer->AddMaterial(materialName);

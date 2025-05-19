@@ -10,7 +10,7 @@ struct CBPassData
 	Matrix viewProjMat = Matrix::Identity;
 	Matrix shadowTransform = Matrix::Identity;
 	Matrix viewMat = Matrix::Identity;
-	Matrix uiTransform = Matrix::Identity;
+	Vec4 projectionParams;
 
 	Vec3 camPos = Vec3::Zero;
 	UINT shadowMapIdx{};
@@ -39,6 +39,13 @@ struct CBObjectData
 	int idx1{};
 	int idx2{};
 	int idx3{};
+};
+
+struct IBObjectData
+{
+	Matrix worldMAt = Matrix::Identity;
+	Matrix invWorldMAt = Matrix::Identity;
+	int idx0{};
 };
 
 struct CBLightsData
