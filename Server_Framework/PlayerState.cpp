@@ -105,7 +105,7 @@ void PlayerState::SkillState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::SkillState::Update(PlayerCharacter* player) {
-	cout << "Skill 업데이트 중!" << endl;
+	//cout << "Skill 업데이트 중!" << endl;
 }
 
 void PlayerState::SkillState::Exit(PlayerCharacter* player) {}
@@ -114,12 +114,12 @@ void PlayerState::SkillState::Exit(PlayerCharacter* player) {}
 PlayerState::HitState& PlayerState::HitState::GetInstance() { static PlayerState::HitState instance; return instance; }
 
 void PlayerState::HitState::Enter(PlayerCharacter* player) {
-	// cout << "Hit 들어왔다리!" << endl;
+	cout << "Hit 들어왔다리!" << endl;
 
 }
 
 void PlayerState::HitState::Update(PlayerCharacter* player) {
-	cout << "Hit 업데이트 중!" << endl;
+	//cout << "Hit 업데이트 중!" << endl;
 }
 
 void PlayerState::HitState::Exit(PlayerCharacter* player) {

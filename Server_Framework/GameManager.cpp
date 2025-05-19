@@ -320,7 +320,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_CHANGE_STATE: {
 		CS_CHANGE_STATE_PACKET* p = reinterpret_cast<CS_CHANGE_STATE_PACKET*>(packet);
 
-		clients[p->id]._player.SetState(p->state);
+		if (p->state != (uint8_t)clients[p->id]._player._state)
+			clients[p->id]._player.SetState(p->state);
 		break;
 	}
 	}
@@ -364,7 +365,6 @@ void GameManager::SendAllPlayersPosPacket() {
 		packet.y[cnt] = player._pos.y;
 		packet.z[cnt] = player._pos.z;
 		packet.look_y[cnt] = player._look_dir.y;
-		packet.state[cnt] = player.GetStateEnum();
 
 		cnt++;
 	}
@@ -375,9 +375,16 @@ void GameManager::SendAllPlayersPosPacket() {
 			packet.z[i] = 0;
 			packet.look_y[i] = 0;
 		}
+		else
+			packet.state[i] = (uint8_t)clients[i]._player._state;
 	}
 	for (auto& cl : clients) {
 		if (cl.second._state != ST_INGAME) continue;
+
+		cout << packet.x[0] << " " << packet.y[0] << " " << packet.z[0] << endl;
+		cout << packet.look_y[0] << endl;
+		cout << (int)packet.state[0] << endl;
+
 		cl.second.do_send(&packet);
 	}
 }

@@ -10,6 +10,7 @@ public:
 	S_PLAYER_CLASS	    _class;
 	int					_hp;
 	S_ITEM_TYPE			_skill;
+	S_PLAYER_STATE		_state;
 
 	int					_barrier;
 	bool				_on_FireEnchant;
@@ -60,36 +61,32 @@ public:
 	void SetState(uint8_t newState) {
 		switch (newState) {
 		case (uint8_t)S_PLAYER_STATE::IDLE:
+			_state = S_PLAYER_STATE::IDLE;
 			SetState(&PlayerState::IdleState::GetInstance());
 			break;
 		case (uint8_t)S_PLAYER_STATE::RUN:
+			_state = S_PLAYER_STATE::RUN;
 			SetState(&PlayerState::RunState::GetInstance());
 			break;
 		case (uint8_t)S_PLAYER_STATE::ATTACK:
+			_state = S_PLAYER_STATE::ATTACK;
 			SetState(&PlayerState::BasicAttackState::GetInstance());
 			break;
 		case (uint8_t)S_PLAYER_STATE::MOVE_ATTACK:
+			_state = S_PLAYER_STATE::MOVE_ATTACK;
 			SetState(&PlayerState::RunAttackState::GetInstance());
 			break;
 		case (uint8_t)S_PLAYER_STATE::JUMP:
+			_state = S_PLAYER_STATE::JUMP;
 			SetState(&PlayerState::JumpState::GetInstance());
 			break;
 		case (uint8_t)S_PLAYER_STATE::SKILL:
+			_state = S_PLAYER_STATE::SKILL;
 			SetState(&PlayerState::SkillState::GetInstance());
 			break;
 		default:
 			break;
 		}
-	}
-
-	uint8_t GetStateEnum() {
-		if (currentState == &PlayerState::IdleState::GetInstance()) return (uint8_t)S_PLAYER_STATE::IDLE;
-		else if (currentState == &PlayerState::RunState::GetInstance()) return (uint8_t)S_PLAYER_STATE::RUN;
-		else if (currentState == &PlayerState::BasicAttackState::GetInstance()) return (uint8_t)S_PLAYER_STATE::ATTACK;
-		else if (currentState == &PlayerState::RunAttackState::GetInstance()) return (uint8_t)S_PLAYER_STATE::MOVE_ATTACK;
-		else if (currentState == &PlayerState::JumpState::GetInstance()) return (uint8_t)S_PLAYER_STATE::JUMP;
-		else if (currentState == &PlayerState::SkillState::GetInstance()) return (uint8_t)S_PLAYER_STATE::SKILL;
-		return 0;
 	}
 
 	bool HasMoveInput() {

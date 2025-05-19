@@ -351,7 +351,7 @@ void ServerManager::print_error(const char* msg, int err_no)
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		reinterpret_cast<LPWSTR>(&msg_buf), 0, NULL);
 	std::cout << msg;
-	std::wcout << L"\t���� : " << msg_buf;
+	std::wcout << L"Because... : " << msg_buf;
 	while (true);
 	LocalFree(msg_buf);
 }

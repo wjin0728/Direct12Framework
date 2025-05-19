@@ -15,7 +15,7 @@ public:
 	SOCKET server_socket, client_socket;
 	HANDLE h_iocp;
 	OVER_PLUS accept_over;
-	std::vector<std::thread> workerThreads; // 워커 스레드 저장 (신규)
+	std::vector<std::thread> workerThreads; 
 
 	const std::chrono::microseconds TICK_DURATION{ 16667 }; // 60Hz
 	uint64_t current_tick = 0;
@@ -26,8 +26,8 @@ public:
 	unordered_map<int, Monster> Monsters; 
 	unordered_map<int, SESSION> clients;
 
-	int item_cnt = 0; // 아이템 id
-	int monster_cnt = 0; // 몬스터 id
+	int item_cnt = 0; 
+	int monster_cnt = 0; 
 
 	GameManager();
 	~GameManager();
