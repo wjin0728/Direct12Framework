@@ -218,7 +218,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     float2 temp_output_60_0 = (rotator302 * _WaveWavelength);
     float2 panner127 = (totalTime * temp_cast_0 + temp_output_60_0);
     float4 temp_cast_2 = 0;
-    float4 lerpResult149 = lerp(diffuseMap[_WaveMask].SampleLevel(linearWrap, panner127, 0), temp_cast_2, (1.0 - _WaveAmplitude));
+    float4 lerpResult149 = lerp(diffuseMap[_WaveMask].SampleLevel(linearWrap, panner127, 0).rrrr, temp_cast_2, (1.0 - _WaveAmplitude));
     float4 waveCrestVertoffset153 = lerpResult149;
     float grayscale298 = Luminance(waveCrestVertoffset153.rgb);
     float4 appendResult301 = (float4(0.0, grayscale298, 0.0, 0.0));
@@ -262,25 +262,25 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 // 클립 및 스크린 좌표 계산
     float4 clipPos = input.positionCS;
     float4 screenPos = ComputeScreenPos(clipPos);
-    float2 uvSS = GetNormalizedScreenSpaceUV(clipPos);
+    float2 uvSS = GetNormalizedScreenSpaceUV(screenPos);
     
-    float4 screenPosNorm = screenPos / screenPos.w;
-    screenPosNorm.z = screenPosNorm.z * 0.5 + 0.5;
-    
-    float sceneDepth = GetNormalizedSceneDepth(screenPosNorm.xy);
+    float sceneDepth = GetNormalizedSceneDepth(screenPos.xy);
     float linearSceneDepth = GetCameraDepth(sceneDepth);
-    float linearFragmentDepth = GetCameraDepth(screenPosNorm.z);
+    float linearFragmentDepth = GetCameraDepth(screenPos.z);
     
     float depthDiff = abs((linearSceneDepth - linearFragmentDepth) / _Depth);
     float baseFalloff = pow(depthDiff, _OverallFalloff);
     float depthFactor = baseFalloff + _ShallowFalloff;
     
-    float4 shallowBlend = lerp(_ShallowColour, _DeepColour, depthFactor);
-    float4 deepBlend = lerp(_DeepColour, _VeryDeepColour, saturate(baseFalloff - 1.0));
-    float4 waterColor = (depthFactor < 1.0f) ? shallowBlend : deepBlend;
+    float3 shallowColor = GammaDecoding(_ShallowColour.rgb);
+    float3 deepColor = GammaDecoding(_DeepColour.rgb);
+    float3 veryDeepColor = GammaDecoding(_VeryDeepColour.rgb);
     
-    return float4(_DeepColour.rgb, 1.f);
+    float3 shallowBlend = lerp(shallowColor, deepColor, depthFactor);
+    float3 deepBlend = lerp(deepColor, veryDeepColor, saturate(baseFalloff - 1.0));
+    float3 waterColor = (depthFactor < 1.0f) ? shallowBlend : deepBlend;
     
+    return float4(sceneDepth.xxx, 1.f);
     // 월드 XZ 기준으로 팬 UV 생성
     float2 mainPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * _NormalTiling);
     float2 detailPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * _NormalTiling2);
@@ -298,15 +298,16 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     // Shoreline foam
     float foamDepthMask = saturate(pow(depthDiff + _FoamShoreline, _FoamFalloff));
     
+    float3 foamColor = GammaDecoding(_FoamColor.rgb);
     float2 panner166 = (0.1 * totalTime * float2(1, 0) + worldPosition.xz);
     float2 panner22 = (0.1 * totalTime * float2(-1, 0) + worldPosition.xz);
     float perlin1 = snoise(float3((panner166 * 1.5), 0.0));
     float perlin2 = snoise(float3((panner22 * 3.0), 0.0));
     float perlinSum = perlin1 + perlin2;
     float maskPerlinFoam = 1.0 - step(perlinSum, depthDiff * _FoamSpread);
-    float4 foamColorCombined = saturate((_FoamColor * maskPerlinFoam) + (_FoamColor * foamDepthMask));
+    float3 foamColorCombined = saturate((foamColor * maskPerlinFoam) + (foamColor * foamDepthMask));
     
-    float4 colorWithFoam = lerp(waterColor, float4(1, 1, 1, 0), foamColorCombined);
+    float3 colorWithFoam = lerp(waterColor, float3(1, 1, 1), foamColorCombined);
     
     float mulTime307 = totalTime * 0.001;
     float2 temp_cast_6 = (mulTime307).xx;
@@ -321,20 +322,22 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float crestNoise1 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(1, 0)) * 2, 0.0));
     float crestNoise2 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(-1, 0)) * 0.8, 0.0));
     float crestFoamMask1 = step(crestNoise1 + crestNoise2, 0.0);
-    float4 crestFoamTex = diffuseMap[_FoamMaskIdx].SampleLevel(linearWrap, crestPannerUV, 0);
+    float3 crestFoamTex = float3(1, 1, 1);
+    if (_FoamMaskIdx != -1) crestFoamTex = diffuseMap[_FoamMaskIdx].SampleLevel(linearWrap, crestPannerUV, 0).rgb;
     
     float crestNoise3 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(1, 0)) * 0.05, 0.0));
     float crestNoise4 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(-1, 0)) * 0.08, 0.0));
     float crestFoamMask2 = step(crestNoise3 + crestNoise4, 0.0);
     
-    float4 waveCrestFoam = lerp(0, crestFoamTex, crestFoamMask1);
+    float3 waveCrestFoam = lerp(0, crestFoamTex, crestFoamMask1);
     waveCrestFoam = lerp(0, waveCrestFoam, crestFoamMask2);
     waveCrestFoam = lerp(0, waveCrestFoam, _WaveFoamOpacity);
     
-    float4 waterAlbedo = colorWithFoam + waveCrestFoam;
+    float3 waterAlbedo = colorWithFoam + waveCrestFoam;
     
     float distanceDepth = abs(linearSceneDepth - linearFragmentDepth);
     float waterOpacity = (_OpacityMin + (saturate(distanceDepth / _OpacityFalloff) * (1.0 - _OpacityMin)) * _Opacity);
+    
     
     float smoothness = lerp(_Smoothness, _FoamSmoothness, foamDepthMask) * _ReflectionPower;
 

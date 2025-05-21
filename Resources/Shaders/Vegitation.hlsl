@@ -148,8 +148,6 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 finalColor = color.rgb;
 #endif
     
-    color.xyz = GammaEncoding(finalColor);
-    
 #ifdef FOG
 	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
     color = lerp(color, gFogColor, fogAmount);
@@ -267,7 +265,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
 {
     PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
     
-    float4 color = float4(1.f, 1.f, 1.f, 1.f);
+    float4 color = float4(leafColor, 1.f);
     float3 worldPosition = input.positionWS.xyz;
     float3 worldNormal = normalize(input.normalWS);
     float3 normal = worldNormal;
@@ -277,8 +275,9 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float2 uvTrunk = input.uv;
 
     float4 texColor = (input.color.b > 0.5) ? diffuseMap[leafTexIdx].Sample(anisoClamp, uvLeaf) : diffuseMap[trunkTexIdx].Sample(anisoClamp, uvTrunk);
-    
-    color = max(texColor, float4(0.f, 0.f, 0.f, 0.f));
+    color = max(texColor, color);
+    color.rgb = GammaDecoding(color.rgb);
+    color.a = texColor.a;
     
 #ifdef TRANSPARENT_CLIP
     clip(color.a - 0.5);
@@ -304,7 +303,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
     float depth = input.positionCS.z / input.positionCS.w;
     
-    color.rgb = GammaDecoding(color.rgb);
+    
     
     output.albedo = color;
     output.normalWS = float4(normal, lerpResult188 + lerpResult195);

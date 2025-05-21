@@ -256,8 +256,6 @@ float4 PS_Forward(DS_OUTPUT input) : SV_TARGET
     
     float3 finalColor = CalculatePhongLight(lightingData, surfaceData);
     
-    color.xyz = GammaEncoding(finalColor);
-    
     #ifdef FOG
     float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
     color = lerp(color, gFogColor, fogAmount);
@@ -337,6 +335,7 @@ PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
     
     if (totalWeight > 0.0)
     {
+        color.rgb = GammaDecoding(color.rgb);
         color.rgb /= totalWeight;
         blendedNormal /= totalWeight;
         blendedMetallic /= totalWeight;
@@ -348,7 +347,6 @@ PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
     }
     blendedNormal = normalize(blendedNormal);
     
-    color.rgb = GammaDecoding(color.rgb);
     normal = normalize(mul(blendedNormal, float3x3(tangentWS, bitangentWS, normalWS)));
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);

@@ -60,8 +60,6 @@ float4 PS_Directional(float4 position : SV_Position) : SV_Target
     float3 finalColor = { 0.f, 0.f, 0.f };                                          
     finalColor = ComputeDirectionalLight(lightingData, surfaceData, lights[idx0]);
     
-    finalColor = GammaEncoding(finalColor);
-    
     return float4(finalColor.rgb, 1.f);
 }
 
@@ -121,8 +119,7 @@ float4 PS_Lighting(VS_OUTPUT output) : SV_Target
     {
         finalColor = color.rgb;
     }
-    
-    finalColor = GammaEncoding(finalColor);
+
     
     return float4(finalColor, 1.f);
 }

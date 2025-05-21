@@ -17,5 +17,6 @@ float4 PS_FinalPass(float4 position : SV_Position) : SV_Target
 {
     float2 uv = position.xy / renderTargetSize;
     float4 color = diffuseMap[lightingTargetIdx].SampleLevel(pointClamp, uv, 0.0);
-    return float4(color.rgb, 1.f);
+    color.rgb = GammaEncoding(color.rgb);
+    return float4(color.rgb, finalRenderTargetAlpha.a);
 }

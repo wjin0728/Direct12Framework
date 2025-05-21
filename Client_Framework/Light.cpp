@@ -78,7 +78,7 @@ void CLight::Start()
 	}
 	float r = max;
 	float size = r * 1.5f;
-	lightCam->GenerateOrthographicProjectionMatrix(20.f, size, size, size);
+	lightCam->GenerateOrthographicProjectionMatrix(1.f, 100.f, size, size);
 }
 
 void CLight::Update()
@@ -101,7 +101,7 @@ void CLight::LateUpdate()
 	for (int i = 0; i < 8; ++i) {
 		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
 	}
-	float r = max;
+	float r = max/5.f;
 
 	auto transform = GetTransform();
 	Vec3 dir = transform->GetWorldLook().GetNormalized();

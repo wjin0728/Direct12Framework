@@ -110,9 +110,7 @@ float4 PS_Forward(GS_OUTPUT input) : SV_TARGET
     float3 camDir = (camPos - input.posW.xyz);
     float distToEye = length(camDir);
     camDir /= distToEye;
-
     
-    color = GammaEncoding(color);
     
    #ifdef FOG
 	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);

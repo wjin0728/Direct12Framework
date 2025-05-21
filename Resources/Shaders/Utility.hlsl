@@ -80,11 +80,8 @@ VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS, matr
 
 float4 ComputeScreenPos(float4 clipPos)
 {
-    float4 o = clipPos * 0.5f;
-    o.xy = float2(o.x, o.y) + o.w / renderTargetSize;
-
-    o.zw = clipPos.zw;
-    return o;
+    float4 ndc = clipPos / clipPos.w;
+    return float4(ndc.xy * 0.5f + 0.5f, ndc.z, clipPos.w);
 }
 
 float2 GetNormalizedScreenSpaceUV(float4 screenPos)
@@ -95,7 +92,8 @@ float2 GetNormalizedScreenSpaceUV(float4 screenPos)
 
 float GetNormalizedSceneDepth(float2 screenPos)
 {
-    float depth = diffuseMap[gbufferDepthIdx].SampleLevel(pointClamp, screenPos, 0).r;
+    screenPos.y = 1.0 - screenPos.y;
+    float depth = diffuseMap[gbufferDepthIdx].SampleLevel(pointClamp, screenPos, 0).a;
     return depth;
 }
 
@@ -172,7 +170,7 @@ float CalcShadowFactor(float4 shadowPosH)
         return 1.0f; // 그림자 바깥은 항상 밝게 처리
     
     // Depth in NDC space.
-    float depth = shadowPosH.z;
+    float depth = shadowPosH.z - 0.001f;
 
     uint width, height, numMips;
     diffuseMap[shadowMapIdx].GetDimensions(0, width, height, numMips);
@@ -267,8 +265,8 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
 
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
-    float3 directLight = (kD * albedo / 3.1415f + specular) * lightColor * NdotL;
-    float3 ambientLight = albedo * 0.2f * ndotUp;
+    float3 directLight = (kD * albedo + specular) * lightColor * NdotL;
+    float3 ambientLight = albedo * 0.1f * ndotUp;
     ambientLight += albedo * 0.3f;
     
     return (directLight + ambientLight) * lightingData.shadowFactor + surfaceData.emissive;

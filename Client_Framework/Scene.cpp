@@ -49,7 +49,7 @@ CScene::CScene()
 		int finalTargetIdx = finalTarget->GetSrvIndex();
 		renderTargetIndices.push_back(finalTargetIdx);
 	}
-	
+	finalTargetAlpha = 1.f;
 }
 
 void CScene::Awake()
@@ -132,7 +132,7 @@ void CScene::RenderGBufferPass()
 	auto& lightCamera = mCameras["DirectionalLight"];
 	if (camera) {
 		camera->SetViewportsAndScissorRects(CMDLIST);
-		RenderForLayer("Opaque", lightCamera, G_PASS);
+		RenderForLayer("Opaque", camera, G_PASS);
 		INSTANCE(CInstancingManager).RenderInstancingGroup(G_PASS);
 		if (mTerrain) mTerrain->Render(camera, G_PASS);
 	}
@@ -408,6 +408,7 @@ void CScene::UpdatePassData()
 	if (finalTarget) {
 		passData.finalTargetIdx = finalTarget->GetSrvIndex();
 	}
+	passData.finalRenderTargetAlpha = Vec4(finalTargetAlpha, finalTargetAlpha, finalTargetAlpha, finalTargetAlpha);
 
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(0, &passData, sizeof(CBPassData));
 

@@ -260,12 +260,240 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetSRVDesc()
 {
 
 	D3D12_RESOURCE_DESC resourceDesc = texResource->GetDesc();
-	if (resourceDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB) {
-		resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	}
-	if (resourceDesc.Format == DXGI_FORMAT_BC7_UNORM_SRGB) {
-		resourceDesc.Format = DXGI_FORMAT_BC7_UNORM;
-	}
+	
+	/*if (!fileName.empty()) {
+		cout << fileName << " Format : ";
+		switch (resourceDesc.Format)
+		{
+		case DXGI_FORMAT_R32G32B32A32_FLOAT:
+			cout << "R32G32B32A32_FLOAT" << endl;
+			break;
+		case DXGI_FORMAT_R32G32B32A32_UINT:
+			cout << "R32G32B32A32_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R32G32B32A32_SINT:
+			cout << "R32G32B32A32_SINT" << endl;
+			break;
+		case DXGI_FORMAT_R32G32B32_FLOAT:
+			cout << "R32G32B32_FLOAT" << endl;
+			break;
+		case DXGI_FORMAT_R32G32B32_UINT:
+			cout << "R32G32B32_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R32G32B32_SINT:
+			cout << "R32G32B32_SINT" << endl;
+			break;
+		case DXGI_FORMAT_R16G16B16A16_FLOAT:
+			cout << "R16G16B16A16_FLOAT" << endl;
+			break;
+		case DXGI_FORMAT_R16G16B16A16_UINT:
+			cout << "R16G16B16A16_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R16G16B16A16_SINT:
+			cout << "R16G16B16A16_SINT" << endl;
+			break;
+		case DXGI_FORMAT_R16G16B16A16_UNORM:
+			cout << "R16G16B16A16_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_R16G16B16A16_SNORM:
+			cout << "R16G16B16A16_SNORM" << endl;
+			break;
+		case DXGI_FORMAT_R32G32_FLOAT:
+			cout << "R32G32_FLOAT" << endl;
+			break;
+		case DXGI_FORMAT_R32G32_UINT:
+			cout << "R32G32_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R32G32_SINT:
+			cout << "R32G32_SINT" << endl;
+			break;
+		case DXGI_FORMAT_R32G8X24_TYPELESS:
+			cout << "R32G8X24_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+			cout << "D32_FLOAT_S8X24_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+			cout << "R32_FLOAT_X8X24_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_X32_TYPELESS_G8X24_UINT:
+			cout << "X32_TYPELESS_G8X24_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R10G10B10A2_UNORM:
+			cout << "R10G10B10A2_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_R10G10B10A2_UINT:
+			cout << "R10G10B10A2_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R11G11B10_FLOAT:
+			cout << "R11G11B10_FLOAT" << endl;
+			break;
+		case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+			cout << "R8G8B8A8_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_R8G8B8A8_UINT:
+			cout << "R8G8B8A8_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R8G8B8A8_UNORM:
+			cout << "R8G8B8A8_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_R8G8B8A8_SNORM:
+			cout << "R8G8B8A8_SNORM" << endl;
+			break;
+		case DXGI_FORMAT_R8G8B8A8_SINT:
+			cout << "R8G8B8A8_SINT" << endl;
+			break;
+		case DXGI_FORMAT_R16G16_TYPELESS:
+			cout << "R16G16_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_R16G16_FLOAT:
+			cout << "R16G16_FLOAT" << endl;
+			break;
+		case DXGI_FORMAT_R16G16_UINT:
+			cout << "R16G16_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R16G16_UNORM:
+			cout << "R16G16_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_R16G16_SNORM:
+			cout << "R16G16_SNORM" << endl;
+			break;
+		case DXGI_FORMAT_R16G16_SINT:
+			cout << "R16G16_SINT" << endl;
+			break;
+		case DXGI_FORMAT_R32_TYPELESS:
+			cout << "R32_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_D32_FLOAT:
+			cout << "D32_FLOAT" << endl;
+			break;
+		case DXGI_FORMAT_R32_FLOAT:
+			cout << "R32_FLOAT" << endl;
+			break;
+		case DXGI_FORMAT_R32_UINT:
+			cout << "R32_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R32_SINT:
+			cout << "R32_SINT" << endl;
+			break;
+		case DXGI_FORMAT_R24G8_TYPELESS:
+			cout << "R24G8_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_D24_UNORM_S8_UINT:
+			cout << "D24_UNORM_S8_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+			cout << "R24_UNORM_X8_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_X24_TYPELESS_G8_UINT:
+			cout << "X24_TYPELESS_G8_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R8G8_TYPELESS:
+			cout << "R8G8_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_R8G8_UINT:
+			cout << "R8G8_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R8G8_UNORM:
+			cout << "R8G8_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_R8G8_SNORM:
+			cout << "R8G8_SNORM" << endl;
+			break;
+		case DXGI_FORMAT_R8G8_SINT:
+			cout << "R8G8_SINT" << endl;
+			break;
+		case DXGI_FORMAT_R16_TYPELESS:
+			cout << "R16_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_R16_FLOAT:
+			cout << "R16_FLOAT" << endl;
+			break;
+		case DXGI_FORMAT_R16_UINT:
+			cout << "R16_UINT" << endl;
+			break;
+		case DXGI_FORMAT_R16_UNORM:
+			cout << "R16_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_R16_SNORM:
+			cout << "R16_SNORM" << endl;
+			break;
+		case DXGI_FORMAT_R16_SINT:
+			cout << "R16_SINT" << endl;
+			break;
+		case DXGI_FORMAT_BC1_TYPELESS:
+			cout << "BC1_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_BC1_UNORM:
+			cout << "BC1_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_BC1_UNORM_SRGB:
+			cout << "BC1_UNORM_SRGB" << endl;
+			break;
+		case DXGI_FORMAT_BC2_TYPELESS:
+			cout << "BC2_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_BC2_UNORM:
+			cout << "BC2_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_BC2_UNORM_SRGB:
+			cout << "BC2_UNORM_SRGB" << endl;
+			break;
+		case DXGI_FORMAT_BC3_TYPELESS:
+			cout << "BC3_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_BC3_UNORM:
+			cout << "BC3_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_BC3_UNORM_SRGB:
+			cout << "BC3_UNORM_SRGB" << endl;
+			break;
+		case DXGI_FORMAT_BC4_TYPELESS:
+			cout << "BC4_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_BC4_UNORM:
+			cout << "BC4_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_BC4_SNORM:
+			cout << "BC4_SNORM" << endl;
+			break;
+		case DXGI_FORMAT_BC5_TYPELESS:
+			cout << "BC5_TYPELESS" << endl;
+			break;
+		case DXGI_FORMAT_BC5_UNORM:
+			cout << "BC5_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_BC7_UNORM:
+			cout << "BC7_UNORM" << endl;
+			break;
+		case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+			cout << "R8G8B8A8_UNORM_SRGB" << endl;
+			break;
+		case DXGI_FORMAT_BC7_UNORM_SRGB:
+			cout << "BC7_UNORM_SRGB" << endl;
+			break;
+		default:
+			break;
+		}
+		if (resourceDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB) {
+			resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		}
+		if (resourceDesc.Format == DXGI_FORMAT_BC7_UNORM_SRGB) {
+			resourceDesc.Format = DXGI_FORMAT_BC7_UNORM;
+		}
+		if (resourceDesc.Format == DXGI_FORMAT_BC1_UNORM_SRGB) {
+			resourceDesc.Format = DXGI_FORMAT_BC1_UNORM;
+		}
+		if (resourceDesc.Format == DXGI_FORMAT_BC2_UNORM_SRGB) {
+			resourceDesc.Format = DXGI_FORMAT_BC2_UNORM;
+		}
+		if (resourceDesc.Format == DXGI_FORMAT_BC3_UNORM_SRGB) {
+			resourceDesc.Format = DXGI_FORMAT_BC3_UNORM;
+		}
+		if (resourceDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB) {
+			resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		}
+	}*/
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;

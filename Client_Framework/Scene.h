@@ -36,6 +36,8 @@ protected:
 
 	Matrix UIProjectionMatrix{};
 
+	float finalTargetAlpha{ 1.f };
+
 public:
 	bool mIsActive{ false };
 	CScene();

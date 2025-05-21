@@ -131,8 +131,6 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 finalColor = color.rgb;
 #endif
     
-    color.xyz = GammaEncoding(finalColor);
-    
 #ifdef FOG
 	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
     color = lerp(color, gFogColor, fogAmount);
@@ -243,7 +241,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
 {
     PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
     
-    float4 color = float4(1.f, 1.f, 1.f, 1.f);
+    float4 color = float4(GammaDecoding(ForwardColor).rgb, 1.f);
     float3 worldPosition = input.positionWS.xyz;
     float3 worldNormal = normalize(input.normalWS);
     float3 normal = worldNormal;
@@ -254,9 +252,8 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     if (ForwardTexIdx != -1)
     {
         float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
-        color = float4(GammaDecoding(texColor.rgb), texColor.a);
+        color *= float4(GammaDecoding(texColor.rgb), texColor.a);
     }
-    else color = float4(ForwardColor.rgb, 1.f);
     
     
     if (normalTexIdx != -1)

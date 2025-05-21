@@ -142,8 +142,6 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 finalColor = color.rgb;
 #endif
     
-    color.xyz = GammaEncoding(finalColor);
-    
 #ifdef FOG
 	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
     color = lerp(color, gFogColor, fogAmount);

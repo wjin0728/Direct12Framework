@@ -84,11 +84,11 @@ VS_OUTPUT VS_Forward(VS_INPUT input
 #endif
     
 #ifdef USE_INSTANCING
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent, invWorldMat);
 #else
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(position);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent);
 #endif
     
     output.positionWS = positionInputs.positionWS;
@@ -121,8 +121,9 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     if (ForwardTexIdx != -1)
     {
         float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
-        color *= float4(GammaDecoding(texColor.rgb), texColor.a);
+        color *= texColor;
     }
+    color.rgb = GammaDecoding(color.rgb);
     #ifdef TRANSPARENT_CLIP
     clip(color.a - 0.5);
     #endif
@@ -132,7 +133,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
         float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoClamp, uv).rgb;
         normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
     }
-    float3 _emissionColor = emissionColor;
+    float3 _emissionColor = GammaDecoding(emissionColor);
     if (emissionMapIdx != -1)
     {
         float4 emissionColorSample = diffuseMap[emissionMapIdx].Sample(anisoClamp, uv);
@@ -160,8 +161,6 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 #else
     float3 finalColor = color.rgb;
 #endif
-    
-    color.xyz = GammaEncoding(finalColor);
     
 #ifdef FOG
 	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
@@ -225,9 +224,9 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input
     float3 position = input.position;
 #endif
 #ifdef USE_INSTANCING
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(position, input.worldMat);
 #else
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(position);
 #endif
     
     output.position = positionInputs.positionCS;
@@ -288,11 +287,11 @@ VS_OUTPUT VS_GPass(VS_INPUT input
 #endif
     
 #ifdef USE_INSTANCING
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent, input.invWorldMat);
 #else
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(position);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent);
 #endif
     
     output.positionWS = positionInputs.positionWS;
@@ -303,7 +302,8 @@ VS_OUTPUT VS_GPass(VS_INPUT input
     output.tangentWS = normalInputs.tangentWS;
     output.bitangentWS = normalInputs.bitangentWS;
     
-    output.ShadowPosH = mul(output.positionWS, shadowTransform);
+    float3 offsetPos = output.positionWS.xyz + output.normalWS * 0.01f;
+    output.ShadowPosH = mul(float4(offsetPos, 1.f), shadowTransform);
     
     output.uv = input.uv;
     
@@ -326,16 +326,16 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     if (ForwardTexIdx != -1)
     {
         float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
-        color*= float4(GammaDecoding(texColor.rgb), texColor.a);
+        color *= texColor;
     }
-    
+    color.rgb = GammaDecoding(color.rgb);
     
     if (normalTexIdx != -1)
     {
         float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoClamp, uv).rgb;
         normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
     }
-    float3 _emissionColor = emissionColor;
+    float3 _emissionColor = GammaDecoding(emissionColor);
     if (emissionMapIdx != -1)
     {
         float4 emissionColorSample = diffuseMap[emissionMapIdx].Sample(anisoClamp, uv);

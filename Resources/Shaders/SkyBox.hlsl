@@ -56,36 +56,13 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 {
     float3 color = float3(0.5f, 0.5f, 0.5f);
-    
+    float3 mBottomColor = float3(0,134,255) / 255;
     float3 worldPosition = input.positionWS.xyz;
-    
     float2 uv = input.uv;
     
     float clampResult13 = clamp(((offset + worldPosition.y) / distance), 0.0, 1.0);
     float3 lerpResult18 = lerp(bottomColor, topColor, saturate(pow(clampResult13, falloff)));
-    float2 texCoord21 = uv * float2(1, 1) + float2(0, 0);
-    float3 lerpResult4 = lerp(bottomColor, topColor, texCoord21.y);
-    
-    float3 staticSwitch20 = lerpResult18 + lerpResult18 * 0.3f;
-    
-    float3 viewDir = normalize(camPos.xyz - worldPosition);
-    LightingData lightingData = (LightingData) 0;
-    lightingData.cameraDirection = viewDir;
-    lightingData.normalWS = float3(0, 0, 1);
-    lightingData.positionWS = worldPosition;
-    lightingData.shadowFactor = 1;
-    
-    SurfaceData surfaceData = (SurfaceData) 0;
-    surfaceData.albedo = color.rgb;
-    surfaceData.metallic = 0;
-    surfaceData.smoothness = 0;
-    surfaceData.specular = 0.5f;
-    surfaceData.emissive = staticSwitch20;
-    
-    
-    float3 finalColor = CalculatePhongLight(lightingData, surfaceData);
-    
-    finalColor = GammaEncoding(finalColor);
-
+    float3 lerpResult4 = lerp(bottomColor, topColor, uv.y);
+    float3 finalColor = GammaDecoding(lerpResult18) + color;
     return float4(finalColor, 1.f);
 }

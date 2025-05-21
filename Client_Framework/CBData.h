@@ -28,6 +28,7 @@ struct CBPassData
 	int lightingTargetIdx{};
 	int postProcessIdx{};
 	int finalTargetIdx{};
+	Vec4 finalRenderTargetAlpha;
 };
 
 struct CBObjectData

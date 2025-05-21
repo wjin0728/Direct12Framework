@@ -38,6 +38,7 @@ cbuffer CBPassData : register(b0)
     int lightingTargetIdx;
     int postProcessIdx;
     int finalTargetIdx;
+    float4 finalRenderTargetAlpha;
 };
 cbuffer CBObjectData : register(b1)
 {

@@ -36,6 +36,13 @@ namespace DirectX
 {
     namespace SimpleMath
     {
+        inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveReverseZFovLH
+        (
+            float FovAngleY,
+            float AspectRatio,
+            float NearZ,
+            float FarZ
+        ) noexcept;
 
         struct Vector2;
         struct Vector4;
