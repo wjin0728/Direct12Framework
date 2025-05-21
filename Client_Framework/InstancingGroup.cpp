@@ -16,13 +16,7 @@ CInstancingGroup::~CInstancingGroup()
 
 void CInstancingGroup::Initialize(INSTANCE_BUFFER_TYPE type)
 {
-	mType = type;
 
-	std::vector<Vec3> vertex;
-	vertex.push_back({ 0.f,0.f,0.f });
-
-	mVertexBuffer = std::make_shared<CVertexBuffer>();
-	mVertexBuffer->CreateBuffer(vertex, 0);
 }
 
 void CInstancingGroup::AddObject(std::shared_ptr<class CGameObject> object)
@@ -33,17 +27,14 @@ void CInstancingGroup::AddObject(std::shared_ptr<class CGameObject> object)
 	}
 }
 
-void CInstancingGroup::Render(const std::shared_ptr<class CCamera>& camera)
+int CInstancingGroup::Update(const std::shared_ptr<class CCamera>& camera, int startOffset)
 {
-	int instancingCnt{};
-	auto instancingBuffer = INSTANCINGBUFFER(mType);
-	mInstancingBufferView = instancingBuffer->GetInstancingBufferView();
-
+	mInstancingBufferOffset = startOffset;
+	mInstancingCnt = 0;
+	auto instancingBuffer = INSTANCE(CDX12Manager).GetInstancingBuffer((UINT)mType);
 	switch (mType)
 	{
 	case INSTANCE_BUFFER_TYPE::BILLBOARD: {
-		RESOURCE.Get<CShader>("Billboard")->SetPipelineState(CMDLIST);
-
 		for (const auto& obj : mObjects) {
 			//if (!camera->IsInFrustum(obj)) continue;
 
@@ -52,23 +43,27 @@ void CInstancingGroup::Render(const std::shared_ptr<class CCamera>& camera)
 			objDate.size = { obj->GetTransform()->GetLocalScale().x, obj->GetTransform()->GetLocalScale().y };
 			objDate.textureMat = obj->GetTransform()->GetTexMat().Transpose();
 
-			instancingBuffer->UpdateBuffer(instancingCnt++, &objDate);
+			instancingBuffer->UpdateBuffer(mInstancingBufferOffset + (mInstancingCnt++), &objDate);
 		}
-
-		if (!mObjects.empty()) {
-			CMDLIST->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-
-			D3D12_VERTEX_BUFFER_VIEW buffers[] = { mVertexBuffer->GetVertexBufferView(), mInstancingBufferView };
-			CMDLIST->IASetVertexBuffers(0, 2, buffers);
-
-			CMDLIST->DrawInstanced(1, instancingCnt, 0, 0);
-		}
-	}
 		break;
+	}
+	case INSTANCE_BUFFER_TYPE::OBJECT: {
+		for (const auto& obj : mObjects) {
+			BoundingSphere objBS = obj->GetRootBoundingSphere();
+			if (!camera->IsInFrustum(objBS, 0)) continue;
+
+			IBObjectData objDate;
+			objDate.worldMAt = obj->GetTransform()->GetWorldMat().Transpose();
+			objDate.invWorldMAt = objDate.worldMAt.Invert();
+
+			instancingBuffer->UpdateBuffer(mInstancingBufferOffset + (mInstancingCnt++), &objDate);
+		}
+		break;
+	}
 	default:
-
 		break;
 	}
-	
-	
+
+	return mInstancingBufferOffset + mInstancingCnt;
 }
+

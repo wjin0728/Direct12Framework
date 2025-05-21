@@ -13,7 +13,7 @@ protected:
 
     bool isDirty{};
     int mCbvIdx = -1;
-    UINT mCbvOffset{ -1 };
+    int mCbvOffset{ -1 };
 
     UINT mDirtyFrame = FRAME_RESOURCE_COUNT + 1;
 
@@ -41,6 +41,12 @@ public:
 
 public:
     void AddMaterial(const std::shared_ptr<CMaterial>& material);
+	void AddMaterials(const std::vector<std::shared_ptr<CMaterial>>& materials)
+	{
+		for (const auto& material : materials) {
+			AddMaterial(material);
+		}
+	}
     void AddMaterial(const std::string& name);
 
 public:
@@ -63,4 +69,5 @@ public:
     
 
     std::shared_ptr<CMaterial> GetMaterial(UINT idx = 0) const { return m_materials[idx]; }
+	BoundingSphere GetWorldBS() const { return mWorldBS; }
 };

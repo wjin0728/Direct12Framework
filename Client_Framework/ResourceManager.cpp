@@ -209,7 +209,7 @@ void CResourceManager::LoadDefaultShaders()
 	}
 	{
 		ShaderInfo info;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::INSTANCE;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
@@ -219,7 +219,7 @@ void CResourceManager::LoadDefaultShaders()
 	}
 	{
 		ShaderInfo info;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::INSTANCE;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;

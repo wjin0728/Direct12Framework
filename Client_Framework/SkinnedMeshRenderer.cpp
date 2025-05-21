@@ -18,15 +18,18 @@ CSkinnedMeshRenderer::~CSkinnedMeshRenderer()
 void CSkinnedMeshRenderer::Awake()
 {
 	CRenderer::Awake();
-	auto root = owner->GetTransform()->GetRoot()->owner;
-
-    for (int i = 0; const auto & boneName : mBoneNames) {
-		mBoneTransforms.push_back(root->FindChildByName(boneName)->GetTransform());
-	}
+    owner->mRootBS = owner->mRootLocalBS = mWorldBS;
+	
 }
 
 void CSkinnedMeshRenderer::Start()
 {
+	CRenderer::Start();
+    auto root = owner->GetTransform()->GetRoot()->owner;
+
+    for (int i = 0; const auto & boneName : mBoneNames) {
+        mBoneTransforms.push_back(root->FindChildByName(boneName)->GetTransform());
+    }
 	for (auto& mat : m_materials) {
         auto& shaderName = mat->mShaderName;
 		mat->SetShader(shaderName + "Animation");
@@ -54,7 +57,7 @@ void CSkinnedMeshRenderer::LateUpdate()
 void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 {
     if (!m_materials[0]->GetShader((PASS_TYPE)pass)) return;
-    if (camera && !camera->IsInFrustum(mWorldBS)) return;
+    if (camera && !camera->IsInFrustum(mWorldBS, pass)) return;
 
     CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->BindToShader(mCbvOffset);
 

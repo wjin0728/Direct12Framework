@@ -15,6 +15,7 @@
 #include"PlayerController.h"
 #include"RigidBody.h"
 #include"ThirdPersonCamera.h"	
+#include"InstancingManager.h"
 
 
 CScene::CScene()
@@ -77,6 +78,8 @@ void CScene::LateUpdate()
 	for (const auto& object : mObjects) {
 		object->LateUpdate();
 	}
+	auto& camera = mCameras["MainCamera"];
+	if(camera) INSTANCE(CInstancingManager).UpdateInstancingGroup(camera);
 	INSTANCE(CResourceManager).UpdateMaterials();
 	UpdatePassData();
 
@@ -99,6 +102,7 @@ void CScene::RenderShadowPass()
 
 	lightCamera->SetViewportsAndScissorRects(CMDLIST);
 	RenderForLayer("Opaque", mainCamera, SHADOW);
+	INSTANCE(CInstancingManager).RenderInstancingGroup(SHADOW);
 
 	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
 	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
@@ -129,6 +133,7 @@ void CScene::RenderGBufferPass()
 	if (camera) {
 		camera->SetViewportsAndScissorRects(CMDLIST);
 		RenderForLayer("Opaque", lightCamera, G_PASS);
+		INSTANCE(CInstancingManager).RenderInstancingGroup(G_PASS);
 		if (mTerrain) mTerrain->Render(camera, G_PASS);
 	}
 

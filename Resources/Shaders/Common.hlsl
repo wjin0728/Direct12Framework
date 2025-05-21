@@ -29,9 +29,9 @@ struct VS_INPUT
     uint4 boneIndices : BONEINDICES;
 #endif
 #ifdef USE_INSTANCING
-    matrix worldMat;
-	matrix invWorldMat;
-	int idx0;
+    matrix worldMat : TRANSFORM;
+	matrix invWorldMat : INVTRANSFORM;
+	int idx0 : INDEX;
 #endif
 };
 
@@ -59,8 +59,13 @@ VS_OUTPUT VS_Forward(VS_INPUT input
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+#else
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+#endif
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
@@ -174,7 +179,11 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input
 {
     VS_SHADOW_OUTPUT output = (VS_SHADOW_OUTPUT) 0;
     
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+#else
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+#endif
     
     output.position = positionInputs.positionCS;
     
@@ -207,8 +216,13 @@ VS_OUTPUT VS_GPass(VS_INPUT input
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
     
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+#else
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+#endif
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;

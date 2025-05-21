@@ -44,6 +44,8 @@ void CTransform::Awake()
 
 void CTransform::Start()
 {
+	dirtyFramesNum = FRAME_RESOURCE_COUNT;
+	mDirtyFlag = true;
 	UpdateWorldMatrix();
 }
 

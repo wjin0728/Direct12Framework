@@ -324,6 +324,8 @@ D3D12_SHADER_BYTECODE CShader::CreateShader(ComPtr<ID3DBlob>& blob, const std::s
 	std::vector<D3D_SHADER_MACRO> macros;
 	if (mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::ANIMATION)
 		macros.push_back({ "USE_SKINNING", "1" });
+	if (mInfo.inputLayoutYype == INPUT_LAYOUT_TYPE::INSTANCE)
+		macros.push_back({ "USE_INSTANCING", "1" });
 	if (mInfo.blendType != BLEND_TYPE::ALPHA_BLEND)
 		macros.push_back({ "TRANSPARENT_CLIP", "1" });
 	macros.push_back({ nullptr, nullptr });

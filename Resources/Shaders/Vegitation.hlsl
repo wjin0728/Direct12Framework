@@ -61,8 +61,13 @@ VS_OUTPUT VS_Forward(VS_INPUT input
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
     
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+#else
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+#endif
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
@@ -105,12 +110,12 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     if (input.color.b > 0.5 && leafNormalIdx != -1)
     {
         float3 normalMapSample = diffuseMap[leafNormalIdx].Sample(anisoClamp, uvLeaf).rgb;
-        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent, leafNormalScale);
+        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent, 0.2);
     }
     else if (input.color.b <= 0.5 && trunkNormalIdx != -1)
     {
         float3 normalMapSample = diffuseMap[trunkNormalIdx].Sample(anisoClamp, uvTrunk).rgb;
-        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent, trunkNormalScale);
+        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent, 0.2);
     }
     
     float3 camDir = (camPos - worldPosition);
@@ -160,8 +165,14 @@ struct VS_SHADOW_INPUT
 {
     float3 position : POSITION;
     float3 normal : NORMAL;
+    float3 tangent : TANGENT;
     float2 uv : TEXCOORD;
     float4 color : COLOR;
+#ifdef USE_INSTANCING
+    matrix worldMat : TRANSFORM;
+	matrix invWorldMat : INVTRANSFORM;
+	int idx0 : INDEX;
+#endif
 };
 
 struct VS_SHADOW_OUTPUT
@@ -179,7 +190,11 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input
 {
     VS_SHADOW_OUTPUT output = (VS_SHADOW_OUTPUT) 0;
     
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+#else
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+#endif
     
     output.position = positionInputs.positionCS;
     output.uv = input.uv;
@@ -215,8 +230,13 @@ VS_OUTPUT VS_GPass(VS_INPUT input
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
     
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+#else
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+#endif
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;

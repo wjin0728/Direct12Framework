@@ -84,5 +84,6 @@ public:
 public:
 	const std::vector<CVertex>& GetVertices() const { return vertices; }
 	const ComPtr<ID3D12Resource>& GetVertexBuffer() const { return mVertexBuffer->mBuffer; }
+	const D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() const { return mVertexBuffer->mVertexBufferView; }
 	UINT GetSubMeshNum() const { return subMeshNum; }
 };

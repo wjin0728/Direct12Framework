@@ -52,6 +52,10 @@ void CCamera::GenerateViewMatrix()
 	mInverseViewMat._41 = position.x; mInverseViewMat._42 = position.y; mInverseViewMat._43 = position.z;
 
 	mFrustumView.Transform(mFrustumWorld, mInverseViewMat);
+
+	//mFrustumShadow는 조금 더 크게 설정
+	Matrix shadowMat = Matrix::CreateScale({1.5f, 1.2f, 1.f}) * mInverseViewMat;
+	mFrustumView.Transform(mFrustumShadow, shadowMat);
 }
 
 void CCamera::Awake()
@@ -134,9 +138,16 @@ bool CCamera::IsInFrustum(const BoundingBox& boundingBox)
 	return mFrustumWorld.Intersects(boundingBox);
 }
 
-bool CCamera::IsInFrustum(const BoundingSphere& boundingSphere)
+bool CCamera::IsInFrustum(const BoundingSphere& boundingSphere, int pass)
 {
-	return mFrustumWorld.Intersects(boundingSphere);
+	if (pass == 0 || pass == 1)
+	{
+		return mFrustumWorld.Intersects(boundingSphere);
+	}
+	else if (pass == 2)
+	{
+		return mFrustumShadow.Intersects(boundingSphere);
+	}
 }
 
 bool CCamera::IsInFrustum(std::shared_ptr<class CGameObject> obj)

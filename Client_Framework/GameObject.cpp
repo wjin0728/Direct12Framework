@@ -17,6 +17,7 @@
 #include"Light.h"
 #include"ContinuousRotation.h"
 #include"UIRenderer.h"
+#include"InstancingManager.h"
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -128,10 +129,6 @@ void CGameObject::SetInstancing(bool isInstancing)
 	}
 
 	mIsInstancing = isInstancing;
-
-	for (auto& child : mChildren) {
-		child->SetInstancing(isInstancing);
-	}
 }
 
 void CGameObject::SetParent(const std::shared_ptr<CGameObject>& parent)
@@ -164,6 +161,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	instance->mObjectType = original->mObjectType;
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
+	instance->mIsInstancing = original->mIsInstancing;
 
 	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
 	if (!instance->mRenderer) {
@@ -198,6 +196,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 	instance->mObjectType = original->mObjectType;
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
+	instance->mIsInstancing = original->mIsInstancing;
 
 	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
 	if (!instance->mRenderer) {
@@ -461,7 +460,8 @@ void CGameObject::InitByObjectName()
 		rotator->SetRotationSpeed({ 0.f, 0.f, 10.f });
 		rotator->SetRotationAxis({ 0.f, 0.f, 1.f });
 	}
-	else if (mName.contains("Env")) {
+	else if (mName.contains("Bush") || mName.contains("Tree")|| mName.contains("Grass")|| mName.contains("Env_Ground")
+		|| mName.contains("Env_Rock") || mName.contains("Env_Lillies") || mName.contains("Env_Wildflowers")) {
 		SetInstancing(true);
 	}
 }
@@ -666,11 +666,12 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 		ReadDateFromFile(inFile, meshName);
 		meshRenderer->SetMesh(meshName);
 	}
+	mRootLocalBS = mRenderer->GetWorldBS();
 
 	int materialCnt{};
 	std::string materialName{};
 	ReadDateFromFile(inFile, materialCnt);
-	if(mName == "SM_Env_Water_Plane_01")
+	if (mName == "SM_Env_Water_Plane_01")
 		materialCnt = 1;
 	for (int i = 0; i < materialCnt; i++) {
 		ReadDateFromFile(inFile, materialName);

@@ -22,12 +22,27 @@ void CInstancingBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT inst
 
 	mInstancingBufferView.BufferLocation = buffer->GetGPUVirtualAddress();
 	mInstancingBufferView.StrideInBytes = dataSize;
-	mInstancingBufferView.SizeInBytes = dataSize * mMaxInstanceNum;
+	mInstancingBufferView.SizeInBytes = bufferSize;
 }
 
 void CInstancingBuffer::UpdateBuffer(UINT idx, const void* data)
 {
 	memcpy(&mappedData[idx * dataSize], data, dataSize);
+}
+
+D3D12_VERTEX_BUFFER_VIEW CInstancingBuffer::GetInstancingBufferView(int startOffset, int instanceCnt)
+{
+	if (startOffset < 0 || startOffset >= mMaxInstanceNum) {
+		return D3D12_VERTEX_BUFFER_VIEW();
+	}
+	if (instanceCnt <= 0 || startOffset + instanceCnt > mMaxInstanceNum) {
+		return D3D12_VERTEX_BUFFER_VIEW();
+	}
+	mInstancingBufferView.BufferLocation = buffer->GetGPUVirtualAddress() + (startOffset * dataSize);
+	mInstancingBufferView.StrideInBytes = dataSize;
+	mInstancingBufferView.SizeInBytes = instanceCnt * dataSize;
+
+	return mInstancingBufferView;
 }
 
 void CInstancingBuffer::CreateBuffer()

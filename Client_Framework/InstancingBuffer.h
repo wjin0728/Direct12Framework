@@ -25,7 +25,7 @@ public:
 	void UpdateBuffer(UINT idx, const void* data);
 
 public:
-	D3D12_VERTEX_BUFFER_VIEW GetInstancingBufferView() const { return mInstancingBufferView; }
+	D3D12_VERTEX_BUFFER_VIEW GetInstancingBufferView(int startOffset, int instanceCnt);
 	UINT GetMaxInstanceNum() const { return mMaxInstanceNum; }
 
 private:

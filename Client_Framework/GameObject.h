@@ -40,7 +40,7 @@ private:
 
 	int mID{ -1 };
 
-private:
+public:
 	BoundingSphere mRootLocalBS = BoundingSphere();
 	BoundingSphere mRootBS = BoundingSphere();
 
@@ -107,6 +107,8 @@ public:
 	void SetParent(const std::shared_ptr<CGameObject>& parent);
 	void SetPlayerController(const std::shared_ptr<CPlayerController>& playerController) { mPlayerController = playerController; }
 	void SetStateMachine(const std::shared_ptr<CObjectStateMachine>& stateMachine) { mStateMachine = stateMachine; }
+	void SetTransform(const std::shared_ptr<CTransform>& transform) { mTransform = transform; }
+	void SetRenderer(const std::shared_ptr<CRenderer>& renderer) { mRenderer = renderer; }
 
 	void ReturnCBVIndex();
 
@@ -123,6 +125,9 @@ public:
 	std::shared_ptr<T> GetComponent();
 	template<typename T>
 	std::shared_ptr<T> GetComponentFromHierarchy();
+
+	template<typename T>
+	void RemoveComponent();
 
 private:
 
@@ -208,4 +213,17 @@ inline std::shared_ptr<T> CGameObject::GetComponentFromHierarchy()
 		}
 	}
 	return nullptr;
+}
+
+template<typename T>
+inline void CGameObject::RemoveComponent()
+{
+	std::shared_ptr<T> result{};
+	for (auto& component : mComponents) {
+		if (result = std::dynamic_pointer_cast<T>(component)) {
+			component->SetOwner(nullptr);
+			mComponents.erase(std::remove(mComponents.begin(), mComponents.end(), component), mComponents.end());
+			return;
+		}
+	}
 }

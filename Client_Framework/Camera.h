@@ -21,6 +21,7 @@ private:
 public:
 	BoundingFrustum mFrustumView = BoundingFrustum();
 	BoundingFrustum mFrustumWorld = BoundingFrustum();
+	BoundingFrustum mFrustumShadow = BoundingFrustum();
 	D3D12_VIEWPORT mViewport{};
 	D3D12_RECT mScissorRect{};
 
@@ -48,7 +49,7 @@ public:
 
 	bool IsInFrustum(const BoundingOrientedBox& boundingBox);
 	bool IsInFrustum(const BoundingBox& boundingBox);
-	bool IsInFrustum(const BoundingSphere& boundingSphere);
+	bool IsInFrustum(const BoundingSphere& boundingSphere, int pass = 0);
 	bool IsInFrustum(std::shared_ptr<class CGameObject> obj);
 
 	void SetFOVAngle(float fovAngle);

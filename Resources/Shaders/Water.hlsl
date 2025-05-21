@@ -279,7 +279,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float4 deepBlend = lerp(_DeepColour, _VeryDeepColour, saturate(baseFalloff - 1.0));
     float4 waterColor = (depthFactor < 1.0f) ? shallowBlend : deepBlend;
     
-    return float4(_ShallowColour.rgb, 1.f);
+    return float4(_DeepColour.rgb, 1.f);
     
     // 월드 XZ 기준으로 팬 UV 생성
     float2 mainPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * _NormalTiling);

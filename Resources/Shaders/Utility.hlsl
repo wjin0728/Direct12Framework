@@ -46,12 +46,33 @@ VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
     return output;
 }
 
+VertexPositionInputs GetVertexPositionInputs(float3 positionOS, matrix _worldMat)
+{
+    VertexPositionInputs output;
+    
+    output.positionWS = mul(float4(positionOS, 1.0f), _worldMat);
+    output.positionCS = mul(output.positionWS, viewProjMat);
+    
+    return output;
+}
+
 VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS)
 {
     VertexNormalInputs output;
     
-    output.normalWS = mul(normalOS, (float3x3)invWorldMat);
+    output.normalWS = mul(normalOS, (float3x3) invWorldMat);
     output.tangentWS = mul(tangentOS, (float3x3) invWorldMat);
+    output.bitangentWS = cross(output.normalWS, output.tangentWS);
+    
+    return output;
+}
+
+VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS, matrix _invWorldMat)
+{
+    VertexNormalInputs output;
+    
+    output.normalWS = mul(normalOS, (float3x3) _invWorldMat);
+    output.tangentWS = mul(tangentOS, (float3x3) _invWorldMat);
     output.bitangentWS = cross(output.normalWS, output.tangentWS);
     
     return output;
@@ -247,8 +268,8 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * albedo / 3.1415f + specular) * lightColor * NdotL;
-    float3 ambientLight = albedo * 0.4f * ndotUp;
-    ambientLight += albedo * 0.5f;
+    float3 ambientLight = albedo * 0.2f * ndotUp;
+    ambientLight += albedo * 0.3f;
     
     return (directLight + ambientLight) * lightingData.shadowFactor + surfaceData.emissive;
 }

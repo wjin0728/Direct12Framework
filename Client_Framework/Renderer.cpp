@@ -20,13 +20,13 @@ CRenderer::~CRenderer()
 
 void CRenderer::Awake()
 {
-	if (owner->GetInstancing()) return;
-	SetCBVIndex();
+	
 }
 
 void CRenderer::Start()
 {
-	
+	if (owner->GetInstancing()) return;
+	SetCBVIndex();
 }
 
 void CRenderer::UpdataObjectDataToShader()
@@ -39,7 +39,7 @@ void CRenderer::UpdataObjectDataToShader()
 	if(mDirtyFrame > 0) {
 		CBObjectData objDate;
 		objDate.worldMAt = GetTransform()->mWorldMat.Transpose();
-		objDate.invWorldMAt = GetTransform()->mWorldMat.Invert();
+		objDate.invWorldMAt = objDate.worldMAt.Invert();
 		objDate.textureMat = GetTransform()->mTextureMat.Transpose();
 
 		auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);

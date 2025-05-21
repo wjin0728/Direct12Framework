@@ -83,8 +83,13 @@ VS_OUTPUT VS_Forward(VS_INPUT input
     float3 tangent = input.tangent;
 #endif
     
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(position);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent);
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+#else
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+#endif
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
@@ -219,7 +224,11 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input
 #else
     float3 position = input.position;
 #endif
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(position);
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+#else
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+#endif
     
     output.position = positionInputs.positionCS;
     
@@ -278,8 +287,13 @@ VS_OUTPUT VS_GPass(VS_INPUT input
     float3 tangent = input.tangent;
 #endif
     
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(position);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent);
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+#else
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+#endif
     
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;

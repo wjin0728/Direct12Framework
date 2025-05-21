@@ -23,6 +23,7 @@ struct VS_INPUT
     float2 uv : TEXCOORD;
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
+    float4 color : COLOR;
 };
 
 struct VS_OUTPUT
@@ -65,7 +66,26 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float2 texCoord21 = uv * float2(1, 1) + float2(0, 0);
     float3 lerpResult4 = lerp(bottomColor, topColor, texCoord21.y);
     
-    float3 staticSwitch20 = lerpResult18;
+    float3 staticSwitch20 = lerpResult18 + lerpResult18 * 0.3f;
+    
+    float3 viewDir = normalize(camPos.xyz - worldPosition);
+    LightingData lightingData = (LightingData) 0;
+    lightingData.cameraDirection = viewDir;
+    lightingData.normalWS = float3(0, 0, 1);
+    lightingData.positionWS = worldPosition;
+    lightingData.shadowFactor = 1;
+    
+    SurfaceData surfaceData = (SurfaceData) 0;
+    surfaceData.albedo = color.rgb;
+    surfaceData.metallic = 0;
+    surfaceData.smoothness = 0;
+    surfaceData.specular = 0.5f;
+    surfaceData.emissive = staticSwitch20;
+    
+    
+    float3 finalColor = CalculatePhongLight(lightingData, surfaceData);
+    
+    finalColor = GammaEncoding(finalColor);
 
-    return float4(color + staticSwitch20, 1.f);
+    return float4(finalColor, 1.f);
 }

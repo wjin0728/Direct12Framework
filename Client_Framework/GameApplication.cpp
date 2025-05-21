@@ -21,7 +21,6 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 		clientHeight = devMode.dmPelsHeight + 200;
 	}
 
-
 	clientWidth = FRAMEBUFFER_WIDTH;
 	clientHeight = FRAMEBUFFER_HEIGHT;
 	
@@ -223,7 +222,7 @@ bool CGameApplication::InitWindow(WNDPROC wndProc, int cmdShow)
 		return false;
 	}
 
-	ShowWindow(mHwnd, SW_SHOWMAXIMIZED);
+	ShowWindow(mHwnd, SW_SHOW);
 	UpdateWindow(mHwnd);
 	SetForegroundWindow(mHwnd);
 	SetFocus(mHwnd);

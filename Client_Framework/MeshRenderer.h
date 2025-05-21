@@ -1,5 +1,6 @@
 #pragma once
 #include "Renderer.h"
+#include"InstancingManager.h"
 
 class CMesh;
 class CMaterial;
@@ -33,6 +34,12 @@ public:
 
 	std::shared_ptr<CMesh> GetMesh() const { return m_mesh; }
 
-
+	InstanceKey GetInstancingKey() const
+	{
+		InstanceKey key{};
+		key.mesh = m_mesh.get();
+		key.material = m_materials[0].get();
+		return key;
+	}
 };
 
