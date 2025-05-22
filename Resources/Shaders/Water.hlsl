@@ -255,11 +255,9 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 worldTangent = input.tangentWS.xyz;
     float3 worldBitangent = input.bitangentWS.xyz;
     float2 uv = input.uv;   
-
-// 카메라 방향 벡터 계산
+    
     float3 viewDir = normalize(camPos.xyz - worldPosition);
-
-// 클립 및 스크린 좌표 계산
+    
     float4 clipPos = input.positionCS;
     float4 screenPos = ComputeScreenPos(clipPos);
     float2 screenUV = input.position.xy / renderTargetSize;
@@ -272,32 +270,30 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float baseFalloff = pow(depthDiff, _OverallFalloff);
     float depthFactor = baseFalloff + _ShallowFalloff;
     
-    float3 shallowColor = GammaDecoding(_ShallowColour.rgb);
-    float3 deepColor = GammaDecoding(_DeepColour.rgb);
-    float3 veryDeepColor = GammaDecoding(_VeryDeepColour.rgb);
+    float3 shallowColor = (_ShallowColour.rgb);
+    float3 deepColor = (_DeepColour.rgb);
+    float3 veryDeepColor = (_VeryDeepColour.rgb);
     
     float3 shallowBlend = lerp(shallowColor, deepColor, depthFactor);
     float3 deepBlend = lerp(deepColor, veryDeepColor, saturate(baseFalloff - 1.0));
     float3 waterColor = (depthFactor < 1.0f) ? shallowBlend : deepBlend;
     
-    // 월드 XZ 기준으로 팬 UV 생성
-    float2 mainPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * _NormalTiling);
-    float2 detailPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * _NormalTiling2);
-
-// 노말 맵 샘플링
-    float3 mainNormalTS = diffuseMap[_RipplesNormalIdx].Sample(linearWrap, mainPannerUV).rgb;
+    float2 mainPannerUV = (totalTime * _RippleSpeed.xx) + (uv.xy * 15.f);
+    float2 detailPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * 10.f);
+    
+    float3 mainNormalTS = diffuseMap[29].Sample(linearWrap, mainPannerUV).rgb;
     float3 detailNormalTS = diffuseMap[_RipplesNormal2Idx].Sample(linearWrap, detailPannerUV).rgb;
-    mainNormalTS = UnpackNormal(mainNormalTS);
+    mainNormalTS = UnpackNormal(mainNormalTS, _NormalScale);
     detailNormalTS = UnpackNormal(detailNormalTS);
     float3 blendedNormalTS = normalize(mainNormalTS + detailNormalTS);
     blendedNormalTS = normalize(blendedNormalTS * _NormalScale);
     blendedNormalTS.z = lerp(1, blendedNormalTS.z, saturate(_NormalScale));
-    normal = UnpackedNormalSampleToWorldSpace(blendedNormalTS, worldNormal, worldTangent, worldBitangent);
+    normal = normalize(blendedNormalTS);
+    normal = UnpackedNormalSampleToWorldSpace(mainNormalTS, worldNormal, worldTangent, worldBitangent);
     
-    // Shoreline foam
     float foamDepthMask = saturate(pow(depthDiff + _FoamShoreline, _FoamFalloff));
     
-    float3 foamColor = GammaDecoding(_FoamColor.rgb);
+    float3 foamColor = _FoamColor.rgb;
     float2 panner166 = (0.1 * totalTime * float2(1, 0) + worldPosition.xz);
     float2 panner22 = (0.1 * totalTime * float2(-1, 0) + worldPosition.xz);
     float perlin1 = snoise(float3((panner166 * 1.5), 0.0));
@@ -339,9 +335,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     
     
     float smoothness = lerp(_Smoothness, _FoamSmoothness, foamDepthMask) * _ReflectionPower;
-
-// 최종 Albedo에 파도 거품 추가
-
+    
     LightingData lightingData = (LightingData) 0;
     lightingData.cameraDirection = viewDir;
     lightingData.normalWS = normal;
@@ -349,9 +343,9 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     lightingData.shadowFactor = CalcShadowFactor(input.ShadowPosH);
     
     SurfaceData surfaceData = (SurfaceData) 0;
-    surfaceData.albedo = waterAlbedo.rgb;
+    surfaceData.albedo = GammaDecoding(waterAlbedo.rgb);
     surfaceData.metallic = 0.f;
-    surfaceData.smoothness = smoothness;
+    surfaceData.smoothness = 0.9;
     surfaceData.specular = 0.5f;
     surfaceData.emissive = 0.f;
     
@@ -361,7 +355,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 finalColor = color.rgb;
 #endif
     
-    return float4(finalColor.rgb, waterOpacity - 0.1f);
+    return float4(finalColor, waterOpacity);
 }
 
 //
