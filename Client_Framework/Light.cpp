@@ -101,7 +101,7 @@ void CLight::LateUpdate()
 	for (int i = 0; i < 8; ++i) {
 		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
 	}
-	float r = max/5.f;
+	float r = max/2.f;
 
 	auto transform = GetTransform();
 	Vec3 dir = transform->GetWorldLook().GetNormalized();

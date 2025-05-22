@@ -88,6 +88,8 @@ using SimpleMath::Color;
 
 #define ALIGNED_SIZE(size)				((size + 255) & ~255)
 
+#define REVERSE_Z
+
 template<typename T>
 using StrDic = std::unordered_map<std::string, std::shared_ptr<T>>;
 

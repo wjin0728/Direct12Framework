@@ -177,11 +177,17 @@ void CResourceManager::LoadDefaultMaterials()
 
 void CResourceManager::LoadDefaultShaders()
 {
+#ifdef REVERSE_Z
+	DEPTH_STENCIL_TYPE commonDepthTest = DEPTH_STENCIL_TYPE::GREATER;
+#elif // REVERSE_Z
+	DEPTH_STENCIL_TYPE commonDepthTest = DEPTH_STENCIL_TYPE::LESS;
+#endif // REVERSE_Z
+
 	{
 		ShaderInfo info;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.depthStencilType = commonDepthTest;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
@@ -191,7 +197,7 @@ void CResourceManager::LoadDefaultShaders()
 		ShaderInfo info;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.depthStencilType = commonDepthTest;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
@@ -201,7 +207,7 @@ void CResourceManager::LoadDefaultShaders()
 		ShaderInfo info;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::ALPHA_BLEND;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.depthStencilType = commonDepthTest;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
@@ -211,7 +217,7 @@ void CResourceManager::LoadDefaultShaders()
 		ShaderInfo info;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::INSTANCE;
 		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.depthStencilType = commonDepthTest;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		MakeShadersForAllPass("Triplanar", "Triplanar", info);
@@ -221,7 +227,7 @@ void CResourceManager::LoadDefaultShaders()
 		ShaderInfo info;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::INSTANCE;
 		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.depthStencilType = commonDepthTest;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		MakeShadersForAllPass("Vegitation", "Vegitation", info);
@@ -230,7 +236,7 @@ void CResourceManager::LoadDefaultShaders()
 		ShaderInfo info;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::TERRAIN;
 		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.depthStencilType = commonDepthTest;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
 		MakeShadersForAllPass("Terrain", "Terrain", info);
@@ -239,7 +245,11 @@ void CResourceManager::LoadDefaultShaders()
 		ShaderInfo info;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
+#ifdef REVERSE_Z
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER_EQUAL;
+#else // REVERSE_Z
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_EQUAL;
+#endif // REVERSE_Z
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		MakeShadersForAllPass("Skybox", "Skybox", info);
@@ -248,7 +258,7 @@ void CResourceManager::LoadDefaultShaders()
 		ShaderInfo info;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::ANIMATION;
 		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.depthStencilType = commonDepthTest;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		MakeShadersForAllPass("LitOpaqueAnimation", "Lit", info);
@@ -257,18 +267,7 @@ void CResourceManager::LoadDefaultShaders()
 		ShaderInfo info;
 		info.shaderType = PASS_TYPE::DIRECTIONAL;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::NONE;
-		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_NO_WRITE;
-		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
-		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-
-		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
-		if (shader->Initialize("Lighting", info, "Lighting")) Add(shader);
-	} {
-		ShaderInfo info;
-		info.shaderType = PASS_TYPE::DIRECTIONAL;
-		info.inputLayoutYype = INPUT_LAYOUT_TYPE::NONE;
-		info.blendType = BLEND_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::DEFAULT; 
 		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS_NO_WRITE;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -281,12 +280,24 @@ void CResourceManager::LoadDefaultShaders()
 		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::ALPHA_BLEND;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::LESS;
+		info.depthStencilType = commonDepthTest;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("Water", info, "Water")) Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::STENCIL;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize("Lighting", info, "Lighting")) Add(shader);
 	}
 	{
 		ShaderInfo info;

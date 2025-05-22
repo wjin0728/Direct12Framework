@@ -92,8 +92,8 @@ float2 GetNormalizedScreenSpaceUV(float4 screenPos)
 
 float GetNormalizedSceneDepth(float2 screenPos)
 {
-    screenPos.y = 1.0 - screenPos.y;
-    float depth = diffuseMap[gbufferDepthIdx].SampleLevel(pointClamp, screenPos, 0).a;
+    //screenPos.y = 1.0 - screenPos.y;
+    float depth = diffuseMap[gbufferDepthIdx].SampleLevel(anisoClamp, screenPos, 0).a;
     return depth;
 }
 
@@ -106,9 +106,9 @@ float GetLinear01Depth(float z)
 
 float GetCameraDepth(float z)
 {
-    float near = projectionParams.x;
-    float far = projectionParams.y;
-    return 1.0 / ((1.0 / near - 1.0 / far) * z + 1.0 / far);
+    float nearZ = projectionParams.x;
+    float farZ = projectionParams.y;
+    return nearZ * farZ / ((farZ - nearZ) * z + nearZ);
 }
 
 float3 GammaDecoding(float3 color)

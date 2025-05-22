@@ -20,7 +20,7 @@ float4 VS_Directional(uint vertexID : SV_VertexID) : SV_Position
         float2(3.0, -1.0)
     };
     
-    return float4(pos[vertexID], 1.0, 1.0);
+    return float4(pos[vertexID], 0.0, 1.0);
 }
 
 [earlydepthstencil]

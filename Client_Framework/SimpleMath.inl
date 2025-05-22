@@ -32,7 +32,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveReverseZFovLH
 
     float Height = CosFov / SinFov;
     float Width = Height / AspectRatio;
-    float fRange = FarZ / (FarZ - NearZ);
+    float fRange = NearZ / (NearZ - FarZ);
 
     XMMATRIX M;
     M.m[0][0] = Width;
@@ -52,7 +52,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveReverseZFovLH
 
     M.m[3][0] = 0.0f;
     M.m[3][1] = 0.0f;
-    M.m[3][2] = -fRange * NearZ;
+    M.m[3][2] = fRange * FarZ;
     M.m[3][3] = 0.0f;
     return M;
 
@@ -61,7 +61,7 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveReverseZFovLH
     float    CosFov;
     XMScalarSinCos(&SinFov, &CosFov, 0.5f * FovAngleY);
 
-    float fRange = FarZ / (FarZ - NearZ);
+    float fRange = NearZ / (NearZ - FarZ);
     float Height = CosFov / SinFov;
     float Width = Height / AspectRatio;
     const float32x4_t Zero = vdupq_n_f32(0);
@@ -70,21 +70,21 @@ inline XMMATRIX XM_CALLCONV XMMatrixPerspectiveReverseZFovLH
     M.r[0] = vsetq_lane_f32(Width, Zero, 0);
     M.r[1] = vsetq_lane_f32(Height, Zero, 1);
     M.r[2] = vsetq_lane_f32(fRange, g_XMIdentityR3.v, 2);
-    M.r[3] = vsetq_lane_f32(-fRange * NearZ, Zero, 2);
+    M.r[3] = vsetq_lane_f32(fRange * FarZ, Zero, 2);
     return M;
 #elif defined(_XM_SSE_INTRINSICS_)
     float    SinFov;
     float    CosFov;
     XMScalarSinCos(&SinFov, &CosFov, 0.5f * FovAngleY);
 
-    float fRange = FarZ / (FarZ - NearZ);
+    float fRange = NearZ / (NearZ - FarZ);
     // Note: This is recorded on the stack
     float Height = CosFov / SinFov;
     XMVECTOR rMem = {
         Height / AspectRatio,
         Height,
         fRange,
-        -fRange * NearZ
+        fRange * FarZ
     };
     // Copy from memory to SSE register
     XMVECTOR vValues = rMem;
@@ -2731,6 +2731,14 @@ inline Matrix Matrix::CreatePerspectiveFieldOfView(float fov, float aspectRatio,
     using namespace DirectX;
     Matrix R;
     XMStoreFloat4x4(&R, XMMatrixPerspectiveFovLH(fov, aspectRatio, nearPlane, farPlane));
+    return R;
+}
+
+inline Matrix Matrix::CreateReverseZPerspectiveFieldOfView(float fov, float aspectRatio, float nearPlane, float farPlane) noexcept
+{
+    using namespace DirectX;
+    Matrix R;
+    XMStoreFloat4x4(&R, XMMatrixPerspectiveReverseZFovLH(fov, aspectRatio, nearPlane, farPlane));
     return R;
 }
 

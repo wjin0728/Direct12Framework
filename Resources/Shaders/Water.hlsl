@@ -262,9 +262,9 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 // 클립 및 스크린 좌표 계산
     float4 clipPos = input.positionCS;
     float4 screenPos = ComputeScreenPos(clipPos);
-    float2 uvSS = GetNormalizedScreenSpaceUV(screenPos);
+    float2 screenUV = input.position.xy / renderTargetSize;
     
-    float sceneDepth = GetNormalizedSceneDepth(screenPos.xy);
+    float sceneDepth = GetNormalizedSceneDepth(screenUV);
     float linearSceneDepth = GetCameraDepth(sceneDepth);
     float linearFragmentDepth = GetCameraDepth(screenPos.z);
     
@@ -280,7 +280,6 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 deepBlend = lerp(deepColor, veryDeepColor, saturate(baseFalloff - 1.0));
     float3 waterColor = (depthFactor < 1.0f) ? shallowBlend : deepBlend;
     
-    return float4(sceneDepth.xxx, 1.f);
     // 월드 XZ 기준으로 팬 UV 생성
     float2 mainPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * _NormalTiling);
     float2 detailPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * _NormalTiling2);
@@ -362,13 +361,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 finalColor = color.rgb;
 #endif
     
-#ifdef FOG
-	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
-    color = lerp(color, gFogColor, fogAmount);
-#endif
-
-    //return float4(1.f,1.f,1.f,1.f);
-    return float4(waterAlbedo.rgb, waterOpacity);
+    return float4(finalColor.rgb, waterOpacity - 0.1f);
 }
 
 //

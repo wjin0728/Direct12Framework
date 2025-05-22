@@ -86,7 +86,12 @@ bool ServerManager::InitPlayerAndCamera()
 	auto camera = mMainCamera->AddComponent<CCamera>();
 	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
+
+#ifdef REVERSE_Z
+	camera->GenerateReverseZPerspectiveProjectionMatrix(1.f, 100.f, 60.f);
+#elif // REVERSE_Z
 	camera->GeneratePerspectiveProjectionMatrix(1.f, 100.f, 60.f);
+#endif // REVERSE_Z
 	mMainCamera->SetTag("MainCamera");
 	mMainCamera->SetName("MainCamera");
 	mMainCamera->SetActive(false);

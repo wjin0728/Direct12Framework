@@ -85,6 +85,7 @@ void CCamera::SetFOVAngle(float fovAngle)
 void CCamera::GeneratePerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle)
 {
 	mAspectRatio = (float(mViewport.Width) / float(mViewport.Height));
+
 	mPerspectiveProjectMat = Matrix::CreatePerspectiveFieldOfView(XMConvertToRadians(fovAngle), mAspectRatio, nearPlane, farPlane);
 
 	mNearZ = nearPlane;
@@ -92,6 +93,23 @@ void CCamera::GeneratePerspectiveProjectionMatrix(float nearPlane, float farPlan
 	SetFOVAngle(fovAngle);
 
 	BoundingFrustum::CreateFromMatrix(mFrustumView, mPerspectiveProjectMat);
+}
+
+void CCamera::GenerateReverseZPerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle)
+{
+	Matrix reverse_z = { 1.0f, 0.0f,  0.0f, 0.0f,
+							0.0f, 1.0f,  0.0f, 0.0f,
+							0.0f, 0.0f, -1.0f, 0.0f,
+							0.0f, 0.0f,  1.0f, 1.0f };
+
+	mAspectRatio = (float(mViewport.Width) / float(mViewport.Height));
+	mNearZ = nearPlane;
+	mFarZ = farPlane;
+	Matrix commonPerspectiveMat = Matrix::CreatePerspectiveFieldOfView(XMConvertToRadians(fovAngle), mAspectRatio, nearPlane, farPlane);
+	BoundingFrustum::CreateFromMatrix(mFrustumView, commonPerspectiveMat);
+	SetFOVAngle(fovAngle);
+
+	mPerspectiveProjectMat = commonPerspectiveMat * reverse_z;
 }
 
 void CCamera::GenerateOrthographicProjectionMatrix(float nearPlane, float farPlane, float width, float height)

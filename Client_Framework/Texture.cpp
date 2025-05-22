@@ -106,7 +106,14 @@ void CTexture::Create2DTexture()
 		if (desc.Format == DXGI_FORMAT_R32_TYPELESS) {
 			clearFormat = DXGI_FORMAT_D32_FLOAT;
 		}
-		optimizedClearValue = new CD3DX12_CLEAR_VALUE(clearFormat, 1.0f, 0);
+		if (name == "DepthStencil") {
+#ifdef REVERSE_Z
+			optimizedClearValue = new CD3DX12_CLEAR_VALUE(clearFormat, 0.f, 0);
+#else
+			optimizedClearValue = new CD3DX12_CLEAR_VALUE(clearFormat, 1.0f, 0);
+#endif // REVERSE_Z
+		}
+		else if(name == "ShadowMap") optimizedClearValue = new CD3DX12_CLEAR_VALUE(clearFormat, 1.0f, 0);
 	}
 	else if (desc.Flags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
 	{

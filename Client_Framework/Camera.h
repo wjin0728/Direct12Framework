@@ -42,6 +42,7 @@ public:
 public:
 	void GenerateViewMatrix();
 	void GeneratePerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle);
+	void GenerateReverseZPerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle);
 	void GenerateOrthographicProjectionMatrix(float nearPlane, float farPlane, float width, float height);
 	void SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ = 0.0f, float fMaxZ = 1.0f);
 	void SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom);

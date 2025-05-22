@@ -583,6 +583,7 @@ namespace DirectX
             static Matrix CreateFromAxisAngle(const Vector3& axis, float angle) noexcept;
 
             static Matrix CreatePerspectiveFieldOfView(float fov, float aspectRatio, float nearPlane, float farPlane) noexcept;
+            static Matrix CreateReverseZPerspectiveFieldOfView(float fov, float aspectRatio, float nearPlane, float farPlane) noexcept;
             static Matrix CreatePerspective(float width, float height, float nearPlane, float farPlane) noexcept;
             static Matrix CreatePerspectiveOffCenter(float left, float right, float bottom, float top, float nearPlane, float farPlane) noexcept;
             static Matrix CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane) noexcept;

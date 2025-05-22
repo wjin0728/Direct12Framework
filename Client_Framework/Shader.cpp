@@ -111,7 +111,7 @@ D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 		desc[10] = { "INVTRANSFORM", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 80, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 		desc[11] = { "INVTRANSFORM", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 96, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 		desc[12] = { "INVTRANSFORM", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 112, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[13] = { "INDEX", 0, DXGI_FORMAT_R32_FLOAT, 1, 128, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
+		desc[13] = { "INDEX", 0, DXGI_FORMAT_R32_SINT, 1, 128, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 		break;
 	}
 	default:
@@ -232,7 +232,7 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc{};
 	d3dDepthStencilDesc.DepthEnable = TRUE;
 	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
 
 	switch (mInfo.depthStencilType)
 	{
@@ -280,10 +280,19 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 	case PASS_TYPE::DIRECTIONAL:
 		d3dDepthStencilDesc.DepthEnable = TRUE;
 		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_NOT_EQUAL;
+#ifdef REVERSE_Z
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+#else // REVERSE_Z
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+#endif // REVERSE_Z
 		break;
 	case PASS_TYPE::STENCIL:
 		d3dDepthStencilDesc.DepthEnable = TRUE;
+#ifdef REVERSE_Z
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+#else // REVERSE_Z
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+#endif // REVERSE_Z
 		d3dDepthStencilDesc.StencilWriteMask = 0xFF;
 		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 		d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
@@ -297,8 +306,12 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 		break;
 	case PASS_TYPE::LIGHTING:
 		d3dDepthStencilDesc.DepthEnable = TRUE;
-		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+#ifdef REVERSE_Z
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+#else // REVERSE_Z
 		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+#endif // REVERSE_Z
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 		d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NOT_EQUAL;
 		d3dDepthStencilDesc.StencilEnable = TRUE;
 
@@ -307,6 +320,7 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 		
 		break;
 	case PASS_TYPE::SHADOW:
+		d3dDepthStencilDesc.DepthEnable = TRUE;
 		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		break;
 	default:

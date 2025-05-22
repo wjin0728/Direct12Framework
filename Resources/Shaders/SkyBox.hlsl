@@ -44,7 +44,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     output.positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
     
-    output.position = output.position.xyww;
+    output.position.z = 0;
     
     output.uv = input.uv;
     

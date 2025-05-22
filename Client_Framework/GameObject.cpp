@@ -226,7 +226,13 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& 
 	object->AddComponent(camera);
 	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
+
+#ifdef REVERSE_Z
+	camera->GenerateReverseZPerspectiveProjectionMatrix(nearPlane, farPlane, fovAngle);
+#elif // REVERSE_Z
 	camera->GeneratePerspectiveProjectionMatrix(nearPlane, farPlane, fovAngle);
+#endif // REVERSE_Z
+
 
 	object->SetActive(true);
 	

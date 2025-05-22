@@ -164,6 +164,7 @@ DS_OUTPUT DS_Forward(TessFactor tessFactors, float2 uv : SV_DomainLocation, cons
     
     dout.worldPos = float4(p, 1.0f);
     dout.position = mul(dout.worldPos, viewProjMat);
+
     dout.positionCS = dout.position;
     dout.ShadowPosH = mul(dout.worldPos, shadowTransform);
 	

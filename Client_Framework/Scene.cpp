@@ -125,7 +125,7 @@ void CScene::RenderGBufferPass()
 	renderTarget->ChangeResourcesToTargets();
 	renderTarget->SetRenderTargets();
 	renderTarget->ClearRenderTargets();
-	renderTarget->ClearDepthStencil();
+	renderTarget->ClearDepthStencil(0.f, 0);
 	auto gBufferPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
 	gBufferPassBuffer->BindToShader(0);
 	auto& camera = mCameras["MainCamera"];
