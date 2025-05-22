@@ -92,6 +92,14 @@ bool CResourceManager::LoadPlayerObjects()
 	return true;
 }
 
+bool CResourceManager::LoadEnemyObjects()
+{
+	LoadPrefabFromFile("Wind");
+	LoadPrefabFromFile("Whirlwind");
+	LoadPrefabFromFile("Wind_Mage");
+	return true;
+}
+
 bool CResourceManager::LoadSkillObjects()
 {
 	LoadPrefabFromFile("Item_Skill1");
@@ -397,6 +405,7 @@ void CResourceManager::BackgroundLoadingThread()
 	LoadDefaultMaterials();
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
 	LoadPlayerObjects();
+	LoadEnemyObjects();
 	LoadSkillObjects();
 
 	mLoadFinished = true;

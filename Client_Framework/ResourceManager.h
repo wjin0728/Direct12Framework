@@ -54,6 +54,7 @@ public:
 	bool LoadSceneResourcesFromFile(std::ifstream& ifs);
 	bool LoadSceneResourcesFromFile(const std::string& fileName);
 	bool LoadPlayerObjects();
+	bool LoadEnemyObjects();
 	bool LoadSkillObjects();
 	bool LoadLoadingScreen();
 
