@@ -69,9 +69,6 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
         skinnedTangent += weights[i] * mul(input.tangent, (float3x3) boneTransform);
     }
     
-    //VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
-    //VertexNormalInputs normalInputs = GetVertexNormalInputs(skinnedNormal, skinnedTangent);
-
     output.positionWS = float4(skinnedPosition, 1.0);
     output.position = mul(output.positionWS, viewProjMat);
     
@@ -182,8 +179,6 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
         }
     }
 
-    //VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
-
     output.position = mul(float4(skinnedPosition, 1.0), viewProjMat);
     
     return output;
@@ -231,9 +226,6 @@ VS_OUTPUT VS_GPass(VS_INPUT input)
         skinnedTangent += weights[i] * mul(input.tangent, (float3x3) boneTransform);
     }
     
-    //VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
-    //VertexNormalInputs normalInputs = GetVertexNormalInputs(skinnedNormal, skinnedTangent);
-
     output.positionWS = float4(skinnedPosition, 1.0);
     output.position = mul(output.positionWS, viewProjMat);
     

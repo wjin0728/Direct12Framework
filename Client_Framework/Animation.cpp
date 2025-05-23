@@ -180,7 +180,7 @@ void CAnimationController::Start()
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
 	}
 
-	SetTrackAnimationSet(0, 1);
+	SetTrackAnimationSet(0, 0);
 	SetTrackSpeed(0, 1.0f);
 	SetTrackWeight(0, 1.0f);
 }
@@ -195,7 +195,7 @@ void CAnimationController::LateUpdate()
 	mTime += deltaTime;
 
 	if (mTracks.size()) {
-		//for (auto& cache : mAnimationSets->mBoneFrameCaches) { cache.lock()->SetLocalMatZero(); }
+		for (auto& cache : mAnimationSets->mBoneFrameCaches) { cache.lock()->SetLocalMatZero(); }
 	
 		for (auto& track : mTracks) {
 			if (track->mEnable) {
@@ -203,8 +203,10 @@ void CAnimationController::LateUpdate()
 				float position = track->UpdatePosition(track->mPosition, deltaTime, set->mLength);
 	
 				for (int i = 0; auto & cache : mAnimationSets->mBoneFrameCaches) {
-					Matrix trackTransform = set->GetSRT(i, position);
-					//cache.lock()->mLocalMat += trackTransform * track->mWeight;
+					Matrix transform = set->GetSRT(i, position);
+					transform *= track->mWeight;
+					cache.lock()->mLocalMat = transform;
+
 					++i;
 				}
 	
@@ -224,9 +226,6 @@ void CAnimationController::LateUpdate()
 
 		finalTransforms[i] = (bondOffset * boneTransform).Transpose();
 		
-		if (cache.lock()->GetOwner()->GetName() == "Root.001")
-			PrintMatrix(finalTransforms[i]);
-
 		i++;
 	}
 

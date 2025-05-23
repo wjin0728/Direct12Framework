@@ -88,7 +88,7 @@ public:
 	void SetLocalUp(const Vec3& up) { mLocalUp = up; };
 	void SetLocalRight(const Vec3& right) { mLocalRight = right; };
 
-	void SetLocalMatZero() { mLocalMat = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; }
+	void SetLocalMatZero() { for (int row = 0; row < 4; ++row) { for (int col = 0; col < 4; ++col) { mLocalMat.m[row][col] = 0; } } }
 
 	void SetTexMat(const Matrix& mat) { mTextureMat = mat; }
 
