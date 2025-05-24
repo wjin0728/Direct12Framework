@@ -2,7 +2,7 @@
 #include "MonoBehaviour.h"
 
 
-CMonoBehaviour::CMonoBehaviour(const std::string& name) : mScriptName(name), CComponent(COMPONENT_TYPE::SCRIPT)
+CMonoBehaviour::CMonoBehaviour(const std::string& name) : mScriptName(name)
 {
 }
 

@@ -11,8 +11,8 @@ protected:
 	std::weak_ptr<CAnimationController> mAnimationController{};
 
 public:
-    CObjectStateMachine() : CComponent(COMPONENT_TYPE::STATE), currentState(PLAYER_STATE::IDLE) {}
-    CObjectStateMachine(uint8_t playerClass) : CComponent(COMPONENT_TYPE::STATE), currentState(PLAYER_STATE::IDLE) { mClass = (PLAYER_CLASS)playerClass; }
+    CObjectStateMachine() : currentState(PLAYER_STATE::IDLE) {}
+    CObjectStateMachine(uint8_t playerClass) : currentState(PLAYER_STATE::IDLE) { mClass = (PLAYER_CLASS)playerClass; }
     CObjectStateMachine(const CObjectStateMachine& other) : CComponent(other) {}
     virtual ~CObjectStateMachine() = default;
 

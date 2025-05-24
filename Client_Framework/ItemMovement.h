@@ -13,7 +13,7 @@ private:
 	std::shared_ptr<class CGameObject> mTargetObject{ nullptr };
 
 public:
-	CItemMovement() : CComponent(COMPONENT_TYPE::SCRIPT) {};
+	CItemMovement() {};
 	CItemMovement(const CItemMovement& other) : CComponent(other), mAmplitude(other.mAmplitude), mFrequency(other.mFrequency), mDirection(other.mDirection) {};
 	virtual ~CItemMovement() {};
 	virtual void Awake() override;

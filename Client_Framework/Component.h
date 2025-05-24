@@ -3,34 +3,13 @@
 
 class CTransform;
 
-enum class COMPONENT_TYPE : UINT8
-{
-	TRANSFORM,
-	COLLIDER,
-	RENDERER,
-	MESH_RENDERER,
-	SKINNED_RENDERER,
-	CAMERA,
-	LIGHT,
-	TERRAIN,
-	RIGID_BODY,
-	ANIMATION,
-	STATE,
-	// ...
-	SCRIPT,
-
-	NOTHING,
-	END
-};
-
 class CComponent
 {
 protected:
-	COMPONENT_TYPE type{};
 	CGameObject* owner{};
 
 public:
-	CComponent(COMPONENT_TYPE type);
+	CComponent();
 	CComponent(const CComponent& other);
 	virtual ~CComponent();
 
@@ -47,6 +26,5 @@ public:
 
 	CGameObject* GetOwner() const;
 	std::shared_ptr<CTransform> GetTransform() const;
-	COMPONENT_TYPE GetType() const { return type; }
 };
 

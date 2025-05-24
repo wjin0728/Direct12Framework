@@ -73,6 +73,19 @@ enum ITEM_TYPE : UINT8
 
 	item_end
 };
+
+
+enum class ENEMY_TYPE : UINT8
+{
+	GRASS_SMALL,
+	GRASS_BIG,
+	FIRE_SMALL,
+	FIRE_BIG,
+	WATER_SMALL,
+	WATER_BIG,
+
+	ENEMY_END
+};
 	
 enum class PLAYER_STATE : UINT8
 {

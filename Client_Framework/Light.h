@@ -16,8 +16,8 @@ protected:
 	std::shared_ptr<CCamera> lightCam{};
 	static std::array< std::shared_ptr<class CMesh>, 3> volumes;
 public:
-	CLight() : CComponent(COMPONENT_TYPE::LIGHT) {}
-	CLight(const CBLightsData& data) : CComponent(COMPONENT_TYPE::LIGHT) { mLightData = data; }
+	CLight() {}
+	CLight(const CBLightsData& data) { mLightData = data; }
 
 	CLight(const CLight& other) : CComponent(other)
 	{

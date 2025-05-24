@@ -7,7 +7,7 @@
 #include"SceneManager.h"
 #include"Scene.h"
 
-CRigidBody::CRigidBody() : CComponent(COMPONENT_TYPE::RIGID_BODY)
+CRigidBody::CRigidBody()
 {
 
 }

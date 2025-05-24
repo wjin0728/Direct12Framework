@@ -205,12 +205,12 @@ void CAnimationSets::SetCallbackHandler(std::shared_ptr<CAnimationSet>& animatio
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CAnimationController::CAnimationController() : CComponent(COMPONENT_TYPE::ANIMATION)
+CAnimationController::CAnimationController()
 {
 	mTracks.push_back(std::make_shared<CAnimationTrack>());
 }
 
-CAnimationController::CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion) : CComponent(COMPONENT_TYPE::ANIMATION)
+CAnimationController::CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion)
 {
 	mApplyRootMotion = applyRootMotion;
 	mAnimationSets = sets;

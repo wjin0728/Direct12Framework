@@ -22,11 +22,10 @@ class CResourceManager
 	MAKE_SINGLETON(CResourceManager)
 
 private:
-	using KeyObjMap = std::unordered_map<std::string, std::shared_ptr<CResource>>;
-	std::array<KeyObjMap, RESOURCE_TYPE_COUNT> resources{};
-	std::unordered_map<std::string, std::shared_ptr<class CGameObject>> prefabs{};
+	std::array<std::unordered_map<std::string, std::shared_ptr<CResource>>, RESOURCE_TYPE_COUNT> mResources{};
+	std::unordered_map<std::string, std::shared_ptr<class CGameObject>> mPrefabs{};
 
-	std::queue<UINT> srvIdxQueue{};
+	std::queue<UINT> mSrvIdxQueue{};
 
 	std::thread mLoadThread;
 	std::queue<CResource*> mGPULoadQueue;
@@ -60,7 +59,7 @@ public:
 
 	void LoadPrefabFromFile(const std::string& name);
 
-	std::unordered_map<std::string, std::shared_ptr<class CGameObject>>& GetPrefabs() { return prefabs; }
+	std::unordered_map<std::string, std::shared_ptr<class CGameObject>>& GetPrefabs() { return mPrefabs; }
 
 public:
 	void LoadDefaultMeshes();
@@ -78,13 +77,13 @@ public:
 	UINT GetMaterialSRVIndex();
 	std::shared_ptr<class CGameObject> GetPrefab(const std::string& name)
 	{
-		auto itr = prefabs.find(name);
-		if (itr != prefabs.end())
+		auto itr = mPrefabs.find(name);
+		if (itr != mPrefabs.end())
 			return itr->second;
 		return nullptr;
 	}
 
-	void ReturnSRVIndex(UINT idx) { srvIdxQueue.push(idx); }
+	void ReturnSRVIndex(UINT idx) { mSrvIdxQueue.push(idx); }
 
 	void BackgroundLoadingThread();
 	void EnqueueRequest(CResource* req);
