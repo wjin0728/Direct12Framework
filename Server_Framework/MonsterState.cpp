@@ -72,24 +72,24 @@ void MonsterState::BasicAttackState::Exit(Monster* monster) {}
 
 
 
-// MonsterState::SkillAttackState 구현  =========================================================================
+// MonsterState::SkillState 구현  =========================================================================
 
 
 
-MonsterState::SkillAttackState& MonsterState::SkillAttackState::GetInstance() { static MonsterState::SkillAttackState instance; return instance; }
+MonsterState::SkillState& MonsterState::SkillState::GetInstance() { static MonsterState::SkillState instance; return instance; }
 
-void MonsterState::SkillAttackState::Enter(Monster* monster) {
-    skillTimer = 2.0f; // 스킬 지속 시간
+void MonsterState::SkillState::Enter(Monster* monster) {
+    skillTimer = 2.0f; // 스킬 지속 시간 지정해주기
 }
 
-void MonsterState::SkillAttackState::Update(Monster* monster) {
+void MonsterState::SkillState::Update(Monster* monster) {
     skillTimer -= TICK_INTERVAL;
     if (skillTimer <= 0) {
         monster->SetState(&MonsterState::IdleState::GetInstance());
     }
 }
 
-void MonsterState::SkillAttackState::Exit(Monster* monster) {}
+void MonsterState::SkillState::Exit(Monster* monster) {}
 
 
 
@@ -122,3 +122,21 @@ void MonsterState::HitState::Update(Monster* monster) {
 }
 
 void MonsterState::HitState::Exit(Monster* monster) {}
+
+
+
+// MonsterState::DeathState 구현          =========================================================================
+
+
+
+MonsterState::DeathState& MonsterState::DeathState::GetInstance() { static MonsterState::DeathState instance; return instance; }
+
+void MonsterState::DeathState::Enter(Monster* monster) {
+    monster->SetVelocity(0, 0, 0);
+}
+
+void MonsterState::DeathState::Update(Monster* monster) {
+    // 사망 처리
+}
+
+void MonsterState::DeathState::Exit(Monster* monster) {}

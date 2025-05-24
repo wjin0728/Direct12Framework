@@ -22,9 +22,11 @@ public:
 
 	Terrain terrain;
 
-	unordered_map<int, Item> items;
-	unordered_map<int, Monster> Monsters; 
-	unordered_map<int, SESSION> clients;
+	array<unordered_map<int, Item>, 6> items;
+	array<unordered_map<int, Monster>, 6> Monsters; 
+	array<unordered_map<int, SESSION>, 6> clients;
+
+	int ServerNumber = 0; // 임시로 쓸 서버 번호
 
 	int item_cnt = 0; 
 	int monster_cnt = 0; 
@@ -72,9 +74,13 @@ public:
 
 	bool CanMove(float x, float z); // 지형 검사
 
+	void MonsterTargetSet(int monster_id, int target_id) {
+		Monsters[ServerNumber][monster_id]._targetId = target_id;
+	}
+
 private:
 	void Update() {
-		for (auto& cl : clients) {
+		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			cl.second._player.Update();
 
@@ -98,16 +104,16 @@ private:
 					// 플레이어 - 아이템 충돌 체크
 					{
 						if (!items.empty()) {
-							for (auto& it : items) {
+							for (auto& it : items[ServerNumber]) {
 								if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
 									it.second.LocalTransform();
 								if (cl.second._player._boundingbox.Intersects(it.second._boundingbox)) {
-									for (auto& cl : clients) {
+									for (auto& cl : clients[ServerNumber]) {
 										if (cl.second._state != ST_INGAME) continue;
 										cl.second.send_remove_item_packet(it.first, cl.first, it.second._item_type);
 									}
 									cout << "cl : " << cl.first << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
-									items.erase(it.first);
+									items[ServerNumber].erase(it.first);
 									break;
 								}
 							}

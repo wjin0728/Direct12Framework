@@ -58,36 +58,7 @@ public:
 	void OnSkillGrassVine();
 
 	void SetState(PlayerStateMachine* newState);
-	void SetState(uint8_t newState) {
-		switch (newState) {
-		case (uint8_t)S_PLAYER_STATE::IDLE:
-			_state = S_PLAYER_STATE::IDLE;
-			SetState(&PlayerState::IdleState::GetInstance());
-			break;
-		case (uint8_t)S_PLAYER_STATE::RUN:
-			_state = S_PLAYER_STATE::RUN;
-			SetState(&PlayerState::RunState::GetInstance());
-			break;
-		case (uint8_t)S_PLAYER_STATE::ATTACK:
-			_state = S_PLAYER_STATE::ATTACK;
-			SetState(&PlayerState::BasicAttackState::GetInstance());
-			break;
-		case (uint8_t)S_PLAYER_STATE::MOVE_ATTACK:
-			_state = S_PLAYER_STATE::MOVE_ATTACK;
-			SetState(&PlayerState::RunAttackState::GetInstance());
-			break;
-		case (uint8_t)S_PLAYER_STATE::JUMP:
-			_state = S_PLAYER_STATE::JUMP;
-			SetState(&PlayerState::JumpState::GetInstance());
-			break;
-		case (uint8_t)S_PLAYER_STATE::SKILL:
-			_state = S_PLAYER_STATE::SKILL;
-			SetState(&PlayerState::SkillState::GetInstance());
-			break;
-		default:
-			break;
-		}
-	}
+	void SetState(uint8_t newState);
 
 	bool HasMoveInput() {
 		return (_velocity.x != 0 || _velocity.y != 0 || _velocity.z != 0);

@@ -52,14 +52,14 @@ namespace MonsterState
     };
 
     // SkillAttack 상태
-    class SkillAttackState : public MonsterStateMachine {
+    class SkillState : public MonsterStateMachine {
     public:
-        static SkillAttackState& GetInstance();
+        static SkillState& GetInstance();
         void Enter(Monster* monster) override;
         void Update(Monster* monster) override;
         void Exit(Monster* monster) override;
     private:
-        SkillAttackState() {}
+        SkillState() {}
         float skillTimer;
     };
 
@@ -72,6 +72,18 @@ namespace MonsterState
         void Exit(Monster* monster) override;
     private:
         HitState() {}
+        float hitTimer;
+    };
+
+    // Death 상태
+    class DeathState : public MonsterStateMachine {
+    public:
+        static DeathState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        DeathState() {}
         float hitTimer;
     };
 }

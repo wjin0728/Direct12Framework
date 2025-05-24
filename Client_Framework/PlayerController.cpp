@@ -125,7 +125,7 @@ void CPlayerController::OnKeyEvents()
 			moveKeyPressed = false;
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
 			mStateMachine->SetState(PLAYER_STATE::IDLE);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 		}
 		return;
 	}

@@ -183,4 +183,9 @@ struct SC_LOGIN_FAIL_PACKET : PACKET {
 struct SC_CHANGE_SCENE_PACKET : PACKET {
 	uint8_t			change_scene;
 };
+
+struct SC_ADD_MONSTER_PACKET : PACKET {
+	int				monster_id;
+	uint8_t			monster_type;
+};
 #pragma pack (pop)

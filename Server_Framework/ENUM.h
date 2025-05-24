@@ -76,3 +76,15 @@ enum class S_PLAYER_STATE : UINT8
 
 	end
 };
+
+enum class S_MONSTER_STATE : UINT8
+{
+	IDLE,
+	RUN,
+	ATTACK,
+	GETHIT,
+	DEATH,
+	SKILL,
+
+	end
+};
