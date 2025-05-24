@@ -280,7 +280,7 @@ void CDX12Manager::InitDepthStencilView()
 	dsBuffer->isSR = false;
 	RESOURCE.Add(dsBuffer);
 
-	shadowMapResolution = 4096.f * 4;
+	shadowMapResolution = 4096.f * 2;
 
 	auto shadowMap = std::make_shared<CTexture>
 	(

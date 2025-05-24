@@ -242,9 +242,11 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 albedo = surfaceData.albedo;
     float metallic = surfaceData.metallic;
     float smoothness = clamp(surfaceData.smoothness, 0.0, 0.99f);
-    float roughness = 1.0 - smoothness;
+    float roughness = clamp(1 - smoothness, 0.14, 1.0);
     float3 direction = light.directionWS;
     float3 lightDir = -normalize(direction);
+    
+    //return camDir * 0.5f + 0.5f;
     
     float3 lightColor = light.lColor * light.strength;
 
@@ -252,6 +254,8 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     F0 = lerp(F0, albedo, metallic);
 
     float3 halfV = normalize(camDir + lightDir);
+    if (all(halfV == 0))
+        halfV = camDir;
     float NdotL = max((dot(normal, lightDir)), 0.0);
     float NdotV = max(dot(normal, camDir), 0.0);
     float VdotH = max(dot(camDir, halfV), 0.0);
@@ -263,6 +267,8 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 numerator = NDF * G * F;
     float denominator = max(4.0 * NdotL * NdotV, 0.00001);
     float3 specular = numerator / denominator;
+    
+    //return specular;
 
     float3 kS = F;
     float3 kD = max(float3(1.f,1.f,1.f) - kS, 0.0) * (1.0 - metallic);

@@ -257,8 +257,8 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float2 uv = input.uv;   
     
     float3 viewDir = normalize(camPos - worldPosition);
-    
-    return float4(viewDir * 0.5 + 0.5, 1.0); 
+    float3 lightDir = lights[0].directionWS;
+    //return float4(lightDir * 0.5 + 0.5, 1.0);
     
     float4 clipPos = input.positionCS;
     float4 screenPos = ComputeScreenPos(clipPos);
@@ -288,8 +288,8 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     mainNormalTS = UnpackNormal(mainNormalTS);
     detailNormalTS = UnpackNormal(detailNormalTS);
     float3 blendedNormalTS = normalize(mainNormalTS + detailNormalTS);
-    blendedNormalTS = normalize(blendedNormalTS * _NormalScale);
-    blendedNormalTS.z = lerp(1, blendedNormalTS.z, saturate(_NormalScale));
+    blendedNormalTS = normalize(blendedNormalTS * 0.001);
+    blendedNormalTS.z = lerp(1, blendedNormalTS.z, saturate(0.001));
     normal = normalize(blendedNormalTS);
     normal = UnpackedNormalSampleToWorldSpace(normal, worldNormal, worldTangent, worldBitangent);
     
