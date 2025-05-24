@@ -10,7 +10,9 @@ enum KEY_FLAG : uint8_t {
 	KEY_A = 0x04,
 	KEY_W = 0x08,
 	KEY_SHIFT = 0x10,
-	KEY_CTRL = 0x20
+	KEY_CTRL = 0x20,
+	KEY_Q = 0x40,
+	KEY_E = 0x80
 };
 
 enum S_OBJECT_TYPE : UINT8

@@ -36,6 +36,12 @@ struct SurfaceData
     float smoothness;
 };
 
+inline float3 SafeNormalize(float3 v)
+{
+    float lenSq = dot(v, v);
+    return lenSq > 1e-6f ? normalize(v) : float3(0.0f, 0.0f, 1.0f);
+}
+
 inline VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
 {
     VertexPositionInputs output;
@@ -46,7 +52,7 @@ inline VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
     return output;
 }
 
-VertexPositionInputs GetVertexPositionInputs(float3 positionOS, matrix _worldMat)
+inline VertexPositionInputs GetVertexPositionInputs(float3 positionOS, matrix _worldMat)
 {
     VertexPositionInputs output;
     
@@ -56,24 +62,24 @@ VertexPositionInputs GetVertexPositionInputs(float3 positionOS, matrix _worldMat
     return output;
 }
 
-VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS)
+inline VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS)
 {
     VertexNormalInputs output;
     
-    output.normalWS = mul(normalOS, (float3x3) invWorldMat);
-    output.tangentWS = mul(tangentOS, (float3x3) invWorldMat);
-    output.bitangentWS = cross(output.normalWS, output.tangentWS);
+    output.normalWS = normalize(mul(normalOS, (float3x3) invWorldMat));
+    output.tangentWS = normalize(mul(tangentOS, (float3x3) invWorldMat));
+    output.bitangentWS = normalize(cross(output.normalWS, output.tangentWS));
     
     return output;
 }
 
-VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS, matrix _invWorldMat)
+inline VertexNormalInputs GetVertexNormalInputs(float3 normalOS, float3 tangentOS, matrix _invWorldMat)
 {
     VertexNormalInputs output;
     
-    output.normalWS = mul(normalOS, (float3x3) _invWorldMat);
-    output.tangentWS = mul(tangentOS, (float3x3) _invWorldMat);
-    output.bitangentWS = cross(output.normalWS, output.tangentWS);
+    output.normalWS = normalize(mul(normalOS, (float3x3) _invWorldMat));
+    output.tangentWS = normalize(mul(tangentOS, (float3x3) _invWorldMat));
+    output.bitangentWS = normalize(cross(output.normalWS, output.tangentWS));
     
     return output;
 }
@@ -111,35 +117,35 @@ float GetCameraDepth(float z)
     return nearZ * farZ / ((farZ - nearZ) * z + nearZ);
 }
 
-float3 GammaDecoding(float3 color)
+inline float3 GammaDecoding(float3 color)
 {
     return pow(color, 2.2f);
 }
 
-float3 GammaEncoding(float3 color)
+inline float3 GammaEncoding(float3 color)
 {
     return pow(color, 0.4545f);
 }
 
-float Luminance(float3 color)
+inline float Luminance(float3 color)
 {
     return dot(color, float3(0.2126, 0.7152, 0.0722));
 }
 
-float3 ChangeLuminace(float3 color, float luminance)
+inline float3 ChangeLuminace(float3 color, float luminance)
 {
     float luminanceColor = Luminance(color);
     return color * (luminance / luminanceColor);
 }
 
-float3 UnpackNormal(float3 normalMapSample, float scale = 1.f)
+inline float3 UnpackNormal(float3 normalMapSample, float scale = 1.f)
 {
     float3 normal = 2.0f * normalMapSample - 1.0f;
     normal *= scale;
     return normalize(normal);
 }
 
-float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent, float scale = 1.f)
+inline float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent, float scale = 1.f)
 {
     float3 normalT = 2.0f * normalMapSample - 1.0f;
     normalT *= scale;
@@ -150,7 +156,7 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 ta
     return mul(normalT, TBN);
 }
 
-float3 UnpackedNormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent, float scale = 1.f)
+inline float3 UnpackedNormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent, float scale = 1.f)
 {
     normalMapSample *= scale;
     normalMapSample = normalize(normalMapSample);
@@ -200,12 +206,12 @@ float CalcShadowFactor(float4 shadowPosH)
     return shadowFactor;
 }
 
-float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
+inline float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
 {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float DistributionGGX(float3 N, float3 H, float roughness)
+inline float DistributionGGX(float3 N, float3 H, float roughness)
 {
     float a = roughness * roughness;
     float a2 = a * a;
@@ -215,14 +221,14 @@ float DistributionGGX(float3 N, float3 H, float roughness)
     return a2 / (3.14159 * denom * denom);
 }
 
-float GeometrySchlickGGX(float NdotV, float roughness)
+inline float GeometrySchlickGGX(float NdotV, float roughness)
 {
     float r = roughness + 1.0;
     float k = (r * r) / 8.0;
     return NdotV / (NdotV * (1.0 - k) + k);
 }
 
-float GeometrySmith(float3 N, float3 V, float3 L, float roughness)
+inline float GeometrySmith(float3 N, float3 V, float3 L, float roughness)
 {
     float NdotV = max(dot(N, V), 0.0);
     float NdotL = max(dot(N, L), 0.0);
@@ -235,7 +241,7 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 camDir = normalize(lightingData.cameraDirection);
     float3 albedo = surfaceData.albedo;
     float metallic = surfaceData.metallic;
-    float smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
+    float smoothness = clamp(surfaceData.smoothness, 0.0, 0.99f);
     float roughness = 1.0 - smoothness;
     float3 direction = light.directionWS;
     float3 lightDir = -normalize(direction);
@@ -265,7 +271,7 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * albedo + specular) * lightColor * NdotL;
-    float3 ambientLight = albedo * 0.1f * ndotUp;
+    float3 ambientLight = albedo * 0.2f * ndotUp;
     ambientLight += albedo * 0.3f;
     
     return (directLight + ambientLight) * lightingData.shadowFactor + surfaceData.emissive;

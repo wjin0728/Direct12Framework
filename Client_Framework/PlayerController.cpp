@@ -33,6 +33,14 @@ void CPlayerController::Start()
 
 void CPlayerController::Update()
 {
+	if (INPUT.IsKeyDown(KEY_TYPE::F1)) {
+		mFreeLook = !mFreeLook;
+	}
+
+	if (mFreeLook) {
+		// Handle free look camera logic here if needed
+		return;
+	}
 	OnKeyEvents();
 	// auto transform = GetTransform();
 	// float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);

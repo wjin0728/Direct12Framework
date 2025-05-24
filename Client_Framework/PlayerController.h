@@ -16,6 +16,7 @@ private:
 	std::weak_ptr<class CTerrain> mTerrain{};
 
 	bool moveKeyPressed = false;
+	bool mFreeLook = false;
 
 public:
 	CPlayerController() : CMonoBehaviour("PlayerController") {};

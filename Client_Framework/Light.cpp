@@ -104,7 +104,7 @@ void CLight::LateUpdate()
 	float r = max/2.f;
 
 	auto transform = GetTransform();
-	Vec3 dir = transform->GetWorldLook().GetNormalized();
+	Vec3 dir = transform->GetWorldLook();
 	transform->SetLocalPosition(center - (r * dir));
 	transform->LookTo(dir);
 
