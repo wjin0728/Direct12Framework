@@ -109,14 +109,14 @@ void GameManager::Worker_thread()
 			int client_id = Get_new_Client_id();
 			if (client_id != -1) {
 				{
-					lock_guard<mutex> ll(clients[client_id]._s_lock);
-					clients[client_id]._state = ST_ALLOC;
+					lock_guard<mutex> ll(clients[ServerNumber][client_id]._s_lock);
+					clients[ServerNumber][client_id]._state = ST_ALLOC;
 				}
-				clients[client_id]._id = client_id;
-				clients[client_id]._prev_remain = 0;
-				clients[client_id]._socket = client_socket;
+				clients[ServerNumber][client_id]._id = client_id;
+				clients[ServerNumber][client_id]._prev_remain = 0;
+				clients[ServerNumber][client_id]._socket = client_socket;
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(client_socket), h_iocp, client_id, 0);
-				clients[client_id].do_recv();
+				clients[ServerNumber][client_id].do_recv();
 				client_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 			}
 			else {
@@ -128,7 +128,7 @@ void GameManager::Worker_thread()
 			break;
 		}
 		case OP_RECV: {
-			int remain_data = num_bytes + clients[key]._prev_remain;
+			int remain_data = num_bytes + clients[ServerNumber][key]._prev_remain;
 			char* p = ex_over->_send_buf;
 			while (remain_data > 0) {
 				WORD* byte = reinterpret_cast<WORD*>(p);
@@ -140,11 +140,11 @@ void GameManager::Worker_thread()
 				}
 				else break;
 			}
-			clients[key]._prev_remain = remain_data;
+			clients[ServerNumber][key]._prev_remain = remain_data;
 			if (remain_data > 0) {
 				memcpy(ex_over->_send_buf, p, remain_data);
 			}
-			clients[key].do_recv();
+			clients[ServerNumber][key].do_recv();
 			break;
 		}
 		case OP_SEND: {
@@ -159,17 +159,17 @@ void GameManager::Worker_thread()
 
 void GameManager::Disconnect(int c_id)
 {
-	closesocket(clients[c_id]._socket);
+	closesocket(clients[ServerNumber][c_id]._socket);
 
-	lock_guard<mutex> ll(clients[c_id]._s_lock);
-	clients[c_id]._state = ST_FREE;
+	lock_guard<mutex> ll(clients[ServerNumber][c_id]._s_lock);
+	clients[ServerNumber][c_id]._state = ST_FREE;
 }
 
 int GameManager::Get_new_Client_id()
 {
 	for (int i = 0; i < MAX_USER; ++i) {
-		lock_guard <mutex> ll{ clients[i]._s_lock };
-		if (clients[i]._state == ST_FREE)
+		lock_guard <mutex> ll{ clients[ServerNumber][i]._s_lock };
+		if (clients[ServerNumber][i]._state == ST_FREE)
 			return i;
 	}
 	return -1;
@@ -180,42 +180,41 @@ void GameManager::Process_packet(int c_id, char* packet)
 	switch (packet[2]) {
 	case CS_LOGIN: {
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet); {
-			lock_guard<mutex> ll{ clients[c_id]._s_lock };
-			clients[c_id]._state = ST_INGAME;
+			lock_guard<mutex> ll{ clients[ServerNumber][c_id]._s_lock };
+			clients[ServerNumber][c_id]._state = ST_INGAME;
 		}
 
-		//clients[c_id]._player._class = p->name[0];
 		if (0 == c_id)
-			clients[c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
+			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
 		else if (1 == c_id)
-			clients[c_id]._player._class = S_PLAYER_CLASS::ARCHER;
+			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::ARCHER;
 		else if (2 == c_id)
-			clients[c_id]._player._class = S_PLAYER_CLASS::MAGE;
-		clients[c_id]._player._pos = Vec3(45.2, 4.2, 42);
+			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::MAGE;
+		clients[ServerNumber][c_id]._player._pos = Vec3(45.2, 4.2, 42);
 
-		clients[c_id].send_login_info_packet();
+		clients[ServerNumber][c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;
 
 		// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
-		for (auto& cl : clients) {
+		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
-			cl.second.send_add_player_packet(&clients[c_id]);
+			cl.second.send_add_player_packet(&clients[ServerNumber][c_id]);
 		}
 		// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
-		for (auto& cl : clients) {
+		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			if (cl.first == c_id) continue;
-			clients[c_id].send_add_player_packet(&cl.second);
+			clients[ServerNumber][c_id].send_add_player_packet(&cl.second);
 			cout << "Send add player " << c_id << " 에게 " << cl.first << endl;
 		}
 
-		clients[c_id]._player.SetState(&PlayerState::IdleState::GetInstance());
+		clients[ServerNumber][c_id]._player.SetState(&PlayerState::IdleState::GetInstance());
 		break;
 	}
 	case CS_CHAT: {
 		CS_CHAT_PACKET* p = reinterpret_cast<CS_CHAT_PACKET*>(packet);
 
-		for (auto& cl : clients) {
+		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			cl.second.send_chat_packet(c_id, p->mess);
 		}
@@ -241,10 +240,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		if (moveDir.LengthSquared() > 0.0001f) {
 			moveDir.Normalize();
-			clients[c_id]._player._velocity = moveDir;
+			clients[ServerNumber][c_id]._player._velocity = moveDir;
 		}
 		else {
-			clients[c_id]._player._velocity = Vec3::Zero;
+			clients[ServerNumber][c_id]._player._velocity = Vec3::Zero;
 		}
 
 		break;
@@ -254,11 +253,11 @@ void GameManager::Process_packet(int c_id, char* packet)
 		Vec3 local_lookDir = Vec3(p->dir_x, p->dir_y, p->dir_z);
 		cout << "dir : " << local_lookDir.x << ", " << local_lookDir.y << ", " << local_lookDir.z << endl;
 		
-		for (auto& cl : clients) {
+		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			if (cl.second._id == c_id) continue;
 			cl.second._player.LocalTransform();
-			clients[c_id]._player.OnFighterBasicAttack(cl.second._player._boundingbox);
+			clients[ServerNumber][c_id]._player.OnFighterBasicAttack(cl.second._player._boundingbox);
 		}
 		break;
 	}
@@ -273,18 +272,18 @@ void GameManager::Process_packet(int c_id, char* packet)
 		CS_SKILL_NONTARGET_PACKET* p = reinterpret_cast<CS_SKILL_NONTARGET_PACKET*>(packet);
 
 		if (S_FIRE_ENCHANT == p->skill_enum) {
-			clients[c_id]._player._on_FireEnchant = true;
+			clients[ServerNumber][c_id]._player._on_FireEnchant = true;
 		}
 		else if (S_WATER_HEAL == p->skill_enum) {
-			for (auto& cl : clients)
+			for (auto& cl : clients[ServerNumber])
 				cl.second._player._hp = min((cl.second._player._hp + WATER_HEAL_AMT), cl.second._player.PlayerMaxHp());
 		}
 		else if (S_WATER_SHIELD == p->skill_enum) {
-			for (auto& cl : clients)
+			for (auto& cl : clients[ServerNumber])
 				cl.second._player._barrier = 2;
 		}
 		else if (S_GRASS_WEAKEN == p->skill_enum) {
-			clients[c_id]._player._on_GrassWeaken = true;
+			clients[ServerNumber][c_id]._player._on_GrassWeaken = true;
 		}
 		break;
 	}
@@ -295,14 +294,14 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_000: {
 		CS_000_PACKET* p = reinterpret_cast<CS_000_PACKET*>(packet);
 
-		items[item_cnt].SetPosition(clients[c_id]._player._pos.x + 3, 
-			clients[c_id]._player._pos.y + 0.3, clients[c_id]._player._pos.z);
-		items[item_cnt].SetItemType(S_ITEM_TYPE::S_FIRE_ENCHANT);
-		items[item_cnt].LocalTransform();
+		items[ServerNumber][item_cnt].SetPosition(clients[ServerNumber][c_id]._player._pos.x + 3, 
+			clients[ServerNumber][c_id]._player._pos.y + 0.3, clients[ServerNumber][c_id]._player._pos.z);
+		items[ServerNumber][item_cnt].SetItemType(S_ITEM_TYPE::S_FIRE_ENCHANT);
+		items[ServerNumber][item_cnt].LocalTransform();
 
-		for (auto& cl : clients) {
+		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
-			cl.second.send_drop_item_packet(items[item_cnt], item_cnt);
+			cl.second.send_drop_item_packet(items[ServerNumber][item_cnt], item_cnt);
 		}
 
 		item_cnt++;
@@ -311,7 +310,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_CHANGE_SCENE: {
 		CS_CHANGE_SCENE_PACKET* p = reinterpret_cast<CS_CHANGE_SCENE_PACKET*>(packet);
 
-		for (auto& cl : clients) {
+		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			//cl.second.send_change_scene_packet(p->change_scene);
 		}
@@ -320,8 +319,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_CHANGE_STATE: {
 		CS_CHANGE_STATE_PACKET* p = reinterpret_cast<CS_CHANGE_STATE_PACKET*>(packet);
 
-		if (p->state != (uint8_t)clients[p->id]._player._state)
-			clients[p->id]._player.SetState(p->state);
+		if (p->state != (uint8_t)clients[ServerNumber][p->id]._player._state)
+			clients[ServerNumber][p->id]._player.SetState(p->state);
 		break;
 	}
 	}
@@ -356,7 +355,7 @@ void GameManager::SendAllPlayersPosPacket() {
 	packet.size = sizeof(SC_ALL_PLAYERS_POS_PACKET);
 	packet.type = SC_ALL_PLAYERS_POS;
 	int cnt = 0;
-	for (auto& cl : clients) {
+	for (auto& cl : clients[ServerNumber]) {
 		if (cl.second._state != ST_INGAME) { continue; }
 		auto& player = cl.second._player;
 
@@ -376,14 +375,14 @@ void GameManager::SendAllPlayersPosPacket() {
 			packet.look_y[i] = 0;
 		}
 		else
-			packet.state[i] = (uint8_t)clients[i]._player._state;
+			packet.state[i] = (uint8_t)clients[ServerNumber][i]._player._state;
 	}
-	for (auto& cl : clients) {
+	for (auto& cl : clients[ServerNumber]) {
 		if (cl.second._state != ST_INGAME) continue;
 
-		cout << packet.x[0] << " " << packet.y[0] << " " << packet.z[0] << endl;
-		cout << packet.look_y[0] << endl;
-		cout << (int)packet.state[0] << endl;
+		//cout << packet.x[0] << " " << packet.y[0] << " " << packet.z[0] << endl;
+		//cout << packet.look_y[0] << endl;
+		//cout << (int)packet.state[0] << endl;
 
 		cl.second.do_send(&packet);
 	}
@@ -392,21 +391,21 @@ void GameManager::SendAllMonstersPosPacket() {
 	SC_MONSTER_POS_PACKET packet;
 	packet.size = sizeof(SC_MONSTER_POS_PACKET);
 	packet.type = SC_MONSTER_POS;
-	for (auto& ms : Monsters) {
+	for (auto& ms : Monsters[ServerNumber]) {
 		packet.monsterId = ms.first;
 		packet.x = ms.second._pos.x;
 		packet.y = ms.second._pos.y;
 		packet.z = ms.second._pos.z;
 		packet.look_y = ms.second._look_dir.y;
 
-		for (auto& cl : clients) {
+		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			cl.second.do_send(&packet);
 		}
 	}
 }
 void GameManager::SendAllItemsPosPacket() {
-	for (auto& it : items) {
+	for (auto& it : items[ServerNumber]) {
 		SC_ITEM_POS_PACKET packet;
 		packet.size = sizeof(SC_ITEM_POS_PACKET);
 		packet.type = SC_ITEM_POS;
@@ -414,7 +413,7 @@ void GameManager::SendAllItemsPosPacket() {
 		packet.x = it.second._pos.x;
 		packet.y = it.second._pos.y;
 		packet.z = it.second._pos.z;
-		for (auto& cl : clients) {
+		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			cl.second.do_send(&packet);
 		}
