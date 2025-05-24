@@ -18,6 +18,7 @@ public:
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mOtherPlayers{};
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mEnemies{};
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mItems{};
+	std::unordered_map<int, std::shared_ptr<class CGameObject>> mProjectiles{};
 
 	int clientID{ -1 };
 	bool RenderOK{ 0 };
