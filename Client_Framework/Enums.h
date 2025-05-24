@@ -86,6 +86,17 @@ enum class ENEMY_TYPE : UINT8
 
 	ENEMY_END
 };
+
+enum class PROJECTILE_TYPE
+{
+	ARROW,
+	FIREBALL,
+	ICEBALL,
+	GRASSBALL,
+	MAGIC_BALL,
+
+	PROJECTILE_END
+};
 	
 enum class PLAYER_STATE : UINT8
 {

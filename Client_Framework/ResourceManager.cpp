@@ -109,6 +109,15 @@ bool CResourceManager::LoadSkillObjects()
 	return true;
 }
 
+bool CResourceManager::LoadProjectileObjects()
+{
+	LoadPrefabFromFile("Arrow");
+	LoadPrefabFromFile("Fireball");
+	LoadPrefabFromFile("Iceball");
+	LoadPrefabFromFile("MagicBall");
+	return true;
+}
+
 void CResourceManager::LoadPrefabFromFile(const std::string& name)
 {
 	std::ifstream ifs{ OBJECT_PATH(name), std::ios::binary };
@@ -407,6 +416,7 @@ void CResourceManager::BackgroundLoadingThread()
 	LoadPlayerObjects();
 	LoadEnemyObjects();
 	LoadSkillObjects();
+	LoadProjectileObjects();
 
 	mLoadFinished = true;
 	mThreadRunning = false;

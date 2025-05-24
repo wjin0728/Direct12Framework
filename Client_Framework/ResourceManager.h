@@ -55,6 +55,7 @@ public:
 	bool LoadPlayerObjects();
 	bool LoadEnemyObjects();
 	bool LoadSkillObjects();
+	bool LoadProjectileObjects();
 	bool LoadLoadingScreen();
 
 	void LoadPrefabFromFile(const std::string& name);
