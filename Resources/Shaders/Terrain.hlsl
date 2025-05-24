@@ -315,7 +315,7 @@ PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
         color.rgb += diffuseMap[splat.data[2].x].Sample(anisoWrap, diffuseUV).rgb * weight.b;
         color.rgb += diffuseMap[splat.data[3].x].Sample(anisoWrap, diffuseUV).rgb * weight.a;
         
-        blendedNormal += (diffuseMap[splat.data[0].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.r;
+        blendedNormal += UnpackNormal(diffuseMap[splat.data[0].y].Sample(anisoWrap, diffuseUV).xyz) * weight.r;
         blendedNormal += (diffuseMap[splat.data[1].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.g;
         blendedNormal += (diffuseMap[splat.data[2].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.b;
         blendedNormal += (diffuseMap[splat.data[3].y].Sample(anisoWrap, diffuseUV).xyz * 2.0 - 1.0) * weight.a;

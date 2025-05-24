@@ -78,9 +78,9 @@ public:
 	mLocalEulerAngle = rotation; mDirtyFlag = true; };
 	void SetLocalRotation(const Quaternion& rotation) {
 		mLocalRotation = rotation; mLocalEulerAngle = Vec3::GetAngleToQuaternion(rotation)* radToDeg; mDirtyFlag = true; }
-	void SetLocalRotationX(float angle) { SetLocalRotation({ angle, 0.f, 0.f }); }
-	void SetLocalRotationY(float angle) { SetLocalRotation({ 0.f, angle, 0.f }); }
-	void SetLocalRotationZ(float angle) { SetLocalRotation({ 0.f, 0.f, angle }); }
+	void SetLocalRotationX(float angle) { SetLocalRotation({ angle, mLocalEulerAngle.y, mLocalEulerAngle.z }); }
+	void SetLocalRotationY(float angle) { SetLocalRotation({ mLocalEulerAngle.x, angle, mLocalEulerAngle.z }); }
+	void SetLocalRotationZ(float angle) { SetLocalRotation({ mLocalEulerAngle.x, mLocalEulerAngle.y, angle }); }
 	void SetLocalScale(const Vec3& scale) { mLocalScale = scale; mDirtyFlag = true; };
 	void SetLocalLook(const Vec3& look) { mLocalLook = look; };
 	void SetLocalUp(const Vec3& up) { mLocalUp = up; };

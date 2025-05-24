@@ -37,19 +37,19 @@ cbuffer MaterialData : register(b5)
     float padding;
 };
 
-float3 mod2D289(float3 x)
+inline float3 mod2D289(float3 x)
 {
     return x - floor(x * (1.0 / 289.0)) * 289.0;
 }
-float2 mod2D289(float2 x)
+inline float2 mod2D289(float2 x)
 {
     return x - floor(x * (1.0 / 289.0)) * 289.0;
 }
-float3 permute(float3 x)
+inline float3 permute(float3 x)
 {
     return mod2D289(((x * 34.0) + 1.0) * x);
 }
-float snoise(float2 v)
+inline float snoise(float2 v)
 {
     const float4 C = float4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
     float2 i = floor(v + dot(v, C.yy));
@@ -74,23 +74,23 @@ float snoise(float2 v)
     return 130.0 * dot(m, g);
 }
 						
-float3 mod3D289(float3 x)
+inline float3 mod3D289(float3 x)
 {
     return x - floor(x / 289.0) * 289.0;
 }
-float4 mod3D289(float4 x)
+inline float4 mod3D289(float4 x)
 {
     return x - floor(x / 289.0) * 289.0;
 }
-float4 permute(float4 x)
+inline float4 permute(float4 x)
 {
     return mod3D289((x * 34.0 + 1.0) * x);
 }
-float4 taylorInvSqrt(float4 r)
+inline float4 taylorInvSqrt(float4 r)
 {
     return 1.79284291400159 - r * 0.85373472095314;
 }
-float snoise(float3 v)
+inline float snoise(float3 v)
 {
     const float2 C = float2(1.0 / 6.0, 1.0 / 3.0);
     float3 i = floor(v + dot(v, C.yyy));
@@ -252,11 +252,13 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 worldPosition = float3(input.normalWS.w, input.tangentWS.w, input.bitangentWS.w);
     float3 worldNormal = normalize(input.normalWS.xyz);
     float3 normal = worldNormal;
-    float3 worldTangent = input.tangentWS.xyz;
-    float3 worldBitangent = input.bitangentWS.xyz;
+    float3 worldTangent = normalize(input.tangentWS.xyz);
+    float3 worldBitangent = normalize(input.bitangentWS.xyz);
     float2 uv = input.uv;   
     
     float3 viewDir = normalize(camPos - worldPosition);
+    float3 lightDir = lights[0].directionWS;
+    //return float4(lightDir * 0.5 + 0.5, 1.0);
     
     float4 clipPos = input.positionCS;
     float4 screenPos = ComputeScreenPos(clipPos);
@@ -278,18 +280,20 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 deepBlend = lerp(deepColor, veryDeepColor, saturate(baseFalloff - 1.0));
     float3 waterColor = (depthFactor < 1.0f) ? shallowBlend : deepBlend;
     
-    float2 mainPannerUV = (totalTime * _RippleSpeed.xx) + (uv.xy * 15.f);
-    float2 detailPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * 10.f);
+    float2 mainPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * 0.2f);
+    float2 detailPannerUV = (totalTime * -_RippleSpeed.xx) + (worldPosition.xz * 0.2f);
     
-    float3 mainNormalTS = diffuseMap[29].Sample(linearWrap, mainPannerUV).rgb;
+    float3 mainNormalTS = diffuseMap[_RipplesNormalIdx].Sample(linearWrap, mainPannerUV).rgb;
     float3 detailNormalTS = diffuseMap[_RipplesNormal2Idx].Sample(linearWrap, detailPannerUV).rgb;
-    mainNormalTS = UnpackNormal(mainNormalTS, _NormalScale);
+    mainNormalTS = UnpackNormal(mainNormalTS);
     detailNormalTS = UnpackNormal(detailNormalTS);
     float3 blendedNormalTS = normalize(mainNormalTS + detailNormalTS);
-    blendedNormalTS = normalize(blendedNormalTS * _NormalScale);
-    blendedNormalTS.z = lerp(1, blendedNormalTS.z, saturate(_NormalScale));
+    blendedNormalTS = normalize(blendedNormalTS * 0.001);
+    blendedNormalTS.z = lerp(1, blendedNormalTS.z, saturate(0.001));
     normal = normalize(blendedNormalTS);
-    normal = UnpackedNormalSampleToWorldSpace(mainNormalTS, worldNormal, worldTangent, worldBitangent);
+    normal = UnpackedNormalSampleToWorldSpace(normal, worldNormal, worldTangent, worldBitangent);
+    
+    //return float4(normal, 1);
     
     float foamDepthMask = saturate(pow(depthDiff + _FoamShoreline, _FoamFalloff));
     
@@ -345,7 +349,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     SurfaceData surfaceData = (SurfaceData) 0;
     surfaceData.albedo = GammaDecoding(waterAlbedo.rgb);
     surfaceData.metallic = 0.f;
-    surfaceData.smoothness = 0.9;
+    surfaceData.smoothness = smoothness;
     surfaceData.specular = 0.5f;
     surfaceData.emissive = 0.f;
     

@@ -19,6 +19,8 @@ struct CameraBlend {
 class CThirdPersonCamera : public CComponent, public std::enable_shared_from_this<CThirdPersonCamera>
 {
 private:
+	bool mFreeLook{ false };
+
 	CameraParams mCameraParams;
 	Vec2 mDeadZoneSize{};
 	Vec3 mOriginalPosition{};
@@ -54,5 +56,7 @@ public:
 	void SetParamsBlended(CameraParams camParams, CameraBlend blendout, float progress);
 
 	void RaycastObjects();
+	void FollowTarget(float speed, float deltaTime);
+	void FreeMovement();
 };
 

@@ -103,8 +103,8 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 worldPosition = input.positionWS.xyz;
     float3 worldNormal = normalize(input.normalWS);
     float3 normal = worldNormal;
-    float3 worldTangent = input.tangentWS;
-    float3 worldBitangent = input.bitangentWS;
+    float3 worldTangent = normalize(input.tangentWS);
+    float3 worldBitangent = normalize(input.bitangentWS);
     float4 texColor = TriplanarSampling(diffuseMap[topTexIdx], diffuseMap[sideTexIdx], diffuseMap[sideTexIdx], worldPosition, worldNormal, fallOff, tilling);
     color = float4(GammaDecoding(texColor.rgb), texColor.a);
     
@@ -247,8 +247,8 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float3 worldPosition = input.positionWS.xyz;
     float3 worldNormal = normalize(input.normalWS);
     float3 normal = worldNormal;
-    float3 worldTangent = input.tangentWS;
-    float3 worldBitangent = input.bitangentWS;
+    float3 worldTangent = normalize(input.tangentWS);
+    float3 worldBitangent = normalize(input.bitangentWS);
     float4 texColor = TriplanarSampling(diffuseMap[topTexIdx], diffuseMap[sideTexIdx], diffuseMap[sideTexIdx], worldPosition, worldNormal, fallOff, tilling);
     color = float4(GammaDecoding(texColor.rgb), texColor.a);
     

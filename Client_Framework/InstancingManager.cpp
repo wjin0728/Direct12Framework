@@ -27,6 +27,7 @@ void CInstancingManager::AddInstancingObject(const InstanceKey& key, std::shared
 	auto material = key.material;
 	if (!mesh || !material) return;
 	auto group = FindInstancingGroup(key);
+	
 	if (!group) {
 		group = std::make_shared<CInstancingGroup>();
 		group->Initialize(INSTANCE_BUFFER_TYPE::OBJECT);
