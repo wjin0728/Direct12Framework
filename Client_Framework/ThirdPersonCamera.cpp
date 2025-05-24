@@ -113,7 +113,7 @@ void CThirdPersonCamera::FreeMovement()
 	Vec3 forward = transform->GetWorldLook();
 	Vec3 right = transform->GetWorldRight();
 	Vec3 up = transform->GetWorldUp();
-	float speed = 5.f * DELTA_TIME;
+	float speed = 10.f * DELTA_TIME;
 
 	Vec3 moveDir = Vec3::Zero;
 	uint8_t dir = 0;
@@ -123,7 +123,7 @@ void CThirdPersonCamera::FreeMovement()
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
 	if (INPUT.IsKeyPress(KEY_TYPE::Q)) dir |= KEY_FLAG::KEY_Q;
 	if (INPUT.IsKeyPress(KEY_TYPE::E)) dir |= KEY_FLAG::KEY_E;
-	if (INPUT.IsKeyPress(KEY_TYPE::SPACE)) speed *= 2.f; // Speed up when space is pressed
+	if (INPUT.IsKeyPress(KEY_TYPE::SHIFT)) speed *= 2.f; // Speed up when space is pressed
 
 	if (dir & KEY_FLAG::KEY_W) moveDir += forward;
 	if (dir & KEY_FLAG::KEY_S) moveDir -= forward;

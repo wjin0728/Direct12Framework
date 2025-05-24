@@ -34,6 +34,16 @@ void CPlayerController::Start()
 void CPlayerController::Update()
 {
 	if (INPUT.IsKeyDown(KEY_TYPE::F1)) {
+		if (!mFreeLook) {
+			if (moveKeyPressed == true) {
+				moveKeyPressed = false;
+				auto camera = mCamera.lock()->GetTransform();
+				Vec3 camForward = camera->GetWorldLook();
+				INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+				mStateMachine->SetState(PLAYER_STATE::IDLE);
+				INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
+			}
+		}
 		mFreeLook = !mFreeLook;
 	}
 
