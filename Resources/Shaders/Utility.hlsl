@@ -36,7 +36,7 @@ struct SurfaceData
     float smoothness;
 };
 
-VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
+inline VertexPositionInputs GetVertexPositionInputs(float3 positionOS)
 {
     VertexPositionInputs output;
     
@@ -246,7 +246,6 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     F0 = lerp(F0, albedo, metallic);
 
     float3 halfV = normalize(camDir + lightDir);
-    if (all(halfV == 0)) halfV = camDir;
     float NdotL = max((dot(normal, lightDir)), 0.0);
     float NdotV = max(dot(normal, camDir), 0.0);
     float VdotH = max(dot(camDir, halfV), 0.0);

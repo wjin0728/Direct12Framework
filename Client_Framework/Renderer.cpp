@@ -9,7 +9,7 @@
 #include"ObjectPoolManager.h"
 #include"Renderer.h"
 
-CRenderer::CRenderer() : 
+CRenderer::CRenderer()
 {
 }
 

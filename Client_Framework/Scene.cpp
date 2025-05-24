@@ -316,6 +316,15 @@ void CScene::RemoveObject(std::shared_ptr<CGameObject> object)
 			objectList.erase(itr);
 		}
 	}
+
+	auto type = object->GetObjectType();
+	if (type != OBJECT_TYPE::NONE) {
+		auto itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
+			[object](const std::shared_ptr<CGameObject>& ptr) { return ptr == object; });
+		if (itr != mObjectTypes[type].end()) {
+			mObjectTypes[type].erase(itr);
+		}
+	}
 }
 
 void CScene::SetTerrain(std::shared_ptr<CTerrain> terrain)
@@ -419,4 +428,22 @@ void CScene::UpdatePassData()
 	}
 
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(ALIGNED_SIZE(sizeof(CBPassData)), &passData, sizeof(CBPassData));
+}
+
+void CScene::AddRemoveQueue(std::shared_ptr<CGameObject> object)
+{
+	if (object) {
+		object->SetActive(false);
+		auto itr = findByRawPointer(mObjects, object.get());
+		mRemoveQueue.push(object);
+	}
+}
+
+void CScene::RemoveObjects()
+{
+	while (!mRemoveQueue.empty()) {
+		auto object = mRemoveQueue.front();
+		mRemoveQueue.pop();
+		RemoveObject(object);
+	}
 }

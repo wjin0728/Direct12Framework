@@ -67,8 +67,7 @@ public:
 	void LoadDefaultTexture();
 	void LoadDefaultMaterials();
 	void LoadDefaultShaders();
-
-
+		
 	void MakeShadersForAllPass(const std::string& shaderName, const std::string& name, ShaderInfo info);
 
 public:
@@ -101,7 +100,7 @@ inline bool CResourceManager::Add(const std::shared_ptr<T>& resource)
 	if (!resource) return false;
 
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
-	KeyObjMap& keyObjMap = resources[static_cast<UINT>(resourceType)];
+	std::unordered_map<std::string, std::shared_ptr<CResource>>& keyObjMap = mResources[static_cast<UINT>(resourceType)];
 
 	std::string key = resource->GetName();
 
@@ -119,7 +118,7 @@ template<typename T>
 inline std::shared_ptr<T> CResourceManager::Get(const std::string& key)
 {
 	RESOURCE_TYPE resourceType = GetResourceType<T>();
-	KeyObjMap& keyObjMap = resources[static_cast<UINT>(resourceType)];
+	std::unordered_map<std::string, std::shared_ptr<CResource>>& keyObjMap = mResources[static_cast<UINT>(resourceType)];
 
 	auto itr = keyObjMap.find(key);
 	if (itr != keyObjMap.end())

@@ -20,6 +20,8 @@ protected:
 	using ObjectMap = std::unordered_map<UINT, std::shared_ptr<CGameObject>>;
 	std::array<UINT, OBJECT_TYPE::end> mObjectCount{};
 
+	std::queue<std::shared_ptr<CGameObject>> mRemoveQueue{};
+
 	ObjectList mObjects{};
 
 	std::unordered_map<std::string, ObjectList> mRenderLayers{};
@@ -65,7 +67,6 @@ public:
 	std::shared_ptr<CGameObject> FindObjectWithTag(const std::string& tag);
 	std::shared_ptr<CGameObject> FindObjectWithTag(const std::string& renderLayer, const std::string& tag);
 
-	
 	void AddObject(const std::string& renderLayer, std::shared_ptr<CGameObject> object);
 	void AddObject(std::shared_ptr<CGameObject> object);
 	void RemoveObject(std::shared_ptr<CGameObject> object);
@@ -84,7 +85,10 @@ public:
 
 	std::vector <std::shared_ptr<CLight>> GetLight(LIGHT_TYPE type) { return mLights[(UINT)type]; }
 
+	void AddRemoveQueue(std::shared_ptr<CGameObject> object);
+
 protected:
 	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);
 	void UpdatePassData();
+	void RemoveObjects();
 };

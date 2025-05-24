@@ -256,7 +256,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 worldBitangent = input.bitangentWS.xyz;
     float2 uv = input.uv;   
     
-    float3 viewDir = normalize(camPos.xyz - worldPosition);
+    float3 viewDir = normalize(camPos - worldPosition);
     
     float4 clipPos = input.positionCS;
     float4 screenPos = ComputeScreenPos(clipPos);
