@@ -87,7 +87,7 @@ enum class ENEMY_TYPE : UINT8
 	ENEMY_END
 };
 
-enum class PROJECTILE_TYPE
+enum class PROJECTILE_TYPE : UINT8
 {
 	ARROW,
 	FIREBALL,

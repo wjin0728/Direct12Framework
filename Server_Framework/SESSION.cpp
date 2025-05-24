@@ -1,5 +1,6 @@
 #include "SESSION.h"
 #include "Item.h"
+#include "Projectile.h"
 
 SESSION::~SESSION() {}
 
@@ -95,5 +96,22 @@ void SESSION::send_change_scene_packet(uint8_t scene)
 	p.type = SC_CHANGE_SCENE;
 	p.size = sizeof(p);
 	p.change_scene = scene;
+	do_send(&p);
+}
+
+void SESSION::send_add_projectile_packet(Projectile proj, int id)
+{
+	SC_ADD_PROJECTILE_PACKET p;
+	p.type = SC_ADD_PROJECTILE;
+	p.size = sizeof(p);
+	p.projectile_type = (uint8_t)proj._type; // 예시로 ARROW 사용
+	p.projectile_id = id;
+	p.x = proj._pos.x;
+	p.y = proj._pos.y;
+	p.z = proj._pos.z;
+	p.dir_x = proj._velocity.x;
+	p.dir_y = proj._velocity.y;
+	p.dir_z = proj._velocity.z;
+	p.user_friendly = proj._user_frinedly;
 	do_send(&p);
 }

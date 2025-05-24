@@ -5,6 +5,7 @@
 #include "Object.h"
 #include "Item.h"
 #include "Monster.h"
+#include "Projectile.h"
 #include <chrono>
 
 	//#include "OVER_PLUS.h"
@@ -25,11 +26,13 @@ public:
 	array<unordered_map<int, Item>, 6> items;
 	array<unordered_map<int, Monster>, 6> Monsters; 
 	array<unordered_map<int, SESSION>, 6> clients;
+	array<unordered_map<int, Projectile>, 6> Projectiles; // 각 서버에 연결된 클라이언트 ID 집합
 
 	int ServerNumber = 0; // 임시로 쓸 서버 번호
 
 	int item_cnt = 0; 
 	int monster_cnt = 0; 
+	int projectile_cnt = 0;
 
 	GameManager();
 	~GameManager();

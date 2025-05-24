@@ -88,3 +88,15 @@ enum class S_MONSTER_STATE : UINT8
 
 	end
 };
+
+
+enum class S_PROJECTILE_TYPE : UINT8
+{
+	ARROW,
+	FIREBALL,
+	ICEBALL,
+	GRASSBALL,
+	MAGIC_BALL,
+
+	PROJECTILE_END
+};

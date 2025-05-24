@@ -19,7 +19,7 @@ constexpr int WATER_SHIELD_AMT = 2;
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
 constexpr char CS_CHAT = 2;
-constexpr char CS_MOUSE_VEC3 = 3;
+constexpr char CS_MOUSE_LDOWN = 3;
 constexpr char CS_SKILL_TARGET = 4;
 constexpr char CS_SKILL_NONTARGET = 5;
 constexpr char CS_ULTIMATE_SKILL = 6;
@@ -42,6 +42,7 @@ constexpr char SC_USE_SKILL = 13;
 constexpr char SC_MONSTER_POS = 14;
 constexpr char SC_ITEM_POS = 15;
 constexpr char SC_CHANGE_SCENE = 16;
+constexpr char SC_ADD_PROJECTILE = 17;
 
 
 #pragma pack (push, 1)
@@ -70,7 +71,7 @@ struct CS_MOVE_PACKET : PACKET {
 	float			look_z;
 };
 
-struct CS_MOUSE_VEC3_PACKET : PACKET {
+struct CS_MOUSE_LDOWN_PACKET : PACKET {
 	int				id;
 	float			dir_x;
 	float			dir_y;
@@ -187,5 +188,13 @@ struct SC_CHANGE_SCENE_PACKET : PACKET {
 struct SC_ADD_MONSTER_PACKET : PACKET {
 	int				monster_id;
 	uint8_t			monster_type;
+};
+
+struct SC_ADD_PROJECTILE_PACKET : PACKET {
+	uint8_t projectile_type;
+	int projectile_id;
+	float x, y, z;
+	float dir_x, dir_y, dir_z;
+	bool user_friendly;
 };
 #pragma pack (pop)

@@ -280,7 +280,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 
-		std::string objName[3] = { "Item_Skill1", "Item_Skill1", "Item_Skill3" };
+		std::string objName[ITEM_TYPE::item_end] 
+			= { "FireEnchant", "FireExplosion", "WaterHeal", "WaterShield", "GrassVine", 
+			"GrassWeaken", "FirePiece", "WaterPiece", "GrassPiece" };
 		auto item = RESOURCE.GetPrefab(objName[(int)packet->item_enum]);
 		if (!item) {
 			std::cout << "item is nullptr" << std::endl;
@@ -324,6 +326,35 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_USE_SKILL_PACKET* packet = reinterpret_cast<SC_USE_SKILL_PACKET*>(packet_ptr);
 		
 
+		break;
+	}
+	case SC_ADD_PROJECTILE: {
+		SC_ADD_PROJECTILE_PACKET* packet = reinterpret_cast<SC_ADD_PROJECTILE_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+
+		std::string objName[(int)PROJECTILE_TYPE::PROJECTILE_END] 
+			= { "Arrow", "FireBall", "IceBall", "GrassBall", "MagicBall" };
+		auto projectile = RESOURCE.GetPrefab(objName[(int)packet->projectile_type]);
+		if (!projectile) {
+			std::cout << "projectile is nullptr" << std::endl;
+			break;
+		}
+		auto projectileObj = CGameObject::Instantiate(projectile);
+		projectileObj->SetTag("Projectile");
+		projectileObj->SetRenderLayer("Transparent");
+		if (packet->user_friendly)
+			projectileObj->SetObjectType(OBJECT_TYPE::PLAYER_PROJECTILE);
+		else
+			projectileObj->SetObjectType(OBJECT_TYPE::ENEMY_PROJECTILE);
+		projectileObj->SetActive(true);
+		projectileObj->SetStatic(false);
+		projectileObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+
+		projectileObj->Awake();
+		projectileObj->Start();
+
+		mProjectiles[packet->projectile_id] = projectileObj;
+		scene->AddObject(projectileObj);
 		break;
 	}
 	default:

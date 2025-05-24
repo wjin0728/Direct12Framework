@@ -79,10 +79,10 @@ public:
 		p.id = clientID;
 		p.skill_enum = skill;
 	}
-	void send_cs_mouse_vec3_packet(Vec3 dir) {
-		CS_MOUSE_VEC3_PACKET p;
+	void send_cs_mouse_ldown_packet(Vec3 dir) {
+		CS_MOUSE_LDOWN_PACKET p;
 		p.size = sizeof(p);
-		p.type = CS_MOUSE_VEC3;
+		p.type = CS_MOUSE_LDOWN;
 		p.id = clientID;
 		p.dir_x = dir.x;
 		p.dir_y = dir.y;

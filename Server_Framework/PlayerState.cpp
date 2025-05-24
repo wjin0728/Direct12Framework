@@ -42,6 +42,18 @@ PlayerState::BasicAttackState& PlayerState::BasicAttackState::GetInstance() { st
 void PlayerState::BasicAttackState::Enter(PlayerCharacter* player) {
     player->SetVelocity(0, 0, 0); // 공격 중 이동 멈춤
 	cout << "BasicAttack 들어왔다리!" << endl;
+
+    switch (player->_class)
+    {
+    case S_PLAYER_CLASS::FIGHTER:
+        break;
+	case S_PLAYER_CLASS::ARCHER:
+        break;
+	case S_PLAYER_CLASS::MAGE:
+        break;
+    default:
+        break;
+    }
 }
 
 void PlayerState::BasicAttackState::Update(PlayerCharacter* player) {

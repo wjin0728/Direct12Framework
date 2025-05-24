@@ -248,17 +248,47 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		break;
 	}
-	case CS_MOUSE_VEC3: {
-		CS_MOUSE_VEC3_PACKET* p = reinterpret_cast<CS_MOUSE_VEC3_PACKET*>(packet);
+	case CS_MOUSE_LDOWN: {
+		CS_MOUSE_LDOWN_PACKET* p = reinterpret_cast<CS_MOUSE_LDOWN_PACKET*>(packet);
 		Vec3 local_lookDir = Vec3(p->dir_x, p->dir_y, p->dir_z);
 		cout << "dir : " << local_lookDir.x << ", " << local_lookDir.y << ", " << local_lookDir.z << endl;
+		local_lookDir.Normalize();
 		
-		for (auto& cl : clients[ServerNumber]) {
-			if (cl.second._state != ST_INGAME) continue;
-			if (cl.second._id == c_id) continue;
-			cl.second._player.LocalTransform();
-			clients[ServerNumber][c_id]._player.OnFighterBasicAttack(cl.second._player._boundingbox);
+		switch (clients[ServerNumber][p->id]._player._class)
+		{
+		case S_PLAYER_CLASS::FIGHTER: {
+			for (auto& mon : Monsters[ServerNumber]) {
+				mon.second.LocalTransform();
+				clients[ServerNumber][c_id]._player.OnFighterBasicAttack(mon.second._boundingbox);
+			}
+			break;
 		}
+		case S_PLAYER_CLASS::ARCHER: {
+			Projectile proj{1, S_PROJECTILE_TYPE::ARROW};
+			proj._pos = clients[ServerNumber][c_id]._player._pos;
+			proj._velocity = local_lookDir;
+			Projectiles[ServerNumber].insert({ projectile_cnt, proj });
+			for (auto& cl : clients[ServerNumber]) {
+				cl.second.send_add_projectile_packet(proj, projectile_cnt);
+			}
+			projectile_cnt++;
+			break;
+		}
+		case S_PLAYER_CLASS::MAGE: {
+			Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
+			proj._pos = clients[ServerNumber][c_id]._player._pos;
+			proj._velocity = local_lookDir;
+			Projectiles[ServerNumber].insert({ projectile_cnt, proj });
+			for (auto& cl : clients[ServerNumber]) {
+				clients[ServerNumber][c_id].send_add_projectile_packet(proj, projectile_cnt);
+			}
+			projectile_cnt++;
+			break;
+		}
+		default:
+			break;
+		}
+
 		break;
 	}
 	case CS_SKILL_TARGET: {

@@ -90,7 +90,7 @@ void CPlayerController::OnKeyEvents()
 	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
 
 	if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-		INSTANCE(ServerManager).send_cs_mouse_vec3_packet(camForward);
+		INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
 		mStateMachine->SetState(PLAYER_STATE::ATTACK);
 		INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
 	}

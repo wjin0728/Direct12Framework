@@ -5,7 +5,9 @@
 #include "OVER_PLUS.h"
 #include "Object.h"
 #include "PlayerCharacter.h"
-#include "Item.h"
+
+class Projectile;
+class Item;
 
 //#include "../../Direct12Framework/SimpleMath.h"
 //
@@ -42,7 +44,7 @@ public:
 	void send_remove_item_packet(int item_id, int player_id, uint8_t item_type);
 	void send_use_skill_packet(S_ITEM_TYPE skill_type, int player_id);
 	void send_change_scene_packet(uint8_t scene);
-
+	void send_add_projectile_packet(Projectile proj, int id);
 };
 
 #endif
