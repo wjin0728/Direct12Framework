@@ -6,7 +6,7 @@
 #include"Transform.h"
 #include"Timer.h"
 
-CCollider::CCollider() : CComponent(COMPONENT_TYPE::COLLIDER)
+CCollider::CCollider()
 {
 }
 

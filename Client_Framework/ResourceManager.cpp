@@ -13,7 +13,7 @@
 void CResourceManager::Initialize()
 {
 	for (UINT i = 0; i < TEXTURE_COUNT; i++) {
-		srvIdxQueue.push(i);
+		mSrvIdxQueue.push(i);
 	}
 }
 
@@ -23,7 +23,7 @@ void CResourceManager::Destroy()
 	{
 		mLoadThread.join(); // 스레드 종료 대기
 	}
-	for (auto& map : resources) {
+	for (auto& map : mResources) {
 		map.clear();
 	}
 }
@@ -31,7 +31,7 @@ void CResourceManager::Destroy()
 
 void CResourceManager::UpdateMaterials()
 {
-	KeyObjMap& keyObjMap = resources[static_cast<UINT8>(RESOURCE_TYPE::MATERIAL)];
+	std::unordered_map<std::string, std::shared_ptr<CResource>>& keyObjMap = mResources[static_cast<UINT8>(RESOURCE_TYPE::MATERIAL)];
 
 	for (auto& [key, material] : keyObjMap) {
 		static_pointer_cast<CMaterial>(material)->Update();
@@ -142,7 +142,7 @@ void CResourceManager::LoadPrefabFromFile(const std::string& name)
 	for (int i = 0; i < materialCount; i++) {
 		Add(CMaterial::CreateMaterialFromFile(ifs));
 	}
-	auto skill = CGameObject::CreateObjectFromFile(ifs, prefabs);
+	auto skill = CGameObject::CreateObjectFromFile(ifs, mPrefabs);
 	if (skill) {
 		skill->SetName(name);
 		skill->SetActive(false);
@@ -150,7 +150,7 @@ void CResourceManager::LoadPrefabFromFile(const std::string& name)
 		skill->SetInstancing(false);
 		skill->SetObjectType(OBJECT_TYPE::ITEM);
 
-		prefabs[name] = skill;
+		mPrefabs[name] = skill;
 	}
 }
 
@@ -166,7 +166,7 @@ void CResourceManager::LoadDefaultMeshes()
 
 void CResourceManager::LoadDefaultTexture()
 {
-	auto& textures = resources[static_cast<UINT>(RESOURCE_TYPE::TEXTURE)];
+	auto& textures = mResources[static_cast<UINT>(RESOURCE_TYPE::TEXTURE)];
 	for (auto& texture : textures) {
 		auto tex = static_pointer_cast<CTexture>(texture.second);
 		tex->AssignedSRVIndex();
@@ -377,7 +377,7 @@ void CResourceManager::MakeShadersForAllPass(const std::string& shaderName, cons
 
 void CResourceManager::ReleaseUploadBuffers()
 {
-	for (auto& map : resources) {
+	for (auto& map : mResources) {
 		for (auto& [name, resource] : map) {
 			resource->ReleaseUploadBuffer();
 		}
@@ -386,15 +386,15 @@ void CResourceManager::ReleaseUploadBuffers()
 
 UINT CResourceManager::GetTopSRVIndex()
 {
-	UINT idx = srvIdxQueue.front();
-	srvIdxQueue.pop();
+	UINT idx = mSrvIdxQueue.front();
+	mSrvIdxQueue.pop();
 
 	return idx;
 }
 
 UINT CResourceManager::GetMaterialSRVIndex()
 {
-	UINT idx = resources[static_cast<UINT8>(RESOURCE_TYPE::MATERIAL)].size();
+	UINT idx = mResources[static_cast<UINT8>(RESOURCE_TYPE::MATERIAL)].size();
 	return idx;
 }
 

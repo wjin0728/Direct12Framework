@@ -8,7 +8,7 @@
 #include "ResourceManager.h"
 #include "Camera.h"
 
-CContinuousRotation::CContinuousRotation() : CComponent(COMPONENT_TYPE::SCRIPT)
+CContinuousRotation::CContinuousRotation()
 {
 }
 

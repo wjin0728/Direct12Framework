@@ -9,7 +9,7 @@
 #include"SceneManager.h"
 #include"Scene.h"
 
-CTransform::CTransform() : CComponent(COMPONENT_TYPE::TRANSFORM), dirtyFramesNum(FRAME_RESOURCE_COUNT)
+CTransform::CTransform() : dirtyFramesNum(FRAME_RESOURCE_COUNT)
 {
 }
 

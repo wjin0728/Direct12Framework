@@ -8,7 +8,7 @@
 #include"Transform.h"
 #include"Timer.h"
 
-CLoadingScreen::CLoadingScreen() : CComponent(COMPONENT_TYPE::SCRIPT)
+CLoadingScreen::CLoadingScreen()
 {
 }
 

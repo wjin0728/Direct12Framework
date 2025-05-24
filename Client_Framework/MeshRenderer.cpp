@@ -13,7 +13,6 @@
 
 CMeshRenderer::CMeshRenderer() : CRenderer()
 {
-	type = COMPONENT_TYPE::MESH_RENDERER; // 타입 재설정
 }
 
 CMeshRenderer::~CMeshRenderer()

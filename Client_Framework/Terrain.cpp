@@ -2,7 +2,6 @@
 #include "Terrain.h"
 
 CTerrain::CTerrain()
-	: CComponent(COMPONENT_TYPE::TERRAIN)
 {
 }
 

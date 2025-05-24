@@ -9,7 +9,7 @@
 #include"ObjectPoolManager.h"
 #include"Renderer.h"
 
-CRenderer::CRenderer() : CComponent(COMPONENT_TYPE::RENDERER)
+CRenderer::CRenderer() : 
 {
 }
 

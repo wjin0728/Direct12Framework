@@ -3,11 +3,11 @@
 #include"Transform.h"
 #include"GameObject.h"
 
-CComponent::CComponent(COMPONENT_TYPE type) : type(type)
+CComponent::CComponent()
 {
 }
 
-CComponent::CComponent(const CComponent& other) : type(other.type)
+CComponent::CComponent(const CComponent& other)
 {
 }
 

@@ -8,7 +8,6 @@
 
 CSkinnedMeshRenderer::CSkinnedMeshRenderer() : CRenderer()
 {
-    type = COMPONENT_TYPE::SKINNED_RENDERER;
 }
 
 CSkinnedMeshRenderer::~CSkinnedMeshRenderer()

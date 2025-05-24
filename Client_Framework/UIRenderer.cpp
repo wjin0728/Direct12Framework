@@ -19,7 +19,6 @@ std::shared_ptr<class CMesh> CUIRenderer::mQuad = nullptr;
 
 CUIRenderer::CUIRenderer()
 {
-	type = COMPONENT_TYPE::RENDERER;
 	mUIData.type = 0;
 	mUIData.color = Vec4(1.f, 1.f, 1.f, 1.f);
 	mUIData.pos = Vec2(0.f, 0.f);

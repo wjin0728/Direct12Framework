@@ -12,8 +12,7 @@
 
 
 CThirdPersonCamera::CThirdPersonCamera()
-	: CComponent(COMPONENT_TYPE::SCRIPT)
-	, mCameraParams{}
+	: mCameraParams{}
 	, mTarget{}
 	, mTerrain{}
 {
