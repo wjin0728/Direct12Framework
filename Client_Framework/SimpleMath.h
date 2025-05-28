@@ -29,6 +29,7 @@
 #endif
 
 #define EPSILON					1.0e-6f
+#define ANIMATION_CALLBACK_EPSILON		0.00165f
 constexpr float degToRad = 0.0174532f;
 constexpr float radToDeg = 57.2957795f;
 
@@ -607,6 +608,8 @@ namespace DirectX
             static void Transform(const Matrix& M, const Quaternion& rotation, Matrix& result) noexcept;
             static Matrix Transform(const Matrix& M, const Quaternion& rotation) noexcept;
 
+            static Matrix Interpolate(Matrix& M1, Matrix& M2, float t);
+
             // Constants
             static const Matrix Identity;
         };
@@ -970,6 +973,9 @@ namespace DirectX
         inline bool IsEqual(float fA, float fB) {
             return(IsZero(fA - fB));
         }
+
+        inline bool IsZero(float fValue, float fEpsilon) { return((fabsf(fValue) < fEpsilon)); }
+        inline bool IsEqual(float fA, float fB, float fEpsilon) { return(IsZero(fA - fB, fEpsilon)); }
 
         inline float InverseSqrt(float fValue) {
             return 1.0f / sqrtf(fValue);
