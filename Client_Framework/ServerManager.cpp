@@ -225,7 +225,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_ADD_PLAYER: {
 		SC_ADD_PLAYER_PACKET* packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet_ptr);
-		std::string objName[3] = { "Player_Fighter", "Player_Archer", "Player_Mage" };
+		std::string objName[3] = { "Player_Archer", "Player_Fighter", "Player_Mage" };
 		auto obj = RESOURCE.GetPrefab(objName[packet->player_class]);
 		if (!obj) {
 			std::cout << "obj is nullptr" << std::endl;

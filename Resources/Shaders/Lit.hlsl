@@ -86,6 +86,15 @@ VS_OUTPUT VS_Forward(VS_INPUT input
 #ifdef USE_INSTANCING
     VertexPositionInputs positionInputs = GetVertexPositionInputs(position, input.worldMat);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent, invWorldMat);
+#elif USE_SKINNING
+    VertexPositionInputs positionInputs;
+    VertexNormalInputs normalInputs;
+    
+    positionInputs.positionWS = float4(position, 1.0);
+    positionInputs.positionCS = mul(positionInputs.positionWS, viewProjMat);
+    normalInputs.normalWS = normal;
+    normalInputs.tangentWS = tangent;
+    normalInputs.bitangentWS = cross(normalInputs.normalWS, normalInputs.tangentWS);
 #else
     VertexPositionInputs positionInputs = GetVertexPositionInputs(position);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent);
@@ -225,6 +234,9 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input
 #endif
 #ifdef USE_INSTANCING
     VertexPositionInputs positionInputs = GetVertexPositionInputs(position, input.worldMat);
+#elif USE_SKINNING
+    VertexPositionInputs positionInputs;
+    positionInputs.positionCS = mul(float4(position, 1.0), viewProjMat);
 #else
     VertexPositionInputs positionInputs = GetVertexPositionInputs(position);
 #endif
@@ -289,6 +301,16 @@ VS_OUTPUT VS_GPass(VS_INPUT input
 #ifdef USE_INSTANCING
     VertexPositionInputs positionInputs = GetVertexPositionInputs(position, input.worldMat);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent, input.invWorldMat);
+#elif USE_SKINNING
+    VertexPositionInputs positionInputs;
+    VertexNormalInputs normalInputs;
+    
+    positionInputs.positionWS = float4(position, 1.0);
+    positionInputs.positionCS = mul(positionInputs.positionWS, viewProjMat);
+    
+    normalInputs.normalWS = normal;
+    normalInputs.tangentWS = tangent;
+    normalInputs.bitangentWS = cross(normalInputs.normalWS, normalInputs.tangentWS);
 #else
     VertexPositionInputs positionInputs = GetVertexPositionInputs(position);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(normal, tangent);

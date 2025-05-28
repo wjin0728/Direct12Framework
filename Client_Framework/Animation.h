@@ -108,6 +108,7 @@ public:
     void SetEnable(bool bEnable) { mEnable = bEnable; }
     void SetSpeed(float fSpeed) { mSpeed = fSpeed; }
     void SetWeight(float fWeight) { mWeight = fWeight; }
+    void SetType(ANIMATION_TYPE fType) { mType = fType; }
 
     void SetPosition(float fPosition) { mPosition = fPosition; }
     float UpdatePosition(float fTrackPosition, float fTrackElapsedTime, float fAnimationLength);
@@ -138,8 +139,8 @@ public:
 
     std::vector<std::shared_ptr<CAnimationTrack>>   mTracks;
     std::shared_ptr<CAnimationSets>                 mAnimationSets;
-    std::vector<Matrix>                            mBindPoseBoneOffsets{};
-    std::vector<std::weak_ptr<CTransform>>           mSkinningBoneTransforms{};
+    std::vector<Matrix>                             mBindPoseBoneOffsets{};
+    std::vector<std::weak_ptr<CTransform>>          mSkinningBoneTransforms{};
     std::vector<Matrix>                             finalTransforms;
 
     UINT                                            mBoneTransformIdx = -1;
@@ -150,6 +151,7 @@ public:
     void SetTrackPosition(int trackIndex, float position);
     void SetTrackSpeed(int trackIndex, float speed);
     void SetTrackWeight(int trackIndex, float weight);
+    void SetTrackType(int trackIndex, ANIMATION_TYPE type);
 
     void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
     void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);

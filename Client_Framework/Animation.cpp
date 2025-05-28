@@ -170,14 +170,16 @@ CAnimationController::CAnimationController(int trackNum, std::shared_ptr<CAnimat
 
 CAnimationController::CAnimationController(const CAnimationController& other) : CComponent(other)
 {
-	mApplyRootMotion = other.mApplyRootMotion;
-	mAnimationSets = other.mAnimationSets;
 	mTracks = other.mTracks;
-	mBoneCaches = other.mBoneCaches;
+	mAnimationSets = other.mAnimationSets;
 	mBindPoseBoneOffsets = other.mBindPoseBoneOffsets;
-	mRootTransform = other.mRootTransform;
-	mBoneTransformIdx = other.mBoneTransformIdx;
+	mSkinningBoneTransforms = other.mSkinningBoneTransforms;
 	finalTransforms = other.finalTransforms;
+	mBoneTransformIdx = other.mBoneTransformIdx;
+	mApplyRootMotion = other.mApplyRootMotion;
+	mModelRootObject = other.mModelRootObject;
+	mRootMotionObject = other.mRootMotionObject;
+	mFirstRootMotionPosition = other.mFirstRootMotionPosition;
 }
 
 CAnimationController::~CAnimationController()
@@ -207,7 +209,7 @@ void CAnimationController::Start()
 			mSkinningBoneTransforms[i] = bone->GetTransform();
 		}
 	}
-	mRootTransform = boneMap[boneNames[0]];
+	mRootMotionObject = boneMap[boneNames[0]];
 
 	if (mBoneTransformIdx == -1) {
 		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
@@ -234,7 +236,7 @@ void CAnimationController::Start()
 	}
 
 
-	mRootTransform.lock()->owner->SetStatic(true);
+	mRootMotionObject.lock()->owner->SetStatic(true);
 }
 
 void CAnimationController::Update()
@@ -277,7 +279,7 @@ void CAnimationController::LateUpdate()
 		Matrix bondOffset = mBindPoseBoneOffsets[i];
 
 		finalTransforms[i] = (bondOffset * boneTransform).Transpose();
-		
+
 		i++;
 	}
 
@@ -329,6 +331,11 @@ void CAnimationController::SetTrackSpeed(int trackIndex, float speed)
 void CAnimationController::SetTrackWeight(int trackIndex, float weight)
 {
 	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetWeight(weight);
+}
+
+void CAnimationController::SetTrackType(int trackIndex, ANIMATION_TYPE type)
+{
+	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetType(type);
 }
 
 void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)
