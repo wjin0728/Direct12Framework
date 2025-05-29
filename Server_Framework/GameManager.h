@@ -47,6 +47,7 @@ public:
 	void SendAllPlayersPosPacket();
 	void SendAllMonstersPosPacket();
 	void SendAllItemsPosPacket();
+	void SendAllProjectilesPosPacket();
 
 	static GameManager& GetInstance() {
 		static GameManager instance;
@@ -128,10 +129,15 @@ private:
 				}
 			}
 		}
+		for (auto& proj : Projectiles[ServerNumber]) {
+			proj.second.Update();
+		}
 		//for (auto& ms : Monsters) {
 		//	ms.second.Update();
 		//}
 		SendAllPlayersPosPacket();
+		SendAllProjectilesPosPacket();
+		
 		//SendAllMonstersPosPacket();
 		//SendAllItemsPosPacket();
 	}

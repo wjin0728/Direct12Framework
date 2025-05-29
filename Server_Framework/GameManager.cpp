@@ -448,3 +448,19 @@ void GameManager::SendAllItemsPosPacket() {
 		}
 	}
 }
+void GameManager::SendAllProjectilesPosPacket()
+{
+	SC_PROJECTILE_POS_PACKET packet;
+	packet.size = sizeof(SC_PROJECTILE_POS_PACKET);
+	packet.type = SC_PROJECTILE_POS;
+	for (auto& proj : Projectiles[ServerNumber]) {
+		packet.projectile_id = proj.first;
+		packet.x = proj.second._pos.x;
+		packet.y = proj.second._pos.y;
+		packet.z = proj.second._pos.z;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.do_send(&packet);
+		}
+	}
+}
