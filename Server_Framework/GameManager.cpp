@@ -265,11 +265,11 @@ void GameManager::Process_packet(int c_id, char* packet)
 			Projectile proj{1, S_PROJECTILE_TYPE::ARROW};
 			proj._pos = clients[ServerNumber][c_id]._player._pos;
 			proj._velocity = local_lookDir;
-			Projectiles[ServerNumber].insert({ projectile_cnt, proj });
+			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
 			for (auto& cl : clients[ServerNumber]) {
-				cl.second.send_add_projectile_packet(proj, projectile_cnt);
+				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
 			}
-			projectile_cnt++;
+			Projectile_cnt[ServerNumber]++;
 			cout << "proj._velocity : " << local_lookDir.y << endl;
 			break;
 		}
@@ -277,11 +277,11 @@ void GameManager::Process_packet(int c_id, char* packet)
 			Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
 			proj._pos = clients[ServerNumber][c_id]._player._pos;
 			proj._velocity = local_lookDir;
-			Projectiles[ServerNumber].insert({ projectile_cnt, proj });
+			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
 			for (auto& cl : clients[ServerNumber]) {
-				clients[ServerNumber][c_id].send_add_projectile_packet(proj, projectile_cnt);
+				clients[ServerNumber][c_id].send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
 			}
-			projectile_cnt++;
+			Projectile_cnt[ServerNumber]++;
 			break;
 		}
 		default:
@@ -323,17 +323,17 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_000: {
 		CS_000_PACKET* p = reinterpret_cast<CS_000_PACKET*>(packet);
 
-		items[ServerNumber][item_cnt].SetPosition(clients[ServerNumber][c_id]._player._pos.x + 3, 
+		items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(clients[ServerNumber][c_id]._player._pos.x + 3, 
 			clients[ServerNumber][c_id]._player._pos.y + 0.3, clients[ServerNumber][c_id]._player._pos.z);
-		items[ServerNumber][item_cnt].SetItemType(S_ITEM_TYPE::S_FIRE_ENCHANT);
-		items[ServerNumber][item_cnt].LocalTransform();
+		items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(S_ITEM_TYPE::S_FIRE_ENCHANT);
+		items[ServerNumber][Item_cnt[ServerNumber]].LocalTransform();
 
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
-			cl.second.send_drop_item_packet(items[ServerNumber][item_cnt], item_cnt);
+			cl.second.send_drop_item_packet(items[ServerNumber][Item_cnt[ServerNumber]], Item_cnt[ServerNumber]);
 		}
 
-		item_cnt++;
+		Item_cnt[ServerNumber]++;
 		break;
 	}
 	case CS_CHANGE_SCENE: {
@@ -442,6 +442,22 @@ void GameManager::SendAllItemsPosPacket() {
 		packet.x = it.second._pos.x;
 		packet.y = it.second._pos.y;
 		packet.z = it.second._pos.z;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second.do_send(&packet);
+		}
+	}
+}
+void GameManager::SendAllProjectilesPosPacket()
+{
+	SC_PROJECTILE_POS_PACKET packet;
+	packet.size = sizeof(SC_PROJECTILE_POS_PACKET);
+	packet.type = SC_PROJECTILE_POS;
+	for (auto& proj : Projectiles[ServerNumber]) {
+		packet.projectile_id = proj.first;
+		packet.x = proj.second._pos.x;
+		packet.y = proj.second._pos.y;
+		packet.z = proj.second._pos.z;
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			cl.second.do_send(&packet);

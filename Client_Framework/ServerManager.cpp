@@ -359,6 +359,12 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		scene->AddObject(projectileObj);
 		break;
 	}
+	case SC_PROJECTILE_POS: {
+		SC_PROJECTILE_POS_PACKET* packet = reinterpret_cast<SC_PROJECTILE_POS_PACKET*>(packet_ptr);
+		
+		mProjectiles[packet->projectile_id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		break;
+	}
 	default:
 		break;
 	}

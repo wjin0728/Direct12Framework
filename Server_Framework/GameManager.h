@@ -30,9 +30,9 @@ public:
 
 	int ServerNumber = 0; // 임시로 쓸 서버 번호
 
-	int item_cnt = 0; 
-	int monster_cnt = 0; 
-	int projectile_cnt = 0;
+	array<int, 6> Item_cnt = { 0, 0, 0, 0, 0, 0 };
+	array<int, 6> monster_cnt = { 0, 0, 0, 0, 0, 0 };
+	array<int, 6> Projectile_cnt = { 0, 0, 0, 0, 0, 0 };
 
 	GameManager();
 	~GameManager();
@@ -47,6 +47,7 @@ public:
 	void SendAllPlayersPosPacket();
 	void SendAllMonstersPosPacket();
 	void SendAllItemsPosPacket();
+	void SendAllProjectilesPosPacket();
 
 	static GameManager& GetInstance() {
 		static GameManager instance;
@@ -128,10 +129,15 @@ private:
 				}
 			}
 		}
+		for (auto& proj : Projectiles[ServerNumber]) {
+			proj.second.Update();
+		}
 		//for (auto& ms : Monsters) {
 		//	ms.second.Update();
 		//}
 		SendAllPlayersPosPacket();
+		SendAllProjectilesPosPacket();
+		
 		//SendAllMonstersPosPacket();
 		//SendAllItemsPosPacket();
 	}
