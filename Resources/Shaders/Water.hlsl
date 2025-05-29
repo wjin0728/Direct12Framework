@@ -288,8 +288,9 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     mainNormalTS = UnpackNormal(mainNormalTS);
     detailNormalTS = UnpackNormal(detailNormalTS);
     float3 blendedNormalTS = normalize(mainNormalTS + detailNormalTS);
-    blendedNormalTS = normalize(blendedNormalTS * 0.001);
-    blendedNormalTS.z = lerp(1, blendedNormalTS.z, saturate(0.001));
+    float normalScale = _NormalScale + 0.05;
+    blendedNormalTS = normalize(float3(blendedNormalTS.xy * normalScale, blendedNormalTS.z));
+    blendedNormalTS.z = lerp(1, blendedNormalTS.z, saturate(normalScale));
     normal = normalize(blendedNormalTS);
     normal = UnpackedNormalSampleToWorldSpace(normal, worldNormal, worldTangent, worldBitangent);
     

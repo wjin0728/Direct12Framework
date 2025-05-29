@@ -435,7 +435,7 @@ bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, 
 
 		pipelineStateDesc.RasterizerState.DepthBias = 1000.f;
 		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.0f;
-		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 3.0f;
+		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
 		break;
 	case PASS_TYPE::STENCIL:
 		pipelineStateDesc.NumRenderTargets = 0;
