@@ -17,7 +17,7 @@ void CObjectStateMachine::Start()
 void CObjectStateMachine::Update()
 {
 	auto controller = owner->GetComponentFromHierarchy<CAnimationController>();
-	if (controller->mAnimationSets->mAnimationSet[controller->mTracks[0]->mIndex]->mType == ANIMATION_TYPE::END) {
+	if (controller->mTracks.front()->mType == ANIMATION_TYPE::END) {
 		switch (currentState) {
 		case PLAYER_STATE::IDLE:
 		case PLAYER_STATE::RUN:
@@ -62,7 +62,7 @@ void CObjectStateMachine::OnEnterState(PLAYER_STATE state)
 	switch (state) {
 	case PLAYER_STATE::IDLE:
 	case PLAYER_STATE::RUN:
-		controller->SetAnimationType(0, ANIMATION_TYPE::LOOP);
+		controller->SetTrackType(0, ANIMATION_TYPE::LOOP);
 		break;
 	case PLAYER_STATE::ATTACK:
 	case PLAYER_STATE::MOVE_ATTACK:
@@ -70,7 +70,7 @@ void CObjectStateMachine::OnEnterState(PLAYER_STATE state)
 	case PLAYER_STATE::DEATH:
 	case PLAYER_STATE::JUMP:
 	case PLAYER_STATE::SKILL:
-		controller->SetAnimationType(0, ANIMATION_TYPE::ONCE);
+		controller->SetTrackType(0, ANIMATION_TYPE::ONCE);
 		break;
 	default:
 		break;

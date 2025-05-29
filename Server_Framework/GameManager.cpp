@@ -185,9 +185,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		if (0 == c_id)
-			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
-		else if (1 == c_id)
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::ARCHER;
+		else if (1 == c_id)
+			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
 		else if (2 == c_id)
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::MAGE;
 		clients[ServerNumber][c_id]._player._pos = Vec3(45.2, 4.2, 42);
@@ -251,8 +251,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_MOUSE_LDOWN: {
 		CS_MOUSE_LDOWN_PACKET* p = reinterpret_cast<CS_MOUSE_LDOWN_PACKET*>(packet);
 		Vec3 local_lookDir = Vec3(p->dir_x, p->dir_y, p->dir_z);
-		cout << "dir : " << local_lookDir.x << ", " << local_lookDir.y << ", " << local_lookDir.z << endl;
-		local_lookDir.Normalize();
 		
 		switch (clients[ServerNumber][p->id]._player._class)
 		{
@@ -272,6 +270,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				cl.second.send_add_projectile_packet(proj, projectile_cnt);
 			}
 			projectile_cnt++;
+			cout << "proj._velocity : " << local_lookDir.y << endl;
 			break;
 		}
 		case S_PLAYER_CLASS::MAGE: {

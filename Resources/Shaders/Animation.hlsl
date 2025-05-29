@@ -63,21 +63,18 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     {
         uint boneIndex = input.boneIndices[i];
         matrix boneTransform = boneTransforms[boneIndex];
-            
+        
         skinnedPosition += weights[i] * mul(float4(input.position, 1.0), boneTransform).xyz;
         skinnedNormal += weights[i] * mul(input.normal, (float3x3) boneTransform);
         skinnedTangent += weights[i] * mul(input.tangent, (float3x3) boneTransform);
     }
     
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(skinnedNormal, skinnedTangent);
+    output.positionWS = float4(skinnedPosition, 1.0);
+    output.position = mul(output.positionWS, viewProjMat);
     
-    output.positionWS = positionInputs.positionWS;
-    output.position = positionInputs.positionCS;
-    
-    output.normalWS = normalInputs.normalWS;
-    output.tangentWS = normalInputs.tangentWS;
-    output.bitangentWS = normalInputs.bitangentWS;
+    output.normalWS = skinnedNormal;
+    output.tangentWS = skinnedTangent;
+    output.bitangentWS = cross(output.normalWS, output.tangentWS);
     
     output.ShadowPosH = mul(output.positionWS, shadowTransform);
     output.uv = input.uv;
@@ -178,9 +175,7 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input)
         }
     }
 
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
-    
-    output.position = positionInputs.positionCS;
+    output.position = mul(float4(skinnedPosition, 1.0), viewProjMat);
     
     return output;
 }
@@ -227,15 +222,12 @@ VS_OUTPUT VS_GPass(VS_INPUT input)
         skinnedTangent += weights[i] * mul(input.tangent, (float3x3) boneTransform);
     }
     
-    VertexPositionInputs positionInputs = GetVertexPositionInputs(skinnedPosition);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(skinnedNormal, skinnedTangent);
+    output.positionWS = float4(skinnedPosition, 1.0);
+    output.position = mul(output.positionWS, viewProjMat);
     
-    output.positionWS = positionInputs.positionWS;
-    output.position = positionInputs.positionCS;
-    
-    output.normalWS = normalInputs.normalWS;
-    output.tangentWS = normalInputs.tangentWS;
-    output.bitangentWS = normalInputs.bitangentWS;
+    output.normalWS = skinnedNormal;
+    output.tangentWS = skinnedTangent;
+    output.bitangentWS = cross(output.normalWS, output.tangentWS);
     
     output.ShadowPosH = mul(output.positionWS, shadowTransform);
     
