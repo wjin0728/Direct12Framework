@@ -31,6 +31,7 @@ void CSkinnedMeshRenderer::Start()
     }
 	for (auto& mat : m_materials) {
         auto& shaderName = mat->mShaderName;
+        if (shaderName.contains("Animation")) continue;
 		mat->SetShader(shaderName + "Animation");
 	}
 }
@@ -56,7 +57,7 @@ void CSkinnedMeshRenderer::LateUpdate()
 void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 {
     if (!m_materials[0]->GetShader((PASS_TYPE)pass)) return;
-    if (camera && !camera->IsInFrustum(mWorldBS, pass)) return;
+    //if (camera && !camera->IsInFrustum(mWorldBS, pass)) return;
 
     CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->BindToShader(mCbvOffset);
 
