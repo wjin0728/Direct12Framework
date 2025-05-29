@@ -286,12 +286,12 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     if (input.color.b > 0.5 && leafNormalIdx != -1)
     {
         float3 normalMapSample = diffuseMap[leafNormalIdx].Sample(anisoClamp, uvLeaf).rgb;
-        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
+        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent, 0.2);
     }
     else if (input.color.b <= 0.5 && trunkNormalIdx != -1)
     {
         float3 normalMapSample = diffuseMap[trunkNormalIdx].Sample(anisoClamp, uvTrunk).rgb;
-        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
+        normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent, trunkNormalScale);
     }
     float temp = (1.0 - input.color.b);
     float lerpResult188 = lerp(leafMetallic, 0.0, temp);

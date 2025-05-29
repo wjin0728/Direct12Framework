@@ -141,14 +141,14 @@ inline float3 ChangeLuminace(float3 color, float luminance)
 inline float3 UnpackNormal(float3 normalMapSample, float scale = 1.f)
 {
     float3 normal = 2.0f * normalMapSample - 1.0f;
-    normal *= scale;
+    normal.xy *= scale;
     return normalize(normal);
 }
 
 inline float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent, float scale = 1.f)
 {
     float3 normalT = 2.0f * normalMapSample - 1.0f;
-    normalT *= scale;
+    normalT.xy *= scale;
     normalT = normalize(normalT);
 
     float3x3 TBN = float3x3(tangent, bitangent, normal);
@@ -158,7 +158,7 @@ inline float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normal, fl
 
 inline float3 UnpackedNormalSampleToWorldSpace(float3 normalMapSample, float3 normal, float3 tangent, float3 bitangent, float scale = 1.f)
 {
-    normalMapSample *= scale;
+    normalMapSample.xy *= scale;
     normalMapSample = normalize(normalMapSample);
     float3x3 TBN = float3x3(tangent, bitangent, normal);
     
@@ -198,8 +198,8 @@ float CalcShadowFactor(float4 shadowPosH)
             shadowPosH.xy + offsets[i], depth ).r;
     }
     float shadowFactor = percentLit / 9.0f;
-    if (shadowFactor < 0.3f)
-        shadowFactor = 0.3f;
+    if (shadowFactor < 0.5f)
+        shadowFactor = 0.5f;
     else if (shadowFactor > 1.0f)
         shadowFactor = 1.0f;
     

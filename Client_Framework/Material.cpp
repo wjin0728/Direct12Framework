@@ -73,6 +73,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	}
 
 	std::shared_ptr<CMaterial> material{};
+	std::vector<PropertyInfo> properties{};
 
 	material = std::make_shared<CMaterial>();
 	material->SetName(name);
@@ -87,7 +88,6 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 
 		while (true) {
 			ReadDateFromFile(inFile, token);
-
 			if (token == "<AlbedoMap>:")
 			{
 				data->mainTexIdx = GetTextureIdx(inFile);
@@ -111,9 +111,12 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 				data->normalTexIdx = GetTextureIdx(inFile);
 			}
 			else if (token == "</Material>") {
+
 				break;
 			}
 		}
+
+		properties = GetPropertyInfos<CommonProperties>();
 	}
 	else if (token == "Universal_Render_Pipeline/Lit") {
 		material->matData = std::make_unique<BYTE[]>(sizeof(LitProperties));
@@ -164,6 +167,8 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 				break;
 			}
 		}
+
+		properties = GetPropertyInfos<LitProperties>();
 	}
 	else if (token == "SyntyStudios/Triplanar01" || token == "SyntyStudios/TriplanarBasic") {
 		material->SetShader("Triplanar");
@@ -202,6 +207,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 				break;
 			}
 		}
+		properties = GetPropertyInfos<TriplanarProperties>();
 	}
 	else if (token == "SyntyStudios/VegitationShader" || token == "SyntyStudios/VegitationShader_Basic") {
 		material->SetShader("Vegitation");
@@ -268,6 +274,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 				break;
 			}
 		}
+		properties = GetPropertyInfos<VegitationProperties>();
 	}
 	else if (token == "SyntyStudios/SkyboxUnlit") {
 		material->SetShader("Skybox");
@@ -366,6 +373,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 				break;
 			}
 		}
+		properties = GetPropertyInfos<WaterProperties>();
 	}
 	else {
 		return nullptr;
@@ -375,6 +383,10 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		return nullptr;
 	//if (!matData) return nullptr;
 	//if (dataSize == 0) return nullptr;
+
+	for (const auto& prop : properties) {
+		material->mProperties[prop.name] = prop;
+	}
 	return material;
 }
 
