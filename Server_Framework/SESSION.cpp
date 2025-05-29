@@ -107,7 +107,7 @@ void SESSION::send_add_projectile_packet(Projectile proj, int id)
 	p.projectile_type = (uint8_t)proj._type; // 예시로 ARROW 사용
 	p.projectile_id = id;
 	p.x = proj._pos.x;
-	p.y = proj._pos.y;
+	p.y = proj._pos.y + 1;
 	p.z = proj._pos.z;
 	p.dir_x = proj._velocity.x;
 	p.dir_y = proj._velocity.y;

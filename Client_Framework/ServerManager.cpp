@@ -278,6 +278,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_DROP_ITEM: {
 		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
+		cout << "packet._pos : " << packet->x << ", " << packet->y << ", " << packet->z << endl;
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 
 		std::string objName[ITEM_TYPE::item_end] 
@@ -349,6 +350,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		projectileObj->SetActive(true);
 		projectileObj->SetStatic(false);
 		projectileObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		Quaternion local_rot = Quaternion::LookRotation(Vec3(packet->dir_x, packet->dir_y, packet->dir_z));
+		projectileObj->GetTransform()->SetLocalRotation(local_rot);
 
 		projectileObj->Awake();
 		projectileObj->Start();
