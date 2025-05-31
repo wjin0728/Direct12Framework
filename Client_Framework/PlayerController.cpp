@@ -137,9 +137,6 @@ void CPlayerController::OnKeyEvents()
 			break;
 		}
 	}
-	if (INPUT.IsKeyDown(KEY_TYPE::P)) {
-
-	}
 
 	if (dir == 0) {
 		if (moveKeyPressed == true) {

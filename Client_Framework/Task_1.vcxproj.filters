@@ -213,9 +213,6 @@
     </ClInclude>
     <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="AnimationEnums.h" />
-    <ClInclude Include="ObjectState.h">
-      <Filter>GameObject\Component</Filter>
-    </ClInclude>
     <ClInclude Include="MiniGame.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -231,10 +228,13 @@
     <ClInclude Include="ContinuousRotation.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="CEntityState.h">
-      <Filter>GameObject\Component</Filter>
-    </ClInclude>
     <ClInclude Include="InstancingManager.h" />
+    <ClInclude Include="CEntityState.h">
+      <Filter>GameObject\Component\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectState.h">
+      <Filter>GameObject\Component\Scripts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -396,17 +396,11 @@
     <ClCompile Include="LoadingScreen.cpp">
       <Filter>Client</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectState.cpp">
-      <Filter>GameObject\Component</Filter>
-    </ClCompile>
     <ClCompile Include="LoadScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="MiniGame.cpp">
       <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="CEntityState.cpp">
-      <Filter>GameObject\Component</Filter>
     </ClCompile>
     <ClCompile Include="ItemMovement.cpp">
       <Filter>GameObject\Component</Filter>
@@ -416,6 +410,12 @@
     </ClCompile>
     <ClCompile Include="InstancingManager.cpp">
       <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="CEntityState.cpp">
+      <Filter>GameObject\Component\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectState.cpp">
+      <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

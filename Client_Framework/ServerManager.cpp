@@ -271,10 +271,19 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			player->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
 			player->GetTransform()->SetLocalRotationY(packet->look_y[i]);
 			auto playerState = player->GetStateMachine();
-			if (playerState && playerState->GetState() != (PLAYER_STATE)packet->state[i])
-				playerState->SetState((PLAYER_STATE)packet->state[i]);
+			if (playerState && playerState->GetState() != packet->state[i])
+				playerState->SetState(packet->state[i]);
 		}
 		break;
+	}
+	case SC_ADD_MONSTER: {
+		SC_ADD_MONSTER_PACKET* packet = reinterpret_cast<SC_ADD_MONSTER_PACKET*>(packet_ptr);
+		std::string objName[3] = { "Wind", "Whirlwind", "Wind_Mage" };
+		auto obj = RESOURCE.GetPrefab(objName[packet->monster_type]);
+		if (!obj) {
+			std::cout << "obj is nullptr" << std::endl;
+			break;
+		}
 	}
 	case SC_DROP_ITEM: {
 		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
@@ -302,8 +311,11 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		movement->SetDirection({ 0.f, 1.f, 0.f });
 		movement->SetTargetObject(mMainCamera);
 
-		itemObj->Awake();
-		itemObj->Start();
+		if (scene && scene->mIsActive) {
+			itemObj->Awake();
+			itemObj->Start();
+		}
+		
 
 		mItems[packet->item_id] = itemObj;
 		scene->AddObject(itemObj);
@@ -353,8 +365,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		Quaternion local_rot = Quaternion::LookRotation(Vec3(packet->dir_x, packet->dir_y, packet->dir_z));
 		projectileObj->GetTransform()->SetLocalRotation(local_rot);
 
-		projectileObj->Awake();
-		projectileObj->Start();
+		if (scene && scene->mIsActive) {
+			projectileObj->Awake();
+			projectileObj->Start();
+		}
 
 		mProjectiles[packet->projectile_id] = projectileObj;
 		scene->AddObject(projectileObj);

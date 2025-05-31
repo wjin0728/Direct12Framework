@@ -176,7 +176,7 @@ float CalcShadowFactor(float4 shadowPosH)
         return 1.0f; // 그림자 바깥은 항상 밝게 처리
     
     // Depth in NDC space.
-    float depth = shadowPosH.z - 0.001f;
+    float depth = shadowPosH.z - 0.0001f;
 
     uint width, height, numMips;
     diffuseMap[shadowMapIdx].GetDimensions(0, width, height, numMips);

@@ -101,7 +101,7 @@ void CSkinnedMesh::Render(ID3D12GraphicsCommandList* cmdList)
 	}
 }
 
-void CSkinnedMesh::Render(ID3D12GraphicsCommandList* cmdList, int idx)
+void CSkinnedMesh::RenderSkinning(ID3D12GraphicsCommandList* cmdList, int idx)
 {
 	cmdList->IASetPrimitiveTopology(primitiveTopology);
 

@@ -101,6 +101,8 @@ void CGameObject::Render(std::shared_ptr<CCamera> camera, int pass)
 		mAnimationController->BindSkinningMatrix();
 	}
 	if (mRenderer) {
+		if(mName == "SM_Env_Rock_Small_01")
+			int a{}; // Debugging purpose, remove later
 		mRenderer->Render(camera, pass);
 	}
 	for (auto& child : mChildren) {

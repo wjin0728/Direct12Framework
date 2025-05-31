@@ -49,6 +49,8 @@ int CInstancingGroup::Update(const std::shared_ptr<class CCamera>& camera, int s
 	}
 	case INSTANCE_BUFFER_TYPE::OBJECT: {
 		for (const auto& obj : mObjects) {
+			if(obj->GetName() == "SM_Env_Rock_Small_01")
+				int a = 0; // Debugging purpose, remove if not needed
 			BoundingSphere objBS = obj->GetRootBoundingSphere();
 			if (!camera->IsInFrustum(objBS, 0)) continue;
 

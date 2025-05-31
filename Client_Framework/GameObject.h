@@ -11,6 +11,7 @@ class CAnimationController;
 class CSkinnedMesh;
 class CPlayerController;
 class CObjectStateMachine;
+class CEntityState;
 
 class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
@@ -24,7 +25,7 @@ private:
 	std::shared_ptr<CRenderer> mRenderer{};
 	std::shared_ptr<CCollider> mCollider{};
 	std::shared_ptr<CPlayerController> mPlayerController{};
-	std::shared_ptr<CObjectStateMachine> mStateMachine{};
+	std::shared_ptr<CEntityState> mStateMachine{};
 
 	std::vector<std::shared_ptr<CGameObject>> mChildren{};
 
@@ -80,7 +81,7 @@ public:
 	std::shared_ptr<CCollider> GetCollider() { return mCollider; }
 	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
 	std::shared_ptr<CPlayerController> GetPlayerController() { return mPlayerController; }
-	std::shared_ptr<CObjectStateMachine> GetStateMachine() { return mStateMachine; }
+	std::shared_ptr<CEntityState> GetStateMachine() { return mStateMachine; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::string& GetName() const { return mName; }
@@ -106,7 +107,7 @@ public:
 	void SetID(int id) { mID = id; }
 	void SetParent(const std::shared_ptr<CGameObject>& parent);
 	void SetPlayerController(const std::shared_ptr<CPlayerController>& playerController) { mPlayerController = playerController; }
-	void SetStateMachine(const std::shared_ptr<CObjectStateMachine>& stateMachine) { mStateMachine = stateMachine; }
+	void SetStateMachine(const std::shared_ptr<CEntityState>& stateMachine) { mStateMachine = stateMachine; }
 	void SetTransform(const std::shared_ptr<CTransform>& transform) { mTransform = transform; }
 	void SetRenderer(const std::shared_ptr<CRenderer>& renderer) { mRenderer = renderer; }
 

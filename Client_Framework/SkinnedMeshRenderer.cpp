@@ -65,7 +65,7 @@ void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
     for (int i = 0; i < subMeshNum; i++) {
         m_materials[i]->BindShader((PASS_TYPE)pass);
         m_materials[i]->BindDataToShader();
-        mSkinnedMesh->Render(CMDLIST, i);
+        mSkinnedMesh->RenderSkinning(CMDLIST, i);
     }
 }
 

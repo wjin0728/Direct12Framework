@@ -29,7 +29,7 @@ CFrameResource::CFrameResource()
 	mStructedBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::UI)]->Initialize(5, sizeof(CBUIData), 20);
 
 	mInstancingBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::OBJECT)] = std::make_shared<CInstancingBuffer>();
-	mInstancingBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::OBJECT)]->Initialize(0, sizeof(IBObjectData), 100000);
+	mInstancingBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::OBJECT)]->Initialize(0, sizeof(IBObjectData), 10000);
 }
 
 

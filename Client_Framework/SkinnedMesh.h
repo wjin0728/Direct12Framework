@@ -36,7 +36,7 @@ public:
 	static std::shared_ptr<CSkinnedMesh> CreateSkinnedMeshFromFile(const std::string& name);
 
 	virtual void Render(ID3D12GraphicsCommandList* cmdList);
-	virtual void Render(ID3D12GraphicsCommandList* cmdList, int idx);
+	void RenderSkinning(ID3D12GraphicsCommandList* cmdList, int idx);
 	virtual void Render(D3D12_VERTEX_BUFFER_VIEW ibv, UINT instancingNum, int idx);
 
 	virtual void CreateGPUResource() override;

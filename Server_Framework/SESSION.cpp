@@ -105,7 +105,7 @@ void SESSION::send_add_projectile_packet(Projectile proj, int id)
 	SC_ADD_PROJECTILE_PACKET p;
 	p.type = SC_ADD_PROJECTILE;
 	p.size = sizeof(p);
-	p.projectile_type = (uint8_t)proj._type; // 예시로 ARROW 사용
+	p.projectile_type = (uint8_t)proj._p_type; // 예시로 ARROW 사용
 	p.projectile_id = id;
 	p.x = proj._pos.x;
 	p.y = proj._pos.y + 1;
