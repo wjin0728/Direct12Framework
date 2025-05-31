@@ -1,6 +1,7 @@
 #include "SESSION.h"
 #include "Item.h"
 #include "Projectile.h"
+#include "Monster.h"
 
 SESSION::~SESSION() {}
 
@@ -113,5 +114,19 @@ void SESSION::send_add_projectile_packet(Projectile proj, int id)
 	p.dir_y = proj._velocity.y;
 	p.dir_z = proj._velocity.z;
 	p.user_friendly = proj._user_frinedly;
+	do_send(&p);
+}
+
+void SESSION::send_add_monster_packet(Monster& monster, int id)
+{
+	SC_ADD_MONSTER_PACKET p;
+	p.type = SC_ADD_MONSTER;
+	p.size = sizeof(p);
+	p.monster_id = id;
+	p.monster_type = (uint8_t)monster._class; // 예시로 S_MONSTER_TYPE 사용
+	p.x = monster._pos.x;
+	p.y = monster._pos.y;
+	p.z = monster._pos.z;
+	p.look_y = monster._look_dir.y;
 	do_send(&p);
 }

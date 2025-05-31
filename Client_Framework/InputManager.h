@@ -30,6 +30,7 @@ enum class KEY_TYPE
 	C = 'C',
 	F = 'F',
 	L = 'L',
+	P = 'P',
 
 	ONE = '1',
 	TWO = '2',
