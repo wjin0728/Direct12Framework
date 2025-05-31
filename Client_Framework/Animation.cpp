@@ -221,14 +221,10 @@ void CAnimationController::Start()
 			if (boneMap.contains(boneName)) cache = boneMap[boneName];
 			else {
 				auto object = owner->FindChildByName(boneName);
-				if (object)
-					cache = object->GetTransform();
-				else
-					cache = GetOwner()->GetTransform();
+				if (object) cache = object->GetTransform();
 			}
 			++i;
 		}
-		mRootMotionObject = mAnimationSets->mBoneFrameCaches.front().lock()->GetTransform();
 
 		SetTrackAnimationSet(0, 0);
 		SetTrackSpeed(0, 1.0f);
@@ -249,7 +245,7 @@ void CAnimationController::LateUpdate()
 	mTime += deltaTime;
 
 	if (mTracks.size()) {
-		for (auto& cache : mAnimationSets->mBoneFrameCaches) { cache.lock()->SetLocalMatZero(); }
+		for (auto& cache : mAnimationSets->mBoneFrameCaches) { if (cache.lock()) cache.lock()->SetLocalMatZero(); }
 	
 		for (auto& track : mTracks) {
 			if (track->mEnable) {
@@ -257,9 +253,11 @@ void CAnimationController::LateUpdate()
 				float position = track->UpdatePosition(track->mPosition, deltaTime, set->mLength);
 	
 				for (int i = 0; auto & cache : mAnimationSets->mBoneFrameCaches) {
-					Matrix transform = set->GetSRT(i, position);
-					transform *= track->mWeight;
-					cache.lock()->mLocalMat = transform;
+					if (cache.lock()) {
+						Matrix transform = set->GetSRT(i, position);
+						transform *= track->mWeight;
+						cache.lock()->mLocalMat = transform;
+					}
 
 					++i;
 				}
@@ -268,7 +266,7 @@ void CAnimationController::LateUpdate()
 			}
 		}
 	
-		mRootMotionObject.lock()->owner->UpdateWorldMatrices(nullptr);
+		GetOwner()->UpdateWorldMatrices(nullptr);
 	
 		OnRootMotion(mRootMotionObject);
 		OnAnimationIK(mRootMotionObject);
@@ -277,7 +275,7 @@ void CAnimationController::LateUpdate()
 	for (int i = 0; auto & cache : mSkinningBoneTransforms) {
 		Matrix boneTransform = cache.lock()->GetWorldMat(false);
 		Matrix bondOffset = mBindPoseBoneOffsets[i];
-
+		
 		finalTransforms[i] = (bondOffset * boneTransform).Transpose();
 
 		i++;
