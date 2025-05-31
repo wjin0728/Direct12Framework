@@ -363,7 +363,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_PROJECTILE_POS: {
 		SC_PROJECTILE_POS_PACKET* packet = reinterpret_cast<SC_PROJECTILE_POS_PACKET*>(packet_ptr);
 		
-		//mProjectiles[packet->projectile_id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		if(mProjectiles.contains(packet->projectile_id)) 
+			mProjectiles[packet->projectile_id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		break;
 	}
 	default:
