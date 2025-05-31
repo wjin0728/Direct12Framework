@@ -123,11 +123,6 @@ public:
 class CAnimationController : public CComponent
 {
 public:
-    static std::unordered_map<PLAYER_STATE, ARCHER_ANIMATION> ARCHER_MAP;
-	static std::unordered_map<PLAYER_STATE, FIGHTER_ANIMATION> FIGHTER_MAP;
-	static std::unordered_map<PLAYER_STATE, MAGE_ANIMATION> MAGE_MAP;
-
-public:
     CAnimationController();
     CAnimationController(int nAnimationTracks, std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion = false);
     CAnimationController(const CAnimationController& other);
@@ -182,4 +177,16 @@ public:
     virtual void OnAnimationIK(std::weak_ptr<CTransform> pRootGameObject) {}
 
     void PrintMatrix(const Matrix& mat);
+
+public:
+    static std::unordered_map<PLAYER_STATE, ARCHER_ANIMATION> ARCHER_MAP;
+    static std::unordered_map<PLAYER_STATE, FIGHTER_ANIMATION> FIGHTER_MAP;
+    static std::unordered_map<PLAYER_STATE, MAGE_ANIMATION> MAGE_MAP;
+
+    static std::unordered_map<PLAYER_STATE, GRASS_SMALL_ANIMATION> GRASS_SMALL_MAP;
+    static std::unordered_map<PLAYER_STATE, GRASS_BIG_ANIMATION> GRASS_BIG_MAP;
+    static std::unordered_map<PLAYER_STATE, FIRE_SMALL_ANIMATION> FIRE_SMALL_MAP;
+    static std::unordered_map<PLAYER_STATE, FIRE_BIG_ANIMATION> FIRE_BIG_MAP;
+    static std::unordered_map<PLAYER_STATE, WATER_SMALL_ANIMATION> WATER_SMALL_MAP;
+    static std::unordered_map<PLAYER_STATE, WATER_BIG_ANIMATION> WATER_BIG_MAP;
 };
