@@ -172,13 +172,14 @@ CAnimationController::CAnimationController(const CAnimationController& other) : 
 {
 	mTracks = other.mTracks;
 	mAnimationSets = other.mAnimationSets;
+	mAnimationSets->mBoneFrameCaches.clear();
 	mBindPoseBoneOffsets = other.mBindPoseBoneOffsets;
-	mSkinningBoneTransforms = other.mSkinningBoneTransforms;
+	mSkinningBoneTransforms.clear();
 	finalTransforms = other.finalTransforms;
 	mBoneTransformIdx = other.mBoneTransformIdx;
 	mApplyRootMotion = other.mApplyRootMotion;
-	mModelRootObject = other.mModelRootObject;
-	mRootMotionObject = other.mRootMotionObject;
+	mModelRootObject.reset();
+	mRootMotionObject.reset();
 	mFirstRootMotionPosition = other.mFirstRootMotionPosition;
 }
 

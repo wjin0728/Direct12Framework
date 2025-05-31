@@ -40,7 +40,7 @@ void CPlayerController::Update()
 				auto camera = mCamera.lock()->GetTransform();
 				Vec3 camForward = camera->GetWorldLook();
 				INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
-				mStateMachine->SetState(PLAYER_STATE::IDLE);
+				mStateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 				INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			}
 		}
@@ -109,19 +109,19 @@ void CPlayerController::OnKeyEvents()
 
 	if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
 		INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
-		mStateMachine->SetState(PLAYER_STATE::ATTACK);
+		mStateMachine->SetState((UINT8)PLAYER_STATE::ATTACK);
 		INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
 	}
 
 	if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
-		mStateMachine->SetState(PLAYER_STATE::JUMP);
+		mStateMachine->SetState((UINT8)PLAYER_STATE::JUMP);
 		INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::JUMP);
 	}
 	if (INPUT.IsKeyDown(KEY_TYPE::F)) {
 		INSTANCE(ServerManager).send_cs_000_packet();
 	}
 	if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-		mStateMachine->SetState(PLAYER_STATE::SKILL);
+		mStateMachine->SetState((UINT8)PLAYER_STATE::SKILL);
 		INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
 		switch (mSkill)
 		{
@@ -142,7 +142,7 @@ void CPlayerController::OnKeyEvents()
 		if (moveKeyPressed == true) {
 			moveKeyPressed = false;
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
-			mStateMachine->SetState(PLAYER_STATE::IDLE);
+			mStateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 		}
 		return;
@@ -151,8 +151,8 @@ void CPlayerController::OnKeyEvents()
 		moveKeyPressed = true;
 	}
 	INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
-	if (mStateMachine->GetState() == PLAYER_STATE::IDLE) {
-		mStateMachine->SetState(PLAYER_STATE::RUN);
+	if (mStateMachine->GetState() == (UINT8)PLAYER_STATE::IDLE) {
+		mStateMachine->SetState((UINT8)PLAYER_STATE::RUN);
 		INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
 	}
 }

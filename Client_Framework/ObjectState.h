@@ -24,4 +24,6 @@ public:
     
     PLAYER_CLASS GetClass() const { return mClass; }
 
+    virtual void OnEnterState(UINT8 state) override;
+    virtual void OnExitState(UINT8 state) override;
 };

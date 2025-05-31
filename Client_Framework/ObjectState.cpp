@@ -22,16 +22,16 @@ void CObjectStateMachine::Update()
 	}
 	if (controller->mTracks.front()->mType == ANIMATION_TYPE::END) {
 		switch (currentState) {
-		case PLAYER_STATE::IDLE:
-		case PLAYER_STATE::RUN:
+		case (UINT8)PLAYER_STATE::IDLE:
+		case (UINT8)PLAYER_STATE::RUN:
 			break;
-		case PLAYER_STATE::ATTACK:
-		case PLAYER_STATE::MOVE_ATTACK:
-		case PLAYER_STATE::GETHIT:
-		case PLAYER_STATE::DEATH:
-		case PLAYER_STATE::JUMP:
-		case PLAYER_STATE::SKILL:
-			SetState(PLAYER_STATE::IDLE);
+		case (UINT8)PLAYER_STATE::ATTACK:
+		case (UINT8)PLAYER_STATE::MOVE_ATTACK:
+		case (UINT8)PLAYER_STATE::GETHIT:
+		case (UINT8)PLAYER_STATE::DEATH:
+		case (UINT8)PLAYER_STATE::JUMP:
+		case (UINT8)PLAYER_STATE::SKILL:
+			SetState((UINT8)PLAYER_STATE::IDLE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			break;
 		default:
@@ -40,7 +40,7 @@ void CObjectStateMachine::Update()
 	}
 }
 
-void CObjectStateMachine::OnEnterState(PLAYER_STATE state)
+void CObjectStateMachine::OnEnterState(UINT8 state)
 {
 	auto controller = mAnimationController.lock();
 	if (!controller) {
@@ -49,13 +49,13 @@ void CObjectStateMachine::OnEnterState(PLAYER_STATE state)
 
 	switch (mClass) {
 	case PLAYER_CLASS::ARCHER:
-		controller->SetTrackAnimationSet(0, (int)CAnimationController::ARCHER_MAP[state]);
+		controller->SetTrackAnimationSet(0, (int)CAnimationController::ARCHER_MAP[(PLAYER_STATE)state]);
 		break;
 	case PLAYER_CLASS::FIGHTER:
-		controller->SetTrackAnimationSet(0, (int)CAnimationController::FIGHTER_MAP[state]);
+		controller->SetTrackAnimationSet(0, (int)CAnimationController::FIGHTER_MAP[(PLAYER_STATE)state]);
 		break;
 	case PLAYER_CLASS::MAGE:
-		controller->SetTrackAnimationSet(0, (int)CAnimationController::MAGE_MAP[state]);
+		controller->SetTrackAnimationSet(0, (int)CAnimationController::MAGE_MAP[(PLAYER_STATE)state]);
 		break;
 	default:
 		break;
@@ -65,7 +65,7 @@ void CObjectStateMachine::OnEnterState(PLAYER_STATE state)
 	controller->SetTrackWeight(0, 1.0f);
 	controller->SetTrackPosition(0, 0.0f);
 
-	switch (state) {
+	switch ((PLAYER_STATE)state) {
 	case PLAYER_STATE::IDLE:
 	case PLAYER_STATE::RUN:
 		controller->SetTrackType(0, ANIMATION_TYPE::LOOP);
@@ -83,14 +83,14 @@ void CObjectStateMachine::OnEnterState(PLAYER_STATE state)
 	}
 }
 
-void CObjectStateMachine::OnExitState(PLAYER_STATE state)
+void CObjectStateMachine::OnExitState(UINT8 state)
 {
 	auto controller = mAnimationController.lock();
 	if (!controller) {
 		return;
 	}
 
-	switch (state) {
+	switch ((PLAYER_STATE)state) {
 	case PLAYER_STATE::IDLE:
 		break;
 	case PLAYER_STATE::RUN:
@@ -111,3 +111,4 @@ void CObjectStateMachine::OnExitState(PLAYER_STATE state)
 		break;
 	}
 }
+

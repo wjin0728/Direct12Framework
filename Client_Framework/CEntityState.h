@@ -21,10 +21,10 @@ public:
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CEntityState>(); }
 
 public:
-	virtual void Awake() = 0;
-	virtual void Start() = 0;
-	virtual void Update() = 0;
-	virtual void LateUpdate() = 0;
+	virtual void Awake(){};
+	virtual void Start() {};
+	virtual void Update() {};
+	virtual void LateUpdate() {};
 
 public:
 	void SetState(UINT8 newState) {
@@ -37,7 +37,7 @@ public:
 	UINT8 GetState() const { return currentState; }
 
 protected:
-	virtual void OnEnterState(UINT8 state) = 0;
-	virtual void OnExitState(UINT8 state) = 0;
+	virtual void OnEnterState(UINT8 state) {};
+	virtual void OnExitState(UINT8 state) {};
 };
 
