@@ -8,6 +8,7 @@
 
 class Projectile;
 class Item;
+class Monster;
 
 //#include "../../Direct12Framework/SimpleMath.h"
 //
@@ -45,6 +46,7 @@ public:
 	void send_use_skill_packet(S_ITEM_TYPE skill_type, int player_id);
 	void send_change_scene_packet(uint8_t scene);
 	void send_add_projectile_packet(Projectile proj, int id);
+	void send_add_monster_packet(Monster& monster, int id);
 };
 
 #endif

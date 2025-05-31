@@ -44,6 +44,8 @@ constexpr char SC_ITEM_POS = 15;
 constexpr char SC_CHANGE_SCENE = 16;
 constexpr char SC_ADD_PROJECTILE = 17;
 constexpr char SC_PROJECTILE_POS = 18;
+constexpr char SC_ADD_MONSTER = 19;
+
 
 
 #pragma pack (push, 1)
@@ -189,6 +191,8 @@ struct SC_CHANGE_SCENE_PACKET : PACKET {
 struct SC_ADD_MONSTER_PACKET : PACKET {
 	int				monster_id;
 	uint8_t			monster_type;
+	float			x, y, z;
+	float			look_y;
 };
 
 struct SC_ADD_PROJECTILE_PACKET : PACKET {
