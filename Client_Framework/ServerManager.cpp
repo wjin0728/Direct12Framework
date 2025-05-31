@@ -254,7 +254,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			player->Start();
 			scene->AddObject(player);
 		}
-
 		break;
 	}
 	case SC_ALL_PLAYERS_POS: {
@@ -342,7 +341,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		auto projectileObj = CGameObject::Instantiate(projectile);
 		projectileObj->SetTag("Projectile");
-		projectileObj->SetRenderLayer("Transparent");
+		projectileObj->SetRenderLayer("Opaque");
 		if (packet->user_friendly)
 			projectileObj->SetObjectType(OBJECT_TYPE::PLAYER_PROJECTILE);
 		else

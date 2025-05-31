@@ -20,7 +20,10 @@ CRenderer::~CRenderer()
 
 void CRenderer::Awake()
 {
-	
+	mCbvIdx = -1;
+	mCbvOffset = -1;
+	mDirtyFrame = FRAME_RESOURCE_COUNT + 1;
+	isDirty = true;
 }
 
 void CRenderer::Start()
