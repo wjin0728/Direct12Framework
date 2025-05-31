@@ -72,6 +72,7 @@ public:
 	void SetParentInScene(std::shared_ptr<CTransform> parent, bool isKeepLocalMat = false);
 	void SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalMat = false);
 
+	void SetLocalTransform(const Matrix& mat);
 	void SetLocalPosition(const Vec3& position) { mLocalPosition = position; mDirtyFlag = true; };
 	void SetLocalRotation(const Vec3& rotation) {
 		mLocalRotation = Quaternion::CreateFromYawPitchRoll(rotation * degToRad);

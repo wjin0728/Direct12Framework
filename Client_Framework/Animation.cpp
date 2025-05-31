@@ -267,8 +267,8 @@ void CAnimationController::LateUpdate()
 				track->HandleCallback();
 			}
 		}
-	
-		mRootMotionObject.lock()->owner->UpdateWorldMatrices(nullptr);
+		auto rootTransform = mRootMotionObject.lock();
+		rootTransform->owner->UpdateWorldMatrices(rootTransform->GetParent());
 	
 		OnRootMotion(mRootMotionObject);
 		OnAnimationIK(mRootMotionObject);

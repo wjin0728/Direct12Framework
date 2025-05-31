@@ -270,8 +270,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			if (!player) continue;
 			player->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
 			player->GetTransform()->SetLocalRotationY(packet->look_y[i]);
-			if (player->GetStateMachine() && player->GetStateMachine()->GetState() != (PLAYER_STATE)packet->state[i])
-				player->GetStateMachine()->SetState((PLAYER_STATE)packet->state[i]);
+			auto playerState = player->GetStateMachine();
+			if (playerState && playerState->GetState() != (PLAYER_STATE)packet->state[i])
+				playerState->SetState((PLAYER_STATE)packet->state[i]);
 		}
 		break;
 	}
@@ -362,7 +363,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_PROJECTILE_POS: {
 		SC_PROJECTILE_POS_PACKET* packet = reinterpret_cast<SC_PROJECTILE_POS_PACKET*>(packet_ptr);
 		
-		mProjectiles[packet->projectile_id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		//mProjectiles[packet->projectile_id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		break;
 	}
 	default:

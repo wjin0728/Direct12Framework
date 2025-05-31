@@ -139,6 +139,7 @@ protected:
 public:
 	std::string mShaderName{};
 	CMaterial() = default;
+	CMaterial(const CMaterial& other);
 	CMaterial(void* data, UINT dataSize);
 	static std::shared_ptr<CMaterial> CreateMaterialFromFile(std::ifstream& inFile);
 

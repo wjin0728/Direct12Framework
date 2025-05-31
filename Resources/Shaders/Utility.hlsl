@@ -110,7 +110,7 @@ float GetLinear01Depth(float z)
     return 1.0 / (1.0 / near + z * (1.0 / far - 1.0 / near));
 }
 
-float GetCameraDepth(float z)
+inline float GetCameraDepth(float z)
 {
     float nearZ = projectionParams.x;
     float farZ = projectionParams.y;

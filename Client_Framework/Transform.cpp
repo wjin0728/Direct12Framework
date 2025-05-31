@@ -152,6 +152,13 @@ void CTransform::SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalM
 	}
 }
 
+void CTransform::SetLocalTransform(const Matrix& mat)
+{
+	mLocalMat = mat;
+	mLocalMat.Decompose(mLocalScale, mLocalRotation, mLocalPosition);
+	mDirtyFlag = true;
+}
+
 Vec3 CTransform::GetWorldPosition()
 {
 	UpdateWorldMatrix();

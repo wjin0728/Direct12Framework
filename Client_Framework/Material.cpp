@@ -7,6 +7,22 @@
 
 
 
+CMaterial::CMaterial(const CMaterial& other)
+{
+	if (this == &other) return;
+	mPoolOffset = other.mPoolOffset;
+	dataSize = other.dataSize;
+	mDirtyFrames = other.mDirtyFrames;
+	mShaderName = other.mShaderName;
+	isLoaded = other.isLoaded;
+	mProperties = other.mProperties;
+	matData.reset(new BYTE[dataSize]);
+	std::memcpy(matData.get(), other.matData.get(), dataSize);
+	for (int type = PASS_TYPE::FORWARD; type < PASS_TYPE::STENCIL; type++) {
+		mShaders[type] = other.mShaders[type];
+	}
+}
+
 CMaterial::CMaterial(void* data, UINT dataSize) : matData(new BYTE[dataSize]), dataSize(dataSize)
 {
 	std::memcpy(matData.get(), data, dataSize);
