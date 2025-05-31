@@ -85,18 +85,17 @@ bool CResourceManager::LoadSceneResourcesFromFile(const std::string& fileName)
 
 bool CResourceManager::LoadPlayerObjects()
 {
-	LoadPrefabFromFile("Player_Archer");
-	LoadPrefabFromFile("Player_Fighter");
-	LoadPrefabFromFile("Player_Mage");
+	LoadPrefabFromFile("Archer");
+	LoadPrefabFromFile("Fighter");
+	LoadPrefabFromFile("Mage");
 
 	return true;
 }
 
 bool CResourceManager::LoadEnemyObjects()
 {
-	LoadPrefabFromFile("Wind");
-	LoadPrefabFromFile("Whirlwind");
-	LoadPrefabFromFile("Wind_Mage");
+	LoadPrefabFromFile("GrassSmall");
+	LoadPrefabFromFile("GrassBig");
 	return true;
 }
 

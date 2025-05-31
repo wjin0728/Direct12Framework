@@ -324,6 +324,8 @@ VS_OUTPUT VS_GPass(VS_INPUT input
     output.tangentWS = normalInputs.tangentWS;
     output.bitangentWS = normalInputs.bitangentWS;
     
+    
+    
     float3 offsetPos = output.positionWS.xyz + output.normalWS * 0.01f;
     output.ShadowPosH = mul(float4(offsetPos, 1.f), shadowTransform);
     

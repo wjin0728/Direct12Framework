@@ -101,12 +101,15 @@ void CPlayerController::OnKeyEvents()
 	camRight.y = 0.f;
 	camForward.Normalize();
 	camRight.Normalize();
-
-	if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
-	if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
-	if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
-	if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
-
+	
+	PLAYER_STATE currentState = (PLAYER_STATE)mStateMachine->GetState();
+	if(currentState == PLAYER_STATE::IDLE || currentState == PLAYER_STATE::RUN) {
+		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
+		if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
+		if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
+		if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
+	}
+	
 	if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
 		INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
 		mStateMachine->SetState((UINT8)PLAYER_STATE::ATTACK);

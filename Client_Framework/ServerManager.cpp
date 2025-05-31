@@ -284,6 +284,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "obj is nullptr" << std::endl;
 			break;
 		}
+		break;
 	}
 	case SC_DROP_ITEM: {
 		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
