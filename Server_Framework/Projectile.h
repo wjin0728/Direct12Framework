@@ -41,6 +41,7 @@ public:
 	}
 	void Update() {
 		_pos += (_velocity * _speed);
+		LocalTransform(); // 바운딩 박스 업데이트 해주기
 	}
 };
 

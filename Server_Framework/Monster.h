@@ -46,6 +46,18 @@ public:
         _barrier(0),
         _on_FireEnchant(false),
         _on_GrassWeaken(false) {
+        switch (monster_type) {
+        case S_ENEMY_TYPE::GRASS_SMALL: {
+            _boundingbox.Center = XMFLOAT3(0, 0.83, 0);
+            _boundingbox.Extents = Vec3(1, 1, 1) / 2.f;
+            break;
+        }
+        case S_ENEMY_TYPE::GRASS_BIG: {
+            _boundingbox.Center = XMFLOAT3(0, 1.69, 0);
+            _boundingbox.Extents = Vec3(1.79, 2.95, 1.42) / 2.f;
+            break;
+        }
+        }
     }
 
     void SetState(MonsterStateMachine* newState);

@@ -147,6 +147,7 @@ struct SC_MONSTER_POS_PACKET : PACKET {
 	int monsterId;
 	float x, y, z;
 	float look_y;
+	uint8_t monster_state;
 };
 
 struct SC_ITEM_POS_PACKET : PACKET {

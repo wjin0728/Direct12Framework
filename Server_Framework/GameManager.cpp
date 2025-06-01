@@ -360,8 +360,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 			{
 				Monster ms{ S_ENEMY_TYPE::GRASS_BIG };
-				ms._pos = Vec3(55.f, 4.2f, 50.f);
-				//ms._pos = Vec3(50.f, 5.f, 50.f);
+				ms._pos = Vec3(55.f, 5.f, 50.f);
 				ms._look_dir = Vec3(0.f, 0.f, 1.f);
 				ms.LocalTransform();
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
@@ -374,7 +373,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 			{
 				Monster ms{ S_ENEMY_TYPE::GRASS_SMALL };
-				ms._pos = Vec3(60.f, 4.2f, 50.f);
+				ms._pos = Vec3(60.f, 5.f, 50.f);
 				ms._look_dir = Vec3(0.f, 0.f, 1.f);
 				ms.LocalTransform();
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
@@ -434,6 +433,73 @@ bool GameManager::CanMove(float x, float z)
 	return false;
 }
 
+void GameManager::Update() {
+	for (auto& cl : clients[ServerNumber]) {
+		if (cl.second._state != ST_INGAME) continue;
+		cl.second._player.Update();
+
+		if (cl.second._player.HasMoveInput()) {
+			Vec3 newPos = cl.second._player._pos + (cl.second._player._velocity * TICK_INTERVAL);
+
+			if (CanMove(newPos.x, newPos.z)) {
+				cl.second._player._pos = newPos;
+
+				float terrainHeight = terrain.GetHeight(cl.second._player._pos.x, cl.second._player._pos.z);
+				cl.second._player._pos.y = terrainHeight;
+
+				float rotationSpeed = 10.f;
+				if (cl.second._player._velocity.LengthSquared() > 0.001f) {
+					Quaternion targetRot = Quaternion::LookRotation(cl.second._player._velocity);
+					Quaternion rotation = cl.second._player._rotation = Quaternion::Slerp(cl.second._player._rotation, targetRot, rotationSpeed * TICK_INTERVAL);
+					Vec3 angle = Vec3::GetAngleToQuaternion(rotation);
+					cl.second._player._look_dir.y = angle.y * radToDeg;
+				}
+
+				// 플레이어 - 아이템 충돌 체크
+				{
+					if (!items.empty()) {
+						for (auto& it : items[ServerNumber]) {
+							if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
+								it.second.LocalTransform();
+							if (cl.second._player._boundingbox.Intersects(it.second._boundingbox)) {
+								for (auto& cl : clients[ServerNumber]) {
+									if (cl.second._state != ST_INGAME) continue;
+									cl.second.send_remove_item_packet(it.first, cl.first, it.second._item_type);
+								}
+								cout << "cl : " << cl.first << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
+								items[ServerNumber].erase(it.first);
+								break;
+							}
+						}
+					}
+				}
+			}
+			else {
+				cl.second._player._velocity = Vec3::Zero;
+			}
+		}
+	}
+	for (auto& proj : Projectiles[ServerNumber]) {
+		proj.second.Update();
+	}
+	for (auto& ms : Monsters[ServerNumber]) {
+		ms.second.Update();
+		if (ms.second._hp >= 0) {
+			for (auto& proj : Projectiles[ServerNumber]) {
+				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
+				if (ms.second._boundingbox.Intersects(proj.second._boundingbox)) {
+					ms.second.SetState((UINT8)S_MONSTER_STATE::DEATH);
+					cout << "몬스터 " << ms.first << "가 projectile " << proj.first << "에 맞았습니다." << endl;
+				}
+			}
+		}
+	}
+	SendAllPlayersPosPacket();
+	SendAllProjectilesPosPacket();
+	SendAllMonstersPosPacket();
+	//SendAllItemsPosPacket();
+}
+
 void GameManager::SendAllPlayersPosPacket() {
 	SC_ALL_PLAYERS_POS_PACKET packet;
 	packet.size = sizeof(SC_ALL_PLAYERS_POS_PACKET);
@@ -481,6 +547,7 @@ void GameManager::SendAllMonstersPosPacket() {
 		packet.y = ms.second._pos.y;
 		packet.z = ms.second._pos.z;
 		packet.look_y = ms.second._look_dir.y;
+		packet.monster_state = (uint8_t)ms.second._state;
 
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
