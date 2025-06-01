@@ -125,8 +125,11 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::JUMP);
 			return;
 		}
-		if (INPUT.IsKeyDown(KEY_TYPE::F)) {
-			INSTANCE(ServerManager).send_cs_000_packet();
+		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(0);
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::M)) /*임시 적 생성*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(1);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::SKILL);

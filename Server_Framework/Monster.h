@@ -9,7 +9,7 @@ public:
     Vec3 _look_dir;
     Vec3 _acceleration;
 
-    S_MONSTER_TYPE _class;
+    S_ENEMY_TYPE _class;
     S_MONSTER_STATE	_state;
 
     int _hp;
@@ -24,7 +24,7 @@ public:
 
 	Monster() :
         Object(S_OBJECT_TYPE::S_ENEMY),
-        _class(S_MONSTER_TYPE::s_end),
+        _class(S_ENEMY_TYPE::s_end),
         currentState(&MonsterState::IdleState::GetInstance()),
         previousState(nullptr),
         _look_dir(Vec3(0, 0, 1)),
@@ -35,7 +35,7 @@ public:
         _on_GrassWeaken(false) {
     }
 
-    Monster(S_MONSTER_TYPE monster_type) :
+    Monster(S_ENEMY_TYPE monster_type) :
         Object(S_OBJECT_TYPE::S_ENEMY),
         _class(monster_type),
         currentState(&MonsterState::IdleState::GetInstance()),

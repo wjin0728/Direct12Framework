@@ -123,7 +123,7 @@ void SESSION::send_add_monster_packet(Monster& monster, int id)
 	p.type = SC_ADD_MONSTER;
 	p.size = sizeof(p);
 	p.monster_id = id;
-	p.monster_type = (uint8_t)monster._class; // 예시로 S_MONSTER_TYPE 사용
+	p.monster_type = (uint8_t)monster._class; 
 	p.x = monster._pos.x;
 	p.y = monster._pos.y;
 	p.z = monster._pos.z;

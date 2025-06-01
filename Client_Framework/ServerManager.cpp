@@ -277,16 +277,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		break;
 	}
-	case SC_ADD_MONSTER: {
-		SC_ADD_MONSTER_PACKET* packet = reinterpret_cast<SC_ADD_MONSTER_PACKET*>(packet_ptr);
-		std::string objName[3] = { "Wind", "Whirlwind", "Wind_Mage" };
-		auto obj = RESOURCE.GetPrefab(objName[packet->monster_type]);
-		if (!obj) {
-			std::cout << "obj is nullptr" << std::endl;
-			break;
-		}
-		break;
-	}
 	case SC_DROP_ITEM: {
 		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
 		cout << "packet._pos : " << packet->x << ", " << packet->y << ", " << packet->z << endl;
@@ -381,6 +371,36 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		
 		if(mProjectiles.contains(packet->projectile_id)) 
 			mProjectiles[packet->projectile_id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		break;
+	}
+	case SC_ADD_MONSTER: {
+		SC_ADD_MONSTER_PACKET* packet = reinterpret_cast<SC_ADD_MONSTER_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+
+		std::string objName[(int)ENEMY_TYPE::ENEMY_END]
+			= { "GrassSmall", "GrassBig", "FireSmall", "FireBig", "WaterSmall", "WaterBig" };
+		auto monster = RESOURCE.GetPrefab(objName[(int)packet->monster_type]);
+		if (!monster) {
+			std::cout << "monster is nullptr" << std::endl;
+			break;
+		}
+		auto monsterObj = CGameObject::Instantiate(monster);
+		monsterObj->SetTag("monster");
+		monsterObj->SetRenderLayer("Opaque");
+		monsterObj->SetActive(true);
+		monsterObj->SetStatic(false);
+		monsterObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		monsterObj->GetTransform()->SetLocalRotationY(packet->look_y);
+
+		if (scene && scene->mIsActive) {
+			monsterObj->Awake();
+			monsterObj->Start();
+		}
+
+		mEnemies[packet->monster_id] = monsterObj;
+		scene->AddObject(monsterObj);
+
+		cout << "Monster Added! ID : " << packet->monster_id << "type : " << (int)packet->monster_type << endl;
 		break;
 	}
 	default:

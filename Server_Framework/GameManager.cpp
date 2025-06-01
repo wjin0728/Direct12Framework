@@ -267,13 +267,13 @@ void GameManager::Process_packet(int c_id, char* packet)
 		case S_PLAYER_CLASS::ARCHER: {
 			Projectile proj{1, S_PROJECTILE_TYPE::ARROW};
 			proj._pos = clients[ServerNumber][c_id]._player._pos;
+			proj._pos.y += 1.f; // 발사 위치 조정
 			proj._velocity = local_lookDir;
 			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
 			for (auto& cl : clients[ServerNumber]) {
 				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
 			}
 			Projectile_cnt[ServerNumber]++;
-			cout << "proj._velocity : " << local_lookDir.y << endl;
 			break;
 		}
 		case S_PLAYER_CLASS::MAGE: {
@@ -326,17 +326,69 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_000: {
 		CS_000_PACKET* p = reinterpret_cast<CS_000_PACKET*>(packet);
 
-		items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(clients[ServerNumber][c_id]._player._pos.x + 3, 
-			clients[ServerNumber][c_id]._player._pos.y + 0.3, clients[ServerNumber][c_id]._player._pos.z);
-		items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(S_ITEM_TYPE::S_FIRE_ENCHANT);
-		items[ServerNumber][Item_cnt[ServerNumber]].LocalTransform();
+		switch (p->key)
+		{ 
+		// 아이템 생성 
+		case 0: {
+			items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(clients[ServerNumber][c_id]._player._pos.x + 3,
+				clients[ServerNumber][c_id]._player._pos.y + 0.3, clients[ServerNumber][c_id]._player._pos.z);
+			items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(S_ITEM_TYPE::S_FIRE_ENCHANT);
+			items[ServerNumber][Item_cnt[ServerNumber]].LocalTransform();
 
-		for (auto& cl : clients[ServerNumber]) {
-			if (cl.second._state != ST_INGAME) continue;
-			cl.second.send_drop_item_packet(items[ServerNumber][Item_cnt[ServerNumber]], Item_cnt[ServerNumber]);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._state != ST_INGAME) continue;
+				cl.second.send_drop_item_packet(items[ServerNumber][Item_cnt[ServerNumber]], Item_cnt[ServerNumber]);
+			}
+
+			Item_cnt[ServerNumber]++;
+			break;
 		}
+		// 몬스터 생성
+		case 1: {
+			{
+				Monster ms{ S_ENEMY_TYPE::GRASS_SMALL };
+				ms._pos = Vec3(50.f, 5.f, 50.f);
+				ms._look_dir = Vec3(0.f, 0.f, 1.f);
+				ms.LocalTransform();
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+				for (auto& cl : clients[ServerNumber]) {
+					if (cl.second._state != ST_INGAME) continue;
+					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+				}
+				Monster_cnt[ServerNumber]++;
+			}
 
-		Item_cnt[ServerNumber]++;
+			{
+				Monster ms{ S_ENEMY_TYPE::GRASS_BIG };
+				ms._pos = Vec3(55.f, 4.2f, 50.f);
+				//ms._pos = Vec3(50.f, 5.f, 50.f);
+				ms._look_dir = Vec3(0.f, 0.f, 1.f);
+				ms.LocalTransform();
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+				for (auto& cl : clients[ServerNumber]) {
+					if (cl.second._state != ST_INGAME) continue;
+					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+				}
+				Monster_cnt[ServerNumber]++;
+			}
+
+			{
+				Monster ms{ S_ENEMY_TYPE::GRASS_SMALL };
+				ms._pos = Vec3(60.f, 4.2f, 50.f);
+				ms._look_dir = Vec3(0.f, 0.f, 1.f);
+				ms.LocalTransform();
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+				for (auto& cl : clients[ServerNumber]) {
+					if (cl.second._state != ST_INGAME) continue;
+					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+				}
+				Monster_cnt[ServerNumber]++;
+			}
+			break;
+		}
+		default:
+			break;
+		} 
 		break;
 	}
 	case CS_CHANGE_SCENE: {

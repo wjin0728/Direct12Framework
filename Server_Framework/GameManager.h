@@ -31,7 +31,7 @@ public:
 	int ServerNumber = 0; // 임시로 쓸 서버 번호
 
 	array<int, 6> Item_cnt = { 0, 0, 0, 0, 0, 0 };
-	array<int, 6> monster_cnt = { 0, 0, 0, 0, 0, 0 };
+	array<int, 6> Monster_cnt = { 0, 0, 0, 0, 0, 0 };
 	array<int, 6> Projectile_cnt = { 0, 0, 0, 0, 0, 0 };
 
 	GameManager();

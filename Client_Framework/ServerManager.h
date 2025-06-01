@@ -45,11 +45,11 @@ public:
 	void Using_Packet(char* packet_ptr);
 	void print_error(const char* msg, int err_no);
 
-	void send_cs_000_packet() {
+	void send_cs_000_packet(int key) {
 		CS_000_PACKET p;
 		p.size = sizeof(p);
 		p.type = CS_000;
-		p.id = clientID;
+		p.key = key;
 		Send_Packet(&p);
 	}
 	void send_cs_move_packet(uint8_t dir, Vec3 look) {
@@ -98,4 +98,3 @@ public:
 		Send_Packet(&p);
 	}
 };
-

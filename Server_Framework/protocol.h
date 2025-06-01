@@ -82,7 +82,7 @@ struct CS_MOUSE_LDOWN_PACKET : PACKET {
 };
 
 struct CS_000_PACKET : PACKET {
-	int				id;
+	int				key;
 };
 
 struct CS_SKILL_TARGET_PACKET : PACKET {

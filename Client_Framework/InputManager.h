@@ -31,6 +31,7 @@ enum class KEY_TYPE
 	F = 'F',
 	L = 'L',
 	P = 'P',
+	M = 'M',
 
 	ONE = '1',
 	TWO = '2',

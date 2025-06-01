@@ -51,8 +51,15 @@ enum S_ITEM_TYPE : UINT8
 	S_item_end
 };
 
-enum S_MONSTER_TYPE : UINT8
+enum class S_ENEMY_TYPE : UINT8
 {
+	GRASS_SMALL,
+	GRASS_BIG,
+	FIRE_SMALL,
+	FIRE_BIG,
+	WATER_SMALL,
+	WATER_BIG,
+
 	s_end
 };
 
