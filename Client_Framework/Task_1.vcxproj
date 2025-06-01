@@ -167,6 +167,7 @@
     <ClInclude Include="CBData.h" />
     <ClInclude Include="CEntityState.h" />
     <ClInclude Include="ContinuousRotation.h" />
+    <ClInclude Include="EnemyState.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Collider.h" />
@@ -196,7 +197,7 @@
     <ClInclude Include="FollowTarget.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="InputManager.h" />
-    <ClInclude Include="MainScene.h" />
+    <ClInclude Include="LobbyScene.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MenuScene.h" />
     <ClInclude Include="MeshRenderer.h" />
@@ -231,6 +232,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CEntityState.cpp" />
     <ClCompile Include="ContinuousRotation.cpp" />
+    <ClCompile Include="EnemyState.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="Component.cpp" />
@@ -259,7 +261,7 @@
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Light.cpp" />
-    <ClCompile Include="MainScene.cpp" />
+    <ClCompile Include="LobbyScene.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MenuScene.cpp" />
     <ClCompile Include="MeshRenderer.cpp" />

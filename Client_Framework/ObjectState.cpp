@@ -131,3 +131,23 @@ void CArcherState::OnEnterState(UINT8 state)
 void CArcherState::OnExitState(UINT8 state)
 {
 }
+
+void CWarriorState::Awake()
+{
+}
+
+void CWarriorState::Start()
+{
+}
+
+void CWarriorState::Update()
+{
+}
+
+void CWarriorState::OnEnterState(UINT8 state)
+{
+}
+
+void CWarriorState::OnExitState(UINT8 state)
+{
+}

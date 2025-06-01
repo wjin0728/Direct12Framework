@@ -38,7 +38,7 @@ void CLoadingScreen::Update()
 
 		if (mFadeOutTime <= 0.f) {
 			mFadeOutTime = 0.f;
-			INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MAINSTAGE, false);
+			INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MAINSTAGE1, false);
 		}
 	}
 }

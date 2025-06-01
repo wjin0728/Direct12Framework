@@ -2,7 +2,7 @@
 #include "SceneManager.h"
 #include"DX12Manager.h"
 #include "Scene.h"
-#include"MainScene.h"
+#include"LobbyScene.h"
 #include"BattleScene.h"
 #include"MenuScene.h"
 #include"LoadScene.h"
@@ -23,8 +23,8 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 {
 	switch (nextScene)
 	{
-	case SCENE_TYPE::MAIN:
-		curScene = std::make_shared<CMainScene>();
+	case SCENE_TYPE::LOBBY:
+		curScene = std::make_shared<CLobbyScene>();
 		break;
 	case SCENE_TYPE::LOADING:
 		curScene = std::make_shared<CLoadScene>();
@@ -32,7 +32,7 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 	case SCENE_TYPE::MENU:
 		curScene = std::make_shared<CMenuScene>();
 		break;
-	case SCENE_TYPE::MAINSTAGE:
+	case SCENE_TYPE::MAINSTAGE1:
 		curScene = std::make_shared<CBattleScene>();
 		break;
 	case SCENE_TYPE::END:

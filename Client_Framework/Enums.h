@@ -16,8 +16,9 @@ enum class SCENE_TYPE : UINT8
 {
 	MENU,
 	LOADING,
-	MAINSTAGE,
-	MAIN,
+	LOBBY,
+	MAINSTAGE1,
+	MAINSTAGE2,
 
 	END
 };
@@ -28,6 +29,7 @@ enum class RESOURCE_TYPE : UINT8
 	MESH,
 	SHADER,
 	TEXTURE,
+	UNNOWN, 
 
 	END
 };

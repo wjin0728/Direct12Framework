@@ -142,7 +142,7 @@
     <ClInclude Include="Camera.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="MainScene.h">
+    <ClInclude Include="LobbyScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="FollowTarget.h">
@@ -212,7 +212,6 @@
       <Filter>GameObject\Component</Filter>
     </ClInclude>
     <ClInclude Include="LoadingScreen.h" />
-    <ClInclude Include="AnimationEnums.h" />
     <ClInclude Include="MiniGame.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -236,6 +235,10 @@
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
     <ClInclude Include="PlayerState.h" />
+    <ClInclude Include="EnemyState.h" />
+    <ClInclude Include="AnimationEnums.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -328,7 +331,7 @@
     <ClCompile Include="Camera.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
-    <ClCompile Include="MainScene.cpp">
+    <ClCompile Include="LobbyScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="PlayerController.cpp">
@@ -419,6 +422,9 @@
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
     <ClCompile Include="PlayerState.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyState.cpp">
       <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
