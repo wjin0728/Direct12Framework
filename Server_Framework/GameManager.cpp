@@ -2,14 +2,14 @@
 
 GameManager::GameManager()
 {
-	//terrain.SetScale(45, 20, 45);
-	terrain.SetScale(100.f, 598.9f, 100.f);
-	terrain.SetResolution(513);
-	terrain.SetNavMapResolution(terrain.GetResolution() * 2);
-	//terrain.LoadHeightMap("LobbyTerrainHeightmap");
-	//terrain.LoadNavMap("LobbyTerrainNavMap");
-	terrain.LoadHeightMap("Battle1TerrainHeightmap");
-	terrain.LoadNavMap("Battle1TerrainNavMask");
+	//terrain[(int)scene_type].SetScale(45, 20, 45);
+	terrain[(int)scene_type].SetScale(100.f, 598.9f, 100.f);
+	terrain[(int)scene_type].SetResolution(513);
+	terrain[(int)scene_type].SetNavMapResolution(terrain[(int)scene_type].GetResolution() * 2);
+	terrain[(int)S_SCENE_TYPE::LOBBY].LoadHeightMap("LobbyTerrainHeightmap");
+	terrain[(int)S_SCENE_TYPE::LOBBY].LoadNavMap("LobbyTerrainNavMap");
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].LoadHeightMap("Battle1TerrainHeightmap");
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].LoadNavMap("Battle1TerrainNavMask");
 	cout << "Map loaded.\n";
 
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -350,6 +350,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 				ms._pos = Vec3(50.f, 5.f, 50.f);
 				ms._look_dir = Vec3(0.f, 0.f, 1.f);
 				ms.LocalTransform();
+				for (auto& cl : clients[ServerNumber]) {
+					ms._Player[cl.first] = &cl.second._player;
+				}
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
@@ -362,8 +365,11 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Monster ms{ S_ENEMY_TYPE::GRASS_BIG };
 				ms._pos = Vec3(55.f, 5.f, 50.f);
 				ms._look_dir = Vec3(0.f, 0.f, 1.f);
-				ms.LocalTransform();
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+				ms.LocalTransform();	
+				for (auto& cl : clients[ServerNumber]) {
+					ms._Player[cl.first] = &cl.second._player;
+				}
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;			
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
@@ -376,6 +382,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 				ms._pos = Vec3(60.f, 5.f, 50.f);
 				ms._look_dir = Vec3(0.f, 0.f, 1.f);
 				ms.LocalTransform();
+				for (auto& cl : clients[ServerNumber]) {
+					ms._Player[cl.first] = &cl.second._player;
+				}
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
@@ -383,6 +392,21 @@ void GameManager::Process_packet(int c_id, char* packet)
 				}
 				Monster_cnt[ServerNumber]++;
 			}
+			break;
+		}
+		// 씬 전환
+		case 2: {
+			ChangeScene((uint8_t)S_SCENE_TYPE::LOBBY);
+			break;
+		}
+		// 씬 전환
+		case 3: {
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAINSTAGE1);
+			break;
+		}
+		// 씬 전환
+		case 4: {
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAINSTAGE2);
 			break;
 		}
 		default:
@@ -411,22 +435,22 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 bool GameManager::CanMove(float x, float z)
 {
-	if (terrain.mNavMapData.empty()) {
+	if (terrain[(int)scene_type].mNavMapData.empty()) {
 		return false;
 	}
-	float localX = x - terrain.GetOffset().x;
-	float localZ = z - terrain.GetOffset().z;
-	if (localX < 0.0f || localZ < 0.0f || localX >= terrain.GetScale().x || localZ >= terrain.GetScale().z) {
+	float localX = x - terrain[(int)scene_type].GetOffset().x;
+	float localZ = z - terrain[(int)scene_type].GetOffset().z;
+	if (localX < 0.0f || localZ < 0.0f || localX >= terrain[(int)scene_type].GetScale().x || localZ >= terrain[(int)scene_type].GetScale().z) {
 		return false;
 	}
-	float xIndex = localX / (terrain.GetScale().x / (terrain.GetNavMapResolution()));
-	float zIndex = localZ / (terrain.GetScale().z / (terrain.GetNavMapResolution()));
-	zIndex = terrain.GetNavMapResolution() - zIndex;
+	float xIndex = localX / (terrain[(int)scene_type].GetScale().x / (terrain[(int)scene_type].GetNavMapResolution()));
+	float zIndex = localZ / (terrain[(int)scene_type].GetScale().z / (terrain[(int)scene_type].GetNavMapResolution()));
+	zIndex = terrain[(int)scene_type].GetNavMapResolution() - zIndex;
 	xIndex = static_cast<int>(xIndex);
 	zIndex = static_cast<int>(zIndex);
 
-	int idx = xIndex + (zIndex * terrain.GetNavMapResolution());
-	if (terrain.mNavMapData[idx] != 0) {
+	int idx = xIndex + (zIndex * terrain[(int)scene_type].GetNavMapResolution());
+	if (terrain[(int)scene_type].mNavMapData[idx] != 0) {
 		return true;
 	}
 
@@ -444,7 +468,7 @@ void GameManager::Update() {
 			if (CanMove(newPos.x, newPos.z)) {
 				cl.second._player._pos = newPos;
 
-				float terrainHeight = terrain.GetHeight(cl.second._player._pos.x, cl.second._player._pos.z);
+				float terrainHeight = terrain[(int)scene_type].GetHeight(cl.second._player._pos.x, cl.second._player._pos.z);
 				cl.second._player._pos.y = terrainHeight;
 
 				float rotationSpeed = 10.f;
@@ -489,7 +513,7 @@ void GameManager::Update() {
 				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
 				if (ms.second._boundingbox.Intersects(proj.second._boundingbox)) {
 					ms.second.SetState((UINT8)S_MONSTER_STATE::DEATH);
-					cout << "몬스터 " << ms.first << "가 projectile " << proj.first << "에 맞았습니다." << endl;
+					//cout << "몬스터 " << ms.first << "가 projectile " << proj.first << "에 맞았습니다." << endl;
 				}
 			}
 		}
@@ -546,7 +570,9 @@ void GameManager::SendAllMonstersPosPacket() {
 		packet.x = ms.second._pos.x;
 		packet.y = ms.second._pos.y;
 		packet.z = ms.second._pos.z;
+		packet.look_x = ms.second._look_dir.x;
 		packet.look_y = ms.second._look_dir.y;
+		packet.look_z = ms.second._look_dir.z;
 		packet.monster_state = (uint8_t)ms.second._state;
 
 		for (auto& cl : clients[ServerNumber]) {

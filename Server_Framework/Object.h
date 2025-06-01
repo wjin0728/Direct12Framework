@@ -10,6 +10,7 @@ public:
 	BoundingOrientedBox 	_orignalboundingbox;
 	BoundingOrientedBox 	_boundingbox;
 	S_OBJECT_TYPE			_type;
+	bool					_active = true;
 
 	Object() : _pos(Vec3::Zero), 
 		_velocity(Vec3::Zero),

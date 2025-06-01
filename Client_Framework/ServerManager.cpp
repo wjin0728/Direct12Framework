@@ -370,8 +370,11 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_PROJECTILE_POS: {
 		SC_PROJECTILE_POS_PACKET* packet = reinterpret_cast<SC_PROJECTILE_POS_PACKET*>(packet_ptr);
 		
-		if(mProjectiles.contains(packet->projectile_id)) 
+		if(mProjectiles.contains(packet->projectile_id)) {
+			//Quaternion local_rot = Quaternion::LookRotation(Vec3(packet->dir_x, packet->dir_y, packet->dir_z));
+			//mProjectiles[packet->projectile_id]->GetTransform()->SetLocalRotation(local_rot);
 			mProjectiles[packet->projectile_id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		}
 		break;
 	}
 	case SC_ADD_MONSTER: {
@@ -419,6 +422,21 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		scene->AddObject(monsterObj);
 
 		cout << "Monster Added! ID : " << packet->monster_id << "type : " << (int)packet->monster_type << endl;
+		break;
+	}
+	case SC_MONSTER_POS: {
+		SC_MONSTER_POS_PACKET* packet = reinterpret_cast<SC_MONSTER_POS_PACKET*>(packet_ptr);
+		if (mEnemies.contains(packet->monsterId)) {
+			mEnemies[packet->monsterId]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+			
+			Quaternion local_rot = Quaternion::LookRotation(Vec3(packet->look_x, packet->look_y, packet->look_z));
+			mEnemies[packet->monsterId]->GetTransform()->SetLocalRotation(local_rot); 
+			// cout << "몬스터 look : " << packet->look_x << ", " << packet->look_y << ", " << packet->look_z << endl;
+			
+			auto monsterState =  mEnemies[packet->monsterId]->GetStateMachine();
+			if (monsterState && monsterState->GetState() != packet->monster_state)
+				monsterState->SetState(packet->monster_state);
+		}
 		break;
 	}
 	default:

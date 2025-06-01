@@ -1,8 +1,8 @@
 #pragma once
 #include "Object.h"
 #include "MonsterState.h"
+#include "PlayerCharacter.h"
 
-class PlayerCharater;
 
 class Monster : public Object {
 public:
@@ -17,10 +17,11 @@ public:
     bool _on_FireEnchant;
     bool _on_GrassWeaken;
 
-	int _targetId;
-
     MonsterStateMachine* currentState;
     MonsterStateMachine* previousState;
+
+    array<PlayerCharacter*, 3>_Player; // 플레이어 타겟
+    PlayerCharacter* _target = nullptr;
 
 	Monster() :
         Object(S_OBJECT_TYPE::S_ENEMY),
@@ -34,7 +35,6 @@ public:
         _on_FireEnchant(false),
         _on_GrassWeaken(false) {
     }
-
     Monster(S_ENEMY_TYPE monster_type) :
         Object(S_OBJECT_TYPE::S_ENEMY),
         _class(monster_type),
@@ -58,6 +58,7 @@ public:
             break;
         }
         }
+        _active = false;
     }
 
     void SetState(MonsterStateMachine* newState);
@@ -69,7 +70,5 @@ public:
 
     bool IsPlayerInRange() const;
 
-    bool IsCloseToPlayer() const;
-
-    Vec3 GetPlayerPosition() const;
+    void SetTarget();
 };

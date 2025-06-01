@@ -42,7 +42,9 @@ void Monster::Update()
 {
     if (currentState) currentState->Update(this);
     LocalTransform(); // 바운딩 박스 업데이트 해주기
+    SetTarget();
 }
+
 void Monster::TakeDamage(int damage)
 {
     if (_barrier > 0) {
@@ -63,19 +65,31 @@ void Monster::TakeDamage(int damage)
 
 bool Monster::IsPlayerInRange() const
 {
-    Vec3 playerPos = GetPlayerPosition();
-    float distance = (_pos - playerPos).Length();
-    return distance < 10.0f; // 예: 10유닛 내
-}
-
-bool Monster::IsCloseToPlayer() const
-{
     //Vec3 playerPos = GetPlayerPosition();
     //float distance = (_pos - playerPos).Length();
-    return 0; // distance < 2.0f; // 예: 2유닛 내
+    //return distance < 10.0f; // 예: 10유닛 내
+    return 0;
 }
 
-Vec3 Monster::GetPlayerPosition() const
+void Monster::SetTarget()
 {
-    return Vec3();
+	float minDistance = 5000.f; // 걍 큰 수
+	for (auto& player : _Player) {
+		if (player == nullptr) continue; // 플레이어가 없으면 패스
+        Vec3 playerPos = player->_pos;
+		float distance = (_pos - playerPos).LengthSquared();
+		cout << distance << endl;
+		if (distance < minDistance) {
+			minDistance = distance;
+            _target = player;
+			cout << "몬스터 " << (int)_class << "가 플레이어 " << (int)player->_class << "를 타겟팅했습니다." << endl;
+		}
+	}
+
+	if (_target) {
+		Vec3 direction = _target->_pos - _pos;
+		direction.y = 0.f;
+		direction.Normalize();
+		_look_dir = direction;
+	}
 }
