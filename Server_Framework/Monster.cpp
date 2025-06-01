@@ -43,7 +43,6 @@ void Monster::Update()
     if (currentState) currentState->Update(this);
     LocalTransform(); // 바운딩 박스 업데이트 해주기
 }
-
 void Monster::TakeDamage(int damage)
 {
     if (_barrier > 0) {

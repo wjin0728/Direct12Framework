@@ -82,7 +82,7 @@ struct CS_MOUSE_LDOWN_PACKET : PACKET {
 };
 
 struct CS_000_PACKET : PACKET {
-	int				id;
+	int				key;
 };
 
 struct CS_SKILL_TARGET_PACKET : PACKET {
@@ -147,6 +147,7 @@ struct SC_MONSTER_POS_PACKET : PACKET {
 	int monsterId;
 	float x, y, z;
 	float look_y;
+	uint8_t monster_state;
 };
 
 struct SC_ITEM_POS_PACKET : PACKET {
