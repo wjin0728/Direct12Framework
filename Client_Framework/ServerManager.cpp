@@ -279,7 +279,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_ADD_MONSTER: {
 		SC_ADD_MONSTER_PACKET* packet = reinterpret_cast<SC_ADD_MONSTER_PACKET*>(packet_ptr);
-		std::string objName[3] = { "GrassSmall", "GrassBig" };
+		std::string objName[6] = { "GrassSmall", "GrassBig", "FireSmall", "FireBig", "WaterSmall", "WaterBig" };
 		auto obj = RESOURCE.GetPrefab(objName[packet->monster_type]);
 		if (!obj) {
 			std::cout << "obj is nullptr" << std::endl;

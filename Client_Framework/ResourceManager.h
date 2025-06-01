@@ -138,6 +138,4 @@ inline RESOURCE_TYPE CResourceManager::GetResourceType()
 		return RESOURCE_TYPE::SHADER;
 	else if (std::is_same_v<T, CTexture>)
 		return RESOURCE_TYPE::TEXTURE;
-	else
-		return RESOURCE_TYPE::UNNOWN;
 }

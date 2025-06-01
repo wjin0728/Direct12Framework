@@ -47,6 +47,7 @@ class CAnimationSet
 {
 public:
     CAnimationSet() {}
+	CAnimationSet(const CAnimationSet& other) = default;
     CAnimationSet(float fLength, int nFramesPerSecond, int nKeyFrameTransforms, int nSkinningBones, string pstrName);
     ~CAnimationSet();
 
@@ -69,7 +70,7 @@ class CAnimationSets
 public:
     CAnimationSets() {}
     CAnimationSets(int nAnimationSets);
-    CAnimationSets(const CAnimationSets& other) = default;
+    CAnimationSets(const CAnimationSets& other);
     ~CAnimationSets();
 
 private:

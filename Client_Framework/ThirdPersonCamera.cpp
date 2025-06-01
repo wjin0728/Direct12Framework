@@ -76,17 +76,6 @@ void CThirdPersonCamera::FollowTarget(float speed, float deltaTime)
 	if (mCanRotate) {
 		Vec2 mouseDelta = INPUT.GetMouseDelta();
 
-		int direction = 0;
-		if (INPUT.IsKeyPress(KEY_TYPE::D)) {
-			direction += 1;
-		}
-		if (INPUT.IsKeyPress(KEY_TYPE::A)) {
-			direction -= 1;
-		}
-
-		float yawOffsetSmooth = std::lerp(0.f, direction * 10.f, speed);
-		mCameraParams.yaw += yawOffsetSmooth;
-
 		float sensitivity = 0.5f;
 		mCameraParams.yaw += mouseDelta.x * sensitivity;
 		mCameraParams.pitch += mouseDelta.y * sensitivity;

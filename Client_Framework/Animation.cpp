@@ -81,6 +81,18 @@ CAnimationSets::CAnimationSets(int setNum)
 	for (auto& set : mAnimationSet) set = std::make_shared<CAnimationSet>();
 }
 
+CAnimationSets::CAnimationSets(const CAnimationSets& other)
+{
+	mAnimationSet.resize(other.mAnimationSet.size());
+	for (int i = 0; i < mAnimationSet.size(); ++i) {
+		if (other.mAnimationSet[i]) {
+			mAnimationSet[i] = std::make_shared<CAnimationSet>(*other.mAnimationSet[i]);
+		}
+	}
+	mBoneNames = other.mBoneNames;
+	mBoneFrameCaches.resize(other.mBoneFrameCaches.size());
+}
+
 CAnimationSets::~CAnimationSets()
 {
 }
@@ -171,15 +183,15 @@ CAnimationController::CAnimationController(int trackNum, std::shared_ptr<CAnimat
 CAnimationController::CAnimationController(const CAnimationController& other) : CComponent(other)
 {
 	mTracks = other.mTracks;
-	mAnimationSets = other.mAnimationSets;
-	mAnimationSets->mBoneFrameCaches.resize(other.mAnimationSets->mBoneFrameCaches.size());
+	mAnimationSets = std::make_shared<CAnimationSets>(*other.mAnimationSets);
 	mBindPoseBoneOffsets = other.mBindPoseBoneOffsets;
-	finalTransforms = other.finalTransforms;
+	finalTransforms.resize(other.finalTransforms.size());
 	mBoneTransformIdx = other.mBoneTransformIdx;
 	mApplyRootMotion = other.mApplyRootMotion;
 	mModelRootObject.reset();
 	mRootMotionObject.reset();
 	mFirstRootMotionPosition = other.mFirstRootMotionPosition;
+	mBoneTransformIdx = -1; // Reset to default value
 }
 
 CAnimationController::~CAnimationController()
@@ -226,7 +238,7 @@ void CAnimationController::Start()
 			++i;
 		}
 
-		SetTrackAnimationSet(0, 0);
+		SetTrackAnimationSet(0, 2);
 		SetTrackSpeed(0, 1.0f);
 		SetTrackWeight(0, 1.0f);
 	}
