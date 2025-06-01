@@ -12,6 +12,7 @@
 #include "ResourceManager.h"
 #include"ItemMovement.h"
 #include "ObjectState.h"
+#include "EnemyState.h"
 
 void ServerManager::Initialize()
 {
@@ -376,10 +377,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_ADD_MONSTER: {
 		SC_ADD_MONSTER_PACKET* packet = reinterpret_cast<SC_ADD_MONSTER_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
-
 		std::string objName[(int)ENEMY_TYPE::ENEMY_END]
 			= { "GrassSmall", "GrassBig", "FireSmall", "FireBig", "WaterSmall", "WaterBig" };
-		auto monster = RESOURCE.GetPrefab(objName[(int)packet->monster_type]);
+		ENEMY_TYPE enumType = (ENEMY_TYPE)packet->monster_type;
+		auto monster = RESOURCE.GetPrefab(objName[(int)enumType]);
 		if (!monster) {
 			std::cout << "monster is nullptr" << std::endl;
 			break;
@@ -391,6 +392,23 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		monsterObj->SetStatic(false);
 		monsterObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		monsterObj->GetTransform()->SetLocalRotationY(packet->look_y);
+
+		std::shared_ptr<CEnemyState> stateMachine{};
+		switch (enumType)
+		{
+		case ENEMY_TYPE::GRASS_SMALL:
+			stateMachine = monsterObj->AddComponent<CGrassSmallState>();
+			break;
+		case ENEMY_TYPE::GRASS_BIG:
+			stateMachine = monsterObj->AddComponent<CGrassBigState>();
+			break;
+		default:
+			break;
+		}
+		if (stateMachine) {
+			stateMachine->SetState((UINT8)MONSTER_STATE::IDLE);
+			monsterObj->SetStateMachine(stateMachine);
+		}
 
 		if (scene && scene->mIsActive) {
 			monsterObj->Awake();

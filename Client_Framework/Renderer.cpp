@@ -44,6 +44,7 @@ void CRenderer::UpdataObjectDataToShader()
 		objDate.worldMAt = GetTransform()->mWorldMat.Transpose();
 		objDate.invWorldMAt = objDate.worldMAt.Invert();
 		objDate.textureMat = GetTransform()->mTextureMat.Transpose();
+		objDate.hitFactor = GetTransform()->mHitFactor;
 
 		auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
 		objectBuffer->UpdateBuffer(mCbvOffset, &objDate);

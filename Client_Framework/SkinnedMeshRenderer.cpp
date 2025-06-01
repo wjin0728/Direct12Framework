@@ -24,11 +24,8 @@ void CSkinnedMeshRenderer::Awake()
 void CSkinnedMeshRenderer::Start()
 {
 	CRenderer::Start();
-    auto root = owner->GetTransform()->GetRoot()->owner;
+    mRootBone = owner->GetTransform()->GetRoot();
 
-    for (int i = 0; const auto & boneName : mBoneNames) {
-        mBoneTransforms.push_back(root->FindChildByName(boneName)->GetTransform());
-    }
 	for (auto& mat : m_materials) {
         auto& shaderName = mat->mShaderName;
         if (shaderName.contains("Animation")) continue;
@@ -42,14 +39,16 @@ void CSkinnedMeshRenderer::Update()
 
 void CSkinnedMeshRenderer::LateUpdate()
 {
-    mSkinnedMesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
-	mSkinnedMesh->oobb.Transform(mWorldOOBB, GetTransform()->GetWorldMat());
+	auto rootTransform = mRootBone.lock();
+    mSkinnedMesh->oobs.Transform(mWorldBS, rootTransform->GetWorldMat(false));
+	mSkinnedMesh->oobb.Transform(mWorldOOBB, rootTransform->GetWorldMat(false));
 
     if (mCbvOffset == -1) return;
     CBObjectData objData;
-    objData.worldMAt = GetTransform()->mWorldMat.Transpose();
-    objData.invWorldMAt = GetTransform()->mWorldMat.Invert();
-    objData.textureMat = GetTransform()->mTextureMat.Transpose();
+    objData.worldMAt = rootTransform->mWorldMat.Transpose();
+    objData.invWorldMAt = rootTransform->mWorldMat.Invert();
+    objData.textureMat = rootTransform->mTextureMat.Transpose();
+	objData.hitFactor = rootTransform->mHitFactor;
 
     CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->UpdateBuffer(mCbvOffset, &objData);
 }
@@ -79,9 +78,4 @@ void CSkinnedMeshRenderer::SetSkinnedMesh(const std::string& name)
 {
 	mSkinnedMesh = INSTANCE(CResourceManager).Get<CSkinnedMesh>(name);
     if (mSkinnedMesh) mWorldBS = mSkinnedMesh->oobs;
-}
-
-void CSkinnedMeshRenderer::AddBone(const std::shared_ptr<CTransform>& bone)
-{
-    mBoneTransforms.push_back(bone);
 }

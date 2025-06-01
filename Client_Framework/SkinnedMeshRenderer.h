@@ -12,7 +12,7 @@ private:
 
     std::shared_ptr<CSkinnedMesh> mSkinnedMesh{};
 	std::vector<std::string> mBoneNames{};
-	std::vector<std::weak_ptr<CTransform>> mBoneTransforms{};
+	std::weak_ptr<CTransform> mRootBone{};
 
 
 public:
@@ -32,7 +32,6 @@ public:
 public:
     void SetSkinnedMesh(const std::shared_ptr<CSkinnedMesh>& mesh);
     void SetSkinnedMesh(const std::string& name);
-    void AddBone(const std::shared_ptr<CTransform>& bone);
     std::shared_ptr<CSkinnedMesh> GetSkinnedMesh() const { return mSkinnedMesh; }
 };
 

@@ -30,6 +30,7 @@ std::shared_ptr<CComponent> CTransform::Clone()
 	copy->mWorldMat = mWorldMat;
 	copy->mLocalMat = mLocalMat;
 	copy->dirtyFramesNum = FRAME_RESOURCE_COUNT;
+	copy->mHitFactor = 0.f;
 
 	return copy;
 }
@@ -46,6 +47,7 @@ void CTransform::Start()
 {
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 	mDirtyFlag = true;
+	mHitFactor = 0.f;
 	UpdateWorldMatrix();
 }
 

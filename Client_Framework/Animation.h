@@ -95,6 +95,7 @@ public:
     float 							mSpeed = 1.0f;
     float 							mPosition = -ANIMATION_CALLBACK_EPSILON;
     float 							mWeight = 1.0f;
+	float                           mTrackProgress = 0.0f; //0.0f ~ 1.0f
 
     int 							mSetIndex = 0; //AnimationSet Index
 
@@ -185,10 +186,10 @@ public:
     static std::unordered_map<PLAYER_STATE, FIGHTER_ANIMATION> FIGHTER_MAP;
     static std::unordered_map<PLAYER_STATE, MAGE_ANIMATION> MAGE_MAP;
 
-    static std::unordered_map<PLAYER_STATE, GRASS_SMALL_ANIMATION> GRASS_SMALL_MAP;
-    static std::unordered_map<PLAYER_STATE, GRASS_BIG_ANIMATION> GRASS_BIG_MAP;
-    static std::unordered_map<PLAYER_STATE, FIRE_SMALL_ANIMATION> FIRE_SMALL_MAP;
-    static std::unordered_map<PLAYER_STATE, FIRE_BIG_ANIMATION> FIRE_BIG_MAP;
-    static std::unordered_map<PLAYER_STATE, WATER_SMALL_ANIMATION> WATER_SMALL_MAP;
-    static std::unordered_map<PLAYER_STATE, WATER_BIG_ANIMATION> WATER_BIG_MAP;
+    static std::unordered_map<MONSTER_STATE, GRASS_SMALL_ANIMATION> GRASS_SMALL_MAP;
+    static std::unordered_map<MONSTER_STATE, GRASS_BIG_ANIMATION> GRASS_BIG_MAP;
+    static std::unordered_map<MONSTER_STATE, FIRE_SMALL_ANIMATION> FIRE_SMALL_MAP;
+    static std::unordered_map<MONSTER_STATE, FIRE_BIG_ANIMATION> FIRE_BIG_MAP;
+    static std::unordered_map<MONSTER_STATE, WATER_SMALL_ANIMATION> WATER_SMALL_MAP;
+    static std::unordered_map<MONSTER_STATE, WATER_BIG_ANIMATION> WATER_BIG_MAP;
 };

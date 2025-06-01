@@ -36,6 +36,9 @@ struct CBObjectData
 	Matrix worldMAt = Matrix::Identity;
 	Matrix invWorldMAt = Matrix::Identity;
 	Matrix textureMat = Matrix::Identity;
+	float hitFactor = 0.0f;
+	float alpha = 1.0f;
+	Vec2 padding0{};
 	int idx0{};
 	int idx1{};
 	int idx2{};

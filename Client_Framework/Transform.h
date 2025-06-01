@@ -24,6 +24,7 @@ private:
 	Matrix mLocalMat = Matrix::Identity;
 	Matrix mTextureMat = Matrix::Identity;
 
+
 private:
 	friend CGameObject;
 	friend class CCamera;
@@ -35,6 +36,7 @@ private:
 	std::weak_ptr<CTransform> mParent{};
 
 public:
+	float mHitFactor = 0.0f;
 	bool mDirtyFlag{};
 	int dirtyFramesNum{};
 	CTransform();
@@ -91,6 +93,7 @@ public:
 	void SetLocalMatZero() { for (int row = 0; row < 4; ++row) { for (int col = 0; col < 4; ++col) { mLocalMat.m[row][col] = 0; } } }
 
 	void SetTexMat(const Matrix& mat) { mTextureMat = mat; }
+	void SetHitFactor(float factor) { mHitFactor = factor; mDirtyFlag = true; }
 
 	std::shared_ptr<CTransform> GetParent() const { return mParent.lock(); }
 	Vec3 GetLocalPosition() const { return mLocalPosition; }

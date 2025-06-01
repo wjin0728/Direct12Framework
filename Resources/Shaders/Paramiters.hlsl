@@ -45,6 +45,9 @@ cbuffer CBObjectData : register(b1)
     matrix worldMat;
     matrix invWorldMat;
     matrix texMat;
+    float hitFactor;
+    float alpha;
+    float2 padding0;
     int idx0;
     int idx1;
     int idx2;
