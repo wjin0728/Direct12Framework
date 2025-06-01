@@ -32,19 +32,7 @@ void MonsterState::RunState::Enter(Monster* monster) {
 }
 
 void MonsterState::RunState::Update(Monster* monster) {
-    Vec3 playerPos = monster->GetPlayerPosition();
-    Vec3 direction = playerPos - monster->_pos;
-    direction.Normalize();
-    float speed = 5.0f;
-    monster->SetVelocity(direction.x * speed, direction.y * speed, direction.z * speed);
-    monster->SetPosition(
-        monster->_pos.x + monster->_velocity.x * TICK_INTERVAL,
-        monster->_pos.y + monster->_velocity.y * TICK_INTERVAL,
-        monster->_pos.z + monster->_velocity.z * TICK_INTERVAL
-    );
-    if (monster->IsCloseToPlayer()) {
-        monster->SetState(&MonsterState::BasicAttackState::GetInstance());
-    }
+
 }
 
 void MonsterState::RunState::Exit(Monster* monster) {}
@@ -106,19 +94,7 @@ void MonsterState::HitState::Enter(Monster* monster) {
 }
 
 void MonsterState::HitState::Update(Monster* monster) {
-    hitTimer -= TICK_INTERVAL;
-    if (hitTimer <= 0) {
-        // 이전 상태 또는 상황에 따라 복귀
-        if (monster->IsPlayerInRange() && !monster->IsCloseToPlayer()) {
-            monster->SetState(&MonsterState::RunState::GetInstance());
-        }
-        else if (monster->IsCloseToPlayer()) {
-            monster->SetState(&MonsterState::BasicAttackState::GetInstance());
-        }
-        else {
-            monster->SetState(&MonsterState::IdleState::GetInstance());
-        }
-    }
+
 }
 
 void MonsterState::HitState::Exit(Monster* monster) {}

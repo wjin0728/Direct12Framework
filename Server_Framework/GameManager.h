@@ -78,10 +78,6 @@ public:
 
 	bool CanMove(float x, float z); // 지형 검사
 
-	void MonsterTargetSet(int monster_id, int target_id) {
-		Monsters[ServerNumber][monster_id]._targetId = target_id;
-	}
-
 private:
 	void Update();
 

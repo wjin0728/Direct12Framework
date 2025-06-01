@@ -350,6 +350,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 				ms._pos = Vec3(50.f, 5.f, 50.f);
 				ms._look_dir = Vec3(0.f, 0.f, 1.f);
 				ms.LocalTransform();
+				for (auto& cl : clients[ServerNumber]) {
+					ms._Player[cl.first] = &cl.second._player;
+				}
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
@@ -362,8 +365,11 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Monster ms{ S_ENEMY_TYPE::GRASS_BIG };
 				ms._pos = Vec3(55.f, 5.f, 50.f);
 				ms._look_dir = Vec3(0.f, 0.f, 1.f);
-				ms.LocalTransform();
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+				ms.LocalTransform();	
+				for (auto& cl : clients[ServerNumber]) {
+					ms._Player[cl.first] = &cl.second._player;
+				}
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;			
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
@@ -376,6 +382,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 				ms._pos = Vec3(60.f, 5.f, 50.f);
 				ms._look_dir = Vec3(0.f, 0.f, 1.f);
 				ms.LocalTransform();
+				for (auto& cl : clients[ServerNumber]) {
+					ms._Player[cl.first] = &cl.second._player;
+				}
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
@@ -383,6 +392,22 @@ void GameManager::Process_packet(int c_id, char* packet)
 				}
 				Monster_cnt[ServerNumber]++;
 			}
+			break;
+		}
+		// 씬 전환
+		case 2: {
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._state != ST_INGAME) continue;
+				cl.second.send_change_scene_packet(1); // 예시로 씬 1로 전환
+			}
+			break;
+		}
+		// 씬 전환
+		case 3: {
+			break;
+		}
+		// 씬 전환
+		case 4: {
 			break;
 		}
 		default:
@@ -546,7 +571,9 @@ void GameManager::SendAllMonstersPosPacket() {
 		packet.x = ms.second._pos.x;
 		packet.y = ms.second._pos.y;
 		packet.z = ms.second._pos.z;
+		packet.look_x = ms.second._look_dir.x;
 		packet.look_y = ms.second._look_dir.y;
+		packet.look_z = ms.second._look_dir.z;
 		packet.monster_state = (uint8_t)ms.second._state;
 
 		for (auto& cl : clients[ServerNumber]) {

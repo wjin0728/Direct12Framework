@@ -146,7 +146,7 @@ struct SC_ALL_PLAYERS_POS_PACKET : PACKET {
 struct SC_MONSTER_POS_PACKET : PACKET {
 	int monsterId;
 	float x, y, z;
-	float look_y;
+	float look_x, look_y, look_z;
 	uint8_t monster_state;
 };
 

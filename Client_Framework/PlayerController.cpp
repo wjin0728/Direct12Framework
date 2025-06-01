@@ -131,6 +131,15 @@ void CPlayerController::OnKeyEvents()
 		if (INPUT.IsKeyDown(KEY_TYPE::M)) /*임시 적 생성*/ {
 			INSTANCE(ServerManager).send_cs_000_packet(1);
 		}
+		if (INPUT.IsKeyDown(KEY_TYPE::ONE)) /*임시 씬 전환*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(2);
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::TWO)) /*임시 씬 전환*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(3);
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::THREE)) /*임시 씬 전환*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(4);
+		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::SKILL);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
