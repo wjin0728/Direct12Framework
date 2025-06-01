@@ -97,6 +97,18 @@ CAnimationSets::~CAnimationSets()
 {
 }
 
+CAnimationTrack::CAnimationTrack(const CAnimationTrack& other)
+{
+	mSetIndex = other.mSetIndex;
+	mPosition = other.mPosition;
+	mSpeed = other.mSpeed;
+	mWeight = other.mWeight;
+	mType = other.mType;
+	mEnable = other.mEnable;
+	mCallbackKeys = other.mCallbackKeys;
+	mAnimationCallbackHandler = std::make_shared<CAnimationCallbackHandler>(*other.mAnimationCallbackHandler);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CAnimationTrack::~CAnimationTrack()
@@ -182,7 +194,12 @@ CAnimationController::CAnimationController(int trackNum, std::shared_ptr<CAnimat
 
 CAnimationController::CAnimationController(const CAnimationController& other) : CComponent(other)
 {
-	mTracks = other.mTracks;
+	mTracks.resize(other.mTracks.size());
+	for (int i = 0; i < mTracks.size(); ++i) {
+		if (other.mTracks[i]) {
+			mTracks[i] = std::make_shared<CAnimationTrack>(*other.mTracks[i]);
+		}
+	}
 	mAnimationSets = std::make_shared<CAnimationSets>(*other.mAnimationSets);
 	mBindPoseBoneOffsets = other.mBindPoseBoneOffsets;
 	finalTransforms.resize(other.finalTransforms.size());
@@ -205,6 +222,8 @@ void CAnimationController::Awake()
 
 void CAnimationController::Start()
 {
+	if(owner->GetName() == "GrassSmall")
+		int a = 0; // Debugging line to check if this component is being initialized on the correct object
 	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
 	if (skinnedMeshRenderer)
 		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();

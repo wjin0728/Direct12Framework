@@ -37,6 +37,7 @@ class CAnimationCallbackHandler
 {
 public:
     CAnimationCallbackHandler() {}
+	CAnimationCallbackHandler(const CAnimationCallbackHandler& other) = default;
     ~CAnimationCallbackHandler() {}
 
 public:
@@ -86,7 +87,7 @@ class CAnimationTrack
 {
 public:
     CAnimationTrack() {}
-    CAnimationTrack(const CAnimationTrack& other) = default;
+    CAnimationTrack(const CAnimationTrack& other);
     ~CAnimationTrack();
 
 public:
