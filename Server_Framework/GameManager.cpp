@@ -2,14 +2,14 @@
 
 GameManager::GameManager()
 {
-	//terrain.SetScale(45, 20, 45);
-	terrain.SetScale(100.f, 598.9f, 100.f);
-	terrain.SetResolution(513);
-	terrain.SetNavMapResolution(terrain.GetResolution() * 2);
-	//terrain.LoadHeightMap("LobbyTerrainHeightmap");
-	//terrain.LoadNavMap("LobbyTerrainNavMap");
-	terrain.LoadHeightMap("Battle1TerrainHeightmap");
-	terrain.LoadNavMap("Battle1TerrainNavMask");
+	//terrain[(int)scene_type].SetScale(45, 20, 45);
+	terrain[(int)scene_type].SetScale(100.f, 598.9f, 100.f);
+	terrain[(int)scene_type].SetResolution(513);
+	terrain[(int)scene_type].SetNavMapResolution(terrain[(int)scene_type].GetResolution() * 2);
+	terrain[(int)S_SCENE_TYPE::LOBBY].LoadHeightMap("LobbyTerrainHeightmap");
+	terrain[(int)S_SCENE_TYPE::LOBBY].LoadNavMap("LobbyTerrainNavMap");
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].LoadHeightMap("Battle1TerrainHeightmap");
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].LoadNavMap("Battle1TerrainNavMask");
 	cout << "Map loaded.\n";
 
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -396,18 +396,17 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		// 씬 전환
 		case 2: {
-			for (auto& cl : clients[ServerNumber]) {
-				if (cl.second._state != ST_INGAME) continue;
-				cl.second.send_change_scene_packet(1); // 예시로 씬 1로 전환
-			}
+			ChangeScene((uint8_t)S_SCENE_TYPE::LOBBY);
 			break;
 		}
 		// 씬 전환
 		case 3: {
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAINSTAGE1);
 			break;
 		}
 		// 씬 전환
 		case 4: {
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAINSTAGE2);
 			break;
 		}
 		default:
@@ -436,22 +435,22 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 bool GameManager::CanMove(float x, float z)
 {
-	if (terrain.mNavMapData.empty()) {
+	if (terrain[(int)scene_type].mNavMapData.empty()) {
 		return false;
 	}
-	float localX = x - terrain.GetOffset().x;
-	float localZ = z - terrain.GetOffset().z;
-	if (localX < 0.0f || localZ < 0.0f || localX >= terrain.GetScale().x || localZ >= terrain.GetScale().z) {
+	float localX = x - terrain[(int)scene_type].GetOffset().x;
+	float localZ = z - terrain[(int)scene_type].GetOffset().z;
+	if (localX < 0.0f || localZ < 0.0f || localX >= terrain[(int)scene_type].GetScale().x || localZ >= terrain[(int)scene_type].GetScale().z) {
 		return false;
 	}
-	float xIndex = localX / (terrain.GetScale().x / (terrain.GetNavMapResolution()));
-	float zIndex = localZ / (terrain.GetScale().z / (terrain.GetNavMapResolution()));
-	zIndex = terrain.GetNavMapResolution() - zIndex;
+	float xIndex = localX / (terrain[(int)scene_type].GetScale().x / (terrain[(int)scene_type].GetNavMapResolution()));
+	float zIndex = localZ / (terrain[(int)scene_type].GetScale().z / (terrain[(int)scene_type].GetNavMapResolution()));
+	zIndex = terrain[(int)scene_type].GetNavMapResolution() - zIndex;
 	xIndex = static_cast<int>(xIndex);
 	zIndex = static_cast<int>(zIndex);
 
-	int idx = xIndex + (zIndex * terrain.GetNavMapResolution());
-	if (terrain.mNavMapData[idx] != 0) {
+	int idx = xIndex + (zIndex * terrain[(int)scene_type].GetNavMapResolution());
+	if (terrain[(int)scene_type].mNavMapData[idx] != 0) {
 		return true;
 	}
 
@@ -469,7 +468,7 @@ void GameManager::Update() {
 			if (CanMove(newPos.x, newPos.z)) {
 				cl.second._player._pos = newPos;
 
-				float terrainHeight = terrain.GetHeight(cl.second._player._pos.x, cl.second._player._pos.z);
+				float terrainHeight = terrain[(int)scene_type].GetHeight(cl.second._player._pos.x, cl.second._player._pos.z);
 				cl.second._player._pos.y = terrainHeight;
 
 				float rotationSpeed = 10.f;
@@ -514,7 +513,7 @@ void GameManager::Update() {
 				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
 				if (ms.second._boundingbox.Intersects(proj.second._boundingbox)) {
 					ms.second.SetState((UINT8)S_MONSTER_STATE::DEATH);
-					cout << "몬스터 " << ms.first << "가 projectile " << proj.first << "에 맞았습니다." << endl;
+					//cout << "몬스터 " << ms.first << "가 projectile " << proj.first << "에 맞았습니다." << endl;
 				}
 			}
 		}
