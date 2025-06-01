@@ -124,7 +124,7 @@ inline float3 GammaDecoding(float3 color)
 
 inline float3 GammaEncoding(float3 color)
 {
-    return pow(color, 0.4545f);
+    return pow(color, 0.454545f);
 }
 
 inline float Luminance(float3 color)
@@ -256,9 +256,10 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 halfV = normalize(camDir + lightDir);
     if (all(halfV == 0))
         halfV = camDir;
-    float NdotL = max((dot(normal, lightDir)), 0.0);
-    float NdotV = max(dot(normal, camDir), 0.0);
-    float VdotH = max(dot(camDir, halfV), 0.0);
+    float NdotL = saturate((dot(normal, lightDir)));
+    float NdotV = saturate(dot(normal, camDir));
+    float VdotH = saturate(dot(camDir, halfV));
+    NdotL = smoothstep(0.0, 1.0, NdotL);
 
     float3 F = FresnelSchlickRoughness(VdotH, F0, roughness);
     float NDF = DistributionGGX(normal, halfV, roughness);

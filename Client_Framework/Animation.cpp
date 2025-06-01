@@ -172,9 +172,8 @@ CAnimationController::CAnimationController(const CAnimationController& other) : 
 {
 	mTracks = other.mTracks;
 	mAnimationSets = other.mAnimationSets;
-	mAnimationSets->mBoneFrameCaches.clear();
+	mAnimationSets->mBoneFrameCaches.resize(other.mAnimationSets->mBoneFrameCaches.size());
 	mBindPoseBoneOffsets = other.mBindPoseBoneOffsets;
-	mSkinningBoneTransforms.clear();
 	finalTransforms = other.finalTransforms;
 	mBoneTransformIdx = other.mBoneTransformIdx;
 	mApplyRootMotion = other.mApplyRootMotion;

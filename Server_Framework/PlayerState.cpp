@@ -57,7 +57,10 @@ void PlayerState::BasicAttackState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::BasicAttackState::Update(PlayerCharacter* player) {
+	attackTimer += TICK_INTERVAL;   
 	// cout << "BasicAttack 업데이트 중!" << endl;
+
+
 }
 
 void PlayerState::BasicAttackState::Exit(PlayerCharacter* player) {}
@@ -71,6 +74,7 @@ void PlayerState::RunAttackState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::RunAttackState::Update(PlayerCharacter* player) {
+    attackTimer += TICK_INTERVAL;
 	// cout << "RunAttack 업데이트 중!" << endl;
 
     if (!player->HasMoveInput()) {
@@ -87,12 +91,13 @@ void PlayerState::RunAttackState::Exit(PlayerCharacter* player) {}
 PlayerState::JumpState& PlayerState::JumpState::GetInstance() { static PlayerState::JumpState instance; return instance; }
 
 void PlayerState::JumpState::Enter(PlayerCharacter* player) {
+    player->SetVelocity(0, 0, 0);
     cout << "Jump 들어왔다리!" << endl;
 }
 
 void PlayerState::JumpState::Update(PlayerCharacter* player) {
 	// cout << "Jump 업데이트 중!" << endl;
-    player->_pos += (player->_velocity * TICK_INTERVAL);
+    //player->_pos += (player->_velocity * TICK_INTERVAL);
 }
 
 void PlayerState::JumpState::Exit(PlayerCharacter* player) {}

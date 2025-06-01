@@ -44,6 +44,8 @@ void PlayerCharacter::SetState(PlayerStateMachine* newState)
 
 void PlayerCharacter::SetState(uint8_t newState)
 {
+	//if (newState == (uint8_t)_state) return;
+
     switch (newState) {
     case (uint8_t)S_PLAYER_STATE::IDLE:
         _state = S_PLAYER_STATE::IDLE;

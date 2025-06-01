@@ -50,7 +50,7 @@ void CFollowTarget::Update()
 	}
 
 	if (dir != 0) {
-		INSTANCE(ServerManager).send_cs_move_packet(dir, transform->GetLocalLook());
+		//INSTANCE(ServerManager).send_cs_move_packet(dir, transform->GetLocalLook());
 	}
 
 	// targetTrans->SetLocalPosition(targetTrans->GetLocalPosition() + acccel * DELTA_TIME);

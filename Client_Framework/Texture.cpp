@@ -482,28 +482,33 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetSRVDesc()
 		default:
 			break;
 		}
-		if (resourceDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB) {
-			resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		}
-		if (resourceDesc.Format == DXGI_FORMAT_BC7_UNORM_SRGB) {
-			resourceDesc.Format = DXGI_FORMAT_BC7_UNORM;
-		}
-		if (resourceDesc.Format == DXGI_FORMAT_BC1_UNORM_SRGB) {
-			resourceDesc.Format = DXGI_FORMAT_BC1_UNORM;
-		}
-		if (resourceDesc.Format == DXGI_FORMAT_BC2_UNORM_SRGB) {
-			resourceDesc.Format = DXGI_FORMAT_BC2_UNORM;
-		}
-		if (resourceDesc.Format == DXGI_FORMAT_BC3_UNORM_SRGB) {
-			resourceDesc.Format = DXGI_FORMAT_BC3_UNORM;
-		}
-		if (resourceDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB) {
-			resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		}
+		
 	}*/
+	
+	if (resourceDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB) {
+		resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	}
+	if (resourceDesc.Format == DXGI_FORMAT_BC7_UNORM_SRGB) {
+		resourceDesc.Format = DXGI_FORMAT_BC7_UNORM;
+	}
+	if (resourceDesc.Format == DXGI_FORMAT_BC1_UNORM_SRGB) {
+		resourceDesc.Format = DXGI_FORMAT_BC1_UNORM;
+	}
+	if (resourceDesc.Format == DXGI_FORMAT_BC2_UNORM_SRGB) {
+		resourceDesc.Format = DXGI_FORMAT_BC2_UNORM;
+	}
+	if (resourceDesc.Format == DXGI_FORMAT_BC3_UNORM_SRGB) {
+		resourceDesc.Format = DXGI_FORMAT_BC3_UNORM;
+	}
+	if (resourceDesc.Format == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB) {
+		resourceDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+	if(name == "Wind_Mage")
+		int i = 0;
 
 	switch (texType)
 	{

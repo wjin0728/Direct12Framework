@@ -4,17 +4,17 @@
 #include "Animation.h"
 #include "ServerManager.h"
 
-void CObjectStateMachine::Awake()
+void CPlayerStateMachine::Awake()
 {
 
 }
 
-void CObjectStateMachine::Start()
+void CPlayerStateMachine::Start()
 {
 	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
 }
 
-void CObjectStateMachine::Update()
+void CPlayerStateMachine::Update()
 {
 	auto controller = mAnimationController.lock();
 	if(!controller) {
@@ -40,7 +40,7 @@ void CObjectStateMachine::Update()
 	}
 }
 
-void CObjectStateMachine::OnEnterState(UINT8 state)
+void CPlayerStateMachine::OnEnterState(UINT8 state)
 {
 	auto controller = mAnimationController.lock();
 	if (!controller) {
@@ -83,7 +83,7 @@ void CObjectStateMachine::OnEnterState(UINT8 state)
 	}
 }
 
-void CObjectStateMachine::OnExitState(UINT8 state)
+void CPlayerStateMachine::OnExitState(UINT8 state)
 {
 	auto controller = mAnimationController.lock();
 	if (!controller) {
@@ -112,3 +112,22 @@ void CObjectStateMachine::OnExitState(UINT8 state)
 	}
 }
 
+void CArcherState::Awake()
+{
+}
+
+void CArcherState::Start()
+{
+}
+
+void CArcherState::Update()
+{
+}
+
+void CArcherState::OnEnterState(UINT8 state)
+{
+}
+
+void CArcherState::OnExitState(UINT8 state)
+{
+}

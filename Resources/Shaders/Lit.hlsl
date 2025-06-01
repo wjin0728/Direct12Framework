@@ -324,10 +324,13 @@ VS_OUTPUT VS_GPass(VS_INPUT input
     output.tangentWS = normalInputs.tangentWS;
     output.bitangentWS = normalInputs.bitangentWS;
     
+    matrix scaleMat = matrix(1.2f, 0.f, 0.f, 0.f,
+                        0.f, 1.2f, 0.f, 0.f,
+                        0.f, 0.f, 1.2f, 0.f,
+                        0.f, 0.f, 0.f, 1.2f);
     
-    
-    float3 offsetPos = output.positionWS.xyz + output.normalWS * 0.01f;
-    output.ShadowPosH = mul(float4(offsetPos, 1.f), shadowTransform);
+    float4 scaledPos = mul(scaleMat, float4(position, 1.f));
+    output.ShadowPosH = mul(scaledPos, shadowTransform);
     
     output.uv = input.uv;
     

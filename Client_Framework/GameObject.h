@@ -10,7 +10,7 @@ class CComponent;
 class CAnimationController;
 class CSkinnedMesh;
 class CPlayerController;
-class CObjectStateMachine;
+class CPlayerStateMachine;
 class CEntityState;
 
 class CGameObject : public std::enable_shared_from_this<CGameObject>

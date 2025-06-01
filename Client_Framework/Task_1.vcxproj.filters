@@ -235,6 +235,7 @@
     <ClInclude Include="ObjectState.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -416,6 +417,9 @@
     </ClCompile>
     <ClCompile Include="ObjectState.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerState.cpp">
+      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

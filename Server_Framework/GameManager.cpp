@@ -211,7 +211,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			cout << "Send add player " << c_id << " 에게 " << cl.first << endl;
 		}
 
-		clients[ServerNumber][c_id]._player.SetState(&PlayerState::IdleState::GetInstance());
+		clients[ServerNumber][c_id]._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 		break;
 	}
 	case CS_CHAT: {
@@ -243,7 +243,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		if (moveDir.LengthSquared() > 0.0001f) {
 			moveDir.Normalize();
-			clients[ServerNumber][c_id]._player._velocity = moveDir;
+			clients[ServerNumber][c_id]._player._velocity = moveDir * 2.f;
 		}
 		else {
 			clients[ServerNumber][c_id]._player._velocity = Vec3::Zero;

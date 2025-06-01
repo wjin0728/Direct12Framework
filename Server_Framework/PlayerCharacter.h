@@ -61,7 +61,7 @@ public:
 	void SetState(uint8_t newState);
 
 	bool HasMoveInput() {
-		return (_velocity.x != 0 || _velocity.y != 0 || _velocity.z != 0);
+		return (_velocity != Vec3::Zero);
 	}
 
 	void Update();

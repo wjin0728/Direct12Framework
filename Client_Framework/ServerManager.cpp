@@ -245,7 +245,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		player->SetActive(true);
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
-		auto stateMachine = player->AddComponent<CObjectStateMachine>(packet->player_class);
+		auto stateMachine = player->AddComponent<CPlayerStateMachine>(packet->player_class);
+		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 		player->SetStateMachine(stateMachine);
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
