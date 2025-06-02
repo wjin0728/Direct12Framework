@@ -108,7 +108,7 @@ public:
 				break;
 			}
 			case S_SCENE_TYPE::MAINSTAGE2: {
-				cl.second._player._pos = Vec3(50.2f, 4.6f, 40.f); // 메인 스테이지 2 초기 위치
+				cl.second._player._pos = Vec3(5.075171f, 2.164612f, 25.88103f); // 메인 스테이지 2 초기 위치
 				break;
 			}
 			default:

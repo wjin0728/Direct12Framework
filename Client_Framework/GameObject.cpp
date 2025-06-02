@@ -468,8 +468,9 @@ void CGameObject::InitByObjectName()
 		rotator->SetRotationSpeed({ 0.f, 0.f, 10.f });
 		rotator->SetRotationAxis({ 0.f, 0.f, 1.f });
 	}
-	else if (mName.contains("Bush") || mName.contains("Tree")|| mName.contains("Grass")|| mName.contains("Env_Ground")
-		|| mName.contains("Env_Rock") || mName.contains("Env_Lillies") || mName.contains("Env_Wildflowers")) {
+	else if (mName.contains("Bush") || mName.contains("_Tree")|| mName.contains("_Grass")|| mName.contains("Env_Ground")
+		|| mName.contains("Env_Rock") || mName.contains("Env_Lillies") || mName.contains("Env_Wildflowers") || mName.contains("Env_Fern")
+		|| mName.contains("Env_Undergrowth_Fern") || mName.contains("Env_Dirt") || mName.contains("Env_Moss")) {
 		SetInstancing(true);
 	}
 }
@@ -624,6 +625,10 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 	for (int i = 0; i < materialCnt; i++) {
 		ReadDateFromFile(inFile, materialName);
 		mRenderer->AddMaterial(materialName);
+	}
+	auto material = mRenderer->GetMaterial();
+	if (material && (material->mShaderName.contains("Common") || material->mShaderName.contains("Lit"))) {
+		SetInstancing(false);
 	}
 }
 
