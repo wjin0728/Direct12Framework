@@ -188,6 +188,7 @@ void CALLBACK ServerManager::recv_callback(DWORD err, DWORD recv_size, LPWSAOVER
 	while (1) {
 		if (recv_size == 0) break; 
 		WORD* byte = reinterpret_cast<WORD*>(buf);
+		//cout << "recv_size : " << recv_size << ", one_packet_size : " << *byte << endl;
 		sm->one_packet_size = *byte; 
 		if (sm->one_packet_size > recv_size) { 
 			memcpy(sm->save_buf, buf, recv_size);
@@ -452,6 +453,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			// cout << "몬스터 look : " << packet->look_x << ", " << packet->look_y << ", " << packet->look_z << endl;
 			
 			auto monsterState =  mEnemies[packet->monsterId]->GetStateMachine();
+			cout << "몬스터 상태 : " << (int)monsterState->GetState() << " -> " << (int)packet->monster_state << endl;
 			if (monsterState && monsterState->GetState() != packet->monster_state)
 				monsterState->SetState(packet->monster_state);
 		}

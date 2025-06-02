@@ -82,7 +82,7 @@ void PlayerState::RunAttackState::Update(PlayerCharacter* player) {
         return;
     }
 
-    player->_pos += (player->_velocity * TICK_INTERVAL);
+    //player->_pos += (player->_velocity * TICK_INTERVAL);
 }
 
 void PlayerState::RunAttackState::Exit(PlayerCharacter* player) {}
