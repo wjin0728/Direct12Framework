@@ -9,8 +9,8 @@ public:
 	SOCKET								send_socket, server_socket;
 	WSAOVERLAPPED						wsaover;
 
-	//char								SERVER_ADDR[NAME_SIZE]{ "1.242.205.234" };
-	char								SERVER_ADDR[NAME_SIZE]{ "127.0.0.1" };
+	char								SERVER_ADDR[NAME_SIZE]{ "1.242.205.234" };
+	//char								SERVER_ADDR[NAME_SIZE]{ "127.0.0.1" };
 
 	std::shared_ptr<class CGameObject> mPlayer{ nullptr };
 	std::shared_ptr<class CGameObject> mMainCamera{ nullptr };
@@ -27,7 +27,7 @@ public:
 
 	size_t save_data_size = 0;
 	size_t one_packet_size = 0;
-	char save_buf[CHAT_SIZE * 2];
+	char save_buf[CHAT_SIZE * 3];
 
 	mutex object_lock;
 

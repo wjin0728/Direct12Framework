@@ -33,6 +33,10 @@ void Monster::SetState(uint8_t newState)
         _state = S_MONSTER_STATE::SKILL;
         SetState(&MonsterState::SkillState::GetInstance());
         break;
+    case (uint8_t)S_MONSTER_STATE::DEATH:
+        _state = S_MONSTER_STATE::DEATH;
+        SetState(&MonsterState::DeathState::GetInstance());
+        break;
     default:
         break;
     }
@@ -78,11 +82,11 @@ void Monster::SetTarget()
 		if (player == nullptr) continue; // 플레이어가 없으면 패스
         Vec3 playerPos = player->_pos;
 		float distance = (_pos - playerPos).LengthSquared();
-		cout << distance << endl;
+		// cout << distance << endl;
 		if (distance < minDistance) {
 			minDistance = distance;
             _target = player;
-			cout << "몬스터 " << (int)_class << "가 플레이어 " << (int)player->_class << "를 타겟팅했습니다." << endl;
+			// cout << "몬스터 " << (int)_class << "가 플레이어 " << (int)player->_class << "를 타겟팅했습니다." << endl;
 		}
 	}
 

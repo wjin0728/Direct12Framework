@@ -515,6 +515,14 @@ void GameManager::Update() {
 	}
 	for (auto& proj : Projectiles[ServerNumber]) {
 		proj.second.Update();
+		if (abs(proj.second._pos.x) > 100.f || abs(proj.second._pos.z) > 100.f) {
+			//for (auto& cl : clients[ServerNumber]) {
+			//	if (cl.second._state != ST_INGAME) continue;
+			//	cl.second.send_remove_projectile_packet(proj.first, cl.first);
+			//}
+			Projectiles[ServerNumber].erase(proj.first);
+			continue;
+		}
 	}
 	for (auto& ms : Monsters[ServerNumber]) {
 		ms.second.Update();
