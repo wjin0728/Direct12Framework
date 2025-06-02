@@ -22,3 +22,23 @@ public:
 private:
 };
 
+class CBattle2Scene : public CScene
+{
+private:
+	static constexpr UINT CASCADE_COUNT = 3;
+
+public:
+	CBattle2Scene();
+	virtual ~CBattle2Scene() = default;
+
+	virtual void Initialize();
+
+	virtual void Update();
+	virtual void LateUpdate();
+
+	virtual void RenderScene();
+
+private:
+};
+
+

@@ -76,3 +76,61 @@ void CBattleScene::RenderScene()
 	CScene::RenderFinalPass();
 }
 
+
+CBattle2Scene::CBattle2Scene() : CScene()
+{
+}
+
+void CBattle2Scene::Initialize()
+{
+	// Load default resources
+	INSTANCE(ServerManager).Client_Login();
+	INSTANCE(ServerManager).RegisterPlayerInScene(this);
+	LoadSceneFromFile(SCENE_PATH("Battle2"));
+	CLight::SetVolumes();
+}
+
+void CBattle2Scene::Update()
+{
+	if (INPUT.IsKeyDown(KEY_TYPE::ESCAPE)) {
+		::PostQuitMessage(0);
+		return;
+	}
+	else if (INPUT.IsKeyDown(KEY_TYPE::ALT)) {
+		INPUT.ChangeMouseState();
+	}
+	/*for (int i = 0; i < 7; i++) {
+		int key = (int)KEY_TYPE::ONE + i;
+		if (INPUT.IsKeyDown((KEY_TYPE)key))
+		{
+			if (renderTargetIndices.size() > i)
+				renderPasstype = i;
+		}
+	}*/
+	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
+
+	}
+	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+
+	}
+	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
+		INPUT.ChangeMouseState();
+	}*/
+	CScene::Update();
+
+}
+
+void CBattle2Scene::LateUpdate()
+{
+	CScene::LateUpdate();
+}
+
+void CBattle2Scene::RenderScene()
+{
+	CScene::RenderShadowPass();
+	CScene::RenderGBufferPass();
+	CScene::RenderLightingPass();
+	CScene::RenderForwardPass();
+	CScene::RenderFinalPass();
+}
+

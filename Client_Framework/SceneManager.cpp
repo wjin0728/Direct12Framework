@@ -35,6 +35,9 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 	case SCENE_TYPE::MAINSTAGE1:
 		curScene = std::make_shared<CBattleScene>();
 		break;
+	case SCENE_TYPE::MAINSTAGE2:
+		curScene = std::make_shared<CBattle2Scene>();
+		break;
 	case SCENE_TYPE::END:
 		break;
 	default:
@@ -58,7 +61,7 @@ void CSceneManager::ChangeScene(SCENE_TYPE nextScene, bool savePrevScene)
 	}
 	else {
 		INSTANCE(CInstancingManager).Destroy();
-		prevScene.reset();
+		curScene.reset();
 	}
 	LoadScene(nextScene);
 }
@@ -72,7 +75,7 @@ void CSceneManager::ChangeScene(SceneChangeReq req)
 	}
 	else {
 		INSTANCE(CInstancingManager).Destroy();
-		prevScene.reset();
+		curScene.reset();
 	}
 	LoadScene(req.changeScene);
 }

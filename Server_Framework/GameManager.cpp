@@ -12,6 +12,11 @@ GameManager::GameManager()
 	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].SetNavMapResolution(terrain[(int)S_SCENE_TYPE::MAINSTAGE1].GetResolution() * 2);
 	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].LoadHeightMap("Battle1TerrainHeightmap");
 	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].LoadNavMap("Battle1TerrainNavMask");
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE2].SetScale(64.f, 600.9f, 64.f);
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE2].SetResolution(513);
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE2].SetNavMapResolution(terrain[(int)S_SCENE_TYPE::MAINSTAGE1].GetResolution() * 2);
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE2].LoadHeightMap("Battle2TerrainHeightmap");
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE2].LoadNavMap("Battle2TerrainNavMask");
 	cout << "Map loaded.\n";
 
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
