@@ -2,12 +2,14 @@
 
 GameManager::GameManager()
 {
-	//terrain[(int)scene_type].SetScale(45, 20, 45);
-	terrain[(int)scene_type].SetScale(100.f, 598.9f, 100.f);
-	terrain[(int)scene_type].SetResolution(513);
-	terrain[(int)scene_type].SetNavMapResolution(terrain[(int)scene_type].GetResolution() * 2);
+	terrain[(int)S_SCENE_TYPE::LOBBY].SetScale(45, 20, 45);
+	terrain[(int)S_SCENE_TYPE::LOBBY].SetResolution(513);
+	terrain[(int)S_SCENE_TYPE::LOBBY].SetNavMapResolution(terrain[(int)S_SCENE_TYPE::LOBBY].GetResolution() * 2);
 	terrain[(int)S_SCENE_TYPE::LOBBY].LoadHeightMap("LobbyTerrainHeightmap");
-	terrain[(int)S_SCENE_TYPE::LOBBY].LoadNavMap("LobbyTerrainNavMap");
+	terrain[(int)S_SCENE_TYPE::LOBBY].LoadNavMap("LobbyTerrainNavMask");
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].SetScale(100.f, 598.9f, 100.f);
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].SetResolution(513);
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].SetNavMapResolution(terrain[(int)S_SCENE_TYPE::MAINSTAGE1].GetResolution() * 2);
 	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].LoadHeightMap("Battle1TerrainHeightmap");
 	terrain[(int)S_SCENE_TYPE::MAINSTAGE1].LoadNavMap("Battle1TerrainNavMask");
 	cout << "Map loaded.\n";

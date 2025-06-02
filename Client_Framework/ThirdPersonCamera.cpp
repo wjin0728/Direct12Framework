@@ -25,7 +25,7 @@ CThirdPersonCamera::~CThirdPersonCamera()
 
 void CThirdPersonCamera::Awake()
 {
-	mCamera = GetOwner()->GetComponent<CCamera>();
+	if(!mCamera) mCamera = GetOwner()->GetComponent<CCamera>();
 }
 
 void CThirdPersonCamera::Start()

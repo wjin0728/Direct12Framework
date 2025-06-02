@@ -39,11 +39,11 @@ void CSkinnedMeshRenderer::Update()
 
 void CSkinnedMeshRenderer::LateUpdate()
 {
+    if (mCbvOffset == -1) return;
 	auto rootTransform = mRootBone.lock();
     mSkinnedMesh->oobs.Transform(mWorldBS, rootTransform->GetWorldMat(false));
 	mSkinnedMesh->oobb.Transform(mWorldOOBB, rootTransform->GetWorldMat(false));
 
-    if (mCbvOffset == -1) return;
     CBObjectData objData;
     objData.worldMAt = rootTransform->mWorldMat.Transpose();
     objData.invWorldMAt = rootTransform->mWorldMat.Invert();

@@ -20,8 +20,8 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
-	rigidBody = GetOwner()->GetComponent<CRigidBody>();
-	mStateMachine = owner->GetComponentFromHierarchy<CPlayerStateMachine>();
+	if(!rigidBody) rigidBody = GetOwner()->GetComponent<CRigidBody>();
+	if (!mStateMachine) mStateMachine = owner->GetComponentFromHierarchy<CPlayerStateMachine>();
 }
 
 void CPlayerController::Start()

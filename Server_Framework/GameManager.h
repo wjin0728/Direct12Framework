@@ -22,7 +22,7 @@ public:
 	uint64_t current_tick = 0;
 
 	array<Terrain, (int)S_SCENE_TYPE::END> terrain;
-	S_SCENE_TYPE scene_type = S_SCENE_TYPE::LOBBY; // 현재 씬 타입
+	S_SCENE_TYPE scene_type = S_SCENE_TYPE::MAINSTAGE1; // 현재 씬 타입
 
 	array<unordered_map<int, Item>, 6> items;
 	array<unordered_map<int, Monster>, 6> Monsters; 
@@ -79,6 +79,9 @@ public:
 
 	bool CanMove(float x, float z); // 지형 검사
 	void ChangeScene(uint8_t scene) {
+		if (scene >= (uint8_t)S_SCENE_TYPE::END) return; // 유효하지 않은 씬 타입 체크
+		if (scene_type == (S_SCENE_TYPE)scene) 
+			return; // 현재 씬과 동일한 씬으로 전환 시도 방지
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			cl.second.send_change_scene_packet(scene);
@@ -91,12 +94,13 @@ public:
 		Monster_cnt[ServerNumber] = 0;
 		Item_cnt[ServerNumber] = 0;
 		Projectile_cnt[ServerNumber] = 0;
+		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
 
 		for (auto& cl : clients[ServerNumber]) {
 			switch ((S_SCENE_TYPE)scene)
 			{
 			case S_SCENE_TYPE::LOBBY: {
-				cl.second._player._pos = Vec3(0.f, 0.f, 0.f); // 로비 초기 위치
+				cl.second._player._pos = Vec3(4.803865f, 0.4409764f, 8.894886f); // 로비 초기 위치
 				break;
 			}
 			case S_SCENE_TYPE::MAINSTAGE1: {
@@ -110,7 +114,6 @@ public:
 			default:
 				break;
 			}
-			cl.second._player._pos = Vec3(0.f, 0.f, 0.f); // 이걸로 초기 위치 잡기
 			cl.second._player._velocity = Vec3::Zero;
 			cl.second._player._hp = cl.second._player.PlayerMaxHp();
 			cl.second._player._barrier = 0;

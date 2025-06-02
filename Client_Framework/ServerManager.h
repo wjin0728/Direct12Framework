@@ -20,6 +20,8 @@ public:
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mItems{};
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mProjectiles{};
 
+	bool mIsConnected{ false };
+	bool mIsLoggedIn{ false };
 	int clientID{ -1 };
 	bool RenderOK{ 0 };
 

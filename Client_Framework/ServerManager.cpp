@@ -51,6 +51,7 @@ void ServerManager::Connect()
 	if (0 != err) {
 		print_error("connect", WSAGetLastError());
 	}
+	mIsConnected = true;
 
 	WSAOVERLAPPED wsaover;
 	ZeroMemory(&wsaover, sizeof(wsaover));
@@ -58,6 +59,14 @@ void ServerManager::Connect()
 
 void ServerManager::Client_Login()
 {
+	if (!mIsConnected) {
+		std::cerr << "Not connected to server.\n";
+		return;
+	}
+	if(mIsLoggedIn) {
+		std::cerr << "Already logged in.\n";
+		return;
+	}
 	CS_LOGIN_PACKET p;
 	p.size = sizeof(p);
 	p.type = CS_LOGIN;
@@ -212,7 +221,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		clientID = packet->id;
 		cout << clientID << endl;
-
+		mIsLoggedIn = true;
 		break;
 	}
 	case SC_LOGIN_FAIL: {
@@ -256,6 +265,14 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			player->Start();
 			scene->AddObject(player);
 		}
+		break;
+	}
+	case SC_CHANGE_SCENE: {
+		SC_CHANGE_SCENE_PACKET* packet = reinterpret_cast<SC_CHANGE_SCENE_PACKET*>(packet_ptr);
+		SCENE_TYPE sceneType = (SCENE_TYPE)packet->change_scene;
+		if (sceneType == INSTANCE(CSceneManager).GetCurSceneType()) break; // 이미 같은 씬이면 리턴
+		
+		INSTANCE(CSceneManager).RequestSceneChange((SCENE_TYPE)packet->change_scene);
 		break;
 	}
 	case SC_ALL_PLAYERS_POS: {

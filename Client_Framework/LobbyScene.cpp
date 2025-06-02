@@ -25,7 +25,6 @@ CLobbyScene::CLobbyScene()
 
 void CLobbyScene::Initialize()
 {// Load default resources
-	INSTANCE(ServerManager).Client_Login();
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
 	LoadSceneFromFile(SCENE_PATH("Lobby"));
 	CLight::SetVolumes();
@@ -40,17 +39,14 @@ void CLobbyScene::Update()
 	else if (INPUT.IsKeyDown(KEY_TYPE::ALT)) {
 		INPUT.ChangeMouseState();
 	}
-	for (int i = 0; i < 7; i++) {
+	/*for (int i = 0; i < 7; i++) {
 		int key = (int)KEY_TYPE::ONE + i;
 		if (INPUT.IsKeyDown((KEY_TYPE)key))
 		{
 			if (renderTargetIndices.size() > i)
 				renderPasstype = i;
 		}
-	}
-	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
-
-	}
+	}*/
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();
 	}*/

@@ -286,8 +286,6 @@ void CAnimationController::Awake()
 
 void CAnimationController::Start()
 {
-	if(owner->GetName() == "GrassSmall")
-		int a = 0; // Debugging line to check if this component is being initialized on the correct object
 	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
 	if (skinnedMeshRenderer)
 		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();

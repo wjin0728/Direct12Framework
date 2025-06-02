@@ -149,7 +149,9 @@ void CScene::RenderLightingPass()
 	renderTarget->SetRenderTargets();
 	renderTarget->ClearRenderTargets();
 	renderTarget->ClearOnlyStencil(0);
-	auto& directionalLight = mLights[(UINT)LIGHT_TYPE::DIRECTIONAL][0];
+
+	std::shared_ptr<CLight> directionalLight{};
+	if(!mLights[(UINT)LIGHT_TYPE::DIRECTIONAL].empty()) directionalLight = mLights[(UINT)LIGHT_TYPE::DIRECTIONAL][0];
 	auto& pointLights = mLights[(UINT)LIGHT_TYPE::POINT];
 	auto& spotLights = mLights[(UINT)LIGHT_TYPE::SPOT];
 	auto& camera = mCameras["MainCamera"];

@@ -34,6 +34,7 @@ CGameObject::~CGameObject()
 
 void CGameObject::Awake()
 {
+	if (misAwake) return;
 	for (auto& component : mComponents) {
 		component->Awake();
 	}
@@ -53,6 +54,7 @@ void CGameObject::Awake()
 
 void CGameObject::Start()
 {
+	if (misAwake) return;
 	for (auto& component : mComponents) {
 		component->Start();
 	}
@@ -60,6 +62,7 @@ void CGameObject::Start()
 	for (auto& child : mChildren) {
 		child->Start();
 	}
+	misAwake = true;
 }
 
 void CGameObject::Update()
@@ -164,6 +167,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
 	instance->mIsInstancing = original->mIsInstancing;
+	instance->misAwake = false;
 
 	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
 	if (!instance->mRenderer) {
@@ -199,6 +203,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 	instance->mRootLocalBS = original->mRootLocalBS;
 	instance->mName = original->mName;
 	instance->mIsInstancing = original->mIsInstancing;
+	instance->misAwake = false;
 
 	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
 	if (!instance->mRenderer) {
@@ -635,10 +640,10 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 	auto material = std::static_pointer_cast<CTerrainMaterial>(RESOURCE.Get<CMaterial>(name + "Material"));
 	if (!material) {
 		material = std::make_shared<CTerrainMaterial>();
-		material->LoadTerrainData(inFile);
 		material->SetName(name + "Material");
 		RESOURCE.Add(material);
 	}
+	material->LoadTerrainData(inFile);
 	size = material->GetSize();
 
 	ReadDateFromFile(inFile, offset);

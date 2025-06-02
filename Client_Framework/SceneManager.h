@@ -24,6 +24,7 @@ class CSceneManager
 private:
 	std::shared_ptr<CScene> curScene{ nullptr };
 	std::shared_ptr<CScene> prevScene{ nullptr };
+	SCENE_TYPE curSceneType{ SCENE_TYPE::END };
 
 	std::vector<std::shared_ptr<CGameObject>> maintainedObjects{};
 	std::queue<SceneChangeReq> sceneChangeQueue{};
@@ -52,6 +53,7 @@ public:
 	void MaintainToAllScenes(const std::shared_ptr<CGameObject>& object) { maintainedObjects.push_back(object); }
 
 	std::shared_ptr<CScene> GetCurScene() { return curScene; }
+	SCENE_TYPE GetCurSceneType() const { return curSceneType; }
 
 };
 

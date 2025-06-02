@@ -41,13 +41,19 @@ void CBattleScene::Update()
 	else if (INPUT.IsKeyDown(KEY_TYPE::ALT)) {
 		INPUT.ChangeMouseState();
 	}
-	for (int i = 0; i < 7; i++) {
+	/*for (int i = 0; i < 7; i++) {
 		int key = (int)KEY_TYPE::ONE + i;
 		if (INPUT.IsKeyDown((KEY_TYPE)key))
 		{
 			if (renderTargetIndices.size() > i)
 				renderPasstype = i;
 		}
+	}*/
+	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
+
+	}
+	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+
 	}
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();

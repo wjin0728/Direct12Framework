@@ -40,6 +40,7 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 	default:
 		break;
 	}
+	curSceneType = nextScene;
 	curScene->Initialize();
 	curScene->Awake();
 	curScene->Start();
@@ -52,9 +53,11 @@ void CSceneManager::ChangeScene(SCENE_TYPE nextScene, bool savePrevScene)
 	if (savePrevScene) {
 		if (curScene) {
 			prevScene = curScene;
+			curScene->mIsActive = false;
 		}
 	}
 	else {
+		INSTANCE(CInstancingManager).Destroy();
 		prevScene.reset();
 	}
 	LoadScene(nextScene);
@@ -68,6 +71,7 @@ void CSceneManager::ChangeScene(SceneChangeReq req)
 		}
 	}
 	else {
+		INSTANCE(CInstancingManager).Destroy();
 		prevScene.reset();
 	}
 	LoadScene(req.changeScene);

@@ -246,6 +246,21 @@ void CTexture::CreateUAV()
 {
 }
 
+void CTexture::ChangeResourceResolution(UINT newWidth, UINT newHeight)
+{
+	if (!texResource) return;
+	if (!fileName.empty()) return; // Cannot change resolution of texture loaded from file
+	width = newWidth;
+	height = newHeight;
+	desc.Width = width;
+	desc.Height = height;
+	texResource.Reset();
+	Create2DTexture();
+	if (srvIdx != -1) {
+		CreateSRV();
+	}
+}
+
 void CTexture::ChangeResourceState(D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
 {
 	auto transition = CD3DX12_RESOURCE_BARRIER::Transition(texResource.Get(), before, after);

@@ -412,6 +412,7 @@ void CResourceManager::BackgroundLoadingThread()
 	LoadDefaultShaders();
 	LoadDefaultMaterials();
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
 	LoadPlayerObjects();
 	LoadEnemyObjects();
 	LoadSkillObjects();

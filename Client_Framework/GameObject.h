@@ -33,6 +33,7 @@ private:
 	bool mActive = true;
 	bool mIsStatic{ false };
 	bool mIsInstancing{ false };
+	bool misAwake{ false };
 
 	std::string mName{};
 	std::string mTag{};

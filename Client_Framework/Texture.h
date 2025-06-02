@@ -63,5 +63,6 @@ public:
 	int CreateSRV();
 	void CreateUAV();
 
+	void ChangeResourceResolution(UINT newWidth, UINT newHeight);
 	void ChangeResourceState(D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
 };
