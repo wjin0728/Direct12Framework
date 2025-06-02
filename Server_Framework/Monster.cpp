@@ -90,6 +90,6 @@ void Monster::SetTarget()
 		Vec3 direction = _target->_pos - _pos;
 		direction.y = 0.f;
 		direction.Normalize();
-		_look_dir = direction;
+		_look_dir = Vec3::Lerp(_look_dir, direction, 0.1f); // 부드러운 회전
 	}
 }

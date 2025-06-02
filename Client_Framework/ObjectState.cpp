@@ -72,7 +72,7 @@ void CPlayerStateMachine::OnEnterState(UINT8 state)
 		break;
 	case PLAYER_STATE::ATTACK:
 	case PLAYER_STATE::MOVE_ATTACK:
-		controller->SetTrackSpeed(0, 2.0f);
+		controller->SetTrackSpeed(0, 3.0f);
 		controller->SetTrackType(0, ANIMATION_TYPE::ONCE);
 		break;
 	case PLAYER_STATE::GETHIT:

@@ -112,11 +112,63 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
 			return;
 		}
+		if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
+			mStateMachine->SetState((UINT8)PLAYER_STATE::JUMP);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::JUMP);
+			return;
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(0);
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::M)) /*임시 적 생성*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(1);
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::ONE)) /*임시 씬 전환*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(2);
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::TWO)) /*임시 씬 전환*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(3);
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::THREE)) /*임시 씬 전환*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(4);
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
+			mStateMachine->SetState((UINT8)PLAYER_STATE::SKILL);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
+			switch (mSkill)
+			{
+			case FIRE_ENCHANT:
+			case WATER_HEAL:
+			case WATER_SHIELD:
+			case GRASS_WEAKEN:
+				INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
+				break;
+			case FIRE_EXPLOSION:
+			case GRASS_VINE:
+				//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Ÿ��id);
+				break;
+			}
+			return;
+		}
+
+		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
+		if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
+		if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
+		if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
+
+		if(dir != 0) {
+			INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
+			mStateMachine->SetState((UINT8)PLAYER_STATE::RUN);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
+			moveKeyPressed = true;
+			return;
+		}
+		break;
 	case PLAYER_STATE::RUN:
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
 			INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
-			mStateMachine->SetState((UINT8)PLAYER_STATE::ATTACK);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
+			mStateMachine->SetState((UINT8)PLAYER_STATE::MOVE_ATTACK);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::MOVE_ATTACK);
 			return;
 		}
 
@@ -164,22 +216,12 @@ void CPlayerController::OnKeyEvents()
 		if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
 
 		if (dir == 0) {
-			if (moveKeyPressed == true) {
-				moveKeyPressed = false;
-				INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
-				mStateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-				INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
-			}
+			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+			mStateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			return;
 		}
-		else if (moveKeyPressed == false) {
-			moveKeyPressed = true;
-		}
 		INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
-		if (mStateMachine->GetState() == (UINT8)PLAYER_STATE::IDLE) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::RUN);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
-		}
 		break;
 	case PLAYER_STATE::ATTACK:
 		break;

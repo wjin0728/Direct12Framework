@@ -49,6 +49,7 @@ public:
 	}
 
 	void SetLookDir(float x, float y, float z) { _look_dir = Vec3(x, y, z); };
+	void SetLookDir(Vec3 dir) { _look_dir = dir; };
 
 	void OnSkillFireEnchant();
 	void OnSkillFireExplosion();

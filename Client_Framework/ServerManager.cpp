@@ -290,6 +290,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			player->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
 			player->GetTransform()->SetLocalRotationY(packet->look_y[i]);
 			auto playerState = player->GetStateMachine();
+			
 			if (playerState && playerState->GetState() != packet->state[i])
 				playerState->SetState(packet->state[i]);
 		}

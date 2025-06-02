@@ -20,16 +20,25 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 		clientWidth = devMode.dmPelsWidth;
 		clientHeight = devMode.dmPelsHeight + 200;
 	}
+	RECT desktopRect;
+	GetWindowRect(GetDesktopWindow(), &desktopRect);
+	clientWidth = GetSystemMetrics(SM_CXSCREEN);
+	clientHeight = GetSystemMetrics(SM_CYSCREEN);
 
-	clientWidth = FRAMEBUFFER_WIDTH;
-	clientHeight = FRAMEBUFFER_HEIGHT;
+
+	//clientWidth = FRAMEBUFFER_WIDTH;
+	//clientHeight = FRAMEBUFFER_HEIGHT;
 	
 	//윈도우 초기화
 	if (!InitWindow(wndProc, cmdShow)) {
 		return false;
 	}
-	/*SetWindowLongPtr(mHwnd, GWL_STYLE, WS_POPUP);
-	SetWindowPos(mHwnd, HWND_TOP, 0, 0, clientWidth, clientHeight, SWP_FRAMECHANGED | SWP_SHOWWINDOW);*/
+	SetWindowLongPtr(mHwnd, GWL_STYLE, WS_POPUP); // 타이틀 바 제거
+	SetWindowPos(mHwnd, HWND_TOP,
+		0, 0,
+		clientWidth, clientHeight,
+		SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_NOZORDER);
+	ShowWindow(mHwnd, SW_MAXIMIZE);
 
 	//매니저 초기화
 	INSTANCE(CResourceManager).Initialize();

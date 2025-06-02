@@ -23,6 +23,8 @@ public:
 	static const UINT renderPassNum		  = 1;
 
 private:
+	//윈도우 핸들
+	HWND mHWnd{};
 	//팩토리
 	ComPtr<IDXGIFactory4> mFactory{};
 	//디바이스

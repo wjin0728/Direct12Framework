@@ -292,7 +292,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 		default:
 			break;
 		}
-
+		Quaternion targetRot = Quaternion::LookRotation(local_lookDir);
+		Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
+		clients[ServerNumber][p->id]._player._rotation = targetRot;
+		clients[ServerNumber][p->id]._player.SetLookDir(angle);
 		break;
 	}
 	case CS_SKILL_TARGET: {

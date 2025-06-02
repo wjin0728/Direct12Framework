@@ -103,6 +103,12 @@ void CDX12Manager::ChangeSwapChainState()
 {
 	WaitForGpu();
 
+	RECT desktopRect;
+	GetWindowRect(GetDesktopWindow(), &desktopRect);
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+
 	BOOL bFullScreenState = FALSE;
 	ThrowIfFailed(mSwapChain->GetFullscreenState(&bFullScreenState, NULL));
 	ThrowIfFailed(mSwapChain->SetFullscreenState(!bFullScreenState, NULL)); // 전체화면 전환
@@ -133,6 +139,10 @@ void CDX12Manager::ChangeSwapChainState()
 
 	InitRenderTargetGroups();
 	InitDepthStencilView();
+
+	SetWindowLong(mHWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+	SetWindowPos(mHWnd, nullptr, 100, 100, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
+		SWP_NOZORDER | SWP_FRAMECHANGED);
 }
 
 void CDX12Manager::InitDescriptorHeaps()
@@ -457,9 +467,10 @@ void CDX12Manager::InitRootSignature()
 
 void CDX12Manager::Initialize(HWND hWnd)
 {
+	mHWnd = hWnd;
 	InitDevice();
 	InitCommandQueueAndList();
-	InitSwapChain(hWnd);
+	InitSwapChain(mHWnd);
 	InitDescriptorHeaps();
 	InitDepthStencilView();
 	InitRootSignature();
