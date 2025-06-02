@@ -22,7 +22,7 @@ public:
 	uint64_t current_tick = 0;
 
 	array<Terrain, (int)S_SCENE_TYPE::END> terrain;
-	S_SCENE_TYPE scene_type = S_SCENE_TYPE::MAINSTAGE1; // 현재 씬 타입
+	S_SCENE_TYPE scene_type = S_SCENE_TYPE::LOBBY; // 현재 씬 타입
 
 	array<unordered_map<int, Item>, 6> items;
 	array<unordered_map<int, Monster>, 6> Monsters; 

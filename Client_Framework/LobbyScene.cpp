@@ -25,6 +25,7 @@ CLobbyScene::CLobbyScene()
 
 void CLobbyScene::Initialize()
 {// Load default resources
+	INSTANCE(ServerManager).Client_Login();
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
 	LoadSceneFromFile(SCENE_PATH("Lobby"));
 	CLight::SetVolumes();
