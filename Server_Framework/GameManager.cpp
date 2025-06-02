@@ -192,16 +192,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		if (0 == c_id) {
-			clients[ServerNumber][c_id]._player._pos = Vec3(45.2, 4.2, 42);
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::ARCHER;
 		}
 		else if (1 == c_id) {
-			clients[ServerNumber][c_id]._player._pos = Vec3(50.2, 4.6, 40);
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
 		}
 		else if (2 == c_id)
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::MAGE;
 
+		clients[ServerNumber][c_id]._player._pos = Vec3(4.803865f, 0.4409764f, 8.894886f);
 		clients[ServerNumber][c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;
 

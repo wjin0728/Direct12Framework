@@ -70,7 +70,7 @@
       <Filter>StateMachine</Filter>
     </ClCompile>
     <ClCompile Include="Projectile.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Object Class</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -117,7 +117,7 @@
       <Filter>StateMachine</Filter>
     </ClInclude>
     <ClInclude Include="Projectile.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Object Class</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
