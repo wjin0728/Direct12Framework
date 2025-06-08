@@ -19,11 +19,11 @@ private:
 	friend class CSkinnedMeshRenderer;
 
 	std::vector<SkinnedVertex> mSkinnedData{};
-
 	std::shared_ptr<CVertexBuffer> mSkinnedVertexBuffer{};
 	UINT mBoneNum = 0;                                // 뼈대 수
 
 	std::vector<Matrix> mBindPoseBoneOffsets{};
+	std::shared_ptr<CStructedBuffer> mBindPoseBoneOffsetsBuffer{}; // 뼈대의 바인드 포즈 오프셋 행렬
 
 public:
 	CSkinnedMesh();
@@ -45,4 +45,5 @@ public:
 public:
 	UINT GetBoneNum() const { return mBoneNum; }
 	std::vector<Matrix>& GetBindPoseBoneOffsets() { return mBindPoseBoneOffsets; }
+	void SetBindPoseToShader();
 };

@@ -46,6 +46,7 @@ public:
 	BoundingSphere mRootLocalBS = BoundingSphere();
 	BoundingSphere mRootBS = BoundingSphere();
 
+
 public:
 	CGameObject(bool makeTransform = true);
 	virtual ~CGameObject();

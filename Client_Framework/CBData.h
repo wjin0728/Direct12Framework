@@ -4,6 +4,7 @@ constexpr auto DIRECTIONAL_LIGHT = 5;
 constexpr auto POINT_LIGHT = 5;
 constexpr auto SPOT_LIGHT = 5;
 constexpr auto TERRAIN_SPLAT_COUNT = 2;
+constexpr auto CASCADE_COUNT = 4;
 
 struct CBPassData
 {
@@ -29,6 +30,24 @@ struct CBPassData
 	int postProcessIdx{};
 	int finalTargetIdx{};
 	Vec4 finalRenderTargetAlpha;
+};
+
+struct CBAllShadowData
+{
+	Matrix shadowMat = Matrix::Identity;
+	Vec3 lightDirection = Vec3::Zero;
+	float shadowMapSize = 1024.0f; 
+	int cascadeCount = CASCADE_COUNT; 
+	float shadowPartition = 0.1f; 
+	float cascadeBlend = 0.1f; 
+	float texelSize = 1.0f / shadowMapSize; 
+	float nativeTexelSize = 1.0f / shadowMapSize; 
+	Vec3 padding0;
+
+	int shadowMapIdx[CASCADE_COUNT]{-1}; 
+	Vec4 cascadeOffset[CASCADE_COUNT]; 
+	Vec4 cascadeScale[CASCADE_COUNT]; 
+	Vec4 cascadeFrustumEyeSpaceDepth[CASCADE_COUNT];
 };
 
 struct CBObjectData

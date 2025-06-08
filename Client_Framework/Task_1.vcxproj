@@ -164,6 +164,7 @@
     <ClInclude Include="BattleScene.h" />
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CascadeShadow.h" />
     <ClInclude Include="CBData.h" />
     <ClInclude Include="CEntityState.h" />
     <ClInclude Include="ContinuousRotation.h" />
@@ -230,6 +231,7 @@
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="BattleScene.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CascadeShadow.cpp" />
     <ClCompile Include="CEntityState.cpp" />
     <ClCompile Include="ContinuousRotation.cpp" />
     <ClCompile Include="EnemyState.cpp" />

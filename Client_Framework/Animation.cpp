@@ -265,7 +265,6 @@ CAnimationController::CAnimationController(const CAnimationController& other) : 
 		}
 	}
 	mAnimationSets = std::make_shared<CAnimationSets>(*other.mAnimationSets);
-	mBindPoseBoneOffsets = other.mBindPoseBoneOffsets;
 	finalTransforms.resize(other.finalTransforms.size());
 	mBoneTransformIdx = other.mBoneTransformIdx;
 	mApplyRootMotion = other.mApplyRootMotion;
@@ -287,8 +286,10 @@ void CAnimationController::Awake()
 void CAnimationController::Start()
 {
 	auto skinnedMeshRenderer = owner->GetComponentFromHierarchy<CSkinnedMeshRenderer>();
-	if (skinnedMeshRenderer)
-		mBindPoseBoneOffsets = skinnedMeshRenderer->mSkinnedMesh->GetBindPoseBoneOffsets();
+	if (!skinnedMeshRenderer) {
+		// If no skinned mesh renderer is found, we cannot proceed with animation setup
+		return;
+	}
 	
 	auto& boneNames = skinnedMeshRenderer->mBoneNames;
 	mSkinningBoneTransforms.resize(boneNames.size());
@@ -337,6 +338,12 @@ void CAnimationController::LateUpdate()
 	float deltaTime = DELTA_TIME;
 	mTime += deltaTime;
 
+	for (int i = 0; auto& cache : mAnimationSets->mBoneFrameCaches) {
+		if(cache.lock() && cache.lock()->owner->GetName() == "weapon_archerarrow_001")
+			int a = 0;
+		i++;
+	}
+
 	if (mTracks.size()) {
 		for (auto& cache : mAnimationSets->mBoneFrameCaches) { if (cache.lock()) cache.lock()->SetLocalMatZero(); }
 	
@@ -365,12 +372,14 @@ void CAnimationController::LateUpdate()
 		OnAnimationIK(mRootMotionObject);
 	}
 
+	for (int i = 0; auto& cache : mSkinningBoneTransforms) {
+		
+		i++;
+	}
+
 	for (int i = 0; auto & cache : mSkinningBoneTransforms) {
 		Matrix boneTransform = cache.lock()->GetWorldMat(false);
-		Matrix bondOffset = mBindPoseBoneOffsets[i];
-		
-		finalTransforms[i] = (bondOffset * boneTransform).Transpose();
-
+		finalTransforms[i] = boneTransform.Transpose();
 		i++;
 	}
 
@@ -436,6 +445,9 @@ void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameO
 
 void CAnimationController::BindSkinningMatrix()
 {
+	if (mBoneTransformIdx == -1) {
+		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
+	}
 	UINT offset = mBoneTransformIdx * ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES);
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->BindToShader(offset);
 }

@@ -11,6 +11,7 @@
 #include"Camera.h"
 #include"SceneManager.h"
 #include"Renderer.h"
+#include"Timer.h"
 
 std::array< std::shared_ptr<CMesh>, 3> CLight::volumes{};
 
@@ -61,24 +62,8 @@ void CLight::Start()
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mainCamera = scene->GetCamera("MainCamera");
 
-	if (!mainCamera || !lightCam) return;
-
-	Vec3 corners[8]{};
-	mainCamera->mFrustumView.GetCorners(corners);
-
-
-	Vec3 center{};
-	for (int i = 0; i < 8; ++i) {
-		center += corners[i];
-	}
-	center /= 8.f;
-	float max = -FLT_MAX;
-	for (int i = 0; i < 8; ++i) {
-		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
-	}
-	float r = max;
-	float size = r * 0.8f;
-	lightCam->GenerateOrthographicProjectionMatrix(1.f, 100.f, size, size);
+	
+	UpdateLightViewBound();
 }
 
 void CLight::Update()
@@ -88,26 +73,10 @@ void CLight::Update()
 void CLight::LateUpdate()
 {
 	if (!mLightData.type == (UINT)LIGHT_TYPE::DIRECTIONAL || !mainCamera || !lightCam) return;
-	Vec3 corners[8]{};
-	mainCamera->GenerateViewMatrix();
-	mainCamera->mFrustumWorld.GetCorners(corners);
 
-	Vec3 center{};
-	for (int i = 0; i < 8; ++i) {
-		center += corners[i];
-	}
-	center /= 8.f;
-	float max = -FLT_MAX;
-	for (int i = 0; i < 8; ++i) {
-		if (max < Vec3::Distance(center, corners[i])) max = Vec3::Distance(center, corners[i]);
-	}
-	float r = max/2.f;
+	//UpdateLightViewBound();
 
 	auto transform = GetTransform();
-	Vec3 dir = transform->GetWorldLook();
-	transform->SetLocalPosition(center - (r * dir));
-	transform->LookTo(dir);
-
 	mLightData.position = transform->GetWorldPosition();
 	mLightData.direction = transform->GetWorldLook();
 }
@@ -148,4 +117,54 @@ void CLight::SetVolumes()
 	volumes[(UINT)LIGHT_TYPE::DIRECTIONAL] = RESOURCE.Get<CMesh>("Rectangle");
 	volumes[(UINT)LIGHT_TYPE::POINT] = RESOURCE.Get<CMesh>("Sphere");
 	//volumes[(UINT)LIGHT_TYPE::SPOT] = CMesh::CreateConeMesh(1.f, 1.f, 10, 10);
+}
+
+void CLight::UpdateLightCamData()
+{
+	if (!mainCamera || !lightCam) return;
+	UpdateLightViewBound();
+
+	Vec3 lightFrustumCenter = mFrustumBoundWS.Center;
+	
+}
+
+void CLight::UpdateLightViewBound()
+{
+	Vec3 corners[8]{};
+	mainCamera->mFrustumWorld.GetCorners(corners);
+
+	BoundingOrientedBox::CreateFromPoints(mFrustumBoundWS, 8, corners, sizeof(Vec3));
+	Vec3 lightFrustumCenter = mFrustumBoundWS.Center;
+	float lightFrustumRadius = 1000.f; // Arbitrary large radius for directional light
+
+	auto transform = GetTransform();
+	Vec3 dir = transform->GetWorldLook();
+	transform->SetLocalPosition(lightFrustumCenter - (lightFrustumRadius * dir));
+	lightCam->GenerateViewMatrix();
+
+	BoundingOrientedBox mFrustumBoundLS{};
+	mFrustumBoundWS.Transform(mFrustumBoundLS, lightCam->GetViewMat());
+
+	std::array<Vec3, 8> frustumCornersLS{};
+	mFrustumBoundLS.GetCorners(frustumCornersLS.data());
+
+	auto minmaxX = std::minmax_element(frustumCornersLS.begin(), frustumCornersLS.end(), [](const Vec3& a, const Vec3& b) { return a.x < b.x; });
+	auto minmaxY = std::minmax_element(frustumCornersLS.begin(), frustumCornersLS.end(), [](const Vec3& a, const Vec3& b) { return a.y < b.y; });
+	auto minmaxZ = std::minmax_element(frustumCornersLS.begin(), frustumCornersLS.end(), [](const Vec3& a, const Vec3& b) { return a.z < b.z; });
+
+	float minX = minmaxX.first->x;
+	float maxX = minmaxX.second->x;
+	float minY = minmaxY.first->y;
+	float maxY = minmaxY.second->y;
+	float minZ = minmaxZ.first->z;
+	float maxZ = minmaxZ.second->z;
+	float sizeX = maxX - minX;
+	float sizeY = maxY - minY;
+
+	float currentTime = TIMER.GetTotalTime();
+	if (currentTime / 1 == 0) {
+		std::cout << "near : " << minZ << " far : " << maxZ << std::endl;
+		std::cout << "sizeX : " << sizeX << " sizeY : " << sizeY << std::endl;
+	}
+	lightCam->GenerateOrthographicProjectionMatrix(minZ, maxZ, 300, 300);
 }

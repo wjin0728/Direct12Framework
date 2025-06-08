@@ -3,6 +3,8 @@
 #ifndef UTIL_DEFINE
 #define UTIL_DEFINE
 
+//#define USE_PCF
+
 #include"Paramiters.hlsl"
 
 struct VertexPositionInputs
@@ -169,14 +171,10 @@ inline float3 UnpackedNormalSampleToWorldSpace(float3 normalMapSample, float3 no
 float CalcShadowFactor(float4 shadowPosH)
 {
     shadowPosH.xyz /= shadowPosH.w;
-
-    if (shadowPosH.x < 0 || shadowPosH.x > 1 ||
-    shadowPosH.y < 0 || shadowPosH.y > 1 ||
-    shadowPosH.z < 0 || shadowPosH.z > 1)
-        return 1.0f; // 그림자 바깥은 항상 밝게 처리
     
+#ifdef USE_PCF
     // Depth in NDC space.
-    float depth = shadowPosH.z - 0.0001f;
+    float depth = shadowPosH.z;
 
     uint width, height, numMips;
     diffuseMap[shadowMapIdx].GetDimensions(0, width, height, numMips);
@@ -204,6 +202,14 @@ float CalcShadowFactor(float4 shadowPosH)
         shadowFactor = 1.0f;
     
     return shadowFactor;
+#else
+    float shadowDepth = diffuseMap[shadowMapIdx].SampleLevel(anisoClamp, shadowPosH.xy, 0).r;
+    
+    if (shadowPosH.z > shadowDepth)
+        return 0.4f; // 그림자 있음
+    else
+        return 1.0f; // 그림자 없음
+#endif
 }
 
 inline float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
@@ -278,7 +284,7 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * albedo + specular) * lightColor * NdotL;
-    float3 ambientLight = albedo * 0.2f * ndotUp;
+    float3 ambientLight = albedo * 0.3f * ndotUp;
     ambientLight += albedo * 0.3f;
     
     return (directLight + ambientLight) * lightingData.shadowFactor + surfaceData.emissive;

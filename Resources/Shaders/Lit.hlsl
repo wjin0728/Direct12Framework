@@ -71,7 +71,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input
     for (int i = 0; i < MAX_VERTEX_INFLUENCES; ++i)
     {
         uint boneIndex = input.boneIndices[i];
-        matrix boneTransform = boneTransforms[boneIndex];
+        matrix boneTransform = mul(boneOffsets[boneIndex], boneTransforms[boneIndex]);
             
         position += weights[i] * mul(float4(input.position, 1.0), boneTransform).xyz;
         normal += weights[i] * mul(input.normal, (float3x3) boneTransform);
@@ -224,7 +224,7 @@ VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input
         if (input.boneWeights[i] > 0.0)
         {
             uint boneIndex = input.boneIndices[i];
-            matrix boneTransform = boneTransforms[boneIndex];
+            matrix boneTransform = mul(boneOffsets[boneIndex], boneTransforms[boneIndex]);
             float3 localPosition = mul(float4(input.position, 1.0), boneTransform).xyz;
             position += localPosition * input.boneWeights[i];
         }
@@ -286,7 +286,7 @@ VS_OUTPUT VS_GPass(VS_INPUT input
     for (int i = 0; i < MAX_VERTEX_INFLUENCES; ++i)
     {
         uint boneIndex = input.boneIndices[i];
-        matrix boneTransform = boneTransforms[boneIndex];
+        matrix boneTransform = mul(boneOffsets[boneIndex], boneTransforms[boneIndex]);
             
         position += weights[i] * mul(float4(input.position, 1.0), boneTransform).xyz;
         normal += weights[i] * mul(input.normal, (float3x3) boneTransform);

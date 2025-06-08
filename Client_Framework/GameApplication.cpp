@@ -9,37 +9,36 @@
 #include "ServerManager.h"
 #include "Light.h"
 
+//#define USE_FULLSCREEN
+#define SCREEN_WIDTH 1600
+#define SCREEN_HEIGHT 900
+
 bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdShow)
 {
 	mHInstance = hInstance;
-
-	DEVMODE devMode = {};
-	devMode.dmSize = sizeof(DEVMODE);
-	if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
-	{
-		clientWidth = devMode.dmPelsWidth;
-		clientHeight = devMode.dmPelsHeight + 200;
-	}
+	
+#ifdef USE_FULLSCREEN
 	RECT desktopRect;
 	GetWindowRect(GetDesktopWindow(), &desktopRect);
 	clientWidth = GetSystemMetrics(SM_CXSCREEN);
 	clientHeight = GetSystemMetrics(SM_CYSCREEN);
-
-
-	//clientWidth = FRAMEBUFFER_WIDTH;
-	//clientHeight = FRAMEBUFFER_HEIGHT;
+#else
+	clientWidth = SCREEN_WIDTH;
+	clientHeight = SCREEN_HEIGHT;
+#endif // USE_FULLSCREEN
 	
 	//윈도우 초기화
 	if (!InitWindow(wndProc, cmdShow)) {
 		return false;
 	}
+#ifdef USE_FULLSCREEN
 	SetWindowLongPtr(mHwnd, GWL_STYLE, WS_POPUP); // 타이틀 바 제거
 	SetWindowPos(mHwnd, HWND_TOP,
 		0, 0,
 		clientWidth, clientHeight,
 		SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_NOZORDER);
 	ShowWindow(mHwnd, SW_MAXIMIZE);
-
+#endif // 윈도우 최대화
 	//매니저 초기화
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CObjectPoolManager).Initialize();

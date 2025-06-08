@@ -137,7 +137,6 @@ public:
 
     std::vector<std::shared_ptr<CAnimationTrack>>   mTracks;
     std::shared_ptr<CAnimationSets>                 mAnimationSets;
-    std::vector<Matrix>                             mBindPoseBoneOffsets{};
     std::vector<std::weak_ptr<CTransform>>          mSkinningBoneTransforms{};
     std::vector<Matrix>                             finalTransforms;
 

@@ -571,10 +571,6 @@ void CGameObject::CreateUIrendererFromFile(std::ifstream& inFile)
 
 void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
 {
-
-	if (mName == "SM_Env_Grass_Tall_Clump_03") {
-		int a{};
-	}
 	using namespace BinaryReader;
 	ReadDateFromFile(inFile, mTransform->mLocalPosition);
 	ReadDateFromFile(inFile, mTransform->mLocalEulerAngle);
@@ -606,6 +602,7 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 			ReadDateFromFile(inFile, boneName);
 			skinnedMeshRenderer->mBoneNames[i] = boneName;
 		}
+		int a = 0; // Debugging purpose, remove later
 	}
 	else if (token == "<Mesh>:") {
 		auto meshRenderer = AddComponent<CMeshRenderer>();

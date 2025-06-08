@@ -54,7 +54,7 @@ void CCamera::GenerateViewMatrix()
 	mFrustumView.Transform(mFrustumWorld, mInverseViewMat);
 
 	//mFrustumShadow는 조금 더 크게 설정
-	Matrix shadowMat = Matrix::CreateScale({1.5f, 1.2f, 1.f}) * mInverseViewMat;
+	Matrix shadowMat = Matrix::CreateScale({1.5f, 1.2f, 1.3f}) * mInverseViewMat;
 	mFrustumView.Transform(mFrustumShadow, shadowMat);
 }
 

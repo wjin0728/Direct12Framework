@@ -43,6 +43,7 @@ class CStructedBuffer
 {
 protected:
 	ComPtr<ID3D12Resource> buffer{};
+	ComPtr<ID3D12Resource> uploadBuffer{};
 
 	BYTE* mappedData{};
 	UINT rootParamIdx{};
@@ -51,17 +52,21 @@ protected:
 	UINT dataNum{};
 	UINT dataSize{};
 
+	bool mWritable{ true };
+
 public:
 	CStructedBuffer() {};
 	~CStructedBuffer();
 
 public:
-	void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum = 1);
+	void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum, BYTE* initialData, bool writable = true);
 	void UpdateBuffer(UINT idx, const void* data);
 	void BindToShader();
 
+	void ReleaseUploadBuffer();
+
 protected:
-	void CreateBuffer();
+	void CreateBuffer(BYTE* initialData);
 };
 
 class CConstantBuffer

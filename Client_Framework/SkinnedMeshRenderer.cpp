@@ -40,6 +40,9 @@ void CSkinnedMeshRenderer::Update()
 void CSkinnedMeshRenderer::LateUpdate()
 {
     if (mCbvOffset == -1) return;
+
+    if(owner->GetName() == "weapon_archerbow_001" || owner->GetName() == "weapon")
+		int a = 0; // Debugging breakpoint
 	auto rootTransform = mRootBone.lock();
     mSkinnedMesh->oobs.Transform(mWorldBS, rootTransform->GetWorldMat(false));
 	mSkinnedMesh->oobb.Transform(mWorldOOBB, rootTransform->GetWorldMat(false));

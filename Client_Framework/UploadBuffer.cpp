@@ -11,14 +11,16 @@ CStructedBuffer::~CStructedBuffer()
 	mappedData = nullptr;
 }
 
-void CStructedBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum)
+void CStructedBuffer::Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum, BYTE* initialData, bool writable)
 {
 	rootParamIdx = _rootParamIdx;
 	dataSize = _dataSize;
 	dataNum = _dataNum;
 	bufferSize = dataSize * dataNum;
 
-	CreateBuffer();
+	mWritable = writable;
+
+	CreateBuffer(initialData);
 }
 
 void CStructedBuffer::BindToShader()
@@ -29,21 +31,38 @@ void CStructedBuffer::BindToShader()
 	cmdList->SetGraphicsRootShaderResourceView(rootParamIdx, bufferLocation);
 }
 
+void CStructedBuffer::ReleaseUploadBuffer()
+{
+	if (uploadBuffer != nullptr) {
+		uploadBuffer.Reset();
+	}
+}
+
 void CStructedBuffer::UpdateBuffer(UINT idx, const void* _data)
 {
+	if(!mappedData) return;
 	memcpy(&mappedData[idx* dataSize], _data, dataSize);
 }
 
-void CStructedBuffer::CreateBuffer()
+void CStructedBuffer::CreateBuffer(BYTE* initialData)
 {
-	CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
+	if(mWritable)
+	{
+		CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 
-	ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
-		&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&buffer)));
+		ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
+			&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&buffer)));
 
-	D3D12_RANGE readRange = { 0, 0 };
-	ThrowIfFailed(buffer->Map(0, &readRange, (void**)&mappedData));
+		D3D12_RANGE readRange = { 0, 0 };
+		ThrowIfFailed(buffer->Map(0, &readRange, (void**)&mappedData));
+	}
+	else
+	{
+		buffer = CreateBufferResource(DEVICE, CMDLIST, initialData, bufferSize,
+			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, &uploadBuffer);
+		mappedData = nullptr; // CPU 접근 불가
+	}
 }
 
 

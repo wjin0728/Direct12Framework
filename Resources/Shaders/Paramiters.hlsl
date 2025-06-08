@@ -79,6 +79,8 @@ cbuffer CBBoneTransforms : register(b3)
     matrix boneTransforms[SKINNED_ANIMATION_BONES];
 };
 
+StructuredBuffer<matrix> boneOffsets : register(t0, space4);
+
 struct CBUIData
 {
     float4 color;

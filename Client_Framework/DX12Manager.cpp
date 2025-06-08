@@ -140,9 +140,6 @@ void CDX12Manager::ChangeSwapChainState()
 	InitRenderTargetGroups();
 	InitDepthStencilView();
 
-	SetWindowLong(mHWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
-	SetWindowPos(mHWnd, nullptr, 100, 100, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
-		SWP_NOZORDER | SWP_FRAMECHANGED);
 }
 
 void CDX12Manager::InitDescriptorHeaps()
@@ -290,7 +287,7 @@ void CDX12Manager::InitDepthStencilView()
 	dsBuffer->isSR = false;
 	RESOURCE.Add(dsBuffer);
 
-	shadowMapResolution = 4096.f * 2;
+	shadowMapResolution = 4096.f * 4;
 
 	auto shadowMap = std::make_shared<CTexture>
 	(
@@ -395,7 +392,7 @@ void CDX12Manager::InitRootSignature()
 	cubeMapTable.RegisterSpace = 2;
 	cubeMapTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[8];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[9];
 	//렌더 패스 정보
 	UINT parameterIndex = 0;
 	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -427,6 +424,11 @@ void CDX12Manager::InitRootSignature()
 	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 0;
 	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 3;
 	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	//BoneOffset 정보
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 0;
+	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 4;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	//텍스쳐 정보
 	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[parameterIndex].DescriptorTable.NumDescriptorRanges = 1;

@@ -15,6 +15,10 @@ protected:
 	std::shared_ptr<CCamera> mainCamera{};
 	std::shared_ptr<CCamera> lightCam{};
 	static std::array< std::shared_ptr<class CMesh>, 3> volumes;
+
+	BoundingOrientedBox mFrustumBoundWS{};
+
+
 public:
 	CLight() {}
 	CLight(const CBLightsData& data) { mLightData = data; }
@@ -62,5 +66,7 @@ public:
 	Vec3 GetWorldDirection() const { return mLightData.direction; }
 	LIGHT_TYPE GetLightType() const { return (LIGHT_TYPE)mLightData.type; }
 
-
+private:
+	void UpdateLightCamData();
+	void UpdateLightViewBound();
 };

@@ -239,6 +239,7 @@
     <ClInclude Include="AnimationEnums.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="CascadeShadow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -425,6 +426,9 @@
       <Filter>Client</Filter>
     </ClCompile>
     <ClCompile Include="EnemyState.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="CascadeShadow.cpp">
       <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>

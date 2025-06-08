@@ -14,6 +14,13 @@ void CSkinnedMesh::CreateGPUResource()
 	if (isLoaded) return;
 	CMesh::CreateGPUResource();
 	CreateSkinnedVertexBuffer();
+
+	std::vector<Matrix> bindPoseBoneOffsets{ mBindPoseBoneOffsets.size() };
+	std::transform(mBindPoseBoneOffsets.begin(), mBindPoseBoneOffsets.end(), bindPoseBoneOffsets.begin(),
+		[](const Matrix& mat) { return mat.Transpose(); });
+	mBindPoseBoneOffsetsBuffer = std::make_shared<CStructedBuffer>();
+	mBindPoseBoneOffsetsBuffer->Initialize(6, sizeof(Matrix), bindPoseBoneOffsets.size(), (BYTE*)bindPoseBoneOffsets.data(), false);
+
 	isLoaded = true;
 }
 
@@ -21,6 +28,11 @@ void CSkinnedMesh::ReleaseUploadBuffers()
 {
 	CMesh::ReleaseUploadBuffer();
 	mSkinnedVertexBuffer->ReleaseUploadBuffer();
+	mBindPoseBoneOffsetsBuffer->ReleaseUploadBuffer();
+}
+
+void CSkinnedMesh::SetBindPoseToShader()
+{
 }
 
 std::shared_ptr<CSkinnedMesh> CSkinnedMesh::CreateSkinnedMeshFromFile(const std::string& name)
@@ -103,6 +115,9 @@ void CSkinnedMesh::Render(ID3D12GraphicsCommandList* cmdList)
 
 void CSkinnedMesh::RenderSkinning(ID3D12GraphicsCommandList* cmdList, int idx)
 {
+	if (mBindPoseBoneOffsetsBuffer)
+		mBindPoseBoneOffsetsBuffer->BindToShader();
+
 	cmdList->IASetPrimitiveTopology(primitiveTopology);
 
 	D3D12_VERTEX_BUFFER_VIEW vbViews[2] = { 
