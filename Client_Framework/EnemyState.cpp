@@ -30,8 +30,6 @@ void CEnemyState::Update()
 		break;
 	case MONSTER_STATE::DEATH:
 		break;
-	case MONSTER_STATE::SKILL:
-		break;
 	case MONSTER_STATE::end:
 		break;
 	default:
@@ -56,7 +54,6 @@ void CEnemyState::OnEnterState(UINT8 state)
 	case MONSTER_STATE::ATTACK:
 	case MONSTER_STATE::PROJECTILE_ATTACK:
 	case MONSTER_STATE::DEATH:
-	case MONSTER_STATE::SKILL:
 		controller->SetTrackType(0, ANIMATION_TYPE::ONCE);
 		break;
 	case MONSTER_STATE::end:
@@ -90,8 +87,6 @@ void CEnemyState::OnExitState(UINT8 state)
 		break;
 	case MONSTER_STATE::DEATH:
 		break;
-	case MONSTER_STATE::SKILL:
-		break;
 	case MONSTER_STATE::end:
 		break;
 	default:
@@ -114,7 +109,7 @@ void CGrassSmallState::OnEnterState(UINT8 state)
 	if (!controller) {
 		return;
 	}
-	controller->SetTrackAnimationSet(0, (int)CAnimationController::GRASS_SMALL_MAP[(MONSTER_STATE)state]);
+	controller->SetTrackAnimationSet(0, (int)state);
 	controller->SetTrackSpeed(0, 1.0f);
 	controller->SetTrackWeight(0, 1.0f);
 	controller->SetTrackPosition(0, 0.0f);
@@ -142,7 +137,7 @@ void CGrassBigState::OnEnterState(UINT8 state)
 	if (!controller) {
 		return;
 	}
-	controller->SetTrackAnimationSet(0, (int)CAnimationController::GRASS_BIG_MAP[(MONSTER_STATE)state]);
+	controller->SetTrackAnimationSet(0, (int)state);
 	controller->SetTrackSpeed(0, 1.0f);
 	controller->SetTrackWeight(0, 1.0f);
 	controller->SetTrackPosition(0, 0.0f);

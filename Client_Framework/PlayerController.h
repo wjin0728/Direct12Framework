@@ -30,7 +30,6 @@ public:
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CPlayerController>(*this); }
 
 public:
-	uint8_t GetAnimationIndexFromState(PLAYER_STATE state);
 
 	void SetStateMachine(const std::shared_ptr<class CPlayerStateMachine>& StateMachine) { mStateMachine = StateMachine; }
 	void SetChildAnimationController();

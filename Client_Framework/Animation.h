@@ -179,16 +179,4 @@ public:
     virtual void OnAnimationIK(std::weak_ptr<CTransform> pRootGameObject) {}
 
     void PrintMatrix(const Matrix& mat);
-
-public:
-    static std::unordered_map<PLAYER_STATE, ARCHER_ANIMATION> ARCHER_MAP;
-    static std::unordered_map<PLAYER_STATE, FIGHTER_ANIMATION> FIGHTER_MAP;
-    static std::unordered_map<PLAYER_STATE, MAGE_ANIMATION> MAGE_MAP;
-
-    static std::unordered_map<MONSTER_STATE, GRASS_SMALL_ANIMATION> GRASS_SMALL_MAP;
-    static std::unordered_map<MONSTER_STATE, GRASS_BIG_ANIMATION> GRASS_BIG_MAP;
-    static std::unordered_map<MONSTER_STATE, FIRE_SMALL_ANIMATION> FIRE_SMALL_MAP;
-    static std::unordered_map<MONSTER_STATE, FIRE_BIG_ANIMATION> FIRE_BIG_MAP;
-    static std::unordered_map<MONSTER_STATE, WATER_SMALL_ANIMATION> WATER_SMALL_MAP;
-    static std::unordered_map<MONSTER_STATE, WATER_BIG_ANIMATION> WATER_BIG_MAP;
 };

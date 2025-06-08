@@ -73,21 +73,6 @@ void CPlayerController::SetState(PLAYER_STATE state)
 
 }
 
-UINT8 CPlayerController::GetAnimationIndexFromState(PLAYER_STATE state)
-{
-	switch (mClass)
-	{
-	case PLAYER_CLASS::ARCHER:
-		return (UINT8)CAnimationController::ARCHER_MAP.at(state);
-	case PLAYER_CLASS::FIGHTER:
-		return (UINT8)CAnimationController::FIGHTER_MAP.at(state);
-	case PLAYER_CLASS::MAGE:
-		return (UINT8)CAnimationController::MAGE_MAP.at(state);
-	default:
-		return 0;
-	}
-}
-
 void CPlayerController::OnKeyEvents()
 {
 	auto transform = GetTransform();
@@ -167,8 +152,8 @@ void CPlayerController::OnKeyEvents()
 	case PLAYER_STATE::RUN:
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
 			INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
-			mStateMachine->SetState((UINT8)PLAYER_STATE::MOVE_ATTACK);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::MOVE_ATTACK);
+			mStateMachine->SetState((UINT8)PLAYER_STATE::RUNATTACK);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUNATTACK);
 			return;
 		}
 
@@ -225,7 +210,7 @@ void CPlayerController::OnKeyEvents()
 		break;
 	case PLAYER_STATE::ATTACK:
 		break;
-	case PLAYER_STATE::MOVE_ATTACK:
+	case PLAYER_STATE::RUNATTACK:
 		break;
 	case PLAYER_STATE::GETHIT:
 		break;

@@ -59,8 +59,8 @@ void PlayerCharacter::SetState(uint8_t newState)
         _state = S_PLAYER_STATE::ATTACK;
         SetState(&PlayerState::BasicAttackState::GetInstance());
         break;
-    case (uint8_t)S_PLAYER_STATE::MOVE_ATTACK:
-        _state = S_PLAYER_STATE::MOVE_ATTACK;
+    case (uint8_t)S_PLAYER_STATE::RUNATTACK:
+        _state = S_PLAYER_STATE::RUNATTACK;
         SetState(&PlayerState::RunAttackState::GetInstance());
         break;
     case (uint8_t)S_PLAYER_STATE::JUMP:

@@ -440,7 +440,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			obj->mAnimationController = obj->AddComponent<CAnimationController>();
 			std::string animName{};
 			ReadDateFromFile(inFile, animName);
-			obj->CreateAnimationFromFile(ANIMATION_PATH(obj->mName + "@anim"));
+			obj->CreateAnimationFromFile(ANIMATION_PATH(obj->mName));
 		}
 		else if (token == "<Light>:") {
 			obj->CreateLightFromFile(inFile);
