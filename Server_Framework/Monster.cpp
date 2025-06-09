@@ -14,26 +14,26 @@ void Monster::SetState(MonsterStateMachine* newState)
     if (currentState) currentState->Enter(this);
 }
 
-void Monster::SetState(uint8_t newState)
+void Monster::SetState(S_MONSTER_STATE newState)
 {
     switch (newState) {
-    case (uint8_t)S_MONSTER_STATE::IDLE:
+    case S_MONSTER_STATE::IDLE:
         _state = S_MONSTER_STATE::IDLE;
         SetState(&MonsterState::IdleState::GetInstance());
         break;
-    case (uint8_t)S_MONSTER_STATE::RUN:
+    case S_MONSTER_STATE::RUN:
         _state = S_MONSTER_STATE::RUN;
         SetState(&MonsterState::RunState::GetInstance());
         break;
-    case (uint8_t)S_MONSTER_STATE::ATTACK:
+    case S_MONSTER_STATE::ATTACK:
         _state = S_MONSTER_STATE::ATTACK;
-        SetState(&MonsterState::BasicAttackState::GetInstance());
+        SetState(&MonsterState::AttackState::GetInstance());
         break;
-    case (uint8_t)S_MONSTER_STATE::SKILL:
+    case S_MONSTER_STATE::SKILL:
         _state = S_MONSTER_STATE::SKILL;
         SetState(&MonsterState::SkillState::GetInstance());
         break;
-    case (uint8_t)S_MONSTER_STATE::DEATH:
+    case S_MONSTER_STATE::DEATH:
         _state = S_MONSTER_STATE::DEATH;
         SetState(&MonsterState::DeathState::GetInstance());
         break;
@@ -67,17 +67,23 @@ void Monster::TakeDamage(int damage)
     }
 }
 
-bool Monster::IsPlayerInRange() const
+bool Monster::IsPlayerInRange(PlayerCharacter* target) const
 {
-    //Vec3 playerPos = GetPlayerPosition();
-    //float distance = (_pos - playerPos).Length();
-    //return distance < 10.0f; // 예: 10유닛 내
-    return 0;
+	if (target == nullptr) return false; // 타겟이 없으면 false
+	float distance = (_pos - target->_pos).LengthSquared();
+    if (distance < pow(8.f, 2)) return true;
+    return false;
+}
+
+bool Monster::IsPlayerTooMuchClose() const
+{
+    return (_target && (_pos - _target->_pos).LengthSquared() < pow(2.f, 2));
 }
 
 void Monster::SetTarget()
 {
 	float minDistance = 5000.f; // 걍 큰 수
+    PlayerCharacter* close_player = nullptr;
 	for (auto& player : _Player) {
 		if (player == nullptr) continue; // 플레이어가 없으면 패스
         Vec3 playerPos = player->_pos;
@@ -85,15 +91,18 @@ void Monster::SetTarget()
 		// cout << distance << endl;
 		if (distance < minDistance) {
 			minDistance = distance;
-            _target = player;
-			// cout << "몬스터 " << (int)_class << "가 플레이어 " << (int)player->_class << "를 타겟팅했습니다." << endl;
+            close_player = player;
 		}
 	}
-
-	if (_target) {
-		Vec3 direction = _target->_pos - _pos;
-		direction.y = 0.f;
-		direction.Normalize();
-		_look_dir = Vec3::Lerp(_look_dir, direction, 0.1f); // 부드러운 회전
+	if (close_player && IsPlayerInRange(close_player)) {
+		_target = close_player;
+        Vec3 direction = _target->_pos - _pos;
+        direction.y = 0.f;
+        direction.Normalize();
+        _look_dir = Vec3::Lerp(_look_dir, direction, 0.1f); // 부드러운 회전
+        _velocity = direction * _speed; // 타겟 방향으로 이동 속도 설정
+	}
+	else {
+		_target = nullptr; 
 	}
 }
