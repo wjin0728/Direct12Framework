@@ -40,14 +40,14 @@ namespace MonsterState
     };
 
     // BasicAttack ป๓ลย
-    class BasicAttackState : public MonsterStateMachine {
+    class AttackState : public MonsterStateMachine {
     public:
-        static BasicAttackState& GetInstance();
+        static AttackState& GetInstance();
         void Enter(Monster* monster) override;
         void Update(Monster* monster) override;
         void Exit(Monster* monster) override;
     private:
-        BasicAttackState() {}
+        AttackState() {}
         float attackTimer;
     };
 

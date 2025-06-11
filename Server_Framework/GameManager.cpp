@@ -512,24 +512,28 @@ void GameManager::Update() {
 			}
 		}
 	}
+	vector<int> erase_proj;
 	for (auto& proj : Projectiles[ServerNumber]) {
 		proj.second.Update();
 		if (abs(proj.second._pos.x) > 100.f || abs(proj.second._pos.z) > 100.f) {
-			//for (auto& cl : clients[ServerNumber]) {
-			//	if (cl.second._state != ST_INGAME) continue;
-			//	cl.second.send_remove_projectile_packet(proj.first, cl.first);
-			//}
-			Projectiles[ServerNumber].erase(proj.first);
-			continue;
+			erase_proj.emplace_back(proj.first);
 		}
 	}
+	for (int i = 0; i < erase_proj.size(); ++i) {
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			//cl.second.send_remove_projectile_packet(erase_proj[i]->_id, cl.first);
+		}
+		Projectiles[ServerNumber].erase(erase_proj[i]);
+	}
+
 	for (auto& ms : Monsters[ServerNumber]) {
 		ms.second.Update();
 		if (ms.second._hp >= 0) {
 			for (auto& proj : Projectiles[ServerNumber]) {
 				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
 				if (ms.second._boundingbox.Intersects(proj.second._boundingbox)) {
-					ms.second.SetState((UINT8)S_MONSTER_STATE::DEATH);
+					ms.second.SetState(S_MONSTER_STATE::DEATH);
 					//cout << "몬스터 " << ms.first << "가 projectile " << proj.first << "에 맞았습니다." << endl;
 				}
 			}
