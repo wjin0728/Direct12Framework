@@ -161,6 +161,9 @@
   <ItemGroup>
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationEnums.h" />
+    <ClInclude Include="AnimationEvent.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="BattleScene.h" />
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
@@ -229,6 +232,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationEvent.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="BattleScene.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CascadeShadow.cpp" />

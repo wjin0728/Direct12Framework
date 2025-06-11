@@ -29,7 +29,7 @@
 #endif
 
 #define EPSILON					1.0e-6f
-#define ANIMATION_CALLBACK_EPSILON		0.00165f
+#define ANIMATION_CALLBACK_EPSILON		0.0165f
 constexpr float degToRad = 0.0174532f;
 constexpr float radToDeg = 57.2957795f;
 

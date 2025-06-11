@@ -211,7 +211,6 @@
     <ClInclude Include="UIRenderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="MiniGame.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -227,19 +226,33 @@
     <ClInclude Include="ContinuousRotation.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="InstancingManager.h" />
     <ClInclude Include="CEntityState.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
     <ClInclude Include="ObjectState.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerState.h" />
-    <ClInclude Include="EnemyState.h" />
     <ClInclude Include="AnimationEnums.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="CascadeShadow.h" />
+    <ClInclude Include="AnimationEvent.h">
+      <Filter>GameObject\Component\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="CascadeShadow.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyState.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerState.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingManager.h">
+      <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadingScreen.h">
+      <Filter>Client</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -430,6 +443,9 @@
     </ClCompile>
     <ClCompile Include="CascadeShadow.cpp">
       <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationEvent.cpp">
+      <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
