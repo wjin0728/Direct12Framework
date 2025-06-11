@@ -16,7 +16,7 @@ CAnimationSet::CAnimationSet(float length, int framesPerSecond, int keyFrameNum,
 	mFramesPerSecond = framesPerSecond;
 	mKeyFrames = keyFrameNum;
 
-	mAnimationSetName = name;
+	mAnimationName = name;
 
 	mKeyFrameTimes.resize(keyFrameNum);
 	mKeyFrameTransforms.resize(keyFrameNum);
@@ -74,8 +74,7 @@ CAnimationTrack::CAnimationTrack(const CAnimationTrack& other)
 	mWeight = other.mWeight;
 	mType = other.mType;
 	mEnable = other.mEnable;
-	mCallbackKeys = other.mCallbackKeys;
-	mAnimationCallbackHandler = std::make_shared<CAnimationCallbackHandler>(*other.mAnimationCallbackHandler);
+	mEventKeys = other.mEventKeys;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,30 +83,30 @@ CAnimationTrack::~CAnimationTrack()
 {
 }
 
-void CAnimationTrack::SetCallbackKeys(int num)
+void CAnimationTrack::HandleCallback(std::shared_ptr<CAnimationEventHandler>& registry)
 {
-	mCallbackKeys.resize(num);
+	for (auto& key : mEventKeys) {
+		if (SimpleMath::IsEqual(key->mTime, mPosition, ANIMATION_CALLBACK_EPSILON)) {
+			auto event = registry->GetEvent(key->mName);
+			if (event) event(mPosition);
+			break;
+		}
+	}
 }
 
-void CAnimationTrack::SetCallbackKey(int index, float keyTime, void* data)
+void CAnimationTrack::SetAnimationSet(std::shared_ptr<CAnimationSet>& set)
 {
-	mCallbackKeys[index].mTime = keyTime;
-	mCallbackKeys[index].mCallbackData = data;
-}
-
-void CAnimationTrack::SetAnimationCallbackHandler(std::shared_ptr<CAnimationCallbackHandler> callbackHandler)
-{
-	mAnimationCallbackHandler = callbackHandler;
-}
-
-void CAnimationTrack::HandleCallback()
-{
-	if (mAnimationCallbackHandler) {
-		for (auto& key : mCallbackKeys) {
-			if (SimpleMath::IsEqual(key.mTime, mPosition, ANIMATION_CALLBACK_EPSILON) && key.mCallbackData) {
-				mAnimationCallbackHandler->HandleCallback(key.mCallbackData, mPosition);
-				break;
-			}
+	if (set) {
+		mPosition = -ANIMATION_CALLBACK_EPSILON;
+		mSpeed = 1.0f;
+		mWeight = 1.0f;
+		mType = set->mType;
+		mEnable = true;
+		mTrackProgress = 0.0f;
+		mEventKeys.resize(set->mEventKeys.size());
+		for (int i = 0;  auto& key : mEventKeys) {
+			if (set->mEventKeys[i]) key = set->mEventKeys[i];
+			++i;
 		}
 	}
 }
@@ -226,11 +225,27 @@ void CAnimationController::Start()
 			++i;
 		}
 
-		SetTrackAnimationSet(0, 2);
-		SetTrackSpeed(0, 1.0f);
-		SetTrackWeight(0, 1.0f);
-	}
+		for (auto& set : mAnimationSets->mAnimationSet) {
+			auto& handler = std::make_shared<CAnimationEventHandler>();
+			if (set->mEventKeys.size()) {
 
+				if (set->mAnimationName == "Attack") {
+					handler->Register("Arrow", [](float time) {
+						std::cout << "[Arrow]\tFootstep at " << time << "s\n";
+						});
+					handler->Register("Start", [](float time) {
+						std::cout << "[Start]\tFootstep at " << time << "s\n";
+						});
+					handler->Register("End", [](float time) {
+						std::cout << "[End]\tFootstep at " << time << "s\n";
+						});
+				}
+			}
+			mEventHandler[set->mAnimationName] = handler;
+		}
+
+		SetTrackAnimationSet(0, 0);
+	}
 
 	mRootMotionObject.lock()->owner->SetStatic(true);
 }
@@ -267,8 +282,9 @@ void CAnimationController::LateUpdate()
 
 					++i;
 				}
-	
-				track->HandleCallback();
+				
+				if (mEventHandler.contains(set->mAnimationName))
+					track->HandleCallback(mEventHandler[set->mAnimationName]);
 			}
 		}
 	
@@ -276,11 +292,6 @@ void CAnimationController::LateUpdate()
 	
 		OnRootMotion(mRootMotionObject);
 		OnAnimationIK(mRootMotionObject);
-	}
-
-	for (int i = 0; auto& cache : mSkinningBoneTransforms) {
-		
-		i++;
 	}
 
 	for (int i = 0; auto & cache : mSkinningBoneTransforms) {
@@ -297,25 +308,11 @@ void CAnimationController::LateUpdate()
 	);
 }
 
-void CAnimationController::SetCallbackKeys(int trackIndex, int num)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetCallbackKeys(num);
-}
-
-void CAnimationController::SetCallbackKey(int trackIndex, int keyIndex, float keyTime, void* data)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetCallbackKey(keyIndex, keyTime, data);
-}
-
-void CAnimationController::SetAnimationCallbackHandler(int trackIndex, std::shared_ptr<CAnimationCallbackHandler> callbackHandler)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetAnimationCallbackHandler(callbackHandler);
-}
-
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
 {
-	if (trackIndex < mTracks.size() && mTracks[trackIndex]->mSetIndex != setIndex) {
-		mTracks[trackIndex]->SetAnimationSet(setIndex);
+	if (trackIndex < mTracks.size() && setIndex < mAnimationSets->mAnimationSet.size() && mTracks[trackIndex]->mSetIndex != setIndex) {
+		mTracks[trackIndex]->SetIndex(setIndex);
+		mTracks[trackIndex]->SetAnimationSet(mAnimationSets->mAnimationSet[setIndex]);
 	}
 }
 
