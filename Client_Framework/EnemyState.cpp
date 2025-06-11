@@ -47,14 +47,12 @@ void CEnemyState::OnEnterState(UINT8 state)
 	{
 	case MONSTER_STATE::IDLE:
 	case MONSTER_STATE::RUN:
-		controller->SetTrackType(0, ANIMATION_TYPE::LOOP);
 		break;
 	case MONSTER_STATE::SPAWN:
 	case MONSTER_STATE::UNDERGROUND:
 	case MONSTER_STATE::ATTACK:
 	case MONSTER_STATE::PROJECTILE_ATTACK:
 	case MONSTER_STATE::DEATH:
-		controller->SetTrackType(0, ANIMATION_TYPE::ONCE);
 		break;
 	case MONSTER_STATE::end:
 		break;
@@ -110,9 +108,6 @@ void CGrassSmallState::OnEnterState(UINT8 state)
 		return;
 	}
 	controller->SetTrackAnimationSet(0, (int)state);
-	controller->SetTrackSpeed(0, 1.0f);
-	controller->SetTrackWeight(0, 1.0f);
-	controller->SetTrackPosition(0, 0.0f);
 
 	CEnemyState::OnEnterState(state);
 }
@@ -138,9 +133,6 @@ void CGrassBigState::OnEnterState(UINT8 state)
 		return;
 	}
 	controller->SetTrackAnimationSet(0, (int)state);
-	controller->SetTrackSpeed(0, 1.0f);
-	controller->SetTrackWeight(0, 1.0f);
-	controller->SetTrackPosition(0, 0.0f);
 
 	CEnemyState::OnEnterState(state);
 }

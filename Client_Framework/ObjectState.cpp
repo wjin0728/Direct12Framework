@@ -49,25 +49,19 @@ void CPlayerStateMachine::OnEnterState(UINT8 state)
 	}
 
 	controller->SetTrackAnimationSet(0, (int)state);
-	controller->SetTrackSpeed(0, 1.0f);
-	controller->SetTrackWeight(0, 1.0f);
-	controller->SetTrackPosition(0, 0.0f);
 
 	switch ((PLAYER_STATE)state) {
 	case PLAYER_STATE::IDLE:
 	case PLAYER_STATE::RUN:
-		controller->SetTrackType(0, ANIMATION_TYPE::LOOP);
 		break;
 	case PLAYER_STATE::ATTACK:
 	case PLAYER_STATE::RUNATTACK:
 		controller->SetTrackSpeed(0, 3.0f);
-		controller->SetTrackType(0, ANIMATION_TYPE::ONCE);
 		break;
 	case PLAYER_STATE::GETHIT:
 	case PLAYER_STATE::DEATH:
 	case PLAYER_STATE::JUMP:
 	case PLAYER_STATE::SKILL:
-		controller->SetTrackType(0, ANIMATION_TYPE::ONCE);
 		break;
 	default:
 		break;
