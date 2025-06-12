@@ -4,25 +4,6 @@
 #include"Mesh.h"
 #include"AnimationEnums.h"
 
-enum class ANIMATION_TYPE : UINT
-{
-    ONCE,
-    LOOP,
-    PINGPONG,
-    END,
-
-    end
-};
-
-enum class ANIMATION_BLEND_TYPE : UINT
-{
-    ADDITIVE,
-    OVERRIDE,
-    OVERRIDE_PASSTHROUGH,
-
-    end
-};
-
 struct EventKey
 {
     float mTime = 0.0f;
@@ -153,11 +134,11 @@ public:
 
     void SetTrackAnimationSet(int trackIndex, int setIndex);
 
-    void SetTrackEnabled(int trackIndex, bool enabled);
-    void SetTrackPosition(int trackIndex, float position);
-    void SetTrackSpeed(int trackIndex, float speed);
-    void SetTrackWeight(int trackIndex, float weight);
-    void SetTrackType(int trackIndex, ANIMATION_TYPE type);
+    void SetTrackEnabled(int trackIndex, bool enabled) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetEnable(enabled); }
+    void SetTrackPosition(int trackIndex, float position) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetPosition(position); }
+    void SetTrackSpeed(int trackIndex, float speed) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetSpeed(speed); }
+    void SetTrackWeight(int trackIndex, float weight) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetWeight(weight); }
+    void SetTrackType(int trackIndex, ANIMATION_TYPE type) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetType(type); }
 
 public:
     virtual void Awake();
@@ -166,10 +147,8 @@ public:
     virtual void Update();
     virtual void LateUpdate();
 
-    void AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject);
     void BindSkinningMatrix();
     void PrepareSkinning();
-    void UploadBoneOffsets();
 
 public:
     bool                        mApplyRootMotion = false;
@@ -179,9 +158,6 @@ public:
     Vec3                        mFirstRootMotionPosition = Vec3(0.0f, 0.0f, 0.0f);
     
     void SetRootMotion(bool bRootMotion) { mApplyRootMotion = bRootMotion; }
-
-    virtual void OnRootMotion(std::weak_ptr<CTransform> pRootGameObject) {}
-    virtual void OnAnimationIK(std::weak_ptr<CTransform> pRootGameObject) {}
 
     void PrintMatrix(const Matrix& mat);
 };

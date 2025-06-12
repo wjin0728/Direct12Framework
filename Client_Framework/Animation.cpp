@@ -231,7 +231,6 @@ void CAnimationController::Start()
 		for (auto& set : mAnimationSets->mAnimationSet) {
 			auto& handler = std::make_shared<CAnimationEventHandler>();
 			if (set->mEventKeys.size()) {
-
 				if (set->mAnimationName == "Attack") {
 					handler->Register("Arrow", [](float time) {
 						std::cout << "[Arrow]\tFootstep at " << time << "s\n";
@@ -292,9 +291,6 @@ void CAnimationController::LateUpdate()
 		}
 	
 		GetOwner()->UpdateWorldMatrices(nullptr);
-	
-		OnRootMotion(mRootMotionObject);
-		OnAnimationIK(mRootMotionObject);
 	}
 
 	for (int i = 0; auto & cache : mSkinningBoneTransforms) {
@@ -319,36 +315,6 @@ void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
 	}
 }
 
-void CAnimationController::SetTrackEnabled(int trackIndex, bool enabled)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetEnable(enabled);
-}
-
-void CAnimationController::SetTrackPosition(int trackIndex, float position)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetPosition(position);
-}
-
-void CAnimationController::SetTrackSpeed(int trackIndex, float speed)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetSpeed(speed);
-}
-
-void CAnimationController::SetTrackWeight(int trackIndex, float weight)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetWeight(weight);
-}
-
-void CAnimationController::SetTrackType(int trackIndex, ANIMATION_TYPE type)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetType(type);
-}
-
-void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)
-{
-
-}
-
 void CAnimationController::BindSkinningMatrix()
 {
 	if (mBoneTransformIdx == -1) {
@@ -356,15 +322,6 @@ void CAnimationController::BindSkinningMatrix()
 	}
 	UINT offset = mBoneTransformIdx * ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES);
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->BindToShader(offset);
-}
-
-void CAnimationController::PrepareSkinning()
-{
-
-}
-
-void CAnimationController::UploadBoneOffsets()
-{
 }
 
 void CAnimationController::PrintMatrix(const Matrix& mat)

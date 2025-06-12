@@ -189,3 +189,22 @@ enum class WATER_BIG_ANIMATION : UINT8
 
 	end
 };
+
+enum class ANIMATION_TYPE : UINT
+{
+	ONCE,
+	LOOP,
+	PINGPONG,
+	END,
+
+	end
+};
+
+enum class ANIMATION_BLEND_TYPE : UINT
+{
+	ADDITIVE,
+	OVERRIDE,
+	OVERRIDE_PASSTHROUGH,
+
+	end
+};
