@@ -86,9 +86,12 @@ CAnimationTrack::~CAnimationTrack()
 void CAnimationTrack::HandleCallback(std::shared_ptr<CAnimationEventHandler>& registry)
 {
 	for (auto& key : mEventKeys) {
-		if (SimpleMath::IsEqual(key->mTime, mPosition, ANIMATION_CALLBACK_EPSILON)) {
+		if (SimpleMath::IsEqual(key->mTime, mPosition, ANIMATION_CALLBACK_EPSILON) && key->mEnable) {
 			auto event = registry->GetEvent(key->mName);
-			if (event) event(mPosition);
+			if (event) {
+				event(mPosition);
+				key->mEnable = false;
+			}
 			break;
 		}
 	}
@@ -108,6 +111,7 @@ void CAnimationTrack::SetAnimationSet(std::shared_ptr<CAnimationSet>& set)
 			if (set->mEventKeys[i]) key = set->mEventKeys[i];
 			++i;
 		}
+		SetEventEnableTrue();
 	}
 }
 
@@ -121,15 +125,14 @@ float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, fl
 			mPosition = trackPosition + trackElapsedTime;
 			if (mPosition > animationLength) {
 				mPosition = -ANIMATION_CALLBACK_EPSILON;
+				SetEventEnableTrue();
 				return(animationLength);
 			}
 		}
-		//			mPosition = fmod(trackPosition, m_pfKeyFrameTimes[m_nKeyFrames-1]); // mPosition = trackPosition - int(trackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
-		//			mPosition = fmod(trackPosition, m_fLength); //if (mPosition < 0) mPosition += m_fLength;
-		//			mPosition = trackPosition - int(trackPosition / m_fLength) * m_fLength;
 		break;
 	}
 	case ANIMATION_TYPE::ONCE:
+		if (mPosition < 0.0f) mPosition = 0.0f;
 		mPosition = trackPosition + trackElapsedTime;
 		if (mPosition > animationLength) {
 			mPosition = 0.0f;

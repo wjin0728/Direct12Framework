@@ -27,6 +27,7 @@ struct EventKey
 {
     float mTime = 0.0f;
     std::string mName;
+    bool mEnable = true;
 
     EventKey(float time, const std::string& name) : mTime(time), mName(name) {}
 };
@@ -114,15 +115,17 @@ public:
     int 							    mSetIndex = 0; //AnimationSet Index
 
 public:
-    void SetAnimationSet(std::shared_ptr<CAnimationSet>& set);
 
 	void SetIndex(int nSetIndex) { mSetIndex = nSetIndex; }
     void SetEnable(bool bEnable) { mEnable = bEnable; }
     void SetSpeed(float fSpeed) { mSpeed = fSpeed; }
     void SetWeight(float fWeight) { mWeight = fWeight; }
     void SetType(ANIMATION_TYPE fType) { mType = fType; }
-
     void SetPosition(float fPosition) { mPosition = fPosition; }
+	void SetEventEnableTrue() { for (auto& key : mEventKeys) key->mEnable = true; }
+
+    void SetAnimationSet(std::shared_ptr<CAnimationSet>& set);
+
     float UpdatePosition(float fTrackPosition, float fTrackElapsedTime, float fAnimationLength);
 
     void HandleCallback(std::shared_ptr<CAnimationEventHandler>& registry);
