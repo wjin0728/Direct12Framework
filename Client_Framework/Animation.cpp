@@ -107,11 +107,11 @@ void CAnimationTrack::SetAnimationSet(std::shared_ptr<CAnimationSet>& set)
 		mEnable = true;
 		mTrackProgress = 0.0f;
 		mEventKeys.resize(set->mEventKeys.size());
-		for (int i = 0;  auto& key : mEventKeys) {
+		for (int i = 0; auto& key : mEventKeys) {
 			if (set->mEventKeys[i]) key = set->mEventKeys[i];
+			key->mEnable = true;
 			++i;
 		}
-		SetEventEnableTrue();
 	}
 }
 
