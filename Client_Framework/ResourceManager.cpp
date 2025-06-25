@@ -8,7 +8,7 @@
 #include"UIRenderer.h"
 #include"GameObject.h"
 #include"ItemMovement.h"
-
+#include "ShadowManager.h"
 
 void CResourceManager::Initialize()
 {
@@ -182,9 +182,13 @@ void CResourceManager::LoadDefaultTexture()
 	}
 
 	auto shadowMap = Get<CTexture>("ShadowMap");
-	INSTANCE(CDX12Manager).OpenCommandList();
-	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
-	INSTANCE(CDX12Manager).CloseCommandList();
+	if (shadowMap) {
+		INSTANCE(CShadowManager).SetShadowMapTextureIdx(shadowMap->GetSrvIndex());
+		INSTANCE(CDX12Manager).OpenCommandList();
+		shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
+		INSTANCE(CDX12Manager).CloseCommandList();
+	}
+	
 }
 
 void CResourceManager::LoadDefaultMaterials()

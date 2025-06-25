@@ -52,11 +52,16 @@ public:
 	void Render(const std::shared_ptr<class CCamera>& camera);
 	void RenderNode(const std::shared_ptr<Node>& node, const std::shared_ptr<class CCamera>& camera);
 
+	BoundingBox GetRootBoundingBox() const
+	{
+		return mRoot->aabb;
+	}
 private:
 	UINT CalculateTriangleCount(const std::array<UINT, 4>& corners) const;
 	BoundingBox CalculateBoundingBox(const std::array<UINT, 4>& corners);
 
 	void SubDivide(std::shared_ptr<Node>& node, const std::array<UINT, 4>& corners);
 	void CreateGridMesh(std::shared_ptr<Node>& node);
+
 };
 

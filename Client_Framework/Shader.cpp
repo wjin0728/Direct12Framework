@@ -409,7 +409,7 @@ bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, 
 	pipelineStateDesc.SampleMask = UINT_MAX;
 	pipelineStateDesc.PrimitiveTopologyType = info.topologyType;
 	pipelineStateDesc.NumRenderTargets = 1;
-	pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
 	pipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	pipelineStateDesc.SampleDesc.Count = 1;
 	pipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
@@ -426,14 +426,14 @@ bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, 
 		break;
 	case PASS_TYPE::FORWARD:
 		pipelineStateDesc.NumRenderTargets = 1;
-		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
 		break;
 	case PASS_TYPE::SHADOW:
 		pipelineStateDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 		pipelineStateDesc.NumRenderTargets = 0;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
 
-		pipelineStateDesc.RasterizerState.DepthBias = 5000.f;
+		pipelineStateDesc.RasterizerState.DepthBias = 6000.f;
 		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.0f;
 		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 2.0f;
 		break;

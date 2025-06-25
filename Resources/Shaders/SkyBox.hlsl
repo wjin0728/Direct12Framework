@@ -55,7 +55,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 //«»ºø ºŒ¿Ã¥ı
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 {
-    float3 color = float3(0.5f, 0.5f, 0.5f);
+    float3 color = float3(0.15f, 0.15f, 0.15f);
     float3 mBottomColor = float3(0,134,255) / 255;
     float3 worldPosition = input.positionWS.xyz;
     float2 uv = input.uv;

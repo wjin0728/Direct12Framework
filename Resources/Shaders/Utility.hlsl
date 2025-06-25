@@ -140,6 +140,38 @@ inline float3 ChangeLuminace(float3 color, float luminance)
     return color * (luminance / luminanceColor);
 }
 
+static const float3x3 ACESInputMat = float3x3(
+    0.59719, 0.35458, 0.04823,
+    0.07600, 0.90834, 0.01566,
+    0.02840, 0.13383, 0.83777
+);
+
+static const float3x3 ACESOutputMat = float3x3(
+     1.60475, -0.53108, -0.07367,
+    -0.10208, 1.10813, -0.00605,
+    -0.00327, -0.07276, 1.07602
+);
+
+
+inline float3 RRTAndODTFit(float3 v)
+{
+    float3 a = v * (v + 0.0245786) - 0.000090537;
+    float3 b = v * (0.983729 * v + 0.4329510) + 0.238081;
+    return a / b;
+}
+
+inline float3 ToneMapping(float3 color)
+{
+    // 입력 색상 → ACEScg 색공간
+    color = mul(ACESInputMat, color);
+    // 톤매핑 커브
+    color = RRTAndODTFit(color);
+    // ACEScg → 출력 색공간(sRGB)
+    color = mul(ACESOutputMat, color);
+    // 필요에 따라 clamp(0,1) 적용 (옵션)
+    return color;
+}
+
 inline float3 UnpackNormal(float3 normalMapSample, float scale = 1.f)
 {
     float3 normal = 2.0f * normalMapSample - 1.0f;
@@ -167,49 +199,97 @@ inline float3 UnpackedNormalSampleToWorldSpace(float3 normalMapSample, float3 no
     return mul(normalMapSample, TBN);
 }
 
+inline float CalPCFPercentLit(float4 shadowMapTexCoord, float rightTexelDepthWeight, float upTexelDepthWeight)
+{
+    float percentLit = 0.0f;
+    
+    const int PCF_BLUR_FOR_LOOP_SIZE = 3;
+    int PCFBlurForLoopStart = -PCF_BLUR_FOR_LOOP_SIZE / 2;
+    int PCFBlurForLoopEnd = PCF_BLUR_FOR_LOOP_SIZE / 2 + 1;
+    
+    for (int x = PCFBlurForLoopStart; x < PCFBlurForLoopEnd; ++x)
+    {
+        for (int y = PCFBlurForLoopStart; y < PCFBlurForLoopEnd; ++y)
+        {
+            float depthcompare = shadowMapTexCoord.z;
+            depthcompare -= 0.001f;
+            depthcompare += rightTexelDepthWeight * ((float) x) + upTexelDepthWeight * ((float) y);
+            float2 finalShadowMapTexCoord = float2(
+                shadowMapTexCoord.x + (((float) x) * nativeTexelSize),
+                shadowMapTexCoord.y + (((float) y) * texelSize)
+            );
+            percentLit += diffuseMap[shadowMapTex].SampleCmpLevelZero(shadowSam, finalShadowMapTexCoord, depthcompare);
+        }
+    }
+    
+    return percentLit / (PCF_BLUR_FOR_LOOP_SIZE * PCF_BLUR_FOR_LOOP_SIZE);
+}
 
 float CalcShadowFactor(float4 shadowPosH)
 {
+    float4 shadowMapTexCoord = 0;
+    float4 blendedShadowMapTexCoord = 0;
+    
+    int currentCascadeIdx = -1;
+    for (int i = 0; i < cascadeCount; ++i)
+    {
+        shadowMapTexCoord = shadowPosH * cascadeScale[i];
+        shadowMapTexCoord += cascadeOffset[i];
+
+        if (min(shadowMapTexCoord.x, shadowMapTexCoord.y) > minBorder && max(shadowMapTexCoord.x, shadowMapTexCoord.y) < maxBorder)
+        {
+            currentCascadeIdx = i;
+            break;
+        }
+    }
+    int nextCascadeIdx = min(cascadeCount - 1, currentCascadeIdx + 1);
+    
+    float2 distanceToOne = float2(1.0f - shadowMapTexCoord.x, 1.0f - shadowMapTexCoord.y);
+    float currentPixelsBlendBandLocation = min(shadowMapTexCoord.x, shadowMapTexCoord.y);
+    float currentPixelsBlendBandLocation2 = min(distanceToOne.x, distanceToOne.y);
+    currentPixelsBlendBandLocation = min(currentPixelsBlendBandLocation, currentPixelsBlendBandLocation2);
+    float blendAmount = currentPixelsBlendBandLocation / cascadeBlend;
+    blendAmount = clamp(blendAmount, 0.0f, 1.0f);
+    
+    float4 shadowMapTexCoordDDX = ddx(shadowPosH) * cascadeScale[currentCascadeIdx];
+    float4 shadowMapTexCoordDDY = ddy(shadowPosH) * cascadeScale[currentCascadeIdx];
+    
+    shadowMapTexCoord.x *= shadowPartition; 
+    shadowMapTexCoord.x += (shadowPartition * (float) currentCascadeIdx);
+        
     shadowPosH.xyz /= shadowPosH.w;
     
-#ifdef USE_PCF
-    // Depth in NDC space.
-    float depth = shadowPosH.z;
-
-    uint width, height, numMips;
-    diffuseMap[shadowMapIdx].GetDimensions(0, width, height, numMips);
+    float2x2 screentoShadowMat = float2x2(shadowMapTexCoordDDX.xy, shadowMapTexCoordDDY.xy);
+    float invDeterminant = 1.0f / determinant(screentoShadowMat);
     
-    float dx = 1.0f / (float) width;
+    float2x2 shadowToScreenMat = float2x2(
+        screentoShadowMat._22 * invDeterminant, screentoShadowMat._12 * -invDeterminant,
+        screentoShadowMat._21 * -invDeterminant, screentoShadowMat._11 * invDeterminant);
 
-    float percentLit = 0.0f;
-    const float2 offsets[9] =
+    float2 rightShadowTexelPos = float2(texelSize, 0.0f);
+    float2 upShadowTexelPos = float2(0.0f, texelSize);
+    
+    float2 vRightTexelDepthRatio = mul(rightShadowTexelPos, shadowToScreenMat);
+    float2 vUpTexelDepthRatio = mul(upShadowTexelPos, shadowToScreenMat);
+    
+    float upTexDepthWeight = vUpTexelDepthRatio.x * shadowMapTexCoordDDX.z + vUpTexelDepthRatio.y * shadowMapTexCoordDDY.z;
+    float rightTexDepthWeight = vRightTexelDepthRatio.x * shadowMapTexCoordDDX.z + vRightTexelDepthRatio.y * shadowMapTexCoordDDY.z;
+    
+    float PCFPercentLit = CalPCFPercentLit(shadowMapTexCoord, rightTexDepthWeight, upTexDepthWeight);
+    
+    if (currentPixelsBlendBandLocation < cascadeBlend)
     {
-        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
-        float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
-        float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx)
-    };
-
-    [unroll]
-    for (int i = 0; i < 9; ++i)
-    {
-        percentLit += diffuseMap[shadowMapIdx].SampleCmpLevelZero(shadowSam,
-            shadowPosH.xy + offsets[i], depth ).r;
+        blendedShadowMapTexCoord = shadowPosH * cascadeScale[nextCascadeIdx];
+        blendedShadowMapTexCoord += cascadeOffset[nextCascadeIdx];
+        blendedShadowMapTexCoord.x *= shadowPartition;
+        blendedShadowMapTexCoord.x += (shadowPartition * (float) nextCascadeIdx);
+        
+        //PCFPercentLit = lerp(PCFPercentLit, CalPCFPercentLit(blendedShadowMapTexCoord, rightTexDepthWeight, upTexDepthWeight), blendAmount);
     }
-    float shadowFactor = percentLit / 9.0f;
-    if (shadowFactor < 0.5f)
-        shadowFactor = 0.5f;
-    else if (shadowFactor > 1.0f)
-        shadowFactor = 1.0f;
     
-    return shadowFactor;
-#else
-    float shadowDepth = diffuseMap[shadowMapIdx].SampleLevel(anisoClamp, shadowPosH.xy, 0).r;
+    float shadowFactor = PCFPercentLit;
     
-    if (shadowPosH.z > shadowDepth)
-        return 0.4f; // 그림자 있음
-    else
-        return 1.0f; // 그림자 없음
-#endif
+    return PCFPercentLit;
 }
 
 inline float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
@@ -247,15 +327,16 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 camDir = normalize(lightingData.cameraDirection);
     float3 albedo = surfaceData.albedo;
     float metallic = surfaceData.metallic;
-    float smoothness = clamp(surfaceData.smoothness, 0.0, 0.99f);
+    float smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
     float roughness = clamp(1 - smoothness, 0.14, 1.0);
     float3 direction = light.directionWS;
     float3 lightDir = -normalize(direction);
     
+    light.lColor = GammaDecoding(light.lColor);
     //return camDir * 0.5f + 0.5f;
     
-    float3 lightColor = light.lColor * light.strength;
-
+    float3 lightColor = light.lColor * 1.2;
+    
     float3 F0 = float3(0.04, 0.04, 0.04);
     F0 = lerp(F0, albedo, metallic);
 
@@ -265,7 +346,7 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float NdotL = saturate((dot(normal, lightDir)));
     float NdotV = saturate(dot(normal, camDir));
     float VdotH = saturate(dot(camDir, halfV));
-    NdotL = smoothstep(0.0, 1.0, NdotL);
+    //NdotL = smoothstep(0.0, 1.0, NdotL);
 
     float3 F = FresnelSchlickRoughness(VdotH, F0, roughness);
     float NDF = DistributionGGX(normal, halfV, roughness);
@@ -274,20 +355,19 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 numerator = NDF * G * F;
     float denominator = max(4.0 * NdotL * NdotV, 0.00001);
     float3 specular = numerator / denominator;
-    
-    //return specular;
 
     float3 kS = F;
-    float3 kD = max(float3(1.f,1.f,1.f) - kS, 0.0) * (1.0 - metallic);
+    float3 kD = max(1 - kS, 0.0) * (1.0 - metallic);
+
     float3 diffuse = albedo;
 
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * albedo + specular) * lightColor * NdotL;
-    float3 ambientLight = albedo * 0.3f * ndotUp;
-    ambientLight += albedo * 0.3f;
+    float3 ambientLight = albedo * 0.02f * ndotUp;
+    ambientLight += albedo * 0.35f;
     
-    return (directLight + ambientLight) * lightingData.shadowFactor + surfaceData.emissive;
+    return ambientLight + (directLight * lightingData.shadowFactor) + surfaceData.emissive;
 }
 
 
@@ -303,6 +383,8 @@ float3 ComputePointLight(LightingData lightingData, SurfaceData surfaceData, CBL
     float3 lightDir = light.positionWS - position;
     float3 lightColor = light.lColor * light.strength;
     float distance = length(lightDir);
+    
+    return light.lColor;
     
     lightDir = normalize(lightDir);
     

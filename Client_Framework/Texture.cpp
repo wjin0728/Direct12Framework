@@ -47,13 +47,14 @@ void CTexture::LoadFromFile(const std::string& _fileName)
 		texResource.Reset();
 	}
 
+	
 	std::wstring fileName = BinaryReader::stringToWstring(_fileName.data());
 	std::wstring extension = std::filesystem::path(fileName).extension();
 	std::unique_ptr<uint8_t[]> ddsData;
 	std::vector<D3D12_SUBRESOURCE_DATA> vSubresources;
 	DDS_ALPHA_MODE ddsAlphaMode = DDS_ALPHA_MODE_UNKNOWN;
 	bool bIsCubeMap = false;
-
+	
 	if (extension == L".dds" || extension == L".DDS") {
 		HRESULT hr = DirectX::LoadDDSTextureFromFileEx(DEVICE, fileName.data(), 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT,
 			texResource.GetAddressOf(), ddsData, vSubresources, &ddsAlphaMode, &bIsCubeMap);
@@ -72,6 +73,7 @@ void CTexture::LoadFromFile(const std::string& _fileName)
 		ThrowIfFailed(hr);
 	}
 	
+	texResource->SetName(BinaryReader::stringToWstring(name).c_str());
 
 	UINT nSubResources = (UINT)vSubresources.size();
 	UINT64 nBytes = GetRequiredIntermediateSize(texResource.Get(), 0, nSubResources);
@@ -89,7 +91,6 @@ void CTexture::LoadFromFile(const std::string& _fileName)
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	
 	CMDLIST->ResourceBarrier(1, &resourceBarrier);
-
 	CreateSRV();
 }
 
@@ -168,6 +169,8 @@ void CTexture::Create2DTexture()
 
 		CMDLIST->ResourceBarrier(1, &barrier);
 	}
+
+	texResource->SetName(BinaryReader::stringToWstring(name).c_str());
 
 	switch (desc.Dimension)
 	{

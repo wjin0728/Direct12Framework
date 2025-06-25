@@ -141,6 +141,7 @@ namespace DirectX
             Vector2& operator+= (const Vector2& V) noexcept;
             Vector2& operator-= (const Vector2& V) noexcept;
             Vector2& operator*= (const Vector2& V) noexcept;
+			Vector2& operator/= (const Vector2& V) noexcept;
             Vector2& operator*= (float S) noexcept;
             Vector2& operator/= (float S) noexcept;
 
@@ -163,6 +164,8 @@ namespace DirectX
 
             void Clamp(const Vector2& vmin, const Vector2& vmax) noexcept;
             void Clamp(const Vector2& vmin, const Vector2& vmax, Vector2& result) const noexcept;
+
+            void Floor() noexcept;
 
             // Static functions
             static float Distance(const Vector2& v1, const Vector2& v2) noexcept;
@@ -254,6 +257,7 @@ namespace DirectX
             Vector3& operator+= (const Vector3& V) noexcept;
             Vector3& operator-= (const Vector3& V) noexcept;
             Vector3& operator*= (const Vector3& V) noexcept;
+			Vector3& operator/= (const Vector3& V) noexcept;
             Vector3& operator*= (float S) noexcept;
             Vector3& operator/= (float S) noexcept;
 
@@ -277,6 +281,8 @@ namespace DirectX
 
             void Clamp(const Vector3& vmin, const Vector3& vmax) noexcept;
             void Clamp(const Vector3& vmin, const Vector3& vmax, Vector3& result) const noexcept;
+
+            void Floor() noexcept;
 
             static Vector3 ClampLength(const Vector3& v, float min, float max) noexcept;
 
@@ -339,6 +345,8 @@ namespace DirectX
             static const Vector3 Left;
             static const Vector3 Forward;
             static const Vector3 Backward;
+            static const Vector3 FLTMax;
+			static const Vector3 FLTMin;
         };
 
         // Binary operators
@@ -381,6 +389,7 @@ namespace DirectX
             Vector4& operator+= (const Vector4& V) noexcept;
             Vector4& operator-= (const Vector4& V) noexcept;
             Vector4& operator*= (const Vector4& V) noexcept;
+			Vector4& operator/= (const Vector4& V) noexcept;
             Vector4& operator*= (float S) noexcept;
             Vector4& operator/= (float S) noexcept;
             Vector4& operator=(const Vector3& V) noexcept { x = V.x; y = V.y; z = V.z; w = 0.f; return *this; }
@@ -404,6 +413,8 @@ namespace DirectX
 
             void Clamp(const Vector4& vmin, const Vector4& vmax) noexcept;
             void Clamp(const Vector4& vmin, const Vector4& vmax, Vector4& result) const noexcept;
+
+			void Floor() noexcept;
 
             // Static functions
             static float Distance(const Vector4& v1, const Vector4& v2) noexcept;

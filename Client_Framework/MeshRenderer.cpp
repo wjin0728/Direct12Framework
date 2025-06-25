@@ -35,6 +35,8 @@ void CMeshRenderer::Start()
 	}
 	CRenderer::Start();
 	UpdataObjectDataToShader();
+	m_mesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
+	m_mesh->oobb.Transform(mWorldOOBB, GetTransform()->GetWorldMat());
 }
 
 void CMeshRenderer::Update()
@@ -84,6 +86,9 @@ void CMeshRenderer::SetMesh(const std::shared_ptr<CMesh>& mesh)
 void CMeshRenderer::SetMesh(const std::string& name)
 {
 	m_mesh = INSTANCE(CResourceManager).Get<CMesh>(name);
-	if (m_mesh) mWorldBS = m_mesh->oobs;
+	if (m_mesh) {
+		mWorldBS = m_mesh->oobs;
+		mWorldOOBB = m_mesh->oobb;
+	}
 }
 

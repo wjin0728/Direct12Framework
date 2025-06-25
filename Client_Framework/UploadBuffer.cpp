@@ -5,7 +5,7 @@
 
 CStructedBuffer::~CStructedBuffer()
 {
-	if (buffer != nullptr) {
+	if (buffer != nullptr && mappedData != nullptr) {
 		buffer->Unmap(0, NULL);
 	}
 	mappedData = nullptr;
@@ -68,7 +68,7 @@ void CStructedBuffer::CreateBuffer(BYTE* initialData)
 
 CConstantBuffer::~CConstantBuffer()
 {
-	if (buffer != nullptr) {
+	if (buffer != nullptr && mappedData != nullptr) {
 		buffer->Unmap(0, NULL);
 	}
 	mappedData = nullptr;

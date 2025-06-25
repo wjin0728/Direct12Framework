@@ -43,8 +43,12 @@ private:
 	int mID{ -1 };
 
 public:
+	bool mCastShadow{ false };
 	BoundingSphere mRootLocalBS = BoundingSphere();
 	BoundingSphere mRootBS = BoundingSphere();
+
+	BoundingBox mLocalAABB = BoundingBox();
+	BoundingBox mWorldAABB = BoundingBox();
 
 
 public:

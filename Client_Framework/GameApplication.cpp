@@ -7,6 +7,7 @@
 #include "InputManager.h"
 #include "ObjectPoolManager.h"
 #include "ServerManager.h"
+#include"ShadowManager.h"
 #include "Light.h"
 
 //#define USE_FULLSCREEN
@@ -39,6 +40,7 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 		SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_NOZORDER);
 	ShowWindow(mHwnd, SW_MAXIMIZE);
 #endif // 윈도우 최대화
+
 	//매니저 초기화
 	INSTANCE(CResourceManager).Initialize();
 	INSTANCE(CObjectPoolManager).Initialize();
@@ -47,6 +49,7 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	TIMER.Initilaize();
 	INPUT.Initialize(mHwnd);
 
+	INSTANCE(CShadowManager).Initialize(3, 2048.f * 2.f);
 	RESOURCE.LoadDefaultTexture();
 	INSTANCE(ServerManager).Connect();
 	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::LOADING);

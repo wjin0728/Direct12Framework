@@ -98,7 +98,7 @@ bool ServerManager::InitPlayerAndCamera()
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
 
 #ifdef REVERSE_Z
-	camera->GenerateReverseZPerspectiveProjectionMatrix(1.f, 100.f, 60.f);
+	camera->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 100.f, 60.f);
 #elif // REVERSE_Z
 	camera->GeneratePerspectiveProjectionMatrix(1.f, 100.f, 60.f);
 #endif // REVERSE_Z

@@ -16,6 +16,7 @@
 #include"RigidBody.h"
 #include"ThirdPersonCamera.h"	
 #include"InstancingManager.h"
+#include"ShadowManager.h"
 
 
 CScene::CScene()
@@ -50,6 +51,7 @@ CScene::CScene()
 		renderTargetIndices.push_back(finalTargetIdx);
 	}
 	finalTargetAlpha = 1.f;
+
 }
 
 void CScene::Awake()
@@ -57,6 +59,7 @@ void CScene::Awake()
 	for (const auto& object : mObjects) {
 		object->Awake();
 	}
+	
 }
 
 void CScene::Start()
@@ -64,6 +67,13 @@ void CScene::Start()
 	for (const auto& object : mObjects) {
 		object->Start();
 	}
+
+	for (const auto& object : mObjects) {
+		ExpandSceneAABB(object, mSceneAABB);
+	}
+	INSTANCE(CShadowManager).SetLightCamera(mCameras["DirectionalLight"]);
+	INSTANCE(CShadowManager).SetViewCamera(mCameras["MainCamera"]);
+	INSTANCE(CShadowManager).UpdateSceneBoundingBox(mSceneAABB);
 }
 
 void CScene::Update()
@@ -73,7 +83,7 @@ void CScene::Update()
 	}
 }
 
-void CScene::LateUpdate()
+void CScene::LateUpdate() 
 {
 	for (const auto& object : mObjects) {
 		object->LateUpdate();
@@ -81,6 +91,7 @@ void CScene::LateUpdate()
 	auto& camera = mCameras["MainCamera"];
 	if(camera) INSTANCE(CInstancingManager).UpdateInstancingGroup(camera);
 	INSTANCE(CResourceManager).UpdateMaterials();
+	INSTANCE(CShadowManager).Update();
 	UpdatePassData();
 
 	INSTANCE(CSceneManager).ProcessSceneChangeQueue();
@@ -88,21 +99,8 @@ void CScene::LateUpdate()
 
 void CScene::RenderShadowPass()
 {
-	auto& lightCamera = mCameras["DirectionalLight"];
-	auto& mainCamera = mCameras["MainCamera"];
-	if (!lightCamera) {
-		return;
-	}
 	INSTANCE(CDX12Manager).PrepareShadowPass();
-
-	auto shadowPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-
-	auto offset = ALIGNED_SIZE(sizeof(CBPassData));
-	shadowPassBuffer->BindToShader(offset);
-
-	lightCamera->SetViewportsAndScissorRects(CMDLIST);
-	RenderForLayer("Opaque", mainCamera, SHADOW);
-	INSTANCE(CInstancingManager).RenderInstancingGroup(SHADOW);
+	INSTANCE(CShadowManager).RenderShadowMaps();
 
 	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
 	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
@@ -128,8 +126,8 @@ void CScene::RenderGBufferPass()
 	renderTarget->ClearDepthStencil(0.f, 0);
 	auto gBufferPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
 	gBufferPassBuffer->BindToShader(0);
+	INSTANCE(CShadowManager).BindShadowData();
 	auto& camera = mCameras["MainCamera"];
-	auto& lightCamera = mCameras["DirectionalLight"];
 	if (camera) {
 		camera->SetViewportsAndScissorRects(CMDLIST);
 		RenderForLayer("Opaque", camera, G_PASS);
@@ -267,6 +265,20 @@ std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::string& render
 	return nullptr;
 }
 
+void CScene::ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB)
+{
+	if (!obj) return;
+	if( obj->GetActive() && obj->mCastShadow) {
+		const BoundingBox& objAABB = obj->mWorldAABB;
+		BoundingBox::CreateMerged(sceneAABB, sceneAABB, objAABB);
+	} 
+
+	for (const auto& child : obj->GetChildren())
+	{
+		ExpandSceneAABB(child, sceneAABB);
+	}
+}
+
 void CScene::AddObject(const std::string& renderLayer, std::shared_ptr<CGameObject> object)
 {
 	auto itr = findByRawPointer(mObjects, object.get());
@@ -370,25 +382,12 @@ void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> c
 void CScene::UpdatePassData()
 {
 	CBPassData passData;
-	Matrix T(
-		0.5f, 0.0f, 0.0f, 0.0f,
-		0.0f, -0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.0f, 1.0f
-	);
-
 	auto& camera = mCameras["MainCamera"];
-	auto& lightCamera = mCameras["DirectionalLight"];
 
 	if (camera) {
 		passData.camPos = camera->GetLocalPosition();
 		passData.viewProjMat = camera->GetViewProjMat().Transpose();
 		passData.viewMat = camera->GetViewMat().Transpose();
-
-		if (lightCamera) {
-			passData.shadowTransform = (lightCamera->GetViewOrthoProjMat() * T).Transpose();
-			passData.shadowMapIdx = RESOURCE.Get<CTexture>("ShadowMap")->GetSrvIndex();
-		}
 		passData.projectionParams = Vec4(camera->GetNear(), camera->GetFar(), camera->GetFov(), camera->GetAspect());
 	}
 	passData.deltaTime = DELTA_TIME;
@@ -422,14 +421,6 @@ void CScene::UpdatePassData()
 	passData.finalRenderTargetAlpha = Vec4(finalTargetAlpha, finalTargetAlpha, finalTargetAlpha, finalTargetAlpha);
 
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(0, &passData, sizeof(CBPassData));
-
-	if (lightCamera) {
-		passData.camPos = lightCamera->GetLocalPosition();
-		passData.viewMat = lightCamera->GetViewMat().Transpose();
-		passData.viewProjMat = lightCamera->GetViewOrthoProjMat().Transpose();
-	}
-
-	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(ALIGNED_SIZE(sizeof(CBPassData)), &passData, sizeof(CBPassData));
 }
 
 void CScene::AddRemoveQueue(std::shared_ptr<CGameObject> object)

@@ -164,7 +164,6 @@
     <ClInclude Include="BattleScene.h" />
     <ClInclude Include="BinaryReader.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="CascadeShadow.h" />
     <ClInclude Include="CBData.h" />
     <ClInclude Include="CEntityState.h" />
     <ClInclude Include="ContinuousRotation.h" />
@@ -187,6 +186,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderPipeline.h" />
     <ClInclude Include="ServerManager.h" />
+    <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="SkinnedMesh.h" />
     <ClInclude Include="SkinnedMeshRenderer.h" />
     <ClInclude Include="ThirdPersonCamera.h" />
@@ -231,7 +231,6 @@
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="BattleScene.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CascadeShadow.cpp" />
     <ClCompile Include="CEntityState.cpp" />
     <ClCompile Include="ContinuousRotation.cpp" />
     <ClCompile Include="EnemyState.cpp" />
@@ -251,6 +250,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderPipeline.cpp" />
     <ClCompile Include="ServerManager.cpp" />
+    <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="SkinnedMesh.cpp" />
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
     <ClCompile Include="ThirdPersonCamera.cpp" />

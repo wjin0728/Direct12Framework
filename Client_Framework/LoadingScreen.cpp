@@ -33,13 +33,14 @@ void CLoadingScreen::Update()
 		mTime = 0.f;
 	}
 	if (!mIsLoading) {
-		mFadeOutTime -= TIMER.GetDeltaTime();
-		renderer->SetAlpha(mFadeOutTime);
-
 		if (mFadeOutTime <= 0.f) {
 			mFadeOutTime = 0.f;
 			INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
 		}
+		mFadeOutTime -= TIMER.GetDeltaTime();
+		mFadeOutTime = std::max<float>(mFadeOutTime, 0.f);
+		renderer->SetAlpha(mFadeOutTime);
+
 	}
 }
 

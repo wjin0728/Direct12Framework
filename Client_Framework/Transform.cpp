@@ -326,6 +326,7 @@ void CTransform::UpdateWorldMatrix(bool update)
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;
 
 	owner->mRootLocalBS.Transform(owner->mRootBS, mWorldMat);
+	owner->mLocalAABB.Transform(owner->mWorldAABB, mWorldMat);
 }
 
 void CTransform::UpdateWorldMatrix(std::shared_ptr<CTransform> parent, bool update)

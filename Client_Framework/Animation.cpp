@@ -338,12 +338,6 @@ void CAnimationController::LateUpdate()
 	float deltaTime = DELTA_TIME;
 	mTime += deltaTime;
 
-	for (int i = 0; auto& cache : mAnimationSets->mBoneFrameCaches) {
-		if(cache.lock() && cache.lock()->owner->GetName() == "weapon_archerarrow_001")
-			int a = 0;
-		i++;
-	}
-
 	if (mTracks.size()) {
 		for (auto& cache : mAnimationSets->mBoneFrameCaches) { if (cache.lock()) cache.lock()->SetLocalMatZero(); }
 	
@@ -446,7 +440,7 @@ void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameO
 void CAnimationController::BindSkinningMatrix()
 {
 	if (mBoneTransformIdx == -1) {
-		mBoneTransformIdx = INSTANCE(CObjectPoolManager).GetBoneTransformIdx();
+		return; // If no bone transform index is set, we cannot bind the skinning matrix
 	}
 	UINT offset = mBoneTransformIdx * ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES);
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->BindToShader(offset);

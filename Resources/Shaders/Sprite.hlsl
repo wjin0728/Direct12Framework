@@ -1,4 +1,5 @@
 #include"Paramiters.hlsl"
+#include"Utility.hlsl"
 
 struct VS_INPUT
 {
@@ -38,5 +39,10 @@ float4 PS_Sprite(VS_OUTPUT input) : SV_Target
     CBUIData uiData = UIData[idx0];
     float4 color = uiData.color;
     texColor = diffuseMap[uiData.textureIdx].SampleLevel(linearClamp, input.uv, 0);
-    return texColor * color;
+    
+    float4 finalColor = texColor * color;
+    finalColor.rgb = GammaDecoding(finalColor.rgb);
+    //finalColor.rgb = ToneMapping(finalColor.rgb);
+    //finalColor.rgb = GammaEncoding(finalColor.rgb);
+    return finalColor;
 }

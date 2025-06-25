@@ -239,7 +239,9 @@
     <ClInclude Include="AnimationEnums.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="CascadeShadow.h" />
+    <ClInclude Include="ShadowManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -428,8 +430,8 @@
     <ClCompile Include="EnemyState.cpp">
       <Filter>Client</Filter>
     </ClCompile>
-    <ClCompile Include="CascadeShadow.cpp">
-      <Filter>Client</Filter>
+    <ClCompile Include="ShadowManager.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

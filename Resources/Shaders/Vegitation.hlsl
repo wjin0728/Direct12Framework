@@ -77,7 +77,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input
     output.tangentWS = normalInputs.tangentWS;
     output.bitangentWS = normalInputs.bitangentWS;
     
-    output.ShadowPosH = mul(output.positionWS, shadowTransform);
+    output.ShadowPosH = mul(output.positionWS, shadowViewMat);
         
     output.color = input.color;
     output.uv = input.uv;
@@ -244,7 +244,7 @@ VS_OUTPUT VS_GPass(VS_INPUT input
     output.tangentWS = normalInputs.tangentWS;
     output.bitangentWS = normalInputs.bitangentWS;
     
-    output.ShadowPosH = mul(output.positionWS, shadowTransform);
+    output.ShadowPosH = mul(output.positionWS, shadowViewMat);
         
     output.color = input.color;
     output.uv = input.uv;

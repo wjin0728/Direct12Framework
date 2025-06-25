@@ -6,7 +6,6 @@ enum class CONSTANT_BUFFER_TYPE : UINT {
 	OBJECT,
 	LIGHT,
 	BONE_TRANSFORM,
-	BONE_OFFSET,
 	MATERIAL,
 	
 	END
@@ -74,13 +73,14 @@ class CConstantBuffer
 protected:
 	ComPtr<ID3D12Resource> buffer{};
 
-	BYTE* mappedData{};
 	UINT rootParamIdx{};
 
 	UINT bufferSize{};
 	UINT mNextOffset{};
 
 public:
+	BYTE* mappedData{};
+
 	CConstantBuffer() {};
 	~CConstantBuffer();
 

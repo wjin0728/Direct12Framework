@@ -15,7 +15,10 @@ private:
 	Vec3 mScale = Vec3::One;
 	UINT mNavMapResolution{};
 	std::vector<BYTE> mNavMapData{};
+
+
 public:
+	BoundingBox mWorldAABB{};
 	CTerrain();
 	~CTerrain();
 

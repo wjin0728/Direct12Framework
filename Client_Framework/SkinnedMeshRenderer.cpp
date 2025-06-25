@@ -31,6 +31,9 @@ void CSkinnedMeshRenderer::Start()
         if (shaderName.contains("Animation")) continue;
 		mat->SetShader(shaderName + "Animation");
 	}
+    auto rootTransform = mRootBone.lock();
+    mSkinnedMesh->oobs.Transform(mWorldBS, rootTransform->GetWorldMat(false));
+    mSkinnedMesh->oobb.Transform(mWorldOOBB, rootTransform->GetWorldMat(false));
 }
 
 void CSkinnedMeshRenderer::Update()
@@ -80,5 +83,8 @@ void CSkinnedMeshRenderer::SetSkinnedMesh(const std::shared_ptr<CSkinnedMesh>& m
 void CSkinnedMeshRenderer::SetSkinnedMesh(const std::string& name)
 {
 	mSkinnedMesh = INSTANCE(CResourceManager).Get<CSkinnedMesh>(name);
-    if (mSkinnedMesh) mWorldBS = mSkinnedMesh->oobs;
+    if (mSkinnedMesh) {
+        mWorldBS = mSkinnedMesh->oobs;
+		mWorldOOBB = mSkinnedMesh->oobb;
+    }
 }

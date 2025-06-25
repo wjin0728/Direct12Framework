@@ -5,13 +5,14 @@
 #include"InstancingBuffer.h"
 #include"Material.h"
 #include"SkinnedMesh.h"
+#include"ShadowManager.h"
 
 CFrameResource::CFrameResource()
 {
 	ThrowIfFailed(DEVICE->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAllocator)));
 
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::PASS)] = std::make_shared<CConstantBuffer>();
-	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::PASS)]->Initialize(0, ALIGNED_SIZE(sizeof(CBPassData)) * PASS_COUNT);
+	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::PASS)]->Initialize(0, ALIGNED_SIZE(sizeof(CBPassData)) * (1 + CASCADE_COUNT));
 
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::OBJECT)] = std::make_shared<CConstantBuffer>();
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::OBJECT)]->Initialize(1, ALIGNED_SIZE(sizeof(CBObjectData)) * OBJECT_COUNT);
@@ -24,6 +25,7 @@ CFrameResource::CFrameResource()
 
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)] = std::make_shared<CConstantBuffer>();
 	mConstantBuffers[static_cast<UINT>(CONSTANT_BUFFER_TYPE::MATERIAL)]->Initialize(4, ALIGNED_SIZE(100) * 70);
+
 
 	mStructedBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::UI)] = std::make_shared<CStructedBuffer>();
 	mStructedBuffers[static_cast<UINT>(STRUCTED_BUFFER_TYPE::UI)]->Initialize(5, sizeof(CBUIData), 20, nullptr);

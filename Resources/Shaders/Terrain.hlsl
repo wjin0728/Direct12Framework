@@ -166,7 +166,7 @@ DS_OUTPUT DS_Forward(TessFactor tessFactors, float2 uv : SV_DomainLocation, cons
     dout.position = mul(dout.worldPos, viewProjMat);
 
     dout.positionCS = dout.position;
-    dout.ShadowPosH = mul(dout.worldPos, shadowTransform);
+    dout.ShadowPosH = mul(dout.worldPos, shadowViewMat);
 	
     return dout;
 }
@@ -178,7 +178,7 @@ float4 PS_Forward(DS_OUTPUT input) : SV_TARGET
     float4 color = float4(0.f, 0.f, 0.f, 1.f);
     float2 uv = input.uv;
     float3 positionWS = input.worldPos.xyz;
-    float2 diffuseUV = input.uv * 5.f;
+    float2 diffuseUV = input.uv * 40.f;
     
     VertexNormalInputs normalInputs = CalculateTerrainNormal(uv, diffuseMap[heightMapIdx]);
     float3 normalWS = normalInputs.normalWS;
@@ -292,7 +292,7 @@ PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
     float4 color = float4(0.f, 0.f, 0.f, 1.f);
     float2 uv = input.uv;
     float3 positionWS = input.worldPos.xyz;
-    float2 diffuseUV = input.uv * 20.f;
+    float2 diffuseUV = input.uv * 10.f;
     
     VertexNormalInputs normalInputs = CalculateTerrainNormal(uv, diffuseMap[heightMapIdx]);
     float3 normalWS = normalInputs.normalWS;

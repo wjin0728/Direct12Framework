@@ -303,6 +303,16 @@ inline Vector2& Vector2::operator*= (const Vector2& V) noexcept
     return *this;
 }
 
+inline Vector2& Vector2::operator/=(const Vector2& V) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR v1 = XMLoadFloat2(this);
+    XMVECTOR v2 = XMLoadFloat2(&V);
+    XMVECTOR X = XMVectorDivide(v1, v2);
+    XMStoreFloat2(this, X);
+	return *this;
+}
+
 inline Vector2& Vector2::operator*= (float S) noexcept
 {
     using namespace DirectX;
@@ -493,6 +503,15 @@ inline void Vector2::Clamp(const Vector2& vmin, const Vector2& vmax, Vector2& re
     XMVECTOR X = XMVectorClamp(v1, v2, v3);
     XMStoreFloat2(&result, X);
 }
+
+inline void Vector2::Floor() noexcept
+{
+    using namespace DirectX;
+    XMVECTOR v1 = XMLoadFloat2(this);
+    XMVECTOR X = XMVectorFloor(v1);
+    XMStoreFloat2(this, X);
+}
+
 
 //------------------------------------------------------------------------------
 // Static functions
@@ -878,6 +897,16 @@ inline Vector3& Vector3::operator*= (const Vector3& V) noexcept
     return *this;
 }
 
+inline Vector3& Vector3::operator/=(const Vector3& V) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR v1 = XMLoadFloat3(this);
+    XMVECTOR v2 = XMLoadFloat3(&V);
+    XMVECTOR X = XMVectorDivide(v1, v2);
+    XMStoreFloat3(this, X);
+	return *this;
+}
+
 inline Vector3& Vector3::operator*= (float S) noexcept
 {
     using namespace DirectX;
@@ -1110,6 +1139,14 @@ inline void Vector3::Clamp(const Vector3& vmin, const Vector3& vmax, Vector3& re
     XMVECTOR v3 = XMLoadFloat3(&vmax);
     XMVECTOR X = XMVectorClamp(v1, v2, v3);
     XMStoreFloat3(&result, X);
+}
+
+inline void Vector3::Floor() noexcept
+{
+    using namespace DirectX;
+    XMVECTOR v1 = XMLoadFloat3(this);
+    XMVECTOR X = XMVectorFloor(v1);
+    XMStoreFloat3(this, X);
 }
 
 inline Vector3 Vector3::ClampLength(const Vector3& v, float min, float max) noexcept
@@ -1529,6 +1566,16 @@ inline Vector4& Vector4::operator*= (const Vector4& V) noexcept
     return *this;
 }
 
+inline Vector4& Vector4::operator/=(const Vector4& V) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR v1 = XMLoadFloat4(this);
+    XMVECTOR v2 = XMLoadFloat4(&V);
+    XMVECTOR X = XMVectorDivide(v1, v2);
+    XMStoreFloat4(this, X);
+	return *this;
+}
+
 inline Vector4& Vector4::operator*= (float S) noexcept
 {
     using namespace DirectX;
@@ -1734,6 +1781,14 @@ inline void Vector4::Clamp(const Vector4& vmin, const Vector4& vmax, Vector4& re
     XMVECTOR v3 = XMLoadFloat4(&vmax);
     XMVECTOR X = XMVectorClamp(v1, v2, v3);
     XMStoreFloat4(&result, X);
+}
+
+inline void Vector4::Floor() noexcept
+{
+    using namespace DirectX;
+    XMVECTOR v1 = XMLoadFloat4(this);
+    XMVECTOR X = XMVectorFloor(v1);
+	XMStoreFloat4(this, X);
 }
 
 //------------------------------------------------------------------------------

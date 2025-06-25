@@ -107,7 +107,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input
     output.tangentWS = normalInputs.tangentWS;
     output.bitangentWS = normalInputs.bitangentWS;
     
-    output.ShadowPosH = mul(output.positionWS, shadowTransform);
+    output.ShadowPosH = mul(output.positionWS, shadowViewMat);
     
     output.uv = input.uv;
     
@@ -324,13 +324,14 @@ VS_OUTPUT VS_GPass(VS_INPUT input
     output.tangentWS = normalInputs.tangentWS;
     output.bitangentWS = normalInputs.bitangentWS;
     
-    matrix scaleMat = matrix(1.2f, 0.f, 0.f, 0.f,
-                        0.f, 1.2f, 0.f, 0.f,
-                        0.f, 0.f, 1.2f, 0.f,
-                        0.f, 0.f, 0.f, 1.2f);
+    matrix scaleMat = matrix(1.f, 0.f, 0.f, 0.f,
+                        0.f, 1.f, 0.f, 0.f,
+                        0.f, 0.f, 1.f, 0.f,
+                        0.f, 0.f, 0.f, 1.f);
     
-    float4 scaledPos = mul(scaleMat, float4(position, 1.f));
-    output.ShadowPosH = mul(scaledPos, shadowTransform);
+    float shadowNormalBias = 0.01f;
+    float3 offsetPos = output.positionWS.xyz + shadowNormalBias * normalize(output.normalWS);
+    output.ShadowPosH = mul(float4(offsetPos, 1.f), shadowViewMat);
     
     output.uv = input.uv;
     
@@ -348,7 +349,6 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float3 worldTangent = normalize(input.tangentWS);
     float3 worldBitangent = normalize(input.bitangentWS);
     float2 uv = input.uv;
-    
     
     if (ForwardTexIdx != -1)
     {

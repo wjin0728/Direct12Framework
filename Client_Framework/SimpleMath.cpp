@@ -37,6 +37,8 @@ namespace DirectX
         const Vector3 Vector3::Left = { -1.f, 0.f, 0.f };
         const Vector3 Vector3::Forward = { 0.f, 0.f, -1.f };
         const Vector3 Vector3::Backward = { 0.f, 0.f, 1.f };
+		const Vector3 Vector3::FLTMax = { FLT_MAX, FLT_MAX, FLT_MAX };
+		const Vector3 Vector3::FLTMin = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
         const Vector4 Vector4::Zero = { 0.f, 0.f, 0.f, 0.f };
         const Vector4 Vector4::One = { 1.f, 1.f, 1.f, 1.f };

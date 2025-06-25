@@ -1,6 +1,8 @@
 #include"Paramiters.hlsl"
 #include"Utility.hlsl"
 
+//#define RENDER_SHADOW_MAP
+
 float4 VS_FinalPass(uint vertexID : SV_VertexID) : SV_Position
 {
     float2 pos[3] =
@@ -16,7 +18,13 @@ float4 VS_FinalPass(uint vertexID : SV_VertexID) : SV_Position
 float4 PS_FinalPass(float4 position : SV_Position) : SV_Target
 {
     float2 uv = position.xy / renderTargetSize;
+#ifdef RENDER_SHADOW_MAP
+    float4 color = diffuseMap[shadowMapTex].SampleLevel(pointClamp, uv, 0.0);
+    return float4(color.rrr, 1.f);
+#else
     float4 color = diffuseMap[lightingTargetIdx].SampleLevel(pointClamp, uv, 0.0);
-    color.rgb = GammaEncoding(color.rgb);
+    //color.rgb = ToneMapping(color.rgb);
+    //color.rgb = GammaEncoding(color.rgb);
     return float4(color.rgb, finalRenderTargetAlpha.a);
+#endif
 }

@@ -36,11 +36,12 @@ protected:
 	std::vector<int> renderTargetIndices{};
 	int renderPasstype{};
 
-	Matrix UIProjectionMatrix{};
 
+	Matrix UIProjectionMatrix{};
 	float finalTargetAlpha{ 1.f };
 
 public:
+	BoundingBox mSceneAABB{};
 	bool mIsActive{ false };
 	CScene();
 	virtual ~CScene() = default;
@@ -67,6 +68,8 @@ public:
 	std::shared_ptr<CGameObject> FindObjectWithTag(const std::string& tag);
 	std::shared_ptr<CGameObject> FindObjectWithTag(const std::string& renderLayer, const std::string& tag);
 
+	void ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB);
+
 	void AddObject(const std::string& renderLayer, std::shared_ptr<CGameObject> object);
 	void AddObject(std::shared_ptr<CGameObject> object);
 	void RemoveObject(std::shared_ptr<CGameObject> object);
@@ -87,8 +90,8 @@ public:
 
 	void AddRemoveQueue(std::shared_ptr<CGameObject> object);
 
-protected:
 	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);
+protected:
 	void UpdatePassData();
 	void RemoveObjects();
 };

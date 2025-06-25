@@ -168,6 +168,9 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	instance->mName = original->mName;
 	instance->mIsInstancing = original->mIsInstancing;
 	instance->misAwake = false;
+	instance->mLocalAABB = original->mLocalAABB;
+	instance->mWorldAABB = original->mWorldAABB;
+	instance->mCastShadow = original->mCastShadow;
 
 	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
 	if (!instance->mRenderer) {
@@ -204,6 +207,9 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 	instance->mName = original->mName;
 	instance->mIsInstancing = original->mIsInstancing;
 	instance->misAwake = false;
+	instance->mLocalAABB = original->mLocalAABB;
+	instance->mWorldAABB = original->mWorldAABB;
+	instance->mCastShadow = original->mCastShadow;
 
 	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
 	if (!instance->mRenderer) {
@@ -602,7 +608,6 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 			ReadDateFromFile(inFile, boneName);
 			skinnedMeshRenderer->mBoneNames[i] = boneName;
 		}
-		int a = 0; // Debugging purpose, remove later
 	}
 	else if (token == "<Mesh>:") {
 		auto meshRenderer = AddComponent<CMeshRenderer>();
@@ -613,6 +618,8 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 		meshRenderer->SetMesh(meshName);
 	}
 	mRootLocalBS = mRenderer->GetWorldBS();
+	BoundingOrientedBox localOBB = mRenderer->GetWorldOOBB();
+	mLocalAABB = BoundingBox(localOBB.Center, localOBB.Extents);
 
 	int materialCnt{};
 	std::string materialName{};
@@ -627,6 +634,8 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 	if (material && (material->mShaderName.contains("Common") || material->mShaderName.contains("Lit"))) {
 		SetInstancing(false);
 	}
+	if(mTag == "Water" || mTag == "UI" || mTag == "SkyDome") mCastShadow = false;
+	else mCastShadow = true;
 }
 
 void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
@@ -662,6 +671,8 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 	terrain->SetMaterial(material);
 	terrain->MakeNavMap(name + "NavMap", resolution*2);
 
+	mLocalAABB = mWorldAABB = terrain->mWorldAABB;
+
 	INSTANCE(CSceneManager).GetCurScene()->SetTerrain(terrain);
 }
 
@@ -669,6 +680,7 @@ void CGameObject::CreateLightFromFile(std::ifstream& inFile)
 {
 	using namespace BinaryReader;
 
+	//mTransform->LookTo(Vec3(0.02, -0.9f, 0.02).GetNormalized());
 	auto light = AddComponent<CLight>();
 	CBLightsData lightData{};
 	ReadDateFromFile(inFile, lightData.type);

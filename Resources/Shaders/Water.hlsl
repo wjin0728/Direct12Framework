@@ -237,7 +237,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     output.bitangentWS.xyz = normalInputs.bitangentWS;
     output.bitangentWS.w = positionWS.z;
     
-    output.ShadowPosH = mul(positionWS, shadowTransform);
+    output.ShadowPosH = mul(positionWS, shadowViewMat);
         
     output.uv = input.uv;
     

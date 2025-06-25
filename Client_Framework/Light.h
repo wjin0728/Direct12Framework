@@ -65,8 +65,4 @@ public:
 	Vec3 GetWorldPosition() const { return mLightData.position; }
 	Vec3 GetWorldDirection() const { return mLightData.direction; }
 	LIGHT_TYPE GetLightType() const { return (LIGHT_TYPE)mLightData.type; }
-
-private:
-	void UpdateLightCamData();
-	void UpdateLightViewBound();
 };

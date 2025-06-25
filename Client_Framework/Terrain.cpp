@@ -43,6 +43,8 @@ void CTerrain::SetHeightMapGridMesh(const std::shared_ptr<CHeightMapGridMesh>& m
 
 	mQuadTree = std::make_shared<CQuadTree>();
 	mQuadTree->Initialize(mTerrainMesh);
+
+	mWorldAABB = mQuadTree->GetRootBoundingBox();
 }
 
 void CTerrain::SetMaterial(const std::shared_ptr<CTerrainMaterial>& material)

@@ -9,7 +9,6 @@ constexpr auto CASCADE_COUNT = 4;
 struct CBPassData
 {
 	Matrix viewProjMat = Matrix::Identity;
-	Matrix shadowTransform = Matrix::Identity;
 	Matrix viewMat = Matrix::Identity;
 	Vec4 projectionParams;
 
@@ -34,20 +33,21 @@ struct CBPassData
 
 struct CBAllShadowData
 {
-	Matrix shadowMat = Matrix::Identity;
+	Matrix shadowViewMat;
 	Vec3 lightDirection = Vec3::Zero;
 	float shadowMapSize = 1024.0f; 
 	int cascadeCount = CASCADE_COUNT; 
 	float shadowPartition = 0.1f; 
 	float cascadeBlend = 0.1f; 
 	float texelSize = 1.0f / shadowMapSize; 
-	float nativeTexelSize = 1.0f / shadowMapSize; 
-	Vec3 padding0;
-
-	int shadowMapIdx[CASCADE_COUNT]{-1}; 
+	float nativeTexelSize = 1.0f / shadowMapSize;
+	int shadowMapIdx{-1};
+	
+	float minBorder;
+	float maxBorder;
 	Vec4 cascadeOffset[CASCADE_COUNT]; 
 	Vec4 cascadeScale[CASCADE_COUNT]; 
-	Vec4 cascadeFrustumEyeSpaceDepth[CASCADE_COUNT];
+	float cascadeFrustumEyeSpaceDepth[CASCADE_COUNT];
 };
 
 struct CBObjectData

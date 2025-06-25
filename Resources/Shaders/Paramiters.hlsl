@@ -3,7 +3,7 @@
 
 #define TEXTURE_COUNT 300
 #define TERRAIN_SPLAT_COUNT 2
-#define CASCADE_COUNT_FLAG 3
+#define CASCADE_COUNT 4
 #define MAX_VERTEX_INFLUENCES 4
 #define LIGHTING
 
@@ -18,7 +18,6 @@ static const float a2 = 0.0001f;
 cbuffer CBPassData : register(b0)
 {
     matrix viewProjMat;
-    matrix shadowTransform;
     matrix viewMat;
     float4 projectionParams;
     float3 camPos; 
@@ -40,6 +39,26 @@ cbuffer CBPassData : register(b0)
     int finalTargetIdx;
     float4 finalRenderTargetAlpha;
 };
+
+cbuffer CBAllShadowData : register(b4)
+{
+    Matrix shadowViewMat;
+    float3 lightDirection;
+    float shadowMapSize;
+    int cascadeCount;
+    float shadowPartition;
+    float cascadeBlend;
+    float texelSize;
+    float nativeTexelSize;
+    int shadowMapTex;
+	
+    float minBorder;
+    float maxBorder;
+    float4 cascadeOffset[CASCADE_COUNT];
+    float4 cascadeScale[CASCADE_COUNT];
+    float cascadeFrustumEyeSpaceDepth[CASCADE_COUNT];
+};
+
 cbuffer CBObjectData : register(b1)
 {
     matrix worldMat;

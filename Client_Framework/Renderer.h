@@ -70,4 +70,13 @@ public:
 
     std::shared_ptr<CMaterial> GetMaterial(UINT idx = 0) const { return m_materials[idx]; }
 	BoundingSphere GetWorldBS() const { return mWorldBS; }
+    BoundingOrientedBox GetWorldOOBB() const { return mWorldOOBB; }
+    bool IsDirty() const { return isDirty; }
+    UINT GetDirtyFrame() const { return mDirtyFrame; }
+    void SetWorldBS(const BoundingSphere& bs) { mWorldBS = bs; }
+    void SetWorldOOBB(const BoundingOrientedBox& oobb) { mWorldOOBB = oobb; }
+    void SetDirty(bool dirty) { isDirty = dirty; }
+    void SetDirtyFrame(UINT frame) { mDirtyFrame = frame; }
+    int GetCBVIdx() const { return mCbvIdx; }
+	int GetCBVOffset() const { return mCbvOffset; }
 };
