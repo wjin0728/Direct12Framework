@@ -8,12 +8,13 @@
 MonsterState::IdleState& MonsterState::IdleState::GetInstance() { static MonsterState::IdleState instance; return instance; }
 
 void MonsterState::IdleState::Enter(Monster* monster) {
+	cout << "IdleState Entered!" << endl;
     monster->SetVelocity(0, 0, 0); // 속도 0
 }
 
 void MonsterState::IdleState::Update(Monster* monster) {
-    if (monster->IsPlayerInRange()) {
-        monster->SetState(&MonsterState::RunState::GetInstance());
+    if (monster->_target) {
+        monster->SetState(S_MONSTER_STATE::RUN);
     }
 }
 
@@ -28,35 +29,36 @@ void MonsterState::IdleState::Exit(Monster* monster) {}
 MonsterState::RunState& MonsterState::RunState::GetInstance() { static MonsterState::RunState instance; return instance; }
 
 void MonsterState::RunState::Enter(Monster* monster) {
+	cout << "RunState Entered!" << endl;
     // 이동 시작
 }
 
 void MonsterState::RunState::Update(Monster* monster) {
-
+	monster->_pos += monster->_velocity * TICK_INTERVAL; // 이동 처리
+	if (monster->IsPlayerTooMuchClose()) {
+		monster->SetState(S_MONSTER_STATE::ATTACK);
+		monster->_target = nullptr; // 타겟 초기화 이거는 임시로 해둔거임
+	}
 }
 
 void MonsterState::RunState::Exit(Monster* monster) {}
 
 
 
-// MonsterState::BasicAttackState 구현  =========================================================================
+// MonsterState::AttackState 구현  =========================================================================
 
 
 
-MonsterState::BasicAttackState& MonsterState::BasicAttackState::GetInstance() { static MonsterState::BasicAttackState instance; return instance; }
+MonsterState::AttackState& MonsterState::AttackState::GetInstance() { static MonsterState::AttackState instance; return instance; }
 
-void MonsterState::BasicAttackState::Enter(Monster* monster) {
-    attackTimer = 1.0f; // 공격 지속 시간
+void MonsterState::AttackState::Enter(Monster* monster) {
+	cout << "BasicAttackState Entered!" << endl;
 }
 
-void MonsterState::BasicAttackState::Update(Monster* monster) {
-    attackTimer -= TICK_INTERVAL;
-    if (attackTimer <= 0) {
-        monster->SetState(&MonsterState::IdleState::GetInstance());
-    }
+void MonsterState::AttackState::Update(Monster* monster) {
 }
 
-void MonsterState::BasicAttackState::Exit(Monster* monster) {}
+void MonsterState::AttackState::Exit(Monster* monster) {}
 
 
 

@@ -5,7 +5,7 @@
 PlayerState::IdleState& PlayerState::IdleState::GetInstance() { static PlayerState::IdleState instance; return instance; }
 
 void PlayerState::IdleState::Enter(PlayerCharacter* player) {
-    cout << "Idle 들어왔다리!" << endl;
+    //cout << "Idle 들어왔다리!" << endl;
     player->SetVelocity(0, 0, 0); // 속도 0으로 설정
 }
 
@@ -22,7 +22,7 @@ void PlayerState::IdleState::Exit(PlayerCharacter* player) {}
 PlayerState::RunState& PlayerState::RunState::GetInstance() { static PlayerState::RunState instance; return instance; }
 
 void PlayerState::RunState::Enter(PlayerCharacter* player) {
-	cout << "RUN 들어왔다리!" << endl;
+
 }
 
 void PlayerState::RunState::Update(PlayerCharacter* player) {
@@ -32,7 +32,7 @@ void PlayerState::RunState::Update(PlayerCharacter* player) {
         return;
     }
 
-    player->_pos += (player->_velocity * TICK_INTERVAL);
+    //player->_pos += (player->_velocity * TICK_INTERVAL);
 }
 
 void PlayerState::RunState::Exit(PlayerCharacter* player) {}
@@ -41,7 +41,7 @@ void PlayerState::RunState::Exit(PlayerCharacter* player) {}
 PlayerState::BasicAttackState& PlayerState::BasicAttackState::GetInstance() { static PlayerState::BasicAttackState instance; return instance; }
 void PlayerState::BasicAttackState::Enter(PlayerCharacter* player) {
     player->SetVelocity(0, 0, 0); // 공격 중 이동 멈춤
-	cout << "BasicAttack 들어왔다리!" << endl;
+	//cout << "BasicAttack 들어왔다리!" << endl;
 
     switch (player->_class)
     {
@@ -70,7 +70,7 @@ void PlayerState::BasicAttackState::Exit(PlayerCharacter* player) {}
 PlayerState::RunAttackState& PlayerState::RunAttackState::GetInstance() { static PlayerState::RunAttackState instance; return instance; }
 
 void PlayerState::RunAttackState::Enter(PlayerCharacter* player) {
-    cout << "RunAttack 들어왔다리!" << endl;
+    //cout << "RunAttack 들어왔다리!" << endl;
 }
 
 void PlayerState::RunAttackState::Update(PlayerCharacter* player) {
@@ -92,7 +92,7 @@ PlayerState::JumpState& PlayerState::JumpState::GetInstance() { static PlayerSta
 
 void PlayerState::JumpState::Enter(PlayerCharacter* player) {
     player->SetVelocity(0, 0, 0);
-    cout << "Jump 들어왔다리!" << endl;
+    //cout << "Jump 들어왔다리!" << endl;
 }
 
 void PlayerState::JumpState::Update(PlayerCharacter* player) {
@@ -108,7 +108,7 @@ PlayerState::SkillState& PlayerState::SkillState::GetInstance() { static PlayerS
 
 void PlayerState::SkillState::Enter(PlayerCharacter* player) {
     player->SetVelocity(0, 0, 0); // 스킬 중 이동 멈춤
-	cout << "Skill 들어왔다리!" << endl;
+	//cout << "Skill 들어왔다리!" << endl;
     // 스킬별 동작 호출
     //switch (player->GetSkill()) {
     //case S_ITEM_TYPE::FIRE_ENCHANT: player->OnSkillFireEnchant(); break;
@@ -131,7 +131,7 @@ void PlayerState::SkillState::Exit(PlayerCharacter* player) {}
 PlayerState::HitState& PlayerState::HitState::GetInstance() { static PlayerState::HitState instance; return instance; }
 
 void PlayerState::HitState::Enter(PlayerCharacter* player) {
-	cout << "Hit 들어왔다리!" << endl;
+	//cout << "Hit 들어왔다리!" << endl;
 
 }
 

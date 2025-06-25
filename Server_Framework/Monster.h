@@ -7,7 +7,7 @@
 class Monster : public Object {
 public:
     Vec3 _look_dir;
-    Vec3 _acceleration;
+    Vec3 _speed{2, 0, 2};
 
     S_ENEMY_TYPE _class;
     S_MONSTER_STATE	_state;
@@ -29,7 +29,6 @@ public:
         currentState(&MonsterState::IdleState::GetInstance()),
         previousState(nullptr),
         _look_dir(Vec3(0, 0, 1)),
-        _acceleration(Vec3::Zero),
         _hp(100),
         _barrier(0),
         _on_FireEnchant(false),
@@ -41,7 +40,6 @@ public:
         currentState(&MonsterState::IdleState::GetInstance()),
         previousState(nullptr),
         _look_dir(Vec3(0, 0, 1)),
-        _acceleration(Vec3::Zero),
         _hp(100),
         _barrier(0),
         _on_FireEnchant(false),
@@ -62,13 +60,14 @@ public:
     }
 
     void SetState(MonsterStateMachine* newState);
-    void SetState(uint8_t newState);
+    void SetState(S_MONSTER_STATE newState);
 
     void Update();
 
     void TakeDamage(int damage);
 
-    bool IsPlayerInRange() const;
+    bool IsPlayerInRange(PlayerCharacter* target) const;
+    bool IsPlayerTooMuchClose() const;
 
     void SetTarget();
 };
