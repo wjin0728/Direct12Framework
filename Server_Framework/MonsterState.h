@@ -13,6 +13,8 @@ public:
     virtual void Enter(Monster* monster) = 0;
     virtual void Update(Monster* monster) = 0;
     virtual void Exit(Monster* monster) = 0;
+
+    int pattern_cnt = 3;
 };
 
 namespace MonsterState

@@ -101,6 +101,7 @@ void CEnemyState::OnExitState(UINT8 state)
 
 void CGrassSmallState::Start()
 {
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
 }
 
 void CGrassSmallState::Update()
@@ -129,6 +130,7 @@ void CGrassSmallState::OnExitState(UINT8 state)
 
 void CGrassBigState::Start()
 {
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
 }
 
 void CGrassBigState::Update()

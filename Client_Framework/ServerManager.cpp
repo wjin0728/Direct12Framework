@@ -453,8 +453,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			// cout << "몬스터 look : " << packet->look_x << ", " << packet->look_y << ", " << packet->look_z << endl;
 			
 			auto monsterState =  mEnemies[packet->monsterId]->GetStateMachine();
-			if (monsterState && monsterState->GetState() != packet->monster_state)
+			if (monsterState && monsterState->GetState() != packet->monster_state){
 				monsterState->SetState(packet->monster_state);
+				cout << "몬스터 상태" << monsterState->GetState() << endl;	
+			}
 		}
 		break;
 	}

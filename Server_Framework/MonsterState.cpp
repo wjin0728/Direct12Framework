@@ -36,8 +36,24 @@ void MonsterState::RunState::Enter(Monster* monster) {
 void MonsterState::RunState::Update(Monster* monster) {
 	monster->_pos += monster->_velocity * TICK_INTERVAL; // 이동 처리
 	if (monster->IsPlayerTooMuchClose()) {
-		monster->SetState(S_MONSTER_STATE::ATTACK);
-		monster->_target = nullptr; // 타겟 초기화 이거는 임시로 해둔거임
+        monster->SetState(S_MONSTER_STATE::SKILL);
+   //     switch (rand() % pattern_cnt)
+   //     {
+   //     case 0: {
+   //         monster->SetState(S_MONSTER_STATE::ATTACK);
+			//break;
+   //     }
+   //     case 1: {
+			//monster->SetState(S_MONSTER_STATE::SKILL);
+			//break;
+   //     }
+   //     case 2: {
+			//monster->SetState(S_MONSTER_STATE::SKILL); // 원거리?
+			//break;
+   //     }
+   //     default:
+   //         break;
+   //     }
 	}
 }
 
@@ -75,7 +91,7 @@ void MonsterState::SkillState::Enter(Monster* monster) {
 void MonsterState::SkillState::Update(Monster* monster) {
     skillTimer -= TICK_INTERVAL;
     if (skillTimer <= 0) {
-        monster->SetState(&MonsterState::IdleState::GetInstance());
+        monster->SetState(S_MONSTER_STATE::IDLE);
     }
 }
 
