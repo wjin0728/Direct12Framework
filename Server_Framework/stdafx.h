@@ -18,6 +18,8 @@
 
 #include "ENUM.h"
 #include "protocol.h"
+#include "../Client_Framework/BinaryReader.h"
+#include "../Client_Framework/AnimationEnums.h"
 
 #include <DirectXMath.h>
 #include <DirectXCollision.h>

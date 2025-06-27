@@ -86,7 +86,7 @@ CAnimationTrack::~CAnimationTrack()
 void CAnimationTrack::HandleCallback(std::shared_ptr<CAnimationEventHandler>& registry)
 {
 	for (auto& key : mEventKeys) {
-		if (SimpleMath::IsEqual(key->mTime, mPosition, ANIMATION_CALLBACK_EPSILON) && key->mEnable) {
+		if (key->mTime < mPosition && key->mEnable) {
 			auto event = registry->GetEvent(key->mName);
 			if (event) {
 				event(mPosition);
@@ -253,6 +253,10 @@ void CAnimationController::Start()
 }
 
 void CAnimationController::Update()
+{
+}
+
+void CAnimationController::PrepareSkinning()
 {
 }
 
