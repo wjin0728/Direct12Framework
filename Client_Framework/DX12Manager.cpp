@@ -147,7 +147,7 @@ void CDX12Manager::ChangeSwapChainState()
 void CDX12Manager::InitDescriptorHeaps()
 {
 	descriptorHeaps = std::make_shared<CDescriptorHeaps>();
-	descriptorHeaps->Initialize(0, TEXTURE_COUNT, CUBE_MAP_COUNT,0);
+	descriptorHeaps->Initialize(0, TEXTURE_COUNT, CUBE_MAP_COUNT,200);
 }
 
 void CDX12Manager::InitRenderTargetGroups()
