@@ -181,6 +181,9 @@
     <ClInclude Include="LoadScene.h" />
     <ClInclude Include="MiniGame.h" />
     <ClInclude Include="ObjectState.h" />
+    <ClInclude Include="ParticleEmitter.h" />
+    <ClInclude Include="ParticleManager.h" />
+    <ClInclude Include="ParticleRenderer.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerState.h" />
     <ClInclude Include="Renderer.h" />
@@ -245,6 +248,9 @@
     <ClCompile Include="LoadScene.cpp" />
     <ClCompile Include="MiniGame.cpp" />
     <ClCompile Include="ObjectState.cpp" />
+    <ClCompile Include="ParticleEmitter.cpp" />
+    <ClCompile Include="ParticleManager.cpp" />
+    <ClCompile Include="ParticleRenderer.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerState.cpp" />
     <ClCompile Include="Renderer.cpp" />

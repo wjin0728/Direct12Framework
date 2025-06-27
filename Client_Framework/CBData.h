@@ -129,3 +129,56 @@ struct CBUIData
 	Vec4 vec4Data0{};
 	Vec4 vec4Data1{};
 };
+
+struct EmitterProperties
+{
+	Vec3 lastEmitPosW;
+	float emitSpeed;
+	Vec3 emitPosW;
+	float floorHeight;
+	Vec3 emitDirW;
+	float restitution;
+	Vec3 emitRightW;
+	float emitterVelocitySensitivity;
+	Vec3 emitUpW;
+	uint32_t maxParticles;
+	Vec3 gravity;
+	uint32_t textureID;
+	Vec3 emissiveColor;
+	float pad1;
+	XMUINT4 randIndex[64];
+};
+
+struct ParticleSpawnData
+{
+	float ageRate;
+	float rotationSpeed;
+	float startSize;
+	float endSize;
+	Vec3 velocity; float mass;
+	Vec3 spreadOffset; float random;
+	Color startColor;
+	Color endColor;
+};
+
+struct ParticleMotion
+{
+	Vec3 Position;
+	float Mass;
+	Vec3 Velocity;
+	float Age;
+	float Rotation;
+	uint32_t ResetDataIndex;
+};
+
+struct CBParticleData
+{
+	Color color = Vec4::One; // RGBA color
+	Vec3 position = Vec3::Zero;
+	float age = 0.0f; // Age of the particle
+	Vec3 velocity = Vec3::Zero;
+	float size = 1.0f;
+	float rotation = 0.0f;
+	int materialIdx = -1; // Index of the material used for the particle
+	float padding0{}; // Padding to align the structure
+};
