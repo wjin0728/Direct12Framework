@@ -460,6 +460,20 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		break;
 	}
+	case SC_REMOVE_MONSTER: {
+		SC_REMOVE_MONSTER_PACKET* packet = reinterpret_cast<SC_REMOVE_MONSTER_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		scene->RemoveObject(mEnemies[packet->monster_id]);
+		mEnemies.erase(packet->monster_id);
+		break;
+	}
+	case SC_REMOVE_PROJECTILE: {
+		SC_REMOVE_PROJECTILE_PACKET* packet = reinterpret_cast<SC_REMOVE_PROJECTILE_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		scene->RemoveObject(mProjectiles[packet->projectile_id]);
+		mProjectiles.erase(packet->projectile_id);
+		break;
+	}
 	default:
 		break;
 	}

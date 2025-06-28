@@ -21,7 +21,7 @@ struct AnimationInfo {
 
     ANIMATION_TYPE mType = ANIMATION_TYPE::LOOP; //Once, Loop, PingPong, End
 	std::vector<std::shared_ptr<EventKey>> mEventKeys; // 이벤트 키 정보 (투사체 발사 등, 아직 안 넣음)
-};;
+};
 
 class Monster : public Object {
 public:
@@ -30,6 +30,7 @@ public:
 
     S_ENEMY_TYPE _class;
     S_MONSTER_STATE	_state;
+	bool _remove = false;
 
     int _hp;
     int _barrier;
@@ -37,7 +38,7 @@ public:
     bool _on_GrassWeaken;
 
     MonsterStateMachine* currentState;
-    MonsterStateMachine* previousState;
+    S_MONSTER_STATE previousState;
 
     array<PlayerCharacter*, 3>_Player; // 플레이어 타겟
     PlayerCharacter* _target = nullptr;
@@ -48,7 +49,6 @@ public:
         Object(S_OBJECT_TYPE::S_ENEMY),
         _class(S_ENEMY_TYPE::s_end),
         currentState(&MonsterState::IdleState::GetInstance()),
-        previousState(nullptr),
         _look_dir(Vec3(0, 0, 1)),
         _hp(100),
         _barrier(0),
@@ -59,7 +59,6 @@ public:
         Object(S_OBJECT_TYPE::S_ENEMY),
         _class(monster_type),
         currentState(&MonsterState::IdleState::GetInstance()),
-        previousState(nullptr),
         _look_dir(Vec3(0, 0, 1)),
         _hp(100),
         _barrier(0),
@@ -82,7 +81,6 @@ public:
             ReadAnimationInfo("Animations/WaterBig.bin");
             break;
         }
-
         case S_ENEMY_TYPE::GRASS_SMALL: {
             ReadAnimationInfo("Animations/GrassSmall.bin");
             _boundingbox.Center = XMFLOAT3(0, 0.83, 0);

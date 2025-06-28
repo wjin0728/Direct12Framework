@@ -5,7 +5,7 @@ void Monster::SetState(MonsterStateMachine* newState)
 {
     if (currentState) {
         if (newState != &MonsterState::HitState::GetInstance()) {
-            previousState = currentState; 
+            previousState = _state; 
             // MonsterState::HitState로 갈 때는 현재 상태 저장
         }
         currentState->Exit(this);
@@ -29,10 +29,10 @@ void Monster::SetState(S_MONSTER_STATE newState)
         _state = S_MONSTER_STATE::ATTACK;
         SetState(&MonsterState::AttackState::GetInstance());
         break;
-    case S_MONSTER_STATE::SKILL:
-        _state = S_MONSTER_STATE::SKILL;
-        SetState(&MonsterState::SkillState::GetInstance());
-        break;
+	case S_MONSTER_STATE::GETHIT:
+		_state = S_MONSTER_STATE::GETHIT;
+		SetState(&MonsterState::HitState::GetInstance());
+		break;
     case S_MONSTER_STATE::DEATH:
         _state = S_MONSTER_STATE::DEATH;
         SetState(&MonsterState::DeathState::GetInstance());
@@ -60,10 +60,10 @@ void Monster::TakeDamage(int damage)
         if (_hp < 0) _hp = 0;
     }
     if (_hp > 0) {
-        SetState(&MonsterState::HitState::GetInstance());
+        SetState(S_MONSTER_STATE::GETHIT);
     }
     else {
-        // 사망
+		SetState(S_MONSTER_STATE::DEATH);
     }
 }
 

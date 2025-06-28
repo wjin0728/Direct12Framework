@@ -45,7 +45,8 @@ constexpr char SC_CHANGE_SCENE = 16;
 constexpr char SC_ADD_PROJECTILE = 17;
 constexpr char SC_PROJECTILE_POS = 18;
 constexpr char SC_ADD_MONSTER = 19;
-
+constexpr char SC_REMOVE_PROJECTILE = 20;
+constexpr char SC_REMOVE_MONSTER = 21;
 
 
 #pragma pack (push, 1)
@@ -207,5 +208,13 @@ struct SC_ADD_PROJECTILE_PACKET : PACKET {
 struct SC_PROJECTILE_POS_PACKET : PACKET {
 	int projectile_id;
 	float x, y, z;
+};
+
+struct SC_REMOVE_PROJECTILE_PACKET : PACKET {
+	int projectile_id;
+};
+
+struct SC_REMOVE_MONSTER_PACKET : PACKET {
+	int monster_id;
 };
 #pragma pack (pop)

@@ -117,6 +117,15 @@ void SESSION::send_add_projectile_packet(Projectile proj, int id)
 	do_send(&p);
 }
 
+void SESSION::send_remove_projectile_packet(int projectile_id)
+{
+	SC_REMOVE_PROJECTILE_PACKET p;
+	p.type = SC_REMOVE_PROJECTILE;
+	p.size = sizeof(p);
+	p.projectile_id = projectile_id;
+	do_send(&p);
+}
+
 void SESSION::send_add_monster_packet(Monster& monster, int id)
 {
 	SC_ADD_MONSTER_PACKET p;
@@ -128,5 +137,14 @@ void SESSION::send_add_monster_packet(Monster& monster, int id)
 	p.y = monster._pos.y;
 	p.z = monster._pos.z;
 	p.look_y = monster._look_dir.y;
+	do_send(&p);
+}
+
+void SESSION::send_remove_monster_packet(int monster_id)
+{
+	SC_REMOVE_MONSTER_PACKET p;
+	p.type = SC_REMOVE_MONSTER;
+	p.size = sizeof(p);
+	p.monster_id = monster_id;
 	do_send(&p);
 }

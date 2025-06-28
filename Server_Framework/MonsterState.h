@@ -28,6 +28,7 @@ namespace MonsterState
         void Exit(Monster* monster) override;
     private:
         IdleState() {}
+		float idleTimer = 0.0f; // 기본 대기 시간
     };
 
     // Run 상태
@@ -86,7 +87,7 @@ namespace MonsterState
         void Exit(Monster* monster) override;
     private:
         DeathState() {}
-        float hitTimer;
+        float deathTimer;
     };
 }
 
