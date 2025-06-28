@@ -4,6 +4,8 @@
 #include"Mesh.h"
 #include"AnimationEnums.h"
 
+// 제발되게해주세요
+
 struct EventKey
 {
     float mTime = 0.0f;
