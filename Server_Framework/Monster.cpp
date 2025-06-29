@@ -107,6 +107,32 @@ void Monster::SetTarget()
 	}
 }
 
+void Monster::AvoidCollision(const unordered_map<int, Monster>& monsters)
+{
+	const float minDistance = _boundingbox.Extents.x * 2; // 최소 거리
+	const float repelStrength = 0.02f; // 반발력 약화 (0.1f -> 0.02f)
+
+	for (const auto& pair : monsters) {
+		Monster* other = const_cast<Monster*>(&pair.second); // const 제거 (주의)
+		if (other == this) continue;
+
+		Vec3 delta = other->_pos - _pos;
+		float distanceSq = delta.LengthSquared();
+
+		if (distanceSq > 0.0f && distanceSq < minDistance * minDistance) {
+			float distance = sqrt(distanceSq);
+			if (distance < 0.001f) distance = 0.001f;
+			Vec3 repel = -delta / distance * (minDistance - distance) * repelStrength;
+			_pos += repel;
+
+			//Vec3 newDirection = _velocity - (delta / distance) * 0.05f;
+			//if (newDirection.LengthSquared() > 0.001f) {
+			//	_velocity = newDirection.Normalize() * _speed.Length();
+			//}
+		}
+	}
+}
+
 void Monster::ReadAnimationInfo(const std::string& fileName)
 {
     using namespace BinaryReader;

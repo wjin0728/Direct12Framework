@@ -97,7 +97,9 @@ public:
         _active = false;
     }
 
-	void ReadAnimationInfo(const std::string& fileName);
+    void AvoidCollision(const unordered_map<int, Monster>& monsters);
+
+    void ReadAnimationInfo(const std::string& fileName);
 
     void SetState(MonsterStateMachine* newState);
     void SetState(S_MONSTER_STATE newState);

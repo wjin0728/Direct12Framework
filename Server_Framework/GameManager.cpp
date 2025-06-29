@@ -518,6 +518,7 @@ void GameManager::Update() {
 	for (auto& ms : Monsters[ServerNumber]) {
 		if (ms.second._remove) continue; // 몬스터가 제거된 경우는 패스
 		ms.second.Update();
+		ms.second.AvoidCollision(Monsters[ServerNumber]);
 
 		// 몬스터 - 투사체 충돌 체크
 		if (ms.second._hp >= 0) {
