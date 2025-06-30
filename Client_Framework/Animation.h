@@ -23,7 +23,7 @@ enum class ANIMATION_BLEND_TYPE : UINT
     end
 };
 
-struct CALLBACKKEY
+struct EventKey
 {
     float mTime = 0.0f;
     void* mCallbackData = NULL;
