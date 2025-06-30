@@ -81,7 +81,9 @@ public:
 protected:
 	ShaderInfo mInfo;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineStateDesc{};
+	D3D12_COMPUTE_PIPELINE_STATE_DESC* computePipelineStateDesc{};
 	ComPtr<ID3D12PipelineState> d3dPiplineState = ComPtr<ID3D12PipelineState>();
+	ComPtr<ID3D12PipelineState> d3dComputePiplineState = ComPtr<ID3D12PipelineState>();
 
 	ComPtr<ID3DBlob> vsBlob{};
 	ComPtr<ID3DBlob> psBlob{};
@@ -111,5 +113,6 @@ public:
 	
 public:
 	void SetPipelineState(ID3D12GraphicsCommandList* cmdList) { if(d3dPiplineState) cmdList->SetPipelineState(d3dPiplineState.Get()); }
+	void SetComputePipelineState(ID3D12GraphicsCommandList* cmdList) { if (d3dComputePiplineState) cmdList->SetPipelineState(d3dComputePiplineState.Get()); }
 	PASS_TYPE GetShaderType() const { return this->mInfo.shaderType; }
 };

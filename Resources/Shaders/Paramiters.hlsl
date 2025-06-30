@@ -19,6 +19,7 @@ cbuffer CBPassData : register(b0)
 {
     matrix viewProjMat;
     matrix viewMat;
+    matrix invViewMat;
     float4 projectionParams;
     float3 camPos; 
     uint shadowMapIdx; 

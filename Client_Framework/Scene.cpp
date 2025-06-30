@@ -387,7 +387,8 @@ void CScene::UpdatePassData()
 	if (camera) {
 		passData.camPos = camera->GetLocalPosition();
 		passData.viewProjMat = camera->GetViewProjMat().Transpose();
-		passData.viewMat = camera->GetViewMat().Transpose();
+		passData.viewMat = camera->GetInverseViewMat().Transpose();
+		passData.invViewMat = camera->GetViewMat().Transpose();
 		passData.projectionParams = Vec4(camera->GetNear(), camera->GetFar(), camera->GetFov(), camera->GetAspect());
 	}
 	passData.deltaTime = DELTA_TIME;

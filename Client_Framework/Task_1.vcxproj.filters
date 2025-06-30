@@ -503,4 +503,9 @@
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Resources\Shaders\Particle.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>

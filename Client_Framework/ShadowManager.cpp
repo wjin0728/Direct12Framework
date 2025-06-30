@@ -49,7 +49,7 @@ void CShadowManager::Initialize(int cascadeLevels, float shadowMapSize)
 
 
 	mShadowDataCB = std::make_shared<CConstantBuffer>();
-	mShadowDataCB->Initialize(7, ALIGNED_SIZE(sizeof(CBAllShadowData)));
+	mShadowDataCB->Initialize(8, ALIGNED_SIZE(sizeof(CBAllShadowData)));
 
 	auto shadowMap = std::make_shared<CTexture>
 		(

@@ -17,7 +17,7 @@ void CParticleRenderer::LateUpdate()
 {
 }
 
-void CParticleRenderer::Render(std::shared_ptr<CCamera> camera, int pass = 0)
+void CParticleRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
 {
 	
 }

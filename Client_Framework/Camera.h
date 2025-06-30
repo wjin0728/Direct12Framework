@@ -63,6 +63,7 @@ public:
 	const Vec3& GetLocalPosition();
 
 	Matrix GetViewMat() const { return mViewMat; }
+	Matrix GetInverseViewMat() const { return mInverseViewMat; }
 	Matrix GetViewProjMat() const { return mViewPerspectiveProjectMat; }
 	Matrix GetViewOrthoProjMat() const { return mViewOrthographicProjectMat; }
 	Matrix GetPerspectiveProjectMat() const { return mPerspectiveProjectMat; }

@@ -309,6 +309,17 @@ void CResourceManager::LoadDefaultShaders()
 	}
 	{
 		ShaderInfo info;
+		info.shaderType = PASS_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::PARTICLE;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize("Particle", info, "Particle")) Add(shader);
+	}
+	{
+		ShaderInfo info;
 		info.shaderType = PASS_TYPE::STENCIL;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;

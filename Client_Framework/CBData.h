@@ -10,6 +10,7 @@ struct CBPassData
 {
 	Matrix viewProjMat = Matrix::Identity;
 	Matrix viewMat = Matrix::Identity;
+	Matrix invViewMat = Matrix::Identity;
 	Vec4 projectionParams;
 
 	Vec3 camPos = Vec3::Zero;
@@ -146,7 +147,6 @@ struct EmitterProperties
 	uint32_t textureID;
 	Vec3 emissiveColor;
 	float pad1;
-	XMUINT4 randIndex[64];
 };
 
 struct ParticleSpawnData
