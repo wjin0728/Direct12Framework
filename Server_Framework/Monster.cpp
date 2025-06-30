@@ -29,10 +29,6 @@ void Monster::SetState(S_MONSTER_STATE newState)
         _state = S_MONSTER_STATE::ATTACK;
         SetState(&MonsterState::AttackState::GetInstance());
         break;
-    case S_MONSTER_STATE::SKILL:
-        _state = S_MONSTER_STATE::SKILL;
-        SetState(&MonsterState::SkillState::GetInstance());
-        break;
     case S_MONSTER_STATE::DEATH:
         _state = S_MONSTER_STATE::DEATH;
         SetState(&MonsterState::DeathState::GetInstance());

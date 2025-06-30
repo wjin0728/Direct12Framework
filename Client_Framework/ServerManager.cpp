@@ -13,6 +13,7 @@
 #include"ItemMovement.h"
 #include "ObjectState.h"
 #include "EnemyState.h"
+#include "CutScene.h"
 
 void ServerManager::Initialize()
 {
@@ -87,9 +88,13 @@ bool ServerManager::InitPlayerAndCamera()
 	mPlayer->SetActive(false);
 	mPlayer->SetStatic(false);
 
+	auto cutScene = mPlayer->AddComponent<CCutScene>();
+	mPlayer->SetCutScene(cutScene);
+
 	auto playerController = mPlayer->AddComponent<CPlayerController>();
 	mPlayer->SetPlayerController(playerController);
-
+	playerController->SetCutScene(cutScene);
+	
 	mMainCamera = std::make_shared<CGameObject>();
 
 	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
@@ -110,6 +115,7 @@ bool ServerManager::InitPlayerAndCamera()
 	auto playerFollower = mMainCamera->AddComponent<CThirdPersonCamera>();
 	playerFollower->SetTarget(mPlayer);
 	playerController->SetCamera(camera);
+	cutScene->SetThirdPersonCamera(playerFollower);
 
 	return true;
 }
@@ -256,6 +262,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		player->SetActive(true);
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
+
 		auto stateMachine = player->AddComponent<CPlayerStateMachine>(packet->player_class);
 		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 		player->SetStateMachine(stateMachine);

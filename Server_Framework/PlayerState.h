@@ -88,6 +88,18 @@ namespace PlayerState
         float skillTimer;
     };
 
+    // Ultimate 상태
+    class UltimateState : public PlayerStateMachine {
+    public:
+        static UltimateState& GetInstance();
+        void Enter(PlayerCharacter* player) override;
+        void Update(PlayerCharacter* player) override;
+        void Exit(PlayerCharacter* player) override;
+    private:
+        UltimateState() {}
+        float ultimateTimer;
+    };
+    
     // Hit 상태
     class HitState : public PlayerStateMachine {
     public:

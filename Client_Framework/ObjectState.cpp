@@ -3,6 +3,7 @@
 #include "PlayerController.h"
 #include "Animation.h"
 #include "ServerManager.h"
+#include "CutScene.h"
 
 void CPlayerStateMachine::Awake()
 {
@@ -21,19 +22,19 @@ void CPlayerStateMachine::Update()
 		return;
 	}
 	if (controller->mTracks.front()->mType == ANIMATION_TYPE::END) {
-		switch (currentState) {
-		case (UINT8)PLAYER_STATE::JUMP:
-		case (UINT8)PLAYER_STATE::FALLING:
-		case (UINT8)PLAYER_STATE::GATHERING:
-		case (UINT8)PLAYER_STATE::GETHIT:
-		case (UINT8)PLAYER_STATE::ATTACK:
-		case (UINT8)PLAYER_STATE::RUNATTACK:
-		case (UINT8)PLAYER_STATE::SKILL:
-		case (UINT8)PLAYER_STATE::ULTIMATE:
+		switch ((PLAYER_STATE)currentState) {
+		case PLAYER_STATE::JUMP:
+		case PLAYER_STATE::FALLING:
+		case PLAYER_STATE::GATHERING:
+		case PLAYER_STATE::GETHIT:
+		case PLAYER_STATE::ATTACK:
+		case PLAYER_STATE::RUNATTACK:
+		case PLAYER_STATE::SKILL:
+		case PLAYER_STATE::ULTIMATE:
 			SetState((UINT8)PLAYER_STATE::IDLE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			break;
-		case (UINT8)PLAYER_STATE::DEATH:
+		case PLAYER_STATE::DEATH:
 			break;
 		default:
 			break;
@@ -49,6 +50,7 @@ void CPlayerStateMachine::OnEnterState(UINT8 state)
 	}
 
 	controller->SetTrackAnimationSet(0, (int)state);
+	auto cutscene = owner->GetComponentFromHierarchy<CCutScene>();
 
 	switch ((PLAYER_STATE)state) {
 	case PLAYER_STATE::IDLE:
@@ -62,6 +64,10 @@ void CPlayerStateMachine::OnEnterState(UINT8 state)
 	case PLAYER_STATE::DEATH:
 	case PLAYER_STATE::JUMP:
 	case PLAYER_STATE::SKILL:
+		break;
+	case PLAYER_STATE::ULTIMATE:
+		if (cutscene && !cutscene->GetEnable())
+			cutscene->PlayCutScene();
 		break;
 	default:
 		break;

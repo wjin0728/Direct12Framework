@@ -4,8 +4,6 @@
 #include"Mesh.h"
 #include"AnimationEnums.h"
 
-// 제발되게해주세요
-
 struct EventKey
 {
     float mTime = 0.0f;
@@ -93,9 +91,14 @@ public:
     float 						    	mWeight = 1.0f;
 	float                               mTrackProgress = 0.0f; //0.0f ~ 1.0f
 
+    int 							    mSetIndex = 0; //AnimationSet Index
+    
     std::vector<shared_ptr<EventKey>>   mEventKeys;
 
-    int 							    mSetIndex = 0; //AnimationSet Index
+	bool mSlowEnable = false;
+    float mSlowStart = 0;
+	float mSlowEnd = 0;
+    float mSlowSpeed = 0.07f;
 
 public:
 

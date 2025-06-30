@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Component.h"
-#include "CEntityState.h"
+#include "EntityState.h"
 
 class CPlayerStateMachine : public CEntityState
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "CEntityState.h"
+#include "EntityState.h"
 
 class CEnemyState :
     public CEntityState

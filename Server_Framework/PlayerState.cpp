@@ -142,3 +142,19 @@ void PlayerState::HitState::Update(PlayerCharacter* player) {
 void PlayerState::HitState::Exit(PlayerCharacter* player) {
 
 }
+
+// PlayerState::UltimateState 구현
+PlayerState::UltimateState& PlayerState::UltimateState::GetInstance() { static PlayerState::UltimateState instance; return instance; }
+
+void PlayerState::UltimateState::Enter(PlayerCharacter* player) {
+    //cout << "Ultimate 들어왔다리!" << endl;
+
+}
+
+void PlayerState::UltimateState::Update(PlayerCharacter* player) {
+    //cout << "Ultimate 업데이트 중!" << endl;
+}
+
+void PlayerState::UltimateState::Exit(PlayerCharacter* player) {
+
+}
