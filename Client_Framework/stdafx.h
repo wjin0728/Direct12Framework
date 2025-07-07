@@ -93,103 +93,109 @@ using SimpleMath::Color;
 template<typename T>
 using StrDic = std::unordered_map<std::string, std::shared_ptr<T>>;
 
-namespace RandomNumberGenerator
+class RandomNumberGenerator
 {
-	std::random_device m_rd;
-	std::minstd_rand m_gen(m_rd());
+public:
+    // --- static ÇÔ¼öµé ---
+    static int32_t RandInt()
+    {
+        return std::uniform_int_distribution<int32_t>(0x80000000, 0x7FFFFFFF)(GetEngine());
+    }
 
-	int32_t RandInt(void)
-	{
-		return std::uniform_int_distribution<int32_t>(0x80000000, 0x7FFFFFFF)(m_gen);
-	}
+    static int32_t RandInt(int32_t MaxVal)
+    {
+        return std::uniform_int_distribution<int32_t>(0, MaxVal)(GetEngine());
+    }
 
-	int32_t RandInt(int32_t MaxVal)
-	{
-		return std::uniform_int_distribution<int32_t>(0, MaxVal)(m_gen);
-	}
+    static int32_t RandInt(int32_t MinVal, int32_t MaxVal)
+    {
+        return std::uniform_int_distribution<int32_t>(MinVal, MaxVal)(GetEngine());
+    }
 
-	int32_t RandInt(int32_t MinVal, int32_t MaxVal)
-	{
-		return std::uniform_int_distribution<int32_t>(MinVal, MaxVal)(m_gen);
-	}
+    static float RandFloat(float MaxVal = 1.0f)
+    {
+        return std::uniform_real_distribution<float>(0.0f, MaxVal)(GetEngine());
+    }
 
-	float RandFloat(float MaxVal = 1.0f)
-	{
-		return std::uniform_real_distribution<float>(0.0f, MaxVal)(m_gen);
-	}
+    static float RandFloat(float MinVal, float MaxVal)
+    {
+        return std::uniform_real_distribution<float>(MinVal, MaxVal)(GetEngine());
+    }
 
-	float RandFloat(float MinVal, float MaxVal)
-	{
-		return std::uniform_real_distribution<float>(MinVal, MaxVal)(m_gen);
-	}
+    static Color RandColor()
+    {
+        return Color(
+            RandFloat(0.0f, 1.0f),
+            RandFloat(0.0f, 1.0f),
+            RandFloat(0.0f, 1.0f),
+            1.0f
+        );
+    }
 
-	Color RandColor()
-	{
-		return Color(
-			std::uniform_real_distribution<float>(0.0f, 1.0f)(m_gen),
-			std::uniform_real_distribution<float>(0.0f, 1.0f)(m_gen),
-			std::uniform_real_distribution<float>(0.0f, 1.0f)(m_gen),
-			1.0f);
-	}
+    static Color RandColor(const Color& c0, const Color& c1)
+    {
+        return Color(
+            RandFloat(c0.x, c1.x),
+            RandFloat(c0.y, c1.y),
+            RandFloat(c0.z, c1.z),
+            1.0f
+        );
+    }
 
-	Color RandColor(const Color& c0, const Color& c1) {
-		return Color(
-			std::uniform_real_distribution<float>(c0.x, c1.x)(m_gen),
-			std::uniform_real_distribution<float>(c0.y, c1.y)(m_gen),
-			std::uniform_real_distribution<float>(c0.z, c1.z)(m_gen),
-			1.0f);
-	}
+    static Vec3 RandVec3(float MinVal = 0.0f, float MaxVal = 1.0f)
+    {
+        return Vec3(
+            RandFloat(MinVal, MaxVal),
+            RandFloat(MinVal, MaxVal),
+            RandFloat(MinVal, MaxVal)
+        );
+    }
 
-	Vec3 RandVec3(float MinVal = 0.0f, float MaxVal = 1.0f)
-	{
-		return Vec3(
-			std::uniform_real_distribution<float>(MinVal, MaxVal)(m_gen),
-			std::uniform_real_distribution<float>(MinVal, MaxVal)(m_gen),
-			std::uniform_real_distribution<float>(MinVal, MaxVal)(m_gen));
-	}
+    static Vec3 RandUniformVec3()
+    {
+        float z = RandFloat(-1.0f, 1.0f);
+        float theta = RandFloat(0.0f, XM_2PI);
+        float r = sqrtf(1.0f - z * z);
+        return Vec3(r * cosf(theta), r * sinf(theta), z);
+    }
 
-	Vec3 RandVec3(const Vec3& MinVal, const Vec3& MaxVal)
-	{
-		return Vec3(
-			std::uniform_real_distribution<float>(MinVal.x, MaxVal.x)(m_gen),
-			std::uniform_real_distribution<float>(MinVal.y, MaxVal.y)(m_gen),
-			std::uniform_real_distribution<float>(MinVal.z, MaxVal.z)(m_gen));
-	}
+    static Vec3 RandVec3(const Vec3& MinVal, const Vec3& MaxVal)
+    {
+        return Vec3(
+            RandFloat(MinVal.x, MaxVal.x),
+            RandFloat(MinVal.y, MaxVal.y),
+            RandFloat(MinVal.z, MaxVal.z)
+        );
+    }
 
-	Vec2 RandVec2(float MinVal = 0.0f, float MaxVal = 1.0f)
-	{
-		return Vec2(
-			std::uniform_real_distribution<float>(MinVal, MaxVal)(m_gen),
-			std::uniform_real_distribution<float>(MinVal, MaxVal)(m_gen));
-	}
+    static Vec2 RandVec2(float MinVal = 0.0f, float MaxVal = 1.0f)
+    {
+        return Vec2(
+            RandFloat(MinVal, MaxVal),
+            RandFloat(MinVal, MaxVal)
+        );
+    }
 
-	Vec2 RandVec2(const Vec2& MinVal, const Vec2& MaxVal)
-	{
-		return Vec2(
-			std::uniform_real_distribution<float>(MinVal.x, MaxVal.x)(m_gen),
-			std::uniform_real_distribution<float>(MinVal.y, MaxVal.y)(m_gen));
-	}
+    static Vec2 RandVec2(const Vec2& MinVal, const Vec2& MaxVal)
+    {
+        return Vec2(
+            RandFloat(MinVal.x, MaxVal.x),
+            RandFloat(MinVal.y, MaxVal.y)
+        );
+    }
 
-	void SetSeed(uint32_t s)
-	{
-		m_gen.seed(s);
-	}
+    static void SetSeed(uint32_t seed)
+    {
+        GetEngine().seed(seed);
+    }
 
-}
-
-inline XMFLOAT4 GetRandomColor() {
-	std::random_device rd;
-	std::default_random_engine dre(rd());
-	std::uniform_real_distribution<float> randColor(0, 1);
-
-	return XMFLOAT4(randColor(dre), randColor(dre), randColor(dre), 1.f);
-}
-
-inline float GetRandBetween(float min, float max) {
-	static std::mt19937 rng{ std::random_device{}() };
-	std::uniform_real_distribution<float> dist(min, max);
-	return dist(rng);
-}
+private:
+    static std::minstd_rand& GetEngine()
+    {
+        static std::minstd_rand gen{ std::random_device{}() };
+        return gen;
+    }
+};
 
 inline std::wstring AnsiToWString(const std::string& str)
 {

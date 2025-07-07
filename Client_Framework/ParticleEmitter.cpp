@@ -3,80 +3,128 @@
 #include"Timer.h"
 #include"Transform.h"
 #include"ParticleManager.h"
+#include"ResourceManager.h"
+#include"Texture.h"
 
-CParticleEmitter::CParticleEmitter(const ParticleProperties& particleProperties)
+Vec3 Gradient::EvaluateColor(float t)
 {
-	mParticleProperties = particleProperties;
+	if (colorKeys.empty()) return Color(1, 1, 1, 1);
+
+	if (t <= colorKeys.front().time) return colorKeys.front().color;
+	if (t >= colorKeys.back().time)  return colorKeys.back().color;
+
+	for (size_t i = 1; i < colorKeys.size(); ++i)
+	{
+		if (t < colorKeys[i].time)
+		{
+			float t0 = colorKeys[i - 1].time;
+			float t1 = colorKeys[i].time;
+			float f = (t - t0) / (t1 - t0);
+			Vec3 c0 = colorKeys[i - 1].color;
+			Vec3 c1 = colorKeys[i].color;
+			return Vec3::Lerp(c0, c1, f);
+		}
+	}
+	return colorKeys.back().color;
+}
+
+float Gradient::EvaluateAlpha(float t)
+{
+	if (alphaKeys.empty()) return 1.0f;
+	if (t <= alphaKeys.front().time) return alphaKeys.front().alpha;
+	if (t >= alphaKeys.back().time)  return alphaKeys.back().alpha;
+	for (size_t i = 1; i < alphaKeys.size(); ++i)
+	{
+		if (t < alphaKeys[i].time)
+		{
+			float t0 = alphaKeys[i - 1].time;
+			float t1 = alphaKeys[i].time;
+			float f = (t - t0) / (t1 - t0);
+			float a0 = alphaKeys[i - 1].alpha;
+			float a1 = alphaKeys[i].alpha;
+			return lerp(a0, a1, f);
+		}
+	}
+	return alphaKeys.back().alpha;
+}
+
+
+CParticleEmitter::CParticleEmitter(UINT maxParticleNum)
+{
+	ZeroMemory(&mParticleProperties, sizeof(ParticleProperties));
+	mParticles.reserve(maxParticleNum);
+	mSpawnData.reserve(maxParticleNum);
 	mTimeSinceLastEmit = 0.f;
+	mIsActive = false;
 }
 
 CParticleEmitter::~CParticleEmitter()
 {
-	INSTANCE(CParticleManager).RemoveParticleEmitter(this);
 	mSpawnData.clear();
 	mParticles.clear();
-	mParticleVertices.clear();
-	mParticleProperties.EmitProperties.lastEmitPosW = Vec3::Zero;
-	mParticleProperties.EmitProperties.emitPosW = Vec3::Zero;
+	mLastEmitPosW = Vec3(0.f, 0.f, 0.f);
+	mEmitterTransform = Matrix::Identity;
 }
 
-void CParticleEmitter::Initialize()
+void CParticleEmitter::Initialize(ParticleProperties* particleProperties)
 {
-	using namespace RandomNumberGenerator;
+	mParticleProperties = particleProperties;
+	if (mParticleProperties->maxParticles <= 0) {
+		mIsActive = false;
+		return;
+	}
 	mSpawnData.clear();
-	mSpawnData.reserve(mParticleProperties.EmitProperties.maxParticles);
-	for (uint32_t i = 0; i < mParticleProperties.EmitProperties.maxParticles; ++i) {
+	for (uint32_t i = 0; i < mParticleProperties->maxParticles; ++i) {
 		ParticleSpawnData data;
-		data.ageRate = 1.f / RandFloat(mParticleProperties.lifeMinMax.x, mParticleProperties.lifeMinMax.y);
-		data.rotationSpeed = RandFloat();
-		data.startSize = RandFloat(mParticleProperties.size.x, mParticleProperties.size.y);
-		data.endSize = RandFloat(mParticleProperties.size.z, mParticleProperties.size.w);
-		float horizontalAngle = RandFloat(XM_2PI);
-		float horizontalVelocity = RandFloat(mParticleProperties.velocity.x, mParticleProperties.velocity.y);
-		data.velocity.x = horizontalVelocity * cosf(horizontalAngle);
-		data.velocity.y = RandFloat(mParticleProperties.velocity.z, mParticleProperties.velocity.w);
-		data.velocity.z = horizontalVelocity * sinf(horizontalAngle);
-		data.mass = RandFloat(mParticleProperties.massMinMax.x, mParticleProperties.massMinMax.y);
-		data.spreadOffset = RandVec3(-mParticleProperties.spread, mParticleProperties.spread);
-		data.startColor = RandColor(mParticleProperties.MinStartColor, mParticleProperties.MaxStartColor);
-		data.endColor = RandColor(mParticleProperties.MinEndColor, mParticleProperties.MaxEndColor);
-		data.random = RandFloat();
+		data.ageRate = 1.f / mParticleProperties->startLifetimeCurve.GetRandomValue(RandomNumberGenerator::RandomNumberGenerator::RandFloat(0.f, 1.f));
+		data.rotationSpeed = RandomNumberGenerator::RandFloat();
+		data.startLocation = mParticleProperties->EmitShapeModule.GetRandomPosition();
+		data.direction = mParticleProperties->EmitShapeModule.GetRandomDirection();
+		data.startRotation = mParticleProperties->startRotationCurve.GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f));
+		data.startSize = mParticleProperties->startSizeCurve.GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f));
+		data.speed = mParticleProperties->startSpeedCurve.GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f));
+		data.startColor = mParticleProperties->startColorGradient.Evaluate(RandomNumberGenerator::RandFloat(0.f, 1.f));
+		data.random = RandomNumberGenerator::RandFloat();
 		mSpawnData.push_back(data);
 	}
 	mParticles.clear();
-	mParticles.reserve(mParticleProperties.EmitProperties.maxParticles);
-	for (uint32_t i = 0; i < mParticleProperties.EmitProperties.maxParticles; ++i) {
+	for (uint32_t i = 0; i < mParticleProperties->maxParticles; ++i) {
 		mParticles.emplace_back();
 	}
 }
 
-void CParticleEmitter::Awake()
+void CParticleEmitter::Release()
 {
-	
-	
-}
-
-void CParticleEmitter::Start()
-{
-	if (mParticleProperties.EmitProperties.maxParticles <= 0) {
-		return;
-	}
-	SetEmitterLocation(GetTransform()->GetWorldPosition());
-
-	INSTANCE(CParticleManager).AddParticleEmitter(this);
-}
-
-void CParticleEmitter::Update()
-{
-	SetEmitterLocation(GetTransform()->GetWorldPosition());
+	mTimeSinceLastEmit = 0.f;
+	ZeroMemory(&mParticleProperties, sizeof(ParticleProperties));
+	mSpawnData.clear();
+	mParticles.clear();
 }
 
 int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr)
 {
+	if (!mIsActive || mParticleProperties->maxParticles <= 0) {
+		return 0;
+	}
+
 	float deltaTime = DELTA_TIME;
-	mTimeSinceLastEmit += deltaTime;
-	if (mTimeSinceLastEmit >= mParticleProperties.emitRate) {
+	if(!mIsPaused){
+		mTimeSinceLastEmit += deltaTime;
+		mTotalTime += deltaTime;
+	}
+
+	float emitRate = 0.f;
+	if (mParticleProperties->emitRate.type == MinMaxCurve::CurveType::Constant) {
+		emitRate = 1.f / std::get<float>(mParticleProperties->emitRate.data);
+	}
+	else if (mParticleProperties->emitRate.type == MinMaxCurve::CurveType::Curve) {
+		float t_curve = mParticleProperties->duration / mTotalTime;
+		emitRate = 1.f / mParticleProperties->emitRate.GetRandomValue(t_curve);
+	}
+
+	if (!mIsPaused && (mTimeSinceLastEmit >= emitRate)) {
 		EmitParticles();
+		mLastEmitPosW = Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
 		mTimeSinceLastEmit = 0.f;
 	}
 
@@ -88,12 +136,11 @@ int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr)
 			continue; 
 		}
 		particle.Position += particle.Velocity * deltaTime;
-		particle.Velocity += mParticleProperties.EmitProperties.gravity * deltaTime * particle.Mass;
-		particle.Rotation += spawnDataItem.rotationSpeed * deltaTime;
+		particle.Velocity += mParticleProperties->gravity * deltaTime;
 		dataPtr[activeParticleCount].position = particle.Position;
-		dataPtr[activeParticleCount].size = lerp(spawnDataItem.startSize, spawnDataItem.endSize, particle.Age);
-		dataPtr[activeParticleCount].color = Color::Lerp(spawnDataItem.startColor, spawnDataItem.endColor, particle.Age);
-		dataPtr[activeParticleCount++].color *= particle.Age * (1.0 - particle.Age) * (1.0 - particle.Age) * 6.7;
+		dataPtr[activeParticleCount].size = mParticleProperties->useSizeOverTime ? mParticleProperties->sizeOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startSize : spawnDataItem.startSize;
+		dataPtr[activeParticleCount].color = mParticleProperties->useColorOverTime ? mParticleProperties->colorOverTimeGradient->Evaluate(particle.Age) * spawnDataItem.startColor : spawnDataItem.startColor;
+		dataPtr[activeParticleCount].rotation = mParticleProperties->useRotationOverTime ? mParticleProperties->rotationOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startRotation : spawnDataItem.startRotation;
 	}
 	return activeParticleCount;
 }
@@ -101,30 +148,135 @@ int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr)
 void CParticleEmitter::EmitParticles()
 {
 	for (auto& particle : mParticles) {
-		ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
 		if (particle.Age >= 1.f) {
-			Vec3 randDir = spawnDataItem.velocity.x * mParticleProperties.EmitProperties.emitRightW +
-				spawnDataItem.velocity.y * mParticleProperties.EmitProperties.emitUpW + spawnDataItem.velocity.z * mParticleProperties.EmitProperties.emitDirW;
-			Vec3 emitterVelocity = mParticleProperties.EmitProperties.emitPosW - mParticleProperties.EmitProperties.lastEmitPosW;
-			Vec3 newVelocity = randDir + emitterVelocity * mParticleProperties.EmitProperties.emitterVelocitySensitivity;
-			particle.Velocity = newVelocity + mParticleProperties.EmitProperties.emitPosW * mParticleProperties.EmitProperties.emitSpeed;
-			particle.Position = mParticleProperties.EmitProperties.emitPosW - emitterVelocity * spawnDataItem.random + spawnDataItem.spreadOffset;
-			particle.Mass = spawnDataItem.mass;
-			particle.Age = 0.f;
-			particle.Rotation = 0.f;
 			particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
+			ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
+			particle.Velocity = spawnDataItem.direction * spawnDataItem.speed;
+			particle.Position = spawnDataItem.startLocation + Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
+			particle.Age = 0.f;
+			break; // Emit one particle at a time
 		}
 	}
 }
 
-void CParticleEmitter::Play()
+void CParticleEmitter::Play(const Vec3& pos)
 {
+	SetEmitterLocation(pos);
+	mIsPlaying = true;
+	mIsPaused = false;
+	mTimeSinceLastEmit = 0.f;
+	mTotalTime = 0.f;
+	for (auto& particle : mParticles) {
+		particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
+		particle.Age = 1.f; 
+	}
 }
 
 void CParticleEmitter::Pause()
 {
+	mIsPaused = true;
+	mIsPlaying = false;
+}
+
+void CParticleEmitter::Resume()
+{
+	mIsPaused = false;
+	mIsPlaying = true;
+	mTimeSinceLastEmit = 0.f;
+	for (auto& particle : mParticles) {
+		particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
+	}
+	mLastEmitPosW = Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
 }
 
 void CParticleEmitter::Reset()
 {
+	
+}
+
+void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, ParticleProperties& properties)
+{
+	using namespace BinaryReader;
+
+	std::string token;
+	while (true) {
+		ReadDateFromFile(ifs, token);
+		if (token == "<Duration>:") {
+			ReadDateFromFile(ifs, properties.duration);
+		}
+		else if (token == "<MaxParticles>:") {
+			ReadDateFromFile(ifs, properties.maxParticles);
+		}
+		else if (token == "<RateOverTime>:") {
+			MinMaxCurve::ReadMinMaxCurveFromFile(ifs, properties.emitRate);
+		}
+		else if (token == "<StartColor>:") {
+			Gradient::ReadGradientFromFile(ifs, properties.startColorGradient);
+		}
+		else if (token == "<StartSize>:") {
+			MinMaxCurve::ReadMinMaxCurveFromFile(ifs, properties.startSizeCurve);
+		}
+		else if (token == "<StartSpeed>:") {
+			MinMaxCurve::ReadMinMaxCurveFromFile(ifs, properties.startSpeedCurve);
+		}
+		else if (token == "<StartRotation>:") {
+			MinMaxCurve::ReadMinMaxCurveFromFile(ifs, properties.startRotationCurve);
+		}
+		else if (token == "<StartLifetime>:") {
+			MinMaxCurve::ReadMinMaxCurveFromFile(ifs, properties.startLifetimeCurve);
+		}
+		else if (token == "<UseColorOvetLifeTime>:") {
+			ReadDateFromFile(ifs, properties.useColorOverTime);
+			if (properties.useColorOverTime) {
+				properties.colorOverTimeGradient = std::make_shared<Gradient>();
+				Gradient::ReadGradientFromFile(ifs, *properties.colorOverTimeGradient);
+			}
+			else properties.colorOverTimeGradient = nullptr;
+		}
+		else if (token == "<UseSizeOvetLifeTime>:") {
+			ReadDateFromFile(ifs, properties.useSizeOverTime);
+			if (properties.useSizeOverTime) {
+				properties.sizeOverTimeCurve = std::make_shared<MinMaxCurve>();
+				MinMaxCurve::ReadMinMaxCurveFromFile(ifs, *properties.sizeOverTimeCurve);
+			}
+			else properties.sizeOverTimeCurve = nullptr;
+		}
+		else if (token == "<UseRotationOvetLifeTime>:") {
+			ReadDateFromFile(ifs, properties.useRotationOverTime);
+			if (properties.useRotationOverTime) {
+				properties.rotationOverTimeCurve = std::make_shared<MinMaxCurve>();
+				MinMaxCurve::ReadMinMaxCurveFromFile(ifs, *properties.rotationOverTimeCurve);
+			}
+			else properties.rotationOverTimeCurve = nullptr;
+		}
+		else if (token == "<UseVelocityOvetLifeTime>:") {
+			ReadDateFromFile(ifs, properties.useVelocityOverTime);
+		}
+		else if (token == "<AlbedoTex>:") {
+			std::string texName;
+			ReadDateFromFile(ifs, texName);
+			if (texName == "null") {
+				properties.textureIdx = -1;
+				continue;
+			}
+			if (RESOURCE.Get<CTexture>(texName)) {
+				properties.textureIdx = RESOURCE.Get<CTexture>(texName)->GetSrvIndex();
+				continue;
+			}
+			std::string path = TEXTURE_PATH(texName);
+			auto mainTex = std::make_shared<CTexture>(texName, path);
+			RESOURCE.Add(mainTex);
+
+			properties.textureIdx = mainTex->GetSrvIndex();
+		}
+		else if (token == "<Gravity>:") {
+			ReadDateFromFile(ifs, properties.gravity);
+		}
+		else if(token == "<ShapeType>:") {
+			ShapeModule::ReadShapeModuleFromFile(ifs, properties.EmitShapeModule);
+		}
+		else if (token == "End") {
+			break;
+		}
+	}
 }

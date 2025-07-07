@@ -101,7 +101,7 @@ public:
 
     ANIMATION_TYPE					mType = ANIMATION_TYPE::LOOP; //Once, Loop, PingPong
 
-    std::vector<CALLBACKKEY>        mCallbackKeys{};
+    std::vector<EventKey>        mCallbackKeys{};
 
     std::shared_ptr<CAnimationCallbackHandler> mAnimationCallbackHandler = NULL;
 

@@ -3,6 +3,7 @@
 struct ParticleVertex
 {
     float3 position;
+    float rotation; 
     float4 color;
     float size;
     int albedoTexIdx;
@@ -29,10 +30,13 @@ VS_OUTPUT VS_Forward(uint billboardVertex : SV_VertexID, uint instanceId : SV_In
     output.texIdx = input.albedoTexIdx;
     output.uv = float2((billboardVertex >> 1), (billboardVertex & 1));
     
-    float2 corner = lerp(float2(-1, 1), float2(1, -1), output.uv);
-    float3 position = mul((float3x3) invViewMat, float3(corner * input.size, 0)) + input.position;
-    
-    output.pos = float4(input.position, 1.0f);
+    float2 corner = lerp(float2(-1, 1), float2(1, -1), output.uv) * input.size;
+    corner = float2(
+        corner.x * cos(input.rotation) - corner.y * sin(input.rotation),
+        corner.x * sin(input.rotation) + corner.y * cos(input.rotation)
+    );
+    float3 position = mul((float3x3) invViewMat, float3(corner, 0)) + input.position;
+    output.pos = mul(viewProjMat, float4(position, 1));
     return output;
 }
 

@@ -230,7 +230,6 @@
     <ClInclude Include="ContinuousRotation.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="InstancingManager.h" />
     <ClInclude Include="CEntityState.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
@@ -248,10 +247,13 @@
     <ClInclude Include="ParticleEmitter.h">
       <Filter>ParticleSystem</Filter>
     </ClInclude>
-    <ClInclude Include="ParticleRenderer.h">
+    <ClInclude Include="ParticleAttach.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
     <ClInclude Include="ParticleManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -427,9 +429,6 @@
     <ClCompile Include="ContinuousRotation.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
-    <ClCompile Include="InstancingManager.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="CEntityState.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
@@ -448,10 +447,13 @@
     <ClCompile Include="ParticleEmitter.cpp">
       <Filter>ParticleSystem</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleRenderer.cpp">
+    <ClCompile Include="ParticleAttach.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
     <ClCompile Include="ParticleManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancingManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
@@ -502,10 +504,8 @@
     <None Include="..\Resources\Shaders\Lit.hlsl">
       <Filter>HLSL</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="..\Resources\Shaders\Particle.hlsl">
+    <None Include="..\Resources\Shaders\Particle.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
+    </None>
   </ItemGroup>
 </Project>

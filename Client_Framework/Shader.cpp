@@ -185,8 +185,6 @@ D3D12_BLEND_DESC CShader::InitBlendState()
 		renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
 		renderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
 		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-
-
 		break;
 	case BLEND_TYPE::ADD_BLEND:
 		renderTarget.BlendEnable = TRUE;
@@ -414,7 +412,7 @@ bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, 
 		pipelineStateDesc.NumRenderTargets = 5;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
 		pipelineStateDesc.RTVFormats[1] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		pipelineStateDesc.RTVFormats[2] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		pipelineStateDesc.RTVFormats[2] = DXGI_FORMAT_R16G16B16A16_FLOAT;
 		pipelineStateDesc.RTVFormats[3] = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		pipelineStateDesc.RTVFormats[4] = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		break;

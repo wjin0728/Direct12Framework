@@ -8,6 +8,7 @@
 #include "ObjectPoolManager.h"
 #include "ServerManager.h"
 #include"ShadowManager.h"
+#include"ParticleManager.h"
 #include "Light.h"
 
 //#define USE_FULLSCREEN
@@ -50,7 +51,9 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	INPUT.Initialize(mHwnd);
 
 	INSTANCE(CShadowManager).Initialize(3, 2048.f * 2.f);
+	INSTANCE(CParticleManager).Initialize(1000);
 	RESOURCE.LoadDefaultTexture();
+	INSTANCE(CParticleManager).LoadParticleProperties();
 	INSTANCE(ServerManager).Connect();
 	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::LOADING);
 

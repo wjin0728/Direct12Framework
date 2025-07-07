@@ -3,17 +3,15 @@
 #include"ParticleEmitter.h"
 #include"UploadBuffer.h"
 
-class CParticleRenderer : public CRenderer
+class CParticleAttach : public CComponent
 {
 private:
 	std::shared_ptr<CParticleEmitter> mParticleEmitter = nullptr;
 	float mElapsedTime = 0.0f;
 
-	std::shared_ptr<CStructedBuffer> mParticleBuffer = nullptr;
-
-	public:
-	CParticleRenderer() = default;
-	~CParticleRenderer() override = default;
+public:
+	CParticleAttach() = default;
+	~CParticleAttach() override = default;
 
 public:
 	virtual void Awake() override;
@@ -21,8 +19,5 @@ public:
 
 	virtual void Update() override;
 	virtual void LateUpdate() override;
-
-	virtual void Render(std::shared_ptr<CCamera> camera, int pass = 0);
-	virtual void UpdataObjectDataToShader();
 };
 

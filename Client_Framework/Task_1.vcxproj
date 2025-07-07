@@ -183,7 +183,7 @@
     <ClInclude Include="ObjectState.h" />
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ParticleManager.h" />
-    <ClInclude Include="ParticleRenderer.h" />
+    <ClInclude Include="ParticleAttach.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerState.h" />
     <ClInclude Include="Renderer.h" />
@@ -250,7 +250,7 @@
     <ClCompile Include="ObjectState.cpp" />
     <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="ParticleManager.cpp" />
-    <ClCompile Include="ParticleRenderer.cpp" />
+    <ClCompile Include="ParticleAttach.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerState.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -354,7 +354,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Resources\Shaders\Particle.hlsl" />
+    <None Include="..\Resources\Shaders\Particle.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

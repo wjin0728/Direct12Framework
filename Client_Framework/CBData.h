@@ -131,43 +131,24 @@ struct CBUIData
 	Vec4 vec4Data1{};
 };
 
-struct EmitterProperties
-{
-	Vec3 lastEmitPosW;
-	float emitSpeed;
-	Vec3 emitPosW;
-	float floorHeight;
-	Vec3 emitDirW;
-	float restitution;
-	Vec3 emitRightW;
-	float emitterVelocitySensitivity;
-	Vec3 emitUpW;
-	uint32_t maxParticles;
-	Vec3 gravity;
-	uint32_t textureID;
-	Vec3 emissiveColor;
-	float pad1;
-};
-
 struct ParticleSpawnData
 {
 	float ageRate;
 	float rotationSpeed;
+	float startRotation;
 	float startSize;
-	float endSize;
-	Vec3 velocity; float mass;
-	Vec3 spreadOffset; float random;
+	float speed;
+	Vec3 direction;
+	Vec3 startLocation; 
+	float random;
 	Color startColor;
-	Color endColor;
 };
 
 struct ParticleMotion
 {
 	Vec3 Position;
-	float Mass;
 	Vec3 Velocity;
 	float Age;
-	float Rotation;
 	uint32_t ResetDataIndex;
 };
 
