@@ -33,7 +33,8 @@ private:
 	UINT cbvSrvDescriptorSize{};
 
 	DescriptorHandle dsvStartHandle{};
-	DescriptorHandle srvStartHandle{};
+	DescriptorHandle textureSrvStartHandle{};
+	DescriptorHandle particleSrvStartHandle{};
 	DescriptorHandle cubeMapStartHandle{};
 	DescriptorHandle uavStartHandle{};
 
@@ -47,12 +48,13 @@ public:
 
 	void CreateDSV(std::shared_ptr<CTexture> resource, DS_TYPE type);
 	void CreateSRV(std::shared_ptr<CTexture> resource, UINT idx) const;
+	void CreateSRV(ComPtr<ID3D12Resource> resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, UINT idx) const;
 	void CreateCubeMap(std::shared_ptr<CTexture> resource, UINT idx) const;
 	void CreateUAV(ComPtr<ID3D12Resource> resource, ComPtr<ID3D12Resource> counterResource,
 		D3D12_UNORDERED_ACCESS_VIEW_DESC desc, UINT idx) const;
 	void SetSRVDescriptorHeap();
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE GetDSVHandle(DS_TYPE type) const;
-	DescriptorHandle GetSRVStartHandle() const { return srvStartHandle; }
+	DescriptorHandle GetSRVStartHandle() const { return textureSrvStartHandle; }
 };
 

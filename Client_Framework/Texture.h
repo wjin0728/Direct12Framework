@@ -35,6 +35,7 @@ protected:
 	UINT width = 0;
 	UINT height = 0;
 	size_t dataSize = 0;
+	Vec4 clearColor{ 0.f, 0.f, 0.f, 1.f };
 
 	TEXTURE_TYPE texType{};
 	INT srvIdx = -1;

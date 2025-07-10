@@ -19,6 +19,7 @@ cbuffer CBPassData : register(b0)
 {
     matrix viewProjMat;
     matrix viewMat;
+    matrix invViewMat;
     float4 projectionParams;
     float3 camPos; 
     uint shadowMapIdx; 
@@ -71,6 +72,9 @@ cbuffer CBObjectData : register(b1)
     int idx1;
     int idx2;
     int idx3;
+    int health;
+    int maxHealth;
+    float2 padding1;
 };
 struct CBLightsData
 {

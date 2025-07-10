@@ -17,6 +17,7 @@
 #include"Material.h"
 #include"InstancingGroup.h"
 #include"ServerManager.h"
+#include"ParticleManager.h"
 #include"Light.h"
 
 CBattleScene::CBattleScene() : CScene()

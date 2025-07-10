@@ -20,6 +20,8 @@ private:
 	Matrix mLocalMat = Matrix::Identity;
 	Matrix mTextureMat = Matrix::Identity;
 
+	float mHealth = 1.0f; 
+	float mMaxHealth = 1.0f; 
 
 private:
 	friend CGameObject;

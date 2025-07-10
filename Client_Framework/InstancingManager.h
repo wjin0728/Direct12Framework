@@ -36,10 +36,7 @@ public:
 	void Initialize();
 	void Destroy();
 
-	void AddInstancingGroup(const InstanceKey& key, std::shared_ptr<class CInstancingGroup> group)
-	{
-		mInstancingGroupMap[key] = group;
-	}
+	void AddInstancingGroup(const InstanceKey& key, std::shared_ptr<class CInstancingGroup> group);
 
 	void AddInstancingObject(const InstanceKey& key, std::shared_ptr<class CGameObject> object);
 	void AddInstancingObject(std::shared_ptr<class CGameObject> object);

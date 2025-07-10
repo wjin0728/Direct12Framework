@@ -15,6 +15,7 @@ void CTerrain::Awake()
 
 void CTerrain::Start()
 {
+	mTerrainMaterial->EnrollToPool();
 }
 
 void CTerrain::Update()
@@ -23,6 +24,9 @@ void CTerrain::Update()
 
 void CTerrain::LateUpdate()
 {
+	if (mTerrainMaterial) {
+		mTerrainMaterial->Update();
+	}
 }
 
 void CTerrain::Render(const std::shared_ptr<class CCamera>& camera, int pass)

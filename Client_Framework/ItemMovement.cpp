@@ -30,7 +30,8 @@ void CItemMovement::Update()
 	transform->SetLocalPosition(pos);
 	if (mTargetObject) {
 		Vec3 targetlook = mTargetObject->GetTransform()->GetLocalLook();
-		transform->LookTo(targetlook);
+		targetlook.y = 0.f; 
+		transform->LookTo(targetlook.GetNormalized());
 	}
 }
 

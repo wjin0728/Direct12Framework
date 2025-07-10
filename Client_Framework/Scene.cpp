@@ -17,6 +17,7 @@
 #include"ThirdPersonCamera.h"	
 #include"InstancingManager.h"
 #include"ShadowManager.h"
+#include"ParticleManager.h"
 
 
 CScene::CScene()
@@ -74,6 +75,7 @@ void CScene::Start()
 	INSTANCE(CShadowManager).SetLightCamera(mCameras["DirectionalLight"]);
 	INSTANCE(CShadowManager).SetViewCamera(mCameras["MainCamera"]);
 	INSTANCE(CShadowManager).UpdateSceneBoundingBox(mSceneAABB);
+	INSTANCE(CParticleManager).SetMainCamera(mCameras["MainCamera"]);
 }
 
 void CScene::Update()
@@ -90,8 +92,8 @@ void CScene::LateUpdate()
 	}
 	auto& camera = mCameras["MainCamera"];
 	if(camera) INSTANCE(CInstancingManager).UpdateInstancingGroup(camera);
-	INSTANCE(CResourceManager).UpdateMaterials();
 	INSTANCE(CShadowManager).Update();
+	INSTANCE(CParticleManager).Update();
 	UpdatePassData();
 
 	INSTANCE(CSceneManager).ProcessSceneChangeQueue();
@@ -175,6 +177,7 @@ void CScene::RenderLightingPass()
 	if (camera) {
 		RenderForLayer("Sky", camera, FORWARD);
 		RenderForLayer("Transparent", camera, FORWARD);
+		INSTANCE(CParticleManager).Render();
 	}
 	renderTarget->ChangeTargetsToResources();
 }
@@ -387,6 +390,7 @@ void CScene::UpdatePassData()
 	if (camera) {
 		passData.camPos = camera->GetLocalPosition();
 		passData.viewProjMat = camera->GetViewProjMat().Transpose();
+		passData.invViewMat = camera->GetInverseViewMat().Transpose();
 		passData.viewMat = camera->GetViewMat().Transpose();
 		passData.projectionParams = Vec4(camera->GetNear(), camera->GetFar(), camera->GetFov(), camera->GetAspect());
 	}

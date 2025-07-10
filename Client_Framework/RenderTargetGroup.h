@@ -23,7 +23,7 @@ enum {
 struct RenderTarget
 {
 	std::shared_ptr<CTexture> rt;
-	float clearColor[4] = {0.f, 0.f, 0.f, 1.f};
+	Vec4 clearColor = {0.f, 0.f, 0.f, 1.f};
 };
 
 class CRenderTargetGroup

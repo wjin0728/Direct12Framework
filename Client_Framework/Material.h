@@ -18,7 +18,7 @@ struct PropertyInfo
 
 struct CommonProperties
 {
-	Vec3 mainColor{};
+	Vec4 mainColor{};
 	int mainTexIdx = -1;
 
 	int normalTexIdx = -1;
@@ -130,21 +130,30 @@ protected:
 	std::unordered_map<std::string, PropertyInfo> mProperties{};
 	UINT dataSize{};
 
+	int mCBVIdx{ -1 }; 
 	UINT mPoolOffset{};
 
 	std::array<std::shared_ptr<CShader>, PASS_TYPE::STENCIL> mShaders{};
 
 	UINT mDirtyFrames{FRAME_RESOURCE_COUNT};
 
+	bool mInstantiated{ false };
+
 public:
 	std::string mShaderName{};
 	CMaterial() = default;
 	CMaterial(const CMaterial& other);
 	CMaterial(void* data, UINT dataSize);
+	virtual ~CMaterial();
+
 	static std::shared_ptr<CMaterial> CreateMaterialFromFile(std::ifstream& inFile);
 
 	void Initialize(void* data, UINT dataSize);
 	void SetShader(const std::string& name);
+	std::shared_ptr<CMaterial> Instantiate() const;
+
+	void EnrollToPool();
+	void DischargeFromPool();
 	virtual void Update();
 	virtual bool BindShader(PASS_TYPE passType);
 	virtual void BindDataToShader();
@@ -217,7 +226,9 @@ public:
 
 public:
 	CTerrainMaterial() = default;
+	virtual ~CTerrainMaterial() = default;
 	virtual void Update();
+
 
 	void LoadTerrainData(std::ifstream& inFile);
 	Vec3 GetSize() const { return data.size; }

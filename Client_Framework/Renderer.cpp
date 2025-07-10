@@ -30,6 +30,11 @@ void CRenderer::Start()
 {
 	if (owner->GetInstancing()) return;
 	SetCBVIndex();
+	for(const auto& material : m_materials) {
+		if (material) {
+			material->EnrollToPool();
+		}
+	}
 }
 
 void CRenderer::UpdataObjectDataToShader()
@@ -45,10 +50,21 @@ void CRenderer::UpdataObjectDataToShader()
 		objDate.invWorldMAt = objDate.worldMAt.Invert();
 		objDate.textureMat = GetTransform()->mTextureMat.Transpose();
 		objDate.hitFactor = GetTransform()->mHitFactor;
+		objDate.health = GetTransform()->mHealth;
+		objDate.maxHealth = GetTransform()->mMaxHealth;
 
 		auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
 		objectBuffer->UpdateBuffer(mCbvOffset, &objDate);
 		mDirtyFrame--;
+	}
+}
+
+void CRenderer::UpdateMaterialDataToShader()
+{
+	for (const auto& material : m_materials) {
+		if (material) {
+			material->Update();
+		}
 	}
 }
 

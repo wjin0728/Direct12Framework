@@ -31,6 +31,13 @@ void CStructedBuffer::BindToShader()
 	cmdList->SetGraphicsRootShaderResourceView(rootParamIdx, bufferLocation);
 }
 
+void CStructedBuffer::BindToComputeShader(UINT rootIdx)
+{
+	D3D12_GPU_VIRTUAL_ADDRESS bufferLocation = buffer->GetGPUVirtualAddress();
+	auto cmdList = INSTANCE(CDX12Manager).GetCommandList();
+	cmdList->SetComputeRootShaderResourceView(rootIdx, bufferLocation);
+}
+
 void CStructedBuffer::ReleaseUploadBuffer()
 {
 	if (uploadBuffer != nullptr) {

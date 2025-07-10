@@ -93,13 +93,109 @@ using SimpleMath::Color;
 template<typename T>
 using StrDic = std::unordered_map<std::string, std::shared_ptr<T>>;
 
-inline XMFLOAT4 GetRandomColor() {
-	std::random_device rd;
-	std::default_random_engine dre(rd());
-	std::uniform_real_distribution<float> randColor(0, 1);
+class RandomNumberGenerator
+{
+public:
+    // --- static ÇÔ¼öµé ---
+    static int32_t RandInt()
+    {
+        return std::uniform_int_distribution<int32_t>(0x80000000, 0x7FFFFFFF)(GetEngine());
+    }
 
-	return XMFLOAT4(randColor(dre), randColor(dre), randColor(dre), 1.f);
-}
+    static int32_t RandInt(int32_t MaxVal)
+    {
+        return std::uniform_int_distribution<int32_t>(0, MaxVal)(GetEngine());
+    }
+
+    static int32_t RandInt(int32_t MinVal, int32_t MaxVal)
+    {
+        return std::uniform_int_distribution<int32_t>(MinVal, MaxVal)(GetEngine());
+    }
+
+    static float RandFloat(float MaxVal = 1.0f)
+    {
+        return std::uniform_real_distribution<float>(0.0f, MaxVal)(GetEngine());
+    }
+
+    static float RandFloat(float MinVal, float MaxVal)
+    {
+        return std::uniform_real_distribution<float>(MinVal, MaxVal)(GetEngine());
+    }
+
+    static Color RandColor()
+    {
+        return Color(
+            RandFloat(0.0f, 1.0f),
+            RandFloat(0.0f, 1.0f),
+            RandFloat(0.0f, 1.0f),
+            1.0f
+        );
+    }
+
+    static Color RandColor(const Color& c0, const Color& c1)
+    {
+        return Color(
+            RandFloat(c0.x, c1.x),
+            RandFloat(c0.y, c1.y),
+            RandFloat(c0.z, c1.z),
+            1.0f
+        );
+    }
+
+    static Vec3 RandVec3(float MinVal = 0.0f, float MaxVal = 1.0f)
+    {
+        return Vec3(
+            RandFloat(MinVal, MaxVal),
+            RandFloat(MinVal, MaxVal),
+            RandFloat(MinVal, MaxVal)
+        );
+    }
+
+    static Vec3 RandUniformVec3()
+    {
+        float z = RandFloat(-1.0f, 1.0f);
+        float theta = RandFloat(0.0f, XM_2PI);
+        float r = sqrtf(1.0f - z * z);
+        return Vec3(r * cosf(theta), r * sinf(theta), z);
+    }
+
+    static Vec3 RandVec3(const Vec3& MinVal, const Vec3& MaxVal)
+    {
+        return Vec3(
+            RandFloat(MinVal.x, MaxVal.x),
+            RandFloat(MinVal.y, MaxVal.y),
+            RandFloat(MinVal.z, MaxVal.z)
+        );
+    }
+
+    static Vec2 RandVec2(float MinVal = 0.0f, float MaxVal = 1.0f)
+    {
+        return Vec2(
+            RandFloat(MinVal, MaxVal),
+            RandFloat(MinVal, MaxVal)
+        );
+    }
+
+    static Vec2 RandVec2(const Vec2& MinVal, const Vec2& MaxVal)
+    {
+        return Vec2(
+            RandFloat(MinVal.x, MaxVal.x),
+            RandFloat(MinVal.y, MaxVal.y)
+        );
+    }
+
+    static void SetSeed(uint32_t seed)
+    {
+        GetEngine().seed(seed);
+    }
+
+private:
+    static std::minstd_rand& GetEngine()
+    {
+        static std::minstd_rand gen{ std::random_device{}() };
+        return gen;
+    }
+};
 
 inline std::wstring AnsiToWString(const std::string& str)
 {

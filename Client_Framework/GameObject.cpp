@@ -568,7 +568,6 @@ void CGameObject::CreateAnimationFromFile(const std::string& fileName)
 					}
 				}
 			}
-
 		}
 		else if (token == "</AnimationSets>")
 		{

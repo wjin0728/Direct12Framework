@@ -177,3 +177,8 @@ const Vec3& CCamera::GetLocalPosition()
 {
 	return GetTransform()->GetWorldPosition();
 }
+
+const Vec3& CCamera::GetLook()
+{
+	return GetTransform()->GetWorldLook();
+}

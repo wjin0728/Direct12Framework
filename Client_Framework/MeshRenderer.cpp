@@ -49,6 +49,7 @@ void CMeshRenderer::LateUpdate()
 	m_mesh->oobs.Transform(mWorldBS, GetTransform()->GetWorldMat());
 	m_mesh->oobb.Transform(mWorldOOBB, GetTransform()->GetWorldMat());
 	UpdataObjectDataToShader();
+	UpdateMaterialDataToShader();
 }
 
 void CMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)

@@ -14,6 +14,13 @@ void CShader::CreateGPUResource()
 		OutputDebugStringA((name).c_str());
 		return;
 	}
+	if(computePipelineStateDesc){
+		hr = device->CreateComputePipelineState(computePipelineStateDesc, IID_PPV_ARGS(&d3dComputePiplineState));
+		if (FAILED(hr)) {
+			OutputDebugStringA((name).c_str());
+			return;
+		}
+	}
 	if (pipelineStateDesc.InputLayout.pInputElementDescs)
 		delete[] pipelineStateDesc.InputLayout.pInputElementDescs;
 
@@ -68,19 +75,6 @@ D3D12_INPUT_LAYOUT_DESC CShader::InitInputLayout()
 		break;
 	}
 	case INPUT_LAYOUT_TYPE::PARTICLE: {
-		elementNum = 11;
-		desc = new D3D12_INPUT_ELEMENT_DESC[elementNum];
-		desc[0] = { "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,	0 };
-		desc[1] = { "POSITIONW",	0, DXGI_FORMAT_R32G32B32_FLOAT,		1, 0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[2] = { "SIZE",			0, DXGI_FORMAT_R32G32_FLOAT,	   1, 12, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[3] = { "MATERIAL_IDX", 0, DXGI_FORMAT_R32_UINT,		   1, 20, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[4] = { "texMatrix",	0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 24, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[5] = { "texMatrix",	1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 40, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[6] = { "texMatrix",	2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 56, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[7] = { "texMatrix",	3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 72, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[8] = { "VELOCITY",	0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 88, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[9] = { "TYPE",	0, DXGI_FORMAT_R32_UINT, 1, 100, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
-		desc[10] = { "AGE",	0, DXGI_FORMAT_R32_FLOAT, 1, 104, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 };
 		break;
 	}
 	case INPUT_LAYOUT_TYPE::ANIMATION: {
@@ -191,8 +185,6 @@ D3D12_BLEND_DESC CShader::InitBlendState()
 		renderTarget.SrcBlend = D3D12_BLEND_SRC_ALPHA;
 		renderTarget.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
 		renderTarget.BlendOp = D3D12_BLEND_OP_ADD;
-
-
 		break;
 	case BLEND_TYPE::ADD_BLEND:
 		renderTarget.BlendEnable = TRUE;
@@ -420,7 +412,7 @@ bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, 
 		pipelineStateDesc.NumRenderTargets = 5;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R16G16B16A16_FLOAT;
 		pipelineStateDesc.RTVFormats[1] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		pipelineStateDesc.RTVFormats[2] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		pipelineStateDesc.RTVFormats[2] = DXGI_FORMAT_R16G16B16A16_FLOAT;
 		pipelineStateDesc.RTVFormats[3] = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		pipelineStateDesc.RTVFormats[4] = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		break;

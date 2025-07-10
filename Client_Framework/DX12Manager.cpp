@@ -147,7 +147,8 @@ void CDX12Manager::ChangeSwapChainState()
 void CDX12Manager::InitDescriptorHeaps()
 {
 	descriptorHeaps = std::make_shared<CDescriptorHeaps>();
-	descriptorHeaps->Initialize(0, TEXTURE_COUNT, CUBE_MAP_COUNT,0);
+	UINT particleCnt = 200;
+	descriptorHeaps->Initialize(0, TEXTURE_COUNT + particleCnt, CUBE_MAP_COUNT, particleCnt);
 }
 
 void CDX12Manager::InitRenderTargetGroups()
@@ -202,7 +203,6 @@ void CDX12Manager::InitRenderTargetGroups()
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[1].rt);
 
-
 		//emissive + shadow
 		renderTargets[2].rt = std::make_shared<CTexture>("GBufferEmissive", DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
@@ -210,10 +210,12 @@ void CDX12Manager::InitRenderTargetGroups()
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[2].rt);
 		//position + smoothness
+		renderTargets[3].clearColor = Vec4(-99999.f, -99999.f, -99999.f, 0.f);
 		renderTargets[3].rt = std::make_shared<CTexture>("GBufferPosition", DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, renderTargets[3].clearColor);
+
 		RESOURCE.Add(renderTargets[3].rt);
 
 		//depth
@@ -378,7 +380,7 @@ void CDX12Manager::InitRootSignature()
 	cubeMapTable.RegisterSpace = 2;
 	cubeMapTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[10];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[11];
 	//렌더 패스 정보
 	UINT parameterIndex = 0;
 	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -415,6 +417,11 @@ void CDX12Manager::InitRootSignature()
 	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 0;
 	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 4;
 	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	//파티클 정보
+	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 0;
+	pd3dRootParameters[parameterIndex].Descriptor.RegisterSpace = 5;
+	pd3dRootParameters[parameterIndex++].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//섀도우 정보
 	pd3dRootParameters[parameterIndex].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[parameterIndex].Descriptor.ShaderRegister = 4;
@@ -547,6 +554,7 @@ void CDX12Manager::BeforeRender()
 	ThrowIfFailed(cmdList->Reset(curFrameCmdAlloc.Get(), NULL));
 
 	cmdList->SetGraphicsRootSignature(mRootSignature.Get());
+	cmdList->SetComputeRootSignature(mRootSignature.Get());
 	descriptorHeaps->SetSRVDescriptorHeap();
 	mCurFrameResource->BindStructedBuffers();
 }

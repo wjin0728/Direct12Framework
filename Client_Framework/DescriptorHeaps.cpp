@@ -37,11 +37,11 @@ void CDescriptorHeaps::InitSrvDescriptorHeap(UINT cbvNum, UINT srvNum, UINT cube
 	ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&srvHeap)));
 	cbvSrvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-	srvStartHandle.cpuHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
-	srvStartHandle.gpuHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
+	textureSrvStartHandle.cpuHandle = srvHeap->GetCPUDescriptorHandleForHeapStart();
+	textureSrvStartHandle.gpuHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
 
-	cubeMapStartHandle.cpuHandle.ptr = (srvStartHandle.cpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<size_t>(srvNum));
-	cubeMapStartHandle.gpuHandle.ptr = (srvStartHandle.gpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<size_t>(srvNum));
+	cubeMapStartHandle.cpuHandle.ptr = (textureSrvStartHandle.cpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<size_t>(srvNum));
+	cubeMapStartHandle.gpuHandle.ptr = (textureSrvStartHandle.gpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<size_t>(srvNum));
 
 	uavStartHandle.cpuHandle.ptr = (cubeMapStartHandle.cpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<size_t>(cubeMapNum));
 	uavStartHandle.gpuHandle.ptr = (cubeMapStartHandle.gpuHandle.ptr) + (cbvSrvDescriptorSize * static_cast<size_t>(cubeMapNum));
@@ -58,11 +58,18 @@ void CDescriptorHeaps::CreateDSV(std::shared_ptr<CTexture> resource, DS_TYPE typ
 
 void CDescriptorHeaps::CreateSRV(std::shared_ptr<CTexture> resource, UINT idx) const
 {
-	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = srvStartHandle.cpuHandle;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = textureSrvStartHandle.cpuHandle;
 	handle.ptr += (cbvSrvDescriptorSize * static_cast<size_t>(idx));
 
 	auto srvDesc = resource->GetSRVDesc();
 	DEVICE->CreateShaderResourceView(resource->GetResource().Get(), &srvDesc, handle);
+}
+
+void CDescriptorHeaps::CreateSRV(ComPtr<ID3D12Resource> resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, UINT idx) const
+{
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle = particleSrvStartHandle.cpuHandle;
+	handle.ptr += (cbvSrvDescriptorSize * static_cast<size_t>(idx));
+	DEVICE->CreateShaderResourceView(resource.Get(), &desc, handle);
 }
 
 void CDescriptorHeaps::CreateCubeMap(std::shared_ptr<CTexture> resource, UINT idx) const
@@ -87,8 +94,8 @@ void CDescriptorHeaps::SetSRVDescriptorHeap()
 {
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get() };
 	CMDLIST->SetDescriptorHeaps(1, descriptorHeaps);
-	CMDLIST->SetGraphicsRootDescriptorTable(8, srvStartHandle.gpuHandle);
-	CMDLIST->SetGraphicsRootDescriptorTable(9, cubeMapStartHandle.gpuHandle);
+	CMDLIST->SetGraphicsRootDescriptorTable(9, textureSrvStartHandle.gpuHandle);
+	CMDLIST->SetGraphicsRootDescriptorTable(10, cubeMapStartHandle.gpuHandle);
 }
 
 CD3DX12_CPU_DESCRIPTOR_HANDLE CDescriptorHeaps::GetDSVHandle(DS_TYPE type) const

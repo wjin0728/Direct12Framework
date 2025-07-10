@@ -179,6 +179,9 @@ float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, fl
 				return(animationLength);
 			}
 		}
+		//			mPosition = fmod(trackPosition, m_pfKeyFrameTimes[m_nKeyFrames-1]); // mPosition = trackPosition - int(trackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
+		//			mPosition = fmod(trackPosition, m_fLength); //if (mPosition < 0) mPosition += m_fLength;
+		//			mPosition = trackPosition - int(trackPosition / m_fLength) * m_fLength;
 		break;
 	}
 	case ANIMATION_TYPE::ONCE:
@@ -331,7 +334,6 @@ void CAnimationController::LateUpdate()
 			if (mEventHandler.contains(set->mAnimationName))
 				track->HandleCallback(mEventHandler[set->mAnimationName]);
 		}
-	
 		GetOwner()->UpdateWorldMatrices(nullptr);
 	}
 

@@ -9,6 +9,9 @@ void CObjectPoolManager::Initialize()
 	for (UINT i = 0; i < OBJECT_COUNT; i++) {
 		cbvIdxQueue.push(i);
 	}
+	for (UINT i = 0; i < MATERIAL_COUNT; i++) { // MATERIAL_CBV_COUNT = 100
+		materialCBVIdxQueue.push(i);
+	}
 	for (UINT i = 0; i < BONE_TRANSFORM_COUNT; i++) { // BONE_TRANSFORM_COUNT = 10
 		boneTransformIdxQueue.push(i);
 	}
@@ -67,6 +70,24 @@ void CObjectPoolManager::ReturnCBVIndex(UINT idx)
 		return;
 	}
 	cbvIdxQueue.push(idx);
+}
+
+UINT CObjectPoolManager::GetMaterialCBVIndex()
+{
+	if (materialCBVIdxQueue.empty()) {
+		throw std::runtime_error("No more material CBV indices available");
+	}
+	UINT idx = materialCBVIdxQueue.front();
+	materialCBVIdxQueue.pop();
+	return idx;
+}
+
+void CObjectPoolManager::ReturnMaterialCBVIndex(UINT idx)
+{
+	if (idx < 0 || idx>= MATERIAL_COUNT) {
+		return;
+	}
+	materialCBVIdxQueue.push(idx);
 }
 
 UINT CObjectPoolManager::GetBoneTransformIdx()

@@ -30,6 +30,7 @@ public:
 
     virtual void Render(std::shared_ptr<CCamera> camera, int pass = 0) = 0;
 	virtual void UpdataObjectDataToShader();
+    virtual void UpdateMaterialDataToShader();
 
     virtual std::shared_ptr<CComponent> Clone() override = 0;
 

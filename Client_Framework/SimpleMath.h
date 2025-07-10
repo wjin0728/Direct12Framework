@@ -131,6 +131,7 @@ namespace DirectX
             Vector2& operator=(Vector2&&) = default;
 
             operator XMVECTOR() const noexcept { return XMLoadFloat2(this); }
+			operator const float* () const noexcept { return reinterpret_cast<const float*>(this); }
 
             // Comparison operators
             bool operator == (const Vector2& V) const noexcept;
@@ -247,6 +248,7 @@ namespace DirectX
             Vector3& operator=(Vector3&&) = default;
 
             operator XMVECTOR() const noexcept { return XMLoadFloat3(this); }
+			operator float* () noexcept { return &x; } // For compatibility with legacy code
 
             // Comparison operators
             bool operator == (const Vector3& V) const noexcept;
@@ -379,6 +381,7 @@ namespace DirectX
             Vector4& operator=(Vector4&&) = default;
 
             operator XMVECTOR() const  noexcept { return XMLoadFloat4(this); }
+			operator float* () noexcept { return &x; }
 
             // Comparison operators
             bool operator == (const Vector4& V) const noexcept;
@@ -1002,6 +1005,16 @@ namespace DirectX
             if (angle < 0.0f)
                 angle += 360.0f;
             return angle;
+        }
+
+        inline float Hermite(float t, float t0, float v0, float m0, float t1, float v1, float m1) 
+        {
+            float s = (t - t0) / (t1 - t0);
+            float h0 = 2 * s * s * s - 3 * s * s + 1;
+            float h1 = -2 * s * s * s + 3 * s * s;
+            float h2 = s * s * s - 2 * s * s + s;
+            float h3 = s * s * s - s * s;
+            return h0 * v0 + h1 * v1 + h2 * (t1 - t0) * m0 + h3 * (t1 - t0) * m1;
         }
 
 #include "SimpleMath.inl"

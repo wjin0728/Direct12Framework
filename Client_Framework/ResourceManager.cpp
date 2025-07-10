@@ -28,16 +28,6 @@ void CResourceManager::Destroy()
 	}
 }
 
-
-void CResourceManager::UpdateMaterials()
-{
-	std::unordered_map<std::string, std::shared_ptr<CResource>>& keyObjMap = mResources[static_cast<UINT8>(RESOURCE_TYPE::MATERIAL)];
-
-	for (auto& [key, material] : keyObjMap) {
-		static_pointer_cast<CMaterial>(material)->Update();
-	}
-}
-
 bool CResourceManager::LoadSceneResourcesFromFile(std::ifstream& ifs)
 {
 	using namespace BinaryReader;
@@ -306,6 +296,17 @@ void CResourceManager::LoadDefaultShaders()
 
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("Water", info, "Water")) Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::PARTICLE;
+		info.blendType = BLEND_TYPE::ALPHA_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize("Particle", info, "Particle")) Add(shader);
 	}
 	{
 		ShaderInfo info;

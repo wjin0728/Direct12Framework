@@ -27,6 +27,10 @@ struct EventSegment
 class CAnimationEventHandler
 {
 public:
+    CAnimationEventHandler() {}
+    CAnimationEventHandler(const CAnimationEventHandler& other) = default;
+    ~CAnimationEventHandler() {}
+
     using Event = std::function<void(float)>;
 
     void Register(const std::string& name, Event event) {

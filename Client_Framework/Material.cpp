@@ -3,14 +3,13 @@
 #include"FrameResource.h"
 #include"ResourceManager.h"
 #include"DX12Manager.h"
-
+#include"ObjectPoolManager.h"
 
 
 
 CMaterial::CMaterial(const CMaterial& other)
 {
 	if (this == &other) return;
-	mPoolOffset = other.mPoolOffset;
 	dataSize = other.dataSize;
 	mDirtyFrames = other.mDirtyFrames;
 	mShaderName = other.mShaderName;
@@ -26,7 +25,11 @@ CMaterial::CMaterial(const CMaterial& other)
 CMaterial::CMaterial(void* data, UINT dataSize) : matData(new BYTE[dataSize]), dataSize(dataSize)
 {
 	std::memcpy(matData.get(), data, dataSize);
-	mPoolOffset = CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->AddData(matData.get(), dataSize);
+}
+
+CMaterial::~CMaterial()
+{
+	DischargeFromPool();
 }
 
 void CMaterial::Initialize(void* data, UINT dataSize)
@@ -36,7 +39,6 @@ void CMaterial::Initialize(void* data, UINT dataSize)
 		matData.reset(new BYTE[dataSize]);
 		std::memcpy(matData.get(), data, dataSize);
 	}
-	mPoolOffset = CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->AddData(matData.get(), dataSize);
 }
 
 void CMaterial::SetShader(const std::string& name)
@@ -48,9 +50,45 @@ void CMaterial::SetShader(const std::string& name)
 	}
 }
 
+std::shared_ptr<CMaterial> CMaterial::Instantiate() const
+{
+	auto mat = std::make_shared<CMaterial>(*this);
+	mat->mInstantiated = true;
+	return mat;
+}
+
+void CMaterial::EnrollToPool()
+{
+	if (mCBVIdx >= 0) return;
+	if (!isLoaded) return;
+	if (!matData) return;
+	if (dataSize == 0) return;
+	mCBVIdx = INSTANCE(CObjectPoolManager).GetMaterialCBVIndex();
+	mPoolOffset = mCBVIdx * ALIGNED_SIZE(100);
+	if (mPoolOffset < 0) {
+		std::cerr << "Failed to enroll material to pool: " + mShaderName << endl;
+		return;
+	}
+	mDirtyFrames = FRAME_RESOURCE_COUNT + 1; // Set dirty frames to update the material
+}
+
+void CMaterial::DischargeFromPool()
+{
+	if (mCBVIdx < 0) return;
+	if (!isLoaded) return;
+	if (!matData) return;
+	INSTANCE(CObjectPoolManager).ReturnMaterialCBVIndex(mCBVIdx);
+	mCBVIdx = -1;
+	mPoolOffset = -1;
+	mDirtyFrames = 0; // Reset dirty frames
+}
+
 void CMaterial::Update()
 {
 	if (mDirtyFrames <= 0) return;
+	if (!isLoaded) return;
+	if (!matData) return;
+	if (mCBVIdx < 0) return;
 
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->UpdateBuffer(mPoolOffset, matData.get(), dataSize);
 
@@ -110,9 +148,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			}
 			else if (token == "<AlbedoColor>:")
 			{
-				Color color{};
-				ReadDateFromFile(inFile, color);
-				data->mainColor = color.ToVector3();
+				ReadDateFromFile(inFile, data->mainColor);
 			}
 			else if (token == "<Smoothness>:")
 			{

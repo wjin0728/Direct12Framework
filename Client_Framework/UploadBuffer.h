@@ -12,7 +12,7 @@ enum class CONSTANT_BUFFER_TYPE : UINT {
 };
 
 enum class STRUCTED_BUFFER_TYPE : UINT {
-	
+	PARTICLE,
 	UI,
 	END
 };
@@ -28,7 +28,7 @@ enum {
 
 	TEXTURE_COUNT = 500,
 	CUBE_MAP_COUNT = 5,
-	MATERIAL_COUNT = 100,
+	MATERIAL_COUNT = 1000,
 	MESH_COUNT = 200,
 	PASS_COUNT = 2,
 	OBJECT_COUNT = 1000,
@@ -44,7 +44,6 @@ protected:
 	ComPtr<ID3D12Resource> buffer{};
 	ComPtr<ID3D12Resource> uploadBuffer{};
 
-	BYTE* mappedData{};
 	UINT rootParamIdx{};
 
 	UINT bufferSize{};
@@ -54,6 +53,7 @@ protected:
 	bool mWritable{ true };
 
 public:
+	BYTE* mappedData{};
 	CStructedBuffer() {};
 	~CStructedBuffer();
 
@@ -61,6 +61,7 @@ public:
 	void Initialize(UINT _rootParamIdx, UINT _dataSize, UINT _dataNum, BYTE* initialData, bool writable = true);
 	void UpdateBuffer(UINT idx, const void* data);
 	void BindToShader();
+	void BindToComputeShader(UINT rootIdx);
 
 	void ReleaseUploadBuffer();
 
