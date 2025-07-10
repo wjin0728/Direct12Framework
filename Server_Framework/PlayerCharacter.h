@@ -34,12 +34,15 @@ public:
 		_class = class_type;
 		if (S_PLAYER_CLASS::FIGHTER == _class) {
 			_hp = MAX_HP_FIGHTER;
+			//ReadAnimationInfo("Animations/Fighter.bin");
 		}
 		else if (S_PLAYER_CLASS::ARCHER == _class) {
 			_hp = MAX_HP_ARCHER_MAGE;
+			ReadAnimationInfo("Animations/Archer.bin");
 		}
 		else if (S_PLAYER_CLASS::MAGE == _class) {
 			_hp = MAX_HP_ARCHER_MAGE;
+			//ReadAnimationInfo("Animations/Mage.bin");
 		}
 	};
 	int PlayerMaxHp() {

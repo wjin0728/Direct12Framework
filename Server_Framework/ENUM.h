@@ -78,9 +78,6 @@ enum class S_PLAYER_STATE : UINT8
 {
 	IDLE,
 	RUN,
-	RUNBACK,
-	RUNL,
-	RUNR,
 
 	JUMP,
 	FALLING,
