@@ -226,9 +226,6 @@
     <ClInclude Include="ContinuousRotation.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="CEntityState.h">
-      <Filter>GameObject\Component\Scripts</Filter>
-    </ClInclude>
     <ClInclude Include="ObjectState.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
@@ -252,6 +249,10 @@
     </ClInclude>
     <ClInclude Include="LoadingScreen.h">
       <Filter>Client</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityState.h" />
+    <ClInclude Include="CutScene.h">
+      <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -429,9 +430,6 @@
     <ClCompile Include="InstancingManager.cpp">
       <Filter>Client</Filter>
     </ClCompile>
-    <ClCompile Include="CEntityState.cpp">
-      <Filter>GameObject\Component\Scripts</Filter>
-    </ClCompile>
     <ClCompile Include="ObjectState.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
@@ -445,6 +443,12 @@
       <Filter>Client</Filter>
     </ClCompile>
     <ClCompile Include="AnimationEvent.cpp">
+      <Filter>GameObject\Component\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityState.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="CutScene.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
   </ItemGroup>

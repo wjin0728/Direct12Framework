@@ -12,6 +12,8 @@ class CCutScene : public CMonoBehaviour
 private:
     friend class CThirdPersonCamera;
 
+    PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
+
     float mElapsed = 0.0f;
     float mDuration = 2.5f; // 컷신 지속 시간
     bool mIsPlaying = false;
@@ -27,10 +29,14 @@ public:
     virtual void Update() override;
 
     void SetThirdPersonCamera(const std::shared_ptr<CThirdPersonCamera>& cam) { mThirdPersonCamera = cam; }
+	void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; }
+
 	bool GetEnable() const { return mIsPlaying; }
 
     void PlayCutScene();
-    void InitializeCutSceneFrames();
+    void InitializeArcherCutScene();
+    void InitializeFighterCutScene();
+    void InitializeMageCutScene();
 
     Matrix GetPositionFromRelative(const Vec3& relativePosition, const Quaternion& relativeRot);
     Vec3 MoveAlongViewDirection(const Vec3& position, const Quaternion& rotation, float distance);

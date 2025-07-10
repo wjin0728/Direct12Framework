@@ -192,7 +192,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		if (0 == c_id) {
-			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::ARCHER;
+			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
 		}
 		else if (1 == c_id) {
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
