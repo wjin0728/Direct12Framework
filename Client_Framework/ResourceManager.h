@@ -7,9 +7,8 @@
 #include"Texture.h"
 #include"Mesh.h"
 #include"Material.h"
+#include"GameObject.h"
 
-class CMaterial;
-class CShader;
 
 struct ResourceRequest
 {
@@ -23,7 +22,7 @@ class CResourceManager
 
 private:
 	std::array<std::unordered_map<std::string, std::shared_ptr<CResource>>, RESOURCE_TYPE_COUNT> mResources{};
-	std::unordered_map<std::string, std::shared_ptr<class CGameObject>> mPrefabs{};
+	std::unordered_map<std::string, std::shared_ptr<CGameObject>> mPrefabs{};
 
 	std::queue<UINT> mSrvIdxQueue{};
 
@@ -48,8 +47,6 @@ public:
 	RESOURCE_TYPE GetResourceType();
 
 public:
-	void UpdateMaterials();
-
 	bool LoadSceneResourcesFromFile(std::ifstream& ifs);
 	bool LoadSceneResourcesFromFile(const std::string& fileName);
 	bool LoadPlayerObjects();

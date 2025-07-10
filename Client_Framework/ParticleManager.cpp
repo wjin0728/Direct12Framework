@@ -3,6 +3,7 @@
 #include"DX12Manager.h"
 #include"ResourceManager.h"
 #include"Shader.h"
+#include"Camera.h"
 
 void CParticleManager::Initialize(UINT poolSize)
 {
@@ -17,6 +18,7 @@ void CParticleManager::Initialize(UINT poolSize)
 		} 
 		else mParticleEmitterPool[i] = std::make_unique<CParticleEmitter>();
 	}
+	
 }
 
 void CParticleManager::LoadParticleProperties()
@@ -26,6 +28,7 @@ void CParticleManager::LoadParticleProperties()
 
 void CParticleManager::Update()
 {
+	mParticleShader = INSTANCE(CResourceManager).Get<CShader>("ParticleForward");
 	mParticleCount = 0;
 	ParticleVertex* particleVerticesPtr = reinterpret_cast<ParticleVertex*>(mParticleVertexBuffer->mappedData);
 	for (auto& emitter : mActiveParticleEmitters) {
@@ -33,13 +36,20 @@ void CParticleManager::Update()
 			ReleaseParticleEmitter(emitter);
 			continue;
 		}
-		int particleCnt = emitter->UpdateParticles(particleVerticesPtr);
+		int particleCnt = emitter->UpdateParticles(particleVerticesPtr, mMainCamera);
 		if (particleCnt > 0) {
 			mParticleCount += particleCnt;
 			particleVerticesPtr += particleCnt;
 		}
 	}
-	mParticleShader = INSTANCE(CResourceManager).Get<CShader>("ParticleForward");
+	if (mParticleCount > 0) {
+		//sort the particles based on their distance to the camera
+		if (!mMainCamera) return;
+		ParticleVertex* particleVertices = reinterpret_cast<ParticleVertex*>(mParticleVertexBuffer->mappedData);
+		std::sort(particleVertices, particleVertices + mParticleCount, [&](const ParticleVertex& a, const ParticleVertex& b) {
+			return a.distanceToCamera > b.distanceToCamera; 
+			});
+	} 
 }
 
 void CParticleManager::Render()
@@ -50,7 +60,7 @@ void CParticleManager::Render()
 	mParticleVertexBuffer->BindToShader();
 	mParticleShader->SetPipelineState(CMDLIST);
 
-	CMDLIST->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	CMDLIST->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	CMDLIST->DrawInstanced(4, mParticleCount, 0, 0);
 }
 
@@ -97,10 +107,25 @@ void CParticleManager::ReleaseParticleEmitter(CParticleEmitter* emitter)
 	}
 }
 
+void CParticleManager::ReleaseAllParticleEmitters()
+{
+	for (auto& emitter : mActiveParticleEmitters) {
+		emitter->Release();
+		emitter->mIsActive = false;
+	}
+	mActiveParticleEmitters.clear();
+	mParticleCount = 0;
+}
+
 void CParticleManager::PlayParticleEmitter(const std::string& name, const Vec3& position, bool looping)
 {
 	CParticleEmitter* emitter = GetAvailableParticleEmitter();
 	if (emitter) {
+		auto it = mParticlePropertiesMap.find(name);
+		if (it == mParticlePropertiesMap.end()) {
+			throw std::runtime_error("Particle properties with name '" + name + "' not found.");
+		}
+		emitter->Initialize(it->second.get());
 		emitter->mIsActive = true;
 		emitter->mIsLooping = looping;
 		emitter->Play(position);

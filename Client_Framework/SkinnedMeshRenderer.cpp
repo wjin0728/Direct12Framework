@@ -57,6 +57,7 @@ void CSkinnedMeshRenderer::LateUpdate()
 	objData.hitFactor = rootTransform->mHitFactor;
 
     CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->UpdateBuffer(mCbvOffset, &objData);
+	UpdateMaterialDataToShader();
 }
 
 void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)

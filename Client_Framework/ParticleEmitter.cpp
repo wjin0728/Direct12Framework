@@ -5,8 +5,9 @@
 #include"ParticleManager.h"
 #include"ResourceManager.h"
 #include"Texture.h"
+#include"Camera.h"
 
-Vec3 Gradient::EvaluateColor(float t)
+Vec3 Gradient::EvaluateColor(float t) const
 {
 	if (colorKeys.empty()) return Color(1, 1, 1, 1);
 
@@ -28,7 +29,7 @@ Vec3 Gradient::EvaluateColor(float t)
 	return colorKeys.back().color;
 }
 
-float Gradient::EvaluateAlpha(float t)
+float Gradient::EvaluateAlpha(float t) const
 {
 	if (alphaKeys.empty()) return 1.0f;
 	if (t <= alphaKeys.front().time) return alphaKeys.front().alpha;
@@ -53,7 +54,7 @@ CParticleEmitter::CParticleEmitter(UINT maxParticleNum)
 {
 	ZeroMemory(&mParticleProperties, sizeof(ParticleProperties));
 	mParticles.reserve(maxParticleNum);
-	mSpawnData.reserve(maxParticleNum);
+	mSpawnData.reserve(maxParticleNum*1.5);
 	mTimeSinceLastEmit = 0.f;
 	mIsActive = false;
 }
@@ -74,16 +75,16 @@ void CParticleEmitter::Initialize(ParticleProperties* particleProperties)
 		return;
 	}
 	mSpawnData.clear();
-	for (uint32_t i = 0; i < mParticleProperties->maxParticles; ++i) {
+	for (uint32_t i = 0; i < mParticleProperties->maxParticles * 2; ++i) {
 		ParticleSpawnData data;
-		data.ageRate = 1.f / mParticleProperties->startLifetimeCurve.GetRandomValue(RandomNumberGenerator::RandomNumberGenerator::RandFloat(0.f, 1.f));
+		data.ageRate = 1.f / mParticleProperties->startLifetimeCurve.GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f));
 		data.rotationSpeed = RandomNumberGenerator::RandFloat();
 		data.startLocation = mParticleProperties->EmitShapeModule.GetRandomPosition();
 		data.direction = mParticleProperties->EmitShapeModule.GetRandomDirection();
 		data.startRotation = mParticleProperties->startRotationCurve.GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f));
 		data.startSize = mParticleProperties->startSizeCurve.GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f));
 		data.speed = mParticleProperties->startSpeedCurve.GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f));
-		data.startColor = mParticleProperties->startColorGradient.Evaluate(RandomNumberGenerator::RandFloat(0.f, 1.f));
+		data.startColor = mParticleProperties->startColorGradient.GetRandomColor(RandomNumberGenerator::RandFloat(0.f, 1.f));
 		data.random = RandomNumberGenerator::RandFloat();
 		mSpawnData.push_back(data);
 	}
@@ -96,12 +97,18 @@ void CParticleEmitter::Initialize(ParticleProperties* particleProperties)
 void CParticleEmitter::Release()
 {
 	mTimeSinceLastEmit = 0.f;
-	ZeroMemory(&mParticleProperties, sizeof(ParticleProperties));
+	mTotalTime = 0.f;
+	mIsActive = false;
+	mIsPlaying = false;
+	mIsPaused = false;
+	mLastEmitPosW = Vec3(0.f, 0.f, 0.f);
+	mEmitterTransform = Matrix::Identity;
+	mParticleProperties = nullptr;
 	mSpawnData.clear();
 	mParticles.clear();
 }
 
-int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr)
+int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr, std::shared_ptr<CCamera> camera)
 {
 	if (!mIsActive || mParticleProperties->maxParticles <= 0) {
 		return 0;
@@ -109,10 +116,40 @@ int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr)
 
 	float deltaTime = DELTA_TIME;
 	if(!mIsPaused){
-		mTimeSinceLastEmit += deltaTime;
 		mTotalTime += deltaTime;
 	}
 
+	EmitParticles();
+
+	Vec3 cameraPos = camera ? camera->GetLocalPosition() : Vec3(0.f, 0.f, 0.f);
+	Vec3 cameraForward = camera ? camera->GetLook() : Vec3(0.f, 0.f, 1.f);
+	mActiveParticleCount = 0;
+	for (int i = 0; auto & particle : mParticles) {
+		ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
+		particle.Age += deltaTime * spawnDataItem.ageRate;
+		if (particle.Age >= 1.f) {
+			continue; 
+		}
+		particle.Velocity += mParticleProperties->gravity * deltaTime;
+		particle.Position += particle.Velocity * deltaTime;
+		dataPtr[mActiveParticleCount].position = particle.Position;
+		//std::cout << "Particle Position: " << particle.Position.x << ", " << particle.Position.y << ", " << particle.Position.z << std::endl;
+		dataPtr[mActiveParticleCount].size = mParticleProperties->useSizeOverTime ? mParticleProperties->sizeOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startSize : spawnDataItem.startSize;
+		dataPtr[mActiveParticleCount].color = mParticleProperties->useColorOverTime ? mParticleProperties->colorOverTimeGradient->GetRandomColor(particle.Age) * spawnDataItem.startColor : spawnDataItem.startColor;
+		dataPtr[mActiveParticleCount].rotation = mParticleProperties->useRotationOverTime ? mParticleProperties->rotationOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startRotation : spawnDataItem.startRotation;
+		dataPtr[mActiveParticleCount].albedoTexIdx = mParticleProperties->textureIdx;
+		dataPtr[mActiveParticleCount].distanceToCamera = (dataPtr[mActiveParticleCount].position - cameraPos).Dot(cameraForward);
+		mActiveParticleCount++;
+	}
+	return mActiveParticleCount;
+}
+
+void CParticleEmitter::EmitParticles()
+{
+	if(!mIsLooping && (mTotalTime >= mParticleProperties->duration)) return; 
+	if(mIsPaused) return; 
+
+	float deltaTime = DELTA_TIME;
 	float emitRate = 0.f;
 	if (mParticleProperties->emitRate.type == MinMaxCurve::CurveType::Constant) {
 		emitRate = 1.f / std::get<float>(mParticleProperties->emitRate.data);
@@ -122,39 +159,19 @@ int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr)
 		emitRate = 1.f / mParticleProperties->emitRate.GetRandomValue(t_curve);
 	}
 
+	mTimeSinceLastEmit += deltaTime;
 	if (!mIsPaused && (mTimeSinceLastEmit >= emitRate)) {
-		EmitParticles();
-		mLastEmitPosW = Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
-		mTimeSinceLastEmit = 0.f;
-	}
-
-	int activeParticleCount = 0;
-	for (int i = 0; auto & particle : mParticles) {
-		ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
-		particle.Age += deltaTime * spawnDataItem.ageRate;
-		if (particle.Age >= 1.f) {
-			continue; 
-		}
-		particle.Position += particle.Velocity * deltaTime;
-		particle.Velocity += mParticleProperties->gravity * deltaTime;
-		dataPtr[activeParticleCount].position = particle.Position;
-		dataPtr[activeParticleCount].size = mParticleProperties->useSizeOverTime ? mParticleProperties->sizeOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startSize : spawnDataItem.startSize;
-		dataPtr[activeParticleCount].color = mParticleProperties->useColorOverTime ? mParticleProperties->colorOverTimeGradient->Evaluate(particle.Age) * spawnDataItem.startColor : spawnDataItem.startColor;
-		dataPtr[activeParticleCount].rotation = mParticleProperties->useRotationOverTime ? mParticleProperties->rotationOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startRotation : spawnDataItem.startRotation;
-	}
-	return activeParticleCount;
-}
-
-void CParticleEmitter::EmitParticles()
-{
-	for (auto& particle : mParticles) {
-		if (particle.Age >= 1.f) {
-			particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
-			ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
-			particle.Velocity = spawnDataItem.direction * spawnDataItem.speed;
-			particle.Position = spawnDataItem.startLocation + Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
-			particle.Age = 0.f;
-			break; // Emit one particle at a time
+		mTimeSinceLastEmit -= emitRate;
+		for (auto& particle : mParticles) {
+			if (particle.Age >= 1.f) {
+				particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
+				ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
+				Vec3 direction = Vec3::TransformNormal(spawnDataItem.direction, mEmitterTransform);
+				particle.Velocity = direction * spawnDataItem.speed;
+				particle.Position = spawnDataItem.startLocation + Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
+				particle.Age = 0.f;
+				break;
+			}
 		}
 	}
 }
@@ -211,7 +228,7 @@ void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, Part
 			MinMaxCurve::ReadMinMaxCurveFromFile(ifs, properties.emitRate);
 		}
 		else if (token == "<StartColor>:") {
-			Gradient::ReadGradientFromFile(ifs, properties.startColorGradient);
+			MinMaxGradient::ReadMinMaxGradientFromFile(ifs, properties.startColorGradient);
 		}
 		else if (token == "<StartSize>:") {
 			MinMaxCurve::ReadMinMaxCurveFromFile(ifs, properties.startSizeCurve);
@@ -228,8 +245,8 @@ void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, Part
 		else if (token == "<UseColorOvetLifeTime>:") {
 			ReadDateFromFile(ifs, properties.useColorOverTime);
 			if (properties.useColorOverTime) {
-				properties.colorOverTimeGradient = std::make_shared<Gradient>();
-				Gradient::ReadGradientFromFile(ifs, *properties.colorOverTimeGradient);
+				properties.colorOverTimeGradient = std::make_shared<MinMaxGradient>();
+				MinMaxGradient::ReadMinMaxGradientFromFile(ifs, *properties.colorOverTimeGradient);
 			}
 			else properties.colorOverTimeGradient = nullptr;
 		}
@@ -272,8 +289,17 @@ void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, Part
 		else if (token == "<Gravity>:") {
 			ReadDateFromFile(ifs, properties.gravity);
 		}
-		else if(token == "<ShapeType>:") {
-			ShapeModule::ReadShapeModuleFromFile(ifs, properties.EmitShapeModule);
+		else if(token == "<UseShape>:") {
+			bool useShape = false;
+			ReadDateFromFile(ifs, useShape);
+			if( useShape ) {
+				ReadDateFromFile(ifs, token);
+				ShapeModule::ReadShapeModuleFromFile(ifs, properties.EmitShapeModule);
+			}
+			else {
+				properties.EmitShapeModule.type = ShapeModule::ShapeType::Point;
+			}
+			
 		}
 		else if (token == "End") {
 			break;

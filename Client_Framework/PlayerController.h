@@ -37,7 +37,7 @@ public:
 	void SetRigidBody(const std::shared_ptr<class CRigidBody>& rigidBody) { this->rigidBody = rigidBody; }
 	void SetCamera(const std::shared_ptr<class CCamera>& camera) { mCamera = camera; }
 	void SetTerrain(const std::shared_ptr<class CTerrain>& terrain) { mTerrain = terrain; }
-	void SetSkill(ITEM_TYPE skill) { mSkill = skill; };
+	void SetSkill(ITEM_TYPE skill);
 	void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; };
 
 	void SetState(PLAYER_STATE state);
@@ -45,6 +45,6 @@ public:
 	void OnKeyEvents();
 
 private:
-
+	void CastingSkill();
 };
 

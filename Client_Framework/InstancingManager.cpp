@@ -20,6 +20,12 @@ void CInstancingManager::Destroy()
 	mInstancingBufferOffset = 0;
 }
 
+void CInstancingManager::AddInstancingGroup(const InstanceKey& key, std::shared_ptr<class CInstancingGroup> group)
+{
+	mInstancingGroupMap[key] = group;
+	key.material->EnrollToPool();
+}
+
 void CInstancingManager::AddInstancingObject(const InstanceKey& key, std::shared_ptr<class CGameObject> object)
 {
 	if (!object) return;
@@ -59,6 +65,7 @@ void CInstancingManager::UpdateInstancingGroup(const std::shared_ptr<class CCame
 	mInstancingBufferOffset = 0;
 	for (auto& [key, group] : mInstancingGroupMap) {
 		mInstancingBufferOffset = group->Update(camera, mInstancingBufferOffset);
+		key.material->Update();
 	}
 }
 
@@ -81,6 +88,5 @@ void CInstancingManager::RenderInstancingGroup(int pass)
 		auto instancingbufferView = instancingBuffer->GetInstancingBufferView(startOffset, instancingCount);
 
 		mesh->Render(instancingbufferView, instancingCount, 0);
-
 	}
 }

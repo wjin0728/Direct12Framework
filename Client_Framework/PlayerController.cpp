@@ -13,6 +13,7 @@
 #include "ServerManager.h"
 #include "AnimationEnums.h"
 #include "ObjectState.h"
+#include"ParticleManager.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -68,6 +69,11 @@ void CPlayerController::SetChildAnimationController()
 {
 }
 
+void CPlayerController::SetSkill(ITEM_TYPE skill)
+{
+	mSkill = skill;
+
+}
 void CPlayerController::SetState(PLAYER_STATE state)
 {
 
@@ -194,20 +200,10 @@ void CPlayerController::OnKeyEvents()
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::SKILL);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
-			switch (mSkill)
-			{
-			case FIRE_ENCHANT:
-			case WATER_HEAL:
-			case WATER_SHIELD:
-			case GRASS_WEAKEN:
-				INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
-				break;
-			case FIRE_EXPLOSION:
-			case GRASS_VINE:
-				//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Ÿ��id);
-				break;
-			}
+			Vec3 pos = transform->GetWorldPosition();
+			pos += Vec3(0.f, 0.5f, 0.f);
+			INSTANCE(CParticleManager).PlayParticleEmitter("Smoke", pos, true);
+
 			return;
 		}
 		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
@@ -242,4 +238,23 @@ void CPlayerController::OnKeyEvents()
 	}
 
 	
+}
+
+void CPlayerController::CastingSkill()
+{
+	INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
+	switch (mSkill)
+	{
+	case FIRE_ENCHANT:
+	case WATER_HEAL:
+	case WATER_SHIELD:
+	case GRASS_WEAKEN:
+		INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
+		break;
+	case FIRE_EXPLOSION:
+
+	case GRASS_VINE:
+		//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Ÿ��id);
+		break;
+	}
 }

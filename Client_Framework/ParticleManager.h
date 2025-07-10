@@ -29,6 +29,7 @@ public:
 
 	CParticleEmitter* GetAvailableParticleEmitter();
 	void ReleaseParticleEmitter(CParticleEmitter* emitter);
+	void ReleaseAllParticleEmitters();
 
 	void PlayParticleEmitter(const std::string& name, const Vec3& position, bool looping = false);
 

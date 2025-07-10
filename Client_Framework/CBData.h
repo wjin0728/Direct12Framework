@@ -63,6 +63,9 @@ struct CBObjectData
 	int idx1{};
 	int idx2{};
 	int idx3{};
+	int health;
+	int maxHealth;
+	Vec2 padding1{};
 };
 
 struct IBObjectData

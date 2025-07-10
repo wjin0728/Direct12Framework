@@ -3,13 +3,12 @@
 
 cbuffer MaterialData : register(b5)
 {
-    float3 ForwardColor;
+    float4 ForwardColor;
     uint ForwardTexIdx;
     
     uint normalTexIdx;
     float smoothness;
     float metallic;
-    float padding;
 };
 
 //
@@ -241,7 +240,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
 {
     PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
     
-    float4 color = float4(GammaDecoding(ForwardColor).rgb, 1.f);
+    float4 color = float4(GammaDecoding(ForwardColor.rgb).rgb, 1.f);
     float3 worldPosition = input.positionWS.xyz;
     float3 worldNormal = normalize(input.normalWS);
     float3 normal = worldNormal;
@@ -254,7 +253,6 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
         float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
         color *= float4(GammaDecoding(texColor.rgb), texColor.a);
     }
-    
     
     if (normalTexIdx != -1)
     {
@@ -269,6 +267,6 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     output.normalWS = float4(normal, metallic);
     output.emissive = float4(0.f, 0.f, 0.f, shadowFactor);
     output.positionWS = float4(worldPosition, smoothness);
-    output.depth = float4(0.f, 0.f, 0.f, depth);
+    output.depth = float4(0.f, 0.f, 0.f, input.position.z);
     return output;
 }

@@ -92,7 +92,6 @@ void CScene::LateUpdate()
 	}
 	auto& camera = mCameras["MainCamera"];
 	if(camera) INSTANCE(CInstancingManager).UpdateInstancingGroup(camera);
-	INSTANCE(CResourceManager).UpdateMaterials();
 	INSTANCE(CShadowManager).Update();
 	INSTANCE(CParticleManager).Update();
 	UpdatePassData();

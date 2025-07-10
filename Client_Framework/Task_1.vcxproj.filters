@@ -507,5 +507,8 @@
     <None Include="..\Resources\Shaders\Particle.hlsl">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="..\Resources\Shaders\Decal.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

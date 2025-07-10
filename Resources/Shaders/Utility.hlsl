@@ -107,9 +107,9 @@ float GetNormalizedSceneDepth(float2 screenPos)
 
 float GetLinear01Depth(float z)
 {
-    float near = projectionParams.x;
-    float far = projectionParams.y;
-    return 1.0 / (1.0 / near + z * (1.0 / far - 1.0 / near));
+    float nearZ = projectionParams.x;
+    float farZ = projectionParams.y;
+    return 1.0 / (1.0 / nearZ + z * (1.0 / farZ - 1.0 / nearZ));
 }
 
 inline float GetCameraDepth(float z)
@@ -117,6 +117,22 @@ inline float GetCameraDepth(float z)
     float nearZ = projectionParams.x;
     float farZ = projectionParams.y;
     return nearZ * farZ / ((farZ - nearZ) * z + nearZ);
+}
+
+inline float3 GetScenePositionWS(float2 screenPos)
+{
+    return diffuseMap[gbufferPosIdx].SampleLevel(anisoClamp, screenPos, 0).xyz;
+}
+
+inline float3 GetSceneNormalWS(float2 screenPos)
+{
+    return diffuseMap[gbufferNormalIdx].SampleLevel(anisoClamp, screenPos, 0).xyz;
+}
+
+inline float3 GetScenePositionViewSpace(float2 screenPos)
+{
+    float3 positionWS = GetScenePositionWS(screenPos);
+    return mul(float4(positionWS, 1.f), viewMat).xyz;
 }
 
 inline float3 GammaDecoding(float3 color)

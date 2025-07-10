@@ -14,6 +14,7 @@ private:
 	std::shared_ptr<CTransform> mRootTransform{};
 
 	std::queue<UINT> cbvIdxQueue;
+	std::queue<UINT> materialCBVIdxQueue; // 추가: 머티리얼 CBV 인덱스 큐
 	std::queue<UINT> boneTransformIdxQueue; // 추가: 뼈 오프셋 인덱스 큐
 	std::queue<UINT> lightCBVIdx;
 	std::queue<UINT> UICBVIdx;
@@ -28,6 +29,9 @@ public:
 
 	UINT GetTopCBVIndex();
 	void ReturnCBVIndex(UINT idx);
+
+	UINT GetMaterialCBVIndex();           // 추가: 머티리얼 CBV 인덱스 획득
+	void ReturnMaterialCBVIndex(UINT idx); // 추가: 머티리얼 CBV 인덱스 반환
 
 	UINT GetBoneTransformIdx();           // 추가: 뼈 오프셋 인덱스 획득
 	void ReturnBoneTransformIdx(UINT idx); // 추가: 뼈 오프셋 인덱스 반환

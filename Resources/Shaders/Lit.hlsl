@@ -370,7 +370,6 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     }
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
-    float depth = input.positionCS.z / input.positionCS.w;
     float3 hitColor = float3(1.0, 0.0, 0.0);
     _emissionColor = lerp(_emissionColor, hitColor, hitFactor);
     
@@ -378,7 +377,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     output.normalWS = float4(normal, metallic);
     output.emissive = float4(_emissionColor, shadowFactor);
     output.positionWS = float4(worldPosition, smoothness);
-    output.depth = float4(0.f, 0.f, 0.f, depth);
+    output.depth = float4(0.f, 0.f, 0.f, input.position.z);
     
     return output;
 }

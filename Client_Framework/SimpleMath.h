@@ -131,6 +131,7 @@ namespace DirectX
             Vector2& operator=(Vector2&&) = default;
 
             operator XMVECTOR() const noexcept { return XMLoadFloat2(this); }
+			operator const float* () const noexcept { return reinterpret_cast<const float*>(this); }
 
             // Comparison operators
             bool operator == (const Vector2& V) const noexcept;
@@ -247,6 +248,7 @@ namespace DirectX
             Vector3& operator=(Vector3&&) = default;
 
             operator XMVECTOR() const noexcept { return XMLoadFloat3(this); }
+			operator float* () noexcept { return &x; } // For compatibility with legacy code
 
             // Comparison operators
             bool operator == (const Vector3& V) const noexcept;
@@ -379,6 +381,7 @@ namespace DirectX
             Vector4& operator=(Vector4&&) = default;
 
             operator XMVECTOR() const  noexcept { return XMLoadFloat4(this); }
+			operator float* () noexcept { return &x; }
 
             // Comparison operators
             bool operator == (const Vector4& V) const noexcept;

@@ -203,7 +203,6 @@ void CDX12Manager::InitRenderTargetGroups()
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[1].rt);
 
-
 		//emissive + shadow
 		renderTargets[2].rt = std::make_shared<CTexture>("GBufferEmissive", DXGI_FORMAT_R16G16B16A16_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
@@ -211,10 +210,12 @@ void CDX12Manager::InitRenderTargetGroups()
 			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 		RESOURCE.Add(renderTargets[2].rt);
 		//position + smoothness
+		renderTargets[3].clearColor = Vec4(-99999.f, -99999.f, -99999.f, 0.f);
 		renderTargets[3].rt = std::make_shared<CTexture>("GBufferPosition", DXGI_FORMAT_R32G32B32A32_FLOAT, nullptr, 0,
 			static_cast<UINT>(renderTargetSize.x), static_cast<UINT>(renderTargetSize.y),
 			CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+			D3D12_HEAP_FLAG_NONE, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, renderTargets[3].clearColor);
+
 		RESOURCE.Add(renderTargets[3].rt);
 
 		//depth

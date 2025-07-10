@@ -27,10 +27,14 @@ float4 VS_Directional(uint vertexID : SV_VertexID) : SV_Position
 float4 PS_Directional(float4 position : SV_Position) : SV_Target
 {
     float2 uv = position.xy / renderTargetSize;
+    float4 gbufferPosition = diffuseMap[gbufferPosIdx].SampleLevel(pointClamp, uv, 0.0);
+    if (gbufferPosition.x <= -99999.f)
+    {
+        discard;
+    }
     float4 color = diffuseMap[gbufferAlbedoIdx].SampleLevel(pointClamp, uv, 0.0);
     float4 gbufferNormal = diffuseMap[gbufferNormalIdx].SampleLevel(pointClamp, uv, 0.0);
     float4 gbufferEmissive = diffuseMap[gbufferEmissiveIdx].SampleLevel(pointClamp, uv, 0.0);
-    float4 gbufferPosition = diffuseMap[gbufferPosIdx].SampleLevel(pointClamp, uv, 0.0);
     float4 gbufferDepth = diffuseMap[gbufferDepthIdx].SampleLevel(pointClamp, uv, 0.0);
     
     float3 positionWS = gbufferPosition.xyz;
@@ -75,10 +79,14 @@ VS_OUTPUT VS_Lighting(VS_INPUT input)
 float4 PS_Lighting(VS_OUTPUT output) : SV_Target
 {
     float2 uv = output.position.xy / renderTargetSize;
+    float4 gbufferPosition = diffuseMap[gbufferPosIdx].SampleLevel(pointClamp, uv, 0.0);
+    if (gbufferPosition.x <= -99999.f)
+    {
+        discard;
+    }
     float4 color = diffuseMap[1].SampleLevel(pointClamp, uv, 0.0);
     float4 gbufferNormal = diffuseMap[gbufferNormalIdx].SampleLevel(pointClamp, uv, 0.0);
     float4 gbufferEmissive = diffuseMap[gbufferEmissiveIdx].SampleLevel(pointClamp, uv, 0.0);
-    float4 gbufferPosition = diffuseMap[gbufferPosIdx].SampleLevel(pointClamp, uv, 0.0);
     float4 gbufferDepth = diffuseMap[gbufferDepthIdx].SampleLevel(pointClamp, uv, 0.0);
     
     float3 positionWS = gbufferPosition.xyz;

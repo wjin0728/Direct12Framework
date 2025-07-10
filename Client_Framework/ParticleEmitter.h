@@ -18,9 +18,9 @@ struct Gradient {
 	std::vector<GradientColorKey> colorKeys;
 	std::vector<GradientAlphaKey> alphaKeys;
 
-	Vec3 EvaluateColor(float t);
-	float EvaluateAlpha(float t);
-	Color Evaluate(float t) {
+	Vec3 EvaluateColor(float t) const;
+	float EvaluateAlpha(float t) const;
+	Color Evaluate(float t) const {
 		Color color = EvaluateColor(t);
 		color.w = EvaluateAlpha(t);
 		return color;
@@ -28,11 +28,12 @@ struct Gradient {
 
 	static void ReadGradientFromFile(std::ifstream& ifs, Gradient& gradient) {
 		using namespace BinaryReader;
-		size_t colorKeyCount, alphaKeyCount;
+		int colorKeyCount{};
+		int alphaKeyCount{};
 
 		ReadDateFromFile(ifs, colorKeyCount);
 		gradient.colorKeys.resize(colorKeyCount);
-		for (size_t i = 0; i < colorKeyCount; ++i) {
+		for (int i = 0; i < colorKeyCount; ++i) {
 			ReadDateFromFile(ifs, gradient.colorKeys[i].time);
 			Color color;
 			ReadDateFromFile(ifs, color);
@@ -40,7 +41,7 @@ struct Gradient {
 		}
 		ReadDateFromFile(ifs, alphaKeyCount);
 		gradient.alphaKeys.resize(alphaKeyCount);
-		for (size_t i = 0; i < alphaKeyCount; ++i) {
+		for (int i = 0; i < alphaKeyCount; ++i) {
 			ReadDateFromFile(ifs, gradient.alphaKeys[i].time);
 			ReadDateFromFile(ifs, gradient.alphaKeys[i].alpha);
 		}
@@ -171,13 +172,94 @@ struct MinMaxCurve
 	}
 };
 
+struct MinMaxGradient
+{
+	enum class GradientType
+	{
+		Constant = 0,
+		Gradient = 1,
+		RandomBetweenTwoColors = 2, 
+		RandomBetweenTwoGradients = 3
+	} type = GradientType::Constant;
+	std::variant<Color, Gradient, std::pair<Color, Color>, std::pair<Gradient, Gradient>> data;
+	Color GetRandomColor(float t = 0) const
+	{
+		switch (type)
+		{
+		case GradientType::Constant:
+			return std::get<Color>(data);
+		case GradientType::Gradient:
+			return std::get<Gradient>(data).Evaluate(t);
+		case GradientType::RandomBetweenTwoColors:
+			{
+			const auto& colors = std::get<std::pair<Color, Color>>(data);
+			return RandomNumberGenerator::RandFloat(0.0f, 1.0f) < 0.5f ? colors.first : colors.second;
+		}
+		case GradientType::RandomBetweenTwoGradients:
+		{
+			const auto& gradients = std::get<std::pair<Gradient, Gradient>>(data);
+			return RandomNumberGenerator::RandFloat(0.0f, 1.0f) < 0.5f ? gradients.first.Evaluate(t) : gradients.second.Evaluate(t);
+		}
+		}
+		return Color(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	static void ReadMinMaxGradientFromFile(std::ifstream& ifs, MinMaxGradient& gradient)
+	{
+		using namespace BinaryReader;
+		int typeInt;
+		ReadDateFromFile(ifs, typeInt);
+		gradient.type = static_cast<GradientType>(typeInt);
+		
+		switch (gradient.type)
+		{
+		case GradientType::Constant:
+		{
+			Color constantColor;
+			ReadDateFromFile(ifs, constantColor);
+			gradient.data = constantColor;
+		}
+			break;
+		case GradientType::Gradient:
+		{
+			Gradient gradientData;
+			Gradient::ReadGradientFromFile(ifs, gradientData);
+			gradient.data = gradientData;
+		}
+			break;
+		case GradientType::RandomBetweenTwoColors:
+			{
+			Color color1, color2;
+			ReadDateFromFile(ifs, color1);
+			ReadDateFromFile(ifs, color2);
+			gradient.data = std::make_pair(color1, color2);
+		}
+			break;
+		case GradientType::RandomBetweenTwoGradients:
+		{
+			std::pair<Gradient, Gradient> randomGradients;
+			Gradient::ReadGradientFromFile(ifs, randomGradients.first);
+			Gradient::ReadGradientFromFile(ifs, randomGradients.second);
+			gradient.data = randomGradients;
+		}
+			break;
+		default:
+			break;
+		}
+	}
+};
+
 struct ShapeModule
 {
 	enum class ShapeType
 	{
-		Cone,
 		Sphere,
+		Hemisphere,
+		HemisphereShell,
+		Cone,
 		Box,
+		Mesh,
+		ConeShell,
+		ConeVolume,
 		Point
 	} type = ShapeType::Cone;
 
@@ -204,6 +286,28 @@ struct ShapeModule
 			};
 			return localDir;
 		}
+		case ShapeType::ConeShell:
+		{
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float phi = RandomNumberGenerator::RandFloat(0, XMConvertToRadians(angle));
+			Vec3 localDir{
+				sinf(phi) * cosf(theta),
+				sinf(phi) * sinf(theta),
+				cosf(phi)
+			};
+			return localDir;
+		}
+		case ShapeType::ConeVolume:
+		{
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float phi = RandomNumberGenerator::RandFloat(0, XMConvertToRadians(angle));
+			Vec3 localDir{
+				sinf(phi) * cosf(theta),
+				sinf(phi) * sinf(theta),
+				cosf(phi)
+			};
+			return localDir.GetNormalized();
+		}
 		case ShapeType::Sphere:
 		{
 			return RandomNumberGenerator::RandUniformVec3();
@@ -219,7 +323,30 @@ struct ShapeModule
 		}
 		case ShapeType::Point:
 			return Vec3(0, 0, 1);
+		case ShapeType::Hemisphere:
+		{
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float phi = RandomNumberGenerator::RandFloat(0, XM_PI * 0.5f);
+			Vec3 localDir{
+				sinf(phi) * cosf(theta),
+				sinf(phi) * sinf(theta),
+				cosf(phi)
+			};
+			return localDir;
 		}
+		case ShapeType::HemisphereShell:
+		{
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float phi = RandomNumberGenerator::RandFloat(0, XM_PI * 0.5f);
+			Vec3 localDir{
+				sinf(phi) * cosf(theta),
+				sinf(phi) * sinf(theta),
+				cosf(phi)
+			};
+			return localDir;
+		}
+		}
+		return Vec3(0, 0, 1); // Default direction if no shape matches
 	}
 	Vec3 GetRandomPosition() const
 	{
@@ -241,6 +368,26 @@ struct ShapeModule
 
 			return Vec3(x, y, h);
 		}
+		case ShapeType::ConeShell:
+		{
+			float angleRad = angle * degToRad;
+			float height = radius / tanf(angleRad);
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float r = radius * sqrtf(RandomNumberGenerator::RandFloat(0.0f, 1.0f));
+			float x = r * cosf(theta);
+			float y = r * sinf(theta);
+			return Vec3(x, y, height);
+		}
+		case ShapeType::ConeVolume:
+		{
+			float angleRad = angle * degToRad;
+			float height = radius / tanf(angleRad);
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float r = radius * sqrtf(RandomNumberGenerator::RandFloat(0.0f, 1.0f));
+			float x = r * cosf(theta);
+			float y = r * sinf(theta);
+			return Vec3(x, y, RandomNumberGenerator::RandFloat(0.0f, height));
+		}
 		case ShapeType::Sphere:
 			return RandomNumberGenerator::RandUniformVec3() * RandomNumberGenerator::RandFloat(0, sphereRadius);
 		case ShapeType::Box:
@@ -251,6 +398,28 @@ struct ShapeModule
 			);
 		case ShapeType::Point:
 			return Vec3(0, 0, 0); // Point emits from a single point
+		case ShapeType::Hemisphere:
+		{
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float phi = RandomNumberGenerator::RandFloat(0, XM_PI * 0.5f);
+			Vec3 localPos{
+				sinf(phi) * cosf(theta),
+				sinf(phi) * sinf(theta),
+				cosf(phi)
+			};
+			return localPos * RandomNumberGenerator::RandFloat(0, sphereRadius);
+		}
+		case ShapeType::HemisphereShell:
+		{
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float phi = RandomNumberGenerator::RandFloat(0, XM_PI * 0.5f);
+			Vec3 localPos{
+				sinf(phi) * cosf(theta),
+				sinf(phi) * sinf(theta),
+				cosf(phi)
+			};
+			return localPos * sphereRadius;
+		}
 		}
 		return Vec3(0, 0, 0);
 	}
@@ -288,6 +457,7 @@ struct ParticleVertex
 	float rotation;
 	Color color;
 	float size;
+	float distanceToCamera; 
 	int albedoTexIdx;
 };
 
@@ -298,7 +468,7 @@ struct ParticleProperties
 	uint32_t textureIdx;
 	Vec3 emissiveColor;
 	ShapeModule EmitShapeModule;
-	Gradient startColorGradient;
+	MinMaxGradient startColorGradient;
 	MinMaxCurve emitRate;
 	MinMaxCurve startSizeCurve;
 	MinMaxCurve startSpeedCurve;
@@ -306,7 +476,7 @@ struct ParticleProperties
 	MinMaxCurve startLifetimeCurve;
 	float duration;
 
-	std::shared_ptr<Gradient> colorOverTimeGradient = nullptr;
+	std::shared_ptr<MinMaxGradient> colorOverTimeGradient = nullptr;
 	bool useColorOverTime = false;
 	std::shared_ptr<MinMaxCurve> sizeOverTimeCurve = nullptr;
 	bool useSizeOverTime = false;
@@ -327,13 +497,14 @@ public:
 
 	std::vector<ParticleSpawnData> mSpawnData;
     std::vector<ParticleMotion> mParticles;
+	int mActiveParticleCount = 0;
 
 	Vec3 mLastEmitPosW = Vec3(0, 0, 0);
 	Matrix mEmitterTransform = Matrix::Identity;
 
-	bool mIsPlaying = true;
+	bool mIsPlaying = false;
 	bool mIsPaused = false;
-	bool mIsActive = true;
+	bool mIsActive = false;
 	bool mIsLooping = false;
 
 public:
@@ -343,7 +514,7 @@ public:
 
 	void Initialize(ParticleProperties* particleProperties);
 	void Release();
-	int UpdateParticles(ParticleVertex* dataPtr);
+	int UpdateParticles(ParticleVertex* dataPtr, std::shared_ptr<CCamera> camera);
 	void EmitParticles();
 	void Play(const Vec3& pos);
 	void Pause();
@@ -351,7 +522,7 @@ public:
 	void Reset();
 
 	bool IsEnded() const {
-		return !mIsLooping && (mTotalTime >= mParticleProperties->duration);
+		return !mIsLooping && (mTotalTime >= mParticleProperties->duration) && (mActiveParticleCount == 0);
 	}
 
 	void SetEmitterLocation(const Vec3& location) { 

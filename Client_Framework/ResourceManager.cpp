@@ -28,16 +28,6 @@ void CResourceManager::Destroy()
 	}
 }
 
-
-void CResourceManager::UpdateMaterials()
-{
-	std::unordered_map<std::string, std::shared_ptr<CResource>>& keyObjMap = mResources[static_cast<UINT8>(RESOURCE_TYPE::MATERIAL)];
-
-	for (auto& [key, material] : keyObjMap) {
-		static_pointer_cast<CMaterial>(material)->Update();
-	}
-}
-
 bool CResourceManager::LoadSceneResourcesFromFile(std::ifstream& ifs)
 {
 	using namespace BinaryReader;
