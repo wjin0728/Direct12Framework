@@ -54,15 +54,19 @@ void CPlayerStateMachine::OnEnterState(UINT8 state)
 
 	switch ((PLAYER_STATE)state) {
 	case PLAYER_STATE::IDLE:
+		break;
 	case PLAYER_STATE::RUN:
 		break;
 	case PLAYER_STATE::ATTACK:
+		break;
 	case PLAYER_STATE::RUNATTACK:
-		controller->SetTrackSpeed(0, 3.0f);
 		break;
 	case PLAYER_STATE::GETHIT:
+		break;
 	case PLAYER_STATE::DEATH:
+		break;
 	case PLAYER_STATE::JUMP:
+		break;
 	case PLAYER_STATE::SKILL:
 		break;
 	case PLAYER_STATE::ULTIMATE:

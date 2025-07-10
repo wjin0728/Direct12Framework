@@ -55,8 +55,8 @@ enum OBJECT_TYPE : UINT8
 
 enum class PLAYER_CLASS : UINT8
 {
-	FIGHTER,
 	ARCHER,
+	FIGHTER,
 	MAGE,
 	end
 };
