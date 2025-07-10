@@ -16,10 +16,6 @@ private:
 	Quaternion mLocalRotation = Quaternion::Identity;
 	Vec3 mLocalEulerAngle{};
 
-	Vec3 mScaleLayerBlending{};
-	Vec3 mRotationLayerBlending{};
-	Vec3 mPositionLayerBlending{};
-
 	Matrix mWorldMat = Matrix::Identity;
 	Matrix mLocalMat = Matrix::Identity;
 	Matrix mTextureMat = Matrix::Identity;
@@ -102,10 +98,6 @@ public:
 	Quaternion GetLocalRotation() const { return mLocalRotation; }
 	Vec3 GetLocalScale() const { return mLocalScale; };
 
-	Vec3 GetPositionLayerBlending() const { return mPositionLayerBlending; }
-	Vec3 GetRotationLayerBlending() const { return mRotationLayerBlending; }
-	Vec3 GetScaleLayerBlending() const { return mScaleLayerBlending; };
-
 	Vec3 GetWorldLook() const { return mWorldMat.Backward().GetNormalized(); };
 	Vec3 GetWorldUp() const { return mWorldMat.Up().GetNormalized(); };
 	Vec3 GetWorldRight() const { return mWorldMat.Right().GetNormalized(); };
@@ -125,8 +117,6 @@ public:
 	void UpdateLocalMatrix();
 	void UpdateWorldMatrix(bool update = true);
 	void UpdateWorldMatrix(std::shared_ptr<CTransform> parent, bool update = true);
-	void ApplyBlendedTransform();
-	void BlendingTransform(const ANIMATION_BLEND_TYPE blendType, const Vec3& scale, const Vec3& rotation, const Vec3& position, float weight);
 
 public:
 	void PrintSRT();

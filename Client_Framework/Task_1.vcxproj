@@ -170,6 +170,7 @@
     <ClInclude Include="CBData.h" />
     <ClInclude Include="CEntityState.h" />
     <ClInclude Include="ContinuousRotation.h" />
+    <ClInclude Include="CutScene.h" />
     <ClInclude Include="EnemyState.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="IndexBuffer.h" />
@@ -239,6 +240,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CEntityState.cpp" />
     <ClCompile Include="ContinuousRotation.cpp" />
+    <ClCompile Include="CutScene.cpp" />
     <ClCompile Include="EnemyState.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Collider.cpp" />

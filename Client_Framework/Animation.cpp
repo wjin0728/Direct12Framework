@@ -107,8 +107,21 @@ void CAnimationTrack::SetAnimationSet(std::shared_ptr<CAnimationSet>& set)
 		mEnable = true;
 		mTrackProgress = 0.0f;
 		mEventKeys.resize(set->mEventKeys.size());
+		mSlowEnable = false;
+		mSlowStart = 0;
+		mSlowEnd = 0;
+
 		for (int i = 0; auto& key : mEventKeys) {
-			if (set->mEventKeys[i]) key = set->mEventKeys[i];
+			if (set->mEventKeys[i]) {
+				key = set->mEventKeys[i];
+			}
+			if (key->mName == "SlowStart") {
+				mSlowEnable = true;
+				mSlowStart = key->mTime;
+			}
+			else if (key->mName == "SlowEnd") {
+				mSlowEnd = key->mTime;
+			}
 			key->mEnable = true;
 			++i;
 		}
@@ -117,7 +130,19 @@ void CAnimationTrack::SetAnimationSet(std::shared_ptr<CAnimationSet>& set)
 
 float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, float animationLength)
 {
+	if (mSlowEnable && mPosition > mSlowStart) {
+		mPosition = trackPosition + elapsedTime * mSlowSpeed;
+		mTrackProgress = mPosition / animationLength;
+		if (mPosition > mSlowEnd) mSlowEnable = false;
+		return(mPosition);
+	}
+	//if (mSlowEnable && mPosition > mSlowStart) {
+	//	return(mPosition);
+	//}
+
+
 	float trackElapsedTime = elapsedTime * mSpeed;
+
 	switch (mType) {
 	case ANIMATION_TYPE::LOOP: {
 		if (mPosition < 0.0f) mPosition = 0.0f;
@@ -142,6 +167,7 @@ float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, fl
 	case ANIMATION_TYPE::PINGPONG:
 		break;
 	}
+
 	mTrackProgress = mPosition / animationLength;
 
 	return(mPosition);
@@ -230,18 +256,13 @@ void CAnimationController::Start()
 
 		for (auto& set : mAnimationSets->mAnimationSet) {
 			auto& handler = std::make_shared<CAnimationEventHandler>();
-			if (set->mEventKeys.size()) {
-				if (set->mAnimationName == "Attack") {
-					handler->Register("Arrow", [](float time) {
-						std::cout << "[Arrow]\tFootstep at " << time << "s\n";
-						});
-					handler->Register("Start", [](float time) {
-						std::cout << "[Start]\tFootstep at " << time << "s\n";
-						});
-					handler->Register("End", [](float time) {
-						std::cout << "[End]\tFootstep at " << time << "s\n";
-						});
-				}
+			if (set->mEventKeys.size() && set->mAnimationName == "Ultimate") {
+				handler->Register("SlowStart", [](float time) {
+					std::cout << "[SlowStart]\tUltimate event at " << time << "s\n";
+					});
+				handler->Register("SlowEnd", [](float time) {
+					std::cout << "[SlowEnd]\tUltimate event at " << time << "s\n";
+					});
 			}
 			mEventHandler[set->mAnimationName] = handler;
 		}

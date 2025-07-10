@@ -56,8 +56,42 @@ void CThirdPersonCamera::Update()
 	}
 	
 	if (mFreeLook) FreeMovement();
-	else FollowTarget(speed, deltaTime);
+	else if (!mIsPlayingCutScene) FollowTarget(speed, deltaTime);
 	//RaycastObjects();
+
+	if (mFreeLook && mTarget)
+	{
+		auto camTransform = GetTransform();
+		auto targetTransform = mTarget->GetTransform();
+
+		Matrix targetWorld = targetTransform->GetWorldMat();
+		Matrix targetWorldInv = targetWorld.Invert();
+
+		Matrix camWorld = camTransform->GetWorldMat();
+
+		// 카메라의 월드 변환을 타겟의 월드 기준으로 변환
+		Matrix relativeMatrix = camWorld * targetWorldInv;
+
+		Vec3 relativePos = Vec3(relativeMatrix._41, relativeMatrix._42, relativeMatrix._43);
+
+		Quaternion relativeRot;
+		Vec3 scale, pos;
+		relativeMatrix.Decompose(scale, relativeRot, pos);
+
+		std::cout << "=== Camera relative to Target ===" << std::endl;
+		std::cout << "Relative Position: "
+			<< relativePos.x << ", "
+			<< relativePos.y << ", "
+			<< relativePos.z << std::endl;
+
+		std::cout << "Relative Rotation: "
+			<< relativeRot.x << ", "
+			<< relativeRot.y << ", "
+			<< relativeRot.z << ", "
+			<< relativeRot.w << std::endl;
+
+		std::cout << "==============================" << std::endl;
+	}
 
 	auto transform = GetTransform();
 	Vec3 camPos = transform->GetWorldPosition();

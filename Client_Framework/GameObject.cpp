@@ -742,17 +742,6 @@ void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>
 	}
 }
 
-void CGameObject::ResetForAnimationBlending()
-{
-	mTransform->mScaleLayerBlending = Vec3(0.0f, 0.0f, 0.0f);
-	mTransform->mRotationLayerBlending = Vec3(0.0f, 0.0f, 0.0f);
-	mTransform->mPositionLayerBlending = Vec3(0.0f, 0.0f, 0.0f);
-
-	for (auto& child : mChildren) {
-		child->ResetForAnimationBlending();
-	}
-}
-
 void CGameObject::PrepareSkinning()
 {
 	mAnimationController->PrepareSkinning();

@@ -13,6 +13,7 @@
 #include "ServerManager.h"
 #include "AnimationEnums.h"
 #include "ObjectState.h"
+#include "CutScene.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -20,7 +21,7 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
-	if(!rigidBody) rigidBody = GetOwner()->GetComponent<CRigidBody>();
+	if (!rigidBody) rigidBody = GetOwner()->GetComponent<CRigidBody>();
 	if (!mStateMachine) mStateMachine = owner->GetComponentFromHierarchy<CPlayerStateMachine>();
 }
 
@@ -135,6 +136,10 @@ void CPlayerController::OnKeyEvents()
 			}
 			return;
 		}
+		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
+			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
+		}
 
 		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 		if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
@@ -195,6 +200,11 @@ void CPlayerController::OnKeyEvents()
 			}
 			return;
 		}
+		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
+			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
+		}
+
 		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 		if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
 		if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;

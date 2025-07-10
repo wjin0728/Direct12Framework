@@ -46,30 +46,34 @@ void PlayerCharacter::SetState(uint8_t newState)
 {
 	//if (newState == (uint8_t)_state) return;
 
-    switch (newState) {
-    case (uint8_t)S_PLAYER_STATE::IDLE:
+    switch ((S_PLAYER_STATE)newState) {
+    case S_PLAYER_STATE::IDLE:
         _state = S_PLAYER_STATE::IDLE;
         SetState(&PlayerState::IdleState::GetInstance());
         break;
-    case (uint8_t)S_PLAYER_STATE::RUN:
+    case S_PLAYER_STATE::RUN:
         _state = S_PLAYER_STATE::RUN;
         SetState(&PlayerState::RunState::GetInstance());
         break;
-    case (uint8_t)S_PLAYER_STATE::ATTACK:
+    case S_PLAYER_STATE::ATTACK:
         _state = S_PLAYER_STATE::ATTACK;
         SetState(&PlayerState::BasicAttackState::GetInstance());
         break;
-    case (uint8_t)S_PLAYER_STATE::RUNATTACK:
+    case S_PLAYER_STATE::RUNATTACK:
         _state = S_PLAYER_STATE::RUNATTACK;
         SetState(&PlayerState::RunAttackState::GetInstance());
         break;
-    case (uint8_t)S_PLAYER_STATE::JUMP:
+    case S_PLAYER_STATE::JUMP:
         _state = S_PLAYER_STATE::JUMP;
         SetState(&PlayerState::JumpState::GetInstance());
         break;
-    case (uint8_t)S_PLAYER_STATE::SKILL:
+    case S_PLAYER_STATE::SKILL:
         _state = S_PLAYER_STATE::SKILL;
         SetState(&PlayerState::SkillState::GetInstance());
+        break;
+    case S_PLAYER_STATE::ULTIMATE:
+        _state = S_PLAYER_STATE::ULTIMATE;
+        SetState(&PlayerState::UltimateState::GetInstance());
         break;
     default:
         break;
