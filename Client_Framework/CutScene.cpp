@@ -17,20 +17,82 @@ void CCutScene::PlayCutScene()
     mElapsed = 0.0f;
     mIsPlaying = true;
     mThirdPersonCamera->SetPlayingCutScene(true);
-    mThirdPersonCamera->SetCanRotate(false); // 컷신 중 회전 금지
+    mThirdPersonCamera->SetCanRotate(false);
 
-    InitializeCutSceneFrames();
+    switch (mClass) {
+    case PLAYER_CLASS::ARCHER:
+        InitializeArcherCutScene();
+        break;
+    case PLAYER_CLASS::FIGHTER:
+        InitializeFighterCutScene();
+        break;
+    case PLAYER_CLASS::MAGE:
+        InitializeMageCutScene();
+        break;
+    }
 }
 
-void CCutScene::InitializeCutSceneFrames()
+void CCutScene::InitializeFighterCutScene()
 {
     mKeyFrames.clear();
-
-    Matrix camWorld = GetPositionFromRelative(Vec3{ -0.0274296, 0.581093, 4.65343 }, Quaternion{ 0.0038204, 0.984563, 0.173641, -0.0216622 });
-    auto& transform = mThirdPersonCamera->GetTransform();
-
     Vec3 scale, translation;
     Quaternion rotation;
+    Matrix camWorld;
+    auto& transform = mThirdPersonCamera->GetTransform();
+
+    //camWorld = GetPositionFromRelative(Vec3{ 1.21935, 0.499366, 0.68519 }, Quaternion{ 0.0381727, 0.85889, 0.0647156, -0.506619 });
+    //camWorld.Decompose(scale, rotation, translation);
+
+    //mKeyFrames[0.0f] = {
+    //    translation,
+    //    rotation
+    //};
+
+    //mKeyFrames[1.00128579] = {
+    //    translation,
+    //    rotation
+    //};
+
+    //mKeyFrames[1.16748214] = {
+    //    translation,
+    //    rotation
+    //};
+
+
+    //mKeyFrames[2.499999] = {
+    //    translation,
+    //    rotation
+    //};
+    //
+    //mKeyFrames[2.5f] = {
+    //transform->GetLocalPosition(),
+    //transform->GetLocalRotation()
+    //};
+}
+
+void CCutScene::InitializeMageCutScene()
+{
+    mKeyFrames.clear();
+    Vec3 scale, translation;
+    Quaternion rotation;
+    Matrix camWorld;
+    auto& transform = mThirdPersonCamera->GetTransform();
+
+    mKeyFrames[2.5f] = {
+        transform->GetLocalPosition(),
+        transform->GetLocalRotation()
+    };
+}
+
+void CCutScene::InitializeArcherCutScene()
+{
+    mKeyFrames.clear();
+    Vec3 scale, translation;
+    Quaternion rotation;
+    Matrix camWorld;
+    auto& transform = mThirdPersonCamera->GetTransform();
+
+    camWorld = GetPositionFromRelative(Vec3{ -0.0274296, 0.581093, 4.65343 }, Quaternion{ 0.0038204, 0.984563, 0.173641, -0.0216622 });
     camWorld.Decompose(scale, rotation, translation);
 
     mKeyFrames[0.0f] = {
@@ -54,7 +116,6 @@ void CCutScene::InitializeCutSceneFrames()
     };
 
     camWorld = GetPositionFromRelative(Vec3{ 1.23505, 3.43635, -1.69316 }, Quaternion{ 0.178597, -0.207647, 0.0385907, 0.960987 });
-    transform = mThirdPersonCamera->GetTransform();
     camWorld.Decompose(scale, rotation, translation);
 
     mKeyFrames[1.4f] = {
@@ -63,8 +124,8 @@ void CCutScene::InitializeCutSceneFrames()
     };
 
     mKeyFrames[2.5f] = {
-        mThirdPersonCamera->GetTransform()->GetLocalPosition(),
-        mThirdPersonCamera->GetTransform()->GetLocalRotation()
+        transform->GetLocalPosition(),
+        transform->GetLocalRotation()
     };
 }
 
@@ -81,9 +142,8 @@ void CCutScene::Update()
         return;
     }
 
-    // 현재 시간 기준 앞뒤 키프레임 찾기
     auto itUpper = mKeyFrames.upper_bound(mElapsed);
-    if (itUpper == mKeyFrames.begin()) return; // 너무 이른 시간
+    if (itUpper == mKeyFrames.begin()) return;
     auto itLower = std::prev(itUpper);
 
     float t0 = itLower->first;

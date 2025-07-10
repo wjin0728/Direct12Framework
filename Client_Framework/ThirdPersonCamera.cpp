@@ -78,13 +78,13 @@ void CThirdPersonCamera::Update()
 		Vec3 scale, pos;
 		relativeMatrix.Decompose(scale, relativeRot, pos);
 
-		std::cout << "=== Camera relative to Target ===" << std::endl;
-		std::cout << "Relative Position: "
+		std::cout << "==============================" << std::endl;
+		std::cout << "Position: "
 			<< relativePos.x << ", "
 			<< relativePos.y << ", "
 			<< relativePos.z << std::endl;
 
-		std::cout << "Relative Rotation: "
+		std::cout << "Rotation: "
 			<< relativeRot.x << ", "
 			<< relativeRot.y << ", "
 			<< relativeRot.z << ", "

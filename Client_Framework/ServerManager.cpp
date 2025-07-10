@@ -242,7 +242,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_ADD_PLAYER: {
 		SC_ADD_PLAYER_PACKET* packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet_ptr);
-		std::string objName[3] = { "Archer", "Fighter", "Mage" };
+		std::string objName[3] = { "Fighter", "Archer", "Mage" };
 		auto obj = RESOURCE.GetPrefab(objName[packet->player_class]);
 		if (!obj) {
 			std::cout << "obj is nullptr" << std::endl;
@@ -252,6 +252,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		std::shared_ptr<CGameObject> player{};
 		if (clientID == packet->id) {
 			player = mPlayer;
+			player->GetCutScene()->SetClass((PLAYER_CLASS)packet->player_class);
 			RenderOK = 1;
 		}
 		else {

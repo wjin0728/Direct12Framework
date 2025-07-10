@@ -13,6 +13,15 @@ struct EventKey
     EventKey(float time, const std::string& name) : mTime(time), mName(name) {}
 };
 
+struct EventSegment
+{
+    ANIMATION_EVENT_TYPE mType;
+
+    float mStart = 0.0f;
+    float mEnd = 0.0f;
+    float mData = 0.2f;
+};
+
 #define _WITH_ANIMATION_INTERPOLATION
 
 class CAnimationEventHandler
@@ -94,11 +103,7 @@ public:
     int 							    mSetIndex = 0; //AnimationSet Index
     
     std::vector<shared_ptr<EventKey>>   mEventKeys;
-
-    bool mSlowEnable = false;
-    float mSlowStart = 0;
-    float mSlowEnd = 0;
-    float mSlowSpeed = 0.07f;
+    std::vector<EventSegment> 	mEventSegments{};
 
 public:
 

@@ -19,3 +19,11 @@ enum class ANIMATION_BLEND_TYPE : UINT
 
 	end
 };
+
+enum class ANIMATION_EVENT_TYPE : UINT
+{
+	SLOW,
+	JUMP,
+
+	end
+};

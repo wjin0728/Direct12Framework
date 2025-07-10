@@ -6,8 +6,8 @@
 #include "Timer.h"
 #include "SkinnedMeshRenderer.h"
 #include "ObjectPoolManager.h"
-#include"AnimationEnums.h"
-
+#include "AnimationEnums.h"
+#include "InputManager.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CAnimationSet::CAnimationSet(float length, int framesPerSecond, int keyFrameNum, int boneNum, string name)
@@ -107,21 +107,32 @@ void CAnimationTrack::SetAnimationSet(std::shared_ptr<CAnimationSet>& set)
 		mEnable = true;
 		mTrackProgress = 0.0f;
 		mEventKeys.resize(set->mEventKeys.size());
-		mSlowEnable = false;
-		mSlowStart = 0;
-		mSlowEnd = 0;
+		mEventSegments.clear();
 
+		EventSegment data;
 		for (int i = 0; auto& key : mEventKeys) {
-			if (set->mEventKeys[i]) {
-				key = set->mEventKeys[i];
-			}
+			if (set->mEventKeys[i]) key = set->mEventKeys[i];
+
+			// 슬로우 모션
 			if (key->mName == "SlowStart") {
-				mSlowEnable = true;
-				mSlowStart = key->mTime;
+				data.mType = ANIMATION_EVENT_TYPE::SLOW;
+				data.mStart = key->mTime;
 			}
 			else if (key->mName == "SlowEnd") {
-				mSlowEnd = key->mTime;
+				data.mEnd = key->mTime;
+				mEventSegments.push_back(data);
 			}
+
+			// 점프
+			if (key->mName == "JumpStart") {
+				data.mType = ANIMATION_EVENT_TYPE::JUMP;
+				data.mStart = key->mTime;
+			}
+			else if (key->mName == "JumpEnd") {
+				data.mEnd = key->mTime;
+				mEventSegments.push_back(data);
+			}
+
 			key->mEnable = true;
 			++i;
 		}
@@ -130,16 +141,30 @@ void CAnimationTrack::SetAnimationSet(std::shared_ptr<CAnimationSet>& set)
 
 float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, float animationLength)
 {
-	if (mSlowEnable && mPosition > mSlowStart) {
-		mPosition = trackPosition + elapsedTime * mSlowSpeed;
-		mTrackProgress = mPosition / animationLength;
-		if (mPosition > mSlowEnd) mSlowEnable = false;
-		return(mPosition);
-	}
-	//if (mSlowEnable && mPosition > mSlowStart) {
-	//	return(mPosition);
-	//}
+	if (INPUT.IsKeyDown(KEY_TYPE::F12)) mEnable = !mEnable;
+	if (!mEnable) return(mPosition);
 
+	for (auto& data : mEventSegments) {
+		if (mPosition < data.mStart || mPosition > data.mEnd)
+			continue;
+
+		switch (data.mType) {
+		case ANIMATION_EVENT_TYPE::SLOW: {
+			mPosition = trackPosition + elapsedTime * data.mData;
+			mTrackProgress = mPosition / animationLength;
+			return(mPosition);
+			break;
+		}
+		case ANIMATION_EVENT_TYPE::JUMP: {
+			float duration = data.mEnd - data.mStart;
+			float elapsed = mPosition - data.mStart;
+			float t = elapsed / duration;
+			float heightFactor = -4.0f * t * (t - 1.0f);
+
+			data.mData * heightFactor;
+		}
+		}
+	}
 
 	float trackElapsedTime = elapsedTime * mSpeed;
 
@@ -290,23 +315,21 @@ void CAnimationController::LateUpdate()
 		for (auto& cache : mAnimationSets->mBoneFrameCaches) { if (cache.lock()) cache.lock()->SetLocalMatZero(); }
 	
 		for (auto& track : mTracks) {
-			if (track->mEnable) {
-				auto& set = mAnimationSets->mAnimationSet[track->mSetIndex];
-				float position = track->UpdatePosition(track->mPosition, deltaTime, set->mLength);
-	
-				for (int i = 0; auto & cache : mAnimationSets->mBoneFrameCaches) {
-					if (cache.lock()) {
-						Matrix transform = set->GetSRT(i, position);
-						transform *= track->mWeight;
-						cache.lock()->mLocalMat = transform;
-					}
+			auto& set = mAnimationSets->mAnimationSet[track->mSetIndex];
+			float position = track->UpdatePosition(track->mPosition, deltaTime, set->mLength);
 
-					++i;
+			for (int i = 0; auto& cache : mAnimationSets->mBoneFrameCaches) {
+				if (cache.lock()) {
+					Matrix transform = set->GetSRT(i, position);
+					transform *= track->mWeight;
+					cache.lock()->mLocalMat = transform;
 				}
-				
-				if (mEventHandler.contains(set->mAnimationName))
-					track->HandleCallback(mEventHandler[set->mAnimationName]);
+
+				++i;
 			}
+
+			if (mEventHandler.contains(set->mAnimationName))
+				track->HandleCallback(mEventHandler[set->mAnimationName]);
 		}
 	
 		GetOwner()->UpdateWorldMatrices(nullptr);
