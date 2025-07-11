@@ -48,8 +48,10 @@ void PlayerState::BasicAttackState::Enter(PlayerCharacter* player) {
     case S_PLAYER_CLASS::FIGHTER:
         break;
 	case S_PLAYER_CLASS::ARCHER:
+        player->SetTarget();
         break;
 	case S_PLAYER_CLASS::MAGE:
+        player->SetTarget();
         break;
     default:
         break;
@@ -60,7 +62,19 @@ void PlayerState::BasicAttackState::Update(PlayerCharacter* player) {
 	attackTimer += TICK_INTERVAL;   
 	// cout << "BasicAttack 업데이트 중!" << endl;
 
+    if (player->_target) {
+        Vec3 direction = player->_target->_pos - player->_pos;
+        Vec3 look = { sin(player->_look_dir.y * degToRad), 0.0f, cos(player->_look_dir.y * degToRad) };
+        direction.y = 0.f;
+        direction.Normalize();
 
+        direction = Vec3::Lerp(look, direction, 0.1f);
+
+        Quaternion targetRot = Quaternion::LookRotation(direction);
+        Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
+        player->_rotation = targetRot;
+        player->SetLookDir(angle);
+    }
 }
 
 void PlayerState::BasicAttackState::Exit(PlayerCharacter* player) {}
@@ -71,6 +85,20 @@ PlayerState::RunAttackState& PlayerState::RunAttackState::GetInstance() { static
 
 void PlayerState::RunAttackState::Enter(PlayerCharacter* player) {
     //cout << "RunAttack 들어왔다리!" << endl;
+    switch (player->_class)
+    {
+    case S_PLAYER_CLASS::FIGHTER:
+        break;
+    case S_PLAYER_CLASS::ARCHER:
+        player->SetTarget();
+        break;
+    case S_PLAYER_CLASS::MAGE:
+        player->SetTarget();
+        break;
+    default:
+        break;
+    }
+
 }
 
 void PlayerState::RunAttackState::Update(PlayerCharacter* player) {
@@ -80,6 +108,20 @@ void PlayerState::RunAttackState::Update(PlayerCharacter* player) {
     if (!player->HasMoveInput()) {
         player->SetState(&PlayerState::IdleState::GetInstance());
         return;
+    }
+
+    if (player->_target) {
+        Vec3 direction = player->_target->_pos - player->_pos;
+        Vec3 look = { sin(player->_look_dir.y * degToRad), 0.0f, cos(player->_look_dir.y * degToRad) };
+        direction.y = 0.f;
+        direction.Normalize();
+
+        direction = Vec3::Lerp(look, direction, 0.1f);
+
+        Quaternion targetRot = Quaternion::LookRotation(direction);
+        Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
+        player->_rotation = targetRot;
+        player->SetLookDir(angle);
     }
 
     //player->_pos += (player->_velocity * TICK_INTERVAL);

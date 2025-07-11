@@ -1,6 +1,7 @@
 #pragma once
 #include "Object.h"
 #include "PlayerState.h"
+#include "Monster.h"
 
 class PlayerCharacter : public Object
 {
@@ -18,6 +19,9 @@ public:
 
 	PlayerStateMachine*		currentState;	
 	PlayerStateMachine*		previousState;
+
+	array<Monster*, 3> _Monster{}; // ∏ÛΩ∫≈Õ ≈∏∞Ÿ
+	Monster* _target = nullptr;
 
 	PlayerCharacter() :
 		Object(S_OBJECT_TYPE::S_PLAYER),
@@ -44,9 +48,9 @@ public:
 	};
 	int PlayerMaxHp() {
 		if (S_PLAYER_CLASS::FIGHTER == _class)
-			return (_class == S_PLAYER_CLASS::FIGHTER) 
+			return (_class == S_PLAYER_CLASS::FIGHTER)
 			? MAX_HP_FIGHTER : MAX_HP_ARCHER_MAGE;
-	}
+	};
 
 	void SetLookDir(float x, float y, float z) { _look_dir = Vec3(x, y, z); };
 	void SetLookDir(Vec3 dir) { _look_dir = dir; };
@@ -69,5 +73,14 @@ public:
 	void TakeDamage(int damage);
 
 	bool OnFighterBasicAttack(BoundingOrientedBox& monster_box);
+
+	void SetTarget();
+	bool IsMonsterInRange(Monster* target) const;
+	void InitializeTarget() {
+		for (auto& monster : _Monster) {
+			monster = nullptr;
+		}
+		_target = nullptr;
+	};
 };
 

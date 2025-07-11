@@ -103,6 +103,38 @@ void PlayerCharacter::TakeDamage(int damage)
 	}
 }
 
+void PlayerCharacter::SetTarget()
+{
+    float minDistance = 5000.f; // °Á Å« ¼ö
+    Monster* close_monster = nullptr;
+
+    for (auto& monster : _Monster) {
+        if (monster == nullptr || monster->_remove) continue;
+        Vec3 monsterPos = monster->_pos;
+        float distance = (_pos - monsterPos).LengthSquared();
+
+        if (distance < minDistance) {
+            minDistance = distance;
+            close_monster = monster;
+        }
+    }
+
+    if (close_monster && IsMonsterInRange(close_monster)) {
+        _target = close_monster;
+    }
+    else {
+        _target = nullptr;
+    }
+}
+
+bool PlayerCharacter::IsMonsterInRange(Monster* target) const
+{
+    if (target == nullptr) return false; // Å¸°ÙÀÌ ¾øÀ¸¸é false
+    float distance = (_pos - target->_pos).LengthSquared();
+    if (distance < pow(8.f, 2)) return true;
+    return false;
+}
+
 //const std::array<float, 2>& center, float radius, const std::array<float, 2>& forward, float sectorAngle,
 //const std::vector<std::array<float, 2>>& rectCorners
 

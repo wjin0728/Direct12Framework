@@ -58,16 +58,15 @@ void CCutScene::InitializeFighterCutScene()
     //    rotation
     //};
 
-
-    //mKeyFrames[2.499999] = {
-    //    translation,
-    //    rotation
-    //};
-    //
-    //mKeyFrames[2.5f] = {
-    //transform->GetLocalPosition(),
-    //transform->GetLocalRotation()
-    //};
+    mKeyFrames[0.0] = {
+        transform->GetLocalPosition(),
+        transform->GetLocalRotation()
+    };
+    
+    mKeyFrames[2.5f] = {
+        transform->GetLocalPosition(),
+        transform->GetLocalRotation()
+    };
 }
 
 void CCutScene::InitializeMageCutScene()
@@ -78,6 +77,11 @@ void CCutScene::InitializeMageCutScene()
     Matrix camWorld;
     auto& transform = mThirdPersonCamera->GetTransform();
 
+    mKeyFrames[0.0] = {
+    transform->GetLocalPosition(),
+    transform->GetLocalRotation()
+    };
+    
     mKeyFrames[2.5f] = {
         transform->GetLocalPosition(),
         transform->GetLocalRotation()

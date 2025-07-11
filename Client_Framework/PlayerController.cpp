@@ -99,7 +99,7 @@ void CPlayerController::OnKeyEvents()
 	{
 	case PLAYER_STATE::IDLE:
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-			INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
+			//INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ATTACK);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
 			return;
@@ -162,7 +162,7 @@ void CPlayerController::OnKeyEvents()
 		break;
 	case PLAYER_STATE::RUN:
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-			INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
+			//INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
 			mStateMachine->SetState((UINT8)PLAYER_STATE::RUNATTACK);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUNATTACK);
 			return;

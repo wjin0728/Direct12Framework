@@ -365,6 +365,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
+					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
 				}
 				Monster_cnt[ServerNumber]++;
@@ -381,6 +382,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;			
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
+					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
 				}
 				Monster_cnt[ServerNumber]++;
@@ -397,6 +399,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
+					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
 				}
 				Monster_cnt[ServerNumber]++;
@@ -437,6 +440,66 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		if (p->state != (uint8_t)clients[ServerNumber][p->id]._player._state)
 			clients[ServerNumber][p->id]._player.SetState(p->state);
+		break;
+	}
+	case CS_ATTACK: {
+		CS_ATTACK_PACKET* p = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
+		auto& player = clients[ServerNumber][c_id]._player;
+		Vec3 direction{};
+
+		switch (clients[ServerNumber][p->id]._player._class)
+		{
+		case S_PLAYER_CLASS::FIGHTER: {
+			direction = player._velocity;
+			for (auto& mon : Monsters[ServerNumber]) {
+				mon.second.LocalTransform();
+				player.OnFighterBasicAttack(mon.second._boundingbox);
+			}
+			break;
+		}
+		case S_PLAYER_CLASS::ARCHER: {
+			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
+
+			proj._pos = player._pos;
+			proj._pos.y += 0.3f;
+
+			direction.x = sin(player._look_dir.y * degToRad); // 1.0
+			direction.y = 0.0f;
+			direction.z = cos(player._look_dir.y * degToRad); // 0.0
+			proj._velocity = direction;
+
+			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+			for (auto& cl : clients[ServerNumber]) {
+				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
+			}
+			Projectile_cnt[ServerNumber]++;
+			break;
+		}
+		case S_PLAYER_CLASS::MAGE: {
+			Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
+
+			proj._pos = player._pos;
+			proj._pos.y += 0.3f;
+
+			direction.x = sin(player._look_dir.y * degToRad); // 1.0
+			direction.y = 0.0f;
+			direction.z = cos(player._look_dir.y * degToRad); // 0.0
+			proj._velocity = direction;
+
+			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+			for (auto& cl : clients[ServerNumber]) {
+				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
+			}
+			Projectile_cnt[ServerNumber]++;
+			break;
+		}
+		default:
+			break;
+		}
+		//Quaternion targetRot = Quaternion::LookRotation(direction);
+		//Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
+		//clients[ServerNumber][p->id]._player._rotation = targetRot;
+		//clients[ServerNumber][p->id]._player.SetLookDir(angle);
 		break;
 	}
 	}

@@ -4,7 +4,7 @@ class Projectile :
     public Object
 {
 public:
-	float _speed = 1.f; // 발사 속도
+	float _speed = 0.5f; // 발사 속도
 	bool _user_frinedly;
 	S_PROJECTILE_TYPE _p_type = S_PROJECTILE_TYPE::PROJECTILE_END;
 	int _damage = 0; // 데미지

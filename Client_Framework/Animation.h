@@ -164,14 +164,17 @@ public:
     void BindSkinningMatrix();
     void PrepareSkinning();
 
+    void PrintMatrix(const Matrix& mat);
+
 public:
     bool                        mApplyRootMotion = false;
-    std::weak_ptr<CTransform>   mModelRootObject;
 
+    std::weak_ptr<CTransform>   mModelRootObject;
     std::weak_ptr<CTransform>   mRootMotionObject;
     Vec3                        mFirstRootMotionPosition = Vec3(0.0f, 0.0f, 0.0f);
     
     void SetRootMotion(bool bRootMotion) { mApplyRootMotion = bRootMotion; }
 
-    void PrintMatrix(const Matrix& mat);
+public:
+
 };

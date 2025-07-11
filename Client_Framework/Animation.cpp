@@ -8,6 +8,8 @@
 #include "ObjectPoolManager.h"
 #include "AnimationEnums.h"
 #include "InputManager.h"
+#include "ServerManager.h"
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CAnimationSet::CAnimationSet(float length, int framesPerSecond, int keyFrameNum, int boneNum, string name)
@@ -284,13 +286,13 @@ void CAnimationController::Start()
 
 		for (auto& set : mAnimationSets->mAnimationSet) {
 			auto& handler = std::make_shared<CAnimationEventHandler>();
-			if (set->mEventKeys.size() && set->mAnimationName == "Ultimate") {
-				handler->Register("SlowStart", [](float time) {
-					std::cout << "[SlowStart]\tUltimate event at " << time << "s\n";
-					});
-				handler->Register("SlowEnd", [](float time) {
-					std::cout << "[SlowEnd]\tUltimate event at " << time << "s\n";
-					});
+			for (auto& key : set->mEventKeys) {
+				if (set->mAnimationName == "Attack" || set->mAnimationName == "RunAttack") {
+					handler->Register("Attack", [](float time) {
+						INSTANCE(ServerManager).send_cs_attack_packet();
+						std::cout << "น฿ป็!!" << std::endl;
+						});
+				}
 			}
 			mEventHandler[set->mAnimationName] = handler;
 		}

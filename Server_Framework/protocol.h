@@ -26,6 +26,7 @@ constexpr char CS_ULTIMATE_SKILL = 6;
 constexpr char CS_000 = 7;
 constexpr char CS_CHANGE_SCENE = 8;
 constexpr char CS_CHANGE_STATE = 9;
+constexpr char CS_ATTACK = 10;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -111,6 +112,10 @@ struct CS_CHANGE_SCENE_PACKET : PACKET {
 struct CS_CHANGE_STATE_PACKET : PACKET {
 	int				id;
 	uint8_t			state;
+};
+
+struct CS_ATTACK_PACKET : PACKET {
+	int				id;
 };
 
 // ----------------------------------------------------------------------------------
