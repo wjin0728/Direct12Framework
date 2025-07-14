@@ -269,20 +269,22 @@ void CPlayerController::CastingSkill()
 		break;
 	case FIRE_EXPLOSION:
 	{
-		auto explosionPrefab = INSTANCE(CResourceManager).GetPrefab("Explosion");
-		if (explosionPrefab) {
-			auto explosionObj = CGameObject::Instantiate(explosionPrefab);
-			explosionObj->GetTransform()->SetLocalPosition(GetTransform()->GetWorldPosition() + Vec3(0.f, 0.5f, 0.f));
-			INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
-			explosionObj->Awake();
-			explosionObj->Start();
-
-			auto explosionParticle = explosionObj->GetComponent<CParticleAttach>();
-			if (explosionParticle) {
-				explosionParticle->Play();
-			}
-		}
 		if (mTargetEnemy.lock()) {
+			auto explosionPrefab = INSTANCE(CResourceManager).GetPrefab("Explosion");
+			if (explosionPrefab) {
+				auto explosionObj = CGameObject::Instantiate(explosionPrefab);
+
+				Vec3 explosionPos = mTargetEnemy.lock()->GetRootBoundingSphere().Center;
+				explosionObj->GetTransform()->SetLocalPosition(explosionPos);
+				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
+				explosionObj->Awake();
+				explosionObj->Start();
+
+				auto explosionParticle = explosionObj->GetComponent<CParticleAttach>();
+				if (explosionParticle) {
+					explosionParticle->Play();
+				}
+			}
 			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
 		}
 		break;
