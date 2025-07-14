@@ -23,7 +23,6 @@ enum class ANIMATION_BLEND_TYPE : UINT
 enum class ANIMATION_EVENT_TYPE : UINT
 {
 	SLOW,
-	JUMP,
 
 	end
 };

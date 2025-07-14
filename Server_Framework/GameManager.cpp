@@ -534,6 +534,12 @@ void GameManager::Update() {
 		if (cl.second._state != ST_INGAME) continue;
 		cl.second._player.Update();
 
+		auto& player = cl.second._player;
+		if (player._class == S_PLAYER_CLASS::FIGHTER && player.currentState == &PlayerState::UltimateState::GetInstance()) {
+			float terrainHeight = terrain[(int)scene_type].GetHeight(player._pos.x, player._pos.z);
+			player._pos.y = terrainHeight + player._data;
+		}
+
 		if (cl.second._player.HasMoveInput()) {
 			Vec3 newPos = cl.second._player._pos + (cl.second._player._velocity * TICK_INTERVAL);
 
