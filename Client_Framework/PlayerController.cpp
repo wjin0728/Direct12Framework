@@ -274,7 +274,11 @@ void CPlayerController::CastingSkill()
 			if (explosionPrefab) {
 				auto explosionObj = CGameObject::Instantiate(explosionPrefab);
 
+				auto camera = mCamera.lock()->GetTransform();
+				Vec3 camForward = camera->GetWorldLook();
 				Vec3 explosionPos = mTargetEnemy.lock()->GetRootBoundingSphere().Center;
+				explosionPos -= camForward * 0.1f; // Offset explosion position slightly in the direction of the camera
+
 				explosionObj->GetTransform()->SetLocalPosition(explosionPos);
 				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
 				explosionObj->Awake();
