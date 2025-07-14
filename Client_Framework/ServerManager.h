@@ -92,6 +92,13 @@ public:
 		p.dir_z = dir.z;
 		Send_Packet(&p);
 	}
+	void send_cs_attack_packet() {
+		CS_ATTACK_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_ATTACK;
+		p.id = clientID;
+		Send_Packet(&p);
+	}
 	void send_cs_change_state_packet(uint8_t state) {
 		CS_CHANGE_STATE_PACKET p;
 		p.size = sizeof(p);

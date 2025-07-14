@@ -26,6 +26,7 @@ constexpr char CS_ULTIMATE_SKILL = 6;
 constexpr char CS_000 = 7;
 constexpr char CS_CHANGE_SCENE = 8;
 constexpr char CS_CHANGE_STATE = 9;
+constexpr char CS_ATTACK = 10;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -45,7 +46,8 @@ constexpr char SC_CHANGE_SCENE = 16;
 constexpr char SC_ADD_PROJECTILE = 17;
 constexpr char SC_PROJECTILE_POS = 18;
 constexpr char SC_ADD_MONSTER = 19;
-
+constexpr char SC_REMOVE_PROJECTILE = 20;
+constexpr char SC_REMOVE_MONSTER = 21;
 
 
 #pragma pack (push, 1)
@@ -110,6 +112,10 @@ struct CS_CHANGE_SCENE_PACKET : PACKET {
 struct CS_CHANGE_STATE_PACKET : PACKET {
 	int				id;
 	uint8_t			state;
+};
+
+struct CS_ATTACK_PACKET : PACKET {
+	int				id;
 };
 
 // ----------------------------------------------------------------------------------
@@ -207,5 +213,13 @@ struct SC_ADD_PROJECTILE_PACKET : PACKET {
 struct SC_PROJECTILE_POS_PACKET : PACKET {
 	int projectile_id;
 	float x, y, z;
+};
+
+struct SC_REMOVE_PROJECTILE_PACKET : PACKET {
+	int projectile_id;
+};
+
+struct SC_REMOVE_MONSTER_PACKET : PACKET {
+	int monster_id;
 };
 #pragma pack (pop)

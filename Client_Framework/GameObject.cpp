@@ -429,7 +429,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			obj->mAnimationController = obj->AddComponent<CAnimationController>();
 			std::string animName{};
 			ReadDateFromFile(inFile, animName);
-			obj->CreateAnimationFromFile(ANIMATION_PATH(obj->mName + "@anim"));
+			obj->CreateAnimationFromFile(ANIMATION_PATH(obj->mName));
 		}
 		else if (token == "<Light>:") {
 			obj->CreateLightFromFile(inFile);
@@ -510,12 +510,38 @@ void CGameObject::CreateAnimationFromFile(const std::string& fileName)
 			ReadDateFromFile(ifs, framesPerSecondNum);
 			ReadDateFromFile(ifs, keyFrameNum);
 
-			mAnimationController->mAnimationSets->mAnimationSet[setNum] = std::make_shared<CAnimationSet>(length, framesPerSecondNum, keyFrameNum, mAnimationController->mAnimationSets->mBoneNames.size(), setName);
+			auto& animSets = mAnimationController->mAnimationSets;
+			auto animSet = std::make_shared<CAnimationSet>(length, framesPerSecondNum, keyFrameNum, animSets->mBoneNames.size(), setName);
+
+			ReadDateFromFile(ifs, token);
+			if (token == "<Loop>:") {
+				int animationType{};
+				ReadDateFromFile(ifs, animationType);
+				animSet->mType = (ANIMATION_TYPE)animationType;
+			}
+
+			ReadDateFromFile(ifs, token);
+			if (token == "<Events>:") {
+				int eventCount{};
+				ReadDateFromFile(ifs, eventCount);
+				animSet->mEventKeys.resize(eventCount);
+
+				for (auto& key : animSet->mEventKeys) {
+					float eventTime{};
+					std::string eventStr;
+
+					ReadDateFromFile(ifs, eventTime);
+					ReadDateFromFile(ifs, eventStr);
+
+					key = std::make_shared<EventKey>(eventTime, eventStr);
+				}
+			}
+
+			animSets->mAnimationSet[setNum] = animSet;
 
 			for (int i = 0; i < keyFrameNum; i++) {
 				ReadDateFromFile(ifs, token);
 				if (token == "<Transforms>:") {
-					auto& animSet = mAnimationController->mAnimationSets->mAnimationSet[setNum];
 					int keyNum{};
 					float keyTime{};
 
@@ -718,17 +744,6 @@ void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>
 
 	for (auto& child : mChildren) {
 		child->CacheFrameHierarchies(boneFrameCaches);
-	}
-}
-
-void CGameObject::ResetForAnimationBlending()
-{
-	mTransform->mScaleLayerBlending = Vec3(0.0f, 0.0f, 0.0f);
-	mTransform->mRotationLayerBlending = Vec3(0.0f, 0.0f, 0.0f);
-	mTransform->mPositionLayerBlending = Vec3(0.0f, 0.0f, 0.0f);
-
-	for (auto& child : mChildren) {
-		child->ResetForAnimationBlending();
 	}
 }
 

@@ -13,6 +13,7 @@
 #include"ItemMovement.h"
 #include "ObjectState.h"
 #include "EnemyState.h"
+#include "CutScene.h"
 
 void ServerManager::Initialize()
 {
@@ -106,8 +107,12 @@ bool ServerManager::InitPlayerAndCamera()
 	mPlayer->SetActive(false);
 	mPlayer->SetStatic(false);
 
+	auto cutScene = mPlayer->AddComponent<CCutScene>();
+	mPlayer->SetCutScene(cutScene);
+
 	auto playerController = mPlayer->AddComponent<CPlayerController>();
 	mPlayer->SetPlayerController(playerController);
+	playerController->SetCutScene(cutScene);
 
 	mMainCamera = std::make_shared<CGameObject>();
 
@@ -130,6 +135,7 @@ bool ServerManager::InitPlayerAndCamera()
 	auto playerFollower = mMainCamera->AddComponent<CThirdPersonCamera>();
 	playerFollower->SetTarget(mPlayer);
 	playerController->SetCamera(camera);
+	cutScene->SetThirdPersonCamera(playerFollower);
 
 	return true;
 }
@@ -269,6 +275,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		std::shared_ptr<CGameObject> player{};
 		if (clientID == packet->id) {
 			player = mPlayer;
+			player->GetCutScene()->SetClass((PLAYER_CLASS)packet->player_class);
 			RenderOK = 1;
 		}
 		else {
@@ -279,6 +286,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		player->SetActive(true);
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
+		
 		auto stateMachine = player->AddComponent<CPlayerStateMachine>(packet->player_class);
 		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 		player->SetStateMachine(stateMachine);
@@ -484,6 +492,20 @@ void ServerManager::Using_Packet(char* packet_ptr)
 				cout << "몬스터 상태" << monsterState->GetState() << endl;	
 			}
 		}
+		break;
+	}
+	case SC_REMOVE_MONSTER: {
+		SC_REMOVE_MONSTER_PACKET* packet = reinterpret_cast<SC_REMOVE_MONSTER_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		scene->RemoveObject(mEnemies[packet->monster_id]);
+		mEnemies.erase(packet->monster_id);
+		break;
+	}
+	case SC_REMOVE_PROJECTILE: {
+		SC_REMOVE_PROJECTILE_PACKET* packet = reinterpret_cast<SC_REMOVE_PROJECTILE_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		scene->RemoveObject(mProjectiles[packet->projectile_id]);
+		mProjectiles.erase(packet->projectile_id);
 		break;
 	}
 	default:

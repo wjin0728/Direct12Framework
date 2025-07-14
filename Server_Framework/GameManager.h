@@ -118,6 +118,7 @@ public:
 			cl.second._player._hp = cl.second._player.PlayerMaxHp();
 			cl.second._player._barrier = 0;
 			cl.second._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
+			cl.second._player.InitializeTarget();
 		}
 	}
 

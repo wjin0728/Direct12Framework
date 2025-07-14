@@ -14,6 +14,7 @@
 #include "AnimationEnums.h"
 #include "ObjectState.h"
 #include"ParticleManager.h"
+#include "CutScene.h"
 #include"RenderManager.h"
 #include"UIRenderer.h"
 #include"TargetMarker.h"
@@ -26,7 +27,7 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
-	if(!rigidBody) rigidBody = GetOwner()->GetComponent<CRigidBody>();
+	if (!rigidBody) rigidBody = GetOwner()->GetComponent<CRigidBody>();
 	if (!mStateMachine) mStateMachine = owner->GetComponentFromHierarchy<CPlayerStateMachine>();
 
 	auto targetUIObj = CGameObject::CreateUIObject("Sprite", "TargetMarker", { 0.f,0.f }, { 80.f,80.f });
@@ -112,21 +113,6 @@ void CPlayerController::SetState(PLAYER_STATE state)
 
 }
 
-UINT8 CPlayerController::GetAnimationIndexFromState(PLAYER_STATE state)
-{
-	switch (mClass)
-	{
-	case PLAYER_CLASS::ARCHER:
-		return (UINT8)CAnimationController::ARCHER_MAP.at(state);
-	case PLAYER_CLASS::FIGHTER:
-		return (UINT8)CAnimationController::FIGHTER_MAP.at(state);
-	case PLAYER_CLASS::MAGE:
-		return (UINT8)CAnimationController::MAGE_MAP.at(state);
-	default:
-		return 0;
-	}
-}
-
 void CPlayerController::OnKeyEvents()
 {
 	auto transform = GetTransform();
@@ -146,7 +132,7 @@ void CPlayerController::OnKeyEvents()
 	{
 	case PLAYER_STATE::IDLE:
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-			INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
+			//INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ATTACK);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
 			return;
@@ -175,6 +161,10 @@ void CPlayerController::OnKeyEvents()
 			CastingSkill();
 			return;
 		}
+		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
+			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
+		}
 
 		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 		if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
@@ -191,9 +181,9 @@ void CPlayerController::OnKeyEvents()
 		break;
 	case PLAYER_STATE::RUN:
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-			INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
-			mStateMachine->SetState((UINT8)PLAYER_STATE::MOVE_ATTACK);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::MOVE_ATTACK);
+			//INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
+			mStateMachine->SetState((UINT8)PLAYER_STATE::RUNATTACK);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUNATTACK);
 			return;
 		}
 
@@ -222,6 +212,11 @@ void CPlayerController::OnKeyEvents()
 
 			return;
 		}
+		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
+			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
+		}
+
 		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 		if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
 		if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
@@ -237,7 +232,7 @@ void CPlayerController::OnKeyEvents()
 		break;
 	case PLAYER_STATE::ATTACK:
 		break;
-	case PLAYER_STATE::MOVE_ATTACK:
+	case PLAYER_STATE::RUNATTACK:
 		break;
 	case PLAYER_STATE::GETHIT:
 		break;

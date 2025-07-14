@@ -12,6 +12,7 @@ class CSkinnedMesh;
 class CPlayerController;
 class CPlayerStateMachine;
 class CEntityState;
+class CCutScene;
 
 class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
@@ -26,6 +27,7 @@ private:
 	std::shared_ptr<CCollider> mCollider{};
 	std::shared_ptr<CPlayerController> mPlayerController{};
 	std::shared_ptr<CEntityState> mStateMachine{};
+	std::shared_ptr<CCutScene> mCutScene{};
 
 	std::vector<std::shared_ptr<CGameObject>> mChildren{};
 
@@ -86,6 +88,7 @@ public:
 	std::shared_ptr<CAnimationController> GetAnimationController() { return mAnimationController; }
 	std::shared_ptr<CPlayerController> GetPlayerController() { return mPlayerController; }
 	std::shared_ptr<CEntityState> GetStateMachine() { return mStateMachine; }
+	std::shared_ptr<CCutScene> GetCutScene() { return mCutScene; }
 
 	std::shared_ptr<CGameObject> GetSptrFromThis();
 	const std::string& GetName() const { return mName; }
@@ -114,6 +117,7 @@ public:
 	void SetStateMachine(const std::shared_ptr<CEntityState>& stateMachine) { mStateMachine = stateMachine; }
 	void SetTransform(const std::shared_ptr<CTransform>& transform) { mTransform = transform; }
 	void SetRenderer(const std::shared_ptr<CRenderer>& renderer) { mRenderer = renderer; }
+	void SetCutScene(const std::shared_ptr<CCutScene>& cutScene) { mCutScene = cutScene; }
 
 	void ReturnCBVIndex();
 
@@ -149,12 +153,10 @@ private:
 public:
 	std::shared_ptr<CAnimationController> mAnimationController{};
 
-	void ResetForAnimationBlending();
 	void CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches);
-
 	void PrepareSkinning();
-
 	void UpdateWorldMatrices(std::shared_ptr<CTransform> parent);
+	
 	void PrintSRT();
 
 	void RegisterRenderer();

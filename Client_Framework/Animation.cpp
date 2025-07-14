@@ -6,101 +6,9 @@
 #include "Timer.h"
 #include "SkinnedMeshRenderer.h"
 #include "ObjectPoolManager.h"
-#include"AnimationEnums.h"
-
-std::unordered_map<PLAYER_STATE, ARCHER_ANIMATION> CAnimationController::ARCHER_MAP = {
-	{ PLAYER_STATE::IDLE, ARCHER_ANIMATION::COMBATIDLE },
-	{ PLAYER_STATE::RUN, ARCHER_ANIMATION::RUN },
-	{ PLAYER_STATE::ATTACK, ARCHER_ANIMATION::ATTACK },
-	{ PLAYER_STATE::MOVE_ATTACK, ARCHER_ANIMATION::RUNATTACK },
-	{ PLAYER_STATE::GETHIT, ARCHER_ANIMATION::GETHIT },
-	{ PLAYER_STATE::DEATH, ARCHER_ANIMATION::DEATH },
-	{ PLAYER_STATE::JUMP, ARCHER_ANIMATION::JUMP },
-	{ PLAYER_STATE::SKILL, ARCHER_ANIMATION::SKILLATTACK }
-};
-
-std::unordered_map<PLAYER_STATE, FIGHTER_ANIMATION> CAnimationController::FIGHTER_MAP = {
-	{ PLAYER_STATE::IDLE, FIGHTER_ANIMATION::IDLE },
-	{ PLAYER_STATE::RUN, FIGHTER_ANIMATION::RUN },
-	{ PLAYER_STATE::ATTACK, FIGHTER_ANIMATION::ATTACK },
-	{ PLAYER_STATE::MOVE_ATTACK, FIGHTER_ANIMATION::RUNATTACK },
-	{ PLAYER_STATE::GETHIT, FIGHTER_ANIMATION::GETHIT },
-	{ PLAYER_STATE::DEATH, FIGHTER_ANIMATION::DEATH },
-	{ PLAYER_STATE::JUMP, FIGHTER_ANIMATION::JUMP },
-	{ PLAYER_STATE::SKILL, FIGHTER_ANIMATION::SKILLATTACK }
-};
-
-std::unordered_map<PLAYER_STATE, MAGE_ANIMATION> CAnimationController::MAGE_MAP = {
-	{ PLAYER_STATE::IDLE, MAGE_ANIMATION::IDLE },
-	{ PLAYER_STATE::RUN, MAGE_ANIMATION::RUN },
-	{ PLAYER_STATE::ATTACK, MAGE_ANIMATION::ATTACK },
-	{ PLAYER_STATE::MOVE_ATTACK, MAGE_ANIMATION::RUNATTACK },
-	{ PLAYER_STATE::GETHIT, MAGE_ANIMATION::GETHIT },
-	{ PLAYER_STATE::DEATH, MAGE_ANIMATION::DEATH },
-	{ PLAYER_STATE::JUMP, MAGE_ANIMATION::JUMP },
-	{ PLAYER_STATE::SKILL, MAGE_ANIMATION::SKILLATTACK }
-};
-
-std::unordered_map<MONSTER_STATE, GRASS_SMALL_ANIMATION> CAnimationController::GRASS_SMALL_MAP = {
-	{ MONSTER_STATE::IDLE, GRASS_SMALL_ANIMATION::IDLE },
-	{ MONSTER_STATE::RUN, GRASS_SMALL_ANIMATION::DASH_FORWARD_IN_PLACE },
-	{ MONSTER_STATE::ATTACK, GRASS_SMALL_ANIMATION::BITE_ATTACK },
-	{ MONSTER_STATE::ATTACK2, GRASS_SMALL_ANIMATION::WIND_SLASH_ATTACK },
-	{ MONSTER_STATE::PROJECTILE_ATTACK, GRASS_SMALL_ANIMATION::PROJECTILE_ATTACK },
-	{ MONSTER_STATE::GETHIT, GRASS_SMALL_ANIMATION::TAKE_DAMAGE },
-	{ MONSTER_STATE::DEATH, GRASS_SMALL_ANIMATION::DIE },
-	{ MONSTER_STATE::SKILL, GRASS_SMALL_ANIMATION::WIND_SLASH_ATTACK }
-};
-std::unordered_map<MONSTER_STATE, GRASS_BIG_ANIMATION> CAnimationController::GRASS_BIG_MAP = {
-	{ MONSTER_STATE::IDLE, GRASS_BIG_ANIMATION::IDLE },
-	{ MONSTER_STATE::RUN, GRASS_BIG_ANIMATION::DASH_FORWARD_IN_PLACE },
-	{ MONSTER_STATE::ATTACK, GRASS_BIG_ANIMATION::CLAP_ATTACK_LOW },
-	{ MONSTER_STATE::ATTACK2, GRASS_BIG_ANIMATION::SLAP_ATTACK },
-	{ MONSTER_STATE::PROJECTILE_ATTACK, GRASS_BIG_ANIMATION::PROJECTILE_ATTACK_LOW },
-	{ MONSTER_STATE::GETHIT, GRASS_BIG_ANIMATION::TAKE_DAMAGE },
-	{ MONSTER_STATE::DEATH, GRASS_BIG_ANIMATION::DIE },
-	{ MONSTER_STATE::SKILL, GRASS_BIG_ANIMATION::WIND_SLASH_ATTACK }
-};
-std::unordered_map<MONSTER_STATE, FIRE_SMALL_ANIMATION> CAnimationController::FIRE_SMALL_MAP = {
-	{ MONSTER_STATE::IDLE, FIRE_SMALL_ANIMATION::IDLE },
-	{ MONSTER_STATE::RUN, FIRE_SMALL_ANIMATION::FLY_FORWARD_IN_PLACE },
-	{ MONSTER_STATE::ATTACK, FIRE_SMALL_ANIMATION::CLAP_ATTACK },
-	{ MONSTER_STATE::ATTACK2, FIRE_SMALL_ANIMATION::SLAP_ATTACK },
-	{ MONSTER_STATE::PROJECTILE_ATTACK, FIRE_SMALL_ANIMATION::PROJECTILE_ATTACK },
-	{ MONSTER_STATE::GETHIT, FIRE_SMALL_ANIMATION::TAKE_DAMAGE },
-	{ MONSTER_STATE::DEATH, FIRE_SMALL_ANIMATION::DIE },
-	{ MONSTER_STATE::SKILL, FIRE_SMALL_ANIMATION::SLASH_ATTACK }
-};
-std::unordered_map<MONSTER_STATE, FIRE_BIG_ANIMATION> CAnimationController::FIRE_BIG_MAP = {
-	{ MONSTER_STATE::IDLE, FIRE_BIG_ANIMATION::IDLE },
-	{ MONSTER_STATE::RUN, FIRE_BIG_ANIMATION::FLY_FORWARD_IN_PLACE },
-	{ MONSTER_STATE::ATTACK, FIRE_BIG_ANIMATION::CLAP_ATTACK },
-	{ MONSTER_STATE::ATTACK2, FIRE_BIG_ANIMATION::SLAP_ATTACK },
-	{ MONSTER_STATE::PROJECTILE_ATTACK, FIRE_BIG_ANIMATION::PROJECTILE_ATTACK_LOW },
-	{ MONSTER_STATE::GETHIT, FIRE_BIG_ANIMATION::TAKE_DAMAGE },
-	{ MONSTER_STATE::DEATH, FIRE_BIG_ANIMATION::DIE },
-	{ MONSTER_STATE::SKILL, FIRE_BIG_ANIMATION::SPELL_ATTACK_01 }
-};
-std::unordered_map<MONSTER_STATE, WATER_SMALL_ANIMATION> CAnimationController::WATER_SMALL_MAP = {
-	{ MONSTER_STATE::IDLE, WATER_SMALL_ANIMATION::IDLE },
-	{ MONSTER_STATE::RUN, WATER_SMALL_ANIMATION::DASH_FORWARD_IN_PLACE },
-	{ MONSTER_STATE::ATTACK, WATER_SMALL_ANIMATION::JAB_ATTACK },
-	{ MONSTER_STATE::ATTACK2, WATER_SMALL_ANIMATION::SLASH_ATTACK },
-	{ MONSTER_STATE::PROJECTILE_ATTACK, WATER_SMALL_ANIMATION::PROJECTILE_ATTACK },
-	{ MONSTER_STATE::GETHIT, WATER_SMALL_ANIMATION::TAKE_DAMAGE },
-	{ MONSTER_STATE::DEATH, WATER_SMALL_ANIMATION::DIE },
-	{ MONSTER_STATE::SKILL, WATER_SMALL_ANIMATION::STAB_ATTACK }
-};
-std::unordered_map<MONSTER_STATE, WATER_BIG_ANIMATION> CAnimationController::WATER_BIG_MAP = {
-	{ MONSTER_STATE::IDLE, WATER_BIG_ANIMATION::IDLE },
-	{ MONSTER_STATE::RUN, WATER_BIG_ANIMATION::DASH_FORWARD_IN_PLACE },
-	{ MONSTER_STATE::ATTACK, WATER_BIG_ANIMATION::ICICLE_ATTACK },
-	{ MONSTER_STATE::ATTACK2, WATER_BIG_ANIMATION::SPIN_ATTACK },
-	{ MONSTER_STATE::PROJECTILE_ATTACK, WATER_BIG_ANIMATION::PROJECTILE_ATTACK_LOW },
-	{ MONSTER_STATE::GETHIT, WATER_BIG_ANIMATION::TAKE_DAMAGE },
-	{ MONSTER_STATE::DEATH, WATER_BIG_ANIMATION::DIE },
-	{ MONSTER_STATE::SKILL, WATER_BIG_ANIMATION::ICICLE_ATTACK_FAR }
-};
+#include "AnimationEnums.h"
+#include "InputManager.h"
+#include "ServerManager.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -110,7 +18,7 @@ CAnimationSet::CAnimationSet(float length, int framesPerSecond, int keyFrameNum,
 	mFramesPerSecond = framesPerSecond;
 	mKeyFrames = keyFrameNum;
 
-	mAnimationSetName = name;
+	mAnimationName = name;
 
 	mKeyFrameTimes.resize(keyFrameNum);
 	mKeyFrameTransforms.resize(keyFrameNum);
@@ -168,8 +76,7 @@ CAnimationTrack::CAnimationTrack(const CAnimationTrack& other)
 	mWeight = other.mWeight;
 	mType = other.mType;
 	mEnable = other.mEnable;
-	mCallbackKeys = other.mCallbackKeys;
-	mAnimationCallbackHandler = std::make_shared<CAnimationCallbackHandler>(*other.mAnimationCallbackHandler);
+	mEventKeys = other.mEventKeys;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,37 +85,91 @@ CAnimationTrack::~CAnimationTrack()
 {
 }
 
-void CAnimationTrack::SetCallbackKeys(int num)
+void CAnimationTrack::HandleCallback(std::shared_ptr<CAnimationEventHandler>& registry)
 {
-	mCallbackKeys.resize(num);
-}
-
-void CAnimationTrack::SetCallbackKey(int index, float keyTime, void* data)
-{
-	mCallbackKeys[index].mTime = keyTime;
-	mCallbackKeys[index].mCallbackData = data;
-}
-
-void CAnimationTrack::SetAnimationCallbackHandler(std::shared_ptr<CAnimationCallbackHandler> callbackHandler)
-{
-	mAnimationCallbackHandler = callbackHandler;
-}
-
-void CAnimationTrack::HandleCallback()
-{
-	if (mAnimationCallbackHandler) {
-		for (auto& key : mCallbackKeys) {
-			if (SimpleMath::IsEqual(key.mTime, mPosition, ANIMATION_CALLBACK_EPSILON) && key.mCallbackData) {
-				mAnimationCallbackHandler->HandleCallback(key.mCallbackData, mPosition);
-				break;
+	for (auto& key : mEventKeys) {
+		if (key->mTime < mPosition && key->mEnable) {
+			auto event = registry->GetEvent(key->mName);
+			if (event) {
+				event(mPosition);
+				key->mEnable = false;
 			}
+			break;
+		}
+	}
+}
+
+void CAnimationTrack::SetAnimationSet(std::shared_ptr<CAnimationSet>& set)
+{
+	if (set) {
+		mPosition = -ANIMATION_CALLBACK_EPSILON;
+		mSpeed = 1.0f;
+		mWeight = 1.0f;
+		mType = set->mType;
+		mEnable = true;
+		mTrackProgress = 0.0f;
+		mEventKeys.resize(set->mEventKeys.size());
+		mEventSegments.clear();
+
+		EventSegment data;
+		for (int i = 0; auto& key : mEventKeys) {
+			if (set->mEventKeys[i]) key = set->mEventKeys[i];
+
+			// 슬로우 모션
+			if (key->mName == "SlowStart") {
+				data.mType = ANIMATION_EVENT_TYPE::SLOW;
+				data.mStart = key->mTime;
+			}
+			else if (key->mName == "SlowEnd") {
+				data.mEnd = key->mTime;
+				mEventSegments.push_back(data);
+			}
+
+			// 점프
+			if (key->mName == "JumpStart") {
+				data.mType = ANIMATION_EVENT_TYPE::JUMP;
+				data.mStart = key->mTime;
+			}
+			else if (key->mName == "JumpEnd") {
+				data.mEnd = key->mTime;
+				mEventSegments.push_back(data);
+			}
+
+			key->mEnable = true;
+			++i;
 		}
 	}
 }
 
 float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, float animationLength)
 {
+	if (INPUT.IsKeyDown(KEY_TYPE::F12)) mEnable = !mEnable;
+	if (!mEnable) return(mPosition);
+
+	for (auto& data : mEventSegments) {
+		if (mPosition < data.mStart || mPosition > data.mEnd)
+			continue;
+
+		switch (data.mType) {
+		case ANIMATION_EVENT_TYPE::SLOW: {
+			mPosition = trackPosition + elapsedTime * data.mData;
+			mTrackProgress = mPosition / animationLength;
+			return(mPosition);
+			break;
+		}
+		case ANIMATION_EVENT_TYPE::JUMP: {
+			float duration = data.mEnd - data.mStart;
+			float elapsed = mPosition - data.mStart;
+			float t = elapsed / duration;
+			float heightFactor = -4.0f * t * (t - 1.0f);
+
+			data.mData * heightFactor;
+		}
+		}
+	}
+
 	float trackElapsedTime = elapsedTime * mSpeed;
+
 	switch (mType) {
 	case ANIMATION_TYPE::LOOP: {
 		if (mPosition < 0.0f) mPosition = 0.0f;
@@ -216,6 +177,7 @@ float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, fl
 			mPosition = trackPosition + trackElapsedTime;
 			if (mPosition > animationLength) {
 				mPosition = -ANIMATION_CALLBACK_EPSILON;
+				SetEventEnableTrue();
 				return(animationLength);
 			}
 		}
@@ -225,6 +187,7 @@ float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, fl
 		break;
 	}
 	case ANIMATION_TYPE::ONCE:
+		if (mPosition < 0.0f) mPosition = 0.0f;
 		mPosition = trackPosition + trackElapsedTime;
 		if (mPosition > animationLength) {
 			mPosition = 0.0f;
@@ -234,6 +197,7 @@ float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, fl
 	case ANIMATION_TYPE::PINGPONG:
 		break;
 	}
+
 	mTrackProgress = mPosition / animationLength;
 
 	return(mPosition);
@@ -320,16 +284,30 @@ void CAnimationController::Start()
 			++i;
 		}
 
-		SetTrackAnimationSet(0, 2);
-		SetTrackSpeed(0, 1.0f);
-		SetTrackWeight(0, 1.0f);
-	}
+		for (auto& set : mAnimationSets->mAnimationSet) {
+			auto& handler = std::make_shared<CAnimationEventHandler>();
+			for (auto& key : set->mEventKeys) {
+				if (set->mAnimationName == "Attack" || set->mAnimationName == "RunAttack") {
+					handler->Register("Attack", [](float time) {
+						INSTANCE(ServerManager).send_cs_attack_packet();
+						std::cout << "발사!!" << std::endl;
+						});
+				}
+			}
+			mEventHandler[set->mAnimationName] = handler;
+		}
 
+		SetTrackAnimationSet(0, 0);
+	}
 
 	mRootMotionObject.lock()->owner->SetStatic(true);
 }
 
 void CAnimationController::Update()
+{
+}
+
+void CAnimationController::PrepareSkinning()
 {
 }
 
@@ -342,33 +320,23 @@ void CAnimationController::LateUpdate()
 		for (auto& cache : mAnimationSets->mBoneFrameCaches) { if (cache.lock()) cache.lock()->SetLocalMatZero(); }
 	
 		for (auto& track : mTracks) {
-			if (track->mEnable) {
-				auto& set = mAnimationSets->mAnimationSet[track->mSetIndex];
-				float position = track->UpdatePosition(track->mPosition, deltaTime, set->mLength);
-	
-				for (int i = 0; auto & cache : mAnimationSets->mBoneFrameCaches) {
-					if (cache.lock()) {
-						Matrix transform = set->GetSRT(i, position);
-						transform *= track->mWeight;
-						cache.lock()->mLocalMat = transform;
-					}
+			auto& set = mAnimationSets->mAnimationSet[track->mSetIndex];
+			float position = track->UpdatePosition(track->mPosition, deltaTime, set->mLength);
 
-					++i;
+			for (int i = 0; auto& cache : mAnimationSets->mBoneFrameCaches) {
+				if (cache.lock()) {
+					Matrix transform = set->GetSRT(i, position);
+					transform *= track->mWeight;
+					cache.lock()->mLocalMat = transform;
 				}
-	
-				track->HandleCallback();
-			}
-		}
-	
-		GetOwner()->UpdateWorldMatrices(nullptr);
-	
-		OnRootMotion(mRootMotionObject);
-		OnAnimationIK(mRootMotionObject);
-	}
 
-	for (int i = 0; auto& cache : mSkinningBoneTransforms) {
-		
-		i++;
+				++i;
+			}
+
+			if (mEventHandler.contains(set->mAnimationName))
+				track->HandleCallback(mEventHandler[set->mAnimationName]);
+		}
+		GetOwner()->UpdateWorldMatrices(nullptr);
 	}
 
 	for (int i = 0; auto & cache : mSkinningBoneTransforms) {
@@ -385,56 +353,12 @@ void CAnimationController::LateUpdate()
 	);
 }
 
-void CAnimationController::SetCallbackKeys(int trackIndex, int num)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetCallbackKeys(num);
-}
-
-void CAnimationController::SetCallbackKey(int trackIndex, int keyIndex, float keyTime, void* data)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetCallbackKey(keyIndex, keyTime, data);
-}
-
-void CAnimationController::SetAnimationCallbackHandler(int trackIndex, std::shared_ptr<CAnimationCallbackHandler> callbackHandler)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetAnimationCallbackHandler(callbackHandler);
-}
-
 void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
 {
-	if (trackIndex < mTracks.size() && mTracks[trackIndex]->mSetIndex != setIndex) {
-		mTracks[trackIndex]->SetAnimationSet(setIndex);
+	if (trackIndex < mTracks.size() && setIndex < mAnimationSets->mAnimationSet.size() && mTracks[trackIndex]->mSetIndex != setIndex) {
+		mTracks[trackIndex]->SetIndex(setIndex);
+		mTracks[trackIndex]->SetAnimationSet(mAnimationSets->mAnimationSet[setIndex]);
 	}
-}
-
-void CAnimationController::SetTrackEnabled(int trackIndex, bool enabled)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetEnable(enabled);
-}
-
-void CAnimationController::SetTrackPosition(int trackIndex, float position)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetPosition(position);
-}
-
-void CAnimationController::SetTrackSpeed(int trackIndex, float speed)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetSpeed(speed);
-}
-
-void CAnimationController::SetTrackWeight(int trackIndex, float weight)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetWeight(weight);
-}
-
-void CAnimationController::SetTrackType(int trackIndex, ANIMATION_TYPE type)
-{
-	if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetType(type);
-}
-
-void CAnimationController::AdvanceTime(float elapsedTime, std::shared_ptr<CGameObject>& rootGameObject)
-{
-
 }
 
 void CAnimationController::BindSkinningMatrix()
@@ -444,15 +368,6 @@ void CAnimationController::BindSkinningMatrix()
 	}
 	UINT offset = mBoneTransformIdx * ALIGNED_SIZE(sizeof(Matrix) * SKINNED_ANIMATION_BONES);
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::BONE_TRANSFORM)->BindToShader(offset);
-}
-
-void CAnimationController::PrepareSkinning()
-{
-
-}
-
-void CAnimationController::UploadBoneOffsets()
-{
 }
 
 void CAnimationController::PrintMatrix(const Matrix& mat)

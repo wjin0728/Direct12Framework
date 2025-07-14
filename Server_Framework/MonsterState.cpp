@@ -1,5 +1,6 @@
 #include "MonsterState.h"
 #include "Monster.h"
+#include "GameManager.h"
 
 // MonsterState::IdleState 구현         =========================================================================
 
@@ -10,12 +11,16 @@ MonsterState::IdleState& MonsterState::IdleState::GetInstance() { static Monster
 void MonsterState::IdleState::Enter(Monster* monster) {
 	cout << "IdleState Entered!" << endl;
     monster->SetVelocity(0, 0, 0); // 속도 0
+	idleTimer = 2.f;
 }
 
 void MonsterState::IdleState::Update(Monster* monster) {
-    if (monster->_target) {
-        monster->SetState(S_MONSTER_STATE::RUN);
-    }
+	idleTimer -= TICK_INTERVAL; // 대기 시간 감소
+	if (idleTimer <= 0) {
+		if (monster->_target) {
+			monster->SetState(S_MONSTER_STATE::RUN);
+		}
+	}
 }
 
 void MonsterState::IdleState::Exit(Monster* monster) {}
@@ -34,9 +39,18 @@ void MonsterState::RunState::Enter(Monster* monster) {
 }
 
 void MonsterState::RunState::Update(Monster* monster) {
-	monster->_pos += monster->_velocity * TICK_INTERVAL; // 이동 처리
+	Vec3 pos = monster->_pos; // 현재 위치 저장
+	monster->_pos += monster->_velocity * TICK_INTERVAL;
+	//if (monster->gameManager.CanMove(pos.x, pos.z)) {
+	//	monster->_pos = pos; // 이동 가능하면 위치 업데이트
+	//}
+	//else {
+	//	monster->SetVelocity(0, 0, 0); // 이동 불가능하면 속도 0
+	//}
+
+
 	if (monster->IsPlayerTooMuchClose()) {
-        monster->SetState(S_MONSTER_STATE::SKILL);
+        monster->SetState(S_MONSTER_STATE::ATTACK);
    //     switch (rand() % pattern_cnt)
    //     {
    //     case 0: {
@@ -69,9 +83,21 @@ MonsterState::AttackState& MonsterState::AttackState::GetInstance() { static Mon
 
 void MonsterState::AttackState::Enter(Monster* monster) {
 	cout << "BasicAttackState Entered!" << endl;
+
+	if (rand() % 2 == 0) {
+		attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK]->mLength;
+	}
+	else {
+        attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK2]->mLength;
+		monster->_state = S_MONSTER_STATE::ATTACK2;
+	}
 }
 
 void MonsterState::AttackState::Update(Monster* monster) {
+    attackTimer -= TICK_INTERVAL;
+	if (attackTimer <= 0) {
+		monster->SetState(S_MONSTER_STATE::IDLE);
+	}
 }
 
 void MonsterState::AttackState::Exit(Monster* monster) {}
@@ -106,16 +132,20 @@ void MonsterState::SkillState::Exit(Monster* monster) {}
 MonsterState::HitState& MonsterState::HitState::GetInstance() { static MonsterState::HitState instance; return instance; }
 
 void MonsterState::HitState::Enter(Monster* monster) {
-    // hitTimer = 0.5f; // 피격 상태 애니메이션 시간 받아서 느야할듯?
+	cout << "HitState Entered!" << endl;
     monster->SetVelocity(0, 0, 0); // 이동 멈춤
-
+	hitTimer = monster->_animations[(int)S_MONSTER_STATE::GETHIT]->mLength;
 }
 
 void MonsterState::HitState::Update(Monster* monster) {
-
+	hitTimer -= TICK_INTERVAL; // 히트 애니메이션 시간 감소
+	if (hitTimer <= 0) {
+		monster->SetState(monster->previousState); // 이전 상태로 돌아가기
+	}
 }
 
-void MonsterState::HitState::Exit(Monster* monster) {}
+void MonsterState::HitState::Exit(Monster* monster) {
+}
 
 
 
@@ -127,10 +157,14 @@ MonsterState::DeathState& MonsterState::DeathState::GetInstance() { static Monst
 
 void MonsterState::DeathState::Enter(Monster* monster) {
     monster->SetVelocity(0, 0, 0);
+	deathTimer = 5.f;
 }
 
 void MonsterState::DeathState::Update(Monster* monster) {
-    // 사망 처리
+	deathTimer -= TICK_INTERVAL; // 사망 후 대기
+	if (deathTimer <= 0) {
+		monster->_remove = true; // 몬스터 비활성화
+	}
 }
 
 void MonsterState::DeathState::Exit(Monster* monster) {}

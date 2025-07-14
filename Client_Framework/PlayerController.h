@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "MonoBehaviour.h"
+#include "CutScene.h"
 
 class CPlayerController : public CMonoBehaviour
 {
@@ -9,6 +10,7 @@ private:
 	PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
 
 	std::shared_ptr<class CPlayerStateMachine> mStateMachine{};
+	std::shared_ptr<class CCutScene> mCutScene{};
 	std::shared_ptr<class CRigidBody> rigidBody{};
 	std::weak_ptr<class CCamera> mCamera{};
 	std::weak_ptr<class CTerrain> mTerrain{};
@@ -36,7 +38,6 @@ public:
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CPlayerController>(*this); }
 
 public:
-	uint8_t GetAnimationIndexFromState(PLAYER_STATE state);
 
 	void SetStateMachine(const std::shared_ptr<class CPlayerStateMachine>& StateMachine) { mStateMachine = StateMachine; }
 	void SetChildAnimationController();
@@ -45,6 +46,7 @@ public:
 	void SetTerrain(const std::shared_ptr<class CTerrain>& terrain) { mTerrain = terrain; }
 	void SetSkill(ITEM_TYPE skill);
 	void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; };
+	void SetCutScene(const std::shared_ptr<class CCutScene>& cutScene) { mCutScene = cutScene; }
 
 	void SetState(PLAYER_STATE state);
 

@@ -365,6 +365,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
+					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
 				}
 				Monster_cnt[ServerNumber]++;
@@ -381,6 +382,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;			
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
+					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
 				}
 				Monster_cnt[ServerNumber]++;
@@ -397,6 +399,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
+					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
 				}
 				Monster_cnt[ServerNumber]++;
@@ -437,6 +440,66 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		if (p->state != (uint8_t)clients[ServerNumber][p->id]._player._state)
 			clients[ServerNumber][p->id]._player.SetState(p->state);
+		break;
+	}
+	case CS_ATTACK: {
+		CS_ATTACK_PACKET* p = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
+		auto& player = clients[ServerNumber][c_id]._player;
+		Vec3 direction{};
+
+		switch (clients[ServerNumber][p->id]._player._class)
+		{
+		case S_PLAYER_CLASS::FIGHTER: {
+			direction = player._velocity;
+			for (auto& mon : Monsters[ServerNumber]) {
+				mon.second.LocalTransform();
+				player.OnFighterBasicAttack(mon.second._boundingbox);
+			}
+			break;
+		}
+		case S_PLAYER_CLASS::ARCHER: {
+			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
+
+			proj._pos = player._pos;
+			proj._pos.y += 0.3f;
+
+			direction.x = sin(player._look_dir.y * degToRad); // 1.0
+			direction.y = 0.0f;
+			direction.z = cos(player._look_dir.y * degToRad); // 0.0
+			proj._velocity = direction;
+
+			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+			for (auto& cl : clients[ServerNumber]) {
+				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
+			}
+			Projectile_cnt[ServerNumber]++;
+			break;
+		}
+		case S_PLAYER_CLASS::MAGE: {
+			Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
+
+			proj._pos = player._pos;
+			proj._pos.y += 0.3f;
+
+			direction.x = sin(player._look_dir.y * degToRad); // 1.0
+			direction.y = 0.0f;
+			direction.z = cos(player._look_dir.y * degToRad); // 0.0
+			proj._velocity = direction;
+
+			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+			for (auto& cl : clients[ServerNumber]) {
+				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
+			}
+			Projectile_cnt[ServerNumber]++;
+			break;
+		}
+		default:
+			break;
+		}
+		//Quaternion targetRot = Quaternion::LookRotation(direction);
+		//Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
+		//clients[ServerNumber][p->id]._player._rotation = targetRot;
+		//clients[ServerNumber][p->id]._player.SetLookDir(angle);
 		break;
 	}
 	}
@@ -512,7 +575,26 @@ void GameManager::Update() {
 			}
 		}
 	}
+
 	vector<int> erase_proj;
+
+	for (auto& ms : Monsters[ServerNumber]) {
+		if (ms.second._remove) continue; // 몬스터가 제거된 경우는 패스
+		ms.second.Update();
+		ms.second.AvoidCollision(Monsters[ServerNumber]);
+
+		// 몬스터 - 투사체 충돌 체크
+		if (ms.second._hp >= 0) {
+			for (auto& proj : Projectiles[ServerNumber]) {
+				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
+				if (ms.second._boundingbox.Intersects(proj.second._boundingbox)) {
+					ms.second.TakeDamage(proj.second._damage);
+					erase_proj.emplace_back(proj.first);
+				}
+			}
+		}
+	}
+
 	for (auto& proj : Projectiles[ServerNumber]) {
 		proj.second.Update();
 		if (abs(proj.second._pos.x) > 100.f || abs(proj.second._pos.z) > 100.f) {
@@ -522,22 +604,9 @@ void GameManager::Update() {
 	for (int i = 0; i < erase_proj.size(); ++i) {
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
-			//cl.second.send_remove_projectile_packet(erase_proj[i]->_id, cl.first);
+			cl.second.send_remove_projectile_packet(erase_proj[i]);
 		}
 		Projectiles[ServerNumber].erase(erase_proj[i]);
-	}
-
-	for (auto& ms : Monsters[ServerNumber]) {
-		ms.second.Update();
-		if (ms.second._hp >= 0) {
-			for (auto& proj : Projectiles[ServerNumber]) {
-				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
-				if (ms.second._boundingbox.Intersects(proj.second._boundingbox)) {
-					ms.second.SetState(S_MONSTER_STATE::DEATH);
-					//cout << "몬스터 " << ms.first << "가 projectile " << proj.first << "에 맞았습니다." << endl;
-				}
-			}
-		}
 	}
 	SendAllPlayersPosPacket();
 	SendAllProjectilesPosPacket();

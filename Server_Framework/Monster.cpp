@@ -5,7 +5,7 @@ void Monster::SetState(MonsterStateMachine* newState)
 {
     if (currentState) {
         if (newState != &MonsterState::HitState::GetInstance()) {
-            previousState = currentState; 
+            previousState = _state; 
             // MonsterState::HitState로 갈 때는 현재 상태 저장
         }
         currentState->Exit(this);
@@ -29,10 +29,10 @@ void Monster::SetState(S_MONSTER_STATE newState)
         _state = S_MONSTER_STATE::ATTACK;
         SetState(&MonsterState::AttackState::GetInstance());
         break;
-    case S_MONSTER_STATE::SKILL:
-        _state = S_MONSTER_STATE::SKILL;
-        SetState(&MonsterState::SkillState::GetInstance());
-        break;
+	case S_MONSTER_STATE::GETHIT:
+		_state = S_MONSTER_STATE::GETHIT;
+		SetState(&MonsterState::HitState::GetInstance());
+		break;
     case S_MONSTER_STATE::DEATH:
         _state = S_MONSTER_STATE::DEATH;
         SetState(&MonsterState::DeathState::GetInstance());
@@ -60,10 +60,10 @@ void Monster::TakeDamage(int damage)
         if (_hp < 0) _hp = 0;
     }
     if (_hp > 0) {
-        SetState(&MonsterState::HitState::GetInstance());
+        SetState(S_MONSTER_STATE::GETHIT);
     }
     else {
-        // 사망
+		SetState(S_MONSTER_STATE::DEATH);
     }
 }
 
@@ -105,4 +105,101 @@ void Monster::SetTarget()
 	else {
 		_target = nullptr; 
 	}
+}
+
+void Monster::AvoidCollision(const unordered_map<int, Monster>& monsters)
+{
+	const float minDistance = _boundingbox.Extents.x * 2; // 최소 거리
+	const float repelStrength = 0.02f; // 반발력 약화 (0.1f -> 0.02f)
+
+	for (const auto& pair : monsters) {
+		Monster* other = const_cast<Monster*>(&pair.second); // const 제거 (주의)
+		if (other == this) continue;
+
+		Vec3 delta = other->_pos - _pos;
+		float distanceSq = delta.LengthSquared();
+
+		if (distanceSq > 0.0f && distanceSq < minDistance * minDistance) {
+			float distance = sqrt(distanceSq);
+			if (distance < 0.001f) distance = 0.001f;
+			Vec3 repel = -delta / distance * (minDistance - distance) * repelStrength;
+			_pos += repel;
+
+			//Vec3 newDirection = _velocity - (delta / distance) * 0.05f;
+			//if (newDirection.LengthSquared() > 0.001f) {
+			//	_velocity = newDirection.Normalize() * _speed.Length();
+			//}
+		}
+	}
+}
+
+void Monster::ReadAnimationInfo(const std::string& fileName)
+{
+    using namespace BinaryReader;
+
+	std::ifstream ifs{ fileName, std::ios::binary };
+	if (!ifs) {
+		return;
+	}
+
+	std::string token{};
+	int setsNum{};
+
+	while (true) {
+		ReadDateFromFile(ifs, token);
+
+		if (token == "<AnimationSets>:") {
+			ReadDateFromFile(ifs, setsNum);
+
+			_animations.resize(setsNum);
+			for (auto& anim : _animations) {
+				anim = std::make_shared<AnimationInfo>();
+			}
+		}
+		else if (token == "<AnimationSet>:") {
+			int setNum{}, framesPerSecondNum{}, keyFrameNum{};
+			float length{};
+			std::string setName;
+
+			ReadDateFromFile(ifs, setNum);
+			ReadDateFromFile(ifs, setName);
+			ReadDateFromFile(ifs, length);
+			ReadDateFromFile(ifs, framesPerSecondNum);
+			ReadDateFromFile(ifs, keyFrameNum);
+
+			auto animSet = _animations[setNum];
+			animSet->mAnimationName = setName;
+			animSet->mLength = length;
+			animSet->mFrameLength = keyFrameNum;
+
+			ReadDateFromFile(ifs, token);
+			if (token == "<Loop>:") {
+				int animationType{};
+				ReadDateFromFile(ifs, animationType);
+				animSet->mType = (ANIMATION_TYPE)animationType;
+			}
+
+			ReadDateFromFile(ifs, token);
+			if (token == "<Events>:") {
+				int eventCount{};
+				ReadDateFromFile(ifs, eventCount);
+				animSet->mEventKeys.resize(eventCount);
+
+				for (auto& key : animSet->mEventKeys) {
+					float eventTime{};
+					std::string eventStr;
+
+					ReadDateFromFile(ifs, eventTime);
+					ReadDateFromFile(ifs, eventStr);
+
+					key = std::make_shared<EventKey>(eventTime, eventStr);
+				}
+			}
+		}
+		else if (token == "</AnimationSets>")
+		{
+			break;
+		}
+	}
+
 }

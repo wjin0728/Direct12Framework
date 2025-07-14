@@ -20,6 +20,7 @@ class CThirdPersonCamera : public CComponent, public std::enable_shared_from_thi
 {
 private:
 	bool mFreeLook{ false };
+	bool mIsPlayingCutScene{ false };
 
 	CameraParams mCameraParams;
 	Vec2 mDeadZoneSize{};
@@ -47,10 +48,12 @@ public:
 	void SetTarget(const std::shared_ptr<CGameObject>& target) { mTarget = target; }
 	void SetTerrain(const std::shared_ptr<CTerrain>& terrain) { mTerrain = terrain; }
 	void SetCanRotate(bool canRotate) { mCanRotate = canRotate; }
-	CameraParams GetCameraParams() const { return mCameraParams; }
+	void SetPlayingCutScene(bool cutScene) { mIsPlayingCutScene = cutScene; }
+	std::shared_ptr<class CGameObject> GetTarget() const { return mTarget; }
 
 	void SetCameraParams(CameraParams& params);
 	CameraParams GetCameraParams(Vec3 trackingPosition);
+	CameraParams GetCameraParams() const { return mCameraParams; }
 
 	CameraBlend ComputeBlendout();
 	void SetParamsBlended(CameraParams camParams, CameraBlend blendout, float progress);
