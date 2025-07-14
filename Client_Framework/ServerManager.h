@@ -33,6 +33,7 @@ public:
 
 public:
 	void Initialize();
+	void Destroy();
 	void Connect();
 	void Client_Login();
 	bool InitPlayerAndCamera();

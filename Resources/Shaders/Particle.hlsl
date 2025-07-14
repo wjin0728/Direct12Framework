@@ -1,8 +1,10 @@
 #include"Paramiters.hlsl"
+#include"Utility.hlsl"
 
 struct ParticleVertex
 {
     float3 position;
+    float3 velocity;
     float rotation; 
     float4 color;
     float size;
@@ -30,6 +32,7 @@ VS_OUTPUT VS_Forward(uint billboardVertex : SV_VertexID, uint instanceId : SV_In
     output.color = input.color;
     output.texIdx = input.albedoTexIdx;
     
+    
     float2 corner = float2(0, 0);
    
     output.uv = float2((billboardVertex >> 1), (billboardVertex & 1));
@@ -50,6 +53,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_Target
     float4 color = input.color;
     float4 texColor = diffuseMap[input.texIdx].Sample(linearClamp, input.uv);
     color = color * texColor;
-    clip(color.a - 0.001);
+    clip(color.a - 0.1);
+    color.rgb = GammaDecoding(color.rgb);
     return color;
 }

@@ -175,7 +175,7 @@
     <ClInclude Include="CResource.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingGroup.h" />
-    <ClInclude Include="InstancingManager.h" />
+    <ClInclude Include="RenderManager.h" />
     <ClInclude Include="ItemMovement.h" />
     <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="LoadScene.h" />
@@ -192,6 +192,7 @@
     <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="SkinnedMesh.h" />
     <ClInclude Include="SkinnedMeshRenderer.h" />
+    <ClInclude Include="TargetMarker.h" />
     <ClInclude Include="ThirdPersonCamera.h" />
     <ClInclude Include="UIRenderer.h" />
     <ClInclude Include="VertexBuffer.h" />
@@ -242,7 +243,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
-    <ClCompile Include="InstancingManager.cpp" />
+    <ClCompile Include="RenderManager.cpp" />
     <ClCompile Include="ItemMovement.cpp" />
     <ClCompile Include="LoadingScreen.cpp" />
     <ClCompile Include="LoadScene.cpp" />
@@ -259,6 +260,7 @@
     <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="SkinnedMesh.cpp" />
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
+    <ClCompile Include="TargetMarker.cpp" />
     <ClCompile Include="ThirdPersonCamera.cpp" />
     <ClCompile Include="UIRenderer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />

@@ -12,8 +12,6 @@ protected:
 
 	UINT mDirtyFrame = FRAME_RESOURCE_COUNT + 1;
 	
-	std::shared_ptr<CCamera> mainCamera{};
-	std::shared_ptr<CCamera> lightCam{};
 	static std::array< std::shared_ptr<class CMesh>, 3> volumes;
 
 	BoundingOrientedBox mFrustumBoundWS{};
@@ -45,7 +43,6 @@ public:
 public:
 	static void SetVolumes();
 
-	void SetLightCam(std::shared_ptr<CCamera> cam) { lightCam = cam; }
 	void SetStrength(const float& _strength) { mLightData.strength = _strength; }
 	void SetColor(const Vec3& _color) { mLightData.color = _color; }
 	void SetLightType(LIGHT_TYPE _type) { mLightData.type = (UINT8)_type; }

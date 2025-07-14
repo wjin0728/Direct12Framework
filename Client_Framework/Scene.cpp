@@ -15,7 +15,7 @@
 #include"PlayerController.h"
 #include"RigidBody.h"
 #include"ThirdPersonCamera.h"	
-#include"InstancingManager.h"
+#include"RenderManager.h"
 #include"ShadowManager.h"
 #include"ParticleManager.h"
 
@@ -53,6 +53,7 @@ CScene::CScene()
 	}
 	finalTargetAlpha = 1.f;
 
+	mRenderMgr = &INSTANCE(CRenderManager);
 }
 
 void CScene::Awake()
@@ -60,7 +61,6 @@ void CScene::Awake()
 	for (const auto& object : mObjects) {
 		object->Awake();
 	}
-	
 }
 
 void CScene::Start()
@@ -72,10 +72,7 @@ void CScene::Start()
 	for (const auto& object : mObjects) {
 		ExpandSceneAABB(object, mSceneAABB);
 	}
-	INSTANCE(CShadowManager).SetLightCamera(mCameras["DirectionalLight"]);
-	INSTANCE(CShadowManager).SetViewCamera(mCameras["MainCamera"]);
 	INSTANCE(CShadowManager).UpdateSceneBoundingBox(mSceneAABB);
-	INSTANCE(CParticleManager).SetMainCamera(mCameras["MainCamera"]);
 }
 
 void CScene::Update()
@@ -90,119 +87,14 @@ void CScene::LateUpdate()
 	for (const auto& object : mObjects) {
 		object->LateUpdate();
 	}
-	auto& camera = mCameras["MainCamera"];
-	if(camera) INSTANCE(CInstancingManager).UpdateInstancingGroup(camera);
+	INSTANCE(CRenderManager).UpdateInstancingGroup();
 	INSTANCE(CShadowManager).Update();
 	INSTANCE(CParticleManager).Update();
 	UpdatePassData();
 
-	INSTANCE(CSceneManager).ProcessSceneChangeQueue();
 }
 
-void CScene::RenderShadowPass()
-{
-	INSTANCE(CDX12Manager).PrepareShadowPass();
-	INSTANCE(CShadowManager).RenderShadowMaps();
 
-	auto shadowMap = RESOURCE.Get<CTexture>("ShadowMap");
-	shadowMap->ChangeResourceState(D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
-}
-
-void CScene::RenderForwardPass()
-{
-	/*auto forwardPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-	forwardPassBuffer->BindToShader(0);
-
-	auto& camera = mCameras["MainCamera"];
-	if (camera) {
-		RenderForLayer("Transparent", camera, FORWARD);
-	}*/
-}
-
-void CScene::RenderGBufferPass()
-{
-	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::G_BUFFER);
-	renderTarget->ChangeResourcesToTargets();
-	renderTarget->SetRenderTargets();
-	renderTarget->ClearRenderTargets();
-	renderTarget->ClearDepthStencil(0.f, 0);
-	auto gBufferPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-	gBufferPassBuffer->BindToShader(0);
-	INSTANCE(CShadowManager).BindShadowData();
-	auto& camera = mCameras["MainCamera"];
-	if (camera) {
-		camera->SetViewportsAndScissorRects(CMDLIST);
-		RenderForLayer("Opaque", camera, G_PASS);
-		INSTANCE(CInstancingManager).RenderInstancingGroup(G_PASS);
-		if (mTerrain) mTerrain->Render(camera, G_PASS);
-	}
-
-	renderTarget->ChangeTargetsToResources();
-}
-
-void CScene::RenderLightingPass()
-{
-	auto lightingPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-	lightingPassBuffer->BindToShader(0);
-	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::LIGHTING_PASS);
-	renderTarget->ChangeResourcesToTargets();
-	renderTarget->SetRenderTargets();
-	renderTarget->ClearRenderTargets();
-	renderTarget->ClearOnlyStencil(0);
-
-	std::shared_ptr<CLight> directionalLight{};
-	if(!mLights[(UINT)LIGHT_TYPE::DIRECTIONAL].empty()) directionalLight = mLights[(UINT)LIGHT_TYPE::DIRECTIONAL][0];
-	auto& pointLights = mLights[(UINT)LIGHT_TYPE::POINT];
-	auto& spotLights = mLights[(UINT)LIGHT_TYPE::SPOT];
-	auto& camera = mCameras["MainCamera"];
-
-	UINT lightCount = 1 + pointLights.size() + spotLights.size();
-	auto lightBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::LIGHT);
-	lightBuffer->UpdateBuffer(sizeof(CBLightsData) * 10, &lightCount);
-	lightBuffer->BindToShader(0);
-	camera->SetViewportsAndScissorRects(CMDLIST);
-	//Directional Light
-	if (directionalLight) {
-		directionalLight->Render(renderTarget);
-	}
-	//Point Light
-	CMDLIST->OMSetStencilRef(0);
-	for (const auto& pointLight : pointLights) {
-		pointLight->Render(renderTarget);
-	}
-	//Spot Light
-	for (const auto& spotLight : spotLights) {
-		spotLight->Render(renderTarget);
-	}
-	if (camera) {
-		RenderForLayer("Sky", camera, FORWARD);
-		RenderForLayer("Transparent", camera, FORWARD);
-		INSTANCE(CParticleManager).Render();
-	}
-	renderTarget->ChangeTargetsToResources();
-}
-
-void CScene::RenderFinalPass()
-{
-	auto finalPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-	finalPassBuffer->BindToShader(0);
-	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
-	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
-	renderTarget->ChangeResourceToTarget(backBufferIdx);
-	renderTarget->SetRenderTarget(backBufferIdx);
-	renderTarget->ClearRenderTarget(backBufferIdx);
-
-	auto& camera = mCameras["MainCamera"];
-	camera->SetViewportsAndScissorRects(CMDLIST);
-	auto finalShader = RESOURCE.Get<CShader>("FinalPass");
-	if(finalShader) {
-		finalShader->SetPipelineState(CMDLIST);
-		CRenderer::RenderFullscreen();
-	}
-	RenderForLayer("UI", camera);
-
-	renderTarget->ChangeTargetToResource(backBufferIdx);
-}
 
 void CScene::LoadSceneFromFile(const std::string& fileName)
 {
@@ -219,11 +111,7 @@ void CScene::LoadSceneFromFile(const std::string& fileName)
 	for (int i = 0; i < rootNum; i++) {
 		auto object = CGameObject::CreateObjectFromFile(ifs, prefabs);
 		auto& tag = object->GetTag();
-		if (tag == "Water") 
-			AddObject("Transparent", object);
-		else if (tag == "UI") AddObject("UI", object);
-		else if (tag == "SkyDome") AddObject("Sky", object);
-		else AddObject("Opaque", object);
+		AddObjectImmediately(object);
 	}
 }
 
@@ -245,27 +133,7 @@ std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::string& tag)
 {
 	std::shared_ptr<CGameObject> obj = nullptr;
 
-	for (const auto& [layer, objects] : mRenderLayers) {
-		if (obj = FindObjectWithTag(layer, tag))
-			return obj;
-	}
 	return obj;
-}
-
-std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::string& renderLayer, const std::string& tag)
-{
-	for (const auto& object : mRenderLayers[renderLayer]) {
-		if (object->GetTag() == tag) {
-			return object;
-		}
-		auto& children = object->GetChildren();
-		for (const auto& child : children) {
-			if (child->GetTag() == tag) {
-				return child;
-			}
-		}
-	}
-	return nullptr;
 }
 
 void CScene::ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB)
@@ -282,15 +150,11 @@ void CScene::ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& scen
 	}
 }
 
-void CScene::AddObject(const std::string& renderLayer, std::shared_ptr<CGameObject> object)
+void CScene::AddObjectImmediately(std::shared_ptr<CGameObject> object)
 {
 	auto itr = findByRawPointer(mObjects, object.get());
 	if (itr == mObjects.end()) {
 		mObjects.push_back(object);
-	}
-
-	if (!mRenderLayers.contains(renderLayer)) {
-		mRenderLayers[renderLayer] = ObjectList{};
 	}
 
 	auto type = object->GetObjectType();
@@ -301,20 +165,12 @@ void CScene::AddObject(const std::string& renderLayer, std::shared_ptr<CGameObje
 			mObjectTypes[type].push_back(object);
 		}
 	}
-	
-	auto& objectList = mRenderLayers[renderLayer];
-	auto itr1 = findByRawPointer(objectList, object.get());
-	if (itr1 == objectList.end()) {
-		object->SetRenderLayer(renderLayer);
-		objectList.push_back(object);
-	}
 }
 
 void CScene::AddObject(std::shared_ptr<CGameObject> object)
 {
-	const std::string& renderLayer = object->GetRenderLayer();
-
-	AddObject(renderLayer, object);
+	if (!object) return;
+	mAddQueue.push(object);
 }
 
 void CScene::RemoveObject(std::shared_ptr<CGameObject> object)
@@ -322,16 +178,6 @@ void CScene::RemoveObject(std::shared_ptr<CGameObject> object)
 	auto itr = findByRawPointer(mObjects, object.get());
 	if (itr != mObjects.end()) {
 		mObjects.erase(itr);
-	}
-
-	const std::string& key = object->GetRenderLayer();
-	if (mRenderLayers.contains(key)) {
-		auto& objectList = mRenderLayers[key];
-
-		auto itr = findByRawPointer(objectList, object.get());
-		if (itr != objectList.end()) {
-			objectList.erase(itr);
-		}
 	}
 
 	auto type = object->GetObjectType();
@@ -349,43 +195,10 @@ void CScene::SetTerrain(std::shared_ptr<CTerrain> terrain)
 	mTerrain = terrain;
 }
 
-void CScene::AddCamera(std::shared_ptr<CCamera> camera)
-{
-	auto& tag = camera->GetOwner()->GetTag();
-
-	mCameras[tag] = camera;
-}
-
-void CScene::RemoveCamera(const std::string& tag)
-{
-	if (!mCameras.contains(tag)) {
-		return;
-	}
-
-	mCameras.erase(tag);
-}
-
-void CScene::AddLight(std::shared_ptr<CLight> light)
-{
-	auto& tag = light->GetOwner()->GetTag();
-	auto type = light->GetLightType();
-	mLights[(UINT)type].push_back(light);
-}
-
-void CScene::RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass)
-{
-	if (!mRenderLayers.contains(layer)) {
-		return;
-	}
-	for (const auto& object : mRenderLayers[layer]) {
-		object->Render(camera, pass);
-	}
-}
-
 void CScene::UpdatePassData()
 {
 	CBPassData passData;
-	auto& camera = mCameras["MainCamera"];
+	auto camera = mRenderMgr->GetCamera("MainCamera");
 
 	if (camera) {
 		passData.camPos = camera->GetLocalPosition();
@@ -427,6 +240,13 @@ void CScene::UpdatePassData()
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(0, &passData, sizeof(CBPassData));
 }
 
+void CScene::CollectVisibleObjects()
+{
+	for (const auto& object : mObjects) {
+		object->RegisterRenderer();
+	}
+}
+
 void CScene::AddRemoveQueue(std::shared_ptr<CGameObject> object)
 {
 	if (object) {
@@ -434,6 +254,18 @@ void CScene::AddRemoveQueue(std::shared_ptr<CGameObject> object)
 		auto itr = findByRawPointer(mObjects, object.get());
 		mRemoveQueue.push(object);
 	}
+}
+
+void CScene::CommitObjectChanges()
+{
+	while (!mAddQueue.empty()) {
+		auto object = mAddQueue.front();
+		mAddQueue.pop();
+		AddObjectImmediately(object);
+		object->Awake();
+		object->Start();
+	}
+	RemoveObjects();
 }
 
 void CScene::RemoveObjects()
@@ -444,3 +276,237 @@ void CScene::RemoveObjects()
 		RemoveObject(object);
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -19,6 +19,7 @@ private:
 	Matrix mInverseViewMat = Matrix::Identity;
 
 public:
+	std::string mCameraName = "MainCamera";
 	BoundingFrustum mFrustumView = BoundingFrustum();
 	BoundingFrustum mFrustumWorld = BoundingFrustum();
 	BoundingFrustum mFrustumShadow = BoundingFrustum();
@@ -63,6 +64,8 @@ public:
 	const Vec3& GetLocalPosition();
 
 	const Vec3& GetLook();
+	const Vec3& GetUp();
+	const Vec3& GetRight();
 
 	Matrix GetViewMat() const { return mViewMat; }
 	Matrix GetInverseViewMat() const { return mInverseViewMat; }
@@ -70,4 +73,7 @@ public:
 	Matrix GetViewOrthoProjMat() const { return mViewOrthographicProjectMat; }
 	Matrix GetPerspectiveProjectMat() const { return mPerspectiveProjectMat; }
 	Matrix GetOrthographicProjectionMat() const { return mOrthographicProjectMat; }
+
+	Vec2 TransformToScreenSpace(const Vec3& worldPos) const;
+	Vec2 TransformToNDC(const Vec3& worldPos) const;
 };

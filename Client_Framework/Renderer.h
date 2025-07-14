@@ -18,6 +18,7 @@ protected:
     UINT mDirtyFrame = FRAME_RESOURCE_COUNT + 1;
 
 public:
+	bool mIsVisible = true;
     CRenderer();
     CRenderer(const CRenderer& other) : m_materials(other.m_materials), CComponent(other) {}
     virtual ~CRenderer();
@@ -28,7 +29,7 @@ public:
     virtual void Update() override {}
     virtual void LateUpdate() override {}
 
-    virtual void Render(std::shared_ptr<CCamera> camera, int pass = 0) = 0;
+    virtual void Render(class CCamera* camera, int pass = 0) = 0;
 	virtual void UpdataObjectDataToShader();
     virtual void UpdateMaterialDataToShader();
 
@@ -39,6 +40,7 @@ public:
 public:
     void SetCBVIndex();
     void ReturnCBVIndex();
+	void RegisterRenderQueue();
 
 public:
     void AddMaterial(const std::shared_ptr<CMaterial>& material);

@@ -33,16 +33,16 @@ private:
 	bool mActive = true;
 	bool mIsStatic{ false };
 	bool mIsInstancing{ false };
-	bool misAwake{ false };
 
 	std::string mName{};
 	std::string mTag{};
-	std::string mRenderLayer{};
+	RENDER_LAYER mRenderLayer{};
 	OBJECT_TYPE mObjectType{ NONE };
 
-	int mID{ -1 };
 
 public:
+	int mID{ -1 };
+	bool misAwake{ false };
 	bool mCastShadow{ false };
 	BoundingSphere mRootLocalBS = BoundingSphere();
 	BoundingSphere mRootBS = BoundingSphere();
@@ -60,8 +60,6 @@ public:
 
 	virtual void Update();
 	virtual void LateUpdate();
-
-	void Render(std::shared_ptr<CCamera> camera, int pass = 0);
 
 public:
 	//������Ʈ�� ���纻�� �����Ѵ�.
@@ -94,7 +92,7 @@ public:
 	const std::string& GetTag() const { return mTag; }
 	const std::string& GetIDString() const { return std::to_string(mID); }
 	const int GetIDInt() const { return mID; }
-	const std::string& GetRenderLayer() const { return mRenderLayer; }
+	const RENDER_LAYER& GetRenderLayer() const { return mRenderLayer; }
 	bool GetActive() const { return mActive; }
 	bool GetStatic() const { return mIsStatic; }
 	bool GetInstancing() const { return mIsInstancing; }
@@ -107,7 +105,7 @@ public:
 	void SetStatic(bool isStatic);
 	void SetInstancing(bool isInstancing);
 	void SetObjectType(OBJECT_TYPE type) { mObjectType = type; }
-	void SetRenderLayer(const std::string& layer) { mRenderLayer = layer; }
+	void SetRenderLayer(const RENDER_LAYER& layer) { mRenderLayer = layer; }
 	void SetName(const std::string& name) { mName = name; }
 	void SetTag(const std::string& tag) { mTag = tag; }
 	void SetID(int id) { mID = id; }
@@ -146,6 +144,7 @@ private:
 	void CreateLightFromFile(std::ifstream& inFile);
 	void CreateAnimationFromFile(const std::string& fileName);
 	void CreateUIrendererFromFile(std::ifstream& inFile);
+	void CreateParticleAttachmentFromFile(std::ifstream& inFile);
 
 public:
 	std::shared_ptr<CAnimationController> mAnimationController{};
@@ -157,6 +156,8 @@ public:
 
 	void UpdateWorldMatrices(std::shared_ptr<CTransform> parent);
 	void PrintSRT();
+
+	void RegisterRenderer();
 };
 
 

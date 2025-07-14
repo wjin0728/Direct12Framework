@@ -119,6 +119,9 @@ public:
 
     static float RandFloat(float MinVal, float MaxVal)
     {
+        if (MinVal > MaxVal) {
+            std::swap(MinVal, MaxVal);
+		}
         return std::uniform_real_distribution<float>(MinVal, MaxVal)(GetEngine());
     }
 

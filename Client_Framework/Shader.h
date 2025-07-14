@@ -44,9 +44,9 @@ enum class DEPTH_STENCIL_TYPE : UINT8
 	LESS_EQUAL,
 	GREATER,
 	GREATER_EQUAL,
-	NO_DEPTH_TEST, // 깊이 테스트(X) + 깊이 기록(O)
-	NO_DEPTH_TEST_NO_WRITE, // 깊이 테스트(X) + 깊이 기록(X)
-	LESS_NO_WRITE, // 깊이 테스트(O) + 깊이 기록(X)
+	NO_DEPTH_TEST, 
+	NO_DEPTH_TEST_NO_WRITE, 
+	LESS_NO_WRITE, 
 
 	DEPTH_STENCIL_TYPE_COUNT
 };

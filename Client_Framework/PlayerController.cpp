@@ -14,6 +14,11 @@
 #include "AnimationEnums.h"
 #include "ObjectState.h"
 #include"ParticleManager.h"
+#include"RenderManager.h"
+#include"UIRenderer.h"
+#include"TargetMarker.h"
+#include"ResourceManager.h"
+#include"ParticleAttach.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -23,6 +28,13 @@ void CPlayerController::Awake()
 {
 	if(!rigidBody) rigidBody = GetOwner()->GetComponent<CRigidBody>();
 	if (!mStateMachine) mStateMachine = owner->GetComponentFromHierarchy<CPlayerStateMachine>();
+
+	auto targetUIObj = CGameObject::CreateUIObject("Sprite", "TargetMarker", { 0.f,0.f }, { 80.f,80.f });
+	if (targetUIObj) {
+		mTargetMarker = targetUIObj->AddComponent<CTargetMarker>();
+		INSTANCE(CSceneManager).GetCurScene()->AddObject(targetUIObj);
+	}
+	mSkill = FIRE_EXPLOSION; // Default skill, can be changed later
 }
 
 void CPlayerController::Start()
@@ -52,6 +64,27 @@ void CPlayerController::Update()
 		// Handle free look camera logic here if needed
 		return;
 	}
+	
+	mTargetEnemy.reset();
+	auto camera = INSTANCE(CRenderManager).GetCamera("MainCamera");
+	auto scene = INSTANCE(CSceneManager).GetCurScene();
+	auto& enemies = scene->GetObjectsWithType(OBJECT_TYPE::ENEMY);
+	float minDistance = FLT_MAX;
+	float sqMaxAttackRange = mMaxAttackRange * mMaxAttackRange;
+	for (const auto& enemy : enemies) {
+		BoundingSphere objBS = enemy->GetRootBoundingSphere();
+		if (!camera->IsInFrustum(objBS, FORWARD)) continue;
+		if (enemy->GetStateMachine()->mIsDead) continue;
+		auto enemyTransform = enemy->GetTransform();
+		Vec3 toEnemy = enemyTransform->GetWorldPosition() - GetTransform()->GetWorldPosition();
+		toEnemy.y = 0.f;
+		float distance = toEnemy.LengthSquared();
+		if ((distance < sqMaxAttackRange) && (distance < minDistance)) {
+			minDistance = distance;
+			mTargetEnemy = enemy;
+		}
+	}
+	mTargetMarker.lock()->SetTarget(mTargetEnemy.lock());
 	OnKeyEvents();
 	// auto transform = GetTransform();
 	// float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
@@ -139,21 +172,7 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(4);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::SKILL);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
-			switch (mSkill)
-			{
-			case FIRE_ENCHANT:
-			case WATER_HEAL:
-			case WATER_SHIELD:
-			case GRASS_WEAKEN:
-				INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
-				break;
-			case FIRE_EXPLOSION:
-			case GRASS_VINE:
-				//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Ÿ��id);
-				break;
-			}
+			CastingSkill();
 			return;
 		}
 
@@ -199,10 +218,7 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(4);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::SKILL);
-			Vec3 pos = transform->GetWorldPosition();
-			pos += Vec3(0.f, 0.5f, 0.f);
-			INSTANCE(CParticleManager).PlayParticleEmitter("Smoke", pos, true);
+			CastingSkill();
 
 			return;
 		}
@@ -252,9 +268,29 @@ void CPlayerController::CastingSkill()
 		INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
 		break;
 	case FIRE_EXPLOSION:
+	{
+		auto explosionPrefab = INSTANCE(CResourceManager).GetPrefab("Explosion");
+		if (explosionPrefab) {
+			auto explosionObj = CGameObject::Instantiate(explosionPrefab);
+			explosionObj->GetTransform()->SetLocalPosition(GetTransform()->GetWorldPosition() + Vec3(0.f, 0.5f, 0.f));
+			INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
+			explosionObj->Awake();
+			explosionObj->Start();
 
+			auto explosionParticle = explosionObj->GetComponent<CParticleAttach>();
+			if (explosionParticle) {
+				explosionParticle->Play();
+			}
+		}
+		if (mTargetEnemy.lock()) {
+			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
+		}
+		break;
+	}
 	case GRASS_VINE:
-		//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Ÿ��id);
+		if (mTargetEnemy.lock()) {
+			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
+		}
 		break;
 	}
 }

@@ -115,7 +115,7 @@ void CTransform::SetParentInScene(std::shared_ptr<CTransform> parent, bool isKee
 	else {
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (scene) {
-			scene->AddObject(GetRoot()->owner->GetRenderLayer(), ownerObj);
+			scene->AddObjectImmediately(ownerObj);
 		}
 		else {
 			ownerObj->SetActive(false);

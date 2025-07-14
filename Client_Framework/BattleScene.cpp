@@ -19,6 +19,7 @@
 #include"ServerManager.h"
 #include"ParticleManager.h"
 #include"Light.h"
+#include"RenderManager.h"
 
 CBattleScene::CBattleScene() : CScene()
 {
@@ -70,11 +71,11 @@ void CBattleScene::LateUpdate()
 
 void CBattleScene::RenderScene()
 {
-	CScene::RenderShadowPass();
-	CScene::RenderGBufferPass();
-	CScene::RenderLightingPass();
-	CScene::RenderForwardPass();
-	CScene::RenderFinalPass();
+	mRenderMgr->RenderShadowPass();
+	mRenderMgr->RenderGBufferPass();
+	mRenderMgr->RenderLightingPass();
+	mRenderMgr->RenderForwardPass();
+	mRenderMgr->RenderFinalPass();
 }
 
 
@@ -128,10 +129,10 @@ void CBattle2Scene::LateUpdate()
 
 void CBattle2Scene::RenderScene()
 {
-	CScene::RenderShadowPass();
-	CScene::RenderGBufferPass();
-	CScene::RenderLightingPass();
-	CScene::RenderForwardPass();
-	CScene::RenderFinalPass();
+	mRenderMgr->RenderShadowPass();
+	mRenderMgr->RenderGBufferPass();
+	mRenderMgr->RenderLightingPass();
+	mRenderMgr->RenderForwardPass();
+	mRenderMgr->RenderFinalPass();
 }
 

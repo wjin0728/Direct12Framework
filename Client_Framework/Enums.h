@@ -4,6 +4,15 @@ enum {
 	FRAME_RESOURCE_COUNT = 1
 };
 
+enum class RENDER_LAYER
+{
+	Opaque,
+	Transparent,
+	UI,
+
+	End
+};
+
 enum class LIGHT_TYPE : UINT8
 {
 	DIRECTIONAL,

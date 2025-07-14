@@ -253,8 +253,11 @@
     <ClInclude Include="ParticleManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="InstancingManager.h">
+    <ClInclude Include="RenderManager.h">
       <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="TargetMarker.h">
+      <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -453,8 +456,11 @@
     <ClCompile Include="ParticleManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
-    <ClCompile Include="InstancingManager.cpp">
+    <ClCompile Include="RenderManager.cpp">
       <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="TargetMarker.cpp">
+      <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

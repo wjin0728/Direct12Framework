@@ -9,6 +9,7 @@
 #include "ServerManager.h"
 #include"ShadowManager.h"
 #include"ParticleManager.h"
+#include"RenderManager.h"
 #include "Light.h"
 
 //#define USE_FULLSCREEN
@@ -91,6 +92,7 @@ int CGameApplication::Run()
 	INSTANCE(CSceneManager).Destroy();
 	INSTANCE(CResourceManager).Destroy();
 	INSTANCE(CDX12Manager).Destroy();
+	INSTANCE(ServerManager).Destroy();
 
 	return (int)msg.wParam;
 }
@@ -108,6 +110,9 @@ void CGameApplication::Render()
 	INSTANCE(CDX12Manager).BeforeRender();
 	INSTANCE(CSceneManager).Render();
 	INSTANCE(CDX12Manager).AfterRender();
+	INSTANCE(CRenderManager).ClearAllRenderLayers();
+	INSTANCE(CSceneManager).ProcessDeferredSceneUpdate();
+	INSTANCE(CSceneManager).ProcessSceneChangeQueue();
 }
 
 void CGameApplication::ShowFPS()

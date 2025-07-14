@@ -23,7 +23,7 @@ public:
 	void Start() override;
 	void Update() override;
 	void LateUpdate() override;
-	void Render(std::shared_ptr<CCamera> camera, int pass = 0) override;
+	void Render(class CCamera* camera, int pass = 0) override;
 	void UpdataObjectDataToShader() override;
 	void UpdateUIDataToShader();
 	std::shared_ptr<CComponent> Clone() override { return std::make_shared<CUIRenderer>(*this); }
@@ -45,6 +45,7 @@ public:
 	void SetSize(const Vec2& size) { mUIData.size = size; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetUVOffset(const Vec2& uvOffset) { mUIData.uvOffset = uvOffset; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetUVScale(const Vec2& uvScale) { mUIData.uvScale = uvScale; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
+	void SetWorldPosition(const Vec3& pos);
 
 	CBUIData GetUIData() const { return mUIData; }
 	Vec4 GetColor() const { return mUIData.color; }

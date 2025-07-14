@@ -10,10 +10,12 @@ protected:
 	UINT8 nextState = 0;
 	std::weak_ptr<class CAnimationController> mAnimationController{};
 
-	int mHealth{};
-	int mMaxHealth{};
 
 public:
+	int mHealth{};
+	int mMaxHealth{};
+	bool mIsDead = false;
+	bool mIsSpawning = false;
     CEntityState() = default;
 	CEntityState(UINT8 currentState) : currentState(currentState) {}
     ~CEntityState() = default;

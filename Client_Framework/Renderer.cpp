@@ -8,6 +8,7 @@
 #include"InstancingBuffer.h"
 #include"ObjectPoolManager.h"
 #include"Renderer.h"
+#include"RenderManager.h"
 
 CRenderer::CRenderer()
 {
@@ -91,6 +92,15 @@ void CRenderer::ReturnCBVIndex()
 	INSTANCE(CObjectPoolManager).ReturnCBVIndex(mCbvIdx);
 	mCbvIdx = -1;
 	mCbvOffset = 0;
+}
+
+void CRenderer::RegisterRenderQueue()
+{
+	if (mIsVisible == false) return;
+	if (owner->GetInstancing()) return;
+	if (mCbvIdx < 0) return;
+
+	INSTANCE(CRenderManager).AddRenderer(this, owner->GetRenderLayer());
 }
 
 void CRenderer::AddMaterial(const std::shared_ptr<CMaterial>& material)

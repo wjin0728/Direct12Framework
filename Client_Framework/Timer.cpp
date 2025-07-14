@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include"stdafx.h"
 #include "Timer.h"
+#include "ParticleAttach.h"
 
 
 void CGameTimer::Initilaize()
@@ -103,6 +104,8 @@ void CGameTimer::Start()
 		isStopped = false;
 	}
 }
+
+
 
 void CGameTimer::Stop()
 {

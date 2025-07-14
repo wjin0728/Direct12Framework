@@ -50,14 +50,14 @@ void CQuadTree::ReleaseBuffer(std::shared_ptr<Node>& node)
 	}
 }
 
-void CQuadTree::Render(const std::shared_ptr<class CCamera>& camera)
+void CQuadTree::Render(class CCamera* camera)
 {
 	if (camera) {
 		RenderNode(mRoot, camera);
 	}
 }
 
-void CQuadTree::RenderNode(const std::shared_ptr<Node>& node, const std::shared_ptr<class CCamera>& camera)
+void CQuadTree::RenderNode(const std::shared_ptr<Node>& node, class CCamera* camera)
 {
 	/*if (!camera->IsInFrustum(node->aabb)) {
 		return;

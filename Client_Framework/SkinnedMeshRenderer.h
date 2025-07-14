@@ -3,6 +3,7 @@
 
 class CSkinnedMesh;
 class CTransform;
+class CAnimationController;
 
 class CSkinnedMeshRenderer : public CRenderer
 {
@@ -13,8 +14,8 @@ private:
     std::shared_ptr<CSkinnedMesh> mSkinnedMesh{};
 	std::vector<std::string> mBoneNames{};
 	std::weak_ptr<CTransform> mRootBone{};
-
-
+	std::weak_ptr<CAnimationController> mAnimationController{};
+         
 public:
     CSkinnedMeshRenderer();
     CSkinnedMeshRenderer(const CSkinnedMeshRenderer& other) : mSkinnedMesh(other.mSkinnedMesh), mBoneNames(other.mBoneNames), CRenderer(other) {}
@@ -25,7 +26,7 @@ public:
     virtual void Update() override;
     virtual void LateUpdate() override;
 
-    virtual void Render(std::shared_ptr<CCamera> camera, int pass = 0) override;
+    virtual void Render(class CCamera* camera, int pass = 0) override;
 
     virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CSkinnedMeshRenderer>(*this); }
 

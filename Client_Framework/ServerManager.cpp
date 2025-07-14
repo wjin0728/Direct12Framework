@@ -35,6 +35,25 @@ void ServerManager::Initialize()
 	InitPlayerAndCamera();
 }
 
+void ServerManager::Destroy()
+{
+	if (server_socket != INVALID_SOCKET) {
+		closesocket(server_socket);
+		server_socket = INVALID_SOCKET;
+	}
+	WSACleanup();
+	mIsConnected = false;
+	mIsLoggedIn = false;
+	clientID = -1;
+	RenderOK = 0;
+	mPlayer.reset();
+	mMainCamera.reset();
+	mOtherPlayers.clear();
+	mItems.clear();
+	mProjectiles.clear();
+	mEnemies.clear();
+}
+
 void ServerManager::Connect()
 {
 	SOCKADDR_IN server_addr;
@@ -83,7 +102,7 @@ bool ServerManager::InitPlayerAndCamera()
 	mPlayer = std::make_shared<CGameObject>();
 	mPlayer->SetTag("Player");
 	mPlayer->SetName("Player");
-	mPlayer->SetRenderLayer("Opaque");
+	mPlayer->SetRenderLayer(RENDER_LAYER::Opaque);
 	mPlayer->SetActive(false);
 	mPlayer->SetStatic(false);
 
@@ -94,6 +113,7 @@ bool ServerManager::InitPlayerAndCamera()
 
 	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
 	auto camera = mMainCamera->AddComponent<CCamera>();
+	camera->mCameraName = "MainCamera";
 	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
 
@@ -117,15 +137,18 @@ bool ServerManager::InitPlayerAndCamera()
 void ServerManager::RegisterPlayerInScene(class CScene* scene)
 {
 	mPlayer->SetActive(true);
+	mPlayer->misAwake = false;
 	mMainCamera->SetActive(true);
-	scene->AddObject(mPlayer);
-	scene->AddObject(mMainCamera);
+	mMainCamera->misAwake = false;
+	scene->AddObjectImmediately(mPlayer);
+	scene->AddObjectImmediately(mMainCamera);
 
 	auto camera = mMainCamera->GetComponent<CCamera>();
-	scene->AddCamera(camera);
 
 	for (auto& pair : mOtherPlayers) {
-		scene->AddObject(pair.second);
+		pair.second->SetActive(true);
+		pair.second->misAwake = false;
+		scene->AddObjectImmediately(pair.second);
 	}
 }
 
@@ -135,11 +158,11 @@ void ServerManager::AddNewPlayer(int id, Vec3 pos)
 	auto player = std::make_shared<CGameObject>();
 	player->SetTag("Player");
 	player->SetName("Player" + std::to_string(id));
-	player->SetRenderLayer("Opaque");
+	player->SetRenderLayer(RENDER_LAYER::Opaque);
 	player->SetActive(false);
 	player->SetStatic(false);
 	player->GetTransform()->SetLocalPosition(pos);
-
+	player->mID = id;
 	mOtherPlayers[id] = player;
 }
 
@@ -264,7 +287,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		if (scene && scene->mIsActive && clientID != packet->id) {
 			player->Awake();
 			player->Start();
-			scene->AddObject(player);
+			scene->AddObjectImmediately(player);
 		}
 		break;
 	}
@@ -312,7 +335,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		auto itemObj = CGameObject::Instantiate(item);
 		itemObj->SetTag("Item");
-		itemObj->SetRenderLayer("Transparent");
+		itemObj->SetRenderLayer(RENDER_LAYER::Transparent);
 		itemObj->SetObjectType(OBJECT_TYPE::ITEM);
 		itemObj->SetActive(true);
 		itemObj->SetStatic(false);
@@ -328,9 +351,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			itemObj->Start();
 		}
 		
-
+		itemObj->mID = packet->item_id;
 		mItems[packet->item_id] = itemObj;
-		scene->AddObject(itemObj);
+		scene->AddObjectImmediately(itemObj);
 
 		break;
 	}
@@ -366,7 +389,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		auto projectileObj = CGameObject::Instantiate(projectile);
 		projectileObj->SetTag("Projectile");
-		projectileObj->SetRenderLayer("Opaque");
+		projectileObj->SetRenderLayer(RENDER_LAYER::Opaque);
 		if (packet->user_friendly)
 			projectileObj->SetObjectType(OBJECT_TYPE::PLAYER_PROJECTILE);
 		else
@@ -382,8 +405,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			projectileObj->Start();
 		}
 
+		projectileObj->mID = packet->projectile_id;
 		mProjectiles[packet->projectile_id] = projectileObj;
-		scene->AddObject(projectileObj);
+		scene->AddObjectImmediately(projectileObj);
 		break;
 	}
 	case SC_PROJECTILE_POS: {
@@ -409,9 +433,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		auto monsterObj = CGameObject::Instantiate(monster);
 		monsterObj->SetTag("monster");
-		monsterObj->SetRenderLayer("Opaque");
+		monsterObj->SetRenderLayer(RENDER_LAYER::Opaque);
 		monsterObj->SetActive(true);
 		monsterObj->SetStatic(false);
+		monsterObj->SetObjectType(OBJECT_TYPE::ENEMY);
 		monsterObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		monsterObj->GetTransform()->SetLocalRotationY(packet->look_y);
 
@@ -437,8 +462,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			monsterObj->Start();
 		}
 
+		monsterObj->mID = packet->monster_id;
 		mEnemies[packet->monster_id] = monsterObj;
-		scene->AddObject(monsterObj);
+		scene->AddObjectImmediately(monsterObj);
 
 		cout << "Monster Added! ID : " << packet->monster_id << "type : " << (int)packet->monster_type << endl;
 		break;

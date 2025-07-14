@@ -25,7 +25,7 @@ CThirdPersonCamera::~CThirdPersonCamera()
 
 void CThirdPersonCamera::Awake()
 {
-	if(!mCamera) mCamera = GetOwner()->GetComponent<CCamera>();
+	if(!mCamera.lock()) mCamera = GetOwner()->GetComponent<CCamera>();
 }
 
 void CThirdPersonCamera::Start()
@@ -47,7 +47,7 @@ void CThirdPersonCamera::Start()
 
 void CThirdPersonCamera::Update()
 {
-	if (!mTarget || !mCamera) return;
+	if (!mTarget || !mCamera.lock()) return;
 	float deltaTime = DELTA_TIME;
 	float speed = deltaTime * 5.f;
 
@@ -153,8 +153,8 @@ void CThirdPersonCamera::LateUpdate()
 void CThirdPersonCamera::SetCameraParams(CameraParams& params)
 {
 	auto transform = GetTransform();
-	float fov = mCamera->GetFov();
-	float aspect = mCamera->GetAspect();
+	float fov = mCamera.lock()->GetFov();
+	float aspect = mCamera.lock()->GetAspect();
 
 	float tanFOVY = tan(0.5f * fov * degToRad);
 	float tanFOVX = tanFOVY * aspect;
@@ -194,8 +194,8 @@ CameraParams CThirdPersonCamera::GetCameraParams(Vec3 trackingPosition)
 
 	Vec3 toCameraOff = position - trackingPosition;
 	Vec3 parallax = rotation.Inverse() * toCameraOff;
-	float fov = mCamera->GetFov();
-	float aspect = mCamera->GetAspect();
+	float fov = mCamera.lock()->GetFov();
+	float aspect = mCamera.lock()->GetAspect();
 	float tanFOVY = tan(0.5f * XMConvertToRadians(fov));
 	float tanFOVX = tanFOVY * aspect;
 	Vec2 screenToWorld = result.distance * Vec2(tanFOVX, tanFOVY);

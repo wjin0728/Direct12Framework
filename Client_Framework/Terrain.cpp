@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Terrain.h"
+#include"RenderManager.h"
 
 CTerrain::CTerrain()
 {
@@ -7,10 +8,14 @@ CTerrain::CTerrain()
 
 CTerrain::~CTerrain()
 {
+	if(INSTANCE(CRenderManager).mTerrain == this) {
+		INSTANCE(CRenderManager).mTerrain = nullptr;
+	}
 }
 
 void CTerrain::Awake()
 {
+	INSTANCE(CRenderManager).mTerrain = this;
 }
 
 void CTerrain::Start()
@@ -29,7 +34,7 @@ void CTerrain::LateUpdate()
 	}
 }
 
-void CTerrain::Render(const std::shared_ptr<class CCamera>& camera, int pass)
+void CTerrain::Render(class CCamera* camera, int pass)
 {
 	mTerrainMaterial->BindShader((PASS_TYPE)pass);
 	mTerrainMaterial->BindDataToShader();

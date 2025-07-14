@@ -16,14 +16,14 @@ void CParticleManager::Initialize(UINT poolSize)
 		if (mParticleEmitterPool[i]) {
 			mParticleEmitterPool[i]->Release(); 
 		} 
-		else mParticleEmitterPool[i] = std::make_unique<CParticleEmitter>();
+		else mParticleEmitterPool[i] = std::make_unique<CParticleEmitter>(particleCount);
 	}
 	
 }
 
 void CParticleManager::LoadParticleProperties()
 {
-	LoadParticleProperties("Smoke", OBJECT_PATH("FX_Smoke"));
+	LoadParticleProperties("DeathSmoke", OBJECT_PATH("FX_Smoke"));
 }
 
 void CParticleManager::Update()
@@ -47,14 +47,16 @@ void CParticleManager::Update()
 		if (!mMainCamera) return;
 		ParticleVertex* particleVertices = reinterpret_cast<ParticleVertex*>(mParticleVertexBuffer->mappedData);
 		std::sort(particleVertices, particleVertices + mParticleCount, [&](const ParticleVertex& a, const ParticleVertex& b) {
-			return a.distanceToCamera > b.distanceToCamera; 
+			if(SimpleMath::IsEqual(a.distanceToCamera, b.distanceToCamera)) 
+				return a.size > b.size;
+			else return a.distanceToCamera > b.distanceToCamera; 
 			});
 	} 
 }
 
 void CParticleManager::Render()
 {
-	if (!mMainCamera) return;
+	//if (!mMainCamera) return;
 	if (mParticleCount == 0) return;
 	if (!mParticleShader) return;
 	mParticleVertexBuffer->BindToShader();
@@ -87,12 +89,23 @@ void CParticleManager::AddParticleProperties(const std::string& name, const Part
 CParticleEmitter* CParticleManager::GetAvailableParticleEmitter()
 {
 	for (auto& emitter : mParticleEmitterPool) {
-		if (!emitter->mIsActive) {
-			emitter->Release();
-			emitter->mIsActive = true;
-			mActiveParticleEmitters.push_back(emitter.get());
+		if (!emitter->mIsActive && !emitter->mParticleAttach) {
 			return emitter.get();
 		}
+	}
+	return nullptr;
+}
+
+CParticleEmitter* CParticleManager::GetAvailableParticleEmitter(const std::string& name)
+{
+	auto it = mParticlePropertiesMap.find(name);
+	if (it == mParticlePropertiesMap.end()) {
+		throw std::runtime_error("Particle properties with name '" + name + "' not found.");
+	}
+	CParticleEmitter* emitter = GetAvailableParticleEmitter();
+	if (emitter) {
+		emitter->Initialize(it->second.get());
+		return emitter;
 	}
 	return nullptr;
 }
@@ -117,7 +130,16 @@ void CParticleManager::ReleaseAllParticleEmitters()
 	mParticleCount = 0;
 }
 
-void CParticleManager::PlayParticleEmitter(const std::string& name, const Vec3& position, bool looping)
+void CParticleManager::PlayParticleEmitter(CParticleEmitter* emitter)
+{
+	if (emitter) {
+		emitter->mIsActive = true;
+		emitter->Play();
+		mActiveParticleEmitters.push_back(emitter);
+	}
+}
+
+CParticleEmitter* CParticleManager::PlayParticleEmitter(const std::string& name, const Vec3& position, bool looping)
 {
 	CParticleEmitter* emitter = GetAvailableParticleEmitter();
 	if (emitter) {
@@ -125,10 +147,14 @@ void CParticleManager::PlayParticleEmitter(const std::string& name, const Vec3& 
 		if (it == mParticlePropertiesMap.end()) {
 			throw std::runtime_error("Particle properties with name '" + name + "' not found.");
 		}
+		emitter->Release();
 		emitter->Initialize(it->second.get());
 		emitter->mIsActive = true;
 		emitter->mIsLooping = looping;
 		emitter->Play(position);
+		mActiveParticleEmitters.push_back(emitter);
+		return emitter;
 	}
+	return nullptr;
 }
 

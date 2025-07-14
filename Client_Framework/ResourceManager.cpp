@@ -94,6 +94,7 @@ bool CResourceManager::LoadSkillObjects()
 	LoadPrefabFromFile("Item_Skill1");
 	LoadPrefabFromFile("Item_Skill2");
 	LoadPrefabFromFile("Item_Skill3");
+	LoadPrefabFromFile("Water_Shield");
 
 	return true;
 }
@@ -104,6 +105,7 @@ bool CResourceManager::LoadProjectileObjects()
 	LoadPrefabFromFile("Fireball");
 	LoadPrefabFromFile("Iceball");
 	LoadPrefabFromFile("MagicBall");
+	LoadPrefabFromFile("Explosion");
 	return true;
 }
 
@@ -179,6 +181,13 @@ void CResourceManager::LoadDefaultTexture()
 		INSTANCE(CDX12Manager).CloseCommandList();
 	}
 	
+	{
+		auto name = "TargetMarker";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
 }
 
 void CResourceManager::LoadDefaultMaterials()

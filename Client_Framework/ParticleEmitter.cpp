@@ -52,7 +52,7 @@ float Gradient::EvaluateAlpha(float t) const
 
 CParticleEmitter::CParticleEmitter(UINT maxParticleNum)
 {
-	ZeroMemory(&mParticleProperties, sizeof(ParticleProperties));
+	mParticleProperties = nullptr;
 	mParticles.reserve(maxParticleNum);
 	mSpawnData.reserve(maxParticleNum*1.5);
 	mTimeSinceLastEmit = 0.f;
@@ -74,6 +74,8 @@ void CParticleEmitter::Initialize(ParticleProperties* particleProperties)
 		mIsActive = false;
 		return;
 	}
+	mBurstRec.clear();
+	mBurstRec.resize(mParticleProperties->bursts.size(), BurstRecord(true, 0, 0.f));
 	mSpawnData.clear();
 	for (uint32_t i = 0; i < mParticleProperties->maxParticles * 2; ++i) {
 		ParticleSpawnData data;
@@ -108,18 +110,17 @@ void CParticleEmitter::Release()
 	mParticles.clear();
 }
 
-int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr, std::shared_ptr<CCamera> camera)
+int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr, CCamera* camera)
 {
 	if (!mIsActive || mParticleProperties->maxParticles <= 0) {
 		return 0;
 	}
+	EmitParticles();
 
 	float deltaTime = DELTA_TIME;
 	if(!mIsPaused){
 		mTotalTime += deltaTime;
 	}
-
-	EmitParticles();
 
 	Vec3 cameraPos = camera ? camera->GetLocalPosition() : Vec3(0.f, 0.f, 0.f);
 	Vec3 cameraForward = camera ? camera->GetLook() : Vec3(0.f, 0.f, 1.f);
@@ -135,6 +136,7 @@ int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr, std::shared_ptr<C
 		dataPtr[mActiveParticleCount].position = particle.Position;
 		//std::cout << "Particle Position: " << particle.Position.x << ", " << particle.Position.y << ", " << particle.Position.z << std::endl;
 		dataPtr[mActiveParticleCount].size = mParticleProperties->useSizeOverTime ? mParticleProperties->sizeOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startSize : spawnDataItem.startSize;
+		dataPtr[mActiveParticleCount].velocity = particle.Velocity;
 		dataPtr[mActiveParticleCount].color = mParticleProperties->useColorOverTime ? mParticleProperties->colorOverTimeGradient->GetRandomColor(particle.Age) * spawnDataItem.startColor : spawnDataItem.startColor;
 		dataPtr[mActiveParticleCount].rotation = mParticleProperties->useRotationOverTime ? mParticleProperties->rotationOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startRotation : spawnDataItem.startRotation;
 		dataPtr[mActiveParticleCount].albedoTexIdx = mParticleProperties->textureIdx;
@@ -150,14 +152,49 @@ void CParticleEmitter::EmitParticles()
 	if(mIsPaused) return; 
 
 	float deltaTime = DELTA_TIME;
+
+	for (int i = 0; i < mParticleProperties->bursts.size();i++) {
+		BurstRecord& burstRec = mBurstRec[i];
+		if (!burstRec.isActive) continue; // Skip if burst is not active
+		const Burst& burst = mParticleProperties->bursts[i];
+		burstRec.rate += burst.interval;
+		if (mTotalTime >= burst.time && burst.interval <= burstRec.rate) {
+			burstRec.rate = 0.f; // Reset rate for next burst
+			burstRec.count++;
+			if (burstRec.count >= burst.cycleTime) {
+				burstRec.isActive = false; 
+			}
+			int burstCount = burst.count.GetRandomValue(0.5);
+			for (int j = 0; j < burstCount; ++j) {
+				for (auto& particle : mParticles) {
+					if (particle.Age >= 1.f) {
+						particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
+						ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
+						Vec3 direction = Vec3::TransformNormal(spawnDataItem.direction, mEmitterTransform);
+						particle.Velocity = direction * spawnDataItem.speed;
+						particle.Position = spawnDataItem.startLocation + Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
+						particle.Age = 0.f;
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	float emitRate = 0.f;
 	if (mParticleProperties->emitRate.type == MinMaxCurve::CurveType::Constant) {
-		emitRate = 1.f / std::get<float>(mParticleProperties->emitRate.data);
+		float rate = std::get<float>(mParticleProperties->emitRate.data);
+		if (rate <= 0.f) return; // No particles to emit
+		emitRate = 1.f / rate;
 	}
 	else if (mParticleProperties->emitRate.type == MinMaxCurve::CurveType::Curve) {
 		float t_curve = mParticleProperties->duration / mTotalTime;
+		if (t_curve <= 0.f) return; // No particles to emit
+		float rate = mParticleProperties->emitRate.GetRandomValue(t_curve);
+		if (rate <= 0.f) return; // No particles to emit
 		emitRate = 1.f / mParticleProperties->emitRate.GetRandomValue(t_curve);
 	}
+
 
 	mTimeSinceLastEmit += deltaTime;
 	if (!mIsPaused && (mTimeSinceLastEmit >= emitRate)) {
@@ -179,14 +216,25 @@ void CParticleEmitter::EmitParticles()
 void CParticleEmitter::Play(const Vec3& pos)
 {
 	SetEmitterLocation(pos);
+	Play();
+}
+
+void CParticleEmitter::Play()
+{
+	if (mParticleProperties == nullptr || mParticleProperties->maxParticles <= 0) {
+		mIsActive = false;
+		return;
+	}
 	mIsPlaying = true;
 	mIsPaused = false;
 	mTimeSinceLastEmit = 0.f;
 	mTotalTime = 0.f;
 	for (auto& particle : mParticles) {
 		particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
-		particle.Age = 1.f; 
+		particle.Age = 1.f;
 	}
+	mBurstRec.clear();
+	mBurstRec.resize(mParticleProperties->bursts.size(), BurstRecord(true, 0, 0.f));
 }
 
 void CParticleEmitter::Pause()
@@ -218,7 +266,15 @@ void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, Part
 	std::string token;
 	while (true) {
 		ReadDateFromFile(ifs, token);
-		if (token == "<Duration>:") {
+		if (token == "<Burst>:") {
+			int burstCount = 0;
+			ReadDateFromFile(ifs, burstCount);
+			properties.bursts.resize(burstCount);
+			for (int i = 0; i < burstCount; ++i) {
+				Burst::ReadBurstFromFile(ifs, properties.bursts[i]);
+			}
+		}
+		else if (token == "<Duration>:") {
 			ReadDateFromFile(ifs, properties.duration);
 		}
 		else if (token == "<MaxParticles>:") {
