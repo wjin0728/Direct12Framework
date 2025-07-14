@@ -143,7 +143,7 @@ void CPlayerController::OnKeyEvents()
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
-			INSTANCE(ServerManager).send_cs_000_packet(0);
+			mStateMachine->ActivateShield(true);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::M)) /*임시 적 생성*/ {
 			INSTANCE(ServerManager).send_cs_000_packet(1);
@@ -161,6 +161,7 @@ void CPlayerController::OnKeyEvents()
 			CastingSkill();
 			return;
 		}
+
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
@@ -193,7 +194,8 @@ void CPlayerController::OnKeyEvents()
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
-			INSTANCE(ServerManager).send_cs_000_packet(0);
+			//INSTANCE(ServerManager).send_cs_000_packet(0);
+			mStateMachine->ActivateShield(true);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::M)) /*임시 적 생성*/ {
 			INSTANCE(ServerManager).send_cs_000_packet(1);
@@ -272,7 +274,7 @@ void CPlayerController::CastingSkill()
 				auto camera = mCamera.lock()->GetTransform();
 				Vec3 camForward = camera->GetWorldLook();
 				Vec3 explosionPos = mTargetEnemy.lock()->GetRootBoundingSphere().Center;
-				explosionPos -= camForward * 0.1f; // Offset explosion position slightly in the direction of the camera
+				explosionPos -= camForward * 0.1f; 
 
 				explosionObj->GetTransform()->SetLocalPosition(explosionPos);
 				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);

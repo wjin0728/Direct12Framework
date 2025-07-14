@@ -291,6 +291,15 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 		player->SetStateMachine(stateMachine);
 
+		auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
+		if (shieldPrefab) {
+			auto shieldObj = CGameObject::Instantiate(shieldPrefab, player->GetTransform());
+			shieldObj->SetActive(false);
+			shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
+			shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
+			stateMachine->SetShield(shieldObj);
+		}
+
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (scene && scene->mIsActive && clientID != packet->id) {
 			player->Awake();

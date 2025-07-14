@@ -4,6 +4,7 @@
 #include "Animation.h"
 #include "ServerManager.h"
 #include "CutScene.h"
+#include"Timer.h"
 
 void CPlayerStateMachine::Awake()
 {
@@ -38,6 +39,14 @@ void CPlayerStateMachine::Update()
 			break;
 		default:
 			break;
+		}
+	}
+
+	if (mShieldDuration > 0) {
+		mShieldDuration -= DELTA_TIME;
+		if (mShieldDuration <= 0) {
+			ActivateShield(false);
+			mShieldDuration = -1.f;
 		}
 	}
 }

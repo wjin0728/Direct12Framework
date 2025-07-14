@@ -16,8 +16,9 @@ private:
 	std::weak_ptr<class CTerrain> mTerrain{};
 
 	std::weak_ptr<class CGameObject> mTargetEnemy{};
-	std::unique_ptr<CGameObject> mTargetUIPrefab{};
 	std::weak_ptr<class CTargetMarker> mTargetMarker{};
+
+	
 
 	bool moveKeyPressed = false;
 	bool mFreeLook = false;

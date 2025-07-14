@@ -7,6 +7,9 @@ class CPlayerStateMachine : public CEntityState
 {
 protected:
     PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
+    std::weak_ptr<class CGameObject> mShield{};
+	float mShieldDuration = -1.0f; // Duration for which the shield is active
+	float mShieldDurationMax = 5.0f; // Maximum duration for the shield
 
 public:
     CPlayerStateMachine() : CEntityState((UINT8)PLAYER_STATE::IDLE) {}
@@ -25,6 +28,18 @@ public:
 public:
     void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; };
     PLAYER_CLASS GetClass() const { return mClass; }
+	void SetShield(std::weak_ptr<class CGameObject> shield) { mShield = shield; }
+    void ActivateShield(bool activate)
+    {
+        if (auto shield = mShield.lock())
+        {
+            shield->SetActive(activate);
+            if (activate)
+            {
+                mShieldDuration = mShieldDurationMax; // Reset shield duration when activated
+			}
+        }
+	}
 };
 
 class CArcherState : public CPlayerStateMachine
