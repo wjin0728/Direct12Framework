@@ -9,8 +9,9 @@ struct EventKey
     float mTime = 0.0f;
     std::string mName;
     bool mEnable = true;
+	float mData = 0.0f;
 
-    EventKey(float time, const std::string& name) : mTime(time), mName(name) {}
+    EventKey(float time, float data, const std::string& name) : mTime(time), mData(data), mName(name) {}
 };
 
 struct EventSegment
@@ -19,7 +20,7 @@ struct EventSegment
 
     float mStart = 0.0f;
     float mEnd = 0.0f;
-    float mData = 0.2f;
+    float mData = 0.14f;
 };
 
 #define _WITH_ANIMATION_INTERPOLATION

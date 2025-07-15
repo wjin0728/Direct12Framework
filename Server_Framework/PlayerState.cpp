@@ -133,7 +133,7 @@ void PlayerState::RunAttackState::Exit(PlayerCharacter* player) {}
 PlayerState::JumpState& PlayerState::JumpState::GetInstance() { static PlayerState::JumpState instance; return instance; }
 
 void PlayerState::JumpState::Enter(PlayerCharacter* player) {
-    player->SetVelocity(0, 0, 0);
+    //player->SetVelocity(0, 0, 0);
     //cout << "Jump 들어왔다리!" << endl;
 }
 
@@ -189,14 +189,30 @@ void PlayerState::HitState::Exit(PlayerCharacter* player) {
 PlayerState::UltimateState& PlayerState::UltimateState::GetInstance() { static PlayerState::UltimateState instance; return instance; }
 
 void PlayerState::UltimateState::Enter(PlayerCharacter* player) {
-    //cout << "Ultimate 들어왔다리!" << endl;
-
+    ultimateTimer = 0.f;
+    player->_data = 0.f;
+    player->SetVelocity(0, 0, 0); // 스킬 중 이동 멈춤
 }
 
 void PlayerState::UltimateState::Update(PlayerCharacter* player) {
-    //cout << "Ultimate 업데이트 중!" << endl;
+    if (player->_class == S_PLAYER_CLASS::FIGHTER) {
+        ultimateTimer += TICK_INTERVAL;
+
+        float start = 1.3;
+        float peak = 1.5;
+        float mid = 1.9;
+        float end = 2.1;
+        float maxHeight = 2.f;
+
+        if (start <= ultimateTimer && ultimateTimer < peak)
+            player->_data = -50.f * (ultimateTimer - peak) * (ultimateTimer - peak) + maxHeight;
+        else if (peak <= ultimateTimer && ultimateTimer < mid)
+            player->_data = maxHeight;
+        else if (mid <= ultimateTimer && ultimateTimer <= end)
+            player->_data = -50.f * (ultimateTimer - mid) * (ultimateTimer - mid) + maxHeight;
+    }
 }
 
 void PlayerState::UltimateState::Exit(PlayerCharacter* player) {
-
+    player->_data = 0.f;
 }

@@ -119,18 +119,9 @@ void CAnimationTrack::SetAnimationSet(std::shared_ptr<CAnimationSet>& set)
 			if (key->mName == "SlowStart") {
 				data.mType = ANIMATION_EVENT_TYPE::SLOW;
 				data.mStart = key->mTime;
+				data.mData = key->mData;
 			}
 			else if (key->mName == "SlowEnd") {
-				data.mEnd = key->mTime;
-				mEventSegments.push_back(data);
-			}
-
-			// มกวม
-			if (key->mName == "JumpStart") {
-				data.mType = ANIMATION_EVENT_TYPE::JUMP;
-				data.mStart = key->mTime;
-			}
-			else if (key->mName == "JumpEnd") {
 				data.mEnd = key->mTime;
 				mEventSegments.push_back(data);
 			}
@@ -155,15 +146,6 @@ float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, fl
 			mPosition = trackPosition + elapsedTime * data.mData;
 			mTrackProgress = mPosition / animationLength;
 			return(mPosition);
-			break;
-		}
-		case ANIMATION_EVENT_TYPE::JUMP: {
-			float duration = data.mEnd - data.mStart;
-			float elapsed = mPosition - data.mStart;
-			float t = elapsed / duration;
-			float heightFactor = -4.0f * t * (t - 1.0f);
-
-			data.mData * heightFactor;
 		}
 		}
 	}

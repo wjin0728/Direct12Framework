@@ -540,13 +540,14 @@ void CGameObject::CreateAnimationFromFile(const std::string& fileName)
 				animSet->mEventKeys.resize(eventCount);
 
 				for (auto& key : animSet->mEventKeys) {
-					float eventTime{};
+					float eventTime{}, floatParam{};
 					std::string eventStr;
 
 					ReadDateFromFile(ifs, eventTime);
+					ReadDateFromFile(ifs, floatParam);
 					ReadDateFromFile(ifs, eventStr);
 
-					key = std::make_shared<EventKey>(eventTime, eventStr);
+					key = std::make_shared<EventKey>(eventTime, floatParam, eventStr);
 				}
 			}
 

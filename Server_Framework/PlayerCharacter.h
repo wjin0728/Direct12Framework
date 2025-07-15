@@ -23,6 +23,9 @@ public:
 	array<Monster*, 3> _Monster{}; // 몬스터 타겟
 	Monster* _target = nullptr;
 
+	float _time = 0.0f; // 애니메이션 재생 시간
+	float _data = 0.0f; // 애니메이션 데이터
+
 	PlayerCharacter() :
 		Object(S_OBJECT_TYPE::S_PLAYER),
 		_look_dir(Vec3(1, 1, 1)), 
