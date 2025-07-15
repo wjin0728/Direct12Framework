@@ -165,6 +165,13 @@ void CPlayerController::OnKeyEvents()
 			//INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
 			mStateMachine->SetState((UINT8)PLAYER_STATE::RUNATTACK);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUNATTACK);
+			
+			if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
+			if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
+			if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
+			if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
+
+			if (dir != 0) { INSTANCE(ServerManager).send_cs_move_packet(dir, camForward); }
 			return;
 		}
 

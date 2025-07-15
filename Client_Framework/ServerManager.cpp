@@ -478,6 +478,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_REMOVE_PROJECTILE: {
 		SC_REMOVE_PROJECTILE_PACKET* packet = reinterpret_cast<SC_REMOVE_PROJECTILE_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!mProjectiles.contains(packet->projectile_id)) break;
 		scene->RemoveObject(mProjectiles[packet->projectile_id]);
 		mProjectiles.erase(packet->projectile_id);
 		break;

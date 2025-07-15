@@ -148,3 +148,15 @@ void SESSION::send_remove_monster_packet(int monster_id)
 	p.monster_id = monster_id;
 	do_send(&p);
 }
+
+void SESSION::send_add_effect_packet(int id, Vec3 pos)
+{
+	SC_ADD_EFFECT_PACKET p;
+	p.type = SC_ADD_EFFECT;
+	p.size = sizeof(p);
+	p.effect_id = id;
+	p.x = pos.x;
+	p.y = pos.y;
+	p.z = pos.z;
+	do_send(&p);
+}

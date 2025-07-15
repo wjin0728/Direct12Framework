@@ -8,6 +8,7 @@ public:
 	bool _user_frinedly;
 	S_PROJECTILE_TYPE _p_type = S_PROJECTILE_TYPE::PROJECTILE_END;
 	int _damage = 0; // 데미지
+	bool _remove = false; // 제거 여부
 
 	Projectile() :
 		Object(S_OBJECT_TYPE::S_PLAYER_PROJECTILE),
