@@ -111,7 +111,6 @@ enum class S_MONSTER_STATE : UINT8
 	end
 };
 
-
 enum class S_PROJECTILE_TYPE : UINT8
 {
 	ARROW,
@@ -121,4 +120,10 @@ enum class S_PROJECTILE_TYPE : UINT8
 	MAGIC_BALL,
 
 	PROJECTILE_END
+};
+
+enum class S_EFFECT_TYPE : UINT8
+{
+	dd,
+	ss
 };
