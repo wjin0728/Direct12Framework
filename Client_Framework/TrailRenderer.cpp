@@ -17,10 +17,10 @@
 CTrailRenderer::CTrailRenderer()
 {
 	mVertexCount = 0;
-    mDuration = 0.2f;
+    mDuration = 1.3f;
     mTotalTime = 0.0f;
-	mWidth = 0.3f; 
-	mMinDstance = 0.1f;
+	mWidth = 0.4f; 
+	mMinDstance = 0.3f;
 	mMaxPoints = 1000; 
     mTrailPoints.reserve(mMaxPoints);
 }
@@ -73,7 +73,7 @@ void CTrailRenderer::LateUpdate()
 	Vec3 worldPos = transform->GetWorldPosition();
 
     if( mTrailPoints.empty()) {
-        mTrailPoints.push_back({ worldPos, mTotalTime, 0.5f });
+        mTrailPoints.push_back({ worldPos, mTotalTime, 0.9f });
         mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
 	}
     else if (mTrailPoints.size() >= 2 && mTrailPoints.size() < mMaxPoints) {
@@ -81,7 +81,7 @@ void CTrailRenderer::LateUpdate()
         origin.position = worldPos;
 		origin.time = mTotalTime;
         if ((origin.position - mTrailPoints[mTrailPoints.size() - 2].position).Length() >= mMinDstance) {
-			mTrailPoints.back().alpha = 0.5f; 
+			mTrailPoints.back().alpha = 0.9f; 
             mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
         }
     }
@@ -104,7 +104,7 @@ void CTrailRenderer::LateUpdate()
                 tail.position = Vec3::Lerp(tail.position, tailNext.position, ratio);
 				tail.alpha = std::lerp(tail.alpha, tailNext.alpha, ratio);
 
-                if ((tail.position - tailNext.position).Length() < 0.02f || ratio >= 1.0f) {
+                if ((tail.position - tailNext.position).Length() < 0.01f || ratio >= 1.0f) {
                     mTrailPoints.erase(mTrailPoints.begin());
                 }
             }
@@ -175,10 +175,10 @@ void CTrailRenderer::UpdateVertices()
     {
         Vec3 direction;
         if (i == 0) {
-            direction = (smoothTrailPoints[1].position - smoothTrailPoints[0].position).GetNormalized();
+            direction = (smoothTrailPoints[i+1].position - smoothTrailPoints[i].position).GetNormalized();
         }
-        else if (i == smoothTrailPoints.size() - 1) 
-            direction = (smoothTrailPoints[i].position - smoothTrailPoints[i - 1].position).GetNormalized();
+        else if (i == (smoothTrailPoints.size() - 1))
+            direction = -transform->GetWorldRight();
         else {
             Vec3 dir1 = (smoothTrailPoints[i].position - smoothTrailPoints[i - 1].position).GetNormalized();
             Vec3 dir2 = (smoothTrailPoints[i + 1].position - smoothTrailPoints[i].position).GetNormalized();
@@ -187,9 +187,10 @@ void CTrailRenderer::UpdateVertices()
 
         Vec3 up = direction.Cross(right).GetNormalized();
 		float t = i * uvStep;
-		Vec3 offset = up * mWidth * lerp(1.f, 0.2f, t); 
+		Vec3 offset = up * mWidth * lerp(0.2f, 1.f, t); 
+		float alpha = smoothTrailPoints[i].alpha * std::lerp(0.0f, 1.f, t); 
+		alpha = std::pow(alpha, 1.5f); 
         float uvX = i * uvStep;
-        float alpha = smoothTrailPoints[i].alpha;
 
         vertices[mVertexCount++] = { smoothTrailPoints[i].position + offset, Vec2(uvX, 1), smoothTrailPoints[i].time, Color(1.f,1.f,1.f,alpha) };
         vertices[mVertexCount++] = { smoothTrailPoints[i].position - offset, Vec2(uvX, 0), smoothTrailPoints[i].time, Color(1.f,1.f,1.f,alpha) };

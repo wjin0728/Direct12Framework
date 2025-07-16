@@ -203,7 +203,7 @@ void CWarriorState::Awake()
 	auto socket = owner->AddBoneSocket("Equipment.weapon.R.001", "WeaponSocket");
 	if (socket) {
 		mTrail = socket->AddComponent<CTrailRenderer>();
-		//mTrail.lock()->mIsVisible = false;
+		mTrail.lock()->mIsVisible = false;
 		mAttackSocket = socket->GetTransform();
 		mAttackSocket.lock()->SetLocalPosition(Vec3(0.0f, 0.5f, 0.0f));
 	}
@@ -267,7 +267,7 @@ void CWarriorState::OnExitState(UINT8 state)
 	case PLAYER_STATE::IDLE:
 	{
 		auto trail = mTrail.lock();
-		if (trail) trail->mIsVisible = false;
+		if (trail) trail->mIsVisible = true;
 	}
 		break;
 	case PLAYER_STATE::RUN:
@@ -275,13 +275,13 @@ void CWarriorState::OnExitState(UINT8 state)
 	case PLAYER_STATE::ATTACK:
 	{
 		auto trail = mTrail.lock();
-		//if (trail) trail->mIsVisible = true;
+		if (trail) trail->mIsVisible = true;
 	}
 		break;
 	case PLAYER_STATE::RUNATTACK:
 	{
 		auto trail = mTrail.lock();
-		//if (trail) trail->mIsVisible = true;
+		if (trail) trail->mIsVisible = true;
 	}
 		break;
 	case PLAYER_STATE::GETHIT:
