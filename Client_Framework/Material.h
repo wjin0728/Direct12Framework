@@ -22,9 +22,9 @@ struct PropertyInfo
 struct CommonProperties
 {
 	Vec4 mainColor{};
-	int mainTexIdx = -1;
+	UINT mainTexIdx = -1;
 
-	int normalTexIdx = -1;
+	UINT normalTexIdx = -1;
 	float smoothness{};
 	float metallic{};
 	Vec4 vec4Data0{}; 
@@ -198,9 +198,13 @@ public:
 		if (it != mProperties.end())
 		{
 			UINT offset = it->second.offset;
-			if (sizeof(T) == dataSize)
+			if (sizeof(T) == it->second.size)
 			{
-				memcpy(matData.get() + offset, &value, dataSize);
+				if (!matData)
+				{
+					memcpy(uploadData + offset, &value, sizeof(T));
+				}
+				else memcpy(matData + offset, &value, it->second.size);
 				mDirtyFrames = FRAME_RESOURCE_COUNT;
 			}
 		}
@@ -212,10 +216,14 @@ public:
 		if (it != mProperties.end())
 		{
 			UINT offset = it->second.offset;
-			if (sizeof(T) == dataSize)
+			if (sizeof(T) == it->second.size)
 			{
 				T value{};
-				memcpy(&value, matData.get() + offset, sizeof(T));
+				if (!matData)
+				{
+					memcpy(&value, uploadData + offset, sizeof(T));
+				}
+				else memcpy(&value, matData + offset, sizeof(T));
 				return value;
 			}
 		}

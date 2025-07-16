@@ -34,6 +34,7 @@ public:
 
 	void PlayParticleEmitter(CParticleEmitter* emitter);
 	CParticleEmitter* PlayParticleEmitter(const std::string& name, const Vec3& position, bool looping = false);
+	CParticleEmitter* PlayParticleEmitter(const std::string& name, const Matrix& mat, bool looping = false);
 
 	ParticleProperties* GetParticleProperties(const std::string& name) const
 	{

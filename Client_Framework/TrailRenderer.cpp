@@ -17,10 +17,10 @@
 CTrailRenderer::CTrailRenderer()
 {
 	mVertexCount = 0;
-    mDuration = 1.3f;
+    mDuration = 0.2f;
     mTotalTime = 0.0f;
-	mWidth = 0.4f; 
-	mMinDstance = 0.3f;
+	mWidth = 0.5f; 
+	mMinDstance = 0.4f;
 	mMaxPoints = 1000; 
     mTrailPoints.reserve(mMaxPoints);
 }
@@ -55,12 +55,14 @@ void CTrailRenderer::Awake()
     owner->SetRenderLayer(RENDER_LAYER::Transparent);
 
 	auto material = INSTANCE(CResourceManager).Get<CMaterial>("TrailDefault");
-    AddMaterial(material->Instantiate());
+	auto matInstance = material->Instantiate();
+	AddMaterial(matInstance);
 }
 
 void CTrailRenderer::Start()
 {
 	CRenderer::Start();
+	int idx = m_materials[0]->GetProperty<UINT>("normalTexIdx");
 }
 
 void CTrailRenderer::Update()
@@ -72,23 +74,25 @@ void CTrailRenderer::LateUpdate()
 	auto transform = GetTransform();
 	Vec3 worldPos = transform->GetWorldPosition();
 
-    if( mTrailPoints.empty()) {
-        mTrailPoints.push_back({ worldPos, mTotalTime, 0.9f });
-        mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
-	}
-    else if (mTrailPoints.size() >= 2 && mTrailPoints.size() < mMaxPoints) {
-        auto& origin = mTrailPoints.back();
-        origin.position = worldPos;
-		origin.time = mTotalTime;
-        if ((origin.position - mTrailPoints[mTrailPoints.size() - 2].position).Length() >= mMinDstance) {
-			mTrailPoints.back().alpha = 0.9f; 
+    if (mIsActive) {
+        if (mTrailPoints.empty()) {
+            mTrailPoints.push_back({ worldPos, mTotalTime, 0.9f });
+            mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
+        }
+        else if (mTrailPoints.size() >= 2 && mTrailPoints.size() < mMaxPoints) {
+            auto& origin = mTrailPoints.back();
+            origin.position = worldPos;
+            origin.time = mTotalTime;
+            if ((origin.position - mTrailPoints[mTrailPoints.size() - 2].position).Length() >= mMinDstance) {
+                mTrailPoints.back().alpha = 0.9f;
+                mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
+            }
+        }
+        else if (mTrailPoints.size() == 1)
+        {
             mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
         }
     }
-    else if(mTrailPoints.size() == 1)
-    {
-        mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
-	}
     if (mTotalTime >= mDuration) {
         float cutTime = mTotalTime - mDuration; 
 
@@ -98,7 +102,7 @@ void CTrailRenderer::LateUpdate()
 
             if (tail.time <= cutTime && cutTime <= tailNext.time) {
                 float timeDiff = tailNext.time - tail.time;
-                float ratio = (cutTime - tail.time) / timeDiff;
+                float ratio = (cutTime - tail.time) * 2 / timeDiff;
 
                 ratio = std::clamp(ratio, 0.0f, 1.0f);
                 tail.position = Vec3::Lerp(tail.position, tailNext.position, ratio);
@@ -120,19 +124,32 @@ void CTrailRenderer::LateUpdate()
 
 void CTrailRenderer::Render(class CCamera* camera, int pass) 
 {
-    if (mTrailPoints.size() < 2)
+    if (mTrailPoints.size() < 3)
         return;
     if (!mVertexBuffer || mVertexCount == 0) return;
 	mVertexBuffer->SetVertexBuffer();
 	m_materials[0]->BindShader(PASS_TYPE::FORWARD);
+	m_materials[0]->BindDataToShader();
 
     CMDLIST->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     CMDLIST->DrawInstanced(mVertexCount, 1, 0, 0);
 }
 
+void CTrailRenderer::SetBlendMaskTexture(const std::string& name)
+{
+    auto material = m_materials[0];
+    if (material) {
+        auto texture = INSTANCE(CResourceManager).Get<CTexture>(name);
+        if (texture) {
+			UINT blendTexIdx = texture->GetSrvIndex();
+            material->SetProperty("normalTexIdx", blendTexIdx);
+        }
+	}
+}
+
 void CTrailRenderer::UpdateVertices()
 {
-    if (mTrailPoints.size() < 2)
+    if (mTrailPoints.size() < 3)
         return;
 	auto camera = INSTANCE(CRenderManager).GetMainCamera();
     if(!camera) return;
@@ -189,12 +206,20 @@ void CTrailRenderer::UpdateVertices()
 		float t = i * uvStep;
 		Vec3 offset = up * mWidth * lerp(0.2f, 1.f, t); 
 		float alpha = smoothTrailPoints[i].alpha * std::lerp(0.0f, 1.f, t); 
-		alpha = std::pow(alpha, 1.5f); 
-        float uvX = i * uvStep;
+		alpha = std::pow(alpha, 0.8f); 
+        float uvY = i * uvStep;
 
-        vertices[mVertexCount++] = { smoothTrailPoints[i].position + offset, Vec2(uvX, 1), smoothTrailPoints[i].time, Color(1.f,1.f,1.f,alpha) };
-        vertices[mVertexCount++] = { smoothTrailPoints[i].position - offset, Vec2(uvX, 0), smoothTrailPoints[i].time, Color(1.f,1.f,1.f,alpha) };
+        vertices[mVertexCount++] = { smoothTrailPoints[i].position + offset, Vec2(1, uvY), smoothTrailPoints[i].time, Color(1.f,1.f,1.f,alpha) };
+        vertices[mVertexCount++] = { smoothTrailPoints[i].position - offset, Vec2(0, uvY), smoothTrailPoints[i].time, Color(1.f,1.f,1.f,alpha) };
     }
 
 	mVertexBuffer->UpdateVertexBuffer(nullptr, mVertexCount);
+}
+
+void CTrailRenderer::ResetTrail()
+{
+	mTrailPoints.clear();
+	mTotalTime = 0.0f;
+	mVertexCount = 0;
+
 }

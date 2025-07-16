@@ -37,6 +37,7 @@ public:
 		}
 	}
 	UINT8 GetState() const { return currentState; }
+	std::weak_ptr<CAnimationController> GetAnimationController() const { return mAnimationController; }
 
 protected:
 	virtual void OnEnterState(UINT8 state) {};

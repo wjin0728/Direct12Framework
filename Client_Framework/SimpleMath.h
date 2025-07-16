@@ -1007,14 +1007,15 @@ namespace DirectX
             return angle;
         }
 
-        inline float Hermite(float t, float t0, float v0, float m0, float t1, float v1, float m1) 
+        inline float Hermite(float t, float v0, float v1, float outTangent0, float inTangent1)
         {
-            float s = (t - t0) / (t1 - t0);
-            float h0 = 2 * s * s * s - 3 * s * s + 1;
-            float h1 = -2 * s * s * s + 3 * s * s;
-            float h2 = s * s * s - 2 * s * s + s;
-            float h3 = s * s * s - s * s;
-            return h0 * v0 + h1 * v1 + h2 * (t1 - t0) * m0 + h3 * (t1 - t0) * m1;
+            float t2 = t * t;
+            float t3 = t2 * t;
+            float h00 = 2 * t3 - 3 * t2 + 1;
+            float h10 = t3 - 2 * t2 + t;
+            float h01 = -2 * t3 + 3 * t2;
+            float h11 = t3 - t2;
+            return h00 * v0 + h10 * outTangent0 + h01 * v1 + h11 * inTangent1;
         }
 
 #include "SimpleMath.inl"

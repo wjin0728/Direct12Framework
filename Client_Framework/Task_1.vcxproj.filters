@@ -512,9 +512,6 @@
     <None Include="..\Resources\Shaders\Vegitation.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="..\Resources\Shaders\Water.hlsl">
-      <Filter>HLSL</Filter>
-    </None>
     <None Include="..\Resources\Shaders\Lit.hlsl">
       <Filter>HLSL</Filter>
     </None>
@@ -526,6 +523,9 @@
     </None>
     <None Include="..\Resources\Shaders\Trail.hlsl">
       <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Water.hlsl">
+      <Filter>Managers</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -528,12 +528,14 @@ void CGameObject::CreateAnimationFromFile(const std::string& fileName)
 
 				for (auto& key : animSet->mEventKeys) {
 					float eventTime{};
+					float floatParam{};
 					std::string eventStr;
 
 					ReadDateFromFile(ifs, eventTime);
+					ReadDateFromFile(ifs, floatParam);
 					ReadDateFromFile(ifs, eventStr);
 
-					key = std::make_shared<EventKey>(eventTime, eventStr);
+					key = std::make_shared<EventKey>(eventTime, floatParam, eventStr);
 				}
 			}
 

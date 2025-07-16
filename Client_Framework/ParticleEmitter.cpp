@@ -141,6 +141,18 @@ int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr, CCamera* camera)
 		dataPtr[mActiveParticleCount].rotation = mParticleProperties->useRotationOverTime ? mParticleProperties->rotationOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startRotation : spawnDataItem.startRotation;
 		dataPtr[mActiveParticleCount].albedoTexIdx = mParticleProperties->textureIdx;
 		dataPtr[mActiveParticleCount].distanceToCamera = (dataPtr[mActiveParticleCount].position - cameraPos).Dot(cameraForward);
+
+		if (mParticleProperties->useTextureSheetAnimation) {
+			float t = mParticleProperties->texSheetAnimationCurve.GetRandomValue(particle.Age);
+			dataPtr[mActiveParticleCount].tileX = mParticleProperties->tileX;
+			dataPtr[mActiveParticleCount].tileY = mParticleProperties->tileY;
+			dataPtr[mActiveParticleCount].frameIdx = std::floor(t * (mParticleProperties->tileX * mParticleProperties->tileX));
+		}
+		else {
+			dataPtr[mActiveParticleCount].tileX = 1;
+			dataPtr[mActiveParticleCount].tileY = 1;
+			dataPtr[mActiveParticleCount].frameIdx = 0;
+		}
 		mActiveParticleCount++;
 	}
 	return mActiveParticleCount;
@@ -356,6 +368,15 @@ void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, Part
 				properties.EmitShapeModule.type = ShapeModule::ShapeType::Point;
 			}
 			
+		}
+		else if (token == "<UseTextureSheetAnimation>:") {
+			ReadDateFromFile(ifs, properties.useTextureSheetAnimation);
+			if(properties.useTextureSheetAnimation) {
+				ReadDateFromFile(ifs, properties.tileX);
+				ReadDateFromFile(ifs, properties.tileY);
+				MinMaxCurve::ReadMinMaxCurveFromFile(ifs, properties.texSheetAnimationCurve);
+				ReadDateFromFile(ifs, properties.cycleTime);
+			}
 		}
 		else if (token == "End") {
 			break;

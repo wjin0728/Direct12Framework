@@ -23,7 +23,8 @@ void CParticleManager::Initialize(UINT poolSize)
 
 void CParticleManager::LoadParticleProperties()
 {
-	LoadParticleProperties("DeathSmoke", OBJECT_PATH("FX_Smoke"));
+	//LoadParticleProperties("DeathSmoke", OBJECT_PATH("FX_Smoke"));
+	LoadParticleProperties("FootDust", OBJECT_PATH("FootDust"));
 }
 
 void CParticleManager::Update()
@@ -152,6 +153,25 @@ CParticleEmitter* CParticleManager::PlayParticleEmitter(const std::string& name,
 		emitter->mIsActive = true;
 		emitter->mIsLooping = looping;
 		emitter->Play(position);
+		mActiveParticleEmitters.push_back(emitter);
+		return emitter;
+	}
+	return nullptr;
+}
+
+CParticleEmitter* CParticleManager::PlayParticleEmitter(const std::string& name, const Matrix& mat, bool looping)
+{
+	CParticleEmitter* emitter = GetAvailableParticleEmitter(name);
+	if (emitter) {
+		auto it = mParticlePropertiesMap.find(name);
+		if (it == mParticlePropertiesMap.end()) {
+			throw std::runtime_error("Particle properties with name '" + name + "' not found.");
+		}
+		emitter->Release();
+		emitter->Initialize(it->second.get());
+		emitter->mIsActive = true;
+		emitter->mIsLooping = looping;
+		emitter->Play(mat);
 		mActiveParticleEmitters.push_back(emitter);
 		return emitter;
 	}

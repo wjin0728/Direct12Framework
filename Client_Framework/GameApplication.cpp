@@ -60,6 +60,11 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 
 	TIMER.Reset();
 
+	ShowWindow(mHwnd, SW_SHOW);
+	UpdateWindow(mHwnd);
+	SetForegroundWindow(mHwnd);
+	SetFocus(mHwnd);
+
 	return true;
 }
 
@@ -240,11 +245,6 @@ bool CGameApplication::InitWindow(WNDPROC wndProc, int cmdShow)
 		MessageBox(0, L"CreateWindow Failed.", 0, 0);
 		return false;
 	}
-
-	ShowWindow(mHwnd, SW_SHOW);
-	UpdateWindow(mHwnd);
-	SetForegroundWindow(mHwnd);
-	SetFocus(mHwnd);
 
 	return true;
 }

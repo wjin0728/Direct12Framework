@@ -363,11 +363,7 @@ void CAnimationController::AddAnimationEvent(const std::string& animName, const 
 			mEventHandler[set->mAnimationName] = handler;
 		}
 		for (auto& key : set->mEventKeys) {
-			handler->Register(name, event);
-			if (set->mAnimationName == "Attack" || set->mAnimationName == "RunAttack") {
-				handler->Register("Attack", [](float time) {
-					INSTANCE(ServerManager).send_cs_attack_packet();
-					});
+			if(key->mName == name) {
 				handler->Register(name, event);
 			}
 		}

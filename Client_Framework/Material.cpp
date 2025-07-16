@@ -69,7 +69,6 @@ void CMaterial::EnrollToPool()
 	if (!matData) {
 		matData = CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->mappedData + mPoolOffset;
 		if(uploadData) std::memcpy(matData, uploadData, dataSize);
-		CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->UpdateBuffer(mPoolOffset, matData, dataSize);
 	}
 	mDirtyFrames = FRAME_RESOURCE_COUNT + 1; // Set dirty frames to update the material
 }

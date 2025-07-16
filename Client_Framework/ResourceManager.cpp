@@ -188,6 +188,20 @@ void CResourceManager::LoadDefaultTexture()
 		tex->AssignedSRVIndex();
 		Add(tex);
 	}
+	{
+		auto name = "WeaponTrail";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "SwordTrail";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
 }
 
 void CResourceManager::LoadDefaultMaterials()

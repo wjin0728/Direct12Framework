@@ -19,10 +19,14 @@ void CPlayerStateMachine::Start()
 {
 	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
 	auto controller = mAnimationController.lock();
-	/*controller->AddAnimationEvent("Run", "Dust", [this](float time) {
-		
-		}
-	);*/
+	auto func = [this](float time) {
+		INSTANCE(CParticleManager).PlayParticleEmitter(
+			"FootDust",
+			owner->GetTransform()->GetWorldMat()
+		);
+		};
+	controller->AddAnimationEvent("Run", " Dust", func);
+	controller->AddAnimationEvent("RunAttack", " Dust", func);
 }
 
 void CPlayerStateMachine::Update()
@@ -203,7 +207,7 @@ void CWarriorState::Awake()
 	auto socket = owner->AddBoneSocket("Equipment.weapon.R.001", "WeaponSocket");
 	if (socket) {
 		mTrail = socket->AddComponent<CTrailRenderer>();
-		mTrail.lock()->mIsVisible = false;
+		mTrail.lock()->mIsActive = false;
 		mAttackSocket = socket->GetTransform();
 		mAttackSocket.lock()->SetLocalPosition(Vec3(0.0f, 0.5f, 0.0f));
 	}
@@ -236,14 +240,35 @@ void CWarriorState::Start()
 			break;
 		}
 	}
-	controller->AddAnimationEvent("Attack", "Attack", [this](float time) {
+	auto func0 = [this](float time) {
 		if (mTrail.expired()) {
 			return;
 		}
 		auto trail = mTrail.lock();
-		if (trail) trail->mIsVisible = true;
+		if (trail) {
+			trail->mIsActive = true;
+			trail->ResetTrail();
+			trail->SetDuration(0.2f);
 		}
-	);
+		};
+	auto func1 = [this](float time) {
+		if (mTrail.expired()) {
+			return;
+		}
+		auto trail = mTrail.lock();
+		if (trail) {
+			trail->mIsActive = false;
+		}
+		};
+	controller->AddAnimationEvent("Attack", "AttackStart", func0);
+	controller->AddAnimationEvent("Attack", "AttackEnd", func1);
+	controller->AddAnimationEvent("RunAttack", "AttackStart", func0);
+	controller->AddAnimationEvent("RunAttack", "AttackEnd", func1);
+
+	auto trail = mTrail.lock();
+	if (trail) {
+		trail->SetBlendMaskTexture("WeaponTrail");
+	}
 }
 
 void CWarriorState::Update()
@@ -254,6 +279,42 @@ void CWarriorState::Update()
 void CWarriorState::OnEnterState(UINT8 state)
 {
 	CPlayerStateMachine::OnEnterState(state);
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	switch ((PLAYER_STATE)state) {
+	case PLAYER_STATE::IDLE:
+		break;
+	case PLAYER_STATE::RUN:
+		break;
+	case PLAYER_STATE::ATTACK:
+		break;
+	case PLAYER_STATE::RUNATTACK:
+	{
+	}
+	break;
+	case PLAYER_STATE::GETHIT:
+		break;
+	case PLAYER_STATE::DEATH:
+		break;
+	case PLAYER_STATE::JUMP:
+		break;
+	case PLAYER_STATE::SKILL:
+		break;
+	case PLAYER_STATE::ULTIMATE:
+	{
+		auto trail = mTrail.lock();
+		if (trail) {
+			trail->mIsActive = true;
+			trail->ResetTrail();
+			trail->SetDuration(1.0f);
+		}
+	}
+	break;
+	default:
+		break;
+	}
 }
 
 void CWarriorState::OnExitState(UINT8 state)
@@ -265,23 +326,17 @@ void CWarriorState::OnExitState(UINT8 state)
 	}
 	switch ((PLAYER_STATE)state) {
 	case PLAYER_STATE::IDLE:
-	{
-		auto trail = mTrail.lock();
-		if (trail) trail->mIsVisible = true;
-	}
 		break;
 	case PLAYER_STATE::RUN:
 		break;
 	case PLAYER_STATE::ATTACK:
-	{
-		auto trail = mTrail.lock();
-		if (trail) trail->mIsVisible = true;
-	}
 		break;
 	case PLAYER_STATE::RUNATTACK:
 	{
 		auto trail = mTrail.lock();
-		if (trail) trail->mIsVisible = true;
+		if (trail) {
+			trail->mIsActive = false;
+		}
 	}
 		break;
 	case PLAYER_STATE::GETHIT:
@@ -292,6 +347,14 @@ void CWarriorState::OnExitState(UINT8 state)
 		break;
 	case PLAYER_STATE::SKILL:
 		break;
+	case PLAYER_STATE::ULTIMATE:
+	{
+		auto trail = mTrail.lock();
+		if (trail) {
+			trail->mIsActive = false;
+		}
+	}
+	break;
 	default:
 		break;
 	}

@@ -35,6 +35,7 @@ private:
     std::unique_ptr<CVertexBuffer> mVertexBuffer{};
     
 public:
+	bool mIsActive = false; 
     CTrailRenderer();
 	CTrailRenderer(const CTrailRenderer& other);
     virtual ~CTrailRenderer();
@@ -54,13 +55,19 @@ public:
 public:
 	void SetWidth(float width) { mWidth = width; }
 	void SetMaxPoints(int maxPoints) { mMaxPoints = maxPoints; }
+	void SetTotalTime(float time) { mTotalTime = time; }
+	void SetIsActive(bool isActive) { mIsActive = isActive; }
+	bool GetIsActive() const { return mIsActive; }
 	int GetMaxPoints() const { return mMaxPoints; }
 	void SetMinDistance(float distance) { mMinDstance = distance; }
 	float GetMinDistance() const { return mMinDstance; }
 	void SetDuration(float duration) { mDuration = duration; }
     float GetWidth() const { return mWidth; }
 	float GetDuration() const { return mDuration; }
+	void SetBlendMaskTexture(const std::string& name);
+
 
 	void UpdateVertices();
+	void ResetTrail();
 };
 

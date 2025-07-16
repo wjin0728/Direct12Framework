@@ -9,8 +9,9 @@ struct EventKey
     float mTime = 0.0f;
     std::string mName;
     bool mEnable = true;
+    float mData = 0.0f;
 
-    EventKey(float time, const std::string& name) : mTime(time), mName(name) {}
+    EventKey(float time, float data, const std::string& name) : mTime(time), mData(data), mName(name) {}
 };
 
 struct EventSegment

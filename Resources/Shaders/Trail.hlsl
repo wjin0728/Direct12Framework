@@ -25,8 +25,8 @@ cbuffer MaterialData : register(b5)
 struct VS_INPUT
 {
     float3 position : POSITION;
-    uint texIdx : TEXCOORD;
-    float2 uv : TIME;
+    float2 uv : TEXCOORD;
+    float time : TIME;
     float4 color : COLOR;
 };
 
@@ -43,6 +43,7 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 
     output.color = input.color;
     output.pos = mul(float4(input.position, 1), viewProjMat);
+    output.uv = input.uv;
     return output;
 }
 
@@ -50,8 +51,19 @@ float4 PS_Forward(VS_OUTPUT input) : SV_Target
 {
     float4 color = input.color;
     float4 texColor = diffuseMap[ForwardTexIdx].Sample(linearClamp, input.uv);
+    float alpha = diffuseMap[normalTexIdx].Sample(linearClamp, input.uv).r;
     texColor = float4(1.0, 1.0, 1.0, 1.0);
+    
+    float2 screenUV = GetNormalizedScreenSpaceUV(input.pos);
+    float sceneDepth = GetNormalizedSceneDepth(screenUV);
+    float linearSceneDepth = GetCameraDepth(sceneDepth);
+    float linearFragmentDepth = GetCameraDepth(input.pos.z);
+    
+    float depth = saturate((linearSceneDepth - linearFragmentDepth) / 0.5);
+    
+    
     color = color * texColor;
-    color.rgb = GammaDecoding(color.rgb);
+    color.a *= alpha * depth;
+    //color.rgb = GammaDecoding(color.rgb);
     return color;
 }
