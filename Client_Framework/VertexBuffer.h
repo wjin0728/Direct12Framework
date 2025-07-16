@@ -1,30 +1,30 @@
 #pragma once
 #include"DX12Manager.h"
+#include"UploadBuffer.h"
 
-class CVertexBuffer
+class CVertexBuffer : public CStructedBuffer
 {
 private:
 	friend class CMesh;
 	friend class CSkinnedMesh;
 
-	ComPtr<ID3D12Resource> mBuffer{};
-	ComPtr<ID3D12Resource> mUploadBuffer{};
 	D3D12_VERTEX_BUFFER_VIEW mVertexBufferView{};
 
 	UINT mSlot{};
 	UINT mStride{};
 	UINT mOffset{};
-	UINT mVerticesNum{};
+
+	bool mIsDynamic = false;
 
 public:
-	CVertexBuffer() = default;
-	~CVertexBuffer() = default;
+	CVertexBuffer() : CStructedBuffer(D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER) {}
+	virtual ~CVertexBuffer() = default;
 
 public:
 	template<typename T>
-	void CreateBuffer(const std::vector<T>& vertices, UINT slot = 0);
-	void ReleaseUploadBuffer();
+	void CreateBuffer(const std::vector<T>& vertices, UINT slot = 0, bool isDynamic = false);
 
+	void UpdateVertexBuffer(const void* data, UINT size);
 	void SetVertexBuffer() const;
 
 public:
@@ -32,18 +32,20 @@ public:
 };
 
 template<typename T>
-inline void CVertexBuffer::CreateBuffer(const std::vector<T>& vertices, UINT slot)
+inline void CVertexBuffer::CreateBuffer(const std::vector<T>& vertices, UINT slot, bool isDynamic)
 {
+	if (vertices.empty()) return;
+	mIsDynamic = isDynamic;
 	mSlot = slot;
-	mStride = sizeof(T);
-	mVerticesNum = vertices.size();
+	dataSize = sizeof(T);
+	dataNum = vertices.size();
 
-	UINT dataSize = mStride * mVerticesNum;
+	bufferSize = dataSize * dataNum;
 
-	mBuffer = CreateBufferResource(DEVICE, CMDLIST, (void*)vertices.data(), dataSize,
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &mUploadBuffer);
+	buffer = CreateBufferResource(DEVICE, CMDLIST, (void*)vertices.data(), bufferSize,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &uploadBuffer);
 
-	mVertexBufferView.BufferLocation = mBuffer->GetGPUVirtualAddress();
-	mVertexBufferView.StrideInBytes = mStride;
-	mVertexBufferView.SizeInBytes = dataSize;
+	mVertexBufferView.BufferLocation = buffer->GetGPUVirtualAddress();
+	mVertexBufferView.StrideInBytes = dataSize;
+	mVertexBufferView.SizeInBytes = bufferSize;
 }

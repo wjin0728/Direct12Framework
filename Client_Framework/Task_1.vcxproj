@@ -195,6 +195,7 @@
     <ClInclude Include="SkinnedMeshRenderer.h" />
     <ClInclude Include="TargetMarker.h" />
     <ClInclude Include="ThirdPersonCamera.h" />
+    <ClInclude Include="TrailRenderer.h" />
     <ClInclude Include="UIRenderer.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -264,6 +265,7 @@
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
     <ClCompile Include="TargetMarker.cpp" />
     <ClCompile Include="ThirdPersonCamera.cpp" />
+    <ClCompile Include="TrailRenderer.cpp" />
     <ClCompile Include="UIRenderer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
@@ -364,6 +366,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\Shaders\Decal.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Shaders\Trail.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

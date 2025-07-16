@@ -45,6 +45,7 @@ private:
 public:
 	int mID{ -1 };
 	bool misAwake{ false };
+	bool mIsStart{ false };
 	bool mCastShadow{ false };
 	BoundingSphere mRootLocalBS = BoundingSphere();
 	BoundingSphere mRootBS = BoundingSphere();
@@ -125,6 +126,7 @@ public:
 
 	void AddChild(std::shared_ptr<CGameObject> child);
 	void RemoveChild(std::shared_ptr<CGameObject> child);
+	std::shared_ptr<CGameObject> AddBoneSocket(const std::string& boneName, const std::string& socketName = "DefaultSocket");
 
 	template<typename T, typename... Args>
 	std::shared_ptr<T> AddComponent(Args&&... args);

@@ -86,6 +86,13 @@ public:
 		}
 		return nullptr;
 	}
+	CCamera* GetMainCamera()
+	{
+		if (!mCameras.empty()) {
+			return mCameras["MainCamera"];
+		}
+		return nullptr;
+	}
 
 	void AddLight(class CLight* light);
 	void RemoveLight(class CLight* light);

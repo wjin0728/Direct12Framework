@@ -259,6 +259,8 @@
     <ClInclude Include="TargetMarker.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
+    <ClInclude Include="CutScene.h" />
+    <ClInclude Include="TrailRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -462,6 +464,12 @@
     <ClCompile Include="TargetMarker.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
+    <ClCompile Include="CutScene.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="TrailRenderer.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -514,6 +522,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="..\Resources\Shaders\Decal.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Trail.hlsl">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>

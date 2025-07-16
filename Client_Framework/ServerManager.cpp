@@ -287,7 +287,21 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
 		
-		auto stateMachine = player->AddComponent<CPlayerStateMachine>(packet->player_class);
+		std::shared_ptr<CPlayerStateMachine> stateMachine{};
+		if(packet->player_class == (UINT8)PLAYER_CLASS::ARCHER) {
+			stateMachine = player->AddComponent<CArcherState>();
+		}
+		else if (packet->player_class == (UINT8)PLAYER_CLASS::FIGHTER) {
+			stateMachine = player->AddComponent<CWarriorState>();
+		}
+		else if (packet->player_class == (UINT8)PLAYER_CLASS::MAGE) {
+			stateMachine = player->AddComponent<CMageState>();
+		}
+		else {
+			std::cout << "Unknown player class: " << (int)packet->player_class << std::endl;
+			return;
+		}
+		
 		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 		player->SetStateMachine(stateMachine);
 

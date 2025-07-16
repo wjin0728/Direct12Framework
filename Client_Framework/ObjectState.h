@@ -47,6 +47,9 @@ class CArcherState : public CPlayerStateMachine
 private:
 
 public:
+	CArcherState() : CPlayerStateMachine((uint8_t)PLAYER_CLASS::ARCHER) {}
+	virtual ~CArcherState() = default;
+
     virtual void Awake() override;
     virtual void Start() override;
     virtual void Update() override;
@@ -58,10 +61,29 @@ public:
 class CWarriorState : public CPlayerStateMachine
 {
 private:
-    public:
+	std::weak_ptr<class CTransform> mAttackSocket;
+	std::weak_ptr<class CTrailRenderer> mTrail;
+public:
+	CWarriorState() : CPlayerStateMachine((uint8_t)PLAYER_CLASS::FIGHTER) {}
+	virtual ~CWarriorState() = default;
     virtual void Awake() override;
     virtual void Start() override;
     virtual void Update() override;
     virtual void OnEnterState(UINT8 state) override;
     virtual void OnExitState(UINT8 state) override;
+};
+
+class CMageState : public CPlayerStateMachine
+{
+private:
+    std::weak_ptr<class CTransform> mAttackSocket;
+public:
+	CMageState() : CPlayerStateMachine((uint8_t)PLAYER_CLASS::MAGE) {}
+	virtual ~CMageState() = default;
+    virtual void Awake() override;
+    virtual void Start() override;
+    virtual void Update() override;
+    virtual void OnEnterState(UINT8 state) override;
+    virtual void OnExitState(UINT8 state) override;
+
 };

@@ -78,7 +78,7 @@ void CThirdPersonCamera::Update()
 		Vec3 scale, pos;
 		relativeMatrix.Decompose(scale, relativeRot, pos);
 
-		std::cout << "==============================" << std::endl;
+		/*std::cout << "==============================" << std::endl;
 		std::cout << "Position: "
 			<< relativePos.x << ", "
 			<< relativePos.y << ", "
@@ -90,7 +90,7 @@ void CThirdPersonCamera::Update()
 			<< relativeRot.z << ", "
 			<< relativeRot.w << std::endl;
 
-		std::cout << "==============================" << std::endl;
+		std::cout << "==============================" << std::endl;*/
 	}
 
 	auto transform = GetTransform();

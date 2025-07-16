@@ -192,6 +192,15 @@ void CResourceManager::LoadDefaultTexture()
 
 void CResourceManager::LoadDefaultMaterials()
 {
+	{
+		auto material = std::make_shared<CMaterial>("TrailDefault");
+		material->Initialize(nullptr, sizeof(CommonProperties));
+		material->SetShader("Trail");
+		material->AddPropertyKey(GetPropertyInfos<CommonProperties>());
+		material->AddPropertyKey(REGISTER_PROPERTY_NAME(CommonProperties, fData0, width));
+
+		Add(material);
+	}
 }
 
 void CResourceManager::LoadDefaultShaders()
@@ -316,6 +325,17 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("Particle", info, "Particle")) Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::TRAIL;
+		info.blendType = BLEND_TYPE::ALPHA_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER;
+		info.rasterizerType = RASTERIZER_TYPE::WIREFRAME;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize("Trail", info, "Trail")) Add(shader);
 	}
 	{
 		ShaderInfo info;

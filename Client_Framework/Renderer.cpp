@@ -9,6 +9,7 @@
 #include"ObjectPoolManager.h"
 #include"Renderer.h"
 #include"RenderManager.h"
+#include "TrailRenderer.h"
 
 CRenderer::CRenderer()
 {

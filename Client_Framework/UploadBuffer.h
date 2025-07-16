@@ -52,9 +52,12 @@ protected:
 
 	bool mWritable{ true };
 
+	D3D12_RESOURCE_STATES bufferState{ D3D12_RESOURCE_STATE_COMMON };
+
 public:
 	BYTE* mappedData{};
 	CStructedBuffer() {};
+	CStructedBuffer(D3D12_RESOURCE_STATES state) : bufferState(state) {};
 	~CStructedBuffer();
 
 public:

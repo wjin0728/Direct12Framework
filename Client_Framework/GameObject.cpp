@@ -42,8 +42,8 @@ void CGameObject::Awake()
 		component->Awake();
 	}
 
-	for (auto& child : mChildren) {
-		child->Awake();
+	for (int i = 0; i < mChildren.size();i++) {
+		mChildren[i]->Awake();
 	}
 
 	mRenderer = GetComponent<CRenderer>();
@@ -57,15 +57,15 @@ void CGameObject::Awake()
 
 void CGameObject::Start()
 {
-	if (misAwake) return;
+	if (mIsStart) return;
 	for (auto& component : mComponents) {
 		component->Start();
 	}
 
-	for (auto& child : mChildren) {
-		child->Start();
+	for (int i = 0; i < mChildren.size(); i++) {
+		mChildren[i]->Start();
 	}
-	misAwake = true;
+	mIsStart = true;
 }
 
 void CGameObject::Update()
@@ -705,6 +705,7 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 	terrain->SetHeightMapGridMesh(mesh);
 	terrain->SetMaterial(material);
 	terrain->MakeNavMap(name + "NavMap", resolution*2);
+	material->Initialize();
 
 	mLocalAABB = mWorldAABB = terrain->mWorldAABB;
 
@@ -763,16 +764,6 @@ void CGameObject::UpdateWorldMatrices(std::shared_ptr<CTransform> parent)
 
 void CGameObject::PrintSRT()
 {
-	std::cout << "S     : " << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
-	std::cout << "Euler : " << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
-	std::cout << "T     : " << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
-	std::cout << "Quat  : " << mTransform->mLocalRotation.x << " " << mTransform->mLocalRotation.y << " " << mTransform->mLocalRotation.z << " " << mTransform->mLocalRotation.w << std::endl;
-	std::cout << std::endl;
-	std::cout << "로컬 변환 행렬" << std::endl;
-	PrintMatrix(mTransform->mLocalMat);
-	std::cout << std::endl;
-	std::cout << "월드 변환 행렬" << std::endl;
-	PrintMatrix(mTransform->mWorldMat);
 }
 
 void CGameObject::RegisterRenderer()
@@ -818,5 +809,20 @@ void CGameObject::RemoveChild(std::shared_ptr<CGameObject> child)
 	if (itr != mChildren.end()) {
 		mChildren.erase(itr);
 	}
+}
+
+std::shared_ptr<CGameObject> CGameObject::AddBoneSocket(const std::string& boneName, const std::string& socketName)
+{
+	std::shared_ptr<CGameObject> socket = std::make_shared<CGameObject>();
+	socket->mName = socketName;
+	socket->mTag = "BoneSocket";
+	socket->mObjectType = OBJECT_TYPE::NONE;
+	auto bone = FindChildByName(boneName);
+	if (!bone) {
+		std::cerr << "Bone not found: " << boneName << std::endl;
+		return nullptr;
+	}
+	bone->AddChild(socket);
+	return socket;
 }
 
