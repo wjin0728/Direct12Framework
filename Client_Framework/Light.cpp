@@ -12,6 +12,7 @@
 #include"SceneManager.h"
 #include"Renderer.h"
 #include"Timer.h"
+#include"RenderManager.h"
 
 std::array< std::shared_ptr<CMesh>, 3> CLight::volumes{};
 
@@ -30,6 +31,8 @@ CLight::~CLight()
 	INSTANCE(CObjectPoolManager).ReturnCBVIndex(mCbvIdx);
 	mCbvIdx = -1;
 	mCbvOffset = 0;
+
+	INSTANCE(CRenderManager).RemoveLight(this);
 }
 
 std::shared_ptr<CComponent> CLight::Clone()
@@ -41,6 +44,7 @@ std::shared_ptr<CComponent> CLight::Clone()
 
 void CLight::Awake()
 {
+	INSTANCE(CRenderManager).AddLight(this);
 }
 
 void CLight::Start()
@@ -59,8 +63,6 @@ void CLight::Start()
 		objDate.idx0 = mLightIndex;
 		objectBuffer->UpdateBuffer(mCbvOffset, &objDate);
 	}
-	auto scene = INSTANCE(CSceneManager).GetCurScene();
-	mainCamera = scene->GetCamera("MainCamera");
 	mLightData.direction = GetTransform()->GetWorldLook();
 }
 

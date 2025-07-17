@@ -2,10 +2,18 @@
 #include "VertexBuffer.h"
 #include"DX12Manager.h"
 
-void CVertexBuffer::ReleaseUploadBuffer()
+
+void CVertexBuffer::UpdateVertexBuffer(const void* data, UINT size)
 {
-	if (mUploadBuffer)
-		mUploadBuffer.Reset();
+	dataNum = size;
+	bufferSize = dataSize * dataNum;
+
+	if (!mappedData) return;
+	if (data) memcpy(&mappedData, data, dataNum);
+
+	mVertexBufferView.BufferLocation = buffer->GetGPUVirtualAddress();
+	mVertexBufferView.StrideInBytes = dataSize;
+	mVertexBufferView.SizeInBytes = bufferSize;
 }
 
 void CVertexBuffer::SetVertexBuffer() const

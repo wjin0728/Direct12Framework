@@ -94,7 +94,6 @@ void CAnimationTrack::HandleCallback(std::shared_ptr<CAnimationEventHandler>& re
 				event(mPosition);
 				key->mEnable = false;
 			}
-			break;
 		}
 	}
 }
@@ -189,27 +188,19 @@ float CAnimationTrack::UpdatePosition(float trackPosition, float elapsedTime, fl
 //
 CAnimationController::CAnimationController()
 {
-	mTracks.push_back(std::make_shared<CAnimationTrack>());
+	mTrack = std::make_unique<CAnimationTrack>();
 }
 
-CAnimationController::CAnimationController(int trackNum, std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion)
+CAnimationController::CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion)
 {
-	mTracks.resize(trackNum);
-	for (auto& track : mTracks) track = std::make_shared<CAnimationTrack>();
-
+	mTrack = std::make_unique<CAnimationTrack>();
 	mApplyRootMotion = applyRootMotion;
-
 	mAnimationSets = sets;
 }
 
 CAnimationController::CAnimationController(const CAnimationController& other) : CComponent(other)
 {
-	mTracks.resize(other.mTracks.size());
-	for (int i = 0; i < mTracks.size(); ++i) {
-		if (other.mTracks[i]) {
-			mTracks[i] = std::make_shared<CAnimationTrack>(*other.mTracks[i]);
-		}
-	}
+	mTrack = std::make_unique<CAnimationTrack>(*other.mTrack.get());
 	mAnimationSets = std::make_shared<CAnimationSets>(*other.mAnimationSets);
 	finalTransforms.resize(other.finalTransforms.size());
 	mBoneTransformIdx = other.mBoneTransformIdx;
@@ -256,7 +247,7 @@ void CAnimationController::Start()
 	}
 
 	if (mAnimationSets) {
-		for (int i = 0; auto & cache : mAnimationSets->mBoneFrameCaches) {
+		for (int i = 0; auto& cache : mAnimationSets->mBoneFrameCaches) {
 			auto& boneName = mAnimationSets->mBoneNames[i];
 			if (boneMap.contains(boneName)) cache = boneMap[boneName];
 			else {
@@ -265,21 +256,7 @@ void CAnimationController::Start()
 			}
 			++i;
 		}
-
-		for (auto& set : mAnimationSets->mAnimationSet) {
-			auto& handler = std::make_shared<CAnimationEventHandler>();
-			for (auto& key : set->mEventKeys) {
-				if (set->mAnimationName == "Attack" || set->mAnimationName == "RunAttack") {
-					handler->Register("Attack", [](float time) {
-						INSTANCE(ServerManager).send_cs_attack_packet();
-						std::cout << "น฿ป็!!" << std::endl;
-						});
-				}
-			}
-			mEventHandler[set->mAnimationName] = handler;
-		}
-
-		SetTrackAnimationSet(0, 0);
+		SetTrackAnimationSet(0);
 	}
 
 	mRootMotionObject.lock()->owner->SetStatic(true);
@@ -298,26 +275,23 @@ void CAnimationController::LateUpdate()
 	float deltaTime = DELTA_TIME;
 	mTime += deltaTime;
 
-	if (mTracks.size()) {
+	if (mTrack) {
 		for (auto& cache : mAnimationSets->mBoneFrameCaches) { if (cache.lock()) cache.lock()->SetLocalMatZero(); }
 	
-		for (auto& track : mTracks) {
-			auto& set = mAnimationSets->mAnimationSet[track->mSetIndex];
-			float position = track->UpdatePosition(track->mPosition, deltaTime, set->mLength);
+		auto& set = mAnimationSets->mAnimationSet[mTrack->mSetIndex];
+		float position = mTrack->UpdatePosition(mTrack->mPosition, deltaTime, set->mLength);
 
-			for (int i = 0; auto& cache : mAnimationSets->mBoneFrameCaches) {
-				if (cache.lock()) {
-					Matrix transform = set->GetSRT(i, position);
-					transform *= track->mWeight;
-					cache.lock()->mLocalMat = transform;
-				}
-
-				++i;
+		for (int i = 0; auto& cache : mAnimationSets->mBoneFrameCaches) {
+			if (cache.lock()) {
+				Matrix transform = set->GetSRT(i, position);
+				transform *= mTrack->mWeight;
+				cache.lock()->mLocalMat = transform;
 			}
-
-			if (mEventHandler.contains(set->mAnimationName))
-				track->HandleCallback(mEventHandler[set->mAnimationName]);
+			++i;
 		}
+
+		if (mEventHandler.contains(set->mAnimationName))
+			mTrack->HandleCallback(mEventHandler[set->mAnimationName]);
 		GetOwner()->UpdateWorldMatrices(nullptr);
 	}
 
@@ -335,11 +309,11 @@ void CAnimationController::LateUpdate()
 	);
 }
 
-void CAnimationController::SetTrackAnimationSet(int trackIndex, int setIndex)
+void CAnimationController::SetTrackAnimationSet(int setIndex)
 {
-	if (trackIndex < mTracks.size() && setIndex < mAnimationSets->mAnimationSet.size() && mTracks[trackIndex]->mSetIndex != setIndex) {
-		mTracks[trackIndex]->SetIndex(setIndex);
-		mTracks[trackIndex]->SetAnimationSet(mAnimationSets->mAnimationSet[setIndex]);
+	if (mTrack && setIndex < mAnimationSets->mAnimationSet.size() && mTrack->mSetIndex != setIndex) {
+		mTrack->SetIndex(setIndex);
+		mTrack->SetAnimationSet(mAnimationSets->mAnimationSet[setIndex]);
 	}
 }
 
@@ -354,11 +328,25 @@ void CAnimationController::BindSkinningMatrix()
 
 void CAnimationController::PrintMatrix(const Matrix& mat)
 {
-	for (int row = 0; row < 4; ++row) {
-		for (int col = 0; col < 4; ++col) {
-			std::cout << mat.m[row][col] << "\t";
+}
+
+void CAnimationController::AddAnimationEvent(const std::string& animName, const std::string& name, CAnimationEventHandler::Event event)
+{
+	for (auto& set : mAnimationSets->mAnimationSet) {
+		if (set->mAnimationName != animName) continue;
+
+		std::shared_ptr<CAnimationEventHandler> handler{};
+		if (mEventHandler.contains(set->mAnimationName)) {
+			handler = mEventHandler[set->mAnimationName];
 		}
-		std::cout << std::endl;
+		else {
+			handler = std::make_shared<CAnimationEventHandler>();
+			mEventHandler[set->mAnimationName] = handler;
+		}
+		for (auto& key : set->mEventKeys) {
+			if(key->mName == name) {
+				handler->Register(name, event);
+			}
+		}
 	}
-	std::cout << std::endl;
 }

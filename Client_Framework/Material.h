@@ -5,7 +5,10 @@
 #include"Shader.h"
 
 #define REGISTER_PROPERTY(type, field) \
-	{ #field, offsetof(T, field), sizeof(((T*)0)->field), 0 }
+	{ #field, offsetof(type, field), sizeof(((type*)0)->field), 0 }
+
+#define REGISTER_PROPERTY_NAME(type, field, fieldName) \
+	{ #fieldName, offsetof(type, field), sizeof(((type*)0)->field), 0 }
 
 
 struct PropertyInfo
@@ -19,12 +22,21 @@ struct PropertyInfo
 struct CommonProperties
 {
 	Vec4 mainColor{};
-	int mainTexIdx = -1;
+	UINT mainTexIdx = -1;
 
-	int normalTexIdx = -1;
+	UINT normalTexIdx = -1;
 	float smoothness{};
 	float metallic{};
-	float padding{};
+	Vec4 vec4Data0{}; 
+	Vec4 vec4Data1{};
+	float fData0{};
+	float fData1{};
+	float fData2{};
+	float fData3{};
+	int iData0{};
+	int iData1{};
+	int iData2{};
+	int iData3{};
 };
 
 struct LitProperties
@@ -126,7 +138,8 @@ struct UIProperties
 class CMaterial : public CResource
 {
 protected:
-	std::unique_ptr<BYTE[]> matData{};
+	BYTE* matData{};
+	BYTE* uploadData{};
 	std::unordered_map<std::string, PropertyInfo> mProperties{};
 	UINT dataSize{};
 
@@ -142,13 +155,14 @@ protected:
 public:
 	std::string mShaderName{};
 	CMaterial() = default;
+	CMaterial(const std::string& name) : CResource(name, RESOURCE_TYPE::MATERIAL) {}
 	CMaterial(const CMaterial& other);
 	CMaterial(void* data, UINT dataSize);
 	virtual ~CMaterial();
 
 	static std::shared_ptr<CMaterial> CreateMaterialFromFile(std::ifstream& inFile);
 
-	void Initialize(void* data, UINT dataSize);
+	virtual void Initialize(void* data, UINT dataSize);
 	void SetShader(const std::string& name);
 	std::shared_ptr<CMaterial> Instantiate() const;
 
@@ -165,6 +179,18 @@ public:
 		return mShaders[passType];
 	}
 
+	void AddPropertyKey(const PropertyInfo& propertyInfo)
+	{
+		mProperties[propertyInfo.name] = propertyInfo;
+	}
+	void AddPropertyKey(const std::vector<PropertyInfo>& propertyInfos)
+	{
+		for (const auto& propertyInfo : propertyInfos)
+		{
+			mProperties[propertyInfo.name] = propertyInfo;
+		}
+	}
+
 	template<typename T>
 	void SetProperty(const std::string& name, const T& value)
 	{
@@ -172,9 +198,13 @@ public:
 		if (it != mProperties.end())
 		{
 			UINT offset = it->second.offset;
-			if (sizeof(T) == dataSize)
+			if (sizeof(T) == it->second.size)
 			{
-				memcpy(matData.get() + offset, &value, dataSize);
+				if (!matData)
+				{
+					memcpy(uploadData + offset, &value, sizeof(T));
+				}
+				else memcpy(matData + offset, &value, it->second.size);
 				mDirtyFrames = FRAME_RESOURCE_COUNT;
 			}
 		}
@@ -186,10 +216,14 @@ public:
 		if (it != mProperties.end())
 		{
 			UINT offset = it->second.offset;
-			if (sizeof(T) == dataSize)
+			if (sizeof(T) == it->second.size)
 			{
 				T value{};
-				memcpy(&value, matData.get() + offset, sizeof(T));
+				if (!matData)
+				{
+					memcpy(&value, uploadData + offset, sizeof(T));
+				}
+				else memcpy(&value, matData + offset, sizeof(T));
 				return value;
 			}
 		}
@@ -229,7 +263,14 @@ public:
 	virtual ~CTerrainMaterial() = default;
 	virtual void Update();
 
+	void Initialize()
+	{
+		uploadData = new BYTE[ALIGNED_SIZE(100)];
 
+		std::memcpy(uploadData, &data, sizeof(TerrainData));
+
+		mDirtyFrames = FRAME_RESOURCE_COUNT + 1;
+	}
 	void LoadTerrainData(std::ifstream& inFile);
 	Vec3 GetSize() const { return data.size; }
 

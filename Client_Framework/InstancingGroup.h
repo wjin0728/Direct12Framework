@@ -3,7 +3,7 @@
 
 class CInstancingGroup
 {
-	friend class CInstancingManager;
+	friend class CRenderManager;
 private:
 	INSTANCE_BUFFER_TYPE mType{};
 	std::vector<std::shared_ptr<class CGameObject>> mObjects{};
@@ -19,6 +19,6 @@ public:
 	void Initialize(INSTANCE_BUFFER_TYPE type);
 	void AddObject(std::shared_ptr<class CGameObject> object);
 
-	int Update(const std::shared_ptr<class CCamera>& camera, int startOffset);
+	int Update(class CCamera* camera, int startOffset);
 };
 

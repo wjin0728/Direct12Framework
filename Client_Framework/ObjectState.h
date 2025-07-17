@@ -7,6 +7,9 @@ class CPlayerStateMachine : public CEntityState
 {
 protected:
     PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
+    std::weak_ptr<class CGameObject> mShield{};
+	float mShieldDuration = -1.0f; // Duration for which the shield is active
+	float mShieldDurationMax = 5.0f; // Maximum duration for the shield
 
 public:
     CPlayerStateMachine() : CEntityState((UINT8)PLAYER_STATE::IDLE) {}
@@ -25,6 +28,18 @@ public:
 public:
     void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; };
     PLAYER_CLASS GetClass() const { return mClass; }
+	void SetShield(std::weak_ptr<class CGameObject> shield) { mShield = shield; }
+    void ActivateShield(bool activate)
+    {
+        if (auto shield = mShield.lock())
+        {
+            shield->SetActive(activate);
+            if (activate)
+            {
+                mShieldDuration = mShieldDurationMax; // Reset shield duration when activated
+			}
+        }
+	}
 };
 
 class CArcherState : public CPlayerStateMachine
@@ -32,6 +47,9 @@ class CArcherState : public CPlayerStateMachine
 private:
 
 public:
+	CArcherState() : CPlayerStateMachine((uint8_t)PLAYER_CLASS::ARCHER) {}
+	virtual ~CArcherState() = default;
+
     virtual void Awake() override;
     virtual void Start() override;
     virtual void Update() override;
@@ -43,7 +61,11 @@ public:
 class CWarriorState : public CPlayerStateMachine
 {
 private:
-    public:
+	std::weak_ptr<class CTransform> mAttackSocket;
+	std::weak_ptr<class CTrailRenderer> mTrail;
+public:
+	CWarriorState() : CPlayerStateMachine((uint8_t)PLAYER_CLASS::FIGHTER) {}
+	virtual ~CWarriorState() = default;
     virtual void Awake() override;
     virtual void Start() override;
     virtual void Update() override;
@@ -55,6 +77,10 @@ class CMageState : public CPlayerStateMachine
 {
 private:
 public:
+    std::weak_ptr<class CTransform> mAttackSocket;
+public:
+	CMageState() : CPlayerStateMachine((uint8_t)PLAYER_CLASS::MAGE) {}
+	virtual ~CMageState() = default;
     virtual void Awake() override;
     virtual void Start() override;
     virtual void Update() override;

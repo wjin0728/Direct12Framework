@@ -28,7 +28,7 @@ private:
 	bool mIsHit{ false };
 	bool mCanRotate{ true };
 
-	std::shared_ptr<class CCamera> mCamera{};
+	std::weak_ptr<class CCamera> mCamera{};
 	std::shared_ptr<class CGameObject> mTarget{};
 	std::weak_ptr<class CTerrain> mTerrain{};
 

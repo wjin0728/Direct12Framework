@@ -14,28 +14,21 @@ class CSceneManager;
 
 class CScene
 {
-protected:
 	friend class CSceneManager;
-	using ObjectList = std::vector<std::shared_ptr<CGameObject>>;
-	using ObjectMap = std::unordered_map<UINT, std::shared_ptr<CGameObject>>;
-	std::array<UINT, OBJECT_TYPE::end> mObjectCount{};
+protected:
+	class CRenderManager* mRenderMgr{};
 
+	using ObjectList = std::vector<std::shared_ptr<CGameObject>>;
+
+	std::queue<std::shared_ptr<CGameObject>> mAddQueue{};
 	std::queue<std::shared_ptr<CGameObject>> mRemoveQueue{};
 
 	ObjectList mObjects{};
-
-	std::unordered_map<std::string, ObjectList> mRenderLayers{};
-	std::vector<std::shared_ptr<class CInstancingGroup>> instancingGroups{};
 	std::array<ObjectList, OBJECT_TYPE::end> mObjectTypes;
-
 	std::shared_ptr<CTerrain> mTerrain{};
-	std::array<std::vector<std::shared_ptr<CLight>>, (UINT)LIGHT_TYPE::END> mLights{};
-
-	std::unordered_map<std::string, std::shared_ptr<CCamera>> mCameras;
 
 	std::vector<int> renderTargetIndices{};
 	int renderPasstype{};
-
 
 	Matrix UIProjectionMatrix{};
 	float finalTargetAlpha{ 1.f };
@@ -55,42 +48,29 @@ public:
 	virtual void LateUpdate();
 
 	virtual void RenderScene() {};
-	void RenderShadowPass();
-	void RenderForwardPass();
-	void RenderGBufferPass();
-	void RenderLightingPass();
-	void RenderFinalPass();
 
 public:
 	void LoadSceneFromFile(const std::string& fileName);
 	void CreatePrefabs(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 
 	std::shared_ptr<CGameObject> FindObjectWithTag(const std::string& tag);
-	std::shared_ptr<CGameObject> FindObjectWithTag(const std::string& renderLayer, const std::string& tag);
 
 	void ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB);
 
-	void AddObject(const std::string& renderLayer, std::shared_ptr<CGameObject> object);
+	void AddObjectImmediately(std::shared_ptr<CGameObject> object);
 	void AddObject(std::shared_ptr<CGameObject> object);
 	void RemoveObject(std::shared_ptr<CGameObject> object);
 	void SetTerrain(std::shared_ptr<CTerrain> terrain);
-
-	void AddCamera(std::shared_ptr<CCamera> camera);
-	void RemoveCamera(const std::string& tag);
 	
-	void AddLight(std::shared_ptr<CLight> light);
-	
-	const std::unordered_map<std::string, ObjectList>& GetObjects() const { return mRenderLayers; }
-	ObjectList& GetObjects(const std::string& layer) { return mRenderLayers[layer]; }
+	ObjectList& GetObjectsWithType(OBJECT_TYPE type) { return mObjectTypes[(UINT)type]; }
 	std::array<ObjectList, OBJECT_TYPE::end>& GetObjectsForType() { return mObjectTypes; }
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
-	std::shared_ptr<CCamera> GetCamera(const std::string& tag) { return mCameras[tag]; }
 
-	std::vector <std::shared_ptr<CLight>> GetLight(LIGHT_TYPE type) { return mLights[(UINT)type]; }
-
+	void CollectVisibleObjects();
 	void AddRemoveQueue(std::shared_ptr<CGameObject> object);
 
-	void RenderForLayer(const std::string& layer, std::shared_ptr<CCamera> camera, int pass = 0);
+	void CommitObjectChanges();
+
 protected:
 	void UpdatePassData();
 	void RemoveObjects();

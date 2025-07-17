@@ -26,7 +26,7 @@ void CEnemyState::Update()
 	case MONSTER_STATE::PROJECTILE_ATTACK:
 		break;
 	case MONSTER_STATE::GETHIT:
-		transform->SetHitFactor(1.f - controller->mTracks.front()->mTrackProgress);
+		transform->SetHitFactor(1.f - controller->mTrack->mTrackProgress);
 		break;
 	case MONSTER_STATE::DEATH:
 		break;
@@ -108,7 +108,7 @@ void CGrassSmallState::OnEnterState(UINT8 state)
 	if (!controller) {
 		return;
 	}
-	controller->SetTrackAnimationSet(0, (int)state);
+	controller->SetTrackAnimationSet((int)state);
 
 	CEnemyState::OnEnterState(state);
 }
@@ -134,7 +134,7 @@ void CGrassBigState::OnEnterState(UINT8 state)
 	if (!controller) {
 		return;
 	}
-	controller->SetTrackAnimationSet(0, (int)state);
+	controller->SetTrackAnimationSet((int)state);
 
 	CEnemyState::OnEnterState(state);
 }

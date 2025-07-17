@@ -15,10 +15,10 @@ private:
 	std::vector<std::unique_ptr<CParticleEmitter>> mParticleEmitterPool;
 	int mParticleCount = 0;
 
-	std::shared_ptr<CCamera> mMainCamera;
 	std::shared_ptr<class CShader> mParticleShader;
 
 public:
+	CCamera* mMainCamera = nullptr;
 	void Initialize(UINT poolSize);
 	void LoadParticleProperties();
 	void Update();
@@ -28,11 +28,22 @@ public:
 	void AddParticleProperties(const std::string& name, const ParticleProperties& properties);
 
 	CParticleEmitter* GetAvailableParticleEmitter();
+	CParticleEmitter* GetAvailableParticleEmitter(const std::string& name);
 	void ReleaseParticleEmitter(CParticleEmitter* emitter);
 	void ReleaseAllParticleEmitters();
 
-	void PlayParticleEmitter(const std::string& name, const Vec3& position, bool looping = false);
+	void PlayParticleEmitter(CParticleEmitter* emitter);
+	CParticleEmitter* PlayParticleEmitter(const std::string& name, const Vec3& position, bool looping = false);
+	CParticleEmitter* PlayParticleEmitter(const std::string& name, const Matrix& mat, bool looping = false);
 
-	void SetMainCamera(std::shared_ptr<CCamera> camera) { mMainCamera = camera; }
+	ParticleProperties* GetParticleProperties(const std::string& name) const
+	{
+		auto it = mParticlePropertiesMap.find(name);
+		if (it != mParticlePropertiesMap.end())
+		{
+			return it->second.get();
+		}
+		return nullptr;
+	}
 };
 

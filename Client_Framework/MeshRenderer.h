@@ -1,6 +1,6 @@
 #pragma once
 #include "Renderer.h"
-#include"InstancingManager.h"
+#include"RenderManager.h"
 
 class CMesh;
 class CMaterial;
@@ -23,7 +23,7 @@ public:
 	virtual void Update() override;
 	virtual void LateUpdate() override;
 
-	virtual void Render(std::shared_ptr<CCamera> camera, int pass = 0) override;
+	virtual void Render(class CCamera* camera, int pass = 0) override;
 	void InstancingRender(D3D12_VERTEX_BUFFER_VIEW ibv, UINT instancingNum);
 
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CMeshRenderer>(*this); } 

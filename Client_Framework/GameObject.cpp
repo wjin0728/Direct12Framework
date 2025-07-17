@@ -17,7 +17,10 @@
 #include"Light.h"
 #include"ContinuousRotation.h"
 #include"UIRenderer.h"
-#include"InstancingManager.h"
+#include"RenderManager.h"
+#include"ParticleAttach.h"
+#include"ParticleManager.h"
+#include"ParticleEmitter.h"
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -39,8 +42,8 @@ void CGameObject::Awake()
 		component->Awake();
 	}
 
-	for (auto& child : mChildren) {
-		child->Awake();
+	for (int i = 0; i < mChildren.size();i++) {
+		mChildren[i]->Awake();
 	}
 
 	mRenderer = GetComponent<CRenderer>();
@@ -54,15 +57,15 @@ void CGameObject::Awake()
 
 void CGameObject::Start()
 {
-	if (misAwake) return;
+	if (mIsStart) return;
 	for (auto& component : mComponents) {
 		component->Start();
 	}
 
-	for (auto& child : mChildren) {
-		child->Start();
+	for (int i = 0; i < mChildren.size(); i++) {
+		mChildren[i]->Start();
 	}
-	misAwake = true;
+	mIsStart = true;
 }
 
 void CGameObject::Update()
@@ -95,22 +98,6 @@ void CGameObject::LateUpdate()
 	}
 
 	if (!mIsStatic) mTransform->UpdateWorldMatrix();
-}
-
-void CGameObject::Render(std::shared_ptr<CCamera> camera, int pass)
-{
-	if (!mActive) return;
-	if (mAnimationController) {
-		mAnimationController->BindSkinningMatrix();
-	}
-	if (mRenderer) {
-		if(mName == "SM_Env_Rock_Small_01")
-			int a{}; // Debugging purpose, remove later
-		mRenderer->Render(camera, pass);
-	}
-	for (auto& child : mChildren) {
-		child->Render(camera, pass);
-	}
 }
 
 void CGameObject::SetStatic(bool isStatic)
@@ -237,6 +224,7 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& 
 
 	auto camera = std::make_shared<CCamera>();
 	object->AddComponent(camera);
+	camera->mCameraName = tag;
 	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
 
@@ -248,8 +236,6 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& 
 
 
 	object->SetActive(true);
-	
-	INSTANCE(CSceneManager).GetCurScene()->AddCamera(camera);
 
 	return object;
 }
@@ -262,14 +248,13 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& 
 
 	auto camera = std::make_shared<CCamera>();
 	object->AddComponent(camera);
+	camera->mCameraName = tag;
 	camera->SetViewport(0, 0, rtSize.x, rtSize.y);
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
 	camera->GenerateOrthographicProjectionMatrix(nearPlane, farPlane, size.x, size.y);
 
 	object->SetActive(true);
-
-	INSTANCE(CSceneManager).GetCurScene()->AddCamera(camera);
-	INSTANCE(CSceneManager).GetCurScene()->AddObject(object);
+	INSTANCE(CSceneManager).GetCurScene()->AddObjectImmediately(object);
 
 	return object;
 }
@@ -289,9 +274,7 @@ std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& shad
 	uiRenderer->SetPosition(pos);
 
 	object->SetActive(true);
-	object->SetRenderLayer("UI");
-
-	INSTANCE(CSceneManager).GetCurScene()->AddObject(object);
+	object->SetRenderLayer(RENDER_LAYER::UI);
 
 	return object;
 }
@@ -456,6 +439,10 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			obj->CreateUIrendererFromFile(inFile);
 
 		}
+		else if (token == "<ParticleSystem>:") {
+			obj->CreateParticleAttachmentFromFile(inFile);
+		}
+
 		else if (token == "</Frame>") {
 			break;
 		}
@@ -470,7 +457,7 @@ void CGameObject::InitByObjectName()
 {
 	if (mName == "SM_Bld_Windmill_01_Blades_01") {
 		auto rotator = AddComponent<CContinuousRotation>();
-		//zÃàÀ¸·Î È¸Àü
+		//zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½
 		rotator->SetRotationSpeed({ 0.f, 0.f, 10.f });
 		rotator->SetRotationAxis({ 0.f, 0.f, 1.f });
 	}
@@ -540,7 +527,9 @@ void CGameObject::CreateAnimationFromFile(const std::string& fileName)
 				animSet->mEventKeys.resize(eventCount);
 
 				for (auto& key : animSet->mEventKeys) {
-					float eventTime{}, floatParam{};
+					float eventTime{};
+					float floatParam{};
+
 					std::string eventStr;
 
 					ReadDateFromFile(ifs, eventTime);
@@ -600,6 +589,25 @@ void CGameObject::CreateUIrendererFromFile(std::ifstream& inFile)
 	uiRenderer->SetColor(color);
 	uiRenderer->SetPosition(pos);
 	uiRenderer->SetShader("Sprite");
+	SetRenderLayer(RENDER_LAYER::UI);
+}
+
+void CGameObject::CreateParticleAttachmentFromFile(std::ifstream& inFile)
+{
+	auto particle = AddComponent<CParticleAttach>();
+	using namespace BinaryReader;
+	bool canEmit{};
+	ReadDateFromFile(inFile, canEmit);
+	particle->mCanEmit = canEmit;
+	if (!canEmit) {
+		return;
+	}
+
+	ParticleProperties particleProperties;
+	ParticleProperties::ReadParticlePropertiesFromFile(inFile, particleProperties);
+	INSTANCE(CParticleManager).AddParticleProperties(mName, particleProperties);
+
+	particle->SetParticleEmitterName(mName);
 }
 
 void CGameObject::CreateTransformFromFile(std::ifstream& inFile)
@@ -643,6 +651,9 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 		std::string meshName{};
 		ReadDateFromFile(inFile, meshName);
 		meshRenderer->SetMesh(meshName);
+	}
+	if(mRenderer == nullptr) {
+		return;
 	}
 	mRootLocalBS = mRenderer->GetWorldBS();
 	BoundingOrientedBox localOBB = mRenderer->GetWorldOOBB();
@@ -697,6 +708,7 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 	terrain->SetHeightMapGridMesh(mesh);
 	terrain->SetMaterial(material);
 	terrain->MakeNavMap(name + "NavMap", resolution*2);
+	material->Initialize();
 
 	mLocalAABB = mWorldAABB = terrain->mWorldAABB;
 
@@ -724,12 +736,9 @@ void CGameObject::CreateLightFromFile(std::ifstream& inFile)
 		mTag = "DirectionalLight";	
 		auto camera = AddComponent<CCamera>();
 		float shadowMapResolution = INSTANCE(CDX12Manager).GetShadowMapResolution();
+		camera->mCameraName = "DirectionalLight";
 		camera->SetViewport(0, 0, shadowMapResolution, shadowMapResolution);
 		camera->SetScissorRect(0, 0, shadowMapResolution, shadowMapResolution);
-		light->SetLightCam(camera);
-
-		INSTANCE(CSceneManager).GetCurScene()->AddCamera(camera);
-		INSTANCE(CSceneManager).GetCurScene()->AddLight(light);
 	}
 }
 
@@ -758,16 +767,17 @@ void CGameObject::UpdateWorldMatrices(std::shared_ptr<CTransform> parent)
 
 void CGameObject::PrintSRT()
 {
-	std::cout << "S     : " << mTransform->mLocalScale.x << " " << mTransform->mLocalScale.y << " " << mTransform->mLocalScale.z << std::endl;
-	std::cout << "Euler : " << mTransform->mLocalEulerAngle.x << " " << mTransform->mLocalEulerAngle.y << " " << mTransform->mLocalEulerAngle.z << std::endl;
-	std::cout << "T     : " << mTransform->mLocalPosition.x << " " << mTransform->mLocalPosition.y << " " << mTransform->mLocalPosition.z << std::endl;
-	std::cout << "Quat  : " << mTransform->mLocalRotation.x << " " << mTransform->mLocalRotation.y << " " << mTransform->mLocalRotation.z << " " << mTransform->mLocalRotation.w << std::endl;
-	std::cout << std::endl;
-	std::cout << "·ÎÄÃ º¯È¯ Çà·Ä" << std::endl;
-	PrintMatrix(mTransform->mLocalMat);
-	std::cout << std::endl;
-	std::cout << "¿ùµå º¯È¯ Çà·Ä" << std::endl;
-	PrintMatrix(mTransform->mWorldMat);
+}
+
+void CGameObject::RegisterRenderer()
+{
+	if (!mActive) return;
+	if (mRenderer) {
+		mRenderer->RegisterRenderQueue();
+	}
+	for (const auto& child : mChildren) {
+		child->RegisterRenderer();
+	}
 }
 
 std::shared_ptr<CGameObject> CGameObject::FindChildByName(const std::string& name)
@@ -802,5 +812,20 @@ void CGameObject::RemoveChild(std::shared_ptr<CGameObject> child)
 	if (itr != mChildren.end()) {
 		mChildren.erase(itr);
 	}
+}
+
+std::shared_ptr<CGameObject> CGameObject::AddBoneSocket(const std::string& boneName, const std::string& socketName)
+{
+	std::shared_ptr<CGameObject> socket = std::make_shared<CGameObject>();
+	socket->mName = socketName;
+	socket->mTag = "BoneSocket";
+	socket->mObjectType = OBJECT_TYPE::NONE;
+	auto bone = FindChildByName(boneName);
+	if (!bone) {
+		std::cerr << "Bone not found: " << boneName << std::endl;
+		return nullptr;
+	}
+	bone->AddChild(socket);
+	return socket;
 }
 

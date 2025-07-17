@@ -9,7 +9,7 @@ struct EventKey
     float mTime = 0.0f;
     std::string mName;
     bool mEnable = true;
-	float mData = 0.0f;
+    float mData = 0.0f;
 
     EventKey(float time, float data, const std::string& name) : mTime(time), mData(data), mName(name) {}
 };
@@ -131,7 +131,7 @@ class CAnimationController : public CComponent
 {
 public:
     CAnimationController();
-    CAnimationController(int nAnimationTracks, std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion = false);
+    CAnimationController(std::shared_ptr<CAnimationSets>& sets, bool applyRootMotion = false);
     CAnimationController(const CAnimationController& other);
     virtual ~CAnimationController();
 
@@ -139,7 +139,7 @@ public:
 
     float mTime = 0.0f;
 
-    std::vector<std::shared_ptr<CAnimationTrack>>   mTracks;
+    std::unique_ptr<CAnimationTrack>   mTrack;
     std::shared_ptr<CAnimationSets>                 mAnimationSets;
     std::vector<std::weak_ptr<CTransform>>          mSkinningBoneTransforms{};
     std::vector<Matrix>                             finalTransforms;
@@ -147,13 +147,13 @@ public:
 
     UINT                                            mBoneTransformIdx = -1;
 
-    void SetTrackAnimationSet(int trackIndex, int setIndex);
+    void SetTrackAnimationSet(int setIndex);
 
-    void SetTrackEnabled(int trackIndex, bool enabled) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetEnable(enabled); }
-    void SetTrackPosition(int trackIndex, float position) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetPosition(position); }
-    void SetTrackSpeed(int trackIndex, float speed) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetSpeed(speed); }
-    void SetTrackWeight(int trackIndex, float weight) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetWeight(weight); }
-    void SetTrackType(int trackIndex, ANIMATION_TYPE type) { if (trackIndex < mTracks.size()) mTracks[trackIndex]->SetType(type); }
+    void SetTrackEnabled(bool enabled) { mTrack->SetEnable(enabled); }
+    void SetTrackPosition(float position) { mTrack->SetPosition(position); }
+    void SetTrackSpeed(float speed) { mTrack->SetSpeed(speed); }
+    void SetTrackWeight(float weight) { mTrack->SetWeight(weight); }
+    void SetTrackType(ANIMATION_TYPE type) { mTrack->SetType(type); }
 
 public:
     virtual void Awake();
@@ -175,6 +175,7 @@ public:
     Vec3                        mFirstRootMotionPosition = Vec3(0.0f, 0.0f, 0.0f);
     
     void SetRootMotion(bool bRootMotion) { mApplyRootMotion = bRootMotion; }
+    void AddAnimationEvent(const std::string& animName, const std::string& name, CAnimationEventHandler::Event event);
 
 public:
 
