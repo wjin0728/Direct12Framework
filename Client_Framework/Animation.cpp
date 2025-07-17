@@ -94,7 +94,6 @@ void CAnimationTrack::HandleCallback(std::shared_ptr<CAnimationEventHandler>& re
 				event(mPosition);
 				key->mEnable = false;
 			}
-			break;
 		}
 	}
 }
