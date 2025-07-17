@@ -86,14 +86,3 @@ public:
     virtual void OnEnterState(UINT8 state) override;
     virtual void OnExitState(UINT8 state) override;
 };
-
-class CMageState : public CPlayerStateMachine
-{
-private:
-public:
-    virtual void Awake() override;
-    virtual void Start() override;
-    virtual void Update() override;
-    virtual void OnEnterState(UINT8 state) override;
-    virtual void OnExitState(UINT8 state) override;
-};

@@ -36,7 +36,7 @@ void CThirdPersonCamera::Start()
 
 	mCameraParams.trackingPosition = mTarget->GetTransform()->GetWorldPosition();
 	mCameraParams.distance = 5.f;
-	mCameraParams.framing = Vec2(0.f, -0.8f);
+	mCameraParams.framing = Vec2(0.f, -0.6f);
 	mCameraParams.yaw = 0.f;
 	mCameraParams.pitch = 25.f;
 
