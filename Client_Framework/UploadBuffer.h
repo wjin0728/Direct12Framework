@@ -52,7 +52,7 @@ protected:
 
 	bool mWritable{ true };
 
-	D3D12_RESOURCE_STATES bufferState{ D3D12_RESOURCE_STATE_COMMON };
+	D3D12_RESOURCE_STATES bufferState{ D3D12_RESOURCE_STATE_GENERIC_READ };
 
 public:
 	BYTE* mappedData{};
