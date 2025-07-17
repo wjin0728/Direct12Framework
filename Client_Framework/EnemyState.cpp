@@ -3,6 +3,15 @@
 #include "Animation.h"
 #include "Transform.h"
 
+void CEnemyState::Awake()
+{
+	 
+}
+
+void CEnemyState::Start()
+{
+}
+
 void CEnemyState::Update()
 {
 	auto transform = GetTransform();
@@ -49,14 +58,18 @@ void CEnemyState::OnEnterState(UINT8 state)
 	case MONSTER_STATE::RUN:
 		break;
 	case MONSTER_STATE::SPAWN:
+		mIsSpawning = true;
+		break;
 	case MONSTER_STATE::UNDERGROUND:
 	case MONSTER_STATE::ATTACK:
 	case MONSTER_STATE::PROJECTILE_ATTACK:
 	case MONSTER_STATE::DEATH:
+		mIsDead = true;
 		break;
 	case MONSTER_STATE::end:
 		break;
 	case MONSTER_STATE::GETHIT:
+		mIsHit = true;
 		GetTransform()->SetHitFactor(1.f);
 		break;
 	default:
@@ -71,6 +84,7 @@ void CEnemyState::OnExitState(UINT8 state)
 	case MONSTER_STATE::IDLE:
 		break;
 	case MONSTER_STATE::SPAWN:
+		mIsSpawning = false;
 		break;
 	case MONSTER_STATE::UNDERGROUND:
 		break;
@@ -81,6 +95,7 @@ void CEnemyState::OnExitState(UINT8 state)
 	case MONSTER_STATE::PROJECTILE_ATTACK:
 		break;
 	case MONSTER_STATE::GETHIT:
+		mIsHit = false;
 		GetTransform()->SetHitFactor(0.f);
 		break;
 	case MONSTER_STATE::DEATH:
@@ -90,6 +105,10 @@ void CEnemyState::OnExitState(UINT8 state)
 	default:
 		break;
 	}
+}
+
+void CGrassSmallState::Awake()
+{
 }
 
 void CGrassSmallState::Start()
@@ -116,6 +135,10 @@ void CGrassSmallState::OnEnterState(UINT8 state)
 void CGrassSmallState::OnExitState(UINT8 state)
 {
 	CEnemyState::OnExitState(state);
+}
+
+void CGrassBigState::Awake()
+{
 }
 
 void CGrassBigState::Start()

@@ -34,10 +34,6 @@ void CLoadScene::Initialize()
 	AddObjectImmediately(loadingScreenUI);
 }
 
-void CLoadScene::Awake()
-{
-	CScene::Awake();
-}
 
 void CLoadScene::Start()
 {

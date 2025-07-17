@@ -18,6 +18,8 @@ class CGameObject : public std::enable_shared_from_this<CGameObject>
 {
 	friend CComponent;
 	friend CTransform;
+	friend CRenderer;
+	friend class CScene;
 
 private:
 	std::vector<std::shared_ptr<CComponent>> mComponents{};
@@ -32,7 +34,7 @@ private:
 	std::vector<std::shared_ptr<CGameObject>> mChildren{};
 
 private:
-	bool mActive = true;
+	bool mActive = false;
 	bool mIsStatic{ false };
 	bool mIsInstancing{ false };
 
@@ -105,7 +107,7 @@ public:
 	BoundingSphere GetRootBoundingSphere() const { return mRootBS; }
 
 
-	void SetActive(bool active) { mActive = active; }
+	void SetActive(bool active);
 	void SetStatic(bool isStatic);
 	void SetInstancing(bool isInstancing);
 	void SetObjectType(OBJECT_TYPE type) { mObjectType = type; }
@@ -178,8 +180,8 @@ inline std::shared_ptr<T> CGameObject::AddComponent(Args&&... args)
 
 	result = std::make_shared<T>(args...);
 	result->SetOwner(this);
+	result->EnqueueAwake();
 	mComponents.push_back(result);
-
 	return result;
 }
 
@@ -195,6 +197,7 @@ inline std::shared_ptr<T> CGameObject::AddComponent(const std::shared_ptr<T>& co
 
 	mComponents.push_back(component);
 	component->SetOwner(this);
+	component->EnqueueAwake();
 	return component;
 }
 

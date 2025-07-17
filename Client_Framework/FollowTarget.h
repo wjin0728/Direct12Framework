@@ -1,7 +1,7 @@
 #pragma once
-#include"MonoBehaviour.h"
+#include"Component.h"
 
-class CFollowTarget : public CMonoBehaviour
+class CFollowTarget : public CComponent
 {
 private:
 	std::shared_ptr<CGameObject> mTarget{};
@@ -9,7 +9,7 @@ private:
 
 public:
 	CFollowTarget();
-	CFollowTarget(const CFollowTarget& other) : CMonoBehaviour(other) {}
+	CFollowTarget(const CFollowTarget& other) : CComponent(other) {}
 	virtual ~CFollowTarget();
 
 	virtual void Awake() override;

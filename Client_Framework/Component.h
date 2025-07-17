@@ -9,6 +9,9 @@ protected:
 	CGameObject* owner{};
 
 public:
+	bool mIsActive{ true };
+	bool mIsAwake{ false };
+	bool mIsStart{ false };
 	CComponent();
 	CComponent(const CComponent& other);
 	virtual ~CComponent();
@@ -23,6 +26,7 @@ public:
 
 public:
 	void SetOwner(CGameObject* _owner);
+	void EnqueueAwake();
 
 	CGameObject* GetOwner() const;
 	std::shared_ptr<CTransform> GetTransform() const;

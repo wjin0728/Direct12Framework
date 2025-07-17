@@ -249,7 +249,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		if (moveDir.LengthSquared() > 0.0001f) {
 			moveDir.Normalize();
-			clients[ServerNumber][c_id]._player._velocity = moveDir * 2.f;
+			clients[ServerNumber][c_id]._player._velocity = moveDir * 3.f;
 		}
 		else {
 			clients[ServerNumber][c_id]._player._velocity = Vec3::Zero;

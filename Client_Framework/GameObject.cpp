@@ -1,6 +1,5 @@
 #include"stdafx.h"
 #include "GameObject.h"
-#include"MonoBehaviour.h"
 #include"Transform.h"
 #include"MeshRenderer.h"
 #include"Camera.h"
@@ -29,6 +28,7 @@ CGameObject::CGameObject(bool makeTransform)
 		mComponents.push_back(mTransform);
 		mTransform->SetOwner(this);
 	}
+	mActive = false;
 }
 
 CGameObject::~CGameObject()
@@ -37,34 +37,35 @@ CGameObject::~CGameObject()
 
 void CGameObject::Awake()
 {
-	if (misAwake) return;
+	if (misAwake || !mActive) return;
 	for (auto& component : mComponents) {
+		if (component->mIsAwake) continue;
 		component->Awake();
+		component->mIsAwake = true;
 	}
 
 	for (int i = 0; i < mChildren.size();i++) {
 		mChildren[i]->Awake();
 	}
-
-	mRenderer = GetComponent<CRenderer>();
-	if (!mRenderer) {
-		mRenderer = GetComponent<CSkinnedMeshRenderer>();
-	}
 	if (!mCollider) {
 		mCollider = GetComponent<CCollider>();
 	}
+	misAwake = true;
 }
 
 void CGameObject::Start()
 {
-	if (mIsStart) return;
+	if (mIsStart || !mActive) return;
 	for (auto& component : mComponents) {
+		if (component->mIsStart) continue;
 		component->Start();
+		component->mIsStart = true;
 	}
 
 	for (int i = 0; i < mChildren.size(); i++) {
 		mChildren[i]->Start();
 	}
+	mRenderer = GetComponent<CRenderer>();
 	mIsStart = true;
 }
 
@@ -98,6 +99,17 @@ void CGameObject::LateUpdate()
 	}
 
 	if (!mIsStatic) mTransform->UpdateWorldMatrix();
+}
+
+void CGameObject::SetActive(bool active)
+{
+	mActive = active;
+	if (mActive) {
+		Awake();
+	}
+	for (auto& child : mChildren) {
+		child->SetActive(active);
+	}
 }
 
 void CGameObject::SetStatic(bool isStatic)
@@ -144,8 +156,11 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	std::shared_ptr<CGameObject> instance = std::make_shared<CGameObject>(false);
 
 	for (const auto& component : original->mComponents) {
-		instance->mComponents.push_back(component->Clone());
-		instance->mComponents.back()->SetOwner(instance.get());
+		auto newComponent = component->Clone();
+		instance->mComponents.push_back(newComponent);
+		newComponent->SetOwner(instance.get());
+		newComponent->mIsAwake = false; 
+		newComponent->mIsStart = false; 
 	}
 
 	instance->mTransform = instance->GetComponent<CTransform>();
@@ -155,6 +170,7 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	instance->mName = original->mName;
 	instance->mIsInstancing = original->mIsInstancing;
 	instance->misAwake = false;
+	instance->mIsStart = false;
 	instance->mLocalAABB = original->mLocalAABB;
 	instance->mWorldAABB = original->mWorldAABB;
 	instance->mCastShadow = original->mCastShadow;
@@ -183,8 +199,11 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 	std::shared_ptr<CGameObject> instance = std::make_shared<CGameObject>(false);
 
 	for (const auto& component : original->mComponents) {
-		instance->mComponents.push_back(component->Clone());
-		instance->mComponents.back()->SetOwner(instance.get());
+		auto newComponent = component->Clone();
+		instance->mComponents.push_back(newComponent);
+		newComponent->SetOwner(instance.get());
+		newComponent->mIsAwake = false;
+		newComponent->mIsStart = false;
 	}
 
 	instance->mTransform = instance->GetComponent<CTransform>();
@@ -234,9 +253,6 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& 
 	camera->GeneratePerspectiveProjectionMatrix(nearPlane, farPlane, fovAngle);
 #endif // REVERSE_Z
 
-
-	object->SetActive(true);
-
 	return object;
 }
 
@@ -253,7 +269,6 @@ std::shared_ptr<CGameObject> CGameObject::CreateCameraObject(const std::string& 
 	camera->SetScissorRect(0, 0, rtSize.x, rtSize.y);
 	camera->GenerateOrthographicProjectionMatrix(nearPlane, farPlane, size.x, size.y);
 
-	object->SetActive(true);
 	INSTANCE(CSceneManager).GetCurScene()->AddObjectImmediately(object);
 
 	return object;
@@ -273,7 +288,6 @@ std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& shad
 	uiRenderer->SetType(0);
 	uiRenderer->SetPosition(pos);
 
-	object->SetActive(true);
 	object->SetRenderLayer(RENDER_LAYER::UI);
 
 	return object;
@@ -313,8 +327,6 @@ std::shared_ptr<CGameObject> CGameObject::CreateTerrainObject(std::ifstream& ifs
 
 	object->CreateTransformFromFile(ifs);
 
-
-	object->SetActive(true);
 
 	return object;
 }

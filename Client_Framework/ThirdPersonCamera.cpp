@@ -25,7 +25,6 @@ CThirdPersonCamera::~CThirdPersonCamera()
 
 void CThirdPersonCamera::Awake()
 {
-	if(!mCamera.lock()) mCamera = GetOwner()->GetComponent<CCamera>();
 }
 
 void CThirdPersonCamera::Start()
@@ -33,6 +32,7 @@ void CThirdPersonCamera::Start()
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mTerrain = scene->GetTerrain();
 	mFreeLook = false;
+	if(!mCamera.lock()) mCamera = GetOwner()->GetComponent<CCamera>();
 
 	mCameraParams.trackingPosition = mTarget->GetTransform()->GetWorldPosition();
 	mCameraParams.distance = 5.f;

@@ -1,9 +1,9 @@
 #pragma once
 #include "stdafx.h"
-#include "MonoBehaviour.h"
+#include "Component.h"
 #include "CutScene.h"
 
-class CPlayerController : public CMonoBehaviour
+class CPlayerController : public CComponent
 {
 private:
 	ITEM_TYPE mSkill = ITEM_TYPE::item_end;
@@ -26,8 +26,8 @@ private:
 	float mMaxAttackRange = 9.0f;
 
 public:
-	CPlayerController() : CMonoBehaviour("PlayerController") {};
-	CPlayerController(const CPlayerController& other) : CMonoBehaviour(other) {}
+	CPlayerController() : CComponent() {};
+	CPlayerController(const CPlayerController& other) : CComponent(other) {}
 	virtual ~CPlayerController();
 
 	virtual void Awake() override;

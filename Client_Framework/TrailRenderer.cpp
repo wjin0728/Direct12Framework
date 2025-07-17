@@ -74,7 +74,7 @@ void CTrailRenderer::LateUpdate()
 	auto transform = GetTransform();
 	Vec3 worldPos = transform->GetWorldPosition();
 
-    if (mIsActive) {
+    if (mActive) {
         if (mTrailPoints.empty()) {
             mTrailPoints.push_back({ worldPos, mTotalTime, 0.9f });
             mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
