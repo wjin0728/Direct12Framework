@@ -59,7 +59,7 @@ void CStructedBuffer::CreateBuffer(BYTE* initialData)
 		CD3DX12_RESOURCE_DESC bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 
 		ThrowIfFailed(DEVICE->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE,
-			&bufferDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&buffer)));
+			&bufferDesc, bufferState, nullptr, IID_PPV_ARGS(&buffer)));
 
 		D3D12_RANGE readRange = { 0, 0 };
 		ThrowIfFailed(buffer->Map(0, &readRange, (void**)&mappedData));
@@ -67,7 +67,7 @@ void CStructedBuffer::CreateBuffer(BYTE* initialData)
 	else
 	{
 		buffer = CreateBufferResource(DEVICE, CMDLIST, initialData, bufferSize,
-			D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, &uploadBuffer);
+			D3D12_HEAP_TYPE_DEFAULT, bufferState, &uploadBuffer);
 		mappedData = nullptr; // CPU 접근 불가
 	}
 }

@@ -15,6 +15,11 @@
 #include "ObjectState.h"
 #include"ParticleManager.h"
 #include "CutScene.h"
+#include"RenderManager.h"
+#include"UIRenderer.h"
+#include"TargetMarker.h"
+#include"ResourceManager.h"
+#include"ParticleAttach.h"
 
 CPlayerController::~CPlayerController()
 {
@@ -24,6 +29,13 @@ void CPlayerController::Awake()
 {
 	if (!rigidBody) rigidBody = GetOwner()->GetComponent<CRigidBody>();
 	if (!mStateMachine) mStateMachine = owner->GetComponentFromHierarchy<CPlayerStateMachine>();
+
+	auto targetUIObj = CGameObject::CreateUIObject("Sprite", "TargetMarker", { 0.f,0.f }, { 80.f,80.f });
+	if (targetUIObj) {
+		mTargetMarker = targetUIObj->AddComponent<CTargetMarker>();
+		INSTANCE(CSceneManager).GetCurScene()->AddObject(targetUIObj);
+	}
+	mSkill = FIRE_EXPLOSION; // Default skill, can be changed later
 }
 
 void CPlayerController::Start()
@@ -31,6 +43,14 @@ void CPlayerController::Start()
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mTerrain = scene->GetTerrain();
 	SetClass(mStateMachine->GetClass());
+	auto controller = owner->GetComponentFromHierarchy<CAnimationController>();
+
+	auto func = [](float time) {
+		INSTANCE(ServerManager).send_cs_attack_packet();
+		std::cout << "Do attack packet sent!" << std::endl;
+		};
+	controller->AddAnimationEvent("Attack", "Attack", func);
+	controller->AddAnimationEvent("RunAttack", "Attack", func);
 }
 
 void CPlayerController::Update()
@@ -53,6 +73,27 @@ void CPlayerController::Update()
 		// Handle free look camera logic here if needed
 		return;
 	}
+	
+	mTargetEnemy.reset();
+	auto camera = INSTANCE(CRenderManager).GetCamera("MainCamera");
+	auto scene = INSTANCE(CSceneManager).GetCurScene();
+	auto& enemies = scene->GetObjectsWithType(OBJECT_TYPE::ENEMY);
+	float minDistance = FLT_MAX;
+	float sqMaxAttackRange = mMaxAttackRange * mMaxAttackRange;
+	for (const auto& enemy : enemies) {
+		BoundingSphere objBS = enemy->GetRootBoundingSphere();
+		if (!camera->IsInFrustum(objBS, FORWARD)) continue;
+		if (enemy->GetStateMachine()->mIsDead) continue;
+		auto enemyTransform = enemy->GetTransform();
+		Vec3 toEnemy = enemyTransform->GetWorldPosition() - GetTransform()->GetWorldPosition();
+		toEnemy.y = 0.f;
+		float distance = toEnemy.LengthSquared();
+		if ((distance < sqMaxAttackRange) && (distance < minDistance)) {
+			minDistance = distance;
+			mTargetEnemy = enemy;
+		}
+	}
+	mTargetMarker.lock()->SetTarget(mTargetEnemy.lock());
 	OnKeyEvents();
 	// auto transform = GetTransform();
 	// float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
@@ -99,7 +140,6 @@ void CPlayerController::OnKeyEvents()
 	{
 	case PLAYER_STATE::IDLE:
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-			//INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ATTACK);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
 			return;
@@ -110,7 +150,7 @@ void CPlayerController::OnKeyEvents()
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
-			INSTANCE(ServerManager).send_cs_000_packet(0);
+			mStateMachine->ActivateShield(true);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::M)) /*임시 적 생성*/ {
 			INSTANCE(ServerManager).send_cs_000_packet(1);
@@ -125,23 +165,10 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(4);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::SKILL);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
-			switch (mSkill)
-			{
-			case FIRE_ENCHANT:
-			case WATER_HEAL:
-			case WATER_SHIELD:
-			case GRASS_WEAKEN:
-				INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
-				break;
-			case FIRE_EXPLOSION:
-			case GRASS_VINE:
-				//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Ÿ��id);
-				break;
-			}
+			CastingSkill();
 			return;
 		}
+
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
@@ -181,7 +208,8 @@ void CPlayerController::OnKeyEvents()
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
-			INSTANCE(ServerManager).send_cs_000_packet(0);
+			//INSTANCE(ServerManager).send_cs_000_packet(0);
+			mStateMachine->ActivateShield(true);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::M)) /*임시 적 생성*/ {
 			INSTANCE(ServerManager).send_cs_000_packet(1);
@@ -196,10 +224,7 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(4);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::SKILL);
-			Vec3 pos = transform->GetWorldPosition();
-			pos += Vec3(0.f, 0.5f, 0.f);
-			INSTANCE(CParticleManager).PlayParticleEmitter("Smoke", pos, true);
+			CastingSkill();
 
 			return;
 		}
@@ -224,6 +249,7 @@ void CPlayerController::OnKeyEvents()
 	case PLAYER_STATE::ATTACK:
 		break;
 	case PLAYER_STATE::RUNATTACK:
+
 		break;
 	case PLAYER_STATE::GETHIT:
 		break;
@@ -254,9 +280,35 @@ void CPlayerController::CastingSkill()
 		INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
 		break;
 	case FIRE_EXPLOSION:
+	{
+		if (mTargetEnemy.lock()) {
+			auto explosionPrefab = INSTANCE(CResourceManager).GetPrefab("Explosion");
+			if (explosionPrefab) {
+				auto explosionObj = CGameObject::Instantiate(explosionPrefab);
 
+				auto camera = mCamera.lock()->GetTransform();
+				Vec3 camForward = camera->GetWorldLook();
+				Vec3 explosionPos = mTargetEnemy.lock()->GetRootBoundingSphere().Center;
+				explosionPos -= camForward * 0.1f; 
+
+				explosionObj->GetTransform()->SetLocalPosition(explosionPos);
+				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
+				explosionObj->Awake();
+				explosionObj->Start();
+
+				auto explosionParticle = explosionObj->GetComponent<CParticleAttach>();
+				if (explosionParticle) {
+					explosionParticle->Play();
+				}
+			}
+			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
+		}
+		break;
+	}
 	case GRASS_VINE:
-		//INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, Ÿ��id);
+		if (mTargetEnemy.lock()) {
+			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
+		}
 		break;
 	}
 }

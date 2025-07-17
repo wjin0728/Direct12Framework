@@ -94,6 +94,7 @@ bool CResourceManager::LoadSkillObjects()
 	LoadPrefabFromFile("Item_Skill1");
 	LoadPrefabFromFile("Item_Skill2");
 	LoadPrefabFromFile("Item_Skill3");
+	LoadPrefabFromFile("Water_Shield");
 
 	return true;
 }
@@ -104,6 +105,7 @@ bool CResourceManager::LoadProjectileObjects()
 	LoadPrefabFromFile("Fireball");
 	LoadPrefabFromFile("Iceball");
 	LoadPrefabFromFile("MagicBall");
+	LoadPrefabFromFile("Explosion");
 	return true;
 }
 
@@ -179,10 +181,40 @@ void CResourceManager::LoadDefaultTexture()
 		INSTANCE(CDX12Manager).CloseCommandList();
 	}
 	
+	{
+		auto name = "TargetMarker";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "WeaponTrail";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "SwordTrail";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
 }
 
 void CResourceManager::LoadDefaultMaterials()
 {
+	{
+		auto material = std::make_shared<CMaterial>("TrailDefault");
+		material->Initialize(nullptr, sizeof(CommonProperties));
+		material->SetShader("Trail");
+		material->AddPropertyKey(GetPropertyInfos<CommonProperties>());
+		material->AddPropertyKey(REGISTER_PROPERTY_NAME(CommonProperties, fData0, width));
+
+		Add(material);
+	}
 }
 
 void CResourceManager::LoadDefaultShaders()
@@ -307,6 +339,17 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("Particle", info, "Particle")) Add(shader);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::TRAIL;
+		info.blendType = BLEND_TYPE::ALPHA_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize("Trail", info, "Trail")) Add(shader);
 	}
 	{
 		ShaderInfo info;

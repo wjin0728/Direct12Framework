@@ -9,6 +9,17 @@ cbuffer MaterialData : register(b5)
     uint normalTexIdx;
     float smoothness;
     float metallic;
+    
+    float4 vec4Data0;
+    float4 vec4Data1;
+    float fData0;
+    float fData1;
+    float fData2;
+    float fData3;
+    int iData0;
+    int iData1;
+    int iData2;
+    int iData3;
 };
 
 //

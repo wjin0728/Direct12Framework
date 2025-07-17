@@ -9,6 +9,7 @@
 #include "ServerManager.h"
 #include"ShadowManager.h"
 #include"ParticleManager.h"
+#include"RenderManager.h"
 #include "Light.h"
 
 //#define USE_FULLSCREEN
@@ -59,6 +60,11 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 
 	TIMER.Reset();
 
+	ShowWindow(mHwnd, SW_SHOW);
+	UpdateWindow(mHwnd);
+	SetForegroundWindow(mHwnd);
+	SetFocus(mHwnd);
+
 	return true;
 }
 
@@ -91,6 +97,7 @@ int CGameApplication::Run()
 	INSTANCE(CSceneManager).Destroy();
 	INSTANCE(CResourceManager).Destroy();
 	INSTANCE(CDX12Manager).Destroy();
+	INSTANCE(ServerManager).Destroy();
 
 	return (int)msg.wParam;
 }
@@ -108,6 +115,9 @@ void CGameApplication::Render()
 	INSTANCE(CDX12Manager).BeforeRender();
 	INSTANCE(CSceneManager).Render();
 	INSTANCE(CDX12Manager).AfterRender();
+	INSTANCE(CRenderManager).ClearAllRenderLayers();
+	INSTANCE(CSceneManager).ProcessDeferredSceneUpdate();
+	INSTANCE(CSceneManager).ProcessSceneChangeQueue();
 }
 
 void CGameApplication::ShowFPS()
@@ -235,11 +245,6 @@ bool CGameApplication::InitWindow(WNDPROC wndProc, int cmdShow)
 		MessageBox(0, L"CreateWindow Failed.", 0, 0);
 		return false;
 	}
-
-	ShowWindow(mHwnd, SW_SHOW);
-	UpdateWindow(mHwnd);
-	SetForegroundWindow(mHwnd);
-	SetFocus(mHwnd);
 
 	return true;
 }

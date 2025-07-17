@@ -52,6 +52,7 @@ struct CurveKeyframe {
 	float time;  
 	float value;
 	float inTangent;
+	float outTangent;
 };
 
 struct Curve {
@@ -60,11 +61,16 @@ struct Curve {
 		if (keyframes.empty()) return 0.f;
 		if (t <= keyframes.front().time) return keyframes.front().value;
 		if (t >= keyframes.back().time) return keyframes.back().value;
-		for (size_t i = 0; i < keyframes.size() - 1; ++i) {
+		for (int i = 0; i < keyframes.size() - 1; ++i) {
 			const auto& k1 = keyframes[i];
 			const auto& k2 = keyframes[i + 1];
 			if (t >= k1.time && t <= k2.time) {
-				return SimpleMath::Hermite(t, k1.time, k1.value, k1.inTangent, k2.time, k2.value, k2.inTangent);
+				float segmentT = (t - k1.time) / (k2.time - k1.time);
+				return SimpleMath::Hermite(
+					segmentT,
+					k1.value, k2.value,
+					k1.outTangent * (k2.time - k1.time),
+					k2.inTangent * (k2.time - k1.time));
 			}
 		}
 		return 0.f;
@@ -72,13 +78,14 @@ struct Curve {
 
 	static void ReadCurveFromFile(std::ifstream& ifs, Curve& curve) {
 		using namespace BinaryReader;
-		size_t keyframeCount;
+		int keyframeCount{};
 		ReadDateFromFile(ifs, keyframeCount);
 		curve.keyframes.resize(keyframeCount);
-		for (size_t i = 0; i < keyframeCount; ++i) {
+		for (int i = 0; i < keyframeCount; ++i) {
 			ReadDateFromFile(ifs, curve.keyframes[i].time);
 			ReadDateFromFile(ifs, curve.keyframes[i].value);
 			ReadDateFromFile(ifs, curve.keyframes[i].inTangent);
+			ReadDateFromFile(ifs, curve.keyframes[i].outTangent);
 		}
 	}
 };
@@ -451,18 +458,47 @@ struct ShapeModule
 	}
 };
 
+struct Burst
+{
+	float time;
+	float interval; 
+	MinMaxCurve count;
+	int cycleTime;
+
+	static void ReadBurstFromFile(std::ifstream& ifs, Burst& burst)
+	{
+		using namespace BinaryReader;
+		ReadDateFromFile(ifs, burst.time);
+		MinMaxCurve::ReadMinMaxCurveFromFile(ifs, burst.count);
+		ReadDateFromFile(ifs, burst.interval);
+		ReadDateFromFile(ifs, burst.cycleTime);
+	}
+};
+
+struct BurstRecord
+{
+	bool isActive;
+	int count;
+	float rate;
+};
+
 struct ParticleVertex
 {
 	Vec3 position;
+	Vec3 velocity;
 	float rotation;
 	Color color;
 	float size;
 	float distanceToCamera; 
 	int albedoTexIdx;
+	int frameIdx;
+	int tileX;
+	int tileY;
 };
 
 struct ParticleProperties
 {
+	std::vector<Burst> bursts;
 	uint32_t maxParticles;
 	Vec3 gravity;
 	uint32_t textureIdx;
@@ -474,7 +510,11 @@ struct ParticleProperties
 	MinMaxCurve startSpeedCurve;
 	MinMaxCurve startRotationCurve;
 	MinMaxCurve startLifetimeCurve;
+	MinMaxCurve texSheetAnimationCurve;
 	float duration;
+	int tileX;
+	int tileY;
+	int cycleTime = 0; 
 
 	std::shared_ptr<MinMaxGradient> colorOverTimeGradient = nullptr;
 	bool useColorOverTime = false;
@@ -483,6 +523,7 @@ struct ParticleProperties
 	std::shared_ptr<MinMaxCurve> rotationOverTimeCurve = nullptr;
 	bool useRotationOverTime = false;
 	bool useVelocityOverTime = false;
+	bool useTextureSheetAnimation = false;
 
 	static void ReadParticlePropertiesFromFile(std::ifstream& ifs, ParticleProperties& properties);
 	
@@ -495,12 +536,14 @@ public:
     float mTimeSinceLastEmit = 0.f;
 	float mTotalTime = 0.f;
 
+	std::vector<BurstRecord> mBurstRec{};
 	std::vector<ParticleSpawnData> mSpawnData;
     std::vector<ParticleMotion> mParticles;
 	int mActiveParticleCount = 0;
 
 	Vec3 mLastEmitPosW = Vec3(0, 0, 0);
 	Matrix mEmitterTransform = Matrix::Identity;
+	class CParticleAttach* mParticleAttach = nullptr;
 
 	bool mIsPlaying = false;
 	bool mIsPaused = false;
@@ -514,9 +557,14 @@ public:
 
 	void Initialize(ParticleProperties* particleProperties);
 	void Release();
-	int UpdateParticles(ParticleVertex* dataPtr, std::shared_ptr<CCamera> camera);
+	int UpdateParticles(ParticleVertex* dataPtr, CCamera* camera);
 	void EmitParticles();
 	void Play(const Vec3& pos);
+	void Play(const Matrix& transform) {
+		SetEmitterTransform(transform);
+		Play();
+	}
+	void Play();
 	void Pause();
 	void Resume();
 	void Reset();

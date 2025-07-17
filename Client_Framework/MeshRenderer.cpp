@@ -9,7 +9,7 @@
 #include"Shader.h"
 #include"InstancingBuffer.h"
 #include"ObjectPoolManager.h"
-#include"InstancingManager.h"
+#include"RenderManager.h"
 
 CMeshRenderer::CMeshRenderer() : CRenderer()
 {
@@ -28,7 +28,7 @@ void CMeshRenderer::Awake()
 void CMeshRenderer::Start()
 {
 	if (owner->GetInstancing()) {
-		INSTANCE(CInstancingManager).AddInstancingObject(GetInstancingKey(), owner->shared_from_this());
+		INSTANCE(CRenderManager).AddInstancingObject(GetInstancingKey(), owner->shared_from_this());
 		owner->SetRenderer(nullptr);
 		owner->RemoveComponent<CMeshRenderer>();
 		return;
@@ -52,7 +52,7 @@ void CMeshRenderer::LateUpdate()
 	UpdateMaterialDataToShader();
 }
 
-void CMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
+void CMeshRenderer::Render(class CCamera* camera, int pass)
 {
 	if (!m_mesh) return;
 	if (!m_materials[0]) return;

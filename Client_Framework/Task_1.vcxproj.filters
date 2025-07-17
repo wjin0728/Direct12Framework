@@ -253,9 +253,14 @@
     <ClInclude Include="ParticleManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="InstancingManager.h">
+    <ClInclude Include="RenderManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
+    <ClInclude Include="TargetMarker.h">
+      <Filter>GameObject\Component\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="CutScene.h" />
+    <ClInclude Include="TrailRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -453,8 +458,17 @@
     <ClCompile Include="ParticleManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
-    <ClCompile Include="InstancingManager.cpp">
+    <ClCompile Include="RenderManager.cpp">
       <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="TargetMarker.cpp">
+      <Filter>GameObject\Component\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="CutScene.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="TrailRenderer.cpp">
+      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -498,9 +512,6 @@
     <None Include="..\Resources\Shaders\Vegitation.hlsl">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="..\Resources\Shaders\Water.hlsl">
-      <Filter>HLSL</Filter>
-    </None>
     <None Include="..\Resources\Shaders\Lit.hlsl">
       <Filter>HLSL</Filter>
     </None>
@@ -509,6 +520,12 @@
     </None>
     <None Include="..\Resources\Shaders\Decal.hlsl">
       <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Trail.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Water.hlsl">
+      <Filter>Managers</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -18,6 +18,8 @@ protected:
 	virtual void ReleaseUploadBuffer() {}
 
 public:
+	CResource() = default;
+	CResource(const std::string& _name, RESOURCE_TYPE _type) : name(_name), type(_type) {}
 	RESOURCE_TYPE GetType() const { return type; }
 	const std::string& GetName() const { return name; }
 

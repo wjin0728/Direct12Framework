@@ -15,16 +15,17 @@ CMaterial::CMaterial(const CMaterial& other)
 	mShaderName = other.mShaderName;
 	isLoaded = other.isLoaded;
 	mProperties = other.mProperties;
-	matData.reset(new BYTE[dataSize]);
-	std::memcpy(matData.get(), other.matData.get(), dataSize);
+	uploadData = new BYTE[ALIGNED_SIZE(100)];
+	if(other.matData) std::memcpy(uploadData, other.matData, dataSize);
+	else if(other.uploadData) std::memcpy(uploadData, other.uploadData, dataSize);
+	
 	for (int type = PASS_TYPE::FORWARD; type < PASS_TYPE::STENCIL; type++) {
 		mShaders[type] = other.mShaders[type];
 	}
 }
 
-CMaterial::CMaterial(void* data, UINT dataSize) : matData(new BYTE[dataSize]), dataSize(dataSize)
+CMaterial::CMaterial(void* data, UINT dataSize) : uploadData(new BYTE[ALIGNED_SIZE(100)]), dataSize(dataSize)
 {
-	std::memcpy(matData.get(), data, dataSize);
 }
 
 CMaterial::~CMaterial()
@@ -35,10 +36,7 @@ CMaterial::~CMaterial()
 void CMaterial::Initialize(void* data, UINT dataSize)
 {
 	this->dataSize = dataSize;
-	if (!matData) {
-		matData.reset(new BYTE[dataSize]);
-		std::memcpy(matData.get(), data, dataSize);
-	}
+	if(!uploadData) uploadData = new BYTE[ALIGNED_SIZE(100)];
 }
 
 void CMaterial::SetShader(const std::string& name)
@@ -61,13 +59,16 @@ void CMaterial::EnrollToPool()
 {
 	if (mCBVIdx >= 0) return;
 	if (!isLoaded) return;
-	if (!matData) return;
 	if (dataSize == 0) return;
 	mCBVIdx = INSTANCE(CObjectPoolManager).GetMaterialCBVIndex();
 	mPoolOffset = mCBVIdx * ALIGNED_SIZE(100);
 	if (mPoolOffset < 0) {
 		std::cerr << "Failed to enroll material to pool: " + mShaderName << endl;
 		return;
+	}
+	if (!matData) {
+		matData = CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->mappedData + mPoolOffset;
+		if(uploadData) std::memcpy(matData, uploadData, dataSize);
 	}
 	mDirtyFrames = FRAME_RESOURCE_COUNT + 1; // Set dirty frames to update the material
 }
@@ -78,6 +79,7 @@ void CMaterial::DischargeFromPool()
 	if (!isLoaded) return;
 	if (!matData) return;
 	INSTANCE(CObjectPoolManager).ReturnMaterialCBVIndex(mCBVIdx);
+	matData = nullptr; // Reset matData to nullptr
 	mCBVIdx = -1;
 	mPoolOffset = -1;
 	mDirtyFrames = 0; // Reset dirty frames
@@ -90,7 +92,7 @@ void CMaterial::Update()
 	if (!matData) return;
 	if (mCBVIdx < 0) return;
 
-	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->UpdateBuffer(mPoolOffset, matData.get(), dataSize);
+	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->UpdateBuffer(mPoolOffset, matData, dataSize);
 
 	mDirtyFrames--;
 }
@@ -111,7 +113,7 @@ void CMaterial::BindDataToShader()
 void CMaterial::CreateGPUResource()
 {
 	if (isLoaded) return;
-	Initialize(matData.get(), dataSize);
+	Initialize(uploadData, dataSize);
 	isLoaded = true;
 }
 
@@ -132,12 +134,13 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	material = std::make_shared<CMaterial>();
 	material->SetName(name);
 
+	if(!material->uploadData) material->uploadData = new BYTE[ALIGNED_SIZE(100)];
+
 	ReadDateFromFile(inFile, token);
 	if (token == "SyntyStudios/Basic_LOD_Shader") {
 		material->SetShader("Common");
-		
-		material->matData = std::make_unique<BYTE[]>(sizeof(CommonProperties));
-		CommonProperties* data = reinterpret_cast<CommonProperties*>(material->matData.get());
+
+		CommonProperties* data = reinterpret_cast<CommonProperties*>(material->uploadData);
 		material->dataSize = sizeof(CommonProperties);
 
 		while (true) {
@@ -171,8 +174,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		properties = GetPropertyInfos<CommonProperties>();
 	}
 	else if (token == "Universal_Render_Pipeline/Lit") {
-		material->matData = std::make_unique<BYTE[]>(sizeof(LitProperties));
-		LitProperties* data = reinterpret_cast<LitProperties*>(material->matData.get());
+		LitProperties* data = reinterpret_cast<LitProperties*>(material->uploadData);
 		material->dataSize = sizeof(LitProperties);
 
 		while (true) {
@@ -224,8 +226,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	}
 	else if (token == "SyntyStudios/Triplanar01" || token == "SyntyStudios/TriplanarBasic") {
 		material->SetShader("Triplanar");
-		material->matData = std::make_unique<BYTE[]>(sizeof(TriplanarProperties));
-		TriplanarProperties* data = reinterpret_cast<TriplanarProperties*>(material->matData.get());
+		TriplanarProperties* data = reinterpret_cast<TriplanarProperties*>(material->uploadData);
 		material->dataSize = sizeof(TriplanarProperties);
 
 		while (true) {
@@ -263,8 +264,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	}
 	else if (token == "SyntyStudios/VegitationShader" || token == "SyntyStudios/VegitationShader_Basic") {
 		material->SetShader("Vegitation");
-		material->matData = std::make_unique<BYTE[]>(sizeof(VegitationProperties));
-		VegitationProperties* data = reinterpret_cast<VegitationProperties*>(material->matData.get());
+		VegitationProperties* data = reinterpret_cast<VegitationProperties*>(material->uploadData);
 		material->dataSize = sizeof(VegitationProperties);
 
 		while (true) {
@@ -330,8 +330,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	}
 	else if (token == "SyntyStudios/SkyboxUnlit") {
 		material->SetShader("Skybox");
-		material->matData = std::make_unique<BYTE[]>(sizeof(SkyboxProperties));
-		SkyboxProperties* data = reinterpret_cast<SkyboxProperties*>(material->matData.get());
+		SkyboxProperties* data = reinterpret_cast<SkyboxProperties*>(material->uploadData);
 		material->dataSize = sizeof(SkyboxProperties);
 
 		while (true) {
@@ -368,8 +367,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	}
 	else if (token == "SyntyStudios/WaterShader") {
 		material->SetShader("Water");
-		material->matData = std::make_unique<BYTE[]>(sizeof(WaterProperties));
-		WaterProperties* data = reinterpret_cast<WaterProperties*>(material->matData.get());
+		WaterProperties* data = reinterpret_cast<WaterProperties*>(material->uploadData);
 		material->dataSize = sizeof(WaterProperties);
 
 		while (true) {
@@ -431,8 +429,10 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		return nullptr;
 	}
 
-	if (RESOURCE.Get<CMaterial>(name)) 
+	if (RESOURCE.Get<CMaterial>(name)) {
+		delete[] material->uploadData;
 		return nullptr;
+	}
 	//if (!matData) return nullptr;
 	//if (dataSize == 0) return nullptr;
 
@@ -463,9 +463,6 @@ int CMaterial::GetTextureIdx(std::ifstream& inFile)
 void CTerrainMaterial::Update()
 {
 	if (mDirtyFrames <= 0) return;
-
-	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::MATERIAL)->UpdateBuffer(mPoolOffset, &data, dataSize);
-
 	mDirtyFrames--;
 }
 
@@ -492,12 +489,10 @@ void CTerrainMaterial::LoadTerrainData(std::ifstream& inFile)
 		ReadDateFromFile(inFile, data.splats[idx].data[idx2].z);
 		ReadDateFromFile(inFile, data.splats[idx].data[idx2].w);
 	}
-
-
-	Initialize(&data, sizeof(TerrainData));
 	SetShader("Terrain");
-
-	mDirtyFrames = FRAME_RESOURCE_COUNT + 1;
+	dataSize = sizeof(TerrainData);
+	
+	isLoaded = true;
 }
 
 

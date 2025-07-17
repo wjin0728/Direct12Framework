@@ -8,6 +8,9 @@
 #include"UploadBuffer.h"
 #include"GameObject.h"
 #include"MeshRenderer.h"
+#include"RenderManager.h"
+#include"ShadowManager.h"
+#include"ParticleManager.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -17,6 +20,10 @@ CCamera::CCamera()
 
 CCamera::~CCamera()
 {
+	INSTANCE(CRenderManager).RemoveCamera(this);
+	if (mCameraName == "MainCamera" && INSTANCE(CShadowManager).mViewCamera == this) INSTANCE(CShadowManager).mViewCamera = nullptr;
+	if (mCameraName == "DirectionalLight" && INSTANCE(CShadowManager).mLightCamera == this) INSTANCE(CShadowManager).mLightCamera = nullptr;
+	if (mCameraName == "MainCamera" && INSTANCE(CParticleManager).mMainCamera == this) INSTANCE(CParticleManager).mMainCamera = nullptr;
 }
 
 std::shared_ptr<CComponent> CCamera::Clone()
@@ -61,6 +68,12 @@ void CCamera::GenerateViewMatrix()
 void CCamera::Awake()
 {
 	GenerateViewMatrix();
+	INSTANCE(CRenderManager).AddCamera(mCameraName, this);
+
+	if (mCameraName == "MainCamera") INSTANCE(CShadowManager).mViewCamera = this;
+	if (mCameraName == "DirectionalLight") INSTANCE(CShadowManager).mLightCamera = this;
+	if (mCameraName == "MainCamera") INSTANCE(CParticleManager).mMainCamera = this;
+
 }
 
 void CCamera::Start()
@@ -181,4 +194,30 @@ const Vec3& CCamera::GetLocalPosition()
 const Vec3& CCamera::GetLook()
 {
 	return GetTransform()->GetWorldLook();
+}
+
+const Vec3& CCamera::GetUp()
+{
+	return GetTransform()->GetWorldUp();
+}
+
+const Vec3& CCamera::GetRight()
+{
+	return GetTransform()->GetWorldRight();
+}
+
+Vec2 CCamera::TransformToScreenSpace(const Vec3& worldPos) const
+{
+	Vec4 screenPos = Vec4::Transform(Vec4(worldPos.x, worldPos.y, worldPos.z, 1), mViewPerspectiveProjectMat);
+	screenPos /= screenPos.w; // Normalize by w to get NDC coordinates
+	screenPos.x = (screenPos.x + 1.0f) * 0.5f * mViewport.Width;
+	screenPos.y = (1.0f - (screenPos.y + 1.0f) * 0.5f) * mViewport.Height; 
+	return Vec2(screenPos.x, screenPos.y);
+}
+
+Vec2 CCamera::TransformToNDC(const Vec3& worldPos) const
+{
+	Vec4 screenPos = Vec4::Transform(Vec4(worldPos.x, worldPos.y, worldPos.z, 1), mViewPerspectiveProjectMat);
+	screenPos /= screenPos.w; // Normalize by w to get NDC coordinates
+	return Vec2(screenPos.x, screenPos.y);
 }

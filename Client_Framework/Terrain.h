@@ -30,7 +30,7 @@ public:
 
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CTerrain>(); }
 
-	void Render(const std::shared_ptr<class CCamera>& camera, int pass);
+	void Render(class CCamera* camera, int pass);
 
 public:
 	void SetHeightMapGridMesh(const std::shared_ptr<CHeightMapGridMesh>& mesh);

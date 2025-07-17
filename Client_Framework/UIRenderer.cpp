@@ -14,6 +14,7 @@
 #include "SceneManager.h"
 #include "Scene.h"
 #include"Transform.h"
+#include"RenderManager.h"
 
 std::shared_ptr<class CMesh> CUIRenderer::mQuad = nullptr;
 
@@ -55,7 +56,7 @@ void CUIRenderer::LateUpdate()
 {
 }
 
-void CUIRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
+void CUIRenderer::Render(class CCamera* camera, int pass)
 {
 	mShader->SetPipelineState(CMDLIST);
 
@@ -129,4 +130,15 @@ void CUIRenderer::SetTexture(const std::shared_ptr<class CTexture>& texture)
 		return;
 	}
 	mUIData.textureIdx = texture->GetSrvIndex(); mUIDirtyFrame = FRAME_RESOURCE_COUNT;
+}
+
+void CUIRenderer::SetWorldPosition(const Vec3& pos)
+{
+	//Transform worldPosition to screen position
+	auto camera = INSTANCE(CRenderManager).GetCamera("MainCamera");
+	if (!camera) {
+		return;
+	}
+	//Vec3 screenPos = camera->WorldToScreen(pos);
+
 }

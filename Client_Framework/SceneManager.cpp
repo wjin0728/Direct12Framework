@@ -9,6 +9,7 @@
 #include"ResourceManager.h"
 #include"GameObject.h"
 #include"MeshRenderer.h"
+#include"RenderManager.h"
 
 //#define DEFFERD_RENDERING
 
@@ -60,7 +61,7 @@ void CSceneManager::ChangeScene(SCENE_TYPE nextScene, bool savePrevScene)
 		}
 	}
 	else {
-		INSTANCE(CInstancingManager).Destroy();
+		INSTANCE(CRenderManager).Destroy();
 		curScene.reset();
 	}
 	LoadScene(nextScene);
@@ -74,7 +75,7 @@ void CSceneManager::ChangeScene(SceneChangeReq req)
 		}
 	}
 	else {
-		INSTANCE(CInstancingManager).Destroy();
+		INSTANCE(CRenderManager).Destroy();
 		curScene.reset();
 	}
 	LoadScene(req.changeScene);
@@ -104,6 +105,11 @@ void CSceneManager::ProcessSceneChangeQueue()
 	ChangeScene(req);
 }
 
+void CSceneManager::ProcessDeferredSceneUpdate()
+{
+	curScene->CommitObjectChanges();
+}
+
 void CSceneManager::InitCurrentScene()
 {
 }
@@ -122,6 +128,7 @@ void CSceneManager::Render()
 	if (!curScene) {
 		return;
 	}
+	curScene->CollectVisibleObjects();
 	curScene->RenderScene();
 }
 

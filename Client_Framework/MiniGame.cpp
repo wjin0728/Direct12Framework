@@ -47,9 +47,4 @@ void CMiniGame::LateUpdate()
 
 void CMiniGame::RenderScene()
 {
-	CScene::RenderShadowPass();
-	CScene::RenderGBufferPass();
-	CScene::RenderLightingPass();
-	//CScene::RenderForwardPass();
-	CScene::RenderFinalPass();
 }

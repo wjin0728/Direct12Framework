@@ -6,9 +6,6 @@ class CShadowManager
 	MAKE_SINGLETON(CShadowManager)
 
 private:
-    std::shared_ptr<class CCamera> mViewCamera{};
-	std::shared_ptr<class CCamera> mLightCamera{};
-
     D3D12_VIEWPORT mViewports[CASCADE_COUNT]{};
     D3D12_RECT mScissorRects[CASCADE_COUNT]{};
 
@@ -40,12 +37,13 @@ private:
 	bool mFitToScene = true;
 
 public:
+    class CCamera* mViewCamera{};
+    class CCamera* mLightCamera{};
+
 	void Initialize(int cascadeLevels, float shadowMapSize);
 	void Destroyi();
     void Update();
 
-	void SetViewCamera(std::shared_ptr<CCamera> camera) { mViewCamera = camera; }
-    void SetLightCamera(std::shared_ptr<CCamera> camera) { mLightCamera = camera; }
 	void SetShadowMapTextureIdx(int idx) { mShadowMapTextureIdx = idx; }
 	void SetSceneOBBWS(const BoundingOrientedBox& obb) { mSceneOBBWS = obb; }
 

@@ -61,9 +61,9 @@ void CLobbyScene::LateUpdate()
 
 void CLobbyScene::RenderScene()
 {
-	CScene::RenderShadowPass();
-	CScene::RenderGBufferPass();
-	CScene::RenderLightingPass();
-	CScene::RenderForwardPass();
-	CScene::RenderFinalPass();
+	mRenderMgr->RenderShadowPass();
+	mRenderMgr->RenderGBufferPass();
+	mRenderMgr->RenderLightingPass();
+	mRenderMgr->RenderForwardPass();
+	mRenderMgr->RenderFinalPass();
 }

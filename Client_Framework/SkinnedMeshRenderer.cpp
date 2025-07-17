@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "ObjectPoolManager.h"
 #include "ResourceManager.h"
+#include "Animation.h"
 
 CSkinnedMeshRenderer::CSkinnedMeshRenderer() : CRenderer()
 {
@@ -25,6 +26,9 @@ void CSkinnedMeshRenderer::Start()
 {
 	CRenderer::Start();
     mRootBone = owner->GetTransform()->GetRoot();
+    if (mRootBone.lock()) {
+        mAnimationController = mRootBone.lock()->owner->GetComponentFromHierarchy<CAnimationController>();
+	}
 
 	for (auto& mat : m_materials) {
         auto& shaderName = mat->mShaderName;
@@ -60,13 +64,17 @@ void CSkinnedMeshRenderer::LateUpdate()
 	UpdateMaterialDataToShader();
 }
 
-void CSkinnedMeshRenderer::Render(std::shared_ptr<CCamera> camera, int pass)
+void CSkinnedMeshRenderer::Render(class CCamera* camera, int pass)
 {
     if (!m_materials[0]->GetShader((PASS_TYPE)pass)) return;
     //if (camera && !camera->IsInFrustum(mWorldBS, pass)) return;
 
     CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::OBJECT)->BindToShader(mCbvOffset);
 
+	auto animationController = mAnimationController.lock();
+    if (animationController) {
+        animationController->BindSkinningMatrix();
+	}
     int subMeshNum = mSkinnedMesh->GetSubMeshNum();
     for (int i = 0; i < subMeshNum; i++) {
         m_materials[i]->BindShader((PASS_TYPE)pass);

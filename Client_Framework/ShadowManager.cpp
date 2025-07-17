@@ -14,7 +14,7 @@
 #include"Renderer.h"
 #include"Timer.h"
 #include"FrameResource.h"
-#include"InstancingManager.h"
+#include"RenderManager.h"
 #include "DescriptorHeaps.h"
 #include"RenderTargetGroup.h"
 #include"Texture.h"
@@ -135,13 +135,6 @@ void CShadowManager::CalculateNearFar(Vec3 sceneBoundCornersLS[8], float& nearPl
     };
 
     INT iPointPassesCollision[3];
-
-    // At a high level: 
-    // 1. Iterate over all 12 triangles of the AABB.  
-    // 2. Clip the triangles against each plane. Create new triangles as needed.
-    // 3. Find the min and max z values as the near and far plane.
-
-    //This is easier because the triangles are in camera spacing making the collisions tests simple comparisions.
 
     float fLightCameraOrthographicMinX = XMVectorGetX(vLightCameraOrthographicMin);
     float fLightCameraOrthographicMaxX = XMVectorGetX(vLightCameraOrthographicMax);
@@ -539,8 +532,8 @@ void CShadowManager::RenderShadowMaps()
 		passDataBuffer->BindToShader(ALIGNED_SIZE(sizeof(CBPassData)) * (i + 1));
 		CMDLIST->RSSetViewports(1, &mViewports[i]);
 		CMDLIST->RSSetScissorRects(1, &mScissorRects[i]);
-		scene->RenderForLayer("Opaque", mViewCamera, SHADOW);
-		INSTANCE(CInstancingManager).RenderInstancingGroup(SHADOW);
+        INSTANCE(CRenderManager).RenderLayer(SHADOW, RENDER_LAYER::Opaque, mViewCamera);
+		INSTANCE(CRenderManager).RenderInstancingGroup(SHADOW);
 	}
 }
 

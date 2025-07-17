@@ -7,6 +7,7 @@
 #include"GameObject.h"
 #include"Transform.h"
 #include"LoadingScreen.h"
+#include"RenderManager.h"
 
 
 CLoadScene::CLoadScene()
@@ -30,6 +31,7 @@ void CLoadScene::Initialize()
 		loadingScreenMoving->AddLoadingScreenTextureIdx(loadingScreen->GetSrvIndex());
 	}
 	mLoadingScreen = loadingScreenMoving;
+	AddObjectImmediately(loadingScreenUI);
 }
 
 void CLoadScene::Awake()
@@ -81,7 +83,7 @@ void CLoadScene::RenderScene()
 
 	CMDLIST->RSSetViewports(1, &mViewport);
 	CMDLIST->RSSetScissorRects(1, &mScissorRect);
-	RenderForLayer("UI", nullptr);
+	mRenderMgr->RenderLayer(FORWARD, RENDER_LAYER::UI, nullptr);
 
 	renderTarget->ChangeTargetToResource(backBufferIdx);
 }
