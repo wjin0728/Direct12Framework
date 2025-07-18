@@ -89,6 +89,29 @@ namespace MonsterState
         DeathState() {}
         float deathTimer;
     };
+
+    // underground 상태
+    class UndergroundState : public MonsterStateMachine {
+    public:
+        static UndergroundState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        UndergroundState() {}
+    };
+
+    // Spawn 상태
+    class SpawnState : public MonsterStateMachine {
+    public:
+        static SpawnState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        SpawnState() {}
+        float SpawnTimer;
+    };
 }
 
 #endif

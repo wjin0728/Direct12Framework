@@ -252,7 +252,12 @@ void CPlayerController::OnKeyEvents()
 	case PLAYER_STATE::ATTACK:
 		break;
 	case PLAYER_STATE::RUNATTACK:
+		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
+		if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
+		if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
+		if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
 
+		INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
 		break;
 	case PLAYER_STATE::GETHIT:
 		break;

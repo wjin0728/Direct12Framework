@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Object.h"
+#include "Monster.h"
 
 class Item : public Object
 {
@@ -14,5 +15,6 @@ public:
 	~Item() {};
 
 	void SetItemType(S_ITEM_TYPE item_type);
+	void CreateItem(Monster* monster);
 };
 

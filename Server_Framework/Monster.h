@@ -11,6 +11,7 @@ public:
     S_ENEMY_TYPE _class;
     S_MONSTER_STATE	_state;
 	bool _remove = false;
+	bool _drop_item = false;
 
     int _hp;
     int _barrier;
@@ -28,7 +29,8 @@ public:
 	Monster() :
         Object(S_OBJECT_TYPE::S_ENEMY),
         _class(S_ENEMY_TYPE::s_end),
-        currentState(&MonsterState::IdleState::GetInstance()),
+        currentState(&MonsterState::UndergroundState::GetInstance()),
+		_state(S_MONSTER_STATE::UNDERGROUND),
         _look_dir(Vec3(0, 0, 1)),
         _hp(100),
         _barrier(0),
@@ -38,7 +40,8 @@ public:
     Monster(S_ENEMY_TYPE monster_type) :
         Object(S_OBJECT_TYPE::S_ENEMY),
         _class(monster_type),
-        currentState(&MonsterState::IdleState::GetInstance()),
+        currentState(&MonsterState::UndergroundState::GetInstance()),
+        _state(S_MONSTER_STATE::UNDERGROUND),
         _look_dir(Vec3(0, 0, 1)),
         _hp(100),
         _barrier(0),
