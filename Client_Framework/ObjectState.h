@@ -76,6 +76,7 @@ public:
 class CMageState : public CPlayerStateMachine
 {
 private:
+public:
     std::weak_ptr<class CTransform> mAttackSocket;
 public:
 	CMageState() : CPlayerStateMachine((uint8_t)PLAYER_CLASS::MAGE) {}

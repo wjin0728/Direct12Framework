@@ -469,7 +469,7 @@ void CGameObject::InitByObjectName()
 {
 	if (mName == "SM_Bld_Windmill_01_Blades_01") {
 		auto rotator = AddComponent<CContinuousRotation>();
-		//zÃàÀ¸·Î È¸Àü
+		//zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½
 		rotator->SetRotationSpeed({ 0.f, 0.f, 10.f });
 		rotator->SetRotationAxis({ 0.f, 0.f, 1.f });
 	}
