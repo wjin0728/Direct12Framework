@@ -144,7 +144,7 @@ void CGrassSmallState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 0.7f });
 
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
