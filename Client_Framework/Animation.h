@@ -20,7 +20,7 @@ struct EventSegment
 
     float mStart = 0.0f;
     float mEnd = 0.0f;
-    float mData = 0.14f;
+    float mData = 0.2f;
 };
 
 #define _WITH_ANIMATION_INTERPOLATION
