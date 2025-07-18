@@ -370,7 +370,7 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     }
     
     float shadowFactor = CalcShadowFactor(input.ShadowPosH);
-    float3 hitColor = float3(1.0, 0.0, 0.0);
+    float3 hitColor = float3(1.0, 1.0, 1.0);
     _emissionColor = lerp(_emissionColor, hitColor, hitFactor);
     
     output.albedo = color;

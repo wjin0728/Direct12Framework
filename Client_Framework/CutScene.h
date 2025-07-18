@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "MonoBehaviour.h"
+#include "Component.h"
 
 struct CutSceneFrame
 {
@@ -7,7 +7,7 @@ struct CutSceneFrame
     Quaternion rotation;
 };
 
-class CCutScene : public CMonoBehaviour
+class CCutScene : public CComponent
 {
 private:
     friend class CThirdPersonCamera;
@@ -22,8 +22,13 @@ private:
     std::shared_ptr<CThirdPersonCamera> mThirdPersonCamera{};
 
 public:
-    CCutScene() : CMonoBehaviour("CutScene") {}
+    CCutScene() : CComponent() {}
     virtual ~CCutScene() = default;
+
+    virtual std::shared_ptr<CComponent> Clone() override
+    {
+        return std::make_shared<CCutScene>(*this);
+	}
 
     virtual void Start() override;
     virtual void Update() override;

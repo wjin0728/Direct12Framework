@@ -4,6 +4,9 @@
 class CEnemyState :
     public CEntityState
 {
+private:
+    std::weak_ptr<class CTransform> mAttackSocket;
+
 public:
     CEnemyState() : CEntityState((UINT8)MONSTER_STATE::IDLE) {}
     virtual ~CEnemyState() {}
@@ -11,7 +14,8 @@ public:
 	CEnemyState& operator=(const CEnemyState&) = delete;
 
 public:
-    virtual void Start() override {};
+	virtual void Awake() override;
+    virtual void Start() override;
     virtual void Update() override;
     virtual void OnEnterState(UINT8 state) override;
     virtual void OnExitState(UINT8 state) override;
@@ -24,6 +28,8 @@ class CGrassBigState :
     public CEnemyState
 {
 public:
+	virtual ~CGrassBigState() {}
+	virtual void Awake() override;
     virtual void Start() override;
     virtual void Update() override;
 
@@ -37,7 +43,9 @@ public:
 class CGrassSmallState :
     public CEnemyState
 {
-    public:
+public:
+	virtual ~CGrassSmallState() {}
+	virtual void Awake() override;
     virtual void Start() override;
     virtual void Update() override;
     virtual void OnEnterState(UINT8 state) override;

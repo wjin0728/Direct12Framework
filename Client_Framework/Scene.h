@@ -22,6 +22,7 @@ protected:
 
 	std::queue<std::shared_ptr<CGameObject>> mAddQueue{};
 	std::queue<std::shared_ptr<CGameObject>> mRemoveQueue{};
+	std::queue<class CComponent*> mComponentStartQueue{};
 
 	ObjectList mObjects{};
 	std::array<ObjectList, OBJECT_TYPE::end> mObjectTypes;
@@ -41,7 +42,7 @@ public:
 
 	virtual void Initialize() {};
 
-	virtual void Awake();
+	virtual void Activate();
 	virtual void Start();
 
 	virtual void Update();
@@ -68,10 +69,12 @@ public:
 
 	void CollectVisibleObjects();
 	void AddRemoveQueue(std::shared_ptr<CGameObject> object);
+	void AddComponentToStartQueue(CComponent* component);
 
 	void CommitObjectChanges();
 
 protected:
 	void UpdatePassData();
 	void RemoveObjects();
+	void AwakeObject(std::shared_ptr<CGameObject> obj);
 };

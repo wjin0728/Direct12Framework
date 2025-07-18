@@ -41,8 +41,6 @@ public:
 	void RequestSceneChange(SCENE_TYPE nextScene, bool savePrevScene = false);
 	void ProcessSceneChangeQueue();
 
-	void ProcessDeferredSceneUpdate();
-
 public:
 	void InitCurrentScene();
 

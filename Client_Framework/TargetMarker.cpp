@@ -21,12 +21,12 @@ void CTargetMarker::Awake()
 	mLockTimeMax = 0.2f;
 	mLockTimeRate = 1 / mLockTimeMax;
 	mTargetChanged = false;
-	mRenderer = owner->GetComponent<CUIRenderer>();
-	mRenderer.lock()->mIsVisible = false;
 }
 
 void CTargetMarker::Start()
 {
+	mRenderer = owner->GetComponent<CUIRenderer>();
+	mRenderer.lock()->mIsVisible = false;
 }
 
 void CTargetMarker::Update()

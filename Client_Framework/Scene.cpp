@@ -56,11 +56,12 @@ CScene::CScene()
 	mRenderMgr = &INSTANCE(CRenderManager);
 }
 
-void CScene::Awake()
+void CScene::Activate()
 {
 	for (const auto& object : mObjects) {
-		object->Awake();
+		object->SetActive(true);
 	}
+	mIsActive = true;
 }
 
 void CScene::Start()
@@ -256,14 +257,24 @@ void CScene::AddRemoveQueue(std::shared_ptr<CGameObject> object)
 	}
 }
 
+void CScene::AddComponentToStartQueue(CComponent* component)
+{
+	if (!component) return;
+	mComponentStartQueue.push(component);
+}
+
 void CScene::CommitObjectChanges()
 {
 	while (!mAddQueue.empty()) {
 		auto object = mAddQueue.front();
 		mAddQueue.pop();
 		AddObjectImmediately(object);
-		object->Awake();
-		object->Start();
+		AwakeObject(object);
+	}
+	while (!mComponentStartQueue.empty()) {
+		auto component = mComponentStartQueue.front();
+		mComponentStartQueue.pop();
+		component->Start();
 	}
 	RemoveObjects();
 }
@@ -277,7 +288,21 @@ void CScene::RemoveObjects()
 	}
 }
 
-
+void CScene::AwakeObject(std::shared_ptr<CGameObject> obj) {
+	for (auto& comp : obj->mComponents) {
+		if(!comp->mIsAwake){
+			comp->Awake();
+			comp->mIsAwake = true;
+		}
+		if (!comp->mIsStart) {
+			AddComponentToStartQueue(comp.get());
+			comp->mIsStart = true;
+		}
+	}
+	for (auto& child : obj->mChildren) {
+		AwakeObject(child);
+	}
+}
 
 
 

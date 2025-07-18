@@ -116,7 +116,6 @@ void CGameApplication::Render()
 	INSTANCE(CSceneManager).Render();
 	INSTANCE(CDX12Manager).AfterRender();
 	INSTANCE(CRenderManager).ClearAllRenderLayers();
-	INSTANCE(CSceneManager).ProcessDeferredSceneUpdate();
 	INSTANCE(CSceneManager).ProcessSceneChangeQueue();
 }
 

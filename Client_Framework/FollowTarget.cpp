@@ -7,7 +7,7 @@
 #include "Terrain.h"
 #include "ServerManager.h"
 
-CFollowTarget::CFollowTarget() : CMonoBehaviour("FollowTarget")
+CFollowTarget::CFollowTarget()
 {
 }
 

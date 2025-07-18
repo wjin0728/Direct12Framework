@@ -10,10 +10,12 @@ protected:
 	UINT8 nextState = 0;
 	std::weak_ptr<class CAnimationController> mAnimationController{};
 
+	
 
 public:
 	int mHealth{};
 	int mMaxHealth{};
+	bool mIsHit = false;
 	bool mIsDead = false;
 	bool mIsSpawning = false;
     CEntityState() = default;
@@ -42,5 +44,22 @@ public:
 protected:
 	virtual void OnEnterState(UINT8 state) {};
 	virtual void OnExitState(UINT8 state) {};
+
+public:
+	void GetHit(int damage) {
+		if (mIsDead) return;
+		mHealth -= damage;
+		if (mHealth <= 0) {
+			mHealth = 0;
+			mIsDead = true;
+		}
+	}
+	void Heal(int amount) {
+		if (mIsDead) return;
+		mHealth += amount;
+		if (mHealth > mMaxHealth) {
+			mHealth = mMaxHealth;
+		}
+	}
 };
 

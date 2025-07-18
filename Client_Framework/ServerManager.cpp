@@ -104,7 +104,6 @@ bool ServerManager::InitPlayerAndCamera()
 	mPlayer->SetTag("Player");
 	mPlayer->SetName("Player");
 	mPlayer->SetRenderLayer(RENDER_LAYER::Opaque);
-	mPlayer->SetActive(false);
 	mPlayer->SetStatic(false);
 
 	auto cutScene = mPlayer->AddComponent<CCutScene>();
@@ -115,6 +114,9 @@ bool ServerManager::InitPlayerAndCamera()
 	playerController->SetCutScene(cutScene);
 
 	mMainCamera = std::make_shared<CGameObject>();
+	mMainCamera->SetTag("MainCamera");
+	mMainCamera->SetName("MainCamera");
+	mMainCamera->SetStatic(false);
 
 	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
 	auto camera = mMainCamera->AddComponent<CCamera>();
@@ -127,10 +129,6 @@ bool ServerManager::InitPlayerAndCamera()
 #elif // REVERSE_Z
 	camera->GeneratePerspectiveProjectionMatrix(1.f, 100.f, 60.f);
 #endif // REVERSE_Z
-	mMainCamera->SetTag("MainCamera");
-	mMainCamera->SetName("MainCamera");
-	mMainCamera->SetActive(false);
-	mMainCamera->SetStatic(false);
 
 	auto playerFollower = mMainCamera->AddComponent<CThirdPersonCamera>();
 	playerFollower->SetTarget(mPlayer);
@@ -142,18 +140,10 @@ bool ServerManager::InitPlayerAndCamera()
 
 void ServerManager::RegisterPlayerInScene(class CScene* scene)
 {
-	mPlayer->SetActive(true);
-	mPlayer->misAwake = false;
-	mMainCamera->SetActive(true);
-	mMainCamera->misAwake = false;
 	scene->AddObjectImmediately(mPlayer);
 	scene->AddObjectImmediately(mMainCamera);
 
-	auto camera = mMainCamera->GetComponent<CCamera>();
-
 	for (auto& pair : mOtherPlayers) {
-		pair.second->SetActive(true);
-		pair.second->misAwake = false;
 		scene->AddObjectImmediately(pair.second);
 	}
 }
@@ -165,7 +155,6 @@ void ServerManager::AddNewPlayer(int id, Vec3 pos)
 	player->SetTag("Player");
 	player->SetName("Player" + std::to_string(id));
 	player->SetRenderLayer(RENDER_LAYER::Opaque);
-	player->SetActive(false);
 	player->SetStatic(false);
 	player->GetTransform()->SetLocalPosition(pos);
 	player->mID = id;
@@ -308,17 +297,15 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
 		if (shieldPrefab) {
 			auto shieldObj = CGameObject::Instantiate(shieldPrefab, player->GetTransform());
-			shieldObj->SetActive(false);
 			shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
 			shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
 			stateMachine->SetShield(shieldObj);
+			stateMachine->ActivateShield(false); 
 		}
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
-		if (scene && scene->mIsActive && clientID != packet->id) {
-			player->Awake();
-			player->Start();
-			scene->AddObjectImmediately(player);
+		if (clientID != packet->id) {
+			scene->AddObject(player);
 		}
 		break;
 	}
@@ -431,14 +418,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		Quaternion local_rot = Quaternion::LookRotation(Vec3(packet->dir_x, packet->dir_y, packet->dir_z));
 		projectileObj->GetTransform()->SetLocalRotation(local_rot);
 
-		if (scene && scene->mIsActive) {
-			projectileObj->Awake();
-			projectileObj->Start();
-		}
-
 		projectileObj->mID = packet->projectile_id;
 		mProjectiles[packet->projectile_id] = projectileObj;
-		scene->AddObjectImmediately(projectileObj);
+		scene->AddObject(projectileObj);
 		break;
 	}
 	case SC_PROJECTILE_POS: {
@@ -488,14 +470,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			monsterObj->SetStateMachine(stateMachine);
 		}
 
-		if (scene && scene->mIsActive) {
-			monsterObj->Awake();
-			monsterObj->Start();
-		}
-
 		monsterObj->mID = packet->monster_id;
 		mEnemies[packet->monster_id] = monsterObj;
-		scene->AddObjectImmediately(monsterObj);
+		scene->AddObject(monsterObj);
 
 		cout << "Monster Added! ID : " << packet->monster_id << "type : " << (int)packet->monster_type << endl;
 		break;

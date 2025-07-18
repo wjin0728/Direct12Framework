@@ -27,23 +27,25 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
+	
+	mSkill = FIRE_EXPLOSION; // Default skill, can be changed later
+}
+
+void CPlayerController::Start()
+{
 	if (!rigidBody) rigidBody = GetOwner()->GetComponent<CRigidBody>();
 	if (!mStateMachine) mStateMachine = owner->GetComponentFromHierarchy<CPlayerStateMachine>();
+
+	auto scene = INSTANCE(CSceneManager).GetCurScene();
+	mTerrain = scene->GetTerrain();
+	SetClass(mStateMachine->GetClass());
+	auto controller = owner->GetComponentFromHierarchy<CAnimationController>();
 
 	auto targetUIObj = CGameObject::CreateUIObject("Sprite", "TargetMarker", { 0.f,0.f }, { 80.f,80.f });
 	if (targetUIObj) {
 		mTargetMarker = targetUIObj->AddComponent<CTargetMarker>();
 		INSTANCE(CSceneManager).GetCurScene()->AddObject(targetUIObj);
 	}
-	mSkill = FIRE_EXPLOSION; // Default skill, can be changed later
-}
-
-void CPlayerController::Start()
-{
-	auto scene = INSTANCE(CSceneManager).GetCurScene();
-	mTerrain = scene->GetTerrain();
-	SetClass(mStateMachine->GetClass());
-	auto controller = owner->GetComponentFromHierarchy<CAnimationController>();
 
 	auto func = [](float time) {
 		INSTANCE(ServerManager).send_cs_attack_packet();

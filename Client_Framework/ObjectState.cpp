@@ -25,8 +25,10 @@ void CPlayerStateMachine::Start()
 			owner->GetTransform()->GetWorldMat()
 		);
 		};
-	controller->AddAnimationEvent("Run", " Dust", func);
-	controller->AddAnimationEvent("RunAttack", " Dust", func);
+	controller->AddAnimationEvent("Run", "Dust", func);
+	controller->AddAnimationEvent("RunAttack", "Dust", func);
+
+	ActivateShield(false);
 }
 
 void CPlayerStateMachine::Update()
@@ -204,19 +206,20 @@ void CArcherState::OnExitState(UINT8 state)
 void CWarriorState::Awake()
 {
 	CPlayerStateMachine::Awake();
-	auto socket = owner->AddBoneSocket("Equipment.weapon.R.001", "WeaponSocket");
-	if (socket) {
-		mTrail = socket->AddComponent<CTrailRenderer>();
-		mTrail.lock()->mIsActive = false;
-		mAttackSocket = socket->GetTransform();
-		mAttackSocket.lock()->SetLocalPosition(Vec3(0.0f, 0.5f, 0.0f));
-	}
 }
 
 void CWarriorState::Start()
 {
 	CPlayerStateMachine::Start();
-	CPlayerStateMachine::Update();
+	auto socket = owner->AddBoneSocket("Equipment.weapon.R.001", "WeaponSocket");
+	if (socket) {
+		socket->SetActive(true);
+		mTrail = socket->AddComponent<CTrailRenderer>();
+		mTrail.lock()->mActive = false;
+		mAttackSocket = socket->GetTransform();
+		mAttackSocket.lock()->SetLocalPosition(Vec3(0.0f, 0.5f, 0.0f));
+		socket->SetRenderer(mTrail.lock());
+	}
 	auto controller = mAnimationController.lock();
 	if (!controller) {
 		return;
@@ -246,7 +249,7 @@ void CWarriorState::Start()
 		}
 		auto trail = mTrail.lock();
 		if (trail) {
-			trail->mIsActive = true;
+			trail->mActive = true;
 			trail->ResetTrail();
 			trail->SetDuration(0.2f);
 		}
@@ -257,7 +260,7 @@ void CWarriorState::Start()
 		}
 		auto trail = mTrail.lock();
 		if (trail) {
-			trail->mIsActive = false;
+			trail->mActive = false;
 		}
 		};
 	controller->AddAnimationEvent("Attack", "AttackStart", func0);
@@ -306,7 +309,7 @@ void CWarriorState::OnEnterState(UINT8 state)
 	{
 		auto trail = mTrail.lock();
 		if (trail) {
-			trail->mIsActive = true;
+			trail->mActive = true;
 			trail->ResetTrail();
 			trail->SetDuration(1.0f);
 		}
@@ -335,7 +338,7 @@ void CWarriorState::OnExitState(UINT8 state)
 	{
 		auto trail = mTrail.lock();
 		if (trail) {
-			trail->mIsActive = false;
+			trail->mActive = false;
 		}
 	}
 		break;
@@ -351,7 +354,7 @@ void CWarriorState::OnExitState(UINT8 state)
 	{
 		auto trail = mTrail.lock();
 		if (trail) {
-			trail->mIsActive = false;
+			trail->mActive = false;
 		}
 	}
 	break;

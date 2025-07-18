@@ -46,10 +46,9 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 	}
 	curSceneType = nextScene;
 	curScene->Initialize();
-	curScene->Awake();
-	curScene->Start();
-	curScene->mIsActive = true;
 	INSTANCE(CResourceManager).ProcessGPULoadQueue();
+	curScene->Activate();
+	curScene->Start();
 }
 
 void CSceneManager::ChangeScene(SCENE_TYPE nextScene, bool savePrevScene)
@@ -105,11 +104,6 @@ void CSceneManager::ProcessSceneChangeQueue()
 	ChangeScene(req);
 }
 
-void CSceneManager::ProcessDeferredSceneUpdate()
-{
-	curScene->CommitObjectChanges();
-}
-
 void CSceneManager::InitCurrentScene()
 {
 }
@@ -119,6 +113,7 @@ void CSceneManager::Update()
 	if (!curScene) {
 		return;
 	}
+	curScene->CommitObjectChanges();
 	curScene->Update();
 	curScene->LateUpdate();
 }
