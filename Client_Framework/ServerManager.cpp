@@ -484,7 +484,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 		if (stateMachine) {
-			stateMachine->SetState((UINT8)MONSTER_STATE::IDLE);
+			stateMachine->SetState((UINT8)MONSTER_STATE::UNDERGROUND);
 			monsterObj->SetStateMachine(stateMachine);
 		}
 
@@ -510,6 +510,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			// cout << "몬스터 look : " << packet->look_x << ", " << packet->look_y << ", " << packet->look_z << endl;
 			
 			auto monsterState =  mEnemies[packet->monsterId]->GetStateMachine();
+
+			cout << "Monster State : " << (int)monsterState->GetState() << endl;
+
 			if (monsterState && monsterState->GetState() != packet->monster_state){
 				monsterState->SetState(packet->monster_state);
 				cout << "몬스터 상태" << monsterState->GetState() << endl;	

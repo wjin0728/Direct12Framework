@@ -168,3 +168,45 @@ void MonsterState::DeathState::Update(Monster* monster) {
 }
 
 void MonsterState::DeathState::Exit(Monster* monster) {}
+
+
+
+// MonsterState::UndergroundState 구현          =========================================================================
+
+
+
+MonsterState::UndergroundState& MonsterState::UndergroundState::GetInstance() { static MonsterState::UndergroundState instance; return instance; }
+
+void MonsterState::UndergroundState::Enter(Monster* monster) {
+    monster->SetVelocity(0, 0, 0);
+}
+
+void MonsterState::UndergroundState::Update(Monster* monster) {
+	if (monster->_target != nullptr) {
+		monster->SetState(S_MONSTER_STATE::SPAWN);
+	}
+}
+
+void MonsterState::UndergroundState::Exit(Monster* monster) {}
+
+
+
+// MonsterState::SpawnState 구현          =========================================================================
+
+
+
+MonsterState::SpawnState& MonsterState::SpawnState::GetInstance() { static MonsterState::SpawnState instance; return instance; }
+
+void MonsterState::SpawnState::Enter(Monster* monster) {
+    monster->SetVelocity(0, 0, 0);
+	SpawnTimer = monster->_animations[(int)S_MONSTER_STATE::SPAWN]->mLength;
+}
+
+void MonsterState::SpawnState::Update(Monster* monster) {
+	SpawnTimer -= TICK_INTERVAL; 
+	if (SpawnTimer <= 0) {
+		monster->SetState(S_MONSTER_STATE::IDLE); 
+	}
+}
+
+void MonsterState::SpawnState::Exit(Monster* monster) {}
