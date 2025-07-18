@@ -523,6 +523,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "Current scene is nullptr" << std::endl;
 			break;
 		}
+		if (!mProjectiles.contains(packet->projectile_id)) break;
 		scene->RemoveObject(mProjectiles[packet->projectile_id]);
 		mProjectiles.erase(packet->projectile_id);
 		break;

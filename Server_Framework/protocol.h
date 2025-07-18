@@ -48,6 +48,9 @@ constexpr char SC_PROJECTILE_POS = 18;
 constexpr char SC_ADD_MONSTER = 19;
 constexpr char SC_REMOVE_PROJECTILE = 20;
 constexpr char SC_REMOVE_MONSTER = 21;
+constexpr char SC_ADD_EFFECT = 22;
+constexpr char SC_REMOVE_WATERSHIELD = 23;
+constexpr char SC_HP = 24;
 
 
 #pragma pack (push, 1)
@@ -69,7 +72,7 @@ struct CS_CHAT_PACKET : PACKET {
 };
 
 struct CS_MOVE_PACKET : PACKET {
-	int				id;
+	short 			id;
 	uint8_t			dir;
 	float			look_x;
 	float			look_y;
@@ -77,31 +80,31 @@ struct CS_MOVE_PACKET : PACKET {
 };
 
 struct CS_MOUSE_LDOWN_PACKET : PACKET {
-	int				id;
+	short 			id;
 	float			dir_x;
 	float			dir_y;
 	float			dir_z;
 };
 
 struct CS_000_PACKET : PACKET {
-	int				key;
+	short 			key;
 };
 
 struct CS_SKILL_TARGET_PACKET : PACKET {
-	int				id;
+	short 			id;
 	uint8_t			skill_enum;
-	int				target_id;
+	short 			target_id;
 };
 
 struct CS_SKILL_NONTARGET_PACKET : PACKET {
-	int				id;
+	short 			id;
 	uint8_t			skill_enum;
 };
 
 struct CS_ULTIMATE_SKILL_PACKET : PACKET {
-	int				id;
+	short 			id;
 	uint8_t			skill_enum;
-	int				target_id;
+	short 			target_id;
 };
 
 
@@ -110,23 +113,23 @@ struct CS_CHANGE_SCENE_PACKET : PACKET {
 };
 
 struct CS_CHANGE_STATE_PACKET : PACKET {
-	int				id;
+	short 			id;
 	uint8_t			state;
 };
 
 struct CS_ATTACK_PACKET : PACKET {
-	int				id;
+	short 			id;
 };
 
 // ----------------------------------------------------------------------------------
 
 
 struct SC_LOGIN_INFO_PACKET : PACKET {
-	int				id;
+	short 			id;
 };
 
 struct SC_ADD_PLAYER_PACKET : PACKET {
-	int				id;
+	short 			id;
 	uint8_t			player_class;
 	float			x;
 	float			y;
@@ -135,40 +138,40 @@ struct SC_ADD_PLAYER_PACKET : PACKET {
 };
 
 struct SC_REMOVE_PLAYER_PACKET : PACKET {
-	int				id;
+	short 			id;
 };
 
 struct SC_ADD_OBJECT_PACKET : PACKET {
-	int				id;
+	short 			id;
 };
 
 struct SC_ALL_PLAYERS_POS_PACKET : PACKET {
-	int clientId[3]{ -1, -1, -1 };
+	short clientId[3]{ -1, -1, -1 };
 	float x[3], y[3], z[3];
 	float look_y[3];
 	uint8_t state[3]{ 0, 0, 0 };
 };
 
 struct SC_MONSTER_POS_PACKET : PACKET {
-	int monsterId;
+	short monsterId;
 	float x, y, z;
 	float look_x, look_y, look_z;
 	uint8_t monster_state;
 };
 
 struct SC_ITEM_POS_PACKET : PACKET {
-	int itemId;
+	short itemId;
 	float x, y, z;
 	float look_y;
 };
 
 struct SC_CHAT_PACKET : PACKET {
-	int				id;
+	short 			id;
 	char			mess[CHAT_SIZE];
 };
 
 struct SC_DROP_ITEM_PACKET : PACKET {
-	int				item_id;
+	short 			item_id;
 	uint8_t			item_enum;
 	float			x;
 	float			y;
@@ -176,7 +179,7 @@ struct SC_DROP_ITEM_PACKET : PACKET {
 };
 
 struct SC_REMOVE_ITEM_PACKET : PACKET {
-	int				item_id;
+	short 			item_id;
 	char			player_id;
 					// -1이면 단순 삭제, 
 					// or player_id 플레이어가 아이템 획득
@@ -184,7 +187,7 @@ struct SC_REMOVE_ITEM_PACKET : PACKET {
 };
 
 struct SC_USE_SKILL_PACKET : PACKET {
-	int				player_id;
+	short 			player_id;
 	uint8_t			skill_type;
 };
 
@@ -196,7 +199,7 @@ struct SC_CHANGE_SCENE_PACKET : PACKET {
 };
 
 struct SC_ADD_MONSTER_PACKET : PACKET {
-	int				monster_id;
+	short 			monster_id;
 	uint8_t			monster_type;
 	float			x, y, z;
 	float			look_y;
@@ -204,22 +207,37 @@ struct SC_ADD_MONSTER_PACKET : PACKET {
 
 struct SC_ADD_PROJECTILE_PACKET : PACKET {
 	uint8_t projectile_type;
-	int projectile_id;
+	short projectile_id;
 	float x, y, z;
 	float dir_x, dir_y, dir_z;
 	bool user_friendly;
 };
 
 struct SC_PROJECTILE_POS_PACKET : PACKET {
-	int projectile_id;
+	short projectile_id;
 	float x, y, z;
 };
 
 struct SC_REMOVE_PROJECTILE_PACKET : PACKET {
-	int projectile_id;
+	short projectile_id;
 };
 
 struct SC_REMOVE_MONSTER_PACKET : PACKET {
-	int monster_id;
+	short monster_id;
 };
+
+struct SC_ADD_EFFECT_PACKET : PACKET {
+	short effect_type;
+	float x, y, z;
+};
+
+struct SC_REMOVE_WATERSHIELD_PACKET : PACKET {
+	short player_id;
+};
+
+struct SC_HP_PACKET : PACKET {
+	short player_id;
+	short hp;
+};
+
 #pragma pack (pop)

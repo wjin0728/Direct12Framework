@@ -148,3 +148,34 @@ void SESSION::send_remove_monster_packet(int monster_id)
 	p.monster_id = monster_id;
 	do_send(&p);
 }
+
+void SESSION::send_add_effect_packet(int type, Vec3 pos)
+{
+	SC_ADD_EFFECT_PACKET p;
+	p.type = SC_ADD_EFFECT;
+	p.size = sizeof(p);
+	p.effect_type = type;
+	p.x = pos.x;
+	p.y = pos.y;
+	p.z = pos.z;
+	do_send(&p);
+}
+
+void SESSION::send_remove_watershield_packet(int id)
+{
+	SC_REMOVE_WATERSHIELD_PACKET p;
+	p.type = SC_REMOVE_WATERSHIELD;
+	p.size = sizeof(p);
+	p.player_id = id;
+	do_send(&p);
+}
+
+void SESSION::send_hp_packet(int id, int hp)
+{
+	SC_HP_PACKET p;
+	p.type = SC_HP;
+	p.size = sizeof(p);
+	p.player_id = id;
+	p.hp = hp;
+	do_send(&p);
+}

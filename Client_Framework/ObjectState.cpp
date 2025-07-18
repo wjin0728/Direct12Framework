@@ -383,3 +383,23 @@ void CMageState::OnEnterState(UINT8 state)
 void CMageState::OnExitState(UINT8 state)
 {
 }
+
+void CMageState::Awake()
+{
+}
+
+void CMageState::Start()
+{
+}
+
+void CMageState::Update()
+{
+}
+
+void CMageState::OnEnterState(UINT8 state)
+{
+}
+
+void CMageState::OnExitState(UINT8 state)
+{
+}

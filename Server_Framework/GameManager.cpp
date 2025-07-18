@@ -257,51 +257,52 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		break;
 	}
-	case CS_MOUSE_LDOWN: {
-		CS_MOUSE_LDOWN_PACKET* p = reinterpret_cast<CS_MOUSE_LDOWN_PACKET*>(packet);
-		Vec3 local_lookDir = Vec3(p->dir_x, p->dir_y, p->dir_z);
-		
-		switch (clients[ServerNumber][p->id]._player._class)
-		{
-		case S_PLAYER_CLASS::FIGHTER: {
-			for (auto& mon : Monsters[ServerNumber]) {
-				mon.second.LocalTransform();
-				clients[ServerNumber][c_id]._player.OnFighterBasicAttack(mon.second._boundingbox);
-			}
-			break;
-		}
-		case S_PLAYER_CLASS::ARCHER: {
-			Projectile proj{1, S_PROJECTILE_TYPE::ARROW};
-			proj._pos = clients[ServerNumber][c_id]._player._pos;
-			proj._pos.y += 1.f; // 발사 위치 조정
-			proj._velocity = local_lookDir;
-			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
-			for (auto& cl : clients[ServerNumber]) {
-				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
-			}
-			Projectile_cnt[ServerNumber]++;
-			break;
-		}
-		case S_PLAYER_CLASS::MAGE: {
-			Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
-			proj._pos = clients[ServerNumber][c_id]._player._pos;
-			proj._velocity = local_lookDir;
-			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
-			for (auto& cl : clients[ServerNumber]) {
-				clients[ServerNumber][c_id].send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
-			}
-			Projectile_cnt[ServerNumber]++;
-			break;
-		}
-		default:
-			break;
-		}
-		Quaternion targetRot = Quaternion::LookRotation(local_lookDir);
-		Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
-		clients[ServerNumber][p->id]._player._rotation = targetRot;
-		clients[ServerNumber][p->id]._player.SetLookDir(angle);
-		break;
-	}
+	//case CS_MOUSE_LDOWN: {
+	//	CS_MOUSE_LDOWN_PACKET* p = reinterpret_cast<CS_MOUSE_LDOWN_PACKET*>(packet);
+	//	Vec3 local_lookDir = Vec3(p->dir_x, p->dir_y, p->dir_z);
+	//	
+	//	switch (clients[ServerNumber][p->id]._player._class)
+	//	{
+	//	case S_PLAYER_CLASS::FIGHTER: {
+	//		for (auto& mon : Monsters[ServerNumber]) {
+	//			mon.second.LocalTransform();
+	//			clients[ServerNumber][c_id]._player.OnFighterBasicAttack(mon.second._boundingbox);
+	//		}
+	//		break;
+	//	}
+	//	case S_PLAYER_CLASS::ARCHER: {
+	//		cout << "Archer CS_MOUSE_LDOWN\n";
+	//		Projectile proj{1, S_PROJECTILE_TYPE::ARROW};
+	//		proj._pos = clients[ServerNumber][c_id]._player._pos;
+	//		proj._pos.y += 1.f; // 발사 위치 조정
+	//		proj._velocity = local_lookDir;
+	//		Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+	//		for (auto& cl : clients[ServerNumber]) {
+	//			cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
+	//		}
+	//		Projectile_cnt[ServerNumber]++;
+	//		break;
+	//	}
+	//	case S_PLAYER_CLASS::MAGE: {
+	//		Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
+	//		proj._pos = clients[ServerNumber][c_id]._player._pos;
+	//		proj._velocity = local_lookDir;
+	//		Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+	//		for (auto& cl : clients[ServerNumber]) {
+	//			clients[ServerNumber][c_id].send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
+	//		}
+	//		Projectile_cnt[ServerNumber]++;
+	//		break;
+	//	}
+	//	default:
+	//		break;
+	//	}
+	//	Quaternion targetRot = Quaternion::LookRotation(local_lookDir);
+	//	Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
+	//	clients[ServerNumber][p->id]._player._rotation = targetRot;
+	//	clients[ServerNumber][p->id]._player.SetLookDir(angle);
+	//	break;
+	//}
 	case CS_SKILL_TARGET: {
 		CS_SKILL_TARGET_PACKET* p = reinterpret_cast<CS_SKILL_TARGET_PACKET*>(packet);
 
@@ -458,6 +459,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			break;
 		}
 		case S_PLAYER_CLASS::ARCHER: {
+			cout << "Archer CS_ATTACK\n";
 			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
 
 			proj._pos = player._pos;
@@ -534,6 +536,12 @@ void GameManager::Update() {
 		if (cl.second._state != ST_INGAME) continue;
 		cl.second._player.Update();
 
+		auto& player = cl.second._player;
+		if (player._class == S_PLAYER_CLASS::FIGHTER && player.currentState == &PlayerState::UltimateState::GetInstance()) {
+			float terrainHeight = terrain[(int)scene_type].GetHeight(player._pos.x, player._pos.z);
+			player._pos.y = terrainHeight + player._data;
+		}
+
 		if (cl.second._player.HasMoveInput()) {
 			Vec3 newPos = cl.second._player._pos + (cl.second._player._velocity * TICK_INTERVAL);
 
@@ -587,9 +595,10 @@ void GameManager::Update() {
 		if (ms.second._hp >= 0) {
 			for (auto& proj : Projectiles[ServerNumber]) {
 				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
+				if (proj.second._remove) continue; // 투사체가 제거된 경우는 패스
 				if (ms.second._boundingbox.Intersects(proj.second._boundingbox)) {
 					ms.second.TakeDamage(proj.second._damage);
-					erase_proj.emplace_back(proj.first);
+					proj.second._remove = true; // 투사체 제거
 				}
 			}
 		}
@@ -597,17 +606,19 @@ void GameManager::Update() {
 
 	for (auto& proj : Projectiles[ServerNumber]) {
 		proj.second.Update();
-		if (abs(proj.second._pos.x) > 100.f || abs(proj.second._pos.z) > 100.f) {
+		if (abs(proj.second._pos.x) > 100.f || abs(proj.second._pos.z) > 100.f
+			|| proj.second._remove) {
 			erase_proj.emplace_back(proj.first);
 		}
 	}
-	for (int i = 0; i < erase_proj.size(); ++i) {
+	for (int i = 0; i < erase_proj.size(); ++i) {	
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			cl.second.send_remove_projectile_packet(erase_proj[i]);
 		}
 		Projectiles[ServerNumber].erase(erase_proj[i]);
 	}
+
 	SendAllPlayersPosPacket();
 	SendAllProjectilesPosPacket();
 	SendAllMonstersPosPacket();

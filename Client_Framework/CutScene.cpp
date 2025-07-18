@@ -40,27 +40,38 @@ void CCutScene::InitializeFighterCutScene()
     Matrix camWorld;
     auto& transform = mThirdPersonCamera->GetTransform();
 
-    //camWorld = GetPositionFromRelative(Vec3{ 1.21935, 0.499366, 0.68519 }, Quaternion{ 0.0381727, 0.85889, 0.0647156, -0.506619 });
-    //camWorld.Decompose(scale, rotation, translation);
+    camWorld = GetPositionFromRelative(Vec3{ 1.27789, 1.11734, 1.92968 }, Quaternion{ -0.0333761, 0.94699, -0.104699, -0.301884 });
+    camWorld.Decompose(scale, rotation, translation);
 
-    //mKeyFrames[0.0f] = {
-    //    translation,
-    //    rotation
-    //};
+    mKeyFrames[0.0f] = {
+        translation,
+        rotation
+    };
+    mKeyFrames[1.3] = {
+        translation,
+        rotation
+    };
 
-    //mKeyFrames[1.00128579] = {
-    //    translation,
-    //    rotation
-    //};
+    camWorld = GetPositionFromRelative(Vec3{ 1.56613, 0.00875664, 3.6023 }, Quaternion{ 0.0177714, 0.968301, 0.072159, -0.238475 });
+    camWorld.Decompose(scale, rotation, translation);
+    translation.y += 1.f;
 
-    //mKeyFrames[1.16748214] = {
-    //    translation,
-    //    rotation
-    //};
+    mKeyFrames[1.30001f] = {
+        translation,
+        rotation
+    };
 
-    mKeyFrames[0.0] = {
-        transform->GetLocalPosition(),
-        transform->GetLocalRotation()
+    mKeyFrames[1.9f] = {
+        translation,
+        rotation
+    };
+
+    camWorld = GetPositionFromRelative(Vec3{ 2.86335, 1.95796, -1.62943 }, Quaternion{ 0.165736, -0.449358, 0.0852413, 0.873695 });
+    camWorld.Decompose(scale, rotation, translation);
+
+    mKeyFrames[1.900001f] = {
+        translation,
+        rotation
     };
     
     mKeyFrames[2.5f] = {
@@ -77,14 +88,40 @@ void CCutScene::InitializeMageCutScene()
     Matrix camWorld;
     auto& transform = mThirdPersonCamera->GetTransform();
 
-    mKeyFrames[0.0] = {
-    transform->GetLocalPosition(),
-    transform->GetLocalRotation()
+    camWorld = GetPositionFromRelative(Vec3{ 0.220673, 0.71169, 2.19035 }, Quaternion{ 0.00203271, 0.997964, 0.0437918, -0.0463231 });
+    camWorld.Decompose(scale, rotation, translation);
+
+    mKeyFrames[0.0f] = {
+        MoveAlongViewDirection(translation, rotation, -2.0f),
+        rotation
+    };
+
+    mKeyFrames[0.55] = {
+        MoveAlongViewDirection(translation, rotation, -1.85f),
+        rotation
+    };
+
+    mKeyFrames[0.7] = {
+        MoveAlongViewDirection(translation, rotation, -0.15f),
+        rotation
     };
     
+    mKeyFrames[1.5] = {
+        translation,
+        rotation
+    };
+
+    camWorld = GetPositionFromRelative(Vec3{ -4.46388, 3.08531, -1.89764 }, Quaternion{ 0.139074, 0.500665, -0.0818722, 0.850465 });
+    camWorld.Decompose(scale, rotation, translation);
+
+    mKeyFrames[1.50001f] = {
+        translation,
+        rotation
+    };
+
     mKeyFrames[2.5f] = {
-        transform->GetLocalPosition(),
-        transform->GetLocalRotation()
+        translation,
+        rotation
     };
 }
 

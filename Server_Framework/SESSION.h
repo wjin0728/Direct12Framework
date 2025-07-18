@@ -49,6 +49,9 @@ public:
 	void send_remove_projectile_packet(int projectile_id);
 	void send_add_monster_packet(Monster& monster, int id);
 	void send_remove_monster_packet(int monster_id);
+	void send_add_effect_packet(int id, Vec3 pos);
+	void send_remove_watershield_packet(int id);
+	void send_hp_packet(int id, int hp);
 };
 
 #endif
