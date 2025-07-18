@@ -122,6 +122,8 @@ public:
 		}
 	}
 
+	void CreateItem(Monster* monster);
+
 private:
 	void Update();
 

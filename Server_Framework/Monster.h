@@ -11,6 +11,7 @@ public:
     S_ENEMY_TYPE _class;
     S_MONSTER_STATE	_state;
 	bool _remove = false;
+	bool _drop_item = false;
 
     int _hp;
     int _barrier;

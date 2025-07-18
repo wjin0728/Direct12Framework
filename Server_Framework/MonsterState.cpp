@@ -157,6 +157,7 @@ MonsterState::DeathState& MonsterState::DeathState::GetInstance() { static Monst
 
 void MonsterState::DeathState::Enter(Monster* monster) {
     monster->SetVelocity(0, 0, 0);
+	monster->_drop_item = false;
 	deathTimer = 5.f;
 }
 

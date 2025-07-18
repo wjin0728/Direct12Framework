@@ -587,7 +587,13 @@ void GameManager::Update() {
 	vector<int> erase_proj;
 
 	for (auto& ms : Monsters[ServerNumber]) {
-		if (ms.second._remove) continue; // 몬스터가 제거된 경우는 패스
+		if (ms.second._remove) {
+			if (!ms.second._drop_item) {
+				CreateItem(&ms.second);
+				ms.second._drop_item = true;
+			}
+			continue; // 몬스터가 제거된 경우는 패스
+		}
 		ms.second.Update();
 		ms.second.AvoidCollision(Monsters[ServerNumber]);
 
@@ -712,4 +718,17 @@ void GameManager::SendAllProjectilesPosPacket()
 			cl.second.do_send(&packet);
 		}
 	}
+}
+
+void GameManager::CreateItem(Monster* monster) {
+	items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(monster->_pos.x, monster->_pos.y + 0.3, monster->_pos.z);
+	items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(rand() % 2 ? S_ITEM_TYPE::S_FIRE_EXPLOSION : S_ITEM_TYPE::S_WATER_SHIELD);
+	items[ServerNumber][Item_cnt[ServerNumber]].LocalTransform();
+
+	for (auto& cl : clients[ServerNumber]) {
+		if (cl.second._state != ST_INGAME) continue;
+		cl.second.send_drop_item_packet(items[ServerNumber][Item_cnt[ServerNumber]], Item_cnt[ServerNumber]);
+	}
+
+	Item_cnt[ServerNumber]++;
 }
