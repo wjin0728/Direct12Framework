@@ -108,7 +108,7 @@ struct CBUIData
 	Vec4 color = Vec4::One;
 	Vec2 size{};
 	Vec2 uvOffset;  
-	Vec2 uvScale;   
+	Vec2 uvScale;
 	float type{ 0 };
 	int textureIdx = -1;
 
@@ -123,9 +123,9 @@ struct CBUIData
 	int intData3{ 0 };
 
 	Vec2 pos{};
+	Vec2 scale = Vec2::One; // Scale for the UI element
 	Vec2 vec2Data1{};
 	Vec2 vec2Data2{};
-	Vec2 vec2Data3{};
 
 	Vec3 vec3Data0{};
 	Vec3 vec3Data1{};

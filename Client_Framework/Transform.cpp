@@ -339,7 +339,8 @@ void CTransform::UpdateWorldMatrix(std::shared_ptr<CTransform> parent, bool upda
 		UpdateLocalMatrix();
 		mDirtyFlag = false;
 	}
-
+	if (owner->GetName() == "SM_Env_Rock_Cliff_02")
+		int a = 0;
 	mWorldMat = parent ? (mLocalMat * parent->GetWorldMat(update)) : mLocalMat;
 
 	dirtyFramesNum = FRAME_RESOURCE_COUNT;

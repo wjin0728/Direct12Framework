@@ -1,7 +1,11 @@
 #include "stdafx.h"
 #include "EnemyState.h"
 #include "Animation.h"
-#include "Transform.h"
+#include"Transform.h"
+#include"ResourceManager.h"
+#include"HealthSystem.h"
+
+const float CEnemyState::MAX_HEALTH = 100.f;
 
 void CEnemyState::Awake()
 {
@@ -10,6 +14,17 @@ void CEnemyState::Awake()
 
 void CEnemyState::Start()
 {
+	auto healthBar = CGameObject::Instantiate(RESOURCE.GetPrefab("HP_Background"), owner->GetTransform());
+	if (healthBar) {
+		healthBar->GetTransform()->SetLocalPosition({ 0.f, 2.f, 0.f });
+		auto healthSystem = healthBar->AddComponent<CHealthSystem>();
+		healthSystem->ViewHealthBar(true);
+		healthSystem->SetRenderToWorld(true);
+		healthSystem->SetHealthBarColor({ 0.8f, 0.f, 0.f, 1.f });
+		healthBar->SetActive(true);
+
+		mHealthSystem = healthSystem;
+	}
 }
 
 void CEnemyState::Update()
@@ -58,11 +73,14 @@ void CEnemyState::OnEnterState(UINT8 state)
 	case MONSTER_STATE::RUN:
 		break;
 	case MONSTER_STATE::SPAWN:
+		if (mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(false);
 		mIsSpawning = true;
+		mIsSpawningFinished = false;
 		break;
 	case MONSTER_STATE::UNDERGROUND:
 	case MONSTER_STATE::ATTACK:
 	case MONSTER_STATE::PROJECTILE_ATTACK:
+		break;
 	case MONSTER_STATE::DEATH:
 		mIsDead = true;
 		break;
@@ -85,6 +103,8 @@ void CEnemyState::OnExitState(UINT8 state)
 		break;
 	case MONSTER_STATE::SPAWN:
 		mIsSpawning = false;
+		mIsSpawningFinished = true;
+		if(mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(true);
 		break;
 	case MONSTER_STATE::UNDERGROUND:
 		break;
@@ -109,11 +129,28 @@ void CEnemyState::OnExitState(UINT8 state)
 
 void CGrassSmallState::Awake()
 {
+	CEnemyState::Awake();
+	auto healthSystem = owner->GetComponentFromHierarchy<CHealthSystem>();
+	mHealth = 50.f;
+	mMaxHealth = 50.f;
 }
 
 void CGrassSmallState::Start()
 {
+	CEnemyState::Start();
 	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+
+	auto healthSystem = mHealthSystem.lock();
+	if (healthSystem) {
+		healthSystem->SetMaxHealth(mHealth);
+		healthSystem->SetHealth(mHealth);
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+
+		auto transform = healthSystem->GetTransform();
+		if (transform) {
+			transform->SetLocalPosition({ 0.f, 2.f, 0.f });
+		}
+	}
 }
 
 void CGrassSmallState::Update()
@@ -139,11 +176,27 @@ void CGrassSmallState::OnExitState(UINT8 state)
 
 void CGrassBigState::Awake()
 {
+	CEnemyState::Awake();
+	mHealth = 100.f;
+	mMaxHealth = 100.f;
 }
 
 void CGrassBigState::Start()
 {
+	CEnemyState::Start();
 	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+
+	auto healthSystem = mHealthSystem.lock();
+	if (healthSystem) {
+		healthSystem->SetMaxHealth(mHealth);
+		healthSystem->SetHealth(mHealth);
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+
+		auto transform = healthSystem->GetTransform();
+		if (transform) {
+			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+		}
+	}
 }
 
 void CGrassBigState::Update()

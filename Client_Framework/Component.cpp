@@ -24,7 +24,7 @@ void CComponent::SetOwner(CGameObject* _owner)
 
 void CComponent::EnqueueAwake()
 {
-    if(owner != nullptr && owner->mActive)
+    if(owner->mActive)
     {
         if(!mIsAwake){
             Awake();

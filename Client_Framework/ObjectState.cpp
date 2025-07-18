@@ -29,6 +29,7 @@ void CPlayerStateMachine::Start()
 	controller->AddAnimationEvent("RunAttack", "Dust", func);
 
 	ActivateShield(false);
+
 }
 
 void CPlayerStateMachine::Update()
@@ -213,12 +214,12 @@ void CWarriorState::Start()
 	CPlayerStateMachine::Start();
 	auto socket = owner->AddBoneSocket("Equipment.weapon.R.001", "WeaponSocket");
 	if (socket) {
-		socket->SetActive(true);
 		mTrail = socket->AddComponent<CTrailRenderer>();
 		mTrail.lock()->mActive = false;
 		mAttackSocket = socket->GetTransform();
 		mAttackSocket.lock()->SetLocalPosition(Vec3(0.0f, 0.5f, 0.0f));
 		socket->SetRenderer(mTrail.lock());
+		socket->SetActive(true);
 	}
 	auto controller = mAnimationController.lock();
 	if (!controller) {

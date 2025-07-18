@@ -140,11 +140,11 @@ bool ServerManager::InitPlayerAndCamera()
 
 void ServerManager::RegisterPlayerInScene(class CScene* scene)
 {
-	scene->AddObjectImmediately(mPlayer);
-	scene->AddObjectImmediately(mMainCamera);
+	scene->AddObjectImmediately(mPlayer, true);
+	scene->AddObjectImmediately(mMainCamera, true);
 
 	for (auto& pair : mOtherPlayers) {
-		scene->AddObjectImmediately(pair.second);
+		scene->AddObjectImmediately(pair.second, true);
 	}
 }
 
@@ -272,7 +272,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			player = mOtherPlayers[packet->id];
 		}
 		CGameObject::Instantiate(obj, player->GetTransform());
-		player->SetActive(true);
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
 		
@@ -304,6 +303,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
 		if (clientID != packet->id) {
 			scene->AddObject(player);
 		}
@@ -342,6 +345,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
 		cout << "packet._pos : " << packet->x << ", " << packet->y << ", " << packet->z << endl;
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
 
 		std::string objName[ITEM_TYPE::item_end] 
 			= { "FireEnchant", "FireExplosion", "WaterHeal", "WaterShield", "GrassVine", 
@@ -355,7 +362,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		itemObj->SetTag("Item");
 		itemObj->SetRenderLayer(RENDER_LAYER::Transparent);
 		itemObj->SetObjectType(OBJECT_TYPE::ITEM);
-		itemObj->SetActive(true);
 		itemObj->SetStatic(false);
 		itemObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		auto movement = itemObj->AddComponent<CItemMovement>();
@@ -364,14 +370,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		movement->SetDirection({ 0.f, 1.f, 0.f });
 		movement->SetTargetObject(mMainCamera);
 
-		if (scene && scene->mIsActive) {
-			itemObj->Awake();
-			itemObj->Start();
-		}
-		
 		itemObj->mID = packet->item_id;
 		mItems[packet->item_id] = itemObj;
-		scene->AddObjectImmediately(itemObj);
+		scene->AddObject(itemObj);
 
 		break;
 	}
@@ -382,6 +383,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		else mPlayer->GetPlayerController()->SetSkill((ITEM_TYPE)packet->item_type);
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
 		scene->RemoveObject(mItems[packet->item_id]);
 		mItems.erase(packet->item_id);
 
@@ -397,6 +402,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_ADD_PROJECTILE: {
 		SC_ADD_PROJECTILE_PACKET* packet = reinterpret_cast<SC_ADD_PROJECTILE_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
 
 		std::string objName[(int)PROJECTILE_TYPE::PROJECTILE_END] 
 			= { "Arrow", "FireBall", "IceBall", "GrassBall", "MagicBall" };
@@ -412,7 +421,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			projectileObj->SetObjectType(OBJECT_TYPE::PLAYER_PROJECTILE);
 		else
 			projectileObj->SetObjectType(OBJECT_TYPE::ENEMY_PROJECTILE);
-		projectileObj->SetActive(true);
 		projectileObj->SetStatic(false);
 		projectileObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		Quaternion local_rot = Quaternion::LookRotation(Vec3(packet->dir_x, packet->dir_y, packet->dir_z));
@@ -436,6 +444,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_ADD_MONSTER: {
 		SC_ADD_MONSTER_PACKET* packet = reinterpret_cast<SC_ADD_MONSTER_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
 		std::string objName[(int)ENEMY_TYPE::ENEMY_END]
 			= { "GrassSmall", "GrassBig", "FireSmall", "FireBig", "WaterSmall", "WaterBig" };
 		ENEMY_TYPE enumType = (ENEMY_TYPE)packet->monster_type;
@@ -447,7 +459,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto monsterObj = CGameObject::Instantiate(monster);
 		monsterObj->SetTag("monster");
 		monsterObj->SetRenderLayer(RENDER_LAYER::Opaque);
-		monsterObj->SetActive(true);
 		monsterObj->SetStatic(false);
 		monsterObj->SetObjectType(OBJECT_TYPE::ENEMY);
 		monsterObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
@@ -497,6 +508,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_REMOVE_MONSTER: {
 		SC_REMOVE_MONSTER_PACKET* packet = reinterpret_cast<SC_REMOVE_MONSTER_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
 		scene->RemoveObject(mEnemies[packet->monster_id]);
 		mEnemies.erase(packet->monster_id);
 		break;
@@ -504,6 +519,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_REMOVE_PROJECTILE: {
 		SC_REMOVE_PROJECTILE_PACKET* packet = reinterpret_cast<SC_REMOVE_PROJECTILE_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
 		scene->RemoveObject(mProjectiles[packet->projectile_id]);
 		mProjectiles.erase(packet->projectile_id);
 		break;

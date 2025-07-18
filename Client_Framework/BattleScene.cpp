@@ -20,6 +20,7 @@
 #include"ParticleManager.h"
 #include"Light.h"
 #include"RenderManager.h"
+#include"CEntityState.h"
 
 CBattleScene::CBattleScene() : CScene()
 {
@@ -30,7 +31,7 @@ void CBattleScene::Initialize()
 	// Load default resources
 	INSTANCE(ServerManager).Client_Login();
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
-	LoadSceneFromFile(SCENE_PATH("Battle1"));
+	LoadSceneFromFile(SCENE_PATH("Scene"));
 	CLight::SetVolumes();
 }
 
@@ -52,10 +53,16 @@ void CBattleScene::Update()
 		}
 	}*/
 	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
-
+		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
+		for (auto& monster : monsters) {
+			monster->GetStateMachine()->GetHit(10.f);
+		}
 	}
 	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
-
+		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
+		for (auto& monster : monsters) {
+			monster->GetStateMachine()->Heal(10.f);
+		}
 	}
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();

@@ -21,7 +21,6 @@ std::shared_ptr<CGameObject> CObjectPool::CreatePoolableObject() const
 	}
 
 	auto obj = CGameObject::Instantiate(mOriginal);
-	obj->SetActive(false);
 
 	return obj;
 }
@@ -33,7 +32,6 @@ void CObjectPool::PushObject(std::shared_ptr<CGameObject> object)
 	}
 	object->ReturnCBVIndex();
 	object->GetTransform()->Reset();
-	object->SetActive(false);
 
 	mPoolStack.push(object);
 }
@@ -50,7 +48,6 @@ std::shared_ptr<CGameObject> CObjectPool::PopObject(const std::shared_ptr<CTrans
 		popObject = CreatePoolableObject();
 	}
 
-	popObject->SetActive(true);
 
 	if (parent) {
 		popObject->GetTransform()->SetParent(parent);

@@ -209,7 +209,7 @@ const Vec3& CCamera::GetRight()
 Vec2 CCamera::TransformToScreenSpace(const Vec3& worldPos) const
 {
 	Vec4 screenPos = Vec4::Transform(Vec4(worldPos.x, worldPos.y, worldPos.z, 1), mViewPerspectiveProjectMat);
-	screenPos /= screenPos.w; // Normalize by w to get NDC coordinates
+	screenPos /= screenPos.w; 
 	screenPos.x = (screenPos.x + 1.0f) * 0.5f * mViewport.Width;
 	screenPos.y = (1.0f - (screenPos.y + 1.0f) * 0.5f) * mViewport.Height; 
 	return Vec2(screenPos.x, screenPos.y);
@@ -218,6 +218,6 @@ Vec2 CCamera::TransformToScreenSpace(const Vec3& worldPos) const
 Vec2 CCamera::TransformToNDC(const Vec3& worldPos) const
 {
 	Vec4 screenPos = Vec4::Transform(Vec4(worldPos.x, worldPos.y, worldPos.z, 1), mViewPerspectiveProjectMat);
-	screenPos /= screenPos.w; // Normalize by w to get NDC coordinates
+	screenPos /= screenPos.w; 
 	return Vec2(screenPos.x, screenPos.y);
 }

@@ -23,6 +23,7 @@ VS_OUTPUT VS_Sprite(VS_INPUT input)
     float2 uv = input.uv * uvScale + uvOffset;
     float2 pos = uiData.pos.xy;
     float2 size = uiData.size / renderTargetSize;
+    size *= uiData.sizeScale;
     
     output.pos = float4(input.pos.x * size.x + pos.x, input.pos.y * size.y + pos.y, 0.f, 1.f);
     //output.pos = float4(input.pos, 1.f);
@@ -39,9 +40,18 @@ float4 PS_Sprite(VS_OUTPUT input) : SV_Target
     CBUIData uiData = UIData[idx0];
     float4 color = uiData.color;
     texColor = diffuseMap[uiData.textureIdx].SampleLevel(linearClamp, input.uv, 0);
-    
+    texColor.rgb = GammaDecoding(texColor.rgb);
     float4 finalColor = texColor * color;
-    finalColor.rgb = GammaDecoding(finalColor.rgb);
+    if (uiData.intData0 == 1)
+    {
+        if (input.uv.x > uiData.floatData1)
+            discard;
+        else if (uiData.floatData0 < input.uv.x && input.uv.x <= uiData.floatData1)
+            return float4(1.f, 1.f, 1.f, finalColor.a * 0.3f);
+        else if (uiData.floatData1 <= input.uv.x && input.uv.x <= uiData.floatData0)
+            return float4(finalColor.rgb / 3.f, finalColor.a);
+    }
+ 
     //finalColor.rgb = ToneMapping(finalColor.rgb);
     //finalColor.rgb = GammaEncoding(finalColor.rgb);
     return finalColor;

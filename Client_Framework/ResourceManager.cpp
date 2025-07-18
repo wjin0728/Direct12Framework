@@ -78,7 +78,8 @@ bool CResourceManager::LoadPlayerObjects()
 	LoadPrefabFromFile("Archer");
 	LoadPrefabFromFile("Fighter");
 	LoadPrefabFromFile("Mage");
-
+	LoadPrefabFromFile("HP_Background");
+	LoadPrefabFromFile("MainUI");
 	return true;
 }
 
@@ -145,7 +146,6 @@ void CResourceManager::LoadPrefabFromFile(const std::string& name)
 	auto skill = CGameObject::CreateObjectFromFile(ifs, mPrefabs);
 	if (skill) {
 		skill->SetName(name);
-		skill->SetActive(false);
 		skill->SetStatic(false);
 		skill->SetInstancing(false);
 		skill->SetObjectType(OBJECT_TYPE::ITEM);

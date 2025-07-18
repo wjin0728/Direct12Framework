@@ -58,7 +58,7 @@ public:
 
 	void ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB);
 
-	void AddObjectImmediately(std::shared_ptr<CGameObject> object);
+	void AddObjectImmediately(std::shared_ptr<CGameObject> object, bool activate = false);
 	void AddObject(std::shared_ptr<CGameObject> object);
 	void RemoveObject(std::shared_ptr<CGameObject> object);
 	void SetTerrain(std::shared_ptr<CTerrain> terrain);
@@ -76,5 +76,4 @@ public:
 protected:
 	void UpdatePassData();
 	void RemoveObjects();
-	void AwakeObject(std::shared_ptr<CGameObject> obj);
 };

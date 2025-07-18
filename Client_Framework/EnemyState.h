@@ -4,7 +4,8 @@
 class CEnemyState :
     public CEntityState
 {
-private:
+protected:
+	static const float MAX_HEALTH;
     std::weak_ptr<class CTransform> mAttackSocket;
 
 public:

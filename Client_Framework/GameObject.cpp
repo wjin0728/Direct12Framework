@@ -24,9 +24,7 @@
 CGameObject::CGameObject(bool makeTransform)
 {
 	if (makeTransform) {
-		mTransform = std::make_shared<CTransform>();
-		mComponents.push_back(mTransform);
-		mTransform->SetOwner(this);
+		mTransform = AddComponent<CTransform>();
 	}
 	mActive = false;
 }
@@ -105,11 +103,14 @@ void CGameObject::SetActive(bool active)
 {
 	mActive = active;
 	if (mActive) {
-		Awake();
+		for (auto& component : mComponents) {
+			component->EnqueueAwake();
+		}
 	}
 	for (auto& child : mChildren) {
 		child->SetActive(active);
 	}
+	mRenderer = GetComponent<CRenderer>();
 }
 
 void CGameObject::SetStatic(bool isStatic)
@@ -174,6 +175,9 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::shared_ptr<CGam
 	instance->mLocalAABB = original->mLocalAABB;
 	instance->mWorldAABB = original->mWorldAABB;
 	instance->mCastShadow = original->mCastShadow;
+	instance->mRenderLayer = original->mRenderLayer;
+	if (instance->mName == "SM_Env_Rock_Cliff_02")
+		int a = 0;
 
 	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
 	if (!instance->mRenderer) {
@@ -213,9 +217,11 @@ std::shared_ptr<CGameObject> CGameObject::Instantiate(const std::unique_ptr<CGam
 	instance->mName = original->mName;
 	instance->mIsInstancing = original->mIsInstancing;
 	instance->misAwake = false;
+	instance->mIsStart = false;
 	instance->mLocalAABB = original->mLocalAABB;
 	instance->mWorldAABB = original->mWorldAABB;
 	instance->mCastShadow = original->mCastShadow;
+	instance->mRenderLayer = original->mRenderLayer;
 
 	instance->mRenderer = instance->GetComponent<CMeshRenderer>();
 	if (!instance->mRenderer) {
@@ -342,7 +348,6 @@ std::shared_ptr<CGameObject> CGameObject::CreateObjectFromFile(std::ifstream& if
 		BinaryReader::ReadDateFromFile(ifs, radius);
 
 		root->mRootLocalBS = BoundingSphere(boundingCenter, radius);
-		root->SetActive(true);
 
 		float isStatic{};
 		BinaryReader::ReadDateFromFile(ifs, isStatic);
@@ -394,7 +399,6 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			std::string prefabName{};
 			ReadDateFromFile(inFile, prefabName);
 			obj = CGameObject::Instantiate(prefabs[prefabName]);
-			obj->SetActive(true);
 			obj->CreateTransformFromFile(inFile);
 
 			std::string tag{};
@@ -669,7 +673,8 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 	mRootLocalBS = mRenderer->GetWorldBS();
 	BoundingOrientedBox localOBB = mRenderer->GetWorldOOBB();
 	mLocalAABB = BoundingBox(localOBB.Center, localOBB.Extents);
-
+	if (mName == "SM_Env_Rock_Cliff_02")
+		int a = 0;
 	int materialCnt{};
 	std::string materialName{};
 	ReadDateFromFile(inFile, materialCnt);

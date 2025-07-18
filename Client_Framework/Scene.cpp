@@ -67,10 +67,6 @@ void CScene::Activate()
 void CScene::Start()
 {
 	for (const auto& object : mObjects) {
-		object->Start();
-	}
-
-	for (const auto& object : mObjects) {
 		ExpandSceneAABB(object, mSceneAABB);
 	}
 	INSTANCE(CShadowManager).UpdateSceneBoundingBox(mSceneAABB);
@@ -151,7 +147,7 @@ void CScene::ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& scen
 	}
 }
 
-void CScene::AddObjectImmediately(std::shared_ptr<CGameObject> object)
+void CScene::AddObjectImmediately(std::shared_ptr<CGameObject> object, bool activate)
 {
 	auto itr = findByRawPointer(mObjects, object.get());
 	if (itr == mObjects.end()) {
@@ -166,6 +162,7 @@ void CScene::AddObjectImmediately(std::shared_ptr<CGameObject> object)
 			mObjectTypes[type].push_back(object);
 		}
 	}
+	object->SetActive(activate);
 }
 
 void CScene::AddObject(std::shared_ptr<CGameObject> object)
@@ -268,8 +265,7 @@ void CScene::CommitObjectChanges()
 	while (!mAddQueue.empty()) {
 		auto object = mAddQueue.front();
 		mAddQueue.pop();
-		AddObjectImmediately(object);
-		AwakeObject(object);
+		AddObjectImmediately(object, true);
 	}
 	while (!mComponentStartQueue.empty()) {
 		auto component = mComponentStartQueue.front();
@@ -287,26 +283,6 @@ void CScene::RemoveObjects()
 		RemoveObject(object);
 	}
 }
-
-void CScene::AwakeObject(std::shared_ptr<CGameObject> obj) {
-	for (auto& comp : obj->mComponents) {
-		if(!comp->mIsAwake){
-			comp->Awake();
-			comp->mIsAwake = true;
-		}
-		if (!comp->mIsStart) {
-			AddComponentToStartQueue(comp.get());
-			comp->mIsStart = true;
-		}
-	}
-	for (auto& child : obj->mChildren) {
-		AwakeObject(child);
-	}
-}
-
-
-
-
 
 
 

@@ -16,7 +16,12 @@ private:
 
 public:
 	CUIRenderer();
-	CUIRenderer(const CUIRenderer& other) : CRenderer(other) {}
+	CUIRenderer(const CUIRenderer& other) : CRenderer(other) 
+	{
+		mUIData = other.mUIData;
+		mShader = other.mShader;
+		mUIdataIdx = -1;
+	}
 	virtual ~CUIRenderer();
 public:
 	void Awake() override;
@@ -45,9 +50,10 @@ public:
 	void SetSize(const Vec2& size) { mUIData.size = size; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetUVOffset(const Vec2& uvOffset) { mUIData.uvOffset = uvOffset; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetUVScale(const Vec2& uvScale) { mUIData.uvScale = uvScale; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
+	void SetScale(const Vec2& scale) { mUIData.scale = scale; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetWorldPosition(const Vec3& pos);
 
-	CBUIData GetUIData() const { return mUIData; }
+	CBUIData& GetUIData() { return mUIData; }
 	Vec4 GetColor() const { return mUIData.color; }
 	Vec2 GetSize() const { return mUIData.size; }
 	Vec2 GetUVOffset() const { return mUIData.uvOffset; }

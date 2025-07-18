@@ -20,7 +20,7 @@ CTrailRenderer::CTrailRenderer()
     mDuration = 0.2f;
     mTotalTime = 0.0f;
 	mWidth = 0.5f; 
-	mMinDstance = 0.4f;
+	mMinDstance = 0.2f;
 	mMaxPoints = 1000; 
     mTrailPoints.reserve(mMaxPoints);
 }

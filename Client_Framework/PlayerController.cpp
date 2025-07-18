@@ -44,7 +44,7 @@ void CPlayerController::Start()
 	auto targetUIObj = CGameObject::CreateUIObject("Sprite", "TargetMarker", { 0.f,0.f }, { 80.f,80.f });
 	if (targetUIObj) {
 		mTargetMarker = targetUIObj->AddComponent<CTargetMarker>();
-		INSTANCE(CSceneManager).GetCurScene()->AddObject(targetUIObj);
+		owner->AddChild(targetUIObj);
 	}
 
 	auto func = [](float time) {
@@ -85,7 +85,8 @@ void CPlayerController::Update()
 	for (const auto& enemy : enemies) {
 		BoundingSphere objBS = enemy->GetRootBoundingSphere();
 		if (!camera->IsInFrustum(objBS, FORWARD)) continue;
-		if (enemy->GetStateMachine()->mIsDead) continue;
+		auto enemyState = enemy->GetStateMachine();
+		if (enemyState->mIsDead || !enemyState->mIsSpawningFinished) continue;
 		auto enemyTransform = enemy->GetTransform();
 		Vec3 toEnemy = enemyTransform->GetWorldPosition() - GetTransform()->GetWorldPosition();
 		toEnemy.y = 0.f;

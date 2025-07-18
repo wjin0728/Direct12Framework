@@ -124,7 +124,7 @@ struct CBUIData
     int intData3;
 
     float2 pos;
-    float2 vec2Data1;
+    float2 sizeScale;
     float2 vec2Data2;
     float2 vec2Data3;
 

@@ -26,6 +26,8 @@ CUIRenderer::CUIRenderer()
 	mUIData.size = Vec2(1.f, 1.f);
 	mUIData.uvOffset = Vec2(0.f, 0.f);
 	mUIData.uvScale = Vec2(1.f, 1.f);
+	mUIData.floatData0 = 1.f;
+	mUIData.intData1 = 0;
 }
 
 CUIRenderer::~CUIRenderer()
@@ -134,11 +136,10 @@ void CUIRenderer::SetTexture(const std::shared_ptr<class CTexture>& texture)
 
 void CUIRenderer::SetWorldPosition(const Vec3& pos)
 {
-	//Transform worldPosition to screen position
 	auto camera = INSTANCE(CRenderManager).GetCamera("MainCamera");
 	if (!camera) {
 		return;
 	}
-	//Vec3 screenPos = camera->WorldToScreen(pos);
-
+	Vec2 screenPos = camera->TransformToScreenSpace(pos);
+	mUIData.pos = screenPos; mUIDirtyFrame = FRAME_RESOURCE_COUNT;
 }

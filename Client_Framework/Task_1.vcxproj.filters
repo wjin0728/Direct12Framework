@@ -256,12 +256,14 @@
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
     <ClInclude Include="CutScene.h" />
-    <ClInclude Include="TrailRenderer.h" />
     <ClInclude Include="EnemyState.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
     <ClInclude Include="HealthSystem.h">
       <Filter>GameObject\Component\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="TrailRenderer.h">
+      <Filter>GameObject\Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -308,9 +310,6 @@
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="FrameResource.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTargetGroup.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="GameApplication.cpp">
@@ -463,14 +462,17 @@
     <ClCompile Include="CutScene.cpp">
       <Filter>Client</Filter>
     </ClCompile>
-    <ClCompile Include="TrailRenderer.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="EnemyState.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
     <ClCompile Include="HealthSystem.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTargetGroup.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="TrailRenderer.cpp">
+      <Filter>GameObject\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
