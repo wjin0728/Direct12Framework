@@ -107,6 +107,7 @@ void CEnemyState::OnExitState(UINT8 state)
 		if(mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(true);
 		break;
 	case MONSTER_STATE::UNDERGROUND:
+		int a = 0; // Placeholder for any specific logic needed when exiting underground state
 		break;
 	case MONSTER_STATE::RUN:
 		break;
@@ -160,13 +161,13 @@ void CGrassSmallState::Update()
 
 void CGrassSmallState::OnEnterState(UINT8 state)
 {
+	CEnemyState::OnEnterState(state);
 	auto controller = mAnimationController.lock();
 	if (!controller) {
 		return;
 	}
 	controller->SetTrackAnimationSet((int)state);
 
-	CEnemyState::OnEnterState(state);
 }
 
 void CGrassSmallState::OnExitState(UINT8 state)
@@ -206,13 +207,13 @@ void CGrassBigState::Update()
 
 void CGrassBigState::OnEnterState(UINT8 state)
 {
+	CEnemyState::OnEnterState(state);
 	auto controller = mAnimationController.lock();
 	if (!controller) {
 		return;
 	}
 	controller->SetTrackAnimationSet((int)state);
 
-	CEnemyState::OnEnterState(state);
 }
 
 void CGrassBigState::OnExitState(UINT8 state)
