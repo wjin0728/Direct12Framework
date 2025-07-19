@@ -590,7 +590,9 @@ void CGameObject::CreateUIrendererFromFile(std::ifstream& inFile)
 	Color color{};
 	ReadDateFromFile(inFile, color);
 	Vec2 size{};
+	Vec2 ratio = INSTANCE(CDX12Manager).GetRenderTargetSize() / Vec2(1920.f, 1080.f);
 	ReadDateFromFile(inFile, size);
+	size *= ratio;
 	Vec2 pos{};
 	ReadDateFromFile(inFile, pos);
 

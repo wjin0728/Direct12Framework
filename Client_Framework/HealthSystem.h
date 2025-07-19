@@ -6,6 +6,7 @@ class CHealthSystem :
     public CComponent
 {
 private:
+	std::weak_ptr<class CGameObject> mOwner{};
 
 	std::weak_ptr<class CUIRenderer> mHealthBarBackground{};
 	std::weak_ptr<class CUIRenderer> mHealthBarEdge{};
@@ -67,5 +68,7 @@ public:
 	void SetFillTexture(const std::string& textureName);
 	void SetHealthBarColor(const Color& color) { mHealthBarColor = color; UpdateHealthBar(); }
 	void SetHealthBarScale(const Vec2& size);
+
+	void BindOwner(const std::shared_ptr<class CGameObject>& owner);
 };
 

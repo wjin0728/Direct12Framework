@@ -135,6 +135,17 @@ void CPlayerStateMachine::OnExitState(UINT8 state)
 	}
 }
 
+void CPlayerStateMachine::GetHit(float damage)
+{
+	CEntityState::GetHit(damage);
+	float hpRatio = mHealth / mMaxHealth;
+	owner->TriggerEvent("OnFaceChanged", { hpRatio >= 0.3f });
+}
+
+void CPlayerStateMachine::Heal(float amount)
+{
+}
+
 void CArcherState::Awake()
 {
 	CPlayerStateMachine::Awake();

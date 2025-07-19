@@ -23,7 +23,7 @@ public:
 	CEntityState(UINT8 currentState) : currentState(currentState) {}
     ~CEntityState() = default;
 
-	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CEntityState>(); }
+	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CEntityState>(*this); }
 
 public:
 	virtual void Awake(){};
@@ -47,7 +47,7 @@ protected:
 	virtual void OnExitState(UINT8 state) {};
 
 public:
-	void GetHit(float damage);
-	void Heal(float amount);
+	virtual void GetHit(float damage);
+	virtual void Heal(float amount);
 };
 

@@ -18,9 +18,9 @@ void CEnemyState::Start()
 	if (healthBar) {
 		healthBar->GetTransform()->SetLocalPosition({ 0.f, 2.f, 0.f });
 		auto healthSystem = healthBar->AddComponent<CHealthSystem>();
-		healthSystem->ViewHealthBar(true);
 		healthSystem->SetRenderToWorld(true);
 		healthSystem->SetHealthBarColor({ 0.8f, 0.f, 0.f, 1.f });
+		healthSystem->BindOwner(healthBar);
 		healthBar->SetActive(true);
 
 		mHealthSystem = healthSystem;
@@ -79,6 +79,8 @@ void CEnemyState::OnEnterState(UINT8 state)
 		mIsSpawningFinished = false;
 		break;
 	case MONSTER_STATE::UNDERGROUND:
+		if (mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(false);
+		break;
 	case MONSTER_STATE::ATTACK:
 	case MONSTER_STATE::PROJECTILE_ATTACK:
 		break;

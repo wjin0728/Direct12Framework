@@ -380,7 +380,7 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 up = float3(0, 1, 0);
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * albedo + specular) * lightColor * NdotL;
-    float3 ambientLight = albedo * 0.02f * ndotUp;
+    float3 ambientLight = albedo * 0.1f * ndotUp;
     ambientLight += albedo * 0.35f;
     
     return ambientLight + (directLight * lightingData.shadowFactor) + surfaceData.emissive;

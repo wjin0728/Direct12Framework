@@ -22,6 +22,8 @@ class CGameObject : public std::enable_shared_from_this<CGameObject>
 	friend class CScene;
 
 private:
+	std::unordered_map<std::string, std::function<void(std::vector<std::any>)>> mEventMap;
+
 	std::vector<std::shared_ptr<CComponent>> mComponents{};
 
 	std::shared_ptr<CTransform> mTransform{};
@@ -67,7 +69,12 @@ public:
 	virtual void LateUpdate();
 
 public:
-	//������Ʈ�� ���纻�� �����Ѵ�.
+	void AddEvent(const std::string& name, std::function<void(std::vector<std::any>)> func) {
+		mEventMap[name] = func;
+	}
+	void TriggerEvent(const std::string& name, const std::vector<std::any>& args) {
+		if (mEventMap.count(name)) mEventMap[name](args);
+	}
 	static std::shared_ptr<CGameObject> Instantiate(const std::shared_ptr<CGameObject>& original,
 		const std::shared_ptr<CTransform>& parentTransform = nullptr);
 	//������Ʈ�� ���纻�� �����Ѵ�.
@@ -138,6 +145,8 @@ public:
 	std::shared_ptr<T> GetComponent();
 	template<typename T>
 	std::shared_ptr<T> GetComponentFromHierarchy();
+	template<typename T>
+	void GetAllComponentsFromHierarchy(std::vector<std::shared_ptr<T>> components);
 
 	template<typename T>
 	void RemoveComponent();
@@ -228,6 +237,21 @@ inline std::shared_ptr<T> CGameObject::GetComponentFromHierarchy()
 		}
 	}
 	return nullptr;
+}
+
+template<typename T>
+inline void CGameObject::GetAllComponentsFromHierarchy(std::vector<std::shared_ptr<T>> components)
+{
+	for (auto& component : mComponents) {
+		if (auto comp = std::dynamic_pointer_cast<T>(component)) {
+			if (comp) {
+				components.push_back(comp);
+			}
+		}
+	}
+	for (auto& child : mChildren) {
+		child->GetAllComponentsFromHierarchy<T>(components);
+	}
 }
 
 template<typename T>

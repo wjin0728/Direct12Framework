@@ -85,6 +85,15 @@ enum ITEM_TYPE : UINT8
 	item_end
 };
 
+enum class ElementType : UINT8
+{
+	Void,
+	Grass,
+	Water,
+	Fire,
+	end
+};
+
 
 enum class ENEMY_TYPE : UINT8
 {

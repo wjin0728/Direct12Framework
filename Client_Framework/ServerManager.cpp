@@ -395,7 +395,31 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_USE_SKILL: {
 		SC_USE_SKILL_PACKET* packet = reinterpret_cast<SC_USE_SKILL_PACKET*>(packet_ptr);
-		
+		switch ((ITEM_TYPE)packet->skill_type)
+		{
+		case ITEM_TYPE::FIRE_ENCHANT: {
+		break;
+		}
+		case ITEM_TYPE::FIRE_EXPLOSION: {
+			break;
+		}
+		case ITEM_TYPE::WATER_HEAL: {
+			break;
+		}
+		case ITEM_TYPE::WATER_SHIELD: {
+			if (auto state = std::dynamic_pointer_cast<CPlayerStateMachine>(mPlayer->GetStateMachine())) {
+				state->ActivateShield(true);
+			}
+			for(auto& pair : mOtherPlayers) {
+				if (auto state = std::dynamic_pointer_cast<CPlayerStateMachine>(pair.second->GetStateMachine())) {
+					state->ActivateShield(true);
+				}
+			}
+			break;
+		}
+		default:
+			break;
+		}
 
 		break;
 	}

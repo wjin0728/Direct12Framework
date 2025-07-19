@@ -117,7 +117,17 @@ void CPlayerController::SetChildAnimationController()
 void CPlayerController::SetSkill(ITEM_TYPE skill)
 {
 	mSkill = skill;
+	ElementType element = ElementType::end;
+	if(skill == ITEM_TYPE::FIRE_ENCHANT || skill == ITEM_TYPE::FIRE_EXPLOSION) {
+		element = ElementType::Fire;
+	} else if (skill == ITEM_TYPE::WATER_HEAL || skill == ITEM_TYPE::WATER_SHIELD) {
+		element = ElementType::Water;
+	} else if (skill == ITEM_TYPE::GRASS_WEAKEN || skill == ITEM_TYPE::GRASS_VINE) {
+		element = ElementType::Grass;
+	} 
+	mStateMachine->SetElementType(element);
 
+	owner->TriggerEvent("OnSkillChanged", { (UINT8)skill, (UINT8)element });
 }
 void CPlayerController::SetState(PLAYER_STATE state)
 {

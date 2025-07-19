@@ -39,6 +39,7 @@ public:
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CPlayerController>(*this); }
 
 public:
+	ITEM_TYPE GetSkill() const { return mSkill; }
 
 	void SetStateMachine(const std::shared_ptr<class CPlayerStateMachine>& StateMachine) { mStateMachine = StateMachine; }
 	void SetChildAnimationController();

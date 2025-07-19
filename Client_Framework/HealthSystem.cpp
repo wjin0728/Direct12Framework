@@ -7,7 +7,7 @@
 #include "RenderManager.h"
 #include"Timer.h"
 #include "HealthSystem.h"
-#include"Timer.h"
+#include "CEntityState.h"
 
 
 CHealthSystem::CHealthSystem()
@@ -20,14 +20,14 @@ CHealthSystem::~CHealthSystem()
 
 void CHealthSystem::Awake()
 {
-
+	mHealthBarBackground = owner->FindChildByName("HP_Background")->GetComponent<CUIRenderer>();
+	mHealthBarFill = owner->FindChildByName("HP")->GetComponent<CUIRenderer>();
+	mHealthBarEdge = owner->FindChildByName("HP_Outline")->GetComponent<CUIRenderer>();
+	ViewHealthBar(false);
 }
 
 void CHealthSystem::Start()
 {
-	mHealthBarBackground = owner->GetComponent<CUIRenderer>();
-	mHealthBarFill = owner->FindChildByName("HP_Fill")->GetComponent<CUIRenderer>();
-	mHealthBarEdge = owner->FindChildByName("HP_Edge")->GetComponent<CUIRenderer>();
 
 	auto fill = mHealthBarFill.lock();
 	auto background = mHealthBarBackground.lock();
@@ -68,7 +68,7 @@ void CHealthSystem::LateUpdate()
 		if (!camera) {
 			return;
 		}
-		Vec2 screenPos = camera->TransformToNDC(GetTransform()->GetWorldPosition());
+		Vec2 screenPos = camera->TransformToNDC(mOwner.lock()->GetTransform()->GetWorldPosition());
 		if (background) {
 			background->SetPosition(screenPos);
 		}
@@ -93,6 +93,7 @@ void CHealthSystem::UpdateHealthBar()
 		CBUIData& uiData = fill->GetUIData();
 		uiData.floatData0 = hpRatio;
 		uiData.floatData1 = std::clamp(mPrevHealth / mMaxHealth, 0.0f, 1.0f);
+		uiData.floatData2 += DELTA_TIME * 5.f;
 	}
 }
 
@@ -138,4 +139,27 @@ void CHealthSystem::SetHealthBarScale(const Vec2& size)
 		fill->SetScale(size);
 	}
 	UpdateHealthBar();
+}
+
+void CHealthSystem::BindOwner(const std::shared_ptr<class CGameObject>& owner)
+{
+	if (!owner) return;
+	mOwner = owner;
+	if (auto state = mOwner.lock()->GetStateMachine()) {
+		mMaxHealth = state->mMaxHealth;
+		mHealth = state->mHealth;
+		mPrevHealth = mHealth;
+
+		owner->AddEvent("OnHealthChanged", [this](const std::vector<std::any>& args) {
+			if (args.size() > 0) {
+				if (mPrevHealth <= mHealth) mPrevHealth = mHealth;
+				if (args[0].type() != typeid(float)) {
+					return;
+				}
+				mHealth = std::any_cast<float>(args[0]);
+				mHealth = std::clamp(mHealth, 0.0f, mMaxHealth);
+				UpdateHealthBar();
+			}
+			});
+	}
 }

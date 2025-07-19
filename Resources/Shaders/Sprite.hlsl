@@ -35,21 +35,35 @@ VS_OUTPUT VS_Sprite(VS_INPUT input)
 //#define TRANSPARENT_CLIP
 float4 PS_Sprite(VS_OUTPUT input) : SV_Target
 {
+    float2 uv = input.uv;
     float4 texColor = {1.f,1.f,1.f,1.f};
     
     CBUIData uiData = UIData[idx0];
     float4 color = uiData.color;
-    texColor = diffuseMap[uiData.textureIdx].SampleLevel(linearClamp, input.uv, 0);
+    texColor = diffuseMap[uiData.textureIdx].SampleLevel(linearClamp, uv, 0);
     texColor.rgb = GammaDecoding(texColor.rgb);
     float4 finalColor = texColor * color;
+    float4 color2 = finalColor * 0.5f;
+    color2.a = finalColor.a;
     if (uiData.intData0 == 1)
     {
-        if (input.uv.x > uiData.floatData1)
+        float fillAmount = uiData.floatData0;
+        float fillAmount2 = uiData.floatData1;
+        if (uv.x > fillAmount2)
             discard;
-        else if (uiData.floatData0 < input.uv.x && input.uv.x <= uiData.floatData1)
+        else if (fillAmount < uv.x && uv.x <= fillAmount2)
             return float4(1.f, 1.f, 1.f, finalColor.a * 0.3f);
-        else if (uiData.floatData1 <= input.uv.x && input.uv.x <= uiData.floatData0)
-            return float4(finalColor.rgb / 3.f, finalColor.a);
+        else if (fillAmount2 <= uv.x && uv.x <= fillAmount)
+            return float4(1.f, 1.f, 1.f, finalColor.a);
+        
+        float time = uiData.floatData2;
+        float wave = sin(uv.x * 20 + time * 5) * 0.1;
+        float newY = uv.y + wave;
+        
+        float t = saturate(uv.x / fillAmount);
+        float4 color = lerp(finalColor, color2, t);
+        
+        return color;
     }
  
     //finalColor.rgb = ToneMapping(finalColor.rgb);

@@ -197,6 +197,7 @@
     <ClInclude Include="TargetMarker.h" />
     <ClInclude Include="ThirdPersonCamera.h" />
     <ClInclude Include="TrailRenderer.h" />
+    <ClInclude Include="UIController.h" />
     <ClInclude Include="UIRenderer.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -267,6 +268,7 @@
     <ClCompile Include="TargetMarker.cpp" />
     <ClCompile Include="ThirdPersonCamera.cpp" />
     <ClCompile Include="TrailRenderer.cpp" />
+    <ClCompile Include="UIController.cpp" />
     <ClCompile Include="UIRenderer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />

@@ -21,6 +21,7 @@
 #include"Light.h"
 #include"RenderManager.h"
 #include"CEntityState.h"
+#include"UIController.h"
 
 CBattleScene::CBattleScene() : CScene()
 {
@@ -32,6 +33,14 @@ void CBattleScene::Initialize()
 	INSTANCE(ServerManager).Client_Login();
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
 	LoadSceneFromFile(SCENE_PATH("Scene"));
+
+	auto mainUI = RESOURCE.GetPrefab("MainUI");
+	if (mainUI) {
+		auto uiObject = CGameObject::Instantiate(mainUI);
+		uiObject->SetName("MainUI");
+		uiObject->AddComponent<CUIController>();
+		AddObjectImmediately(uiObject);
+	}
 	CLight::SetVolumes();
 }
 
