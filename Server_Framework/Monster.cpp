@@ -41,7 +41,11 @@ void Monster::SetState(S_MONSTER_STATE newState)
         _state = S_MONSTER_STATE::SPAWN;
         SetState(&MonsterState::SpawnState::GetInstance());
         break;
-    default:
+	case S_MONSTER_STATE::UNDERGROUND:
+		_state = S_MONSTER_STATE::UNDERGROUND;
+		SetState(&MonsterState::UndergroundState::GetInstance());
+		break;
+	default:
         break;
     }
 }

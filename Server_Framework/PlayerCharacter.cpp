@@ -76,6 +76,10 @@ void PlayerCharacter::SetState(uint8_t newState)
         _state = S_PLAYER_STATE::ULTIMATE;
         SetState(&PlayerState::UltimateState::GetInstance());
         break;
+    case S_PLAYER_STATE::GATHERING:
+        _state = S_PLAYER_STATE::GATHERING;
+        SetState(&PlayerState::GatheringState::GetInstance());
+        break;
     default:
         break;
     }

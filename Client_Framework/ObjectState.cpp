@@ -45,13 +45,16 @@ void CPlayerStateMachine::Update()
 		case PLAYER_STATE::GATHERING:
 		case PLAYER_STATE::GETHIT:
 		case PLAYER_STATE::ATTACK:
-		case PLAYER_STATE::RUNATTACK:
 		case PLAYER_STATE::SKILL:
 		case PLAYER_STATE::ULTIMATE:
 			SetState((UINT8)PLAYER_STATE::IDLE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			break;
 		case PLAYER_STATE::DEATH:
+			break;
+		case PLAYER_STATE::RUNATTACK:
+			SetState((UINT8)PLAYER_STATE::RUN);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
 			break;
 		default:
 			break;
@@ -156,7 +159,6 @@ void CArcherState::Update()
 		case PLAYER_STATE::GATHERING:
 		case PLAYER_STATE::GETHIT:
 		case PLAYER_STATE::ATTACK:
-		case PLAYER_STATE::RUNATTACK:
 		case PLAYER_STATE::SKILL:
 		case PLAYER_STATE::ULTIMATE:
 			SetState((UINT8)PLAYER_STATE::IDLE);
@@ -164,6 +166,10 @@ void CArcherState::Update()
 			break;
 		case PLAYER_STATE::DEATH:
 			break;
+		case PLAYER_STATE::RUNATTACK:
+			SetState((UINT8)PLAYER_STATE::RUN);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
+		break;
 		default:
 			break;
 		}

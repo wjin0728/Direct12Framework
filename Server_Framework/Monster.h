@@ -12,8 +12,12 @@ public:
     S_MONSTER_STATE	_state;
 	bool _remove = false;
 	bool _drop_item = false;
+    int _wave = 3;
+    Vec3 _spawn_pos{};
+    Vec3 _spawn_dir{};
 
     int _hp;
+    int _max_hp;
     int _barrier;
     bool _on_FireEnchant;
     bool _on_GrassWeaken;

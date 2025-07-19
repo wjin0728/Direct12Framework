@@ -9,7 +9,7 @@ const float CEnemyState::MAX_HEALTH = 100.f;
 
 void CEnemyState::Awake()
 {
-	 
+
 }
 
 void CEnemyState::Start()
@@ -74,6 +74,7 @@ void CEnemyState::OnEnterState(UINT8 state)
 		break;
 	case MONSTER_STATE::SPAWN:
 		if (mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(false);
+		mIsDead = false;
 		mIsSpawning = true;
 		mIsSpawningFinished = false;
 		break;
@@ -107,7 +108,6 @@ void CEnemyState::OnExitState(UINT8 state)
 		if(mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(true);
 		break;
 	case MONSTER_STATE::UNDERGROUND:
-		int a = 0; // Placeholder for any specific logic needed when exiting underground state
 		break;
 	case MONSTER_STATE::RUN:
 		break;
