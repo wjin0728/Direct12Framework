@@ -14,8 +14,7 @@ cbuffer MaterialData : register(b5)
     float4 vec4Data1;
     float fData0;
     float fData1;
-    float fData2;
-    float fData3;
+    float2 tilling;
     int iData0;
     int iData1;
     int iData2;

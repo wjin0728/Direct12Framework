@@ -350,25 +350,21 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 
-		std::string objName[ITEM_TYPE::item_end] 
-			= { "FireEnchant", "FireExplosion", "WaterHeal", "WaterShield", "GrassVine", 
-			"GrassWeaken", "FirePiece", "WaterPiece", "GrassPiece" };
-		auto item = RESOURCE.GetPrefab(objName[(int)packet->item_enum]);
+		auto item = RESOURCE.GetPrefab("Item_Skill");
 		if (!item) {
 			std::cout << "item is nullptr" << std::endl;
 			break;
 		}
 		auto itemObj = CGameObject::Instantiate(item);
 		itemObj->SetTag("Item");
-		itemObj->SetRenderLayer(RENDER_LAYER::Transparent);
+		itemObj->SetRenderLayer(RENDER_LAYER::Opaque);
 		itemObj->SetObjectType(OBJECT_TYPE::ITEM);
 		itemObj->SetStatic(false);
 		itemObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-		auto movement = itemObj->AddComponent<CItemMovement>();
+		auto movement = itemObj->AddComponent<CItemMovement>((ITEM_TYPE)packet->item_enum);
 		movement->SetAmplitude(0.2f);
 		movement->SetFrequency(1.f);
 		movement->SetDirection({ 0.f, 1.f, 0.f });
-		movement->SetTargetObject(mMainCamera);
 
 		itemObj->mID = packet->item_id;
 		mItems[packet->item_id] = itemObj;

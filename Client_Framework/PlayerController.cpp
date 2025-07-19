@@ -27,7 +27,6 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
-	
 	mSkill = FIRE_EXPLOSION; // Default skill, can be changed later
 }
 
@@ -311,9 +310,6 @@ void CPlayerController::CastingSkill()
 
 				explosionObj->GetTransform()->SetLocalPosition(explosionPos);
 				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
-				explosionObj->Awake();
-				explosionObj->Start();
-
 				auto explosionParticle = explosionObj->GetComponent<CParticleAttach>();
 				if (explosionParticle) {
 					explosionParticle->Play();

@@ -22,11 +22,11 @@
 #include"ParticleAttach.h"
 #include"HealthSystem.h"
 
-void CUIController::Awake()
+void CPlayerHUD::Awake()
 {
 }
 
-void CUIController::Start()
+void CPlayerHUD::Start()
 {
     PLAYER_CLASS playerClass{ PLAYER_CLASS::end };
     ElementType elementType{ ElementType::end };
@@ -136,15 +136,15 @@ void CUIController::Start()
 
 }
 
-void CUIController::Update()
+void CPlayerHUD::Update()
 {
 }
 
-void CUIController::LateUpdate()
+void CPlayerHUD::LateUpdate()
 {
 }
 
-void CUIController::BindPlayerToUI(const std::shared_ptr<class CGameObject>& player, const std::string& name)
+void CPlayerHUD::BindPlayerToUI(const std::shared_ptr<class CGameObject>& player, const std::string& name)
 {
 	if (!player) return;
 	if (name.empty()) return;

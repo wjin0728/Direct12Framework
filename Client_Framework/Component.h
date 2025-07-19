@@ -9,6 +9,8 @@ protected:
 	CGameObject* owner{};
 
 public:
+	operator CGameObject* () const { return owner; }
+
 	bool mIsActive{ true };
 	bool mIsAwake{ false };
 	bool mIsStart{ false };

@@ -137,6 +137,8 @@ public:
 	void RemoveChild(std::shared_ptr<CGameObject> child);
 	std::shared_ptr<CGameObject> AddBoneSocket(const std::string& boneName, const std::string& socketName = "DefaultSocket");
 
+	void GetAllChildren(std::vector<std::shared_ptr<CGameObject>>& children);
+
 	template<typename T, typename... Args>
 	std::shared_ptr<T> AddComponent(Args&&... args);
 	template<typename T>

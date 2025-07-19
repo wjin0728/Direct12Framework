@@ -39,16 +39,19 @@ void CHealthSystem::Start()
 		fill->SetShader("Sprite");
 		fill->SetColor(mHealthBarColor);
 		fill->SetScale(mHealthBarScale);
+		fill->mIsVisible = mViewHealthBar;
 	}
 	if (background)
 	{
 		background->SetShader("Sprite");
 		background->SetScale(mHealthBarScale);
+		background->mIsVisible = mViewHealthBar;
 	}
 	if (edge)
 	{
 		edge->SetShader("Sprite");
 		edge->SetScale(mHealthBarScale);
+		edge->mIsVisible = mViewHealthBar;
 	}
 	UpdateHealthBar();
 }
@@ -99,6 +102,7 @@ void CHealthSystem::UpdateHealthBar()
 
 void CHealthSystem::ViewHealthBar(bool view)
 {
+	mViewHealthBar = view;
 	auto background = mHealthBarBackground.lock();
 	auto fill = mHealthBarFill.lock();
 	auto edge = mHealthBarEdge.lock();
@@ -152,13 +156,10 @@ void CHealthSystem::BindOwner(const std::shared_ptr<class CGameObject>& owner)
 
 		owner->AddEvent("OnHealthChanged", [this](const std::vector<std::any>& args) {
 			if (args.size() > 0) {
-				if (mPrevHealth <= mHealth) mPrevHealth = mHealth;
 				if (args[0].type() != typeid(float)) {
 					return;
 				}
-				mHealth = std::any_cast<float>(args[0]);
-				mHealth = std::clamp(mHealth, 0.0f, mMaxHealth);
-				UpdateHealthBar();
+				ChangeHealth(std::any_cast<float>(args[0]));
 			}
 			});
 	}

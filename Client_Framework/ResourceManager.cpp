@@ -92,9 +92,7 @@ bool CResourceManager::LoadEnemyObjects()
 
 bool CResourceManager::LoadSkillObjects()
 {
-	LoadPrefabFromFile("Item_Skill1");
-	LoadPrefabFromFile("Item_Skill2");
-	LoadPrefabFromFile("Item_Skill3");
+	LoadPrefabFromFile("Item_Skill");
 	LoadPrefabFromFile("Water_Shield");
 
 	return true;
@@ -215,6 +213,14 @@ void CResourceManager::LoadDefaultMaterials()
 
 		Add(material);
 	}
+	{
+		auto material = std::make_shared<CMaterial>("ItemDefault");
+		material->Initialize(nullptr, sizeof(CommonProperties));
+		material->SetShader("CommonBoth");
+		material->AddPropertyKey(GetPropertyInfos<CommonProperties>());
+
+		Add(material);
+	}
 }
 
 void CResourceManager::LoadDefaultShaders()
@@ -234,6 +240,16 @@ void CResourceManager::LoadDefaultShaders()
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 		MakeShadersForAllPass("Common", "Common", info);
+	}
+	{
+		ShaderInfo info;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = commonDepthTest;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		MakeShadersForAllPass("CommonBoth", "Common", info);
 	}
 	{
 		ShaderInfo info;

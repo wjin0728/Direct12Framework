@@ -19,6 +19,7 @@ private:
 	float mMaxHealth = 10.0f;
 	float mPrevHealth = 0;
 
+	bool mViewHealthBar = true;
 	bool mRenderToWorld = false;
 	Color mHealthBarColor = Color(0.0f, 1.0f, 0.0f, 1.0f); 
 
@@ -56,6 +57,14 @@ public:
 		mHealth += healAmount; 
 		if (mHealth > mMaxHealth) mHealth = mMaxHealth; 
 		UpdateHealthBar(); 
+	}
+
+	void ChangeHealth(float healthChange) 
+	{ 
+		if (mPrevHealth <= mHealth) mPrevHealth = mHealth;
+		mHealth = healthChange;
+		mHealth = std::clamp(mHealth, 0.0f, mMaxHealth);
+		UpdateHealthBar();
 	}
 
 	void UpdateHealthBar();

@@ -49,5 +49,6 @@ protected:
 public:
 	virtual void GetHit(float damage);
 	virtual void Heal(float amount);
+	virtual void UpdateHealth(float newHealth);
 };
 

@@ -46,6 +46,7 @@ public:
 
     virtual void GetHit(float damage) override;
     virtual void Heal(float amount) override;
+    virtual void UpdateHealth(float newHealth) override;
 };
 
 class CArcherState : public CPlayerStateMachine

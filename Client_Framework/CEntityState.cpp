@@ -28,3 +28,17 @@ void CEntityState::Heal(float amount)
 		mHealth = mMaxHealth;
 	}
 }
+
+void CEntityState::UpdateHealth(float newHealth)
+{
+	if (mIsDead) return;
+	mHealth = newHealth;
+	if (mHealthSystem.lock()) {
+		mHealthSystem.lock()->ChangeHealth(newHealth);
+	}
+	owner->TriggerEvent("OnHealthChanged", { mHealth });
+	if (mHealth <= 0) {
+		mHealth = 0;
+		mIsDead = true;
+	}
+}

@@ -10,12 +10,11 @@ private:
 public:
 	CLoadScene();
 	~CLoadScene() = default;
-	void Initialize() override;
-	void Start() override;
-
-	void Update() override;
-	void LateUpdate() override;
-	void RenderScene() override;
+	virtual void Initialize() override;
+	virtual void Start() override; 
+	virtual void Update() override;
+	virtual void LateUpdate() override;
+	virtual void RenderScene() override;
 
 };
 

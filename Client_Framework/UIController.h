@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "Component.h"
 
-class CUIController :
+class CPlayerHUD :
     public CComponent
 {
 public:
@@ -12,10 +12,10 @@ public:
 	std::unordered_map<std::string, std::weak_ptr<class CUIRenderer>> mUIRenderers{};
 
 public:
-	CUIController() = default;
-	~CUIController() = default;
+	CPlayerHUD() = default;
+	~CPlayerHUD() = default;
 
-	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CUIController>(*this); }
+	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CPlayerHUD>(*this); }
 
 public:
 	virtual void Awake();

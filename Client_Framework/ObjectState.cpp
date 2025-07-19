@@ -143,6 +143,13 @@ void CPlayerStateMachine::Heal(float amount)
 {
 }
 
+void CPlayerStateMachine::UpdateHealth(float newHealth)
+{
+	CEntityState::UpdateHealth(newHealth);
+	float hpRatio = mHealth / mMaxHealth;
+	owner->TriggerEvent("OnFaceChanged", { hpRatio >= 0.3f });
+}
+
 void CArcherState::Awake()
 {
 	CPlayerStateMachine::Awake();

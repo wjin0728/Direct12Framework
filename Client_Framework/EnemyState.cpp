@@ -21,6 +21,7 @@ void CEnemyState::Start()
 		healthSystem->SetRenderToWorld(true);
 		healthSystem->SetHealthBarColor({ 0.8f, 0.f, 0.f, 1.f });
 		healthSystem->BindOwner(healthBar);
+		healthSystem->ViewHealthBar(false);
 		healthBar->SetActive(true);
 
 		mHealthSystem = healthSystem;
@@ -123,6 +124,7 @@ void CEnemyState::OnExitState(UINT8 state)
 		GetTransform()->SetHitFactor(0.f);
 		break;
 	case MONSTER_STATE::DEATH:
+		if (mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(false);
 		break;
 	case MONSTER_STATE::end:
 		break;

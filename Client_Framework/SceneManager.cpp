@@ -4,7 +4,7 @@
 #include "Scene.h"
 #include"LobbyScene.h"
 #include"BattleScene.h"
-#include"MenuScene.h"
+#include"MainScene.h"
 #include"LoadScene.h"
 #include"ResourceManager.h"
 #include"GameObject.h"
@@ -31,7 +31,7 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 		curScene = std::make_shared<CLoadScene>();
 		break;
 	case SCENE_TYPE::MENU:
-		curScene = std::make_shared<CMenuScene>();
+		curScene = std::make_shared<CMainScene>();
 		break;
 	case SCENE_TYPE::MAINSTAGE1:
 		curScene = std::make_shared<CBattleScene>();

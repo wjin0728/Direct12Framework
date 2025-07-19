@@ -848,3 +848,11 @@ std::shared_ptr<CGameObject> CGameObject::AddBoneSocket(const std::string& boneN
 	return socket;
 }
 
+void CGameObject::GetAllChildren(std::vector<std::shared_ptr<CGameObject>>& children)
+{
+	for (const auto& child : mChildren) {
+		children.push_back(child);
+		child->GetAllChildren(children);
+	}
+}
+

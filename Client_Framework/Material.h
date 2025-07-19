@@ -31,8 +31,7 @@ struct CommonProperties
 	Vec4 vec4Data1{};
 	float fData0{};
 	float fData1{};
-	float fData2{};
-	float fData3{};
+	Vec2 tiling{1.f,1.f}; 
 	int iData0{};
 	int iData1{};
 	int iData2{};
@@ -297,7 +296,8 @@ inline std::vector<PropertyInfo> GetPropertyInfos<CommonProperties>()
 		REGISTER_PROPERTY(T, mainTexIdx),
 		REGISTER_PROPERTY(T, normalTexIdx),
 		REGISTER_PROPERTY(T, smoothness),
-		REGISTER_PROPERTY(T, metallic)
+		REGISTER_PROPERTY(T, metallic),
+		REGISTER_PROPERTY(T, tiling)
 	};
 }
 

@@ -122,7 +122,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 	using namespace BinaryReader;
 	std::string token{};
 
-	ReadDateFromFile(inFile, token);
+	BinaryReader::ReadDateFromFile(inFile, token);
 	std::string name = token;
 	if (name == "Tree_Mat_01") {
 		int i{};
@@ -136,30 +136,30 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 
 	if(!material->uploadData) material->uploadData = new BYTE[ALIGNED_SIZE(100)];
 
-	ReadDateFromFile(inFile, token);
+	BinaryReader::ReadDateFromFile(inFile, token);
 	if (token == "SyntyStudios/Basic_LOD_Shader") {
 		material->SetShader("Common");
 
 		CommonProperties* data = reinterpret_cast<CommonProperties*>(material->uploadData);
 		material->dataSize = sizeof(CommonProperties);
-
+		data->tiling = Vec2(1.0f, 1.0f);
 		while (true) {
-			ReadDateFromFile(inFile, token);
+			BinaryReader::ReadDateFromFile(inFile, token);
 			if (token == "<AlbedoMap>:")
 			{
 				data->mainTexIdx = GetTextureIdx(inFile);
 			}
 			else if (token == "<AlbedoColor>:")
 			{
-				ReadDateFromFile(inFile, data->mainColor);
+				BinaryReader::ReadDateFromFile(inFile, data->mainColor);
 			}
 			else if (token == "<Smoothness>:")
 			{
-				ReadDateFromFile(inFile, data->smoothness);
+				BinaryReader::ReadDateFromFile(inFile, data->smoothness);
 			}
 			else if (token == "<Metallic>:")
 			{
-				ReadDateFromFile(inFile, data->metallic);
+				BinaryReader::ReadDateFromFile(inFile, data->metallic);
 			}
 			else if (token == "<NormalMap>:")
 			{
@@ -178,10 +178,10 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		material->dataSize = sizeof(LitProperties);
 
 		while (true) {
-			ReadDateFromFile(inFile, token);
+			BinaryReader::ReadDateFromFile(inFile, token);
 			if (token == "<RenderMode>:") {
 				float mode{};
-				ReadDateFromFile(inFile, mode);
+				BinaryReader::ReadDateFromFile(inFile, mode);
 				if (mode == 0) material->SetShader("LitOpaque");
 				else if (mode == 1) material->SetShader("LitTransparent");
 			}
@@ -192,16 +192,16 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			else if (token == "<AlbedoColor>:")
 			{
 				Color color{};
-				ReadDateFromFile(inFile, color);
+				BinaryReader::ReadDateFromFile(inFile, color);
 				data->mainColor = color;
 			}
 			else if (token == "<Smoothness>:")
 			{
-				ReadDateFromFile(inFile, data->smoothness);
+				BinaryReader::ReadDateFromFile(inFile, data->smoothness);
 			}
 			else if (token == "<Metallic>:")
 			{
-				ReadDateFromFile(inFile, data->metallic);
+				BinaryReader::ReadDateFromFile(inFile, data->metallic);
 			}
 			else if (token == "<NormalMap>:")
 			{
@@ -214,7 +214,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			else if (token == "<EmissionColor>:")
 			{
 				Color color{};
-				ReadDateFromFile(inFile, color);
+				BinaryReader::ReadDateFromFile(inFile, color);
 				data->emissiveColor = color.ToVector3();
 			}
 			else if (token == "</Material>") {
@@ -230,7 +230,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		material->dataSize = sizeof(TriplanarProperties);
 
 		while (true) {
-			ReadDateFromFile(inFile, token);
+			BinaryReader::ReadDateFromFile(inFile, token);
 
 			if (token == "<SidesMap>:")
 			{
@@ -250,11 +250,11 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			}
 			else if (token == "<FallOff>:")
 			{
-				ReadDateFromFile(inFile, data->fallOff);
+				BinaryReader::ReadDateFromFile(inFile, data->fallOff);
 			}
 			else if (token == "<Tiling>:")
 			{
-				ReadDateFromFile(inFile, data->tilling);
+				BinaryReader::ReadDateFromFile(inFile, data->tilling);
 			}
 			else if (token == "</Material>") {
 				break;
@@ -268,7 +268,7 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		material->dataSize = sizeof(VegitationProperties);
 
 		while (true) {
-			ReadDateFromFile(inFile, token);
+			BinaryReader::ReadDateFromFile(inFile, token);
 
 			if (token == "<LeafAlbedoMap>:")
 			{
@@ -280,21 +280,21 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			}
 			else if (token == "<LeafNormalScale>:")
 			{
-				ReadDateFromFile(inFile, data->leafNormalScale);
+				BinaryReader::ReadDateFromFile(inFile, data->leafNormalScale);
 			}
 			else if (token == "<LeafAlbedoColor>:")
 			{
 				Color color{};
-				ReadDateFromFile(inFile, color);
+				BinaryReader::ReadDateFromFile(inFile, color);
 				data->leafColor = color.ToVector3();
 			}
 			else if (token == "<LeafSmoothness>:")
 			{
-				ReadDateFromFile(inFile, data->leafSmoothness);
+				BinaryReader::ReadDateFromFile(inFile, data->leafSmoothness);
 			}
 			else if (token == "<LeafMetallic>:")
 			{
-				ReadDateFromFile(inFile, data->leafMetallic);
+				BinaryReader::ReadDateFromFile(inFile, data->leafMetallic);
 			}
 			else if (token == "<TrunkAlbedoMap>:")
 			{
@@ -306,21 +306,21 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 			}
 			else if (token == "<TrunkNormalScale>:")
 			{
-				ReadDateFromFile(inFile, data->trunkNormalScale);
+				BinaryReader::ReadDateFromFile(inFile, data->trunkNormalScale);
 			}
 			else if (token == "<TrunkAlbedoColor>:")
 			{
 				Color color{};
-				ReadDateFromFile(inFile, color);
+				BinaryReader::ReadDateFromFile(inFile, color);
 				data->trunkColor = color.ToVector3();
 			}
 			else if (token == "<TrunkSmoothness>:")
 			{
-				ReadDateFromFile(inFile, data->trunkSmoothness);
+				BinaryReader::ReadDateFromFile(inFile, data->trunkSmoothness);
 			}
 			else if (token == "<TrunkMetallic>:")
 			{
-				ReadDateFromFile(inFile, data->trunkMetallic);
+				BinaryReader::ReadDateFromFile(inFile, data->trunkMetallic);
 			}
 			else if (token == "</Material>") {
 				break;
@@ -334,31 +334,31 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		material->dataSize = sizeof(SkyboxProperties);
 
 		while (true) {
-			ReadDateFromFile(inFile, token);
+			BinaryReader::ReadDateFromFile(inFile, token);
 
 			if (token == "<TopColor>:")
 			{
 				Color color{};
-				ReadDateFromFile(inFile, color);
+				BinaryReader::ReadDateFromFile(inFile, color);
 				data->topColor = color.ToVector3();
 			}
 			else if (token == "<BottomColor>:")
 			{
 				Color color{};
-				ReadDateFromFile(inFile, color);
+				BinaryReader::ReadDateFromFile(inFile, color);
 				data->bottomColor = color.ToVector3();
 			}
 			else if (token == "<Falloff>:")
 			{
-				ReadDateFromFile(inFile, data->falloff);
+				BinaryReader::ReadDateFromFile(inFile, data->falloff);
 			}
 			else if (token == "<Distance>:")
 			{
-				ReadDateFromFile(inFile, data->distance);
+				BinaryReader::ReadDateFromFile(inFile, data->distance);
 			}
 			else if (token == "<Offset>:")
 			{
-				ReadDateFromFile(inFile, data->offset);
+				BinaryReader::ReadDateFromFile(inFile, data->offset);
 			}
 			else if (token == "</Material>") {
 				break;
@@ -371,54 +371,54 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		material->dataSize = sizeof(WaterProperties);
 
 		while (true) {
-			ReadDateFromFile(inFile, token);
+			BinaryReader::ReadDateFromFile(inFile, token);
 
 			if (token == "<ShallowColour>:")
 			{
-				ReadDateFromFile(inFile, data->shallowColor);
+				BinaryReader::ReadDateFromFile(inFile, data->shallowColor);
 			}
 			else if (token == "<DeepColour>:")
 			{
-				ReadDateFromFile(inFile, data->deepColor);
+				BinaryReader::ReadDateFromFile(inFile, data->deepColor);
 			}
 			else if (token == "<VeryDeepColour>:")
 			{
-				ReadDateFromFile(inFile, data->veryDeepColor);
+				BinaryReader::ReadDateFromFile(inFile, data->veryDeepColor);
 			}
 			else if (token == "<FoamColor>:")
 			{
-				ReadDateFromFile(inFile, data->foamColor);
+				BinaryReader::ReadDateFromFile(inFile, data->foamColor);
 			}
-			else if (token == "<Opacity>:")            ReadDateFromFile(inFile, data->opacity);
-			else if (token == "<Smoothness>:")         ReadDateFromFile(inFile, data->smoothness);
-			else if (token == "<FoamSmoothness>:")     ReadDateFromFile(inFile, data->foamSmoothness);
-			else if (token == "<FoamShoreline>:")      ReadDateFromFile(inFile, data->foamShoreline);
-			else if (token == "<FoamFalloff>:")        ReadDateFromFile(inFile, data->foamFalloff);
-			else if (token == "<FoamSpread>:")         ReadDateFromFile(inFile, data->foamSpread);
-			else if (token == "<OpacityFalloff>:")     ReadDateFromFile(inFile, data->opacityFalloff);
-			else if (token == "<OpacityMin>:")         ReadDateFromFile(inFile, data->opacityMin);
-			else if (token == "<ReflectionPower>:")    ReadDateFromFile(inFile, data->reflectionPower);
-			else if (token == "<Depth>:")              ReadDateFromFile(inFile, data->depth);
-			else if (token == "<NormalScale>:")        ReadDateFromFile(inFile, data->normalScale);
-			else if (token == "<NormalTiling>:")       ReadDateFromFile(inFile, data->normalTiling);
-			else if (token == "<NormalTiling2>:")      ReadDateFromFile(inFile, data->normalTiling2);
-			else if (token == "<RippleSpeed>:")        ReadDateFromFile(inFile, data->rippleSpeed);
-			else if (token == "<WaveDirection>:")      ReadDateFromFile(inFile, data->waveDirection);
-			else if (token == "<WaveWavelength>:")     ReadDateFromFile(inFile, data->waveWavelength);
-			else if (token == "<WaveAmplitude>:")      ReadDateFromFile(inFile, data->waveAmplitude);
-			else if (token == "<WaveSpeed>:")          ReadDateFromFile(inFile, data->waveSpeed);
-			else if (token == "<WaveFoamOpacity>:")    ReadDateFromFile(inFile, data->waveFoamOpacity);
-			else if (token == "<WaveFoamSpeed>:")      ReadDateFromFile(inFile, data->waveSpeed);
-			else if (token == "<WaveNoiseAmount>:")    ReadDateFromFile(inFile, data->waveNoiseAmount);
-			else if (token == "<WaveNoiseScale>:")     ReadDateFromFile(inFile, data->waveNoiseScale);
+			else if (token == "<Opacity>:")            BinaryReader::ReadDateFromFile(inFile, data->opacity);
+			else if (token == "<Smoothness>:")         BinaryReader::ReadDateFromFile(inFile, data->smoothness);
+			else if (token == "<FoamSmoothness>:")     BinaryReader::ReadDateFromFile(inFile, data->foamSmoothness);
+			else if (token == "<FoamShoreline>:")      BinaryReader::ReadDateFromFile(inFile, data->foamShoreline);
+			else if (token == "<FoamFalloff>:")        BinaryReader::ReadDateFromFile(inFile, data->foamFalloff);
+			else if (token == "<FoamSpread>:")         BinaryReader::ReadDateFromFile(inFile, data->foamSpread);
+			else if (token == "<OpacityFalloff>:")     BinaryReader::ReadDateFromFile(inFile, data->opacityFalloff);
+			else if (token == "<OpacityMin>:")         BinaryReader::ReadDateFromFile(inFile, data->opacityMin);
+			else if (token == "<ReflectionPower>:")    BinaryReader::ReadDateFromFile(inFile, data->reflectionPower);
+			else if (token == "<Depth>:")              BinaryReader::ReadDateFromFile(inFile, data->depth);
+			else if (token == "<NormalScale>:")        BinaryReader::ReadDateFromFile(inFile, data->normalScale);
+			else if (token == "<NormalTiling>:")       BinaryReader::ReadDateFromFile(inFile, data->normalTiling);
+			else if (token == "<NormalTiling2>:")      BinaryReader::ReadDateFromFile(inFile, data->normalTiling2);
+			else if (token == "<RippleSpeed>:")        BinaryReader::ReadDateFromFile(inFile, data->rippleSpeed);
+			else if (token == "<WaveDirection>:")      BinaryReader::ReadDateFromFile(inFile, data->waveDirection);
+			else if (token == "<WaveWavelength>:")     BinaryReader::ReadDateFromFile(inFile, data->waveWavelength);
+			else if (token == "<WaveAmplitude>:")      BinaryReader::ReadDateFromFile(inFile, data->waveAmplitude);
+			else if (token == "<WaveSpeed>:")          BinaryReader::ReadDateFromFile(inFile, data->waveSpeed);
+			else if (token == "<WaveFoamOpacity>:")    BinaryReader::ReadDateFromFile(inFile, data->waveFoamOpacity);
+			else if (token == "<WaveFoamSpeed>:")      BinaryReader::ReadDateFromFile(inFile, data->waveSpeed);
+			else if (token == "<WaveNoiseAmount>:")    BinaryReader::ReadDateFromFile(inFile, data->waveNoiseAmount);
+			else if (token == "<WaveNoiseScale>:")     BinaryReader::ReadDateFromFile(inFile, data->waveNoiseScale);
 			else if (token == "<RipplesNormal>:")      data->ripplesNormalIdx = GetTextureIdx(inFile);
 			else if (token == "<RipplesNormal2>:")     data->ripplesNormal2Idx = GetTextureIdx(inFile);
 			else if (token == "<WaveMask>:")           data->waveMaskIdx = GetTextureIdx(inFile);
 			else if (token == "<FoamMask>:")           data->foamMaskIdx = GetTextureIdx(inFile);
-			else if (token == "<OverallFalloff>:")     ReadDateFromFile(inFile, data->overallFalloff);
-			else if (token == "<ShallowFalloff>:")     ReadDateFromFile(inFile, data->shallowFalloff);
-			else if (token == "<NormalTiling2>:")      ReadDateFromFile(inFile, data->normalTiling2);
-			else if (token == "<OpacityFalloff>:")     ReadDateFromFile(inFile, data->opacityFalloff);
+			else if (token == "<OverallFalloff>:")     BinaryReader::ReadDateFromFile(inFile, data->overallFalloff);
+			else if (token == "<ShallowFalloff>:")     BinaryReader::ReadDateFromFile(inFile, data->shallowFalloff);
+			else if (token == "<NormalTiling2>:")      BinaryReader::ReadDateFromFile(inFile, data->normalTiling2);
+			else if (token == "<OpacityFalloff>:")     BinaryReader::ReadDateFromFile(inFile, data->opacityFalloff);
 			else if (token == "</Material>") {
 				break;
 			}
@@ -471,23 +471,23 @@ void CTerrainMaterial::LoadTerrainData(std::ifstream& inFile)
 	using namespace BinaryReader;
 	std::string token{};
 
-	ReadDateFromFile(inFile, data.size);
-	ReadDateFromFile(inFile, data.splatNum);
+	BinaryReader::ReadDateFromFile(inFile, data.size);
+	BinaryReader::ReadDateFromFile(inFile, data.splatNum);
 
 	for (int i = 0; i < data.splatNum; i++) {
 		data.alphaMapIdx[i].x = GetTextureIdx(inFile);
 	}
 
 	int splatCnt{};
-	ReadDateFromFile(inFile, splatCnt);
+	BinaryReader::ReadDateFromFile(inFile, splatCnt);
 	for (int i = 0; i < splatCnt; i++) {
 		UINT idx = i / 4;
 		UINT idx2 = i % 4;
 
 		data.splats[idx].data[idx2].x = GetTextureIdx(inFile);
 		data.splats[idx].data[idx2].y = GetTextureIdx(inFile);
-		ReadDateFromFile(inFile, data.splats[idx].data[idx2].z);
-		ReadDateFromFile(inFile, data.splats[idx].data[idx2].w);
+		BinaryReader::ReadDateFromFile(inFile, data.splats[idx].data[idx2].z);
+		BinaryReader::ReadDateFromFile(inFile, data.splats[idx].data[idx2].w);
 	}
 	SetShader("Terrain");
 	dataSize = sizeof(TerrainData);

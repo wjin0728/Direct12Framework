@@ -38,7 +38,7 @@ void CBattleScene::Initialize()
 	if (mainUI) {
 		auto uiObject = CGameObject::Instantiate(mainUI);
 		uiObject->SetName("MainUI");
-		uiObject->AddComponent<CUIController>();
+		uiObject->AddComponent<CPlayerHUD>();
 		AddObjectImmediately(uiObject);
 	}
 	CLight::SetVolumes();

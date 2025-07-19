@@ -51,6 +51,7 @@ public:
 		}
 	}
     void AddMaterial(const std::string& name);
+	void SetMaterial(const std::shared_ptr<CMaterial>& material, UINT idx = 0);
 
 public:
     bool IsIntersect(const BoundingOrientedBox& oobb) const

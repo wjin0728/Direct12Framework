@@ -32,6 +32,9 @@ void CParticleAttach::Awake()
 
 void CParticleAttach::Start()
 {
+
+	if(mReserve) Play();
+	
 }
 
 void CParticleAttach::Update()
@@ -57,27 +60,25 @@ void CParticleAttach::InitializeParticleEmitter()
 
 void CParticleAttach::Play()
 {
-	if (mParticleEmitter == nullptr && mCanEmit)
-	{
-		mParticleEmitter = INSTANCE(CParticleManager).GetAvailableParticleEmitter(mParticleEmitterName);
-	}
-	if (mParticleEmitter) mParticleEmitter->mParticleAttach = this;
+	InitializeParticleEmitter();
 
 	if (mParticleEmitter && !mParticleEmitter->mIsPlaying)
 		mParticleEmitter->mEmitterTransform = GetTransform()->GetWorldMat();
 		INSTANCE(CParticleManager).PlayParticleEmitter(mParticleEmitter);
-
-	auto& children = owner->GetChildren();
-	for (auto& child : children)
-	{
-		auto particleAttach = child->GetComponent<CParticleAttach>();
-		if (particleAttach)
-		{
-			particleAttach->Play();
-		}
-	}
 }
 
 void CParticleAttach::Stop()
 {
+}
+
+void CParticleAttach::Reserve(bool reserve)
+{
+	if (mReserve == reserve) return;
+	mReserve = reserve;
+	std::vector<std::shared_ptr<CParticleAttach>> children{};
+	owner->GetAllComponentsFromHierarchy<CParticleAttach>(children);
+	for (auto& child : children)
+	{
+		child->Reserve(reserve);
+	}
 }

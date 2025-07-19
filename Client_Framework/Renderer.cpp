@@ -113,3 +113,14 @@ void CRenderer::AddMaterial(const std::string& name)
 {
 	m_materials.push_back(INSTANCE(CResourceManager).Get<CMaterial>(name));
 }
+
+void CRenderer::SetMaterial(const std::shared_ptr<CMaterial>& material, UINT idx)
+{
+	if (idx < m_materials.size()) {
+		m_materials[idx] = material;
+	} else if (idx == m_materials.size()) {
+		m_materials.push_back(material);
+	} else {
+		return;
+	}
+}

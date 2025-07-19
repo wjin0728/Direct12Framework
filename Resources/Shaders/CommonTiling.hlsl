@@ -14,7 +14,8 @@ cbuffer MaterialData : register(b5)
     float4 vec4Data1;
     float fData0;
     float fData1;
-    float2 tilling;
+    float fData2;
+    float fData3;
     int iData0;
     int iData1;
     int iData2;
@@ -103,7 +104,6 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 worldBitangent = normalize(input.bitangentWS);
     
     float2 uv = input.uv;
-    uv = uv * tilling;
     
     float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
     color = float4(GammaDecoding(texColor.rgb), texColor.a);
@@ -258,7 +258,6 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float3 worldTangent = normalize(input.tangentWS);
     float3 worldBitangent = normalize(input.bitangentWS);
     float2 uv = input.uv;
-    uv = uv * tilling;
     
     if (ForwardTexIdx != -1)
     {
