@@ -29,6 +29,7 @@ public:
 	void EnqueueAwake();
 
 	CGameObject* GetOwner() const;
+	const std::string& GetName() const;
 	std::shared_ptr<CTransform> GetTransform() const;
 };
 

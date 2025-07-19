@@ -15,7 +15,7 @@ public:
 	std::shared_ptr<class CGameObject> mPlayer{ nullptr };
 	std::shared_ptr<class CGameObject> mMainCamera{ nullptr };
 
-	std::unordered_map<int, std::shared_ptr<class CGameObject>> mOtherPlayers{};
+	std::map<int, std::shared_ptr<class CGameObject>> mOtherPlayers{};
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mEnemies{};
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mItems{};
 	std::unordered_map<int, std::shared_ptr<class CGameObject>> mProjectiles{};

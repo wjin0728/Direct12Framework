@@ -62,6 +62,10 @@ void CUIRenderer::Render(class CCamera* camera, int pass)
 {
 	mShader->SetPipelineState(CMDLIST);
 
+	if(GetName() == "MainPlayer_Background") {
+		int i = 0;
+	}
+
 	UpdataObjectDataToShader();
 	auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
 	auto UIDataBuffer = STRUCTEDBUFFER((UINT)STRUCTED_BUFFER_TYPE::UI);

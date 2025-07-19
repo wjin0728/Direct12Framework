@@ -7,6 +7,7 @@ class CPlayerStateMachine : public CEntityState
 {
 protected:
     PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
+    ElementType mElementType = ElementType::end;
     std::weak_ptr<class CGameObject> mShield{};
 	float mShieldDuration = -1.0f; // Duration for which the shield is active
 	float mShieldDurationMax = 5.0f; // Maximum duration for the shield
@@ -26,6 +27,8 @@ public:
     virtual void OnExitState(UINT8 state) override;
 
 public:
+	void SetElementType(ElementType elementType) { mElementType = elementType; }
+    ElementType GetElementType() const { return mElementType; }
     void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; };
     PLAYER_CLASS GetClass() const { return mClass; }
 	void SetShield(std::weak_ptr<class CGameObject> shield) { mShield = shield; }
@@ -40,6 +43,9 @@ public:
 			}
         }
 	}
+
+    virtual void GetHit(float damage) override;
+    virtual void Heal(float amount) override;
 };
 
 class CArcherState : public CPlayerStateMachine

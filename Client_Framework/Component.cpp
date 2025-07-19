@@ -42,6 +42,11 @@ CGameObject* CComponent::GetOwner() const
     return owner;
 }
 
+const std::string& CComponent::GetName() const
+{
+	return owner->GetName();
+}
+
 std::shared_ptr<CTransform> CComponent::GetTransform() const
 {
     return owner->GetTransform();

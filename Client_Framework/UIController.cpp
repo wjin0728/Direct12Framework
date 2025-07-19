@@ -1,0 +1,181 @@
+#include "stdafx.h"
+#include "UIController.h"
+#include "PlayerController.h"
+#include"GameObject.h"
+#include"Transform.h"
+#include"Timer.h"
+#include"InputManager.h"
+#include"SceneManager.h"
+#include"Scene.h"
+#include"Terrain.h"
+#include"Camera.h"
+#include"Animation.h"
+#include "ServerManager.h"
+#include "AnimationEnums.h"
+#include "ObjectState.h"
+#include"ParticleManager.h"
+#include "CutScene.h"
+#include"RenderManager.h"
+#include"UIRenderer.h"
+#include"TargetMarker.h"
+#include"ResourceManager.h"
+#include"ParticleAttach.h"
+#include"HealthSystem.h"
+
+void CUIController::Awake()
+{
+}
+
+void CUIController::Start()
+{
+    PLAYER_CLASS playerClass{ PLAYER_CLASS::end };
+    ElementType elementType{ ElementType::end };
+
+    mPlayer = INSTANCE(ServerManager).mPlayer;
+    auto mainPlayer = mPlayer.lock();
+    if (!mainPlayer) return;
+    if (auto playerState = mainPlayer->GetComponent<CPlayerStateMachine>())
+    {
+        playerClass = playerState->GetClass();
+        elementType = playerState->GetElementType();
+    }
+
+    std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
+    std::array<std::string, 4> elementNames = { "Void", "Grass", "Water", "Fire" };
+
+	std::shared_ptr<CUIRenderer> mainPlayerBackgroundRenderer = nullptr;
+    std::shared_ptr<CUIRenderer> skillIconRenderer = nullptr;
+    std::shared_ptr<CUIRenderer> ultimateBackgroundRenderer = nullptr;
+
+    if (auto mainPlayerUI = owner->FindChildByName("MainPlayer")) {
+        if (auto background = mainPlayerUI->FindChildByName("MainPlayer_Background"))
+        {
+            if (mainPlayerBackgroundRenderer = background->GetComponent<CUIRenderer>())
+            {
+                mainPlayerBackgroundRenderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+                mainPlayerBackgroundRenderer->SetTexture("MainPlayer_" + classNames[(UINT8)playerClass] + "_Background");
+            }
+        }
+        if (auto mainPlayerImage = mainPlayerUI->FindChildByName("MainPlayer"))
+        {
+            if (auto playerRenderer = mainPlayerImage->GetComponent<CUIRenderer>()) {
+                playerRenderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+                playerRenderer->SetTexture("MainPlayer_" + classNames[(UINT8)playerClass]);
+            }
+        }
+        if (auto hpBar = mainPlayerUI->FindChildByName("HealthBar")) {
+            auto healthSystem = hpBar->AddComponent<CHealthSystem>();
+            healthSystem->BindOwner(mPlayer.lock());
+            healthSystem->ViewHealthBar(true);
+            healthSystem->SetRenderToWorld(false);
+            healthSystem->SetHealthBarColor({ 0.0f, 0.8f, 0.f, 1.f });
+        }
+    }
+
+    if (auto ultimate = owner->FindChildByName("Ultimate")) {
+        if (ultimateBackgroundRenderer = ultimate->GetComponent<CUIRenderer>())
+        {
+            Color elementColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+            if (elementType == ElementType::Void) elementColor = { 1.f, 1.f, 1.f, 1.0f };
+            else if (elementType == ElementType::Grass) elementColor = { 0.4196f, 0.9921f, 0.6235f, 1.0f };
+            else if (elementType == ElementType::Water) elementColor = { 0.3764f, 0.7372f, 0.9921f, 1.0f };
+            else if (elementType == ElementType::Fire) elementColor = { 1.f, 0.457f, 0.3443396f, 1.0f };
+            ultimateBackgroundRenderer->SetColor(elementColor);
+            ultimateBackgroundRenderer->SetTexture("Ultimate_Background_Void");
+        }
+        if (auto icon = ultimate->FindChildByName("Ultimate_Icon"))
+        {
+            if (auto iconRenderer = icon->GetComponent<CUIRenderer>())
+            {
+                iconRenderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+                iconRenderer->SetTexture("Ultimate_Icon_" + classNames[(UINT8)playerClass]);
+            }
+        }
+    }
+    if (auto skill = owner->FindChildByName("Skill")) {
+        if (skillIconRenderer = skill->GetComponent<CUIRenderer>())
+        {
+			ITEM_TYPE skillType = mPlayer.lock()->GetComponent<CPlayerController>()->GetSkill();
+            std::string skillName{"Background"};
+            if (skillType == ITEM_TYPE::FIRE_EXPLOSION) skillName = "Explosion";
+            else if (skillType == ITEM_TYPE::GRASS_VINE) skillName = "Vine";
+            else if (skillType == ITEM_TYPE::WATER_SHIELD) skillName = "Shield";
+            skillIconRenderer->SetTexture("Skill_" + skillName);
+		}
+
+    }
+
+    mPlayer.lock()->AddEvent("OnSkillChanged", [mainPlayerBackgroundRenderer, skillIconRenderer, ultimateBackgroundRenderer](const std::vector<std::any>& args) {
+        if (args.size() < 2) return;
+        if (!mainPlayerBackgroundRenderer) return;
+        if (!skillIconRenderer) return;
+        if (!ultimateBackgroundRenderer) return;
+
+        UINT8 skillType = std::any_cast<UINT8>(args[0]);
+        UINT8 elementType = std::any_cast<UINT8>(args[1]);
+        Color elementColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+        if (elementType == (UINT8)ElementType::Void) elementColor = { 1.f, 1.f, 1.f, 1.0f };
+        else if (elementType == (UINT8)ElementType::Grass) elementColor = { 0.4196f, 0.9921f, 0.6235f, 1.0f };
+        else if (elementType == (UINT8)ElementType::Water) elementColor = { 0.3764f, 0.7372f, 0.9921f, 1.0f };
+        else if (elementType == (UINT8)ElementType::Fire) elementColor = { 1.f, 0.457f, 0.3443396f, 1.0f };
+        ultimateBackgroundRenderer->SetColor(elementColor);
+        mainPlayerBackgroundRenderer->SetColor(elementColor);
+
+        std::string skillName{"Background"};
+        if (skillType == (UINT8)ITEM_TYPE::FIRE_EXPLOSION) skillName = "Explosion";
+        else if (skillType == (UINT8)ITEM_TYPE::GRASS_VINE) skillName = "Vine";
+        else if (skillType == (UINT8)ITEM_TYPE::WATER_SHIELD) skillName = "Shield";
+		skillIconRenderer->SetTexture("Skill_" + skillName);
+        }
+    );
+
+    for (int i = 0; auto& player : mOtherPlayers)
+    {
+        BindPlayerToUI(mOtherPlayers[i++].lock(), "Player" + std::to_string(i));
+    }
+
+}
+
+void CUIController::Update()
+{
+}
+
+void CUIController::LateUpdate()
+{
+}
+
+void CUIController::BindPlayerToUI(const std::shared_ptr<class CGameObject>& player, const std::string& name)
+{
+	if (!player) return;
+	if (name.empty()) return;
+
+	PLAYER_CLASS playerClass{ PLAYER_CLASS::end };
+    if (auto playerState = player->GetComponent<CPlayerStateMachine>())
+    {
+        playerClass = playerState->GetClass();
+    }
+
+    std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
+
+    if (auto player = owner->FindChildByName("name"))
+    {
+        if (auto playerRenderer = player->GetComponent<CUIRenderer>()) {
+            playerRenderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+            playerRenderer->SetTexture("Player_" + classNames[(UINT8)playerClass] + "_Normal");
+            mOtherPlayers[0].lock()->AddEvent("OnFaceChanged", [playerRenderer, playerClass](const std::vector<std::any>& args) {
+                if (args.size() < 1) return;
+                bool isNormal = std::any_cast<bool>(args[0]);
+                std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
+                std::string faceType = isNormal ? "_Normal" : "_Sad";
+                playerRenderer->SetTexture("Player_" + classNames[(UINT8)playerClass] + faceType);
+                });
+        }
+        if (auto hpBar = player->FindChildByName("HealthBar")) {
+            auto healthSystem = hpBar->AddComponent<CHealthSystem>();
+            healthSystem->BindOwner(player);
+            healthSystem->ViewHealthBar(true);
+            healthSystem->SetRenderToWorld(false);
+            healthSystem->SetHealthBarColor({ 0.0f, 0.8f, 0.f, 1.f });
+        }
+    }
+}
