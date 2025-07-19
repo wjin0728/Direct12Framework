@@ -216,3 +216,16 @@ void PlayerState::UltimateState::Update(PlayerCharacter* player) {
 void PlayerState::UltimateState::Exit(PlayerCharacter* player) {
     player->_data = 0.f;
 }
+
+// PlayerState::GatheringState ±¸Çö
+PlayerState::GatheringState& PlayerState::GatheringState::GetInstance() { static PlayerState::GatheringState instance; return instance; }
+
+void PlayerState::GatheringState::Enter(PlayerCharacter* player) {
+    player->SetVelocity(0, 0, 0);
+}
+
+void PlayerState::GatheringState::Update(PlayerCharacter* player) {
+}
+
+void PlayerState::GatheringState::Exit(PlayerCharacter* player) {
+}

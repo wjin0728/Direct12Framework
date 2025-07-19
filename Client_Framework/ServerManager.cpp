@@ -512,14 +512,13 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_MONSTER_POS_PACKET* packet = reinterpret_cast<SC_MONSTER_POS_PACKET*>(packet_ptr);
 		if (mEnemies.contains(packet->monsterId)) {
 			mEnemies[packet->monsterId]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-			
+
 			Quaternion local_rot = Quaternion::LookRotation(Vec3(packet->look_x, packet->look_y, packet->look_z));
 			mEnemies[packet->monsterId]->GetTransform()->SetLocalRotation(local_rot); 
 			// cout << "몬스터 look : " << packet->look_x << ", " << packet->look_y << ", " << packet->look_z << endl;
 			
 			auto monsterState =  mEnemies[packet->monsterId]->GetStateMachine();
-
-			cout << "Monster State : " << (int)monsterState->GetState() << endl;
+			//cout << "Monster State : " << (int)monsterState->GetState() << endl;
 
 			if (monsterState && monsterState->GetState() != packet->monster_state){
 				monsterState->SetState(packet->monster_state);

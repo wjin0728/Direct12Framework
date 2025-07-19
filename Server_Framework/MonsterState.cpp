@@ -1,8 +1,8 @@
-#include "MonsterState.h"
+ï»¿#include "MonsterState.h"
 #include "Monster.h"
 #include "GameManager.h"
 
-// MonsterState::IdleState ±¸Çö         =========================================================================
+// MonsterState::IdleState êµ¬í˜„         =========================================================================
 
 
 
@@ -10,12 +10,12 @@ MonsterState::IdleState& MonsterState::IdleState::GetInstance() { static Monster
 
 void MonsterState::IdleState::Enter(Monster* monster) {
 	cout << "IdleState Entered!" << endl;
-    monster->SetVelocity(0, 0, 0); // ¼Óµµ 0
+    monster->SetVelocity(0, 0, 0); // ì†ë„ 0
 	idleTimer = 2.f;
 }
 
 void MonsterState::IdleState::Update(Monster* monster) {
-	idleTimer -= TICK_INTERVAL; // ´ë±â ½Ã°£ °¨¼Ò
+	idleTimer -= TICK_INTERVAL; // ëŒ€ê¸° ì‹œê°„ ê°ì†Œ
 	if (idleTimer <= 0) {
 		if (monster->_target) {
 			monster->SetState(S_MONSTER_STATE::RUN);
@@ -27,7 +27,7 @@ void MonsterState::IdleState::Exit(Monster* monster) {}
 
 
 
-// MonsterState::RunState ±¸Çö          =========================================================================
+// MonsterState::RunState êµ¬í˜„          =========================================================================
 
 
 
@@ -35,17 +35,17 @@ MonsterState::RunState& MonsterState::RunState::GetInstance() { static MonsterSt
 
 void MonsterState::RunState::Enter(Monster* monster) {
 	cout << "RunState Entered!" << endl;
-    // ÀÌµ¿ ½ÃÀÛ
+    // ì´ë™ ì‹œì‘
 }
 
 void MonsterState::RunState::Update(Monster* monster) {
-	Vec3 pos = monster->_pos; // ÇöÀç À§Ä¡ ÀúÀå
+	Vec3 pos = monster->_pos; // í˜„ì¬ ìœ„ì¹˜ ì €ì¥
 	monster->_pos += monster->_velocity * TICK_INTERVAL;
 	//if (monster->gameManager.CanMove(pos.x, pos.z)) {
-	//	monster->_pos = pos; // ÀÌµ¿ °¡´ÉÇÏ¸é À§Ä¡ ¾÷µ¥ÀÌÆ®
+	//	monster->_pos = pos; // ì´ë™ ê°€ëŠ¥í•˜ë©´ ìœ„ì¹˜ ì—…ë°ì´íŠ¸
 	//}
 	//else {
-	//	monster->SetVelocity(0, 0, 0); // ÀÌµ¿ ºÒ°¡´ÉÇÏ¸é ¼Óµµ 0
+	//	monster->SetVelocity(0, 0, 0); // ì´ë™ ë¶ˆê°€ëŠ¥í•˜ë©´ ì†ë„ 0
 	//}
 
 
@@ -62,7 +62,7 @@ void MonsterState::RunState::Update(Monster* monster) {
 			//break;
    //     }
    //     case 2: {
-			//monster->SetState(S_MONSTER_STATE::SKILL); // ¿ø°Å¸®?
+			//monster->SetState(S_MONSTER_STATE::SKILL); // ì›ê±°ë¦¬?
 			//break;
    //     }
    //     default:
@@ -75,7 +75,7 @@ void MonsterState::RunState::Exit(Monster* monster) {}
 
 
 
-// MonsterState::AttackState ±¸Çö  =========================================================================
+// MonsterState::AttackState êµ¬í˜„  =========================================================================
 
 
 
@@ -104,14 +104,14 @@ void MonsterState::AttackState::Exit(Monster* monster) {}
 
 
 
-// MonsterState::SkillState ±¸Çö  =========================================================================
+// MonsterState::SkillState êµ¬í˜„  =========================================================================
 
 
 
 MonsterState::SkillState& MonsterState::SkillState::GetInstance() { static MonsterState::SkillState instance; return instance; }
 
 void MonsterState::SkillState::Enter(Monster* monster) {
-    skillTimer = 2.0f; // ½ºÅ³ Áö¼Ó ½Ã°£ ÁöÁ¤ÇØÁÖ±â
+    skillTimer = 2.0f; // ìŠ¤í‚¬ ì§€ì† ì‹œê°„ ì§€ì •í•´ì£¼ê¸°
 }
 
 void MonsterState::SkillState::Update(Monster* monster) {
@@ -125,7 +125,7 @@ void MonsterState::SkillState::Exit(Monster* monster) {}
 
 
 
-// MonsterState::HitState ±¸Çö          =========================================================================
+// MonsterState::HitState êµ¬í˜„          =========================================================================
 
 
 
@@ -133,14 +133,14 @@ MonsterState::HitState& MonsterState::HitState::GetInstance() { static MonsterSt
 
 void MonsterState::HitState::Enter(Monster* monster) {
 	cout << "HitState Entered!" << endl;
-    monster->SetVelocity(0, 0, 0); // ÀÌµ¿ ¸ØÃã
+    monster->SetVelocity(0, 0, 0); // ì´ë™ ë©ˆì¶¤
 	hitTimer = monster->_animations[(int)S_MONSTER_STATE::GETHIT]->mLength;
 }
 
 void MonsterState::HitState::Update(Monster* monster) {
-	hitTimer -= TICK_INTERVAL; // È÷Æ® ¾Ö´Ï¸ŞÀÌ¼Ç ½Ã°£ °¨¼Ò
+	hitTimer -= TICK_INTERVAL; // íˆíŠ¸ ì• ë‹ˆë©”ì´ì…˜ ì‹œê°„ ê°ì†Œ
 	if (hitTimer <= 0) {
-		monster->SetState(monster->previousState); // ÀÌÀü »óÅÂ·Î µ¹¾Æ°¡±â
+		monster->SetState(monster->previousState); // ì´ì „ ìƒíƒœë¡œ ëŒì•„ê°€ê¸°
 	}
 }
 
@@ -149,22 +149,24 @@ void MonsterState::HitState::Exit(Monster* monster) {
 
 
 
-// MonsterState::DeathState ±¸Çö          =========================================================================
+// MonsterState::DeathState êµ¬í˜„          =========================================================================
 
 
 
 MonsterState::DeathState& MonsterState::DeathState::GetInstance() { static MonsterState::DeathState instance; return instance; }
 
 void MonsterState::DeathState::Enter(Monster* monster) {
-    monster->SetVelocity(0, 0, 0);
+	cout << "DeathState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0);
 	monster->_drop_item = false;
-	deathTimer = 5.f;
+	deathTimer = monster->_animations[(int)S_MONSTER_STATE::DEATH]->mLength;
 }
 
 void MonsterState::DeathState::Update(Monster* monster) {
-	deathTimer -= TICK_INTERVAL; // »ç¸Á ÈÄ ´ë±â
+	deathTimer -= TICK_INTERVAL;
 	if (deathTimer <= 0) {
-		monster->_remove = true; // ¸ó½ºÅÍ ºñÈ°¼ºÈ­
+		--monster->_wave;
+		monster->SetState(S_MONSTER_STATE::UNDERGROUND);
 	}
 }
 
@@ -172,14 +174,24 @@ void MonsterState::DeathState::Exit(Monster* monster) {}
 
 
 
-// MonsterState::UndergroundState ±¸Çö          =========================================================================
+// MonsterState::UndergroundState êµ¬í˜„          =========================================================================
 
 
 
 MonsterState::UndergroundState& MonsterState::UndergroundState::GetInstance() { static MonsterState::UndergroundState instance; return instance; }
 
 void MonsterState::UndergroundState::Enter(Monster* monster) {
-    monster->SetVelocity(0, 0, 0);
+	if (!monster->_wave) {
+		monster->_remove = true;
+		return;
+	}
+	cout << "UndergroundState Entered!" << endl;
+	monster->_pos = monster->_spawn_pos;
+	monster->_look_dir = monster->_spawn_dir;
+	monster->_target = nullptr;
+	monster->_hp = monster->_max_hp;
+	monster->SetVelocity(0, 0, 0);
+	monster->LocalTransform();
 }
 
 void MonsterState::UndergroundState::Update(Monster* monster) {
@@ -188,18 +200,21 @@ void MonsterState::UndergroundState::Update(Monster* monster) {
 	}
 }
 
-void MonsterState::UndergroundState::Exit(Monster* monster) {}
+void MonsterState::UndergroundState::Exit(Monster* monster) {
+	monster->_pos.y = 5.f;
+}
 
 
 
-// MonsterState::SpawnState ±¸Çö          =========================================================================
+// MonsterState::SpawnState êµ¬í˜„          =========================================================================
 
 
 
 MonsterState::SpawnState& MonsterState::SpawnState::GetInstance() { static MonsterState::SpawnState instance; return instance; }
 
 void MonsterState::SpawnState::Enter(Monster* monster) {
-    monster->SetVelocity(0, 0, 0);
+	cout << "SpawnState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0);
 	SpawnTimer = monster->_animations[(int)S_MONSTER_STATE::SPAWN]->mLength;
 }
 

@@ -191,10 +191,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[ServerNumber][c_id]._state = ST_INGAME;
 		}
 
-		if (1 == c_id) {
+		if (0 == c_id) {
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::ARCHER;
 		}
-		else if (0 == c_id) {
+		else if (1 == c_id) {
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
 		}
 		else if (2 == c_id)
@@ -357,8 +357,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 		case 1: {
 			{
 				Monster ms{ S_ENEMY_TYPE::GRASS_SMALL };
-				ms._pos = Vec3(50.f, 5.f, 50.f);
-				ms._look_dir = Vec3(0.f, 0.f, 1.f);
+				ms._pos = ms._spawn_pos = Vec3(50.f, 0.f, 50.f);
+				ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+				ms._hp = ms._max_hp = 50.f;
 				ms.LocalTransform();
 				for (auto& cl : clients[ServerNumber]) {
 					ms._Player[cl.first] = &cl.second._player;
@@ -374,9 +375,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 			{
 				Monster ms{ S_ENEMY_TYPE::GRASS_BIG };
-				ms._pos = Vec3(55.f, 5.f, 50.f);
-				ms._look_dir = Vec3(0.f, 0.f, 1.f);
-				ms.LocalTransform();	
+				ms._pos = ms._spawn_pos = Vec3(55.f, 0.f, 50.f);
+				ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+				ms._hp = ms._max_hp = 100.f;
+				ms.LocalTransform();
 				for (auto& cl : clients[ServerNumber]) {
 					ms._Player[cl.first] = &cl.second._player;
 				}
@@ -391,8 +393,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 			{
 				Monster ms{ S_ENEMY_TYPE::GRASS_SMALL };
-				ms._pos = Vec3(60.f, 5.f, 50.f);
-				ms._look_dir = Vec3(0.f, 0.f, 1.f);
+				ms._pos = ms._spawn_pos = Vec3(60.f, 0.f, 50.f);
+				ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+				ms._hp = ms._max_hp = 50.f;
 				ms.LocalTransform();
 				for (auto& cl : clients[ServerNumber]) {
 					ms._Player[cl.first] = &cl.second._player;
@@ -552,16 +555,18 @@ void GameManager::Update() {
 				cl.second._player._pos.y = terrainHeight;
 
 				float rotationSpeed = 10.f;
-				if (cl.second._player._velocity.LengthSquared() > 0.001f) {
-					Quaternion targetRot = Quaternion::LookRotation(cl.second._player._velocity);
-					Quaternion rotation = cl.second._player._rotation = Quaternion::Slerp(cl.second._player._rotation, targetRot, rotationSpeed * TICK_INTERVAL);
-					Vec3 angle = Vec3::GetAngleToQuaternion(rotation);
-					cl.second._player._look_dir.y = angle.y * radToDeg;
+				if (cl.second._player._class != S_PLAYER_CLASS::ARCHER || cl.second._player._state != S_PLAYER_STATE::RUNATTACK || !cl.second._player._target) {
+					if (cl.second._player._velocity.LengthSquared() > 0.001f) {
+						Quaternion targetRot = Quaternion::LookRotation(cl.second._player._velocity);
+						Quaternion rotation = cl.second._player._rotation = Quaternion::Slerp(cl.second._player._rotation, targetRot, rotationSpeed * TICK_INTERVAL);
+						Vec3 angle = Vec3::GetAngleToQuaternion(rotation);
+						cl.second._player._look_dir.y = angle.y * radToDeg;
+					}
 				}
 
 				// 플레이어 - 아이템 충돌 체크
 				{
-					if (!items.empty()) {
+					if (cl.second._player._state == S_PLAYER_STATE::GATHERING && !items.empty()) {
 						for (auto& it : items[ServerNumber]) {
 							if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
 								it.second.LocalTransform();
@@ -587,18 +592,16 @@ void GameManager::Update() {
 	vector<int> erase_proj;
 
 	for (auto& ms : Monsters[ServerNumber]) {
-		if (ms.second._remove) {
-			if (!ms.second._drop_item) {
-				CreateItem(&ms.second);
-				ms.second._drop_item = true;
-			}
-			continue; // 몬스터가 제거된 경우는 패스
+		if (ms.second._remove) continue; // 몬스터가 제거된 경우는 패스
+		else if (ms.second._state == S_MONSTER_STATE::DEATH && !ms.second._drop_item) {
+			CreateItem(&ms.second);
+			ms.second._drop_item = true;
 		}
 		ms.second.Update();
 		ms.second.AvoidCollision(Monsters[ServerNumber]);
 
 		// 몬스터 - 투사체 충돌 체크
-		if (ms.second._hp >= 0) {
+		if (ms.second._hp >= 0 && ms.second._state != S_MONSTER_STATE::UNDERGROUND && ms.second._state != S_MONSTER_STATE::DEATH) {
 			for (auto& proj : Projectiles[ServerNumber]) {
 				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
 				if (proj.second._remove) continue; // 투사체가 제거된 경우는 패스

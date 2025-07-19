@@ -180,7 +180,10 @@ void CPlayerController::OnKeyEvents()
 			CastingSkill();
 			return;
 		}
-
+		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
+			mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
+		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
@@ -239,6 +242,10 @@ void CPlayerController::OnKeyEvents()
 			CastingSkill();
 
 			return;
+		}
+		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
+			mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
