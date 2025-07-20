@@ -510,6 +510,23 @@ void GameManager::Update() {
 			player._pos.y = terrainHeight + player._data;
 		}
 
+		// 플레이어 - 아이템 충돌 체크
+		if (cl.second._player._state == S_PLAYER_STATE::GATHERING && !items.empty()) {
+			for (auto& it : items[ServerNumber]) {
+				if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
+					it.second.LocalTransform();
+				if (cl.second._player._boundingbox.Intersects(it.second._boundingbox)) {
+					for (auto& cl : clients[ServerNumber]) {
+						if (cl.second._state != ST_INGAME) continue;
+						cl.second.send_remove_item_packet(it.first, cl.first, it.second._item_type);
+					}
+					cout << "cl : " << cl.first << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
+					items[ServerNumber].erase(it.first);
+					break;
+				}
+			}
+		}
+
 		if (cl.second._player.HasMoveInput()) {
 			Vec3 newPos = cl.second._player._pos + (cl.second._player._velocity * TICK_INTERVAL);
 
@@ -526,25 +543,6 @@ void GameManager::Update() {
 						Quaternion rotation = cl.second._player._rotation = Quaternion::Slerp(cl.second._player._rotation, targetRot, rotationSpeed * TICK_INTERVAL);
 						Vec3 angle = Vec3::GetAngleToQuaternion(rotation);
 						cl.second._player._look_dir.y = angle.y * radToDeg;
-					}
-				}
-
-				// 플레이어 - 아이템 충돌 체크
-				{
-					if (cl.second._player._state == S_PLAYER_STATE::GATHERING && !items.empty()) {
-						for (auto& it : items[ServerNumber]) {
-							if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
-								it.second.LocalTransform();
-							if (cl.second._player._boundingbox.Intersects(it.second._boundingbox)) {
-								for (auto& cl : clients[ServerNumber]) {
-									if (cl.second._state != ST_INGAME) continue;
-									cl.second.send_remove_item_packet(it.first, cl.first, it.second._item_type);
-								}
-								cout << "cl : " << cl.first << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
-								items[ServerNumber].erase(it.first);
-								break;
-							}
-						}
 					}
 				}
 			}
@@ -693,7 +691,9 @@ void GameManager::SendAllProjectilesPosPacket()
 }
 
 void GameManager::CreateItem(Monster* monster) {
-	items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(monster->_pos.x, monster->_pos.y + 0.3, monster->_pos.z);
+	float terrainHeight = terrain[(int)scene_type].GetHeight(monster->_pos.x, monster->_pos.z);
+
+	items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(monster->_pos.x, terrainHeight + 0.3, monster->_pos.z);
 	items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(rand() % 2 ? S_ITEM_TYPE::S_FIRE_EXPLOSION : S_ITEM_TYPE::S_WATER_SHIELD);
 	items[ServerNumber][Item_cnt[ServerNumber]].LocalTransform();
 
