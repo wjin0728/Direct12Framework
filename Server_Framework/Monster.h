@@ -12,7 +12,7 @@ public:
     S_MONSTER_STATE	_state;
 	bool _remove = false;
 	bool _drop_item = false;
-    int _wave = 3;
+    int _wave = 1;
     Vec3 _spawn_pos{};
     Vec3 _spawn_dir{};
 
