@@ -417,6 +417,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		case S_PLAYER_CLASS::FIGHTER: {
 			direction = player._velocity;
 			for (auto& mon : Monsters[ServerNumber]) {
+				if (mon.second._remove || mon.second._state == S_MONSTER_STATE::UNDERGROUND || mon.second._state == S_MONSTER_STATE::DEATH || mon.second._state == S_MONSTER_STATE::SPAWN) continue; // 몬스터가 제거된 경우는 패스
 				mon.second.LocalTransform();
 				if (player.OnFighterBasicAttack(mon.second._boundingbox)) {
 					mon.second.TakeDamage(5);
