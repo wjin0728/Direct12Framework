@@ -163,6 +163,7 @@ private:
 	void CreateLightFromFile(std::ifstream& inFile);
 	void CreateAnimationFromFile(const std::string& fileName);
 	void CreateUIrendererFromFile(std::ifstream& inFile);
+	void CreateButtonFromFile(std::ifstream& inFile);
 	void CreateParticleAttachmentFromFile(std::ifstream& inFile);
 
 public:

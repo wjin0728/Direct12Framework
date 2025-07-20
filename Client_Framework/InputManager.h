@@ -84,18 +84,27 @@ private:
 	POINT mPrevMousePos{};
 	Vec2 mMouseDelta{};
 	bool mFixMousePos{};
+	bool mCanInput{true};
 
 public:
 	void Initialize(HWND hwnd);
 	void Update();
 
-	bool IsKeyPress(KEY_TYPE key) { return GetState(key) == KEY_STATE::PRESS; }
-	bool IsKeyDown(KEY_TYPE key) { return GetState(key) == KEY_STATE::DOWN; }
+	bool IsKeyPress(KEY_TYPE key) { return mCanInput && GetState(key) == KEY_STATE::PRESS; }
+	bool IsKeyDown(KEY_TYPE key) { return mCanInput && GetState(key) == KEY_STATE::DOWN; }
 	bool IsKeyUp(KEY_TYPE key) { return GetState(key) == KEY_STATE::UP; }
 
 	void FixMousePosition(bool fix);
 	void ChangeMouseState();
+	void CanInput(bool can) { mCanInput = can; }
 	Vec2 GetMouseDelta() const { return mMouseDelta; }
+	Vec2 GetMousePosition() const
+	{
+		POINT pos{};
+		GetCursorPos(&pos);
+		ScreenToClient(mHwnd, &pos); 
+		return Vec2(static_cast<float>(pos.x), static_cast<float>(pos.y));
+	}
 
 private:
 	inline KEY_STATE GetState(KEY_TYPE key) { return mStates[static_cast<UINT>(key)]; }

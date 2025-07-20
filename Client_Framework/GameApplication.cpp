@@ -56,7 +56,8 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	RESOURCE.LoadDefaultTexture();
 	INSTANCE(CParticleManager).LoadParticleProperties();
 	INSTANCE(ServerManager).Connect();
-	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::LOADING);
+	INSTANCE(CResourceManager).LoadPrevResources();
+	INSTANCE(CSceneManager).LoadScene(SCENE_TYPE::MENU);
 
 	TIMER.Reset();
 

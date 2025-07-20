@@ -48,9 +48,7 @@ void CParticleManager::Update()
 		if (!mMainCamera) return;
 		ParticleVertex* particleVertices = reinterpret_cast<ParticleVertex*>(mParticleVertexBuffer->mappedData);
 		std::sort(particleVertices, particleVertices + mParticleCount, [&](const ParticleVertex& a, const ParticleVertex& b) {
-			if(SimpleMath::IsEqual(a.distanceToCamera, b.distanceToCamera)) 
-				return a.size > b.size;
-			else return a.distanceToCamera > b.distanceToCamera; 
+			return a.distanceToCamera > b.distanceToCamera; 
 			});
 	} 
 }

@@ -4,6 +4,7 @@
 void CInputManager::Initialize(HWND hwnd)
 {
 	mHwnd = hwnd;
+	mCanInput = true;
 	mStates.fill(KEY_STATE::NONE);
 	FixMousePosition(true);
 }
@@ -13,6 +14,10 @@ void CInputManager::Update()
 	HWND hwnd = ::GetActiveWindow();
 	if (mHwnd != hwnd)
 	{
+		mStates.fill(KEY_STATE::NONE);
+		return;
+	}
+	if (mCanInput == false) {
 		mStates.fill(KEY_STATE::NONE);
 		return;
 	}

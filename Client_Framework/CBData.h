@@ -29,7 +29,7 @@ struct CBPassData
 	int lightingTargetIdx{};
 	int postProcessIdx{};
 	int finalTargetIdx{};
-	Vec4 finalRenderTargetAlpha;
+	Vec4 fadeColor;
 };
 
 struct CBAllShadowData
@@ -151,6 +151,7 @@ struct ParticleMotion
 {
 	Vec3 Position;
 	Vec3 Velocity;
+	float rotation;
 	float Age;
 	uint32_t ResetDataIndex;
 };

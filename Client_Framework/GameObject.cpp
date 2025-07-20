@@ -20,6 +20,7 @@
 #include"ParticleAttach.h"
 #include"ParticleManager.h"
 #include"ParticleEmitter.h"
+#include"Button.h"
 
 CGameObject::CGameObject(bool makeTransform)
 {
@@ -455,6 +456,10 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 			obj->CreateUIrendererFromFile(inFile);
 
 		}
+		else if (token == "<Button>:") {
+			obj->CreateButtonFromFile(inFile);
+
+		}
 		else if (token == "<ParticleSystem>:") {
 			obj->CreateParticleAttachmentFromFile(inFile);
 		}
@@ -608,6 +613,18 @@ void CGameObject::CreateUIrendererFromFile(std::ifstream& inFile)
 	uiRenderer->SetPosition(pos);
 	uiRenderer->SetShader("Sprite");
 	SetRenderLayer(RENDER_LAYER::UI);
+}
+
+void CGameObject::CreateButtonFromFile(std::ifstream& inFile)
+{
+	using namespace BinaryReader;
+	auto button = AddComponent<CButton>();
+	Color color{};
+	ReadDateFromFile(inFile, button->mTargetSize);
+	ReadDateFromFile(inFile, button->mTargetPos);
+	ReadDateFromFile(inFile, color);
+
+
 }
 
 void CGameObject::CreateParticleAttachmentFromFile(std::ifstream& inFile)

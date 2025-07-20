@@ -261,6 +261,16 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 		d3dDepthStencilDesc.DepthEnable = FALSE;
 		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 		break;
+	case DEPTH_STENCIL_TYPE::GREATER_NO_WRITE:
+		d3dDepthStencilDesc.DepthEnable = TRUE;
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+		break;
+	case DEPTH_STENCIL_TYPE::GREATER_EQUAL_NO_WRITE:
+		d3dDepthStencilDesc.DepthEnable = TRUE;
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+		break;
 	default:
 		break;
 	}

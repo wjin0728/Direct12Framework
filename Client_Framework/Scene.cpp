@@ -51,7 +51,6 @@ CScene::CScene()
 		int finalTargetIdx = finalTarget->GetSrvIndex();
 		renderTargetIndices.push_back(finalTargetIdx);
 	}
-	finalTargetAlpha = 1.f;
 
 	mRenderMgr = &INSTANCE(CRenderManager);
 }
@@ -74,6 +73,7 @@ void CScene::Start()
 
 void CScene::Update()
 {
+	FadeUpdate();
 	for (const auto& object : mObjects) {
 		object->Update();
 	}
@@ -92,6 +92,12 @@ void CScene::LateUpdate()
 }
 
 
+
+void CScene::RenderFadeOverlay()
+{
+	if (mFadeType == FadeType::None) return;
+	mRenderMgr->RenderFadePass();
+}
 
 void CScene::LoadSceneFromFile(const std::string& fileName)
 {
@@ -233,7 +239,7 @@ void CScene::UpdatePassData()
 	if (finalTarget) {
 		passData.finalTargetIdx = finalTarget->GetSrvIndex();
 	}
-	passData.finalRenderTargetAlpha = Vec4(finalTargetAlpha, finalTargetAlpha, finalTargetAlpha, finalTargetAlpha);
+	passData.fadeColor = mFadeColor;
 
 	CONSTANTBUFFER(CONSTANT_BUFFER_TYPE::PASS)->UpdateBuffer(0, &passData, sizeof(CBPassData));
 }
@@ -273,6 +279,47 @@ void CScene::CommitObjectChanges()
 		component->Start();
 	}
 	RemoveObjects();
+}
+
+void CScene::FadeUpdate()
+{
+	if (mFadeType == FadeType::None) return;
+	mFadeTime += DELTA_TIME;
+	float alpha = 0.f;
+	if (mFadeType == FadeType::In) {
+		alpha = mFadeTime / mFadeDuration;
+	} else if (mFadeType == FadeType::Out) {
+		alpha = 1.f - (mFadeTime / mFadeDuration);
+	}
+	mFadeColor.w = std::clamp(alpha, 0.f, 1.f);
+	if (mFadeTime >= mFadeDuration) {
+		mFadeColor.w = (mFadeType == FadeType::In) ? 1.f : 0.f;
+		mFadeType = FadeType::None;
+		if (mOnFadeFinish) {
+			mOnFadeFinish();
+			mOnFadeFinish = nullptr;
+		}
+	}
+}
+
+void CScene::FadeIn(float duration, const Color& color, std::function<void()> onFinish)
+{
+	mFadeColor = color;
+	mFadeDuration = duration;
+	mFadeTime = 0.f;
+	mOnFadeFinish = onFinish;
+	mFadeColor.w = 0.f; 
+	mFadeType = FadeType::In;
+}
+
+void CScene::FadeOut(float duration, const Color& color, std::function<void()> onFinish)
+{
+	mFadeColor = color;
+	mFadeDuration = duration;
+	mFadeTime = 0.f;
+	mOnFadeFinish = onFinish;
+	mFadeColor.w = 1.f; 
+	mFadeType = FadeType::Out;
 }
 
 void CScene::RemoveObjects()

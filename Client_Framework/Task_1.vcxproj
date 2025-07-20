@@ -163,6 +163,7 @@
     <ClInclude Include="AnimationEnums.h" />
     <ClInclude Include="BattleScene.h" />
     <ClInclude Include="BinaryReader.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CBData.h" />
     <ClInclude Include="CEntityState.h" />
@@ -239,6 +240,7 @@
   <ItemGroup>
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="BattleScene.cpp" />
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CEntityState.cpp" />
     <ClCompile Include="ContinuousRotation.cpp" />
@@ -377,6 +379,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\Shaders\Trail.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Shaders\FadeInOut.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

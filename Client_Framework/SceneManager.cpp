@@ -125,6 +125,7 @@ void CSceneManager::Render()
 	}
 	curScene->CollectVisibleObjects();
 	curScene->RenderScene();
+	curScene->RenderFadeOverlay();
 }
 
 bool CSceneManager::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)

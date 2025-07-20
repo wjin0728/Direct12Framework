@@ -12,6 +12,13 @@ class CLight;
 
 class CSceneManager;
 
+enum class FadeType
+{
+	In,
+	Out,
+	None
+};
+
 class CScene
 {
 	friend class CSceneManager;
@@ -32,7 +39,14 @@ protected:
 	int renderPasstype{};
 
 	Matrix UIProjectionMatrix{};
-	float finalTargetAlpha{ 1.f };
+
+	FadeType mFadeType{ FadeType::None };
+	Color mFadeColor{ 0.0f, 0.0f, 0.0f, 0.0f };
+	float mFadeTime{ 0.0f };
+	float mFadeDuration{ 0.5f };
+
+	std::function<void()> mOnFadeFinish;
+
 
 public:
 	BoundingBox mSceneAABB{};
@@ -49,6 +63,8 @@ public:
 	virtual void LateUpdate();
 
 	virtual void RenderScene() {};
+
+	void RenderFadeOverlay();
 
 public:
 	void LoadSceneFromFile(const std::string& fileName);
@@ -72,6 +88,10 @@ public:
 	void AddComponentToStartQueue(CComponent* component);
 
 	void CommitObjectChanges();
+
+	void FadeUpdate();
+	void FadeIn(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
+	void FadeOut(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
 
 protected:
 	void UpdatePassData();

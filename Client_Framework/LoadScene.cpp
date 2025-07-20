@@ -8,6 +8,7 @@
 #include"Transform.h"
 #include"LoadingScreen.h"
 #include"RenderManager.h"
+#include"InputManager.h"
 
 
 CLoadScene::CLoadScene()
@@ -32,6 +33,9 @@ void CLoadScene::Initialize()
 	}
 	mLoadingScreen = loadingScreenMoving;
 	AddObjectImmediately(loadingScreenUI);
+
+	FadeOut(0.5f, {0.0,0.0,0.0,1.f});
+	INPUT.FixMousePosition(true);
 }
 
 

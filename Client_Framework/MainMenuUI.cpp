@@ -7,20 +7,11 @@
 #include"InputManager.h"
 #include"SceneManager.h"
 #include"Scene.h"
-#include"Terrain.h"
 #include"Camera.h"
-#include"Animation.h"
-#include "ServerManager.h"
-#include "AnimationEnums.h"
-#include "ObjectState.h"
-#include"ParticleManager.h"
-#include "CutScene.h"
 #include"RenderManager.h"
 #include"UIRenderer.h"
-#include"TargetMarker.h"
 #include"ResourceManager.h"
-#include"ParticleAttach.h"
-#include"HealthSystem.h"
+#include"Button.h"
 
 CMainMenu::CMainMenu()
 {
@@ -32,12 +23,32 @@ void CMainMenu::Awake()
 
 void CMainMenu::Start()
 {
-    
+    if (auto startButtonObj = owner->FindChildByName("NewGame")) {
+        if (auto button = startButtonObj->GetComponent<CButton>())
+        {
+            auto fadeFunction = []() {
+                INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOADING, false);
+				};
 
+            button->SetOnClick([fadeFunction]() {
+				fadeFunction();
+            });
+				}
+    }
+    if (auto exitButtonObj = owner->FindChildByName("Exit")) {
+        if (auto button = exitButtonObj->GetComponent<CButton>())
+        {
+            auto exitFunction = []() {
+                ::PostQuitMessage(0);
+                };
+            button->SetOnClick(exitFunction);
+        }
+    }
 }
 
 void CMainMenu::Update()
 {
+
 }
 
 void CMainMenu::LateUpdate()

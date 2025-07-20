@@ -27,6 +27,9 @@ void CRenderManager::Destroy()
 	for(RENDER_LAYER layer = RENDER_LAYER::Opaque; layer < RENDER_LAYER::End; layer = (RENDER_LAYER)((UINT)layer + 1)) {
 		ClearRenderLayer(layer);
 	}
+	for(auto& lights : mLights) {
+		lights.clear();
+	}
 }
 
 void CRenderManager::AddRenderer(CRenderer* renderer, RENDER_LAYER layer)
@@ -195,6 +198,28 @@ void CRenderManager::RenderLightingPass()
 	renderTarget->ChangeTargetsToResources();
 }
 
+void CRenderManager::RenderUIPass(bool clearRenderTarget)
+{
+	auto uiPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	uiPassBuffer->BindToShader(0);
+	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
+	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
+	renderTarget->ChangeResourceToTarget(backBufferIdx);
+	renderTarget->SetRenderTarget(backBufferIdx);
+	if (clearRenderTarget) {
+		renderTarget->ClearRenderTargets();
+	}
+	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
+
+	D3D12_VIEWPORT mViewport = { 0.f,0.f,rtSize.x, rtSize.y };
+	D3D12_RECT mScissorRect = { 0.f,0.f,rtSize.x, rtSize.y };
+
+	CMDLIST->RSSetViewports(1, &mViewport);
+	CMDLIST->RSSetScissorRects(1, &mScissorRect);
+	RenderLayer(FORWARD, RENDER_LAYER::UI, nullptr);
+	renderTarget->ChangeTargetToResource(backBufferIdx);
+}
+
 void CRenderManager::RenderFinalPass()
 {
 	auto finalPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
@@ -212,8 +237,28 @@ void CRenderManager::RenderFinalPass()
 		finalShader->SetPipelineState(CMDLIST);
 		CRenderer::RenderFullscreen();
 	}
-	RenderLayer(FORWARD, RENDER_LAYER::UI, camera);
 
+	renderTarget->ChangeTargetToResource(backBufferIdx);
+}
+
+void CRenderManager::RenderFadePass()
+{
+	auto fadePassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	fadePassBuffer->BindToShader(0);
+	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
+	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
+	renderTarget->ChangeResourceToTarget(backBufferIdx);
+	renderTarget->SetRenderTarget(backBufferIdx);
+	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
+	D3D12_VIEWPORT mViewport = { 0.f,0.f,rtSize.x, rtSize.y };
+	D3D12_RECT mScissorRect = { 0.f,0.f,rtSize.x, rtSize.y };
+	CMDLIST->RSSetViewports(1, &mViewport);
+	CMDLIST->RSSetScissorRects(1, &mScissorRect);
+	auto fadeShader = RESOURCE.Get<CShader>("FadeInOut");
+	if (fadeShader) {
+		fadeShader->SetPipelineState(CMDLIST);
+		CRenderer::RenderFullscreen();
+	}
 	renderTarget->ChangeTargetToResource(backBufferIdx);
 }
 
