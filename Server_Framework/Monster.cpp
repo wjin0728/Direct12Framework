@@ -16,8 +16,6 @@ void Monster::SetState(MonsterStateMachine* newState)
 
 void Monster::SetState(S_MONSTER_STATE newState)
 {
-	_animation_time = 0.f;
-
     switch (newState) {
     case S_MONSTER_STATE::IDLE:
         _state = S_MONSTER_STATE::IDLE;
@@ -54,7 +52,6 @@ void Monster::SetState(S_MONSTER_STATE newState)
 
 void Monster::Update()
 {
-	_animation_time += TICK_INTERVAL;
     if (currentState) currentState->Update(this);
     LocalTransform(); // 바운딩 박스 업데이트 해주기
     SetTarget();
