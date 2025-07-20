@@ -18,7 +18,7 @@ void CObjectPoolManager::Initialize()
 	for (UINT i = 0; i < LIGHT_COUNT; i++) {
 		lightCBVIdx.push(i);
 	}
-	for (UINT i = 0; i < 20; i++) {
+	for (UINT i = 0; i < 100; i++) {
 		UICBVIdx.push(i);
 	}
 }

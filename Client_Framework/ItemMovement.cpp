@@ -30,7 +30,7 @@ void CItemMovement::Start()
 	{
 	case FIRE_ENCHANT:
 		itemName = "FireEnchant";
-		itemColor = Color(1.f, 0.2f, 0.f, 1.f);
+		itemColor = Color(0.7f, 0.2f, 0.f, 1.f);
 		break;
 	case FIRE_EXPLOSION:
 		itemName = "FireExplosion";
@@ -60,7 +60,10 @@ void CItemMovement::Start()
 
 	if (auto renderer = owner->GetComponent<CMeshRenderer>()) {
 		if (auto mat = renderer->GetMaterial()->Instantiate()) {
+			mat->EnrollToPool();
 			mat->SetProperty("mainColor", itemColor);
+			UINT texIdx = RESOURCE.GetTextureIndex("TranslucentCrystal01_Emission");
+			mat->SetProperty("mainTexIdx", texIdx);
 			renderer->SetMaterial(mat);
 		}
 	}
@@ -71,7 +74,7 @@ void CItemMovement::Start()
 			if (auto mat = RESOURCE.Get<CMaterial>("ItemDefault")->Instantiate()) {
 				auto texture = RESOURCE.Get<CTexture>(itemName);
 				mat->SetProperty("mainTexIdx", texture->GetSrvIndex());
-				mat->SetProperty("tiling", Vec2(3.f,1.f));
+				mat->SetProperty("tiling", Vec2(10.f,1.f));
 				mat->SetProperty("mainColor", itemColor);
 				renderer->SetMaterial(mat);
 			}

@@ -187,6 +187,27 @@ void CResourceManager::LoadDefaultTexture()
 		Add(tex);
 	}
 	{
+		auto name = "GrassVine";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "FireExplosion";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "Water_Shield";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
 		auto name = "WeaponTrail";
 		std::string path = TEXTURE_PATH(name);
 		auto tex = std::make_shared<CTexture>(name, path);
@@ -404,6 +425,23 @@ void CResourceManager::LoadDefaultShaders()
 		if (shader->Initialize("FinalPass", info, "FinalPass", false)) Add(shader);
 	}
 	
+}
+
+int CResourceManager::GetTextureIndex(const std::string& name)
+{
+	if (name == "null")
+		return -1;
+
+	if (Get<CTexture>(name)) {
+		return Get<CTexture>(name)->GetSrvIndex();
+	}
+	std::string path = TEXTURE_PATH(name);
+	auto mainTex = std::make_shared<CTexture>(name, path);
+	mainTex->AssignedSRVIndex();
+	ProcessGPULoadImmediate(mainTex.get());
+	Add(mainTex);
+
+	return mainTex->GetSrvIndex();
 }
 
 bool CResourceManager::LoadLoadingScreen()

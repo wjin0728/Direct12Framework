@@ -187,6 +187,7 @@ void CPlayerController::OnKeyEvents()
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
+			return;
 		}
 
 		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
@@ -240,16 +241,21 @@ void CPlayerController::OnKeyEvents()
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
 			CastingSkill();
-
+			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
+			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
+			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+			//mStateMachine->ActivateShield(false);
+			return;
 		}
 
 		if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
@@ -319,7 +325,7 @@ void CPlayerController::CastingSkill()
 				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
 				auto explosionParticle = explosionObj->GetComponent<CParticleAttach>();
 				if (explosionParticle) {
-					explosionParticle->Play();
+					explosionParticle->Reserve(true);
 				}
 			}
 			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);

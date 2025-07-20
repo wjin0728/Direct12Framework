@@ -64,6 +64,8 @@ public:
 	void LoadDefaultTexture();
 	void LoadDefaultMaterials();
 	void LoadDefaultShaders();
+
+	int GetTextureIndex(const std::string& name);
 		
 	void MakeShadersForAllPass(const std::string& shaderName, const std::string& name, ShaderInfo info);
 
@@ -81,6 +83,7 @@ public:
 	}
 
 	void ReturnSRVIndex(UINT idx) { mSrvIdxQueue.push(idx); }
+
 
 	void BackgroundLoadingThread();
 	void EnqueueRequest(CResource* req);

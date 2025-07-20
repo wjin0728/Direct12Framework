@@ -163,9 +163,6 @@
     <ClInclude Include="Collider.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="MenuScene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="IndexBuffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -265,6 +262,9 @@
     <ClInclude Include="TrailRenderer.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
+    <ClInclude Include="MainMenuUI.h" />
+    <ClInclude Include="MainScene.h" />
+    <ClInclude Include="UIController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -372,9 +372,6 @@
     <ClCompile Include="Collider.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
-    <ClCompile Include="MenuScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
     <ClCompile Include="IndexBuffer.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -474,6 +471,15 @@
     <ClCompile Include="TrailRenderer.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
+    <ClCompile Include="MainMenuUI.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="UIController.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
+    <ClCompile Include="MainScene.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -529,7 +535,7 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="..\Resources\Shaders\Water.hlsl">
-      <Filter>Managers</Filter>
+      <Filter>HLSL</Filter>
     </None>
   </ItemGroup>
 </Project>

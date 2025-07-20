@@ -46,9 +46,9 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 	}
 	curSceneType = nextScene;
 	curScene->Initialize();
-	INSTANCE(CResourceManager).ProcessGPULoadQueue();
 	curScene->Activate();
 	curScene->Start();
+	INSTANCE(CResourceManager).ProcessGPULoadQueue();
 }
 
 void CSceneManager::ChangeScene(SCENE_TYPE nextScene, bool savePrevScene)

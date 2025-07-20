@@ -41,12 +41,12 @@ struct CommonProperties
 struct LitProperties
 {
 	Vec4 mainColor{};
-	int mainTexIdx = -1;
+	UINT mainTexIdx = -1;
 
-	int normalTexIdx = -1;
+	UINT normalTexIdx = -1;
 	float smoothness{};
 	float metallic{};
-	int emissiveTexIdx = -1;
+	UINT emissiveTexIdx = -1;
 	Vec3 emissiveColor{};
 };
 

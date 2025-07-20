@@ -78,7 +78,5 @@ float4 PS_Forward(VS_OUTPUT input) : SV_Target
     float linearSceneDepth = GetCameraDepth(sceneDepth);
     float linearFragmentDepth = GetCameraDepth(input.pos.z);
     
-    float depth = saturate((linearSceneDepth - linearFragmentDepth)/0.05f);
-    color.a *= depth;
     return color;
     }

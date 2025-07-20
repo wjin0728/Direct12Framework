@@ -258,7 +258,6 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float3 worldTangent = normalize(input.tangentWS);
     float3 worldBitangent = normalize(input.bitangentWS);
     float2 uv = input.uv;
-    uv = uv * tilling;
     
     if (ForwardTexIdx != -1)
     {
