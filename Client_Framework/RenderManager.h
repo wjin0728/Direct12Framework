@@ -27,6 +27,8 @@ class CRenderManager
 {
 	MAKE_SINGLETON(CRenderManager)
 
+	friend class CRenderer;
+	friend class CShadowManager;
 private:
 	enum class RenderPass
 	{

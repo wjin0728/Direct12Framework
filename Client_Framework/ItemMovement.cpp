@@ -58,6 +58,7 @@ void CItemMovement::Start()
 		break;
 	}
 
+	owner->mCastShadow = false;
 	if (auto renderer = owner->GetComponent<CMeshRenderer>()) {
 		if (auto mat = renderer->GetMaterial()->Instantiate()) {
 			mat->EnrollToPool();
@@ -68,13 +69,17 @@ void CItemMovement::Start()
 		}
 	}
 
-	mOutSide = owner->FindChildByName("Image");
+	mOutSide = owner->FindChildByName("Capsule");
 	if(mOutSide.lock()) {
+		mOutSide.lock()->mCastShadow = false;
 		if (auto renderer = mOutSide.lock()->GetComponent<CMeshRenderer>()) {
 			if (auto mat = RESOURCE.Get<CMaterial>("ItemDefault")->Instantiate()) {
 				auto texture = RESOURCE.Get<CTexture>(itemName);
 				mat->SetProperty("mainTexIdx", texture->GetSrvIndex());
-				mat->SetProperty("tiling", Vec2(10.f,1.f));
+				mat->SetProperty("tiling", Vec2(3.f,1.f));
+				mat->SetProperty("smoothness", 0.0f);
+				mat->SetProperty("metallic", 0.0f);
+				//itemColor.w = 0.5f; // Set alpha to 0.5 for the capsule
 				mat->SetProperty("mainColor", itemColor);
 				renderer->SetMaterial(mat);
 			}

@@ -124,3 +124,8 @@ void CRenderer::SetMaterial(const std::shared_ptr<CMaterial>& material, UINT idx
 		return;
 	}
 }
+
+bool CRenderer::IsCastShadow() const
+{
+	return owner->mCastShadow;
+}

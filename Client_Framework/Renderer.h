@@ -83,4 +83,6 @@ public:
     void SetDirtyFrame(UINT frame) { mDirtyFrame = frame; }
     int GetCBVIdx() const { return mCbvIdx; }
 	int GetCBVOffset() const { return mCbvOffset; }
+
+    bool IsCastShadow() const;
 };

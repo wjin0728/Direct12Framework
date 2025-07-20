@@ -50,7 +50,7 @@ public:
 	int mID{ -1 };
 	bool misAwake{ false };
 	bool mIsStart{ false };
-	bool mCastShadow{ false };
+	bool mCastShadow{ true };
 	BoundingSphere mRootLocalBS = BoundingSphere();
 	BoundingSphere mRootBS = BoundingSphere();
 
