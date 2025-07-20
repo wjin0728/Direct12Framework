@@ -236,7 +236,8 @@ struct SC_REMOVE_WATERSHIELD_PACKET : PACKET {
 };
 
 struct SC_HP_PACKET : PACKET {
-	short player_id;
+	uint8_t object_type;
+	short object_id;
 	short hp;
 };
 

@@ -192,10 +192,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		if (0 == c_id) {
-			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::ARCHER;
+			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
 		}
 		else if (1 == c_id) {
-			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::FIGHTER;
+			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::ARCHER;
 		}
 		else if (2 == c_id)
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::MAGE;
@@ -257,56 +257,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		break;
 	}
-	//case CS_MOUSE_LDOWN: {
-	//	CS_MOUSE_LDOWN_PACKET* p = reinterpret_cast<CS_MOUSE_LDOWN_PACKET*>(packet);
-	//	Vec3 local_lookDir = Vec3(p->dir_x, p->dir_y, p->dir_z);
-	//	
-	//	switch (clients[ServerNumber][p->id]._player._class)
-	//	{
-	//	case S_PLAYER_CLASS::FIGHTER: {
-	//		for (auto& mon : Monsters[ServerNumber]) {
-	//			mon.second.LocalTransform();
-	//			clients[ServerNumber][c_id]._player.OnFighterBasicAttack(mon.second._boundingbox);
-	//		}
-	//		break;
-	//	}
-	//	case S_PLAYER_CLASS::ARCHER: {
-	//		cout << "Archer CS_MOUSE_LDOWN\n";
-	//		Projectile proj{1, S_PROJECTILE_TYPE::ARROW};
-	//		proj._pos = clients[ServerNumber][c_id]._player._pos;
-	//		proj._pos.y += 1.f; // 발사 위치 조정
-	//		proj._velocity = local_lookDir;
-	//		Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
-	//		for (auto& cl : clients[ServerNumber]) {
-	//			cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
-	//		}
-	//		Projectile_cnt[ServerNumber]++;
-	//		break;
-	//	}
-	//	case S_PLAYER_CLASS::MAGE: {
-	//		Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
-	//		proj._pos = clients[ServerNumber][c_id]._player._pos;
-	//		proj._velocity = local_lookDir;
-	//		Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
-	//		for (auto& cl : clients[ServerNumber]) {
-	//			clients[ServerNumber][c_id].send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
-	//		}
-	//		Projectile_cnt[ServerNumber]++;
-	//		break;
-	//	}
-	//	default:
-	//		break;
-	//	}
-	//	Quaternion targetRot = Quaternion::LookRotation(local_lookDir);
-	//	Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
-	//	clients[ServerNumber][p->id]._player._rotation = targetRot;
-	//	clients[ServerNumber][p->id]._player.SetLookDir(angle);
-	//	break;
-	//}
 	case CS_SKILL_TARGET: {
 		CS_SKILL_TARGET_PACKET* p = reinterpret_cast<CS_SKILL_TARGET_PACKET*>(packet);
 
-		if (S_FIRE_EXPLOSION == p->skill_enum) {}
+		if (S_FIRE_EXPLOSION == p->skill_enum) {
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._state != ST_INGAME) continue;
+				cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, p->target_id, Monsters[ServerNumber][p->target_id]._hp);
+			}
+		}
 		else if (S_GRASS_VINE == p->skill_enum) {}
 		break;
 	}
@@ -322,7 +281,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		else if (S_WATER_SHIELD == p->skill_enum) {
 			for (auto& cl : clients[ServerNumber])
-				cl.second._player._barrier = 2;
+				cl.second._player._barrier = 2; // 워터실드!!!!!!!
 		}
 		else if (S_GRASS_WEAKEN == p->skill_enum) {
 			clients[ServerNumber][c_id]._player._on_GrassWeaken = true;
@@ -457,7 +416,13 @@ void GameManager::Process_packet(int c_id, char* packet)
 			direction = player._velocity;
 			for (auto& mon : Monsters[ServerNumber]) {
 				mon.second.LocalTransform();
-				player.OnFighterBasicAttack(mon.second._boundingbox);
+				if (player.OnFighterBasicAttack(mon.second._boundingbox)) {
+					mon.second.TakeDamage(5);
+					for (auto& cl : clients[ServerNumber]) {
+						if (cl.second._state != ST_INGAME) continue;
+						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp);
+					}
+				}
 			}
 			break;
 		}
@@ -607,6 +572,10 @@ void GameManager::Update() {
 				if (proj.second._remove) continue; // 투사체가 제거된 경우는 패스
 				if (ms.second._boundingbox.Intersects(proj.second._boundingbox)) {
 					ms.second.TakeDamage(proj.second._damage);
+					for (auto& cl : clients[ServerNumber]) {
+						if (cl.second._state != ST_INGAME) continue;
+						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, ms.first, ms.second._hp);
+					}
 					proj.second._remove = true; // 투사체 제거
 				}
 			}

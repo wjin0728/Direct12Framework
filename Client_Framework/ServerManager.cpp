@@ -550,6 +550,37 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		mProjectiles.erase(packet->projectile_id);
 		break;
 	}
+	case SC_HP: {
+		SC_HP_PACKET* packet = reinterpret_cast<SC_HP_PACKET*>(packet_ptr);
+		if (packet->object_type == (uint8_t)OBJECT_TYPE::PLAYER) {
+			if (clientID == packet->object_id) {
+				if (mPlayer) {
+					auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(mPlayer->GetStateMachine());
+					if (playerState) {
+						playerState->UpdateHealth(packet->hp);
+					}
+				}
+			}
+			else {
+				auto it = mOtherPlayers.find(packet->object_id);
+				if (it != mOtherPlayers.end()) {
+					auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(it->second->GetStateMachine());
+					if (playerState) {
+						playerState->UpdateHealth(packet->hp);
+					}
+				}
+			}
+		}
+		else {
+			auto it = mEnemies.find(packet->object_id);
+			if (it != mEnemies.end()) {
+				auto enemyState = std::dynamic_pointer_cast<CEnemyState>(it->second->GetStateMachine());
+				if (enemyState) {
+					enemyState->UpdateHealth(packet->hp);
+				}
+			}
+		}
+	}
 	default:
 		break;
 	}

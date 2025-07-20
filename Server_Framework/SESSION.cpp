@@ -170,12 +170,13 @@ void SESSION::send_remove_watershield_packet(int id)
 	do_send(&p);
 }
 
-void SESSION::send_hp_packet(int id, int hp)
+void SESSION::send_hp_packet(S_OBJECT_TYPE type, int id, int hp)
 {
 	SC_HP_PACKET p;
 	p.type = SC_HP;
 	p.size = sizeof(p);
-	p.player_id = id;
+	p.object_type = (uint8_t)type;
+	p.object_id = id;
 	p.hp = hp;
 	do_send(&p);
 }
