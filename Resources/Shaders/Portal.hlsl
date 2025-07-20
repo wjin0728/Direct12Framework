@@ -3,38 +3,16 @@
 
 cbuffer MaterialData : register(b5)
 {
-    float4 _FoamColor;
-    float4 _ShallowColour;
-    float4 _DeepColour;
-    float4 _VeryDeepColour;
-    float _WaveSpeed;
-    float _Smoothness;
-    float _FoamSmoothness;
-    float _ReflectionPower;
-    float _OpacityFalloff;
-    float _NormalScale;
-    float _NormalTiling2;
-    float _WaveFoamOpacity;
-    float _RippleSpeed;
-    float _WaveNoiseScale;
-    float _WaveNoiseAmount;
-    float _WaveDirection;
-    float _WaveWavelength;
-    float _WaveAmplitude;
-    float _Depth;
-    float _OverallFalloff;
-    float _ShallowFalloff;
-    float _FoamSpread;
-    float _FoamShoreline;
-    float _FoamFalloff;
-    float _OpacityMin;
-    float _NormalTiling;
-    float _Opacity;
-    int _WaveMask;
-    int _FoamMaskIdx;
-    int _RipplesNormalIdx;
-    int _RipplesNormal2Idx;
-    float padding;
+    float4 mainColor; // 0
+    
+    float _WaveAmplitude; // 1
+    float _WaveDirection; // 2
+    float _WaveSpeed; // 3
+    float _WaveWavelength; // 4
+    float _WaveNoiseScale; // 5
+    float _WaveNoiseAmount; // 6
+    uint mainTextureIndex; // 6
+    uint _WaveMask; // 7
 };
 
 inline float3 mod2D289(float3 x)
@@ -192,11 +170,8 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
     float4 position : SV_POSITION;
+    float3 positionWS : POSITION;
     float4 positionCS : TEXCOORD0;
-    float4 normalWS : TEXCOORD1;
-    float4 tangentWS : TEXCOORD2;
-    float4 bitangentWS : TEXCOORD3;
-    float4 ShadowPosH : TEXCOORD4;
     float2 uv : TEXCOORD5;
 };
 
@@ -204,14 +179,14 @@ struct VS_OUTPUT
 VS_OUTPUT VS_Forward(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
-    float3 ase_worldPos = mul(float4(input.position, 1.0f), worldMat).xyz;
+    float3 worldPos = mul(float4(input.position, 1.0f), worldMat).xyz;
     
     float2 temp_cast_0 = (_WaveSpeed).xx;
     float mulTime307 = totalTime * 0.001;
     float2 temp_cast_1 = (mulTime307).xx;
     float2 texCoord312 = input.uv.xy * float2(1, 1) + temp_cast_1;
     float simplePerlin2D320 = snoise(texCoord312 * _WaveNoiseScale);
-    float2 appendResult59 = (float2(ase_worldPos.x, ase_worldPos.z));
+    float2 appendResult59 = (float2(worldPos.x, worldPos.z));
     float cos302 = cos(_WaveDirection);
     float sin302 = sin(_WaveDirection);
     float2 rotator302 = mul(((simplePerlin2D320 * _WaveNoiseAmount) + appendResult59) - float2(0, 0), float2x2(cos302, -sin302, sin302, cos302)) + float2(0, 0);
@@ -224,21 +199,15 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
     float4 appendResult301 = (float4(0.0, grayscale298, 0.0, 0.0));
     
     VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position + appendResult301.xyz);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
     
     float4 positionWS = positionInputs.positionWS;
     output.position = positionInputs.positionCS;
     output.positionCS = positionInputs.positionCS;
+    output.positionWS = positionWS;
     
-    output.normalWS.xyz = normalInputs.normalWS;
-    output.normalWS.w = positionWS.x;
-    output.tangentWS.xyz = normalInputs.tangentWS;
-    output.tangentWS.w = positionWS.y;
-    output.bitangentWS.xyz = normalInputs.bitangentWS;
-    output.bitangentWS.w = positionWS.z;
+    //uv transformation
+    float2 uv = mul(float3(input.uv, 1.0), (float3x3) texMat).xy;
     
-    output.ShadowPosH = mul(positionWS, shadowViewMat);
-        
     output.uv = input.uv;
     
     return output;
@@ -248,17 +217,10 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 //«»ºø ºŒ¿Ã¥ı
 float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
 {
-    float4 color = float4(1.f, 1.f, 1.f, 1.f);
-    float3 worldPosition = float3(input.normalWS.w, input.tangentWS.w, input.bitangentWS.w);
-    float3 worldNormal = normalize(input.normalWS.xyz);
-    float3 normal = worldNormal;
-    float3 worldTangent = normalize(input.tangentWS.xyz);
-    float3 worldBitangent = normalize(input.bitangentWS.xyz);
+    float4 color = mainColor;
+    float3 worldPosition = input.positionWS;
     float2 uv = input.uv;   
     
-    float3 viewDir = normalize(camPos - worldPosition);
-    float3 lightDir = lights[0].directionWS;
-    //return float4(lightDir * 0.5 + 0.5, 1.0);
     
     float4 clipPos = input.positionCS;
     float4 screenPos = ComputeScreenPos(clipPos);
@@ -268,97 +230,6 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float linearSceneDepth = GetCameraDepth(sceneDepth);
     float linearFragmentDepth = GetCameraDepth(screenPos.z);
     
-    float depthDiff = abs((linearSceneDepth - linearFragmentDepth) / _Depth);
-    float baseFalloff = pow(depthDiff, _OverallFalloff);
-    float depthFactor = baseFalloff + _ShallowFalloff;
-    
-    float3 shallowColor = (_ShallowColour.rgb);
-    float3 deepColor = (_DeepColour.rgb);
-    float3 veryDeepColor = (_VeryDeepColour.rgb);
-    
-    float3 shallowBlend = lerp(shallowColor, deepColor, depthFactor);
-    float3 deepBlend = lerp(deepColor, veryDeepColor, saturate(baseFalloff - 1.0));
-    float3 waterColor = (depthFactor < 1.0f) ? shallowBlend : deepBlend;
-    
-    float2 mainPannerUV = (totalTime * _RippleSpeed.xx) + (worldPosition.xz * 0.2f);
-    float2 detailPannerUV = (totalTime * -_RippleSpeed.xx) + (worldPosition.xz * 0.2f);
-    
-    float3 mainNormalTS = diffuseMap[_RipplesNormalIdx].Sample(linearWrap, mainPannerUV).rgb;
-    float3 detailNormalTS = diffuseMap[_RipplesNormal2Idx].Sample(linearWrap, detailPannerUV).rgb;
-    mainNormalTS = UnpackNormal(mainNormalTS);
-    detailNormalTS = UnpackNormal(detailNormalTS);
-    float3 blendedNormalTS = normalize(mainNormalTS + detailNormalTS);
-    float normalScale = _NormalScale + 0.05;
-    blendedNormalTS = normalize(float3(blendedNormalTS.xy * normalScale, blendedNormalTS.z));
-    blendedNormalTS.z = lerp(1, blendedNormalTS.z, saturate(normalScale));
-    normal = normalize(blendedNormalTS);
-    normal = UnpackedNormalSampleToWorldSpace(normal, worldNormal, worldTangent, worldBitangent);
-    
-    //return float4(normal, 1);
-    
-    float foamDepthMask = saturate(pow(depthDiff + _FoamShoreline, _FoamFalloff));
-    
-    float3 foamColor = _FoamColor.rgb;
-    float2 panner166 = (0.1 * totalTime * float2(1, 0) + worldPosition.xz);
-    float2 panner22 = (0.1 * totalTime * float2(-1, 0) + worldPosition.xz);
-    float perlin1 = snoise(float3((panner166 * 1.5), 0.0));
-    float perlin2 = snoise(float3((panner22 * 3.0), 0.0));
-    float perlinSum = perlin1 + perlin2;
-    float maskPerlinFoam = 1.0 - step(perlinSum, depthDiff * _FoamSpread);
-    float3 foamColorCombined = saturate((foamColor * maskPerlinFoam) + (foamColor * foamDepthMask));
-    
-    float3 colorWithFoam = lerp(waterColor, float3(1, 1, 1), foamColorCombined);
-    
-    float mulTime307 = totalTime * 0.001;
-    float2 temp_cast_6 = (mulTime307).xx;
-    float2 texCoord312 = uv + temp_cast_6;
-    float2 waveBase = float2(worldPosition.x, worldPosition.z);
-    float2 waveNoiseUV = waveBase + snoise(texCoord312 * _WaveNoiseScale) * _WaveNoiseAmount;
-    float2x2 rot = float2x2(cos(_WaveDirection), -sin(_WaveDirection), sin(_WaveDirection), cos(_WaveDirection));
-    waveNoiseUV = mul(waveNoiseUV, rot);
-    
-    float2 crestPannerUV = waveNoiseUV * _WaveWavelength + (totalTime * _WaveSpeed.xx);
-    
-    float crestNoise1 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(1, 0)) * 2, 0.0));
-    float crestNoise2 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(-1, 0)) * 0.8, 0.0));
-    float crestFoamMask1 = step(crestNoise1 + crestNoise2, 0.0);
-    float3 crestFoamTex = float3(1, 1, 1);
-    if (_FoamMaskIdx != -1) crestFoamTex = diffuseMap[_FoamMaskIdx].SampleLevel(linearWrap, crestPannerUV, 0).rgb;
-    
-    float crestNoise3 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(1, 0)) * 0.05, 0.0));
-    float crestNoise4 = snoise(float3((worldPosition.xz + 0.1 * totalTime * float2(-1, 0)) * 0.08, 0.0));
-    float crestFoamMask2 = step(crestNoise3 + crestNoise4, 0.0);
-    
-    float3 waveCrestFoam = lerp(0, crestFoamTex, crestFoamMask1);
-    waveCrestFoam = lerp(0, waveCrestFoam, crestFoamMask2);
-    waveCrestFoam = lerp(0, waveCrestFoam, _WaveFoamOpacity);
-    
-    float3 waterAlbedo = colorWithFoam + waveCrestFoam;
-    
-    float distanceDepth = abs(linearSceneDepth - linearFragmentDepth);
-    float waterOpacity = (_OpacityMin + (saturate(distanceDepth / _OpacityFalloff) * (1.0 - _OpacityMin)) * _Opacity);
-    
-    
-    float smoothness = lerp(_Smoothness, _FoamSmoothness, foamDepthMask) * _ReflectionPower;
-    
-    LightingData lightingData = (LightingData) 0;
-    lightingData.cameraDirection = viewDir;
-    lightingData.normalWS = normal;
-    lightingData.positionWS = worldPosition;
-    lightingData.shadowFactor = CalcShadowFactor(input.ShadowPosH);
-    
-    SurfaceData surfaceData = (SurfaceData) 0;
-    surfaceData.albedo = GammaDecoding(waterAlbedo.rgb);
-    surfaceData.metallic = 0.f;
-    surfaceData.smoothness = smoothness;
-    surfaceData.specular = 0.5f;
-    surfaceData.emissive = 0.f;
-    
-#ifdef LIGHTING
-    float3 finalColor = CalculatePhongLight(lightingData, surfaceData);
-#else
-    float3 finalColor = color.rgb;
-#endif
     
     return float4(finalColor, waterOpacity);
 }

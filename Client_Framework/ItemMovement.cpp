@@ -58,7 +58,6 @@ void CItemMovement::Start()
 		break;
 	}
 
-	owner->mCastShadow = false;
 	if (auto renderer = owner->GetComponent<CMeshRenderer>()) {
 		if (auto mat = renderer->GetMaterial()->Instantiate()) {
 			mat->EnrollToPool();

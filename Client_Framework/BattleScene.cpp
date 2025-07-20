@@ -22,6 +22,7 @@
 #include"RenderManager.h"
 #include"CEntityState.h"
 #include"UIController.h"
+#include "ParticleAttach.h"
 
 CBattleScene::CBattleScene() : CScene()
 {
@@ -40,6 +41,15 @@ void CBattleScene::Initialize()
 		uiObject->SetName("MainUI");
 		uiObject->AddComponent<CPlayerHUD>();
 		AddObjectImmediately(uiObject);
+	}
+	auto portal = RESOURCE.GetPrefab("Portal");
+	if (portal) {
+		auto portalObject = CGameObject::Instantiate(portal);
+		portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(47.92172f, 6.699f, 36.38293f));
+		auto particle = portalObject->GetComponent<CParticleAttach>();
+		particle->SetLoop(true);
+
+		AddObjectImmediately(portalObject);
 	}
 	CLight::SetVolumes();
 }

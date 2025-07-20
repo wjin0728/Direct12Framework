@@ -10,7 +10,8 @@ private:
 	CParticleEmitter* mParticleEmitter = nullptr;
 	float mElapsedTime = 0.0f;
 
-	bool mReserve = false;
+	bool mReserve = true;
+	bool mLoop = false;
 
 public:
 	bool mCanEmit = true;
@@ -32,6 +33,7 @@ public:
 	void Play();
 	void Stop();
 	void Reserve(bool reserve);
+	void SetLoop(bool loop);
 	void SetParticleEmitterName(const std::string& name) { mParticleEmitterName = name; }
 	void SetParticleEmitter(CParticleEmitter* emitter) { mParticleEmitter = emitter; }
 };

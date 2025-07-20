@@ -126,6 +126,18 @@ struct WaterProperties
 	float padding;
 };
 
+struct PortalProperties
+{
+	float waveAmplitude;
+	float waveDirection; 
+	float waveSpeed; 
+	float waveWavelength; 
+	float waveNoiseScale; 
+	float waveNoiseAmount; 
+	UINT mainTextureIndex;
+	UINT waveMask; 
+};
+
 struct UIProperties
 {
 	Vec3 color{};
@@ -286,6 +298,22 @@ std::vector<PropertyInfo> GetPropertyInfos()
 }
 
 #pragma once
+
+template<>
+inline std::vector<PropertyInfo> GetPropertyInfos<PortalProperties>()
+{
+	using T = PortalProperties;
+	return {
+		REGISTER_PROPERTY(T, waveAmplitude),
+		REGISTER_PROPERTY(T, waveDirection),
+		REGISTER_PROPERTY(T, waveSpeed),
+		REGISTER_PROPERTY(T, waveWavelength),
+		REGISTER_PROPERTY(T, waveNoiseScale),
+		REGISTER_PROPERTY(T, waveNoiseAmount),
+		REGISTER_PROPERTY(T, mainTextureIndex),
+		REGISTER_PROPERTY(T, waveMask)
+	};
+}
 
 template<>
 inline std::vector<PropertyInfo> GetPropertyInfos<CommonProperties>()

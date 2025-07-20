@@ -17,6 +17,7 @@ CParticleAttach::~CParticleAttach()
 	if (mParticleEmitter)
 	{
 		mParticleEmitter->mParticleAttach = nullptr;
+		mParticleEmitter->mIsLooping = false;
 		mParticleEmitter = nullptr;
 	}
 }
@@ -62,9 +63,11 @@ void CParticleAttach::Play()
 {
 	InitializeParticleEmitter();
 
-	if (mParticleEmitter && !mParticleEmitter->mIsPlaying)
+	if (mParticleEmitter && !mParticleEmitter->mIsPlaying) {
 		mParticleEmitter->mEmitterTransform = GetTransform()->GetWorldMat();
 		INSTANCE(CParticleManager).PlayParticleEmitter(mParticleEmitter);
+		mParticleEmitter->mIsLooping = mLoop;
+	}
 }
 
 void CParticleAttach::Stop()
@@ -80,5 +83,24 @@ void CParticleAttach::Reserve(bool reserve)
 	for (auto& child : children)
 	{
 		child->Reserve(reserve);
+	}
+}
+
+void CParticleAttach::SetLoop(bool loop)
+{
+	mLoop = loop;
+	if (mParticleEmitter)
+	{
+		mParticleEmitter->mIsLooping = loop;
+		if (loop)
+		{
+			mParticleEmitter->mIsPlaying = true;
+		}
+		else
+		{
+			mParticleEmitter->mIsPlaying = false;
+			mParticleEmitter->mParticleAttach = nullptr;
+			mParticleEmitter = nullptr;
+		}
 	}
 }

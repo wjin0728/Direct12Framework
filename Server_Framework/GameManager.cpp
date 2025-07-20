@@ -35,6 +35,8 @@ GameManager::GameManager()
 	std::cout << "Server initialized.\n";
 
 	S_Accept();
+
+	scene_type = S_SCENE_TYPE::MAINSTAGE1;
 }
 GameManager::~GameManager()
 {

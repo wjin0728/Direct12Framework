@@ -178,17 +178,7 @@ void CParticleEmitter::EmitParticles()
 			}
 			int burstCount = burst.count.GetRandomValue(0.5);
 			for (int j = 0; j < burstCount; ++j) {
-				for (auto& particle : mParticles) {
-					if (particle.Age >= 1.f) {
-						particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
-						ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
-						Vec3 direction = Vec3::TransformNormal(spawnDataItem.direction, mEmitterTransform);
-						particle.Velocity = direction * spawnDataItem.speed;
-						particle.Position = spawnDataItem.startLocation + Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
-						particle.Age = 0.f;
-						break;
-					}
-				}
+				CreateParticle();
 			}
 		}
 	}
@@ -211,16 +201,21 @@ void CParticleEmitter::EmitParticles()
 	mTimeSinceLastEmit += deltaTime;
 	if (!mIsPaused && (mTimeSinceLastEmit >= emitRate)) {
 		mTimeSinceLastEmit -= emitRate;
-		for (auto& particle : mParticles) {
-			if (particle.Age >= 1.f) {
-				particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
-				ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
-				Vec3 direction = Vec3::TransformNormal(spawnDataItem.direction, mEmitterTransform);
-				particle.Velocity = direction * spawnDataItem.speed;
-				particle.Position = spawnDataItem.startLocation + Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
-				particle.Age = 0.f;
-				break;
-			}
+		CreateParticle();
+	}
+}
+
+void CParticleEmitter::CreateParticle()
+{
+	for (auto& particle : mParticles) {
+		if (particle.Age >= 1.f) {
+			particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
+			ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
+			Vec3 direction = Vec3::TransformNormal(spawnDataItem.direction, mEmitterTransform);
+			particle.Velocity = direction * spawnDataItem.speed;
+			particle.Position = spawnDataItem.startLocation + Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
+			particle.Age = 0.f;
+			break;
 		}
 	}
 }

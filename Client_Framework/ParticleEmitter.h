@@ -559,6 +559,7 @@ public:
 	void Release();
 	int UpdateParticles(ParticleVertex* dataPtr, CCamera* camera);
 	void EmitParticles();
+	void CreateParticle();
 	void Play(const Vec3& pos);
 	void Play(const Matrix& transform) {
 		SetEmitterTransform(transform);
