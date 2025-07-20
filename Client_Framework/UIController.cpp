@@ -68,7 +68,7 @@ void CPlayerHUD::Start()
             healthSystem->BindOwner(mPlayer.lock());
             healthSystem->ViewHealthBar(true);
             healthSystem->SetRenderToWorld(false);
-            healthSystem->SetHealthBarColor({ 0.0f, 0.8f, 0.f, 1.f });
+            healthSystem->SetHealthBarColor({ 0.0f, 0.7f, 0.f, 1.f });
         }
     }
 
@@ -78,8 +78,8 @@ void CPlayerHUD::Start()
             Color elementColor = { 1.0f, 1.0f, 1.0f, 1.0f };
             if (elementType == ElementType::Void) elementColor = { 1.f, 1.f, 1.f, 1.0f };
             else if (elementType == ElementType::Grass) elementColor = { 0.4196f, 0.9921f, 0.6235f, 1.0f };
-            else if (elementType == ElementType::Water) elementColor = { 0.3764f, 0.7372f, 0.9921f, 1.0f };
-            else if (elementType == ElementType::Fire) elementColor = { 1.f, 0.457f, 0.3443396f, 1.0f };
+            else if (elementType == ElementType::Water) elementColor = { 0.3764f, 0.3372f, 0.9921f, 1.0f };
+            else if (elementType == ElementType::Fire) elementColor = { 1.f, 0.27f, 0.2443396f, 1.0f };
             ultimateBackgroundRenderer->SetColor(elementColor);
             ultimateBackgroundRenderer->SetTexture("Ultimate_Background_Void");
         }
@@ -114,10 +114,10 @@ void CPlayerHUD::Start()
         UINT8 skillType = std::any_cast<UINT8>(args[0]);
         UINT8 elementType = std::any_cast<UINT8>(args[1]);
         Color elementColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-        if (elementType == (UINT8)ElementType::Void) elementColor = { 1.f, 1.f, 1.f, 1.0f };
-        else if (elementType == (UINT8)ElementType::Grass) elementColor = { 0.4196f, 0.9921f, 0.6235f, 1.0f };
-        else if (elementType == (UINT8)ElementType::Water) elementColor = { 0.3764f, 0.7372f, 0.9921f, 1.0f };
-        else if (elementType == (UINT8)ElementType::Fire) elementColor = { 1.f, 0.457f, 0.3443396f, 1.0f };
+        if (elementType == (UINT)ElementType::Void) elementColor = { 1.f, 1.f, 1.f, 1.0f };
+        else if (elementType == (UINT)ElementType::Grass) elementColor = { 0.4196f, 0.9921f, 0.6235f, 1.0f };
+        else if (elementType == (UINT)ElementType::Water) elementColor = { 0.3764f, 0.3372f, 0.9921f, 1.0f };
+        else if (elementType == (UINT)ElementType::Fire) elementColor = { 1.f, 0.27f, 0.2443396f, 1.0f };
         ultimateBackgroundRenderer->SetColor(elementColor);
         mainPlayerBackgroundRenderer->SetColor(elementColor);
 

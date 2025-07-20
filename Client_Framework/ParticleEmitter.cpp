@@ -133,12 +133,16 @@ int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr, CCamera* camera)
 		}
 		particle.Velocity += mParticleProperties->gravity * deltaTime;
 		particle.Position += particle.Velocity * deltaTime;
+		if (mParticleProperties->useRotationOverTime) {
+			particle.rotation += mParticleProperties->rotationOverTimeCurve->GetRandomValue(particle.Age) * deltaTime;
+			//particle.rotation = std::fmod(particle.rotation, 1.f); 
+		}
+		
 		dataPtr[mActiveParticleCount].position = particle.Position;
-		//std::cout << "Particle Position: " << particle.Position.x << ", " << particle.Position.y << ", " << particle.Position.z << std::endl;
 		dataPtr[mActiveParticleCount].size = mParticleProperties->useSizeOverTime ? mParticleProperties->sizeOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startSize : spawnDataItem.startSize;
 		dataPtr[mActiveParticleCount].velocity = particle.Velocity;
 		dataPtr[mActiveParticleCount].color = mParticleProperties->useColorOverTime ? mParticleProperties->colorOverTimeGradient->GetRandomColor(particle.Age) * spawnDataItem.startColor : spawnDataItem.startColor;
-		dataPtr[mActiveParticleCount].rotation = mParticleProperties->useRotationOverTime ? mParticleProperties->rotationOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startRotation : spawnDataItem.startRotation;
+		dataPtr[mActiveParticleCount].rotation = particle.rotation;
 		dataPtr[mActiveParticleCount].albedoTexIdx = mParticleProperties->textureIdx;
 		dataPtr[mActiveParticleCount].distanceToCamera = (dataPtr[mActiveParticleCount].position - cameraPos).Dot(cameraForward);
 
@@ -213,6 +217,7 @@ void CParticleEmitter::CreateParticle()
 			ParticleSpawnData& spawnDataItem = mSpawnData[particle.ResetDataIndex];
 			Vec3 direction = Vec3::TransformNormal(spawnDataItem.direction, mEmitterTransform);
 			particle.Velocity = direction * spawnDataItem.speed;
+			particle.rotation = spawnDataItem.startRotation;
 			particle.Position = spawnDataItem.startLocation + Vec3(mEmitterTransform._41, mEmitterTransform._42, mEmitterTransform._43);
 			particle.Age = 0.f;
 			break;

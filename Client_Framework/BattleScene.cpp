@@ -52,6 +52,10 @@ void CBattleScene::Initialize()
 		AddObjectImmediately(portalObject);
 	}
 	CLight::SetVolumes();
+
+
+	INPUT.FixMousePosition(true);
+	FadeOut(0.5f, { 0.0,0.0,0.0,1.f });
 }
 
 void CBattleScene::Update()
@@ -102,6 +106,7 @@ void CBattleScene::RenderScene()
 	mRenderMgr->RenderLightingPass();
 	mRenderMgr->RenderForwardPass();
 	mRenderMgr->RenderFinalPass();
+	mRenderMgr->RenderUIPass();
 }
 
 
@@ -116,6 +121,17 @@ void CBattle2Scene::Initialize()
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
 	LoadSceneFromFile(SCENE_PATH("Battle2"));
 	CLight::SetVolumes();
+
+	auto mainUI = RESOURCE.GetPrefab("MainUI");
+	if (mainUI) {
+		auto uiObject = CGameObject::Instantiate(mainUI);
+		uiObject->SetName("MainUI");
+		uiObject->AddComponent<CPlayerHUD>();
+		AddObjectImmediately(uiObject);
+	}
+
+	INPUT.FixMousePosition(true);
+	FadeOut(0.5f, { 0.0,0.0,0.0,1.f });
 }
 
 void CBattle2Scene::Update()
@@ -160,5 +176,6 @@ void CBattle2Scene::RenderScene()
 	mRenderMgr->RenderLightingPass();
 	mRenderMgr->RenderForwardPass();
 	mRenderMgr->RenderFinalPass();
+	mRenderMgr->RenderUIPass();
 }
 

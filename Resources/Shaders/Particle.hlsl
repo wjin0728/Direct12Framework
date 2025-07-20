@@ -44,6 +44,7 @@ VS_OUTPUT VS_Forward(uint billboardVertex : SV_VertexID, uint instanceId : SV_In
    
     output.uv = float2((billboardVertex >> 1), (billboardVertex & 1));
     
+    
     corner = lerp(float2(-0.5, 0.5), float2(0.5, -0.5), output.uv) * input.size;
     corner = float2(
         corner.x * cos(input.rotation) - corner.y * sin(input.rotation),
@@ -77,6 +78,8 @@ float4 PS_Forward(VS_OUTPUT input) : SV_Target
     float sceneDepth = GetNormalizedSceneDepth(screenUV);
     float linearSceneDepth = GetCameraDepth(sceneDepth);
     float linearFragmentDepth = GetCameraDepth(input.pos.z);
+    
+    color.a *= saturate(abs(linearFragmentDepth - linearSceneDepth) / 0.2f);
     
     return color;
     }

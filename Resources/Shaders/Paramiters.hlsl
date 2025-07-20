@@ -38,7 +38,7 @@ cbuffer CBPassData : register(b0)
     int lightingTargetIdx;
     int postProcessIdx;
     int finalTargetIdx;
-    float4 finalRenderTargetAlpha;
+    float4 fadeInOutColor;
 };
 
 cbuffer CBAllShadowData : register(b4)

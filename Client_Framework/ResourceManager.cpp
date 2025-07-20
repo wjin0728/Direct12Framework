@@ -372,7 +372,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::PARTICLE;
 		info.blendType = BLEND_TYPE::ALPHA_BLEND;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER_EQUAL_NO_WRITE;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
@@ -383,7 +383,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::TRAIL;
 		info.blendType = BLEND_TYPE::ALPHA_BLEND;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER_NO_WRITE;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
@@ -425,7 +425,6 @@ void CResourceManager::LoadDefaultShaders()
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("FinalPass", info, "FinalPass", false)) Add(shader);
 	}
-	
 }
 
 int CResourceManager::GetTextureIndex(const std::string& name)
@@ -447,6 +446,18 @@ int CResourceManager::GetTextureIndex(const std::string& name)
 
 bool CResourceManager::LoadLoadingScreen()
 {
+	for (int i = 0; i < 16;i++) {
+		auto name = "Loading" + std::to_string(i);
+		std::shared_ptr<CTexture> loadingScreen = std::make_shared<CTexture>(name, TEXTURE_PATH(name));
+		loadingScreen->AssignedSRVIndex();
+		Add(loadingScreen);
+	}
+
+	return true;
+}
+
+void CResourceManager::LoadPrevResources()
+{
 	{
 		std::shared_ptr<CMesh> m = CMesh::CreateRectangleMesh({ 2.f,2.f });
 		m->SetName("Rectangle");
@@ -466,14 +477,20 @@ bool CResourceManager::LoadLoadingScreen()
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("Sprite", info, "Sprite", false)) Add(shader);
 	}
-	for (int i = 0; i < 16;i++) {
-		auto name = "Loading" + std::to_string(i);
-		std::shared_ptr<CTexture> loadingScreen = std::make_shared<CTexture>(name, TEXTURE_PATH(name));
-		loadingScreen->AssignedSRVIndex();
-		Add(loadingScreen);
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::NONE;
+		info.blendType = BLEND_TYPE::ALPHA_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize("FadeInOut", info, "FadeInOut", false)) Add(shader);
 	}
 
-	return true;
+	LoadPrefabFromFile("StartUI");
 }
 
 void CResourceManager::MakeShadersForAllPass(const std::string& shaderName, const std::string& name, ShaderInfo info)

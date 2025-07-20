@@ -55,6 +55,8 @@ public:
 	bool LoadProjectileObjects();
 	bool LoadLoadingScreen();
 
+	void LoadPrevResources();
+
 	void LoadPrefabFromFile(const std::string& name);
 
 	std::unordered_map<std::string, std::shared_ptr<class CGameObject>>& GetPrefabs() { return mPrefabs; }

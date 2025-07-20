@@ -132,6 +132,8 @@ public:
 	void RenderGBufferPass();
 	void RenderLightingPass();
 	void RenderFinalPass();
+	void RenderUIPass(bool clearRenderTarget = false);
+	void RenderFadePass();
 	void RenderInstancingGroup(int pass = 0);
 };
 

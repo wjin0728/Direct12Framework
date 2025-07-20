@@ -12,6 +12,7 @@
 #include"ServerManager.h"
 #include"LoadingScreen.h"
 #include"RenderManager.h"
+#include "MainMenuUI.h"
 
 CMainScene::CMainScene()
 {
@@ -19,6 +20,15 @@ CMainScene::CMainScene()
 
 void CMainScene::Initialize()
 {
+	auto mainUI = RESOURCE.GetPrefab("StartUI");
+	if (mainUI) {
+		auto uiObject = CGameObject::Instantiate(mainUI);
+		uiObject->SetName("StartUI");
+		uiObject->AddComponent<CMainMenu>();
+		AddObjectImmediately(uiObject);
+	}
+	INPUT.FixMousePosition(false);
+	FadeOut(1.f, { 0.f, 0.f, 0.f, 1.f });
 }
 
 void CMainScene::Start()
@@ -38,22 +48,5 @@ void CMainScene::LateUpdate()
 
 void CMainScene::RenderScene()
 {
-	auto finalPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
-	finalPassBuffer->BindToShader(0);
-	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
-	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
-	renderTarget->ChangeResourceToTarget(backBufferIdx);
-	renderTarget->SetRenderTarget(backBufferIdx);
-	renderTarget->ClearRenderTarget(backBufferIdx);
-
-	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
-
-	D3D12_VIEWPORT mViewport = { 0.f,0.f,rtSize.x, rtSize.y };
-	D3D12_RECT mScissorRect = { 0.f,0.f,rtSize.x, rtSize.y };
-
-	CMDLIST->RSSetViewports(1, &mViewport);
-	CMDLIST->RSSetScissorRects(1, &mScissorRect);
-	mRenderMgr->RenderLayer(FORWARD, RENDER_LAYER::UI, nullptr);
-
-	renderTarget->ChangeTargetToResource(backBufferIdx);
+	mRenderMgr->RenderUIPass();
 }

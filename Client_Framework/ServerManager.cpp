@@ -315,9 +315,13 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_CHANGE_SCENE: {
 		SC_CHANGE_SCENE_PACKET* packet = reinterpret_cast<SC_CHANGE_SCENE_PACKET*>(packet_ptr);
 		SCENE_TYPE sceneType = (SCENE_TYPE)packet->change_scene;
+
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (sceneType == INSTANCE(CSceneManager).GetCurSceneType()) break; // 이미 같은 씬이면 리턴
 		
-		INSTANCE(CSceneManager).RequestSceneChange((SCENE_TYPE)packet->change_scene);
+		scene->FadeIn(0.5f, {0.f,0.f,0.f,0.f}, [sceneType]() {
+			INSTANCE(CSceneManager).RequestSceneChange(sceneType);
+			});
 		break;
 	}
 	case SC_ALL_PLAYERS_POS: {
