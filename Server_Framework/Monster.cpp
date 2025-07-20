@@ -16,6 +16,8 @@ void Monster::SetState(MonsterStateMachine* newState)
 
 void Monster::SetState(S_MONSTER_STATE newState)
 {
+	_animation_time = 0.f;
+
     switch (newState) {
     case S_MONSTER_STATE::IDLE:
         _state = S_MONSTER_STATE::IDLE;
@@ -52,6 +54,7 @@ void Monster::SetState(S_MONSTER_STATE newState)
 
 void Monster::Update()
 {
+	_animation_time += TICK_INTERVAL;
     if (currentState) currentState->Update(this);
     LocalTransform(); // 바운딩 박스 업데이트 해주기
     SetTarget();
@@ -194,13 +197,14 @@ void Monster::ReadAnimationInfo(const std::string& fileName)
 				animSet->mEventKeys.resize(eventCount);
 
 				for (auto& key : animSet->mEventKeys) {
-					float eventTime{};
+					float eventTime{}, floatParam{};
 					std::string eventStr;
 
 					ReadDateFromFile(ifs, eventTime);
+					ReadDateFromFile(ifs, floatParam);
 					ReadDateFromFile(ifs, eventStr);
 
-					key = std::make_shared<EventKey>(eventTime, eventStr);
+					key = std::make_shared<EventKey>(eventTime, floatParam, eventStr);
 				}
 			}
 		}
@@ -209,5 +213,16 @@ void Monster::ReadAnimationInfo(const std::string& fileName)
 			break;
 		}
 	}
+}
 
+void HandleEvent(S_ENEMY_TYPE type, S_MONSTER_STATE state)
+{
+	switch (type) {
+	case S_ENEMY_TYPE::GRASS_SMALL: {
+		break;
+	}
+	case S_ENEMY_TYPE::GRASS_BIG: {
+		break;
+	}
+	}
 }
