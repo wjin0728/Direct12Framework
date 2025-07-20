@@ -23,7 +23,7 @@ public:
 		case S_PROJECTILE_TYPE::ARROW:
 			_damage = 50;
 			_boundingbox.Center = XMFLOAT3(0, 0, 0.2230943);
-			_boundingbox.Extents = Vec3(0.106043, 0.03977784, 0.6090841) / 2.f;
+			_boundingbox.Extents = Vec3(0.106043, 0.03977784, 0.6090841) / 4.f;
 			break;
 		case S_PROJECTILE_TYPE::FIREBALL:
 			break;
