@@ -105,17 +105,17 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float2 uv = input.uv;
     uv = uv * tilling;
     
-    float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
+    float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoWrap, uv);
     color = float4(GammaDecoding(texColor.rgb), texColor.a);
     
 #ifdef TRANSPARENT_CLIP
-    clip(color.a - 0.1);
+    clip(color.a - 0.5);
 #endif
     
     
     if (normalTexIdx != -1)
     {
-        float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoClamp, uv).rgb;
+        float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoWrap, uv).rgb;
         normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
     }
     float3 camDir = (camPos - worldPosition);
@@ -258,16 +258,17 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     float3 worldTangent = normalize(input.tangentWS);
     float3 worldBitangent = normalize(input.bitangentWS);
     float2 uv = input.uv;
+    uv = uv * tilling;
     
     if (ForwardTexIdx != -1)
     {
-        float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
+        float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoWrap, uv);
         color *= float4(GammaDecoding(texColor.rgb), texColor.a);
     }
     
     if (normalTexIdx != -1)
     {
-        float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoClamp, uv).rgb;
+        float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoWrap, uv).rgb;
         normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
     }
     

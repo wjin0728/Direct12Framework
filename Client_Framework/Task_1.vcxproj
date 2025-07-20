@@ -179,6 +179,7 @@
     <ClInclude Include="InstancingGroup.h" />
     <ClInclude Include="MainMenuUI.h" />
     <ClInclude Include="MainScene.h" />
+    <ClInclude Include="Portal.h" />
     <ClInclude Include="RenderManager.h" />
     <ClInclude Include="ItemMovement.h" />
     <ClInclude Include="LoadingScreen.h" />
@@ -250,6 +251,7 @@
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
     <ClCompile Include="MainMenuUI.cpp" />
+    <ClCompile Include="Portal.cpp" />
     <ClCompile Include="RenderManager.cpp" />
     <ClCompile Include="ItemMovement.cpp" />
     <ClCompile Include="LoadingScreen.cpp" />
@@ -377,6 +379,9 @@
     <None Include="..\Resources\Shaders\Trail.hlsl">
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Resources\Shaders\Portal.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

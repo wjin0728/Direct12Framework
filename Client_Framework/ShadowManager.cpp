@@ -532,7 +532,13 @@ void CShadowManager::RenderShadowMaps()
 		passDataBuffer->BindToShader(ALIGNED_SIZE(sizeof(CBPassData)) * (i + 1));
 		CMDLIST->RSSetViewports(1, &mViewports[i]);
 		CMDLIST->RSSetScissorRects(1, &mScissorRects[i]);
-        INSTANCE(CRenderManager).RenderLayer(SHADOW, RENDER_LAYER::Opaque, mViewCamera);
+        auto& renderers = INSTANCE(CRenderManager).mRenderLayerLists[(UINT)RENDER_LAYER::Opaque];
+        for (auto& renderer : renderers) {
+            if (!renderer) continue;
+            if (!renderer->IsCastShadow()) 
+                continue;
+            renderer->Render(mViewCamera, SHADOW);
+        }
 		INSTANCE(CRenderManager).RenderInstancingGroup(SHADOW);
 	}
 }

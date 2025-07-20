@@ -265,6 +265,7 @@
     <ClInclude Include="MainMenuUI.h" />
     <ClInclude Include="MainScene.h" />
     <ClInclude Include="UIController.h" />
+    <ClInclude Include="Portal.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -480,6 +481,9 @@
     <ClCompile Include="MainScene.cpp">
       <Filter>Client</Filter>
     </ClCompile>
+    <ClCompile Include="Portal.cpp">
+      <Filter>Client</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
@@ -537,5 +541,10 @@
     <None Include="..\Resources\Shaders\Water.hlsl">
       <Filter>HLSL</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Resources\Shaders\Portal.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
