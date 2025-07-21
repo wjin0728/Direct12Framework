@@ -333,24 +333,24 @@ void GameManager::Process_packet(int c_id, char* packet)
 				}
 
 				auto func0 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(2.f, 9.f);
+					Vec2 center = monster->GetWorldOffsetPosition(1.f, 4.5f);
 					for (auto& cl : clients[ServerNumber]) {
 						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						std::cout << "distance : " << distance << std::endl;
-						if (distance < 200.f) {
+						//std::cout << "distance : " << distance << std::endl;
+						if (distance < 16.f) {
 							cl.second._player.TakeDamage(100);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
+							//std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
 				};
 				auto func1 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.f, 6.f);
+					Vec2 center = monster->GetWorldOffsetPosition(0.f, 3.f);
 					for (auto& cl : clients[ServerNumber]) {
 						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						std::cout << "distance : " << distance << std::endl;
-						if (distance < 30.f) {
+						//std::cout << "distance : " << distance << std::endl;
+						if (distance < 5.f) {
 							cl.second._player.TakeDamage(100);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
+							//std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
 				};
@@ -378,22 +378,22 @@ void GameManager::Process_packet(int c_id, char* packet)
 				}
 
 				auto func0 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.f, 25.f);
+					Vec2 center = monster->GetWorldOffsetPosition(0.f, 5.f);
 					for (auto& cl : clients[ServerNumber]) {
 						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
 						std::cout << "distance : " << distance << std::endl;
-						if (distance < 100.f) {
+						if (distance < 16.f) {
 							cl.second._player.TakeDamage(150);
 							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
 					};
 				auto func1 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(10.f, 10.f);
+					Vec2 center = monster->GetWorldOffsetPosition(6.f, 6.f);
 					for (auto& cl : clients[ServerNumber]) {
 						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
 						std::cout << "distance : " << distance << std::endl;
-						if (distance < 200.f) {
+						if (distance < 100.f) {
 							cl.second._player.TakeDamage(150);
 							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
@@ -426,10 +426,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 					Vec2 center = monster->GetWorldOffsetPosition(2.f, 9.f);
 					for (auto& cl : clients[ServerNumber]) {
 						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						std::cout << "distance : " << distance << std::endl;
+						//std::cout << "distance : " << distance << std::endl;
 						if (distance < 200.f) {
 							cl.second._player.TakeDamage(100);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
+							//std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
 					};
@@ -437,10 +437,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 					Vec2 center = monster->GetWorldOffsetPosition(0.f, 6.f);
 					for (auto& cl : clients[ServerNumber]) {
 						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						std::cout << "distance : " << distance << std::endl;
+						//std::cout << "distance : " << distance << std::endl;
 						if (distance < 30.f) {
 							cl.second._player.TakeDamage(100);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
+							//std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
 					};
