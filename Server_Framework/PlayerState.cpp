@@ -173,8 +173,7 @@ void PlayerState::SkillState::Exit(PlayerCharacter* player) {}
 PlayerState::HitState& PlayerState::HitState::GetInstance() { static PlayerState::HitState instance; return instance; }
 
 void PlayerState::HitState::Enter(PlayerCharacter* player) {
-	//cout << "Hit 들어왔다리!" << endl;
-
+    player->SetVelocity(0, 0, 0);
 }
 
 void PlayerState::HitState::Update(PlayerCharacter* player) {
@@ -228,19 +227,4 @@ void PlayerState::GatheringState::Update(PlayerCharacter* player) {
 }
 
 void PlayerState::GatheringState::Exit(PlayerCharacter* player) {
-}
-
-// PlayerState::GetHit State 구현
-PlayerState::GetHitState& PlayerState::GetHitState::GetInstance() { static PlayerState::GetHitState instance; return instance; }
-
-void PlayerState::GetHitState::Enter(PlayerCharacter* player) {
-    //cout << "GetHit 들어왔다리!" << endl;
-    player->SetVelocity(0, 0, 0);
-}
-
-void PlayerState::GetHitState::Update(PlayerCharacter* player) {
-    //cout << "GetHit 업데이트중!" << endl;
-}
-
-void PlayerState::GetHitState::Exit(PlayerCharacter* player) {
 }

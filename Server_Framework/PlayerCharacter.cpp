@@ -82,7 +82,7 @@ void PlayerCharacter::SetState(uint8_t newState)
         break;
     case S_PLAYER_STATE::GETHIT:
         _state = S_PLAYER_STATE::GETHIT;
-        SetState(&PlayerState::GetHitState::GetInstance());
+        SetState(&PlayerState::HitState::GetInstance());
         break;
     default:
         break;
