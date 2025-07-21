@@ -28,7 +28,9 @@ public:
     array<PlayerCharacter*, 3>_Player; // 플레이어 타겟
     PlayerCharacter* _target = nullptr;
 
-    vector<std::shared_ptr<AnimationInfo>> _animations{}; // 애니메이션 정보들 (S_MONSTER_STATE 순서대로 들어감)
+    vector<AnimationInfo> _animations{}; // 애니메이션 정보들 (S_MONSTER_STATE 순서대로 들어감)
+    vector<CAnimationEventHandler> mEventHandler;
+    float _animation_time = 0.f;
 
 	Monster() :
         Object(S_OBJECT_TYPE::S_ENEMY),
@@ -87,6 +89,8 @@ public:
     void AvoidCollision(const unordered_map<int, Monster>& monsters);
 
     void ReadAnimationInfo(const std::string& fileName);
+    void HandleCallback(CAnimationEventHandler& registry);
+    void AddAnimationEvent(S_MONSTER_STATE state, const std::string& name, CAnimationEventHandler::Event event) { mEventHandler[(int)state].Register(name, event); }
 
     void SetState(MonsterStateMachine* newState);
     void SetState(S_MONSTER_STATE newState);
@@ -99,4 +103,17 @@ public:
     bool IsPlayerTooMuchClose() const;
 
     void SetTarget();
+
+    Vec2 GetWorldOffsetPosition(float local_x, float local_z) {
+        Vec3 forward = _look_dir;
+        forward.y = 0.0f;
+        forward.Normalize();
+
+        Vec3 right = Vec3::Up.Cross(forward);
+        right.Normalize();
+
+        Vec3 result = right * local_x + forward * local_z + _pos;
+
+        return {result.x, result.z};
+    }
 };
