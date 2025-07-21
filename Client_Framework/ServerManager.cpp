@@ -585,6 +585,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			}
 		}
 	}
+	case SC_MAKE_POTAL: {
+		break;
+	}
 	default:
 		break;
 	}
