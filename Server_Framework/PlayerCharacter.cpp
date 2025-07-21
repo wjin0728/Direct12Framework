@@ -80,6 +80,10 @@ void PlayerCharacter::SetState(uint8_t newState)
         _state = S_PLAYER_STATE::GATHERING;
         SetState(&PlayerState::GatheringState::GetInstance());
         break;
+    case S_PLAYER_STATE::GETHIT:
+        _state = S_PLAYER_STATE::GETHIT;
+        SetState(&PlayerState::GetHitState::GetInstance());
+        break;
     default:
         break;
     }
@@ -100,10 +104,10 @@ void PlayerCharacter::TakeDamage(int damage)
 	else {
 		_hp -= damage;
 		if (_hp < 0) _hp = 0;
-	}
+    }
 	if (_hp > 0) {
-		SetState(&PlayerState::HitState::GetInstance());
-	}
+        SetState((uint8_t)S_PLAYER_STATE::GETHIT);
+    }
 	else {
 		// »ç¸Á Ã³¸®
 	}

@@ -339,7 +339,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 						//std::cout << "distance : " << distance << std::endl;
 						if (distance < 16.f) {
 							cl.second._player.TakeDamage(100);
-							//std::cout << "맞았다!!!!!!!!" << std::endl;
+							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
 				};
@@ -350,7 +350,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 						//std::cout << "distance : " << distance << std::endl;
 						if (distance < 5.f) {
 							cl.second._player.TakeDamage(100);
-							//std::cout << "맞았다!!!!!!!!" << std::endl;
+							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
 				};

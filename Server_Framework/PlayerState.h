@@ -123,6 +123,18 @@ namespace PlayerState
         GatheringState() {}
         float GatheringTimer;
     };
+
+    // GetHit ป๓ลย
+    class GetHitState : public PlayerStateMachine {
+    public:
+        static GetHitState& GetInstance();
+        void Enter(PlayerCharacter* player) override;
+        void Update(PlayerCharacter* player) override;
+        void Exit(PlayerCharacter* player) override;
+    private:
+        GetHitState() {}
+        float GetHitTimer;
+    };
 }
 
 #endif
