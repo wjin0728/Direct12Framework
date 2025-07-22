@@ -33,7 +33,7 @@ void CBattleScene::Initialize()
 	// Load default resources
 	INSTANCE(ServerManager).Client_Login();
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
-	LoadSceneFromFile(SCENE_PATH("Scene"));
+	LoadSceneFromFile(SCENE_PATH("Battle1"));
 
 	auto mainUI = RESOURCE.GetPrefab("MainUI");
 	if (mainUI) {
@@ -42,7 +42,7 @@ void CBattleScene::Initialize()
 		uiObject->AddComponent<CPlayerHUD>(1);
 		AddObjectImmediately(uiObject);
 	}
-	auto portal = RESOURCE.GetPrefab("Portal");
+	/*auto portal = RESOURCE.GetPrefab("Portal");
 	if (portal) {
 		auto portalObject = CGameObject::Instantiate(portal);
 		portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(47.92172f, 6.699f, 36.38293f));
@@ -50,7 +50,7 @@ void CBattleScene::Initialize()
 		particle->SetLoop(true);
 
 		AddObjectImmediately(portalObject);
-	}
+	}*/
 	CLight::SetVolumes();
 
 

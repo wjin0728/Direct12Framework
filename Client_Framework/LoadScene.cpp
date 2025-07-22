@@ -56,7 +56,7 @@ void CLoadScene::Update()
 		if (resourceMgr.IsGPULoadQueueEmpty())
 		{
 			CircularFadeIn(1.f, { 0.0,0.0,0.0,1.f }, []() {
-				INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MAINSTAGE3, false);
+				INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MAINSTAGE1, false);
 				});
 			mIsLoading = false;
 		}

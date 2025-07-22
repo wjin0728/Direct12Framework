@@ -10,6 +10,7 @@
 #include"GameObject.h"
 #include"MeshRenderer.h"
 #include"RenderManager.h"
+#include"ParticleManager.h"
 
 //#define DEFFERD_RENDERING
 
@@ -64,7 +65,11 @@ void CSceneManager::ChangeScene(SCENE_TYPE nextScene, bool savePrevScene)
 	}
 	else {
 		INSTANCE(CRenderManager).Destroy();
-		curScene.reset();
+		INSTANCE(CParticleManager).ReleaseAllParticleEmitters();
+		if (curScene) {
+			curScene->mIsActive = false;
+			curScene.reset();
+		}
 	}
 	LoadScene(nextScene);
 }
@@ -78,7 +83,12 @@ void CSceneManager::ChangeScene(SceneChangeReq req)
 	}
 	else {
 		INSTANCE(CRenderManager).Destroy();
-		curScene.reset();
+		INSTANCE(CParticleManager).ReleaseAllParticleEmitters();
+		if (curScene) {
+			curScene->mIsActive = false;
+			curScene.reset();
+
+		}
 	}
 	LoadScene(req.changeScene);
 }

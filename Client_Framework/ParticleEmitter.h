@@ -301,7 +301,7 @@ struct ShapeModule
 				cosf(phi)
 			};
 
-			
+
 			return Vec3::TransformNormal(localDir, transform);
 		}
 		case ShapeType::ConeShell:
@@ -363,8 +363,14 @@ struct ShapeModule
 			};
 			return Vec3::TransformNormal(localDir.GetNormalized(), transform);
 		}
+		case ShapeType::Circle:
+		{
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			Vec3 localDir = Vec3::Backward; 
+			return Vec3::TransformNormal(localDir, transform);
 		}
-		return Vec3(0, 0, 1); // Default direction if no shape matches
+		return Vec3(0, 0, 1); 
+		}
 	}
 	Vec3 GetRandomPosition() const
 	{
@@ -433,13 +439,13 @@ struct ShapeModule
 			return Vec3(0, 0, 0);
 		case ShapeType::Hemisphere:
 		{
-			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);     
-			float phi = RandomNumberGenerator::RandFloat(0, XM_PIDIV2);      
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float phi = RandomNumberGenerator::RandFloat(0, XM_PIDIV2);
 			float randomRadius = RandomNumberGenerator::RandFloat(0.0f, 1.0f) * radius; // Random radius within the hemisphere
 			Vec3 localPos{
-				randomRadius * sinf(phi) * cosf(theta), 
-				randomRadius * sinf(phi) * sinf(theta), 
-				randomRadius * cosf(phi)               
+				randomRadius * sinf(phi) * cosf(theta),
+				randomRadius * sinf(phi) * sinf(theta),
+				randomRadius * cosf(phi)
 			};
 
 			return Vec3::Transform(localPos, transform);
@@ -456,8 +462,16 @@ struct ShapeModule
 
 			return Vec3::Transform(localPos, transform);
 		}
+		case ShapeType::Circle:
+		{
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float r = radius * sqrtf(RandomNumberGenerator::RandFloat(0.0f, 1.0f));
+			float x = r * cosf(theta);
+			float y = r * sinf(theta);
+			return Vec3::Transform(Vec3(x, y, 0), transform);
 		}
 		return Vec3(0, 0, 0);
+		}
 	}
 
 	static void ReadShapeModuleFromFile(std::ifstream& ifs, ShapeModule& shapeModule)

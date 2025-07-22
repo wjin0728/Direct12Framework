@@ -565,10 +565,10 @@ void CResourceManager::BackgroundLoadingThread()
 	LoadDefaultMeshes();
 	LoadDefaultShaders();
 	LoadDefaultMaterials();
-	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
-	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle2Resources.bin");
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle2Resources.bin");
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle3Resources.bin");
-	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
 	LoadPlayerObjects();
 	LoadEnemyObjects();
 	LoadSkillObjects();

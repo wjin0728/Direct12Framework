@@ -44,6 +44,7 @@ void CPlayerController::Start()
 	if (targetUIObj) {
 		mTargetMarker = targetUIObj->AddComponent<CTargetMarker>();
 		owner->AddChild(targetUIObj);
+		targetUIObj->SetActive(true);
 	}
 
 	auto func = [](float time) {

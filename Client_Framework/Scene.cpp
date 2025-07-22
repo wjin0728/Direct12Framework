@@ -144,13 +144,11 @@ std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::string& tag)
 void CScene::ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB)
 {
 	if (!obj) return;
-	if (obj->GetRenderLayer() == RENDER_LAYER::UI) return; // UI는 AABB 계산에서 제외
+	if (obj->GetRenderLayer() == RENDER_LAYER::UI) return; 
 	if (obj->GetTag() == "Cloud") return;
+	if (obj->GetTag() == "Player") return; 
+	if (obj->GetTag() == "SkyDome") return; 
 	if( obj->GetActive() && obj->mCastShadow) {
-		std::cout << obj->GetName() << " AABB: " << obj->mWorldAABB.Center.x << ", " 
-			<< obj->mWorldAABB.Center.y << ", " << obj->mWorldAABB.Center.z << std::endl;
-		std::cout << "Size: " << obj->mWorldAABB.Extents.x << ", "
-			<< obj->mWorldAABB.Extents.y << ", " << obj->mWorldAABB.Extents.z << std::endl;
 		const BoundingBox& objAABB = obj->mWorldAABB;
 		BoundingBox::CreateMerged(sceneAABB, sceneAABB, objAABB);
 	} 
