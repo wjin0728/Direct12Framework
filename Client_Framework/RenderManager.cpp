@@ -145,6 +145,10 @@ void CRenderManager::RenderGBufferPass()
 	auto gBufferPassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
 	gBufferPassBuffer->BindToShader(0);
 	INSTANCE(CShadowManager).BindShadowData();
+
+	auto lightBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::LIGHT);
+	lightBuffer->BindToShader(0);
+
 	auto& camera = mCameras["MainCamera"];
 	if (camera) {
 		camera->SetViewportsAndScissorRects(CMDLIST);
@@ -170,12 +174,12 @@ void CRenderManager::RenderLightingPass()
 	if (!mLights[(UINT)LIGHT_TYPE::DIRECTIONAL].empty()) directionalLight = mLights[(UINT)LIGHT_TYPE::DIRECTIONAL][0];
 	auto& pointLights = mLights[(UINT)LIGHT_TYPE::POINT];
 	auto& spotLights = mLights[(UINT)LIGHT_TYPE::SPOT];
-	auto& camera = mCameras["MainCamera"];
 
 	UINT lightCount = 1 + pointLights.size() + spotLights.size();
 	auto lightBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::LIGHT);
 	lightBuffer->UpdateBuffer(sizeof(CBLightsData) * 10, &lightCount);
 	lightBuffer->BindToShader(0);
+	auto& camera = mCameras["MainCamera"];
 	camera->SetViewportsAndScissorRects(CMDLIST);
 	//Directional Light
 	if (directionalLight) {

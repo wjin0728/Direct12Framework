@@ -8,11 +8,13 @@ class CPlayerHUD :
 public:
 	std::weak_ptr<class CGameObject> mPlayer;
 	std::array<std::weak_ptr<class CGameObject>, 2> mOtherPlayers{};
+	int mStage = 0;
 
 	std::unordered_map<std::string, std::weak_ptr<class CUIRenderer>> mUIRenderers{};
 
 public:
 	CPlayerHUD() = default;
+	CPlayerHUD(int stage) : mStage(stage) {}
 	~CPlayerHUD() = default;
 
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CPlayerHUD>(*this); }

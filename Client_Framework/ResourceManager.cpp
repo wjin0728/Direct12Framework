@@ -369,6 +369,18 @@ void CResourceManager::LoadDefaultShaders()
 		ShaderInfo info;
 		info.shaderType = PASS_TYPE::FORWARD;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = commonDepthTest;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		MakeShadersForAllPass("Cloud", "Cloud", info);
+	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::ALPHA_BLEND;
 		info.depthStencilType = commonDepthTest;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;

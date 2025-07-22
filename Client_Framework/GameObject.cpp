@@ -724,6 +724,7 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 	if (mTag == "SkyDome") mRenderLayer = RENDER_LAYER::Transparent;
 	if(mTag == "Cloud") {
 		mCastShadow = false;
+		mRenderLayer = RENDER_LAYER::Opaque;
 	}
 }
 

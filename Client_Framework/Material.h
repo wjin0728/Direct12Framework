@@ -177,7 +177,7 @@ struct CloudProperties
 	float yMultiplier = 1.0f;
 	float zMultiplier = 1.0f;
 
-	float padding; 
+	UINT noiseTexIdx = -1; 
 };
 
 struct UIProperties
@@ -341,6 +341,30 @@ std::vector<PropertyInfo> GetPropertyInfos()
 
 
 #pragma once
+
+template<>
+inline std::vector<PropertyInfo> GetPropertyInfos <CloudProperties>()
+{
+	using T = CloudProperties;
+	return {
+		REGISTER_PROPERTY(T, emissiveColor),
+		REGISTER_PROPERTY(T, lightDirMultiplier),
+		REGISTER_PROPERTY(T, minEmit),
+		REGISTER_PROPERTY(T, minEmitDir),
+		REGISTER_PROPERTY(T, maxEmit),
+		REGISTER_PROPERTY(T, directLight),
+		REGISTER_PROPERTY(T, lightMin),
+		REGISTER_PROPERTY(T, lightingContrast),
+		REGISTER_PROPERTY(T, lightMax),
+		REGISTER_PROPERTY(T, windEffect),
+		REGISTER_PROPERTY(T, panningSpeed),
+		REGISTER_PROPERTY(T, windNoiseScale),
+		REGISTER_PROPERTY(T, windWorldScale),
+		REGISTER_PROPERTY(T, xMultiplier),
+		REGISTER_PROPERTY(T, yMultiplier),
+		REGISTER_PROPERTY(T, zMultiplier),
+	};
+}
 
 template<>
 inline std::vector<PropertyInfo> GetPropertyInfos<ScrollingProperties>()

@@ -478,6 +478,95 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		}
 		properties = GetPropertyInfos<ScrollingProperties>();
 	}
+	else if (token =="SyntyStudios/CloudShader") {
+		material->SetShader("Cloud");
+
+		CloudProperties* data = reinterpret_cast<CloudProperties*>(material->uploadData);
+		material->dataSize = sizeof(CloudProperties);
+
+		data->emissiveColor = Color(1, 1, 1, 1);
+
+		std::string token;
+		while (true)
+		{
+			BinaryReader::ReadDateFromFile(inFile, token);
+
+			if (token == "<EmissiveColour>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->emissiveColor);
+			}
+			else if (token == "<lightDirMulti>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->lightDirMultiplier);
+			}
+			else if (token == "<minEmit>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->minEmit);
+			}
+			else if (token == "<minEmit_dir>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->minEmitDir);
+			}
+			else if (token == "<maxEmit>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->maxEmit);
+			}
+			else if (token == "<DirectLight>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->directLight);
+			}
+			else if (token == "<lightMin>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->lightMin);
+			}
+			else if (token == "<lightingContrast>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->lightingContrast);
+			}
+			else if (token == "<lightMax>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->lightMax);
+			}
+			else if (token == "<WindEffect>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->windEffect);
+			}
+			else if (token == "<PanningSpeed>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->panningSpeed);
+			}
+			else if (token == "<PanningNoise>:")
+			{
+				data->noiseTexIdx = GetTextureIdx(inFile);
+			}
+			else if (token == "<WindNoiseScale>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->windNoiseScale);
+			}
+			else if (token == "<WindWorldScale>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->windWorldScale);
+			}
+			else if (token == "<X_Multiplier>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->xMultiplier);
+			}
+			else if (token == "<Y_Multiplier>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->yMultiplier);
+			}
+			else if (token == "<Z_Multiplier>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->zMultiplier);
+			}
+			else if (token == "</Material>")
+			{
+				break;
+			}
+		}
+
+		properties = GetPropertyInfos<CloudProperties>();
+	}
 	else {
 		return nullptr;
 	}

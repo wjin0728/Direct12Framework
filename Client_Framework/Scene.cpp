@@ -145,6 +145,7 @@ void CScene::ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& scen
 {
 	if (!obj) return;
 	if (obj->GetRenderLayer() == RENDER_LAYER::UI) return; // UI는 AABB 계산에서 제외
+	if (obj->GetTag() == "Cloud") return;
 	if( obj->GetActive() && obj->mCastShadow) {
 		std::cout << obj->GetName() << " AABB: " << obj->mWorldAABB.Center.x << ", " 
 			<< obj->mWorldAABB.Center.y << ", " << obj->mWorldAABB.Center.z << std::endl;

@@ -8,8 +8,7 @@ cbuffer MaterialData : register(b5)
     float minEmit; 
     float minEmitDir; 
     float maxEmit; 
-
-    // Direct Light
+    
     float directLight; 
     float lightMin; 
     float lightingContrast; 
@@ -24,7 +23,7 @@ cbuffer MaterialData : register(b5)
     float yMultiplier;
     float zMultiplier;
 
-    float padding; 
+    uint noiseTexIdx;
 };
 
 //
@@ -37,20 +36,13 @@ struct VS_INPUT
     float3 position : POSITION;
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
-    float2 uv : TEXCOORD;
-    float4 color : COLOR;
 };
 
 struct VS_OUTPUT
 {
     float4 position : SV_POSITION;
     float4 positionWS : TEXCOORD0;
-    float4 positionCS : TEXCOORD1;
-    float3 normalWS : TEXCOORD2;
-    float3 tangentWS : TEXCOORD3;
-    float3 bitangentWS : TEXCOORD4;
-    float4 ShadowPosH : TEXCOORD5;
-    float2 uv : TEXCOORD6;
+    float3 normalWS : TEXCOORD1;
 };
 
 inline float3 mod3D289(float3 x)
@@ -113,18 +105,88 @@ inline float snoise(float3 v)
     return 42.0 * dot(m, px);
 }
 
+struct PS_GPASS_OUTPUT
+{
+    float4 albedo : SV_Target0;
+    float4 normalWS : SV_Target1;
+    float4 emissive : SV_Target2;
+    float4 positionWS : SV_Target3;
+    float4 depth : SV_Target4;
+};
 
-VS_OUTPUT VS_Forward(VS_INPUT input)
+VS_OUTPUT VS_GPass(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
     
-    output.position = mul(float4(input.position, 1.0f), worldMat);
+    float3 positionOS = input.position;
+    float4 positionWS = mul(float4(positionOS, 1.0f), worldMat);
     
+    float3 noiseCoord = positionWS.xyz * 0.5f;
+    float perlin = snoise(noiseCoord * windNoiseScale);
+    perlin = perlin * 0.5f + 0.5f;
+
+    float3 blendNoise = float3(perlin, perlin, perlin);
+    float2 pannerUV = (panningSpeed * totalTime) + (positionWS.xy * windWorldScale * blendNoise.xy);
+    float4 noiseSample = diffuseMap[noiseTexIdx].SampleLevel(linearWrap, pannerUV, 0);
+
+    float3 displacement = float3(
+        xMultiplier * noiseSample.r,
+        yMultiplier * noiseSample.g,
+        zMultiplier * noiseSample.b
+    );
+    
+    displacement *= windEffect;
+    
+    positionOS += displacement;
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(positionOS);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+    
+    
+    output.position = positionInputs.positionCS;
+    output.positionWS = positionInputs.positionWS;
+    output.normalWS = normalInputs.normalWS;
+
     return output;
 }
 
-//«»ºø ºŒ¿Ã¥ı
-float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
+PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input)
 {
+    PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
+    CBLightsData lightingData = lights[0]; 
     
+    float3 worldPosition = input.positionWS.xyz;
+    float3 camDir = (camPos - input.positionWS.xyz);
+    float distToEye = length(camDir);
+    camDir /= distToEye;
+    
+    float3 lightDir = -normalize(lightingData.directionWS);
+    float3 mainLightColor = lightingData.lColor;
+    mainLightColor = GammaDecoding(mainLightColor);
+    float3 normal = normalize(input.normalWS);
+    
+    float lightIntensity = max(max(mainLightColor.r, mainLightColor.g), mainLightColor.b);
+    float3 lightColorNormalized = mainLightColor.rgb / max(lightIntensity, 0.001); 
+    float3 lightColorFinal = lightColorNormalized * lightIntensity;
+    
+    float NdotL = dot(normal, lightDir);
+    float directLighting = clamp(exp2(NdotL * lightingContrast) * directLight, lightMin, lightMax);
+    
+    float3 invViewDir = 1.0f - camDir;
+    float dotLightView = dot(lightDir, invViewDir);
+    
+    float viewLum = Luminance(invViewDir); 
+    float lightLum = Luminance(lightDir);
+    float minEmitTerm = minEmit + (lightLum * minEmitDir);
+    float emitStrength = clamp(max(dotLightView * lightDirMultiplier * viewLum, minEmitTerm), 0.0, maxEmit);
+    
+    
+    float3 emissiveResult = GammaDecoding(emissiveColor.rgb) * emitStrength;
+    
+    output.albedo = float4(lightColorFinal * directLighting, 1.f);
+    output.normalWS = float4(normal, 0.f);
+    output.emissive = float4(emissiveResult, 0.f);
+    output.positionWS = float4(worldPosition, 0.f);
+    output.depth = float4(0.f, 0.f, 0.f, input.position.z);
+    
+    return output;
 }

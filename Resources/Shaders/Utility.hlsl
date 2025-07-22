@@ -379,24 +379,9 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * albedo + specular) * lightColor * NdotL;
     float3 ambientLight = albedo * 0.2f * ndotUp;
-    ambientLight += albedo * 0.4f;
+    ambientLight += albedo * 0.3f;
     
     return ambientLight + (directLight * lightingData.shadowFactor) + surfaceData.emissive;
-}
-
-float ComputeEffectiveRadius(float intensity, float threshold,
-	float kC, float kL, float kQ)
-{
-    float a = kQ;
-    float b = kL;
-    float c = kC - (intensity / threshold);
-
-    float discriminant = b * b - 4 * a * c;
-
-    if (discriminant < 0.0f)
-        return 0.0f;
-
-    return (-b + sqrt(discriminant)) / (2 * a);
 }
 
 
@@ -443,7 +428,7 @@ float3 ComputePointLight(LightingData lightingData, SurfaceData surfaceData, CBL
     float3 kS = F;
     float3 kD = (1 - kS) * (1 - metallic);
 
-    float fade = saturate(1 - pow(distance / light.range, 0.4f));
+    float fade = saturate(1 - pow(distance / light.range, 0.5f));
     float att = fade * fade; 
 
     return (kD * albedo + specular) * lightColor * NdotL * att;

@@ -39,7 +39,7 @@ void CBattleScene::Initialize()
 	if (mainUI) {
 		auto uiObject = CGameObject::Instantiate(mainUI);
 		uiObject->SetName("MainUI");
-		uiObject->AddComponent<CPlayerHUD>();
+		uiObject->AddComponent<CPlayerHUD>(1);
 		AddObjectImmediately(uiObject);
 	}
 	auto portal = RESOURCE.GetPrefab("Portal");
@@ -126,7 +126,7 @@ void CBattle2Scene::Initialize()
 	if (mainUI) {
 		auto uiObject = CGameObject::Instantiate(mainUI);
 		uiObject->SetName("MainUI");
-		uiObject->AddComponent<CPlayerHUD>();
+		uiObject->AddComponent<CPlayerHUD>(2);
 		AddObjectImmediately(uiObject);
 	}
 
@@ -196,7 +196,7 @@ void CBattle3Scene::Initialize()
 	if (mainUI) {
 		auto uiObject = CGameObject::Instantiate(mainUI);
 		uiObject->SetName("MainUI");
-		uiObject->AddComponent<CPlayerHUD>();
+		uiObject->AddComponent<CPlayerHUD>(3);
 		AddObjectImmediately(uiObject);
 	}
 

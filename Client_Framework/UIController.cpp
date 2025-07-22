@@ -71,7 +71,6 @@ void CPlayerHUD::Start()
             healthSystem->SetHealthBarColor({ 0.0f, 0.7f, 0.f, 1.f });
         }
     }
-
     if (auto ultimate = owner->FindChildByName("Ultimate")) {
         if (ultimateBackgroundRenderer = ultimate->GetComponent<CUIRenderer>())
         {
@@ -104,7 +103,6 @@ void CPlayerHUD::Start()
 		}
 
     }
-
     mPlayer.lock()->AddEvent("OnSkillChanged", [mainPlayerBackgroundRenderer, skillIconRenderer, ultimateBackgroundRenderer](const std::vector<std::any>& args) {
         if (args.size() < 2) return;
         if (!mainPlayerBackgroundRenderer) return;

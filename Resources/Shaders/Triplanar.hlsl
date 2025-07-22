@@ -239,7 +239,7 @@ VS_OUTPUT VS_GPass(VS_INPUT input
     return output;
 }
 
-PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
+PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) 
 {
     PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
     
