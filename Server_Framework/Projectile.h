@@ -21,7 +21,7 @@ public:
 		switch (type)
 		{
 		case S_PROJECTILE_TYPE::ARROW:
-			_damage = 50;
+			_damage = 5;
 			_boundingbox.Center = XMFLOAT3(0, 0, 0.2230943);
 			_boundingbox.Extents = Vec3(0.106043, 0.03977784, 0.6090841) / 4.f;
 			break;
@@ -32,6 +32,7 @@ public:
 		case S_PROJECTILE_TYPE::GRASSBALL:
 			break;
 		case S_PROJECTILE_TYPE::MAGIC_BALL:
+			_damage = 5;
 			_boundingbox.Center = XMFLOAT3(0, 0, 0);
 			_boundingbox.Extents = Vec3(0.8, 0.8, 0.8) / 2.f;
 			break;

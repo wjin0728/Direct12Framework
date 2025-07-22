@@ -177,7 +177,7 @@ void PlayerState::HitState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::HitState::Update(PlayerCharacter* player) {
-	//cout << "Hit 업데이트 중!" << endl;
+    player->SetVelocity(0, 0, 0);
 }
 
 void PlayerState::HitState::Exit(PlayerCharacter* player) {

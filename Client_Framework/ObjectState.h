@@ -9,6 +9,7 @@ protected:
     PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
     ElementType mElementType = ElementType::end;
     std::weak_ptr<class CGameObject> mShield{};
+	int mShieldHealth = 0; // Health of the shield
 	float mShieldDuration = -1.0f; // Duration for which the shield is active
 	float mShieldDurationMax = 5.0f; // Maximum duration for the shield
 
@@ -32,21 +33,26 @@ public:
     void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; };
     PLAYER_CLASS GetClass() const { return mClass; }
 	void SetShield(std::weak_ptr<class CGameObject> shield) { mShield = shield; }
+	void SetShieldHealth(int health) { mShieldHealth = health; }
     void ActivateShield(bool activate)
     {
-        if (auto shield = mShield.lock())
-        {
+        if (auto shield = mShield.lock()) {
             shield->SetActive(activate);
-            if (activate)
-            {
+
+            if (activate) {
+                mShieldHealth = 3;
                 mShieldDuration = mShieldDurationMax; // Reset shield duration when activated
 			}
+            else {
+                mShieldHealth = 0;
+                mShieldDuration = -1.f;
+            }
         }
 	}
 
     virtual void GetHit(float damage) override;
     virtual void Heal(float amount) override;
-    virtual void UpdateHealth(float newHealth) override;
+    virtual void UpdateHealth(float newHealth, int newSheild);
 };
 
 class CArcherState : public CPlayerStateMachine

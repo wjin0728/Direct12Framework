@@ -28,6 +28,12 @@ void CPlayerStateMachine::Start()
 	controller->AddAnimationEvent("Run", "Dust", func);
 	controller->AddAnimationEvent("RunAttack", "Dust", func);
 
+	if (mClass == PLAYER_CLASS::FIGHTER) {
+		mHealth = mMaxHealth = MAX_HP_FIGHTER;
+	}
+	else {
+		mHealth = mMaxHealth = MAX_HP_ARCHER_MAGE;
+	}
 	ActivateShield(false);
 
 }
@@ -65,8 +71,10 @@ void CPlayerStateMachine::Update()
 		mShieldDuration -= DELTA_TIME;
 		if (mShieldDuration <= 0) {
 			ActivateShield(false);
-			mShieldDuration = -1.f;
 		}
+	}
+	else if (mShieldDuration <= 0) {
+		ActivateShield(false);
 	}
 }
 
@@ -146,11 +154,14 @@ void CPlayerStateMachine::Heal(float amount)
 {
 }
 
-void CPlayerStateMachine::UpdateHealth(float newHealth)
+void CPlayerStateMachine::UpdateHealth(float newHealth, int newSheild)
 {
 	CEntityState::UpdateHealth(newHealth);
 	float hpRatio = mHealth / mMaxHealth;
 	owner->TriggerEvent("OnFaceChanged", { hpRatio >= 0.3f });
+
+	mShieldHealth = newSheild;
+	std::cout << "실드 사용, 남은 실드: " << mShieldHealth << std::endl;
 }
 
 void CArcherState::Awake()

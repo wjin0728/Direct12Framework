@@ -299,7 +299,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
 			shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
 			stateMachine->SetShield(shieldObj);
-			stateMachine->ActivateShield(false); 
+			stateMachine->ActivateShield(false);
 		}
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
@@ -322,6 +322,15 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		scene->FadeIn(0.5f, {0.f,0.f,0.f,0.f}, [sceneType]() {
 			INSTANCE(CSceneManager).RequestSceneChange(sceneType);
 			});
+
+		if (auto state = std::dynamic_pointer_cast<CPlayerStateMachine>(mPlayer->GetStateMachine())) {
+			state->ActivateShield(false);
+		}
+		for (auto& pair : mOtherPlayers) {
+			if (auto state = std::dynamic_pointer_cast<CPlayerStateMachine>(pair.second->GetStateMachine())) {
+				state->ActivateShield(false);
+			}
+		}
 		break;
 	}
 	case SC_ALL_PLAYERS_POS: {
@@ -561,7 +570,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 				if (mPlayer) {
 					auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(mPlayer->GetStateMachine());
 					if (playerState) {
-						playerState->UpdateHealth(packet->hp);
+						playerState->UpdateHealth(packet->hp, packet->shield);
 					}
 				}
 			}
@@ -570,7 +579,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 				if (it != mOtherPlayers.end()) {
 					auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(it->second->GetStateMachine());
 					if (playerState) {
-						playerState->UpdateHealth(packet->hp);
+						playerState->UpdateHealth(packet->hp, packet->shield);
 					}
 				}
 			}

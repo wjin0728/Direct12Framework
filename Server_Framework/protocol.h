@@ -240,6 +240,7 @@ struct SC_HP_PACKET : PACKET {
 	uint8_t object_type;
 	short object_id;
 	short hp;
+	short shield;
 };
 
 struct SC_MAKE_POTAL_PACKET : PACKET {};

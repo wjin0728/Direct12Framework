@@ -275,7 +275,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 		if (S_FIRE_EXPLOSION == p->skill_enum) {
 			for (auto& cl : clients[ServerNumber]) {
 				if (cl.second._state != ST_INGAME) continue;
-				cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, p->target_id, Monsters[ServerNumber][p->target_id]._hp);
+				Monsters[ServerNumber][p->target_id].TakeDamage(10);
+				cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, p->target_id, Monsters[ServerNumber][p->target_id]._hp, 0);
 			}
 		}
 		else if (S_GRASS_VINE == p->skill_enum) {}
@@ -349,6 +350,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 						//std::cout << "distance : " << distance << std::endl;
 						if (distance < 16.f) {
 							cl.second._player.TakeDamage(100);
+							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+
 							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
@@ -360,6 +363,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 						//std::cout << "distance : " << distance << std::endl;
 						if (distance < 5.f) {
 							cl.second._player.TakeDamage(100);
+							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+
 							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
@@ -518,7 +523,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 					mon.second.TakeDamage(5);
 					for (auto& cl : clients[ServerNumber]) {
 						if (cl.second._state != ST_INGAME) continue;
-						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp);
+						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
 					}
 				}
 			}
@@ -679,7 +684,7 @@ void GameManager::Update() {
 					monster.TakeDamage(proj.second._damage);
 					for (auto& cl : clients[ServerNumber]) {
 						if (cl.second._state != ST_INGAME) continue;
-						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, ms.first, monster._hp);
+						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, ms.first, monster._hp, 0);
 					}
 					proj.second._remove = true; // 투사체 제거
 				}
@@ -801,7 +806,8 @@ void GameManager::CreateItem(Monster* monster) {
 	float terrainHeight = terrain[(int)scene_type].GetHeight(monster->_pos.x, monster->_pos.z);
 
 	items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(monster->_pos.x, terrainHeight + 0.3, monster->_pos.z);
-	items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(rand() % 2 ? S_ITEM_TYPE::S_FIRE_EXPLOSION : S_ITEM_TYPE::S_WATER_SHIELD);
+	//items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(rand() % 2 ? S_ITEM_TYPE::S_FIRE_EXPLOSION : S_ITEM_TYPE::S_WATER_SHIELD);
+	items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(S_ITEM_TYPE::S_WATER_SHIELD);
 	items[ServerNumber][Item_cnt[ServerNumber]].LocalTransform();
 
 	for (auto& cl : clients[ServerNumber]) {
