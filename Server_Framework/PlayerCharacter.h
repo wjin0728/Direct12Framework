@@ -20,6 +20,8 @@ public:
 	PlayerStateMachine*		currentState;	
 	PlayerStateMachine*		previousState;
 
+	BoundingOrientedBox attackBox;
+
 	array<Monster*, 3> _Monster{}; // ∏ÛΩ∫≈Õ ≈∏∞Ÿ
 	Monster* _target = nullptr;
 

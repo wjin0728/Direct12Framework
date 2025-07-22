@@ -585,6 +585,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			}
 		}
 	}
+	case SC_MAKE_POTAL: {
+		// 지금 씬 어딘지 보고 그거 맞게 if문 해서 포탈 위치 땅땅땅
+		break;
+	}
 	default:
 		break;
 	}

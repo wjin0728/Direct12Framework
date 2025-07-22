@@ -51,6 +51,7 @@ constexpr char SC_REMOVE_MONSTER = 21;
 constexpr char SC_ADD_EFFECT = 22;
 constexpr char SC_REMOVE_WATERSHIELD = 23;
 constexpr char SC_HP = 24;
+constexpr char SC_MAKE_POTAL = 25;
 
 
 #pragma pack (push, 1)
@@ -240,5 +241,7 @@ struct SC_HP_PACKET : PACKET {
 	short object_id;
 	short hp;
 };
+
+struct SC_MAKE_POTAL_PACKET : PACKET {};
 
 #pragma pack (pop)

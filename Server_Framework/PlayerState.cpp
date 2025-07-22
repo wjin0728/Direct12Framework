@@ -173,8 +173,7 @@ void PlayerState::SkillState::Exit(PlayerCharacter* player) {}
 PlayerState::HitState& PlayerState::HitState::GetInstance() { static PlayerState::HitState instance; return instance; }
 
 void PlayerState::HitState::Enter(PlayerCharacter* player) {
-	//cout << "Hit 들어왔다리!" << endl;
-
+    player->SetVelocity(0, 0, 0);
 }
 
 void PlayerState::HitState::Update(PlayerCharacter* player) {

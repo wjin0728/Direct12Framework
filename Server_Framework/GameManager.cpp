@@ -341,6 +341,33 @@ void GameManager::Process_packet(int c_id, char* packet)
 					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
 				}
+
+				auto func0 = [this](class Monster* monster) {
+					Vec2 center = monster->GetWorldOffsetPosition(1.f, 4.5f);
+					for (auto& cl : clients[ServerNumber]) {
+						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
+						//std::cout << "distance : " << distance << std::endl;
+						if (distance < 16.f) {
+							cl.second._player.TakeDamage(100);
+							std::cout << "맞았다!!!!!!!!" << std::endl;
+						}
+					}
+				};
+				auto func1 = [this](class Monster* monster) {
+					Vec2 center = monster->GetWorldOffsetPosition(0.f, 3.f);
+					for (auto& cl : clients[ServerNumber]) {
+						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
+						//std::cout << "distance : " << distance << std::endl;
+						if (distance < 5.f) {
+							cl.second._player.TakeDamage(100);
+							std::cout << "맞았다!!!!!!!!" << std::endl;
+						}
+					}
+				};
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
+				//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
 				Monster_cnt[ServerNumber]++;
 			}
 
@@ -359,6 +386,33 @@ void GameManager::Process_packet(int c_id, char* packet)
 					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
 				}
+
+				auto func0 = [this](class Monster* monster) {
+					Vec2 center = monster->GetWorldOffsetPosition(0.f, 5.f);
+					for (auto& cl : clients[ServerNumber]) {
+						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
+						std::cout << "distance : " << distance << std::endl;
+						if (distance < 16.f) {
+							cl.second._player.TakeDamage(150);
+							std::cout << "맞았다!!!!!!!!" << std::endl;
+						}
+					}
+					};
+				auto func1 = [this](class Monster* monster) {
+					Vec2 center = monster->GetWorldOffsetPosition(6.f, 6.f);
+					for (auto& cl : clients[ServerNumber]) {
+						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
+						std::cout << "distance : " << distance << std::endl;
+						if (distance < 100.f) {
+							cl.second._player.TakeDamage(150);
+							std::cout << "맞았다!!!!!!!!" << std::endl;
+						}
+					}
+					};
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func0);
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func1);
+				//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
 				Monster_cnt[ServerNumber]++;
 			}
 
@@ -377,6 +431,33 @@ void GameManager::Process_packet(int c_id, char* packet)
 					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
 					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
 				}
+
+				auto func0 = [this](class Monster* monster) {
+					Vec2 center = monster->GetWorldOffsetPosition(2.f, 9.f);
+					for (auto& cl : clients[ServerNumber]) {
+						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
+						//std::cout << "distance : " << distance << std::endl;
+						if (distance < 200.f) {
+							cl.second._player.TakeDamage(100);
+							//std::cout << "맞았다!!!!!!!!" << std::endl;
+						}
+					}
+					};
+				auto func1 = [this](class Monster* monster) {
+					Vec2 center = monster->GetWorldOffsetPosition(0.f, 6.f);
+					for (auto& cl : clients[ServerNumber]) {
+						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
+						//std::cout << "distance : " << distance << std::endl;
+						if (distance < 30.f) {
+							cl.second._player.TakeDamage(100);
+							//std::cout << "맞았다!!!!!!!!" << std::endl;
+						}
+					}
+					};
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
+				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
+				//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
 				Monster_cnt[ServerNumber]++;
 			}
 			break;
@@ -518,21 +599,22 @@ bool GameManager::CanMove(float x, float z)
 
 void GameManager::Update() {
 	for (auto& cl : clients[ServerNumber]) {
-		if (cl.second._state != ST_INGAME) continue;
-		cl.second._player.Update();
-
 		auto& player = cl.second._player;
+
+		if (cl.second._state != ST_INGAME) continue;
+		player.Update();
+
 		if (player._class == S_PLAYER_CLASS::FIGHTER && player.currentState == &PlayerState::UltimateState::GetInstance()) {
 			float terrainHeight = terrain[(int)scene_type].GetHeight(player._pos.x, player._pos.z);
 			player._pos.y = terrainHeight + player._data;
 		}
 
 		// 플레이어 - 아이템 충돌 체크
-		if (cl.second._player._state == S_PLAYER_STATE::GATHERING && !items.empty()) {
+		if (player._state == S_PLAYER_STATE::GATHERING && !items.empty()) {
 			for (auto& it : items[ServerNumber]) {
 				if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
 					it.second.LocalTransform();
-				if (cl.second._player._boundingbox.Intersects(it.second._boundingbox)) {
+				if (player._boundingbox.Intersects(it.second._boundingbox)) {
 					for (auto& cl : clients[ServerNumber]) {
 						if (cl.second._state != ST_INGAME) continue;
 						cl.second.send_remove_item_packet(it.first, cl.first, it.second._item_type);
@@ -544,27 +626,27 @@ void GameManager::Update() {
 			}
 		}
 
-		if (cl.second._player.HasMoveInput()) {
-			Vec3 newPos = cl.second._player._pos + (cl.second._player._velocity * TICK_INTERVAL);
+		if (player.HasMoveInput()) {
+			Vec3 newPos = player._pos + (player._velocity * TICK_INTERVAL);
 
 			if (CanMove(newPos.x, newPos.z)) {
-				cl.second._player._pos = newPos;
+				player._pos = newPos;
 
-				float terrainHeight = terrain[(int)scene_type].GetHeight(cl.second._player._pos.x, cl.second._player._pos.z);
-				cl.second._player._pos.y = terrainHeight;
+				float terrainHeight = terrain[(int)scene_type].GetHeight(player._pos.x, player._pos.z);
+				player._pos.y = terrainHeight;
 
 				float rotationSpeed = 10.f;
-				if (cl.second._player._class != S_PLAYER_CLASS::ARCHER || cl.second._player._state != S_PLAYER_STATE::RUNATTACK || !cl.second._player._target) {
-					if (cl.second._player._velocity.LengthSquared() > 0.001f) {
-						Quaternion targetRot = Quaternion::LookRotation(cl.second._player._velocity);
-						Quaternion rotation = cl.second._player._rotation = Quaternion::Slerp(cl.second._player._rotation, targetRot, rotationSpeed * TICK_INTERVAL);
+				if (player._class != S_PLAYER_CLASS::ARCHER || player._state != S_PLAYER_STATE::RUNATTACK || !player._target) {
+					if (player._velocity.LengthSquared() > 0.001f) {
+						Quaternion targetRot = Quaternion::LookRotation(player._velocity);
+						Quaternion rotation = player._rotation = Quaternion::Slerp(player._rotation, targetRot, rotationSpeed * TICK_INTERVAL);
 						Vec3 angle = Vec3::GetAngleToQuaternion(rotation);
-						cl.second._player._look_dir.y = angle.y * radToDeg;
+						player._look_dir.y = angle.y * radToDeg;
 					}
 				}
 			}
 			else {
-				cl.second._player._velocity = Vec3::Zero;
+				player._velocity = Vec3::Zero;
 			}
 		}
 	}
@@ -572,24 +654,32 @@ void GameManager::Update() {
 	vector<int> erase_proj;
 
 	for (auto& ms : Monsters[ServerNumber]) {
-		if (ms.second._remove) continue; // 몬스터가 제거된 경우는 패스
-		else if (ms.second._state == S_MONSTER_STATE::DEATH && !ms.second._drop_item) {
-			CreateItem(&ms.second);
-			ms.second._drop_item = true;
+		auto& monster = ms.second;
+
+		if (monster._remove) continue; // 몬스터가 제거된 경우는 패스
+		else if (monster._state == S_MONSTER_STATE::DEATH && !monster._drop_item) {
+			CreateItem(&monster);
+			monster._drop_item = true;
 		}
-		ms.second.Update();
-		ms.second.AvoidCollision(Monsters[ServerNumber]);
+
+		// 이벤트 처리
+		if (monster._state == S_MONSTER_STATE::ATTACK || monster._state == S_MONSTER_STATE::ATTACK2 || monster._state == S_MONSTER_STATE::PROJECTILE_ATTACK) {
+			monster.HandleCallback(monster.mEventHandler[(int)monster._state]);
+		}
+
+		monster.Update();
+		monster.AvoidCollision(Monsters[ServerNumber]);
 
 		// 몬스터 - 투사체 충돌 체크
-		if (ms.second._hp >= 0 && ms.second._state != S_MONSTER_STATE::UNDERGROUND && ms.second._state != S_MONSTER_STATE::DEATH) {
+		if (monster._hp >= 0 && monster._state != S_MONSTER_STATE::UNDERGROUND && monster._state != S_MONSTER_STATE::DEATH) {
 			for (auto& proj : Projectiles[ServerNumber]) {
 				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
 				if (proj.second._remove) continue; // 투사체가 제거된 경우는 패스
-				if (ms.second._boundingbox.Intersects(proj.second._boundingbox)) {
-					ms.second.TakeDamage(proj.second._damage);
+				if (monster._boundingbox.Intersects(proj.second._boundingbox)) {
+					monster.TakeDamage(proj.second._damage);
 					for (auto& cl : clients[ServerNumber]) {
 						if (cl.second._state != ST_INGAME) continue;
-						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, ms.first, ms.second._hp);
+						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, ms.first, monster._hp);
 					}
 					proj.second._remove = true; // 투사체 제거
 				}

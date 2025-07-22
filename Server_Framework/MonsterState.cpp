@@ -9,7 +9,7 @@
 MonsterState::IdleState& MonsterState::IdleState::GetInstance() { static MonsterState::IdleState instance; return instance; }
 
 void MonsterState::IdleState::Enter(Monster* monster) {
-	cout << "IdleState Entered!" << endl;
+	//cout << "IdleState Entered!" << endl;
     monster->SetVelocity(0, 0, 0); // 속도 0
 	idleTimer = 2.f;
 }
@@ -34,7 +34,7 @@ void MonsterState::IdleState::Exit(Monster* monster) {}
 MonsterState::RunState& MonsterState::RunState::GetInstance() { static MonsterState::RunState instance; return instance; }
 
 void MonsterState::RunState::Enter(Monster* monster) {
-	cout << "RunState Entered!" << endl;
+	//cout << "RunState Entered!" << endl;
     // 이동 시작
 }
 
@@ -82,13 +82,13 @@ void MonsterState::RunState::Exit(Monster* monster) {}
 MonsterState::AttackState& MonsterState::AttackState::GetInstance() { static MonsterState::AttackState instance; return instance; }
 
 void MonsterState::AttackState::Enter(Monster* monster) {
-	cout << "BasicAttackState Entered!" << endl;
+	//cout << "BasicAttackState Entered!" << endl;
 
 	if (rand() % 2 == 0) {
-		attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK]->mLength;
+		attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK].mLength;
 	}
 	else {
-        attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK2]->mLength;
+        attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK2].mLength;
 		monster->_state = S_MONSTER_STATE::ATTACK2;
 	}
 }
@@ -132,9 +132,9 @@ void MonsterState::SkillState::Exit(Monster* monster) {}
 MonsterState::HitState& MonsterState::HitState::GetInstance() { static MonsterState::HitState instance; return instance; }
 
 void MonsterState::HitState::Enter(Monster* monster) {
-	cout << "HitState Entered!" << endl;
+	//cout << "HitState Entered!" << endl;
     monster->SetVelocity(0, 0, 0); // 이동 멈춤
-	hitTimer = monster->_animations[(int)S_MONSTER_STATE::GETHIT]->mLength;
+	hitTimer = monster->_animations[(int)S_MONSTER_STATE::GETHIT].mLength;
 }
 
 void MonsterState::HitState::Update(Monster* monster) {
@@ -156,10 +156,10 @@ void MonsterState::HitState::Exit(Monster* monster) {
 MonsterState::DeathState& MonsterState::DeathState::GetInstance() { static MonsterState::DeathState instance; return instance; }
 
 void MonsterState::DeathState::Enter(Monster* monster) {
-	cout << "DeathState Entered!" << endl;
+	//cout << "DeathState Entered!" << endl;
 	monster->SetVelocity(0, 0, 0);
 	monster->_drop_item = false;
-	deathTimer = monster->_animations[(int)S_MONSTER_STATE::DEATH]->mLength;
+	deathTimer = monster->_animations[(int)S_MONSTER_STATE::DEATH].mLength;
 }
 
 void MonsterState::DeathState::Update(Monster* monster) {
@@ -181,11 +181,11 @@ void MonsterState::DeathState::Exit(Monster* monster) {}
 MonsterState::UndergroundState& MonsterState::UndergroundState::GetInstance() { static MonsterState::UndergroundState instance; return instance; }
 
 void MonsterState::UndergroundState::Enter(Monster* monster) {
+	//cout << "UndergroundState Entered!" << endl;
 	if (!monster->_wave) {
 		monster->_remove = true;
 		return;
 	}
-	cout << "UndergroundState Entered!" << endl;
 	monster->_pos = monster->_spawn_pos;
 	monster->_look_dir = monster->_spawn_dir;
 	monster->_target = nullptr;
@@ -215,7 +215,7 @@ MonsterState::SpawnState& MonsterState::SpawnState::GetInstance() { static Monst
 void MonsterState::SpawnState::Enter(Monster* monster) {
 	cout << "SpawnState Entered!" << endl;
 	monster->SetVelocity(0, 0, 0);
-	SpawnTimer = monster->_animations[(int)S_MONSTER_STATE::SPAWN]->mLength;
+	SpawnTimer = monster->_animations[(int)S_MONSTER_STATE::SPAWN].mLength;
 }
 
 void MonsterState::SpawnState::Update(Monster* monster) {

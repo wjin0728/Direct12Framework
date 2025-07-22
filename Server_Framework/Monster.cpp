@@ -17,6 +17,12 @@ void Monster::SetState(MonsterStateMachine* newState)
 void Monster::SetState(S_MONSTER_STATE newState)
 {
 
+	if (newState == S_MONSTER_STATE::ATTACK) {
+		for (auto& key : _animations[(int)S_MONSTER_STATE::ATTACK].mEventKeys) { key.mEnable = true; }
+		for (auto& key : _animations[(int)S_MONSTER_STATE::ATTACK2].mEventKeys) { key.mEnable = true; }
+		for (auto& key : _animations[(int)S_MONSTER_STATE::PROJECTILE_ATTACK].mEventKeys) { key.mEnable = true; }
+	}
+
     switch (newState) {
     case S_MONSTER_STATE::IDLE:
         _state = S_MONSTER_STATE::IDLE;
@@ -159,13 +165,10 @@ void Monster::ReadAnimationInfo(const std::string& fileName)
 
 		if (token == "<AnimationSets>:") {
 			ReadDateFromFile(ifs, setsNum);
-
-			_animations.resize(setsNum);
-			for (auto& anim : _animations) {
-				anim = std::make_shared<AnimationInfo>();
-			}
 		}
 		else if (token == "<AnimationSet>:") {
+			mEventHandler.push_back(CAnimationEventHandler{}); // 이벤트 핸들러 초기화
+
 			int setNum{}, framesPerSecondNum{}, keyFrameNum{};
 			float length{};
 			std::string setName;
@@ -176,25 +179,25 @@ void Monster::ReadAnimationInfo(const std::string& fileName)
 			ReadDateFromFile(ifs, framesPerSecondNum);
 			ReadDateFromFile(ifs, keyFrameNum);
 
-			auto animSet = _animations[setNum];
-			animSet->mAnimationName = setName;
-			animSet->mLength = length;
-			animSet->mFrameLength = keyFrameNum;
+			AnimationInfo animSet{};
+			animSet.mAnimationName = setName;
+			animSet.mLength = length;
+			animSet.mFrameLength = keyFrameNum;
 
 			ReadDateFromFile(ifs, token);
 			if (token == "<Loop>:") {
 				int animationType{};
 				ReadDateFromFile(ifs, animationType);
-				animSet->mType = (ANIMATION_TYPE)animationType;
+				animSet.mType = (ANIMATION_TYPE)animationType;
 			}
 
 			ReadDateFromFile(ifs, token);
 			if (token == "<Events>:") {
 				int eventCount{};
 				ReadDateFromFile(ifs, eventCount);
-				animSet->mEventKeys.resize(eventCount);
 
-				for (auto& key : animSet->mEventKeys) {
+				for (int i = 0; i < eventCount; ++i) {
+					EventKey eventKey{};
 					float eventTime{}, floatParam{};
 					std::string eventStr;
 
@@ -202,9 +205,15 @@ void Monster::ReadAnimationInfo(const std::string& fileName)
 					ReadDateFromFile(ifs, floatParam);
 					ReadDateFromFile(ifs, eventStr);
 
-					key = std::make_shared<EventKey>(eventTime, floatParam, eventStr);
+					eventKey.mTime = eventTime;
+					eventKey.mData = floatParam;
+					eventKey.mName = eventStr;
+
+					animSet.mEventKeys.push_back(eventKey);
 				}
 			}
+
+			_animations.push_back(animSet);
 		}
 		else if (token == "</AnimationSets>")
 		{
@@ -213,14 +222,17 @@ void Monster::ReadAnimationInfo(const std::string& fileName)
 	}
 }
 
-void HandleEvent(S_ENEMY_TYPE type, S_MONSTER_STATE state)
+
+
+void Monster::HandleCallback(CAnimationEventHandler& registry)
 {
-	switch (type) {
-	case S_ENEMY_TYPE::GRASS_SMALL: {
-		break;
-	}
-	case S_ENEMY_TYPE::GRASS_BIG: {
-		break;
-	}
+	for (auto& key : _animations[(int)_state].mEventKeys) {
+		if (key.mTime < _animation_time && key.mEnable) {
+			auto event = registry.GetEvent(key.mName);
+			if (event) {
+				event(this);
+				key.mEnable = false;
+			}
+		}
 	}
 }
