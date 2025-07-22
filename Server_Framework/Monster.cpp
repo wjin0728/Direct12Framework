@@ -16,6 +16,7 @@ void Monster::SetState(MonsterStateMachine* newState)
 
 void Monster::SetState(S_MONSTER_STATE newState)
 {
+	_animation_time = 0.f;
 
 	if (newState == S_MONSTER_STATE::ATTACK) {
 		for (auto& key : _animations[(int)S_MONSTER_STATE::ATTACK].mEventKeys) { key.mEnable = true; }
@@ -59,6 +60,7 @@ void Monster::SetState(S_MONSTER_STATE newState)
 
 void Monster::Update()
 {
+	_animation_time += TICK_INTERVAL;
     if (currentState) currentState->Update(this);
     LocalTransform(); // 바운딩 박스 업데이트 해주기
     SetTarget();
