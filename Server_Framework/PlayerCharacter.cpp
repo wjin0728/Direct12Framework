@@ -97,9 +97,9 @@ void PlayerCharacter::Update()
 
 void PlayerCharacter::TakeDamage(int damage) 
 {
-	if (_barrier > 0) {
-		_barrier -= damage;
-		if (_barrier < 0) _barrier = 0;
+	if (_barrier) {
+		_barrier--;
+		std::cout << "실드 사용, 남은 실드: " << _barrier << std::endl;
 	}
 	else {
 		_hp -= damage;

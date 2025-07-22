@@ -170,7 +170,7 @@ void SESSION::send_remove_watershield_packet(int id)
 	do_send(&p);
 }
 
-void SESSION::send_hp_packet(S_OBJECT_TYPE type, int id, int hp)
+void SESSION::send_hp_packet(S_OBJECT_TYPE type, int id, int hp, int shield)
 {
 	SC_HP_PACKET p;
 	p.type = SC_HP;
@@ -178,5 +178,6 @@ void SESSION::send_hp_packet(S_OBJECT_TYPE type, int id, int hp)
 	p.object_type = (uint8_t)type;
 	p.object_id = id;
 	p.hp = hp;
+	p.shield = shield;
 	do_send(&p);
 }
