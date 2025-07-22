@@ -13,8 +13,8 @@ protected:
 	
 
 public:
-	int mHealth{};
-	int mMaxHealth{};
+	float mHealth{};
+	float mMaxHealth{};
 	bool mIsHit = false;
 	bool mIsDead = false;
 	bool mIsSpawning = false;

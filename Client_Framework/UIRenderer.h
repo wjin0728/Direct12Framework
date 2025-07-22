@@ -53,7 +53,7 @@ public:
 	void SetScale(const Vec2& scale) { mUIData.scale = scale; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetWorldPosition(const Vec3& pos);
 
-	CBUIData& GetUIData() { return mUIData; }
+	CBUIData& GetUIData() { mUIDirtyFrame = FRAME_RESOURCE_COUNT;return mUIData; }
 	Vec4 GetColor() const { return mUIData.color; }
 	Vec2 GetSize() const { return mUIData.size; }
 	Vec2 GetUVOffset() const { return mUIData.uvOffset; }
