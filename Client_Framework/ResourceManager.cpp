@@ -88,6 +88,10 @@ bool CResourceManager::LoadEnemyObjects()
 {
 	LoadPrefabFromFile("GrassSmall");
 	LoadPrefabFromFile("GrassBig");
+	LoadPrefabFromFile("IceBig");
+	LoadPrefabFromFile("IceSmall");
+	LoadPrefabFromFile("FireBig");
+	LoadPrefabFromFile("FireSmall");
 	return true;
 }
 

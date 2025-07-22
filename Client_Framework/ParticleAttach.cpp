@@ -50,6 +50,8 @@ void CParticleAttach::LateUpdate()
 	if (transform == nullptr || mParticleEmitter == nullptr)
 		return;
 	mParticleEmitter->mEmitterTransform = transform->GetWorldMat();
+
+
 }
 
 void CParticleAttach::InitializeParticleEmitter()

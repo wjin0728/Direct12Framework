@@ -56,5 +56,7 @@ public:
 
 private:
 	void CastingSkill();
+	void LockOnTarget();
+	void InteractWithItem();
 };
 

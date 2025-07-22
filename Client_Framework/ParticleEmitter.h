@@ -324,7 +324,7 @@ struct ShapeModule
 				sinf(phi) * sinf(theta),
 				cosf(phi)
 			};
-			return Vec3::TransformNormal(localDir.GetNormalized(), transform);
+			return Vec3::TransformNormal(localDir, transform);
 		}
 		case ShapeType::Sphere:
 		{
@@ -404,14 +404,19 @@ struct ShapeModule
 		}
 		case ShapeType::ConeVolume:
 		{
-			float angleRad = angle * degToRad;
-			float height = radius / tanf(angleRad);
-			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
-			float r = radius * sqrtf(RandomNumberGenerator::RandFloat(0.0f, 1.0f));
-			float x = r * cosf(theta);
-			float y = r * sinf(theta);
-			float h = RandomNumberGenerator::RandFloat(0.0f, height);
-			return Vec3::Transform(Vec3(x, y, h), transform);
+			float angleRad = XMConvertToRadians(angle);
+
+			float r = radius * sqrt(RandomNumberGenerator::RandFloat(0.0f, 1.0f));
+			float theta = RandomNumberGenerator::RandFloat(0.0f, XM_2PI);
+
+			float x = r * cos(theta);
+			float y = r * sin(theta);
+
+			float maxZ = length * (1.0f - r / radius); 
+			float z = RandomNumberGenerator::RandFloat(0.0f, maxZ);
+			Vec3 localPos(x, y, z);
+			return Vec3::Transform(localPos, transform);
+
 		}
 		case ShapeType::Sphere:
 		{
@@ -490,6 +495,7 @@ struct ShapeModule
 		case ShapeType::ConeVolume:
 			ReadDateFromFile(ifs, shapeModule.angle);
 			ReadDateFromFile(ifs, shapeModule.radius);
+			ReadDateFromFile(ifs, shapeModule.length);
 			break;
 		case ShapeType::Sphere:
 			ReadDateFromFile(ifs, shapeModule.radius);

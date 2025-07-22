@@ -224,3 +224,208 @@ void CGrassBigState::OnExitState(UINT8 state)
 {
 	CEnemyState::OnExitState(state);
 }
+
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////
+///
+/// </summary>
+/// 
+/// 
+void CWaterBigState::Awake()
+{
+	CEnemyState::Awake();
+	mHealth = 100.f;
+	mMaxHealth = 100.f;
+}
+
+void CWaterBigState::Start()
+{
+	CEnemyState::Start();
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+
+	auto healthSystem = mHealthSystem.lock();
+	if (healthSystem) {
+		healthSystem->SetMaxHealth(mHealth);
+		healthSystem->SetHealth(mHealth);
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+
+		auto transform = healthSystem->GetTransform();
+		if (transform) {
+			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+		}
+	}
+}
+
+
+void CWaterBigState::Update()
+{
+	CEnemyState::Update();
+}
+
+void CWaterBigState::OnEnterState(UINT8 state)
+{
+	CEnemyState::OnEnterState(state);
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	controller->SetTrackAnimationSet((int)state);
+
+}
+
+void CWaterBigState::OnExitState(UINT8 state)
+{
+	CEnemyState::OnExitState(state);
+}
+
+
+//////////////////////////////////////////////////////////////////
+///
+
+void CWaterSmallState::Awake()
+{
+	CEnemyState::Awake();
+	mHealth = 100.f;
+	mMaxHealth = 100.f;
+}
+
+void CWaterSmallState::Start()
+{
+	CEnemyState::Start();
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+
+	auto healthSystem = mHealthSystem.lock();
+	if (healthSystem) {
+		healthSystem->SetMaxHealth(mHealth);
+		healthSystem->SetHealth(mHealth);
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+
+		auto transform = healthSystem->GetTransform();
+		if (transform) {
+			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+		}
+	}
+}
+
+
+void CWaterSmallState::Update()
+{
+	CEnemyState::Update();
+}
+
+void CWaterSmallState::OnEnterState(UINT8 state)
+{
+	CEnemyState::OnEnterState(state);
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	controller->SetTrackAnimationSet((int)state);
+
+}
+
+void CWaterSmallState::OnExitState(UINT8 state)
+{
+	CEnemyState::OnExitState(state);
+}
+
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////
+/// 
+/// </summary>
+/// 
+void CFireBigState::Awake()
+{
+	CEnemyState::Awake();
+	mHealth = 100.f;
+	mMaxHealth = 100.f;
+}
+
+void CFireBigState::Start()
+{
+	CEnemyState::Start();
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+
+	auto healthSystem = mHealthSystem.lock();
+	if (healthSystem) {
+		healthSystem->SetMaxHealth(mHealth);
+		healthSystem->SetHealth(mHealth);
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+
+		auto transform = healthSystem->GetTransform();
+		if (transform) {
+			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+		}
+	}
+}
+
+
+void CFireBigState::Update()
+{
+	CEnemyState::Update();
+}
+
+void CFireBigState::OnEnterState(UINT8 state)
+{
+	CEnemyState::OnEnterState(state);
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	controller->SetTrackAnimationSet((int)state);
+
+}
+
+void CFireBigState::OnExitState(UINT8 state)
+{
+	CEnemyState::OnExitState(state);
+}
+
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
+
+void CFireSmallState::Awake()
+{
+	CEnemyState::Awake();
+	mHealth = 100.f;
+	mMaxHealth = 100.f;
+}
+
+void CFireSmallState::Start()
+{
+	CEnemyState::Start();
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+	auto healthSystem = mHealthSystem.lock();
+	if (healthSystem) {
+		healthSystem->SetMaxHealth(mHealth);
+		healthSystem->SetHealth(mHealth);
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+		auto transform = healthSystem->GetTransform();
+		if (transform) {
+			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+		}
+	}
+}
+
+void CFireSmallState::Update()
+{
+	CEnemyState::Update();
+}
+
+
+void CFireSmallState::OnEnterState(UINT8 state)
+{
+	CEnemyState::OnEnterState(state);
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	controller->SetTrackAnimationSet((int)state);
+}
+
+void CFireSmallState::OnExitState(UINT8 state)
+{
+	CEnemyState::OnExitState(state);
+}
+

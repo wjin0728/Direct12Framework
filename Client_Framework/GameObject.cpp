@@ -645,6 +645,11 @@ void CGameObject::CreateParticleAttachmentFromFile(std::ifstream& inFile)
 	ReadDateFromFile(inFile, isLoop);
 	particle->SetLoop(isLoop);
 	ParticleProperties particleProperties;
+
+
+	if(mName == "FX_Spark") {
+		int a = 0;
+	}
 	ParticleProperties::ReadParticlePropertiesFromFile(inFile, particleProperties);
 	INSTANCE(CParticleManager).AddParticleProperties(mName, particleProperties);
 

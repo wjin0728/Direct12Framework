@@ -14,6 +14,8 @@
 #include "ObjectState.h"
 #include "EnemyState.h"
 #include "CutScene.h"
+#include"ParticleAttach.h"
+#include"ParticleManager.h"
 
 void ServerManager::Initialize()
 {
@@ -594,8 +596,22 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			}
 		}
 	}
+			  break;
 	case SC_MAKE_POTAL: {
-		// 지금 씬 어딘지 보고 그거 맞게 if문 해서 포탈 위치 땅땅땅
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
+		auto portal = RESOURCE.GetPrefab("Portal");
+		if (portal) {
+			auto portalObject = CGameObject::Instantiate(portal);
+			portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(47.92172f, 6.699f, 36.38293f));
+			auto particle = portalObject->GetComponent<CParticleAttach>();
+			particle->SetLoop(true);
+
+			scene->AddObject(portalObject);
+		}
 		break;
 	}
 	default:

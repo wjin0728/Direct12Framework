@@ -76,6 +76,18 @@ void CPlayerController::Update()
 		return;
 	}
 	
+	LockOnTarget();
+	OnKeyEvents();
+	// auto transform = GetTransform();
+	// float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
+
+	// Vec3 pos = transform->GetWorldPosition();
+	// pos.y = terrainHeight;
+	// transform->SetLocalPosition(pos);
+}
+
+void CPlayerController::LockOnTarget()
+{
 	mTargetEnemy.reset();
 	auto camera = INSTANCE(CRenderManager).GetCamera("MainCamera");
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
@@ -97,13 +109,26 @@ void CPlayerController::Update()
 		}
 	}
 	mTargetMarker.lock()->SetTarget(mTargetEnemy.lock());
-	OnKeyEvents();
-	// auto transform = GetTransform();
-	// float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
+}
 
-	// Vec3 pos = transform->GetWorldPosition();
-	// pos.y = terrainHeight;
-	// transform->SetLocalPosition(pos);
+void CPlayerController::InteractWithItem()
+{
+	auto camera = INSTANCE(CRenderManager).GetCamera("MainCamera");
+	auto scene = INSTANCE(CSceneManager).GetCurScene();
+	auto& items = scene->GetObjectsWithType(OBJECT_TYPE::ITEM);
+	float minDistance = FLT_MAX;
+	for (const auto& item : items) {
+		BoundingSphere objBS = item->GetRootBoundingSphere();
+		if (!camera->IsInFrustum(objBS, FORWARD)) continue;
+		auto itemTransform = item->GetTransform();
+		Vec3 toItem = itemTransform->GetWorldPosition() - GetTransform()->GetWorldPosition();
+		toItem.y = 0.f;
+		float distance = toItem.LengthSquared();
+		if (distance < minDistance) {
+			minDistance = distance;
+			//mTargetItem = item;
+		}
+	}
 }
 
 void CPlayerController::LateUpdate()

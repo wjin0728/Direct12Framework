@@ -54,3 +54,56 @@ public:
 
 	virtual ENEMY_TYPE GetEnemyType() const override { return ENEMY_TYPE::GRASS_SMALL; };
 };
+
+class CWaterBigState :
+    public CEnemyState
+{
+    public:
+    virtual ~CWaterBigState() {}
+    virtual void Awake() override;
+    virtual void Start() override;
+    virtual void Update() override;
+    virtual void OnEnterState(UINT8 state) override;
+    virtual void OnExitState(UINT8 state) override;
+    virtual ENEMY_TYPE GetEnemyType() const override { return ENEMY_TYPE::WATER_BIG; };
+};
+
+class CWaterSmallState :
+    public CEnemyState
+{
+    public:
+    virtual ~CWaterSmallState() {}
+    virtual void Awake() override;
+    virtual void Start() override;
+    virtual void Update() override;
+    virtual void OnEnterState(UINT8 state) override;
+    virtual void OnExitState(UINT8 state) override;
+    virtual ENEMY_TYPE GetEnemyType() const override { return ENEMY_TYPE::WATER_SMALL; };
+};
+
+class CFireBigState :
+    public CEnemyState
+{
+    public:
+    virtual ~CFireBigState() {}
+    virtual void Awake() override;
+    virtual void Start() override;
+    virtual void Update() override;
+    virtual void OnEnterState(UINT8 state) override;
+    virtual void OnExitState(UINT8 state) override;
+    virtual ENEMY_TYPE GetEnemyType() const override { return ENEMY_TYPE::FIRE_BIG; };
+};
+
+
+class CFireSmallState :
+    public CEnemyState
+{
+    public:
+    virtual ~CFireSmallState() {}
+    virtual void Awake() override;
+    virtual void Start() override;
+    virtual void Update() override;
+    virtual void OnEnterState(UINT8 state) override;
+    virtual void OnExitState(UINT8 state) override;
+    virtual ENEMY_TYPE GetEnemyType() const override { return ENEMY_TYPE::FIRE_SMALL; };
+};

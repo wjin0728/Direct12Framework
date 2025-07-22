@@ -230,7 +230,6 @@
     <ClInclude Include="ObjectState.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerState.h" />
     <ClInclude Include="AnimationEnums.h">
       <Filter>Utility</Filter>
     </ClInclude>
@@ -252,7 +251,6 @@
     <ClInclude Include="TargetMarker.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
-    <ClInclude Include="CutScene.h" />
     <ClInclude Include="EnemyState.h">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClInclude>
@@ -264,9 +262,24 @@
     </ClInclude>
     <ClInclude Include="MainMenuUI.h" />
     <ClInclude Include="MainScene.h" />
-    <ClInclude Include="UIController.h" />
-    <ClInclude Include="Portal.h" />
-    <ClInclude Include="Button.h" />
+    <ClInclude Include="Button.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="CutScene.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Portal.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerState.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="UIController.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="InteractIcon.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -416,9 +429,6 @@
     <ClCompile Include="UIRenderer.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
-    <ClCompile Include="LoadingScreen.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="LoadScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -458,9 +468,6 @@
     <ClCompile Include="TargetMarker.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
-    <ClCompile Include="CutScene.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="EnemyState.cpp">
       <Filter>GameObject\Component\Scripts</Filter>
     </ClCompile>
@@ -476,9 +483,6 @@
     <ClCompile Include="MainMenuUI.cpp">
       <Filter>Client</Filter>
     </ClCompile>
-    <ClCompile Include="UIController.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="MainScene.cpp">
       <Filter>Client</Filter>
     </ClCompile>
@@ -486,7 +490,19 @@
       <Filter>Client</Filter>
     </ClCompile>
     <ClCompile Include="Button.cpp">
-      <Filter>Client</Filter>
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="CutScene.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadingScreen.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="UIController.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="InteractIcon.cpp">
+      <Filter>GameObject\Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
