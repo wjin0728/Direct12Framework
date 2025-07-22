@@ -22,6 +22,7 @@ public:
 	uint64_t current_tick = 0;
 
 	array<Terrain, (int)S_SCENE_TYPE::END> terrain;
+	array<Vec3, (int)S_SCENE_TYPE::END> spawn_points; // 각 씬의 스폰 포인트
 	S_SCENE_TYPE scene_type = S_SCENE_TYPE::LOBBY; // 현재 씬 타입
 
 	array<unordered_map<int, Item>, 6> items;
@@ -97,23 +98,7 @@ public:
 		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
 
 		for (auto& cl : clients[ServerNumber]) {
-			switch ((S_SCENE_TYPE)scene)
-			{
-			case S_SCENE_TYPE::LOBBY: {
-				cl.second._player._pos = Vec3(4.803865f, 0.4409764f, 8.894886f); // 로비 초기 위치
-				break;
-			}
-			case S_SCENE_TYPE::MAINSTAGE1: {
-				cl.second._player._pos = Vec3(45.2f, 4.2f, 42.f); // 메인 스테이지 1 초기 위치
-				break;
-			}
-			case S_SCENE_TYPE::MAINSTAGE2: {
-				cl.second._player._pos = Vec3(5.075171f, 2.164612f, 25.88103f); // 메인 스테이지 2 초기 위치
-				break;
-			}
-			default:
-				break;
-			}
+			cl.second._player._pos = spawn_points[(int)scene_type];
 			cl.second._player._velocity = Vec3::Zero;
 			cl.second._player._hp = cl.second._player.PlayerMaxHp();
 			cl.second._player._barrier = 0;

@@ -69,7 +69,7 @@ void CScene::Start()
 		ExpandSceneAABB(object, mSceneAABB);
 	}
 	INSTANCE(CShadowManager).UpdateSceneBoundingBox(mSceneAABB);
-}
+}	
 
 void CScene::Update()
 {
@@ -95,8 +95,10 @@ void CScene::LateUpdate()
 
 void CScene::RenderFadeOverlay()
 {
-	if (mFadeType == FadeType::None) return;
-	mRenderMgr->RenderFadePass();
+	if (mFadeState == FadeState::None) return;
+
+	if (mFadeType == FadeType::Default) mRenderMgr->RenderFadePass();
+	else if (mFadeType == FadeType::Circular) mRenderMgr->RenderCircularFadePass();
 }
 
 void CScene::LoadSceneFromFile(const std::string& fileName)
@@ -142,7 +144,12 @@ std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::string& tag)
 void CScene::ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB)
 {
 	if (!obj) return;
+	if (obj->GetRenderLayer() == RENDER_LAYER::UI) return; // UI는 AABB 계산에서 제외
 	if( obj->GetActive() && obj->mCastShadow) {
+		std::cout << obj->GetName() << " AABB: " << obj->mWorldAABB.Center.x << ", " 
+			<< obj->mWorldAABB.Center.y << ", " << obj->mWorldAABB.Center.z << std::endl;
+		std::cout << "Size: " << obj->mWorldAABB.Extents.x << ", "
+			<< obj->mWorldAABB.Extents.y << ", " << obj->mWorldAABB.Extents.z << std::endl;
 		const BoundingBox& objAABB = obj->mWorldAABB;
 		BoundingBox::CreateMerged(sceneAABB, sceneAABB, objAABB);
 	} 
@@ -283,21 +290,42 @@ void CScene::CommitObjectChanges()
 
 void CScene::FadeUpdate()
 {
-	if (mFadeType == FadeType::None) return;
+	if (mFadeState == FadeState::None) return;
 	mFadeTime += DELTA_TIME;
-	float alpha = 0.f;
-	if (mFadeType == FadeType::In) {
-		alpha = mFadeTime / mFadeDuration;
-	} else if (mFadeType == FadeType::Out) {
-		alpha = 1.f - (mFadeTime / mFadeDuration);
+	if(mFadeType == FadeType::Default) {
+		float alpha = 0.f;
+		if (mFadeState == FadeState::In) {
+			alpha = mFadeTime / mFadeDuration;
+		}
+		else if (mFadeState == FadeState::Out) {
+			alpha = 1.f - (mFadeTime / mFadeDuration);
+		}
+		mFadeColor.w = std::clamp(alpha, 0.f, 1.f);
+		if (mFadeTime >= mFadeDuration) {
+			mFadeColor.w = (mFadeState == FadeState::In) ? 1.f : 0.f;
+			mFadeState = FadeState::None;
+			if (mOnFadeFinish) {
+				mOnFadeFinish();
+				mOnFadeFinish = nullptr;
+			}
+		}
 	}
-	mFadeColor.w = std::clamp(alpha, 0.f, 1.f);
-	if (mFadeTime >= mFadeDuration) {
-		mFadeColor.w = (mFadeType == FadeType::In) ? 1.f : 0.f;
-		mFadeType = FadeType::None;
-		if (mOnFadeFinish) {
-			mOnFadeFinish();
-			mOnFadeFinish = nullptr;
+	else if (mFadeType == FadeType::Circular) {
+		float radius = 0.f;
+		if (mFadeState == FadeState::Out) {
+			radius = mFadeTime / mFadeDuration;
+		}
+		else if (mFadeState == FadeState::In) {
+			radius = 1.f - (mFadeTime / mFadeDuration);
+		}
+		mFadeColor.w = std::clamp(radius, 0.f, 1.f);
+		if (mFadeTime >= mFadeDuration) {
+			mFadeColor.w = (mFadeState == FadeState::Out) ? 1.f : 0.f;
+			mFadeState = FadeState::None;
+			if (mOnFadeFinish) {
+				mOnFadeFinish();
+				mOnFadeFinish = nullptr;
+			}
 		}
 	}
 }
@@ -309,7 +337,8 @@ void CScene::FadeIn(float duration, const Color& color, std::function<void()> on
 	mFadeTime = 0.f;
 	mOnFadeFinish = onFinish;
 	mFadeColor.w = 0.f; 
-	mFadeType = FadeType::In;
+	mFadeState = FadeState::In;
+	mFadeType = FadeType::Default;
 }
 
 void CScene::FadeOut(float duration, const Color& color, std::function<void()> onFinish)
@@ -319,7 +348,30 @@ void CScene::FadeOut(float duration, const Color& color, std::function<void()> o
 	mFadeTime = 0.f;
 	mOnFadeFinish = onFinish;
 	mFadeColor.w = 1.f; 
-	mFadeType = FadeType::Out;
+	mFadeState = FadeState::Out;
+	mFadeType = FadeType::Default;
+}
+
+void CScene::CircularFadeIn(float duration, const Color& color, std::function<void()> onFinish)
+{
+	mFadeColor = color;
+	mFadeDuration = duration;
+	mFadeTime = 0.f;
+	mOnFadeFinish = onFinish;
+	mFadeColor.w = 1.f; 
+	mFadeState = FadeState::In;
+	mFadeType = FadeType::Circular;
+}
+
+void CScene::CircularFadeOut(float duration, const Color& color, std::function<void()> onFinish)
+{
+	mFadeColor = color;
+	mFadeDuration = duration;
+	mFadeTime = 0.f;
+	mOnFadeFinish = onFinish;
+	mFadeColor.w = 0.f; 
+	mFadeState = FadeState::Out;
+	mFadeType = FadeType::Circular;
 }
 
 void CScene::RemoveObjects()

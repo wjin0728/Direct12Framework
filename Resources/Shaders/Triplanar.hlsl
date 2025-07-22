@@ -5,7 +5,7 @@ cbuffer MaterialData : register(b5)
 {
     float fallOff;
     float tilling;
-    float padding;
+    float2 padding;
     
     int topTexIdx;
     int topNormalIdx;

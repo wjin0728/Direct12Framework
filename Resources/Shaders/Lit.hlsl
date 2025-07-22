@@ -352,20 +352,20 @@ PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
     
     if (ForwardTexIdx != -1)
     {
-        float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoClamp, uv);
+        float4 texColor = diffuseMap[ForwardTexIdx].Sample(anisoWrap, uv);
         color *= texColor;
     }
     color.rgb = GammaDecoding(color.rgb);
     
     if (normalTexIdx != -1)
     {
-        float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoClamp, uv).rgb;
+        float3 normalMapSample = diffuseMap[normalTexIdx].Sample(anisoWrap, uv).rgb;
         normal = NormalSampleToWorldSpace(normalMapSample, worldNormal, worldTangent, worldBitangent);
     }
     float3 _emissionColor = GammaDecoding(emissionColor);
     if (emissionMapIdx != -1)
     {
-        float4 emissionColorSample = diffuseMap[emissionMapIdx].Sample(anisoClamp, uv);
+        float4 emissionColorSample = diffuseMap[emissionMapIdx].Sample(anisoWrap, uv);
         _emissionColor *= float4(GammaDecoding(emissionColorSample.rgb), emissionColorSample.a).rgb;
     }
     

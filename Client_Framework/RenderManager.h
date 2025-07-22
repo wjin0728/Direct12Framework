@@ -134,6 +134,7 @@ public:
 	void RenderFinalPass();
 	void RenderUIPass(bool clearRenderTarget = false);
 	void RenderFadePass();
+	void RenderCircularFadePass();
 	void RenderInstancingGroup(int pass = 0);
 };
 

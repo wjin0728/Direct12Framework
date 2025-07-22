@@ -349,9 +349,8 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float3 lightDir = -normalize(direction);
     
     light.lColor = GammaDecoding(light.lColor);
-    //return camDir * 0.5f + 0.5f;
     
-    float3 lightColor = light.lColor * 1.2;
+    float3 lightColor = light.lColor * light.intensity;
     
     float3 F0 = float3(0.04, 0.04, 0.04);
     F0 = lerp(F0, albedo, metallic);
@@ -362,7 +361,6 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float NdotL = saturate((dot(normal, lightDir)));
     float NdotV = saturate(dot(normal, camDir));
     float VdotH = saturate(dot(camDir, halfV));
-    //NdotL = smoothstep(0.0, 1.0, NdotL);
 
     float3 F = FresnelSchlickRoughness(VdotH, F0, roughness);
     float NDF = DistributionGGX(normal, halfV, roughness);
@@ -381,9 +379,24 @@ float3 ComputeDirectionalLight(LightingData lightingData, SurfaceData surfaceDat
     float ndotUp = saturate(dot(normal, up));
     float3 directLight = (kD * albedo + specular) * lightColor * NdotL;
     float3 ambientLight = albedo * 0.2f * ndotUp;
-    ambientLight += albedo * 0.3f;
+    ambientLight += albedo * 0.4f;
     
     return ambientLight + (directLight * lightingData.shadowFactor) + surfaceData.emissive;
+}
+
+float ComputeEffectiveRadius(float intensity, float threshold,
+	float kC, float kL, float kQ)
+{
+    float a = kQ;
+    float b = kL;
+    float c = kC - (intensity / threshold);
+
+    float discriminant = b * b - 4 * a * c;
+
+    if (discriminant < 0.0f)
+        return 0.0f;
+
+    return (-b + sqrt(discriminant)) / (2 * a);
 }
 
 
@@ -393,45 +406,47 @@ float3 ComputePointLight(LightingData lightingData, SurfaceData surfaceData, CBL
     float3 position = lightingData.positionWS;
     float3 camDir = lightingData.cameraDirection;
     float3 albedo = surfaceData.albedo;
-    float3 specular = surfaceData.specular;
-    float metallic = surfaceData.metallic;
-    float smoothness = surfaceData.smoothness;
-    float3 lightDir = light.positionWS - position;
-    float3 lightColor = light.lColor * light.strength;
+    float3 lightDir = light.lightPos - position;
     float distance = length(lightDir);
-    
-    return light.lColor;
+    float metallic = surfaceData.metallic;
+    float smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
+    float roughness = clamp(1 - smoothness, 0.14, 1.0);
     
     lightDir = normalize(lightDir);
     
     if (distance > light.range)
         return float3(0.f, 0.f, 0.f);
     
-    smoothness = clamp(surfaceData.smoothness, 0.0, 1.0);
-    float roughness = 1.0 - smoothness;
-    float3 F0 = float3(0.04, 0.04, 0.04); // 비금속 기본값
-    F0 = lerp(F0, albedo, metallic); // 금속성 반영
+    light.lColor = GammaDecoding(light.lColor);
     
+    float3 lightColor = light.lColor * light.intensity;
+    
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, albedo, metallic);
+
     float3 halfV = normalize(camDir + lightDir);
-    float viewHalfDot = max(dot(halfV, normal), 0.f);
-    float NdotL = max(dot(normal, lightDir), 0.0);
-    float NdotV = max(dot(normal, camDir), 0.0);
-    
-    float3 F = FresnelSchlickRoughness(NdotV, F0, roughness);
+    if (all(halfV == 0))
+        halfV = camDir;
+
+    float NdotL = saturate(dot(normal, lightDir));
+    float NdotV = saturate(dot(normal, camDir));
+    float VdotH = saturate(dot(camDir, halfV));
+
+    float3 F = FresnelSchlickRoughness(VdotH, F0, roughness);
     float NDF = DistributionGGX(normal, halfV, roughness);
     float G = GeometrySmith(normal, camDir, lightDir, roughness);
-    
+
     float3 numerator = NDF * G * F;
-    float denominator = 4.0 * NdotV * NdotL + 0.00001;
-    specular *= (numerator / denominator);
-    
+    float denominator = max(4.0 * NdotL * NdotV, 0.00001);
+    float3 specular = numerator / denominator;
+
     float3 kS = F;
-    float3 kD = 1.0 - kS; 
-    kD *= 1.0 - metallic; 
-    float3 diffuse = albedo / 3.14159;
-    float att = 1.0f / (a0 + distance * a1 + distance * distance * a2);
-    
-    return (kD * diffuse + specular) * lightColor * NdotL * att;
+    float3 kD = (1 - kS) * (1 - metallic);
+
+    float fade = saturate(1 - pow(distance / light.range, 0.4f));
+    float att = fade * fade; 
+
+    return (kD * albedo + specular) * lightColor * NdotL * att;
 }
 
 
@@ -444,9 +459,9 @@ float3 ComputeSpotLight(LightingData lightingData, SurfaceData surfaceData, CBLi
     float3 specular = surfaceData.specular;
     float metallic = surfaceData.metallic;
     float smoothness = surfaceData.smoothness;
-    float3 lightDir = light.positionWS - position;
+    float3 lightDir = light.lightPos - position;
     float3 direction = light.directionWS;
-    float3 lightColor = light.lColor * light.strength;
+    float3 lightColor = light.lColor * light.intensity;
     float distanceSqr = dot(lightDir, lightDir);
 
 // 거리 감쇠 계산

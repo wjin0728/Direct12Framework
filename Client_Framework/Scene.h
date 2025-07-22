@@ -12,11 +12,18 @@ class CLight;
 
 class CSceneManager;
 
-enum class FadeType
+enum class FadeState
 {
 	In,
 	Out,
 	None
+};
+
+enum class FadeType
+{
+	Default,
+	Circular, 
+	End
 };
 
 class CScene
@@ -40,11 +47,13 @@ protected:
 
 	Matrix UIProjectionMatrix{};
 
-	FadeType mFadeType{ FadeType::None };
+	FadeState mFadeState{ FadeState::None };
+	FadeType mFadeType{ FadeType::Default };
+
 	Color mFadeColor{ 0.0f, 0.0f, 0.0f, 0.0f };
 	float mFadeTime{ 0.0f };
 	float mFadeDuration{ 0.5f };
-
+	float mFadeRadius{ 0.0f };
 	std::function<void()> mOnFadeFinish;
 
 
@@ -92,6 +101,9 @@ public:
 	void FadeUpdate();
 	void FadeIn(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
 	void FadeOut(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
+
+	void CircularFadeIn(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
+	void CircularFadeOut(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
 
 protected:
 	void UpdatePassData();

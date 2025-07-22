@@ -482,9 +482,10 @@ void CGameObject::InitByObjectName()
 		rotator->SetRotationSpeed({ 0.f, 0.f, 10.f });
 		rotator->SetRotationAxis({ 0.f, 0.f, 1.f });
 	}
-	else if (mName.contains("Bush") || mName.contains("_Tree")|| mName.contains("_Grass")|| mName.contains("Env_Ground")
-		|| mName.contains("Env_Rock") || mName.contains("Env_Lillies") || mName.contains("Env_Wildflowers") || mName.contains("Env_Fern")
-		|| mName.contains("Env_Undergrowth_Fern") || mName.contains("Env_Dirt") || mName.contains("Env_Moss")) {
+	else if (mName.contains("Bush") || mName.contains("_Tree")|| mName.contains("_Grass")|| mName.contains("Env_Ground") || mName.contains("Env_Backrgound")
+		|| mName.contains("SM_Env_Rock") || mName.contains("Env_Lillies") || mName.contains("Env_Wildflowers") || mName.contains("Env_Fern")
+		|| mName.contains("Env_Undergrowth_Fern") || mName.contains("Env_Dirt") || mName.contains("Env_Moss") || mName.contains("Env_Succulent") || mName.contains("SM_Env_Crater")
+		|| mName.contains("SM_Env_Cactus") || mName.contains("SM_Env_DirtRoad") ) {
 		SetInstancing(true);
 	}
 }
@@ -613,6 +614,7 @@ void CGameObject::CreateUIrendererFromFile(std::ifstream& inFile)
 	uiRenderer->SetPosition(pos);
 	uiRenderer->SetShader("Sprite");
 	SetRenderLayer(RENDER_LAYER::UI);
+	mCastShadow = false;
 }
 
 void CGameObject::CreateButtonFromFile(std::ifstream& inFile)
@@ -637,7 +639,11 @@ void CGameObject::CreateParticleAttachmentFromFile(std::ifstream& inFile)
 	if (!canEmit) {
 		return;
 	}
-
+	std::string str{};
+	ReadDateFromFile(inFile, str);
+	bool isLoop{};
+	ReadDateFromFile(inFile, isLoop);
+	particle->SetLoop(isLoop);
 	ParticleProperties particleProperties;
 	ParticleProperties::ReadParticlePropertiesFromFile(inFile, particleProperties);
 	INSTANCE(CParticleManager).AddParticleProperties(mName, particleProperties);
@@ -705,11 +711,20 @@ void CGameObject::CreateRendererFromFile(std::ifstream& inFile)
 		mRenderer->AddMaterial(materialName);
 	}
 	auto material = mRenderer->GetMaterial();
-	if (material && (material->mShaderName.contains("Common") || material->mShaderName.contains("Lit"))) {
+	if (material && (material->mShaderName.contains("Common") || material->mShaderName.contains("Lit") || material->mShaderName.contains("Scrolling"))) {
 		SetInstancing(false);
 	}
 	if(mTag == "Water" || mTag == "UI" || mTag == "SkyDome") mCastShadow = false;
-	else mCastShadow = true;
+	else if (mTag == "DirectionalLight") {
+		mCastShadow = false;
+	}
+	else {
+		mCastShadow = true;
+	}
+	if (mTag == "SkyDome") mRenderLayer = RENDER_LAYER::Transparent;
+	if(mTag == "Cloud") {
+		mCastShadow = false;
+	}
 }
 
 void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
@@ -748,6 +763,7 @@ void CGameObject::CreateTerrainFromFile(std::ifstream& inFile)
 
 	mLocalAABB = mWorldAABB = terrain->mWorldAABB;
 
+	mCastShadow = true;
 	INSTANCE(CSceneManager).GetCurScene()->SetTerrain(terrain);
 }
 
@@ -776,6 +792,7 @@ void CGameObject::CreateLightFromFile(std::ifstream& inFile)
 		camera->SetViewport(0, 0, shadowMapResolution, shadowMapResolution);
 		camera->SetScissorRect(0, 0, shadowMapResolution, shadowMapResolution);
 	}
+	mCastShadow = false;
 }
 
 void CGameObject::CacheFrameHierarchies(std::vector<std::shared_ptr<CGameObject>>& boneFrameCaches)

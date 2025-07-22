@@ -260,6 +260,7 @@ struct ShapeModule
 	enum class ShapeType
 	{
 		Sphere,
+		SphereShell,
 		Hemisphere,
 		HemisphereShell,
 		Cone,
@@ -267,6 +268,8 @@ struct ShapeModule
 		Mesh,
 		ConeShell,
 		ConeVolume,
+		ConeVolumeShell,
+		Circle,
 		Point
 	} type = ShapeType::Cone;
 
@@ -276,7 +279,12 @@ struct ShapeModule
 
 	Vec3 boxSize = { 1.0f, 1.0f, 1.0f };
 
-	float sphereRadius = 1.0f;
+	Vec3 position = { 0.0f, 0.0f, 0.0f }; // Position of the shape in world space
+	Vec3 rotation = { 0.0f, 0.0f, 0.0f }; // Rotation of the shape in world space
+	Vec3 scale = { 1.0f, 1.0f, 1.0f }; // Scale of the shape in world space
+
+
+	Matrix transform{};
 
 	Vec3 GetRandomDirection() const
 	{
@@ -284,6 +292,7 @@ struct ShapeModule
 		{
 		case ShapeType::Cone:
 		{
+
 			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
 			float phi = RandomNumberGenerator::RandFloat(0, XMConvertToRadians(angle));
 			Vec3 localDir{
@@ -291,7 +300,9 @@ struct ShapeModule
 				sinf(phi) * sinf(theta),
 				cosf(phi)
 			};
-			return localDir;
+
+			
+			return Vec3::TransformNormal(localDir, transform);
 		}
 		case ShapeType::ConeShell:
 		{
@@ -313,11 +324,11 @@ struct ShapeModule
 				sinf(phi) * sinf(theta),
 				cosf(phi)
 			};
-			return localDir.GetNormalized();
+			return Vec3::TransformNormal(localDir.GetNormalized(), transform);
 		}
 		case ShapeType::Sphere:
 		{
-			return RandomNumberGenerator::RandUniformVec3();
+			return Vec3::TransformNormal(RandomNumberGenerator::RandUniformVec3(), transform);
 		}
 		case ShapeType::Box:
 		{
@@ -326,7 +337,7 @@ struct ShapeModule
 				RandomNumberGenerator::RandFloat(-boxSize.y * 0.5f, boxSize.y * 0.5f),
 				RandomNumberGenerator::RandFloat(-boxSize.z * 0.5f, boxSize.z * 0.5f)
 			};
-			return randomInBox.GetNormalized();
+			return Vec3::TransformNormal(randomInBox.GetNormalized(), transform);
 		}
 		case ShapeType::Point:
 			return Vec3(0, 0, 1);
@@ -339,7 +350,7 @@ struct ShapeModule
 				sinf(phi) * sinf(theta),
 				cosf(phi)
 			};
-			return localDir;
+			return Vec3::TransformNormal(localDir.GetNormalized(), transform);
 		}
 		case ShapeType::HemisphereShell:
 		{
@@ -350,7 +361,7 @@ struct ShapeModule
 				sinf(phi) * sinf(theta),
 				cosf(phi)
 			};
-			return localDir;
+			return Vec3::TransformNormal(localDir.GetNormalized(), transform);
 		}
 		}
 		return Vec3(0, 0, 1); // Default direction if no shape matches
@@ -373,7 +384,7 @@ struct ShapeModule
 			float x = r * cosf(theta);
 			float y = r * sinf(theta);
 
-			return Vec3(x, y, h);
+			return Vec3::Transform(Vec3(x, y, h), transform);
 		}
 		case ShapeType::ConeShell:
 		{
@@ -383,7 +394,7 @@ struct ShapeModule
 			float r = radius * sqrtf(RandomNumberGenerator::RandFloat(0.0f, 1.0f));
 			float x = r * cosf(theta);
 			float y = r * sinf(theta);
-			return Vec3(x, y, height);
+			return Vec3::Transform(Vec3(x, y, height), transform);
 		}
 		case ShapeType::ConeVolume:
 		{
@@ -393,39 +404,57 @@ struct ShapeModule
 			float r = radius * sqrtf(RandomNumberGenerator::RandFloat(0.0f, 1.0f));
 			float x = r * cosf(theta);
 			float y = r * sinf(theta);
-			return Vec3(x, y, RandomNumberGenerator::RandFloat(0.0f, height));
+			float h = RandomNumberGenerator::RandFloat(0.0f, height);
+			return Vec3::Transform(Vec3(x, y, h), transform);
 		}
 		case ShapeType::Sphere:
-			return RandomNumberGenerator::RandUniformVec3() * RandomNumberGenerator::RandFloat(0, sphereRadius);
+		{
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float phi = RandomNumberGenerator::RandFloat(0, XM_2PI);
+			float randomRadius = RandomNumberGenerator::RandFloat(0.0f, 1.0f) * radius; // Random radius within the hemisphere
+			Vec3 localPos{
+				randomRadius * sinf(phi) * cosf(theta),
+				randomRadius * sinf(phi) * sinf(theta),
+				randomRadius * cosf(phi)
+			};
+
+			return Vec3::Transform(localPos, transform);
+		}
 		case ShapeType::Box:
-			return Vec3(
+		{
+			Vec3 pos = Vec3(
 				RandomNumberGenerator::RandFloat(-boxSize.x * 0.5f, boxSize.x * 0.5f),
 				RandomNumberGenerator::RandFloat(-boxSize.y * 0.5f, boxSize.y * 0.5f),
 				RandomNumberGenerator::RandFloat(-boxSize.z * 0.5f, boxSize.z * 0.5f)
 			);
+			return Vec3::Transform(pos, transform);
+		}
 		case ShapeType::Point:
-			return Vec3(0, 0, 0); // Point emits from a single point
+			return Vec3(0, 0, 0);
 		case ShapeType::Hemisphere:
 		{
-			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
-			float phi = RandomNumberGenerator::RandFloat(0, XM_PI * 0.5f);
+			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);     
+			float phi = RandomNumberGenerator::RandFloat(0, XM_PIDIV2);      
+			float randomRadius = RandomNumberGenerator::RandFloat(0.0f, 1.0f) * radius; // Random radius within the hemisphere
 			Vec3 localPos{
-				sinf(phi) * cosf(theta),
-				sinf(phi) * sinf(theta),
-				cosf(phi)
+				randomRadius * sinf(phi) * cosf(theta), 
+				randomRadius * sinf(phi) * sinf(theta), 
+				randomRadius * cosf(phi)               
 			};
-			return localPos * RandomNumberGenerator::RandFloat(0, sphereRadius);
+
+			return Vec3::Transform(localPos, transform);
 		}
 		case ShapeType::HemisphereShell:
 		{
 			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
-			float phi = RandomNumberGenerator::RandFloat(0, XM_PI * 0.5f);
+			float phi = RandomNumberGenerator::RandFloat(0, XM_PIDIV2);
 			Vec3 localPos{
-				sinf(phi) * cosf(theta),
-				sinf(phi) * sinf(theta),
-				cosf(phi)
+				radius * sinf(phi) * cosf(theta),
+				radius * sinf(phi) * sinf(theta),
+				radius * cosf(phi)
 			};
-			return localPos * sphereRadius;
+
+			return Vec3::Transform(localPos, transform);
 		}
 		}
 		return Vec3(0, 0, 0);
@@ -444,17 +473,34 @@ struct ShapeModule
 			ReadDateFromFile(ifs, shapeModule.radius);
 			ReadDateFromFile(ifs, shapeModule.length);
 			break;
+		case ShapeType::ConeVolume:
+			ReadDateFromFile(ifs, shapeModule.angle);
+			ReadDateFromFile(ifs, shapeModule.radius);
+			break;
 		case ShapeType::Sphere:
-			ReadDateFromFile(ifs, shapeModule.sphereRadius);
+			ReadDateFromFile(ifs, shapeModule.radius);
+			break;
+		case ShapeType::Hemisphere:
+			ReadDateFromFile(ifs, shapeModule.radius);
 			break;
 		case ShapeType::Box:
 			ReadDateFromFile(ifs, shapeModule.boxSize.x);
 			ReadDateFromFile(ifs, shapeModule.boxSize.y);
 			ReadDateFromFile(ifs, shapeModule.boxSize.z);
 			break;
+		case ShapeType::Circle:
+			ReadDateFromFile(ifs, shapeModule.radius);
+			break;
 		case ShapeType::Point:
 			break; 
 		}
+		ReadDateFromFile(ifs, shapeModule.position);
+		ReadDateFromFile(ifs, shapeModule.rotation);
+		ReadDateFromFile(ifs, shapeModule.scale);
+
+		shapeModule.transform = Matrix::CreateScale(shapeModule.scale) *
+			Matrix::CreateFromYawPitchRoll(shapeModule.rotation.y, shapeModule.rotation.x, shapeModule.rotation.z) *
+			Matrix::CreateTranslation(shapeModule.position);
 	}
 };
 
@@ -480,6 +526,19 @@ struct BurstRecord
 	bool isActive;
 	int count;
 	float rate;
+};
+
+struct ParticleSpawnData
+{
+	float ageRate;
+	float rotationSpeed;
+	float startRotation;
+	float startSize;
+	float speed;
+	Vec3 direction;
+	Vec3 startLocation;
+	float random;
+	Color startColor;
 };
 
 struct ParticleVertex
@@ -523,6 +582,9 @@ struct ParticleProperties
 	std::shared_ptr<MinMaxCurve> rotationOverTimeCurve = nullptr;
 	bool useRotationOverTime = false;
 	bool useVelocityOverTime = false;
+	std::shared_ptr<MinMaxCurve> velocityOverTimeCurveX = nullptr;
+	std::shared_ptr<MinMaxCurve> velocityOverTimeCurveY = nullptr;
+	std::shared_ptr<MinMaxCurve> velocityOverTimeCurveZ = nullptr;
 	bool useTextureSheetAnimation = false;
 
 	static void ReadParticlePropertiesFromFile(std::ifstream& ifs, ParticleProperties& properties);

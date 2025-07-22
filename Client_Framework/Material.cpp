@@ -425,6 +425,59 @@ std::shared_ptr<CMaterial> CMaterial::CreateMaterialFromFile(std::ifstream& inFi
 		}
 		properties = GetPropertyInfos<WaterProperties>();
 	}
+	else if (token == "SyntyStudios/TexturePanner") {
+		material->SetShader("Scrolling");
+		ScrollingProperties* data = reinterpret_cast<ScrollingProperties*>(material->uploadData);
+		material->dataSize = sizeof(ScrollingProperties);
+		while (true) {
+			BinaryReader::ReadDateFromFile(inFile, token);
+			if (token == "<AlbedoMap>:")
+			{
+				data->albedoTextureIndex = GetTextureIdx(inFile);
+			}
+			else if (token == "<AlbedoColor>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->albedoTint);
+			}
+			else if (token == "<NormalMap>:")
+			{
+				data->normalTextureIndex = GetTextureIdx(inFile);
+			}
+			else if (token == "<EmissionMap>:")
+			{
+				data->emissionTextureIndex = GetTextureIdx(inFile);
+			}
+			else if (token == "<Smoothness>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->smoothness);
+			}
+			else if (token == "<Metallic>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->metallic);
+			}
+			else if (token == "<EmissionValue>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->emissionValue);
+			}
+			else if (token == "<Tiling>:")
+			{
+				Vec2 tiling{};
+				BinaryReader::ReadDateFromFile(inFile, data->tiling);
+			}
+			else if (token == "<Offset>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->offset);
+			}
+			else if (token == "<Scroll>:")
+			{
+				BinaryReader::ReadDateFromFile(inFile, data->scrollSpeed);
+			}
+			else if (token == "</Material>") {
+				break;
+			}
+		}
+		properties = GetPropertyInfos<ScrollingProperties>();
+	}
 	else {
 		return nullptr;
 	}

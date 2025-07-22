@@ -54,7 +54,7 @@ struct TriplanarProperties
 {
 	float fallOff{};
 	float tilling{};
-	float padding{};
+	Vec2 padding{};
 
 	int topTexIdx = -1;
 	int topNormalIdx = -1;
@@ -136,6 +136,48 @@ struct PortalProperties
 	float waveNoiseAmount; 
 	UINT mainTextureIndex;
 	UINT waveMask; 
+};
+
+struct ScrollingProperties
+{
+    Vec4 albedoTint;  
+	UINT albedoTextureIndex;  
+    UINT normalTextureIndex;  
+    UINT emissionTextureIndex;
+    float emissionValue;      
+
+	Vec2 scrollSpeed{ 0.f, 0.f }; 
+    float metallic;           
+    float smoothness;         
+
+	Vec2 tiling{ 1.f, 1.f };
+	Vec2 offset{ 0.f, 0.f };
+
+};
+
+struct CloudProperties
+{
+	Vec4 emissiveColor;
+	float lightDirMultiplier;
+	float minEmit;
+	float minEmitDir;
+	float maxEmit;
+
+	float directLight;
+	float lightMin;
+	float lightingContrast;
+	float lightMax;
+
+	float windEffect;
+	float panningSpeed;
+	float windNoiseScale;
+	float windWorldScale;
+
+	float xMultiplier = 1.0f;
+	float yMultiplier = 1.0f;
+	float zMultiplier = 1.0f;
+
+	float padding; 
 };
 
 struct UIProperties
@@ -297,21 +339,24 @@ std::vector<PropertyInfo> GetPropertyInfos()
 	return {};
 }
 
+
 #pragma once
 
 template<>
-inline std::vector<PropertyInfo> GetPropertyInfos<PortalProperties>()
+inline std::vector<PropertyInfo> GetPropertyInfos<ScrollingProperties>()
 {
-	using T = PortalProperties;
+	using T = ScrollingProperties;
 	return {
-		REGISTER_PROPERTY(T, waveAmplitude),
-		REGISTER_PROPERTY(T, waveDirection),
-		REGISTER_PROPERTY(T, waveSpeed),
-		REGISTER_PROPERTY(T, waveWavelength),
-		REGISTER_PROPERTY(T, waveNoiseScale),
-		REGISTER_PROPERTY(T, waveNoiseAmount),
-		REGISTER_PROPERTY(T, mainTextureIndex),
-		REGISTER_PROPERTY(T, waveMask)
+		REGISTER_PROPERTY(T, albedoTint),
+		REGISTER_PROPERTY(T, albedoTextureIndex),
+		REGISTER_PROPERTY(T, normalTextureIndex),
+		REGISTER_PROPERTY(T, emissionTextureIndex),
+		REGISTER_PROPERTY(T, emissionValue),
+		REGISTER_PROPERTY(T, metallic),
+		REGISTER_PROPERTY(T, smoothness),
+		REGISTER_PROPERTY(T, tiling),
+		REGISTER_PROPERTY(T, offset),
+		REGISTER_PROPERTY(T, scrollSpeed)
 	};
 }
 

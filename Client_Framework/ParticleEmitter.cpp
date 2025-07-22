@@ -80,7 +80,7 @@ void CParticleEmitter::Initialize(ParticleProperties* particleProperties)
 	for (uint32_t i = 0; i < mParticleProperties->maxParticles * 2; ++i) {
 		ParticleSpawnData data;
 		data.ageRate = 1.f / mParticleProperties->startLifetimeCurve.GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f));
-		data.rotationSpeed = RandomNumberGenerator::RandFloat();
+		data.rotationSpeed = mParticleProperties->useRotationOverTime ? mParticleProperties->rotationOverTimeCurve->GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f)) : 0.f;
 		data.startLocation = mParticleProperties->EmitShapeModule.GetRandomPosition();
 		data.direction = mParticleProperties->EmitShapeModule.GetRandomDirection();
 		data.startRotation = mParticleProperties->startRotationCurve.GetRandomValue(RandomNumberGenerator::RandFloat(0.f, 1.f));
@@ -132,11 +132,14 @@ int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr, CCamera* camera)
 			continue; 
 		}
 		particle.Velocity += mParticleProperties->gravity * deltaTime;
-		particle.Position += particle.Velocity * deltaTime;
-		if (mParticleProperties->useRotationOverTime) {
-			particle.rotation += mParticleProperties->rotationOverTimeCurve->GetRandomValue(particle.Age) * deltaTime;
-			//particle.rotation = std::fmod(particle.rotation, 1.f); 
+		if(mParticleProperties->useVelocityOverTime) {
+			float x = mParticleProperties->velocityOverTimeCurveX->GetRandomValue(particle.Age);
+			float y = mParticleProperties->velocityOverTimeCurveY->GetRandomValue(particle.Age);
+			float z = mParticleProperties->velocityOverTimeCurveZ->GetRandomValue(particle.Age);
+			particle.Position += Vec3(x, y, z) * deltaTime;
 		}
+		particle.Position += particle.Velocity * deltaTime;
+		particle.rotation += spawnDataItem.rotationSpeed * deltaTime;
 		
 		dataPtr[mActiveParticleCount].position = particle.Position;
 		dataPtr[mActiveParticleCount].size = mParticleProperties->useSizeOverTime ? mParticleProperties->sizeOverTimeCurve->GetRandomValue(particle.Age) * spawnDataItem.startSize : spawnDataItem.startSize;
@@ -336,6 +339,20 @@ void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, Part
 		}
 		else if (token == "<UseVelocityOvetLifeTime>:") {
 			ReadDateFromFile(ifs, properties.useVelocityOverTime);
+			if (properties.useVelocityOverTime) {
+				properties.velocityOverTimeCurveX = std::make_shared<MinMaxCurve>();
+				MinMaxCurve::ReadMinMaxCurveFromFile(ifs, *properties.velocityOverTimeCurveX);
+				properties.velocityOverTimeCurveY = std::make_shared<MinMaxCurve>();
+				MinMaxCurve::ReadMinMaxCurveFromFile(ifs, *properties.velocityOverTimeCurveY);
+				properties.velocityOverTimeCurveZ = std::make_shared<MinMaxCurve>();
+				MinMaxCurve::ReadMinMaxCurveFromFile(ifs, *properties.velocityOverTimeCurveZ);
+			}
+			else {
+				properties.velocityOverTimeCurveX = nullptr;
+				properties.velocityOverTimeCurveY = nullptr;
+				properties.velocityOverTimeCurveZ = nullptr;
+			}
+
 		}
 		else if (token == "<AlbedoTex>:") {
 			std::string texName;

@@ -10,6 +10,8 @@ CParticleAttach::CParticleAttach(const CParticleAttach& other)
 	mParticleEmitterName = other.mParticleEmitterName;
 	mParticleEmitter = nullptr;
 	mCanEmit = other.mCanEmit;
+	mLoop = other.mLoop;
+	mReserve = other.mReserve;
 }
 
 CParticleAttach::~CParticleAttach()

@@ -17,6 +17,11 @@ GameManager::GameManager()
 	terrain[(int)S_SCENE_TYPE::MAINSTAGE2].SetNavMapResolution(terrain[(int)S_SCENE_TYPE::MAINSTAGE1].GetResolution() * 2);
 	terrain[(int)S_SCENE_TYPE::MAINSTAGE2].LoadHeightMap("Battle2TerrainHeightmap");
 	terrain[(int)S_SCENE_TYPE::MAINSTAGE2].LoadNavMap("Battle2TerrainNavMask");
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE3].SetScale(64.f, 600.f, 64.f);
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE3].SetResolution(513);
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE3].SetNavMapResolution(terrain[(int)S_SCENE_TYPE::MAINSTAGE1].GetResolution() * 2);
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE3].LoadHeightMap("Battle3TerrainHeightmap");
+	terrain[(int)S_SCENE_TYPE::MAINSTAGE3].LoadNavMap("Battle3TerrainNavMask");
 	cout << "Map loaded.\n";
 
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -36,7 +41,12 @@ GameManager::GameManager()
 
 	S_Accept();
 
-	scene_type = S_SCENE_TYPE::MAINSTAGE1;
+	scene_type = S_SCENE_TYPE::MAINSTAGE3;
+
+	spawn_points[(int)S_SCENE_TYPE::LOBBY] = Vec3(4.803865f, 0.4409764f, 8.894886f);
+	spawn_points[(int)S_SCENE_TYPE::MAINSTAGE1] = Vec3(45.2f, 4.2f, 42.f);
+	spawn_points[(int)S_SCENE_TYPE::MAINSTAGE2] = Vec3(5.075171f, 2.164612f, 25.88103f);
+	spawn_points[(int)S_SCENE_TYPE::MAINSTAGE3] = Vec3(26.92197f, 1.299845, 6.873069);
 }
 GameManager::~GameManager()
 {
@@ -202,7 +212,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		else if (2 == c_id)
 			clients[ServerNumber][c_id]._player._class = S_PLAYER_CLASS::MAGE;
 
-		clients[ServerNumber][c_id]._player._pos = Vec3(4.803865f, 0.4409764f, 8.894886f);
+		clients[ServerNumber][c_id]._player._pos = spawn_points[(int)scene_type];
 		clients[ServerNumber][c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;
 
@@ -384,6 +394,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 		// 씬 전환
 		case 4: {
 			ChangeScene((uint8_t)S_SCENE_TYPE::MAINSTAGE2);
+			break;
+		}
+		case 5: {
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAINSTAGE3);
 			break;
 		}
 		default:

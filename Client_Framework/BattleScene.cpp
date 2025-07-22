@@ -179,3 +179,73 @@ void CBattle2Scene::RenderScene()
 	mRenderMgr->RenderUIPass();
 }
 
+
+CBattle3Scene::CBattle3Scene() : CScene()
+{
+}
+
+void CBattle3Scene::Initialize()
+{
+	// Load default resources
+	INSTANCE(ServerManager).Client_Login();
+	INSTANCE(ServerManager).RegisterPlayerInScene(this);
+	LoadSceneFromFile(SCENE_PATH("Battle3"));
+	CLight::SetVolumes();
+
+	auto mainUI = RESOURCE.GetPrefab("MainUI");
+	if (mainUI) {
+		auto uiObject = CGameObject::Instantiate(mainUI);
+		uiObject->SetName("MainUI");
+		uiObject->AddComponent<CPlayerHUD>();
+		AddObjectImmediately(uiObject);
+	}
+
+	INPUT.FixMousePosition(true);
+	FadeOut(0.5f, { 0.0,0.0,0.0,1.f });
+}
+
+void CBattle3Scene::Update()
+{
+	if (INPUT.IsKeyDown(KEY_TYPE::ESCAPE)) {
+		::PostQuitMessage(0);
+		return;
+	}
+	else if (INPUT.IsKeyDown(KEY_TYPE::ALT)) {
+		INPUT.ChangeMouseState();
+	}
+	/*for (int i = 0; i < 7; i++) {
+		int key = (int)KEY_TYPE::ONE + i;
+		if (INPUT.IsKeyDown((KEY_TYPE)key))
+		{
+			if (renderTargetIndices.size() > i)
+				renderPasstype = i;
+		}
+	}*/
+	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
+
+	}
+	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+
+	}
+	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
+		INPUT.ChangeMouseState();
+	}*/
+	CScene::Update();
+
+}
+
+void CBattle3Scene::LateUpdate()
+{
+	CScene::LateUpdate();
+}
+
+void CBattle3Scene::RenderScene()
+{
+	mRenderMgr->RenderShadowPass();
+	mRenderMgr->RenderGBufferPass();
+	mRenderMgr->RenderLightingPass();
+	mRenderMgr->RenderForwardPass();
+	mRenderMgr->RenderFinalPass();
+	mRenderMgr->RenderUIPass();
+}
+

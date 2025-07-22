@@ -31,7 +31,7 @@ void CMainMenu::Start()
 				};
 
             button->SetOnClick([fadeFunction]() {
-				fadeFunction();
+                INSTANCE(CSceneManager).GetCurScene()->FadeIn(0.5f, {0.f,0.f,0.f, 0.f}, fadeFunction);
             });
 				}
     }

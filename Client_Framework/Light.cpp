@@ -64,6 +64,9 @@ void CLight::Start()
 		objectBuffer->UpdateBuffer(mCbvOffset, &objDate);
 	}
 	mLightData.direction = GetTransform()->GetWorldLook();
+	mLightData.position = GetTransform()->GetWorldPosition();
+	float radius = mLightData.range * 2.f;
+	GetTransform()->SetLocalScale(Vec3(radius, radius, radius));
 }
 
 void CLight::Update()
@@ -72,6 +75,14 @@ void CLight::Update()
 
 void CLight::LateUpdate()
 {
+	auto objectBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::OBJECT);
+	CBObjectData objDate;
+	objDate.worldMAt = GetTransform()->GetWorldMat().Transpose();
+	objDate.invWorldMAt = GetTransform()->GetWorldMat().Invert();
+	objDate.idx0 = mLightIndex;
+	objectBuffer->UpdateBuffer(mCbvOffset, &objDate);
+	mLightData.direction = GetTransform()->GetWorldLook();
+	mLightData.position = GetTransform()->GetWorldPosition();
 }
 
 void CLight::Render(std::shared_ptr<CRenderTargetGroup> renderTarget)
@@ -87,9 +98,10 @@ void CLight::Render(std::shared_ptr<CRenderTargetGroup> renderTarget)
 		renderTarget->SetOnlyDepthStencil();
 		renderTarget->ClearOnlyStencil(0);
 		volumes[mLightData.type]->Render(CMDLIST, 0);
-
+		 
 		RESOURCE.Get<CShader>("LightingLighting")->SetPipelineState(CMDLIST);
 		renderTarget->SetRenderTargets();
+		CMDLIST->OMSetStencilRef(0);
 		volumes[mLightData.type]->Render(CMDLIST, 0);
 	}
 	else if (mLightData.type == (UINT)LIGHT_TYPE::DIRECTIONAL) {
@@ -110,4 +122,19 @@ void CLight::SetVolumes()
 	volumes[(UINT)LIGHT_TYPE::DIRECTIONAL] = RESOURCE.Get<CMesh>("Rectangle");
 	volumes[(UINT)LIGHT_TYPE::POINT] = RESOURCE.Get<CMesh>("Sphere");
 	//volumes[(UINT)LIGHT_TYPE::SPOT] = CMesh::CreateConeMesh(1.f, 1.f, 10, 10);
+}
+
+float CLight::ComputeEffectiveRadius(float intensity, float threshold,
+	float kC, float kL, float kQ)
+{
+	float a = kQ;
+	float b = kL;
+	float c = kC - (intensity / threshold);
+
+	float discriminant = b * b - 4 * a * c;
+
+	if (discriminant < 0.0f)
+		return 0.0f;
+
+	return (-b + sqrt(discriminant)) / (2 * a);
 }

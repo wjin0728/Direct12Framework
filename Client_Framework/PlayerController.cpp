@@ -176,6 +176,9 @@ void CPlayerController::OnKeyEvents()
 		if (INPUT.IsKeyDown(KEY_TYPE::THREE)) /*임시 씬 전환*/ {
 			INSTANCE(ServerManager).send_cs_000_packet(4);
 		}
+		if (INPUT.IsKeyDown(KEY_TYPE::FOUR)) /*임시 씬 전환*/ {
+			INSTANCE(ServerManager).send_cs_000_packet(5);
+		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
 			CastingSkill();
 			return;

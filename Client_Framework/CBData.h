@@ -134,19 +134,6 @@ struct CBUIData
 	Vec4 vec4Data1{};
 };
 
-struct ParticleSpawnData
-{
-	float ageRate;
-	float rotationSpeed;
-	float startRotation;
-	float startSize;
-	float speed;
-	Vec3 direction;
-	Vec3 startLocation; 
-	float random;
-	Color startColor;
-};
-
 struct ParticleMotion
 {
 	Vec3 Position;

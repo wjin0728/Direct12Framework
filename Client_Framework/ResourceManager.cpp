@@ -305,6 +305,16 @@ void CResourceManager::LoadDefaultShaders()
 	}
 	{
 		ShaderInfo info;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
+		info.blendType = BLEND_TYPE::DEFAULT;
+		info.depthStencilType = commonDepthTest;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_BACK;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		MakeShadersForAllPass("Scrolling", "Scrolling", info);
+
+	}
+	{
+		ShaderInfo info;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::INSTANCE;
 		info.blendType = BLEND_TYPE::DEFAULT;
 		info.depthStencilType = commonDepthTest;
@@ -394,7 +404,7 @@ void CResourceManager::LoadDefaultShaders()
 		info.shaderType = PASS_TYPE::STENCIL;
 		info.inputLayoutYype = INPUT_LAYOUT_TYPE::DEFAULT;
 		info.blendType = BLEND_TYPE::DEFAULT;
-		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::GREATER_NO_WRITE;
 		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
 		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
@@ -489,6 +499,18 @@ void CResourceManager::LoadPrevResources()
 		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
 		if (shader->Initialize("FadeInOut", info, "FadeInOut", false)) Add(shader);
 	}
+	{
+		ShaderInfo info;
+		info.shaderType = PASS_TYPE::FORWARD;
+		info.inputLayoutYype = INPUT_LAYOUT_TYPE::NONE;
+		info.blendType = BLEND_TYPE::ALPHA_BLEND;
+		info.depthStencilType = DEPTH_STENCIL_TYPE::NO_DEPTH_TEST_NO_WRITE;
+		info.rasterizerType = RASTERIZER_TYPE::CULL_NONE;
+		info.topologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+		std::shared_ptr<CShader> shader = std::make_shared<CShader>();
+		if (shader->Initialize("FadeInOutCircle", info, "FadeInOutCircle", false)) Add(shader);
+	}
 
 	LoadPrefabFromFile("StartUI");
 }
@@ -531,9 +553,10 @@ void CResourceManager::BackgroundLoadingThread()
 	LoadDefaultMeshes();
 	LoadDefaultShaders();
 	LoadDefaultMaterials();
-	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
-	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle2Resources.bin");
-	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
+	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
+	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle2Resources.bin");
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle3Resources.bin");
+	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
 	LoadPlayerObjects();
 	LoadEnemyObjects();
 	LoadSkillObjects();

@@ -39,6 +39,9 @@ void CSceneManager::LoadScene(SCENE_TYPE nextScene)
 	case SCENE_TYPE::MAINSTAGE2:
 		curScene = std::make_shared<CBattle2Scene>();
 		break;
+	case SCENE_TYPE::MAINSTAGE3:
+		curScene = std::make_shared<CBattle3Scene>();
+		break;
 	case SCENE_TYPE::END:
 		break;
 	default:

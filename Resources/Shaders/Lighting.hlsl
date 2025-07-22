@@ -78,13 +78,11 @@ VS_OUTPUT VS_Lighting(VS_INPUT input)
 [earlydepthstencil]
 float4 PS_Lighting(VS_OUTPUT output) : SV_Target
 {
+    //return float4(1.f, 1.f, 1.f, 1.f);
     float2 uv = output.position.xy / renderTargetSize;
     float4 gbufferPosition = diffuseMap[gbufferPosIdx].SampleLevel(pointClamp, uv, 0.0);
-    if (gbufferPosition.x <= -99999.f)
-    {
-        discard;
-    }
-    float4 color = diffuseMap[1].SampleLevel(pointClamp, uv, 0.0);
+    
+    float4 color = diffuseMap[gbufferAlbedoIdx].SampleLevel(pointClamp, uv, 0.0);
     float4 gbufferNormal = diffuseMap[gbufferNormalIdx].SampleLevel(pointClamp, uv, 0.0);
     float4 gbufferEmissive = diffuseMap[gbufferEmissiveIdx].SampleLevel(pointClamp, uv, 0.0);
     float4 gbufferDepth = diffuseMap[gbufferDepthIdx].SampleLevel(pointClamp, uv, 0.0);
@@ -92,7 +90,7 @@ float4 PS_Lighting(VS_OUTPUT output) : SV_Target
     float3 positionWS = gbufferPosition.xyz;
     float3 normal = gbufferNormal.rgb;
     float metallic = gbufferNormal.a;
-    float smoothness = gbufferNormal.a;
+    float smoothness = gbufferPosition.a;
     float3 emissive = gbufferEmissive.rgb;
     float shadow = gbufferEmissive.a;
     
@@ -111,10 +109,11 @@ float4 PS_Lighting(VS_OUTPUT output) : SV_Target
     surfaceData.metallic = metallic;
     surfaceData.smoothness = smoothness;
     surfaceData.specular = 0.5f;
-    surfaceData.emissive = 0.f;
+    surfaceData.emissive = emissive;
     
     float3 finalColor = { 0.f, 0.f, 0.f };
     CBLightsData lightData = lights[idx0];
+    //finalColor = ComputePointLight(lightingData, surfaceData, lightData);
     if (lightData.lightType == 1)
     {
         finalColor = ComputePointLight(lightingData, surfaceData, lightData);

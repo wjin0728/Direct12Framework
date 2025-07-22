@@ -32,7 +32,6 @@ VS_OUTPUT VS_Sprite(VS_INPUT input)
     return output;
 }
 
-//#define TRANSPARENT_CLIP
 float4 PS_Sprite(VS_OUTPUT input) : SV_Target
 {
     float2 uv = input.uv;

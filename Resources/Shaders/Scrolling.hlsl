@@ -1,0 +1,277 @@
+#include"Paramiters.hlsl"
+#include"Utility.hlsl"
+
+cbuffer MaterialData : register(b5)
+{
+    float4 mainColor; 
+    uint albedoTexIdx; 
+    uint normalTexIdx; 
+    uint emissiveTexIdx; 
+    float emissiveStrength; 
+    
+    float2 scrollSpeed; // UV Scroll Speed
+    float metallic;
+    float smoothness;
+    
+    float2 tilling; // UV Tiling
+    float2 offset; // UV Offset
+    
+};
+
+
+//
+//Forward
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+struct VS_INPUT
+{
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float2 uv : TEXCOORD;
+    float4 color : COLOR;
+#ifdef USE_INSTANCING
+    matrix worldMat : TRANSFORM;
+	matrix invWorldMat : INVTRANSFORM;
+	int idx0 : INDEX;
+#endif
+};
+
+struct VS_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float4 positionWS : TEXCOORD0;
+    float4 positionCS : TEXCOORD1;
+    float3 normalWS : TEXCOORD2;
+    float3 tangentWS : TEXCOORD3;
+    float3 bitangentWS : TEXCOORD4;
+    float4 ShadowPosH : TEXCOORD5;
+    float2 uv : TEXCOORD6; // UV ÁÂÇ¥
+};
+
+//Á¤Á¡ ¼ÎÀÌ´õ
+VS_OUTPUT VS_Forward(VS_INPUT input
+#ifdef USE_INSTANCING
+    , uint instanceId : SV_InstanceID
+#endif
+)
+{
+    VS_OUTPUT output = (VS_OUTPUT)0;
+    
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+#else
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+#endif
+    
+    output.positionWS = positionInputs.positionWS;
+    output.position = positionInputs.positionCS;
+    output.positionCS = positionInputs.positionCS;
+    
+    output.normalWS = normalInputs.normalWS;
+    output.tangentWS = normalInputs.tangentWS;
+    output.bitangentWS = normalInputs.bitangentWS;
+    
+    output.ShadowPosH = mul(output.positionWS, shadowViewMat);
+    output.uv = input.uv;
+    
+    return output;
+}
+
+
+//ÇÈ¼¿ ¼ÎÀÌ´õ
+float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
+{
+    float4 color = float4(1.f, 0.f, 0.f, 1.f);
+    float3 worldPosition = input.positionWS.xyz;
+    float3 worldNormal = normalize(input.normalWS);
+    float3 normal = worldNormal;
+    float3 worldTangent = normalize(input.tangentWS);
+    float3 worldBitangent = normalize(input.bitangentWS);
+    float2 uv = input.uv * tilling + offset;
+    
+    #ifdef TRANSPARENT_CLIP
+    clip(color.a - 0.1);
+    #endif
+    
+    float3 camDir = (camPos - input.positionWS.xyz);
+    float distToEye = length(camDir);
+    camDir /= distToEye;
+    
+    uv = (uv + scrollSpeed * totalTime);
+    float4 texColor = diffuseMap[albedoTexIdx].Sample(anisoWrap, uv);
+    texColor.rgb = GammaDecoding(texColor.rgb);
+    
+    float4 normalMapSample = float4(0.f, 0.f, 1.f, 1.f);
+    if (normalTexIdx != -1)
+    {
+        normalMapSample = diffuseMap[normalTexIdx].Sample(anisoWrap, uv);
+        normal = NormalSampleToWorldSpace(normalMapSample.rgb, worldNormal, worldTangent, worldBitangent);
+    }
+    float4 emissiveColor = float4(0.f, 0.f, 0.f, 1.f);
+    if (emissiveTexIdx != -1)
+    {
+        emissiveColor = diffuseMap[emissiveTexIdx].Sample(anisoWrap, uv);
+        emissiveColor.rgb = GammaDecoding(emissiveColor.rgb);
+        //emissiveColor.rgb *= emissiveStrength;
+    }
+    
+    
+    
+    LightingData lightingData = (LightingData)0;
+    lightingData.cameraDirection = camDir;
+    lightingData.normalWS = normal;
+    lightingData.positionWS = worldPosition;
+    lightingData.shadowFactor = CalcShadowFactor(input.ShadowPosH);
+    
+    SurfaceData surfaceData = (SurfaceData)0;
+    surfaceData.albedo = texColor.rgb * mainColor.rgb;
+    surfaceData.metallic = metallic;
+    surfaceData.smoothness = smoothness;
+    surfaceData.specular = 0.5f;
+    surfaceData.emissive = emissiveColor.rgb;
+    
+#ifdef LIGHTING
+    float3 finalColor = CalculatePhongLight(lightingData, surfaceData);
+#else
+    float3 finalColor = color.rgb;
+#endif
+    
+#ifdef FOG
+	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
+    color = lerp(color, gFogColor, fogAmount);
+#endif
+
+    return color;
+}
+
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Shadow Cast
+struct VS_SHADOW_INPUT
+{
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float2 uv : TEXCOORD;
+    float4 color : COLOR;
+};
+
+struct VS_SHADOW_OUTPUT
+{
+    float4 position : SV_POSITION;
+};
+
+VS_SHADOW_OUTPUT VS_Shadow(VS_SHADOW_INPUT input
+)
+{
+    VS_SHADOW_OUTPUT output = (VS_SHADOW_OUTPUT) 0;
+    
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+#else
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+#endif
+    
+    output.position = positionInputs.positionCS;
+    
+    return output;
+}
+
+void PS_Shadow(VS_SHADOW_OUTPUT input)
+{
+   
+}
+
+//
+//G Pass
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+struct PS_GPASS_OUTPUT
+{
+    float4 albedo : SV_Target0;
+    float4 normalWS : SV_Target1;
+    float4 emissive : SV_Target2;
+    float4 positionWS : SV_Target3;
+    float4 depth : SV_Target4;
+};
+
+VS_OUTPUT VS_GPass(VS_INPUT input
+#ifdef USE_INSTANCING
+    , uint instanceId : SV_InstanceID
+#endif
+)
+{
+    VS_OUTPUT output = (VS_OUTPUT) 0;
+    
+#ifdef USE_INSTANCING
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position, input.worldMat);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent, input.invWorldMat);
+#else
+    VertexPositionInputs positionInputs = GetVertexPositionInputs(input.position);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normal, input.tangent);
+#endif
+    
+    output.positionWS = positionInputs.positionWS;
+    output.position = positionInputs.positionCS;
+    output.positionCS = positionInputs.positionCS;
+    
+    output.normalWS = normalInputs.normalWS;
+    output.tangentWS = normalInputs.tangentWS;
+    output.bitangentWS = normalInputs.bitangentWS;
+    
+    output.ShadowPosH = mul(output.positionWS, shadowViewMat);
+    output.uv = input.uv;
+    
+    return output;
+}
+
+PS_GPASS_OUTPUT PS_GPass(VS_OUTPUT input) : SV_Target
+{
+    PS_GPASS_OUTPUT output = (PS_GPASS_OUTPUT) 0;
+    
+    float4 color = mainColor;
+    float3 worldPosition = input.positionWS.xyz;
+    float3 worldNormal = normalize(input.normalWS);
+    float3 normal = worldNormal;
+    float3 worldTangent = normalize(input.tangentWS);
+    float3 worldBitangent = normalize(input.bitangentWS);
+    float2 uv = input.uv * tilling + offset;
+    
+#ifdef TRANSPARENT_CLIP
+    clip(color.a - 0.1);
+#endif
+    
+    uv = (uv - scrollSpeed * totalTime);
+    float4 texColor = diffuseMap[albedoTexIdx].Sample(anisoWrap, uv);
+    texColor.rgb = GammaDecoding(texColor.rgb);
+    
+    float4 normalMapSample = float4(0.f, 0.f, 1.f, 1.f);
+    if (normalTexIdx != -1)
+    {
+        normalMapSample = diffuseMap[normalTexIdx].Sample(anisoWrap, uv);
+        normal = NormalSampleToWorldSpace(normalMapSample.rgb, worldNormal, worldTangent, worldBitangent);
+    }
+    float4 emissiveColor = float4(0.f, 0.f, 0.f, 1.f);
+    if (emissiveTexIdx != -1)
+    {
+        emissiveColor = diffuseMap[emissiveTexIdx].Sample(anisoWrap, uv);
+        emissiveColor.rgb = GammaDecoding(emissiveColor.rgb);
+        emissiveColor.rgb *= emissiveStrength;
+    }
+    
+    float shadowFactor = CalcShadowFactor(input.ShadowPosH);
+    float depth = input.positionCS.z / input.positionCS.w;
+    
+    output.albedo = texColor * color;
+    output.normalWS = float4(normal, 0.f);
+    output.emissive = float4(emissiveColor.rgb, shadowFactor);
+    output.positionWS = float4(worldPosition, 0.f);
+    output.depth = float4(0.f, 0.f, 0.f, input.position.z);
+    
+    return output;
+}

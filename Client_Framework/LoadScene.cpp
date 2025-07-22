@@ -34,8 +34,9 @@ void CLoadScene::Initialize()
 	mLoadingScreen = loadingScreenMoving;
 	AddObjectImmediately(loadingScreenUI);
 
-	FadeOut(0.5f, {0.0,0.0,0.0,1.f});
+	FadeOut(0.4f, {0.0,0.0,0.0,1.f});
 	INPUT.FixMousePosition(true);
+	mIsLoading = true;
 }
 
 
@@ -49,12 +50,15 @@ void CLoadScene::Update()
 {
 	auto& resourceMgr = RESOURCE;
 
-	if (resourceMgr.IsLoadFinished())
+	if (mIsLoading && resourceMgr.IsLoadFinished())
 	{
 		resourceMgr.ProcessGPULoadQueue(3);
 		if (resourceMgr.IsGPULoadQueueEmpty())
 		{
-			mLoadingScreen->SetIsLoading(false);
+			CircularFadeIn(1.f, { 0.0,0.0,0.0,1.f }, []() {
+				INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MAINSTAGE3, false);
+				});
+			mIsLoading = false;
 		}
 
 	}

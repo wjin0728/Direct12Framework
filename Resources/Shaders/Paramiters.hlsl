@@ -80,11 +80,11 @@ struct CBLightsData
 {
     int lightType;
     float3 lColor;
-    float strength;
+    float intensity;
     float range;
     float spotAngle;
     float innerSpotAngle;
-    float3 positionWS;
+    float3 lightPos;
     float padding0;
     float3 directionWS;
     float padding1;

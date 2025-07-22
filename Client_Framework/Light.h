@@ -43,6 +43,9 @@ public:
 public:
 	static void SetVolumes();
 
+	float ComputeEffectiveRadius(float intensity, float threshold = 0.01f,
+		float kC = 1.0f, float kL = 0.7f, float kQ = 1.8f);
+
 	void SetStrength(const float& _strength) { mLightData.strength = _strength; }
 	void SetColor(const Vec3& _color) { mLightData.color = _color; }
 	void SetLightType(LIGHT_TYPE _type) { mLightData.type = (UINT8)_type; }

@@ -548,5 +548,11 @@
     <None Include="..\Resources\Shaders\FadeInOut.hlsl">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="..\Resources\Shaders\FadeInOutCircle.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\Scrolling.hlsl">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

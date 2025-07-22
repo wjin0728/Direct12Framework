@@ -182,7 +182,6 @@ void CRenderManager::RenderLightingPass()
 		directionalLight->Render(renderTarget);
 	}
 	//Point Light
-	CMDLIST->OMSetStencilRef(0);
 	for (const auto& pointLight : pointLights) {
 		pointLight->Render(renderTarget);
 	}
@@ -191,7 +190,6 @@ void CRenderManager::RenderLightingPass()
 		spotLight->Render(renderTarget);
 	}
 	if (camera) {
-		RenderLayer(FORWARD, RENDER_LAYER::Opaque, camera);
 		RenderLayer(FORWARD, RENDER_LAYER::Transparent, camera);
 		INSTANCE(CParticleManager).Render();
 	}
@@ -255,6 +253,27 @@ void CRenderManager::RenderFadePass()
 	CMDLIST->RSSetViewports(1, &mViewport);
 	CMDLIST->RSSetScissorRects(1, &mScissorRect);
 	auto fadeShader = RESOURCE.Get<CShader>("FadeInOut");
+	if (fadeShader) {
+		fadeShader->SetPipelineState(CMDLIST);
+		CRenderer::RenderFullscreen();
+	}
+	renderTarget->ChangeTargetToResource(backBufferIdx);
+}
+
+void CRenderManager::RenderCircularFadePass()
+{
+	auto fadePassBuffer = CONSTANTBUFFER((UINT)CONSTANT_BUFFER_TYPE::PASS);
+	fadePassBuffer->BindToShader(0);
+	auto renderTarget = RT_GROUP(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN);
+	UINT backBufferIdx = INSTANCE(CDX12Manager).GetCurrBackBufferIdx();
+	renderTarget->ChangeResourceToTarget(backBufferIdx);
+	renderTarget->SetRenderTarget(backBufferIdx);
+	Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
+	D3D12_VIEWPORT mViewport = { 0.f,0.f,rtSize.x, rtSize.y };
+	D3D12_RECT mScissorRect = { 0.f,0.f,rtSize.x, rtSize.y };
+	CMDLIST->RSSetViewports(1, &mViewport);
+	CMDLIST->RSSetScissorRects(1, &mScissorRect);
+	auto fadeShader = RESOURCE.Get<CShader>("FadeInOutCircle");
 	if (fadeShader) {
 		fadeShader->SetPipelineState(CMDLIST);
 		CRenderer::RenderFullscreen();

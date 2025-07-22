@@ -6,7 +6,7 @@ class CLoadScene : public CScene
 {
 private:
 	std::shared_ptr<class CLoadingScreen> mLoadingScreen{ nullptr };
-
+	bool mIsLoading{ false };
 public:
 	CLoadScene();
 	~CLoadScene() = default;

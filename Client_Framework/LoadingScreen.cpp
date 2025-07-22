@@ -32,16 +32,6 @@ void CLoadingScreen::Update()
 		renderer->SetTextureIdx(mLoadingScreenTextureIdx[mLoadingScreenIndex]);
 		mTime = 0.f;
 	}
-	if (!mIsLoading) {
-		if (mFadeOutTime <= 0.f) {
-			mFadeOutTime = 0.f;
-			INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MAINSTAGE1, false);
-		}
-		mFadeOutTime -= TIMER.GetDeltaTime();
-		mFadeOutTime = std::max<float>(mFadeOutTime, 0.f);
-		renderer->SetAlpha(mFadeOutTime);
-
-	}
 }
 
 void CLoadingScreen::LateUpdate()

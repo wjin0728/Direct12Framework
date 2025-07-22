@@ -7,7 +7,7 @@
 
 void CParticleManager::Initialize(UINT poolSize)
 {
-	UINT particleCount = 100; 
+	UINT particleCount = 500; 
 	mParticleVertexBuffer = std::make_unique<CStructedBuffer>();
 	mParticleVertexBuffer->Initialize(7, sizeof(ParticleVertex), poolSize * particleCount, nullptr);
 
@@ -80,7 +80,7 @@ void CParticleManager::LoadParticleProperties(const std::string& name, const std
 void CParticleManager::AddParticleProperties(const std::string& name, const ParticleProperties& properties)
 {
 	if (mParticlePropertiesMap.find(name) != mParticlePropertiesMap.end()) {
-		throw std::runtime_error("Particle properties with name '" + name + "' already exists.");
+		return;
 	}
 	mParticlePropertiesMap[name] = std::make_unique<ParticleProperties>(properties);
 }

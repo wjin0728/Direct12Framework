@@ -300,13 +300,14 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 		break;
 	case PASS_TYPE::STENCIL:
 		d3dDepthStencilDesc.DepthEnable = TRUE;
+		d3dDepthStencilDesc.StencilEnable = TRUE;
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 #ifdef REVERSE_Z
-		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
 #else // REVERSE_Z
 		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
 #endif // REVERSE_Z
 		d3dDepthStencilDesc.StencilWriteMask = 0xFF;
-		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 		d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
 		d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_DECR_SAT;
 		d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
@@ -323,9 +324,12 @@ D3D12_DEPTH_STENCIL_DESC CShader::InitDepthStencilState()
 #else // REVERSE_Z
 		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
 #endif // REVERSE_Z
-		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-		d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NOT_EQUAL;
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;	
 		d3dDepthStencilDesc.StencilEnable = TRUE;
+		d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NOT_EQUAL;
+		d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
 
 		d3dDepthStencilDesc.StencilReadMask = 0xFF;
 		//d3dDepthStencilDesc.StencilWriteMask = 0xFF;
@@ -445,7 +449,7 @@ bool CShader::Initialize(const std::string& shaderName, const ShaderInfo& info, 
 		pipelineStateDesc.NumRenderTargets = 0;
 		pipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
 
-		pipelineStateDesc.RasterizerState.DepthBias = 6000.f;
+		pipelineStateDesc.RasterizerState.DepthBias = 5000.f;
 		pipelineStateDesc.RasterizerState.DepthBiasClamp = 0.0f;
 		pipelineStateDesc.RasterizerState.SlopeScaledDepthBias = 2.0f;
 		break;

@@ -308,7 +308,7 @@ PS_GPASS_OUTPUT PS_GPass(DS_OUTPUT input) : SV_Target
     for (int i = 0; i < splatNum; i++)
     {
         SplatData splat = splats[i];
-        float4 weight = diffuseMap[alphaMapIdx[i].x].Sample(anisoClamp, uv);
+        float4 weight = diffuseMap[alphaMapIdx[i].x].SampleLevel(anisoClamp, uv, 0);
         
         color.rgb += diffuseMap[splat.data[0].x].Sample(anisoWrap, diffuseUV).rgb * weight.r;
         color.rgb += diffuseMap[splat.data[1].x].Sample(anisoWrap, diffuseUV).rgb * weight.g;
