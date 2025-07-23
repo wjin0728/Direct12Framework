@@ -128,6 +128,7 @@ void CUIRenderer::SetTexture(const std::string& name)
 		return;
 	}
 	mUIData.textureIdx = srvIndex;
+	mUIDirtyFrame = FRAME_RESOURCE_COUNT;
 }
 
 void CUIRenderer::SetTexture(const std::shared_ptr<class CTexture>& texture)

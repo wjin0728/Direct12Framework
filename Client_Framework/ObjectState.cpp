@@ -395,6 +395,7 @@ void CWarriorState::OnExitState(UINT8 state)
 
 void CMageState::Awake()
 {
+
 }
 
 void CMageState::Start()

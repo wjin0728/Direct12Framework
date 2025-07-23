@@ -121,6 +121,9 @@ void CPlayerController::InteractWithItem()
 	float sqMaxInteractRange = maxInteractRange * maxInteractRange;
 	float minDistance = FLT_MAX;
 
+	if (mTargetItem.expired()) {
+		owner->TriggerEvent("OnItemTargeted", { false, Vec2(0.f, 0.f) });
+	}
 	auto prevTargetItem = mTargetItem.lock();
 	mTargetItem.reset();
 	for (const auto& item : items) {
