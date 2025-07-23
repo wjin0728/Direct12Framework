@@ -67,8 +67,14 @@ void CParticleAttach::Play()
 {
 	InitializeParticleEmitter();
 
-	if (mParticleEmitter && !mParticleEmitter->mIsPlaying) {
+	if (mParticleEmitter) {
+		if (mParticleEmitter->mIsPlaying && mLoop) return; // If already playing and looping, do nothing
+		if (mParticleEmitter->mIsPlaying && !mLoop) {
+			mParticleEmitter->Stop(); 
+		}
 		mParticleEmitter->mEmitterTransform = GetTransform()->GetWorldMat();
+
+		
 		INSTANCE(CParticleManager).PlayParticleEmitter(mParticleEmitter);
 		mParticleEmitter->mIsLooping = mLoop;
 	}

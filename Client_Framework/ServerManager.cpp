@@ -453,6 +453,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto projectileObj = CGameObject::Instantiate(projectile);
 		projectileObj->SetTag("Projectile");
 		projectileObj->SetRenderLayer(RENDER_LAYER::Opaque);
+		if(objName[(int)packet->projectile_type] == "MagicBall") 
+			projectileObj->SetRenderLayer(RENDER_LAYER::Transparent);
 		if (packet->user_friendly)
 			projectileObj->SetObjectType(OBJECT_TYPE::PLAYER_PROJECTILE);
 		else

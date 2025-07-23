@@ -19,6 +19,7 @@ public:
 	bool mIsDead = false;
 	bool mIsSpawning = false;
 	bool mIsSpawningFinished = false;
+	bool mIsInvisible = false;
     CEntityState() = default;
 	CEntityState(UINT8 currentState) : currentState(currentState) {}
     ~CEntityState() = default;

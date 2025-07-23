@@ -89,11 +89,11 @@ void CAnimationTrack::HandleCallback(std::shared_ptr<CAnimationEventHandler>& re
 {
 	for (auto& key : mEventKeys) {
 		if (key->mTime < mPosition && key->mEnable) {
-			auto event = registry->GetEvent(key->mName);
-			if (event) {
-				event(mPosition);
-				key->mEnable = false;
+			auto event = registry->GetEvents(key->mName);
+			for(auto& e : event) {
+				e(mPosition);
 			}
+			key->mEnable = false; 
 		}
 	}
 }

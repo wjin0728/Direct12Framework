@@ -51,8 +51,12 @@ void CEnemyState::Update()
 	case MONSTER_STATE::PROJECTILE_ATTACK:
 		break;
 	case MONSTER_STATE::GETHIT:
-		transform->SetHitFactor(1.f - controller->mTrack->mTrackProgress);
+	{
+		float hitFactor = 1.f - (controller->mTrack->mTrackProgress * 3);
+		if (hitFactor < 0.f) hitFactor = 0.f;
+		GetTransform()->SetHitFactor(hitFactor);
 		break;
+	}
 	case MONSTER_STATE::DEATH:
 		break;
 	case MONSTER_STATE::end:

@@ -90,7 +90,7 @@ class CMageState : public CPlayerStateMachine
 {
 private:
 public:
-    std::weak_ptr<class CTransform> mAttackSocket;
+	std::weak_ptr<class CParticleAttach> mStaffParticle;
 public:
 	CMageState() : CPlayerStateMachine((uint8_t)PLAYER_CLASS::MAGE) {}
 	virtual ~CMageState() = default;

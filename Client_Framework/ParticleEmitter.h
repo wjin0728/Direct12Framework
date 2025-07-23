@@ -651,6 +651,7 @@ public:
 	void Pause();
 	void Resume();
 	void Reset();
+	void Stop(bool reset = true);
 
 	bool IsEnded() const {
 		return !mIsLooping && (mTotalTime >= mParticleProperties->duration) && (mActiveParticleCount == 0);

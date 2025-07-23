@@ -35,17 +35,16 @@ public:
     using Event = std::function<void(float)>;
 
     void Register(const std::string& name, Event event) {
-        mEvents[name] = std::move(event);
+        mEvents[name].emplace_back(event);
     }
 
-    Event GetEvent(const std::string& name) const {
+    std::vector<Event> GetEvents(const std::string& name) const {
         auto it = mEvents.find(name);
         if (it != mEvents.end()) return it->second;
-        return nullptr;
     }
 
 private:
-    std::unordered_map<std::string, Event> mEvents;
+    std::unordered_map < std::string, std::vector<Event>> mEvents;
 };
 
 class CAnimationSet

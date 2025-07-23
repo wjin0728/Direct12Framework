@@ -274,6 +274,23 @@ void CParticleEmitter::Reset()
 	
 }
 
+void CParticleEmitter::Stop(bool reset)
+{
+	mIsActive = false;
+	mIsPlaying = false;
+	mIsPaused = false;
+	mTimeSinceLastEmit = 0.f;
+	mTotalTime = 0.f;
+	if (reset) {
+		for (auto& particle : mParticles) {
+			particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
+			particle.Age = 1.f;
+		}
+	}
+	mLastEmitPosW = Vec3(0.f, 0.f, 0.f);
+	mEmitterTransform = Matrix::Identity;
+}
+
 void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, ParticleProperties& properties)
 {
 	using namespace BinaryReader;

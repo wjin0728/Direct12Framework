@@ -204,7 +204,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		if (0 == c_id)
-			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
+			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::MAGE);
 		else if (1 == c_id)
 			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::ARCHER);
 		else if (2 == c_id)
@@ -555,7 +555,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			direction.x = sin(player._look_dir.y * degToRad); // 1.0
 			direction.y = 0.0f;
 			direction.z = cos(player._look_dir.y * degToRad); // 0.0
-			proj._velocity = direction;
+			proj._velocity = direction / 4.f;
 
 			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
 			for (auto& cl : clients[ServerNumber]) {

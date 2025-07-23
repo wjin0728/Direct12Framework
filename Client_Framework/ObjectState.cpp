@@ -9,6 +9,7 @@
 #include"Transform.h"
 #include"ResourceManager.h"
 #include"ParticleManager.h"
+#include"ParticleAttach.h"
 
 void CPlayerStateMachine::Awake()
 {
@@ -67,6 +68,29 @@ void CPlayerStateMachine::Update()
 		}
 	}
 
+	switch ((PLAYER_STATE)currentState) {
+	case PLAYER_STATE::JUMP:
+	case PLAYER_STATE::FALLING:
+	case PLAYER_STATE::GATHERING:
+	case PLAYER_STATE::GETHIT:
+	{
+		float hitFactor = 1.f - (controller->mTrack->mTrackProgress * 4);
+		if (hitFactor < 0.f) hitFactor = 0.f;
+		GetTransform()->SetHitFactor(hitFactor);
+	}
+		break;
+	case PLAYER_STATE::ATTACK:
+	case PLAYER_STATE::SKILL:
+	case PLAYER_STATE::ULTIMATE:
+		break;
+	case PLAYER_STATE::DEATH:
+		break;
+	case PLAYER_STATE::RUNATTACK:
+		break;
+	default:
+		break;
+	}
+
 	if (mShieldDuration > 0) {
 		mShieldDuration -= DELTA_TIME;
 		if (mShieldDuration <= 0) {
@@ -98,8 +122,13 @@ void CPlayerStateMachine::OnEnterState(UINT8 state)
 	case PLAYER_STATE::RUNATTACK:
 		break;
 	case PLAYER_STATE::GETHIT:
+		mIsHit = true;
+		mIsInvisible = true;
+		GetTransform()->SetHitFactor(1.f);
 		break;
 	case PLAYER_STATE::DEATH:
+		mIsHit = false;
+		mIsDead = true;
 		break;
 	case PLAYER_STATE::JUMP:
 		break;
@@ -131,6 +160,9 @@ void CPlayerStateMachine::OnExitState(UINT8 state)
 	case PLAYER_STATE::RUNATTACK:
 		break;
 	case PLAYER_STATE::GETHIT:
+		mIsInvisible = false;
+		GetTransform()->SetHitFactor(0.f);
+		mIsHit = false;
 		break;
 	case PLAYER_STATE::DEATH:
 		break;
@@ -395,21 +427,153 @@ void CWarriorState::OnExitState(UINT8 state)
 
 void CMageState::Awake()
 {
-
+	CPlayerStateMachine::Awake();
+	mClass = PLAYER_CLASS::MAGE;
+	mMaxHealth = MAX_HP_ARCHER_MAGE;
+	mHealth = mMaxHealth;
+	mShieldHealth = 0;
+	mShieldDuration = 0.f;
+	mIsDead = false;
+	mIsHit = false;
 }
 
 void CMageState::Start()
 {
+	CPlayerStateMachine::Start();
+	mStaffParticle = owner->GetComponentFromHierarchy<CParticleAttach>();
+
+	auto func0 = [this](float time) {
+		if (mStaffParticle.expired()) {
+			return;
+		}
+		auto staff = mStaffParticle.lock();
+		if (staff) {
+			staff->Play();
+		}
+		};
+
+	auto controller = mAnimationController.lock();
+
+	/*controller->AddAnimationEvent("Attack", "Attack", func0);
+	controller->AddAnimationEvent("RunAttack", "Attack", func0);*/
+	if (!controller) {
+		return;
+	}
+	if (controller->mTrack->mType == ANIMATION_TYPE::END) {
+		switch ((PLAYER_STATE)currentState) {
+		case PLAYER_STATE::JUMP:
+		case PLAYER_STATE::FALLING:
+		case PLAYER_STATE::GATHERING:
+		case PLAYER_STATE::GETHIT:
+		case PLAYER_STATE::ATTACK:
+		case PLAYER_STATE::SKILL:
+		case PLAYER_STATE::ULTIMATE:
+			break;
+		case PLAYER_STATE::DEATH:
+			break;
+		case PLAYER_STATE::RUNATTACK:
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void CMageState::Update()
 {
+	CPlayerStateMachine::Update();
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	if (controller->mTrack->mType == ANIMATION_TYPE::END) {
+		switch ((PLAYER_STATE)currentState) {
+		case PLAYER_STATE::JUMP:
+		case PLAYER_STATE::FALLING:
+		case PLAYER_STATE::GATHERING:
+		case PLAYER_STATE::GETHIT:
+		case PLAYER_STATE::ATTACK:
+		case PLAYER_STATE::SKILL:
+		case PLAYER_STATE::ULTIMATE:
+			break;
+		case PLAYER_STATE::DEATH:
+			break;
+		case PLAYER_STATE::RUNATTACK:
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void CMageState::OnEnterState(UINT8 state)
 {
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	controller->SetTrackAnimationSet((int)state);
+	auto cutscene = owner->GetComponentFromHierarchy<CCutScene>();
+	switch ((PLAYER_STATE)state) {
+	case PLAYER_STATE::IDLE:
+		break;
+	case PLAYER_STATE::RUN:
+		break;
+	case PLAYER_STATE::ATTACK:
+		break;
+	case PLAYER_STATE::RUNATTACK:
+		break;
+	case PLAYER_STATE::GETHIT:
+		mIsHit = true;
+		mIsInvisible = true;
+		GetTransform()->SetHitFactor(1.f);
+		break;
+	case PLAYER_STATE::DEATH:
+		mIsHit = false;
+		mIsDead = true;
+		break;
+	case PLAYER_STATE::JUMP:
+		break;
+	case PLAYER_STATE::SKILL:
+		if (cutscene && !cutscene->GetEnable())
+			cutscene->PlayCutScene();
+		break;
+	case PLAYER_STATE::ULTIMATE:
+		if (cutscene && !cutscene->GetEnable())
+			cutscene->PlayCutScene();
+		break;
+	default:
+		break;
+	}
 }
 
 void CMageState::OnExitState(UINT8 state)
 {
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	switch ((PLAYER_STATE)state) {
+	case PLAYER_STATE::IDLE:
+		break;
+	case PLAYER_STATE::RUN:
+		break;
+	case PLAYER_STATE::ATTACK:
+		break;
+	case PLAYER_STATE::RUNATTACK:
+		break;
+	case PLAYER_STATE::GETHIT:
+		mIsInvisible = false;
+		GetTransform()->SetHitFactor(0.f);
+		mIsHit = false;
+		break;
+	case PLAYER_STATE::DEATH:
+		break;
+	case PLAYER_STATE::JUMP:
+		break;
+	case PLAYER_STATE::SKILL:
+		break;
+	default:
+		break;
+	}
 }
