@@ -11,9 +11,8 @@ public:
 	OVER_PLUS accept_over;
 	std::vector<std::thread> workerThreads; 
 
-	array<unordered_map<int, SESSION>, 6> clients;
-
-	int ServerNumber = 0; // 임시로 쓸 서버 번호
+	unordered_map<int, SESSION> clients;
+	char Room_Cnt[6]{ 0, 0, 0, 0, 0, 0 };
 
 	GameManager();
 	~GameManager();

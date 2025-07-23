@@ -2,9 +2,8 @@
 #define SESSION_H
 
 #include "Lobbystdafx.h"
-#include "OVER_PLUS.h"
 #include "PlayerCharacter.h"
-
+#include "OVER_PLUS.h"
 
 class SESSION
 {
@@ -29,7 +28,8 @@ public:
 	void do_send(void* packet);
 
 	void send_login_info_packet();
-	void send_add_player_packet(SESSION* client);
+	void send_room_player_count_packet(char* room_cnt);
+	void send_lobby_server_out_packet();
 };
 
 #endif

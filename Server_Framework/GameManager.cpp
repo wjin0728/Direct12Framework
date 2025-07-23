@@ -197,8 +197,8 @@ int GameManager::Get_new_Client_id()
 void GameManager::Process_packet(int c_id, char* packet)
 {
 	switch (packet[2]) {
-	case CS_LOGIN: {
-		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet); {
+	case CS_GAME_SERVER_LOGIN: {
+		CS_GAME_SERVER_LOGIN_PACKET* p = reinterpret_cast<CS_GAME_SERVER_LOGIN_PACKET*>(packet); {
 			lock_guard<mutex> ll{ clients[ServerNumber][c_id]._s_lock };
 			clients[ServerNumber][c_id]._state = ST_INGAME;
 		}
@@ -210,8 +210,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 		else if (2 == c_id)
 			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::MAGE);
 
+		//clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)p->player_class);
+
 		clients[ServerNumber][c_id]._player._pos = spawn_points[(int)scene_type];
-		clients[ServerNumber][c_id].send_login_info_packet();
 		cout << "login : " << c_id << endl;
 
 		// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송

@@ -5,35 +5,35 @@
 #include "GameObject.h"
 #include "FollowTarget.h"
 #include "Transform.h"
-#include"Camera.h"
-#include"PlayerController.h"
-#include"ThirdPersonCamera.h"
+#include "Camera.h"
+#include "PlayerController.h"
+#include "ThirdPersonCamera.h"
 #include "DX12Manager.h"
 #include "ResourceManager.h"
-#include"ItemMovement.h"
+#include "ItemMovement.h"
 #include "ObjectState.h"
 #include "EnemyState.h"
 #include "CutScene.h"
-#include"ParticleAttach.h"
-#include"ParticleManager.h"
+#include "ParticleAttach.h"
+#include "ParticleManager.h"
 
 void ServerManager::Initialize()
 {
 	// ------- ���� ���̱� -------------------
 	std::wcout.imbue(std::locale("korean"));
 
-	WSADATA WSAData{};
-	int err = WSAStartup(MAKEWORD(2, 2), &WSAData);
-	if (0 != err) {
-		print_error("WSAStartup", WSAGetLastError());
-	}
+	//WSADATA WSAData{};
+	//int err = WSAStartup(MAKEWORD(2, 2), &WSAData);
+	//if (0 != err) {
+	//	print_error("WSAStartup", WSAGetLastError());
+	//}
 
-	server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
-	if (server_socket == INVALID_SOCKET) {
-		std::cerr << "WSASocket failed: " << WSAGetLastError() << "\n";
-		WSACleanup();
-		exit(1);
-	}
+	//server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
+	//if (server_socket == INVALID_SOCKET) {
+	//	std::cerr << "WSASocket failed: " << WSAGetLastError() << "\n";
+	//	WSACleanup();
+	//	exit(1);
+	//}
 
 	InitPlayerAndCamera();
 }
@@ -57,19 +57,38 @@ void ServerManager::Destroy()
 	mEnemies.clear();
 }
 
-void ServerManager::Connect()
+void ServerManager::Connect(int port_num)
 {
+	if (server_socket != INVALID_SOCKET) {
+		closesocket(server_socket);
+		server_socket = INVALID_SOCKET;
+	}
+
+	WSADATA WSAData{};
+	int err = WSAStartup(MAKEWORD(2, 2), &WSAData);
+	if (0 != err) {
+		print_error("WSAStartup", WSAGetLastError());
+	}
+
+	server_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, nullptr, 0, WSA_FLAG_OVERLAPPED);
+	if (server_socket == INVALID_SOCKET) {
+		std::cerr << "WSASocket failed: " << WSAGetLastError() << "\n";
+		WSACleanup();
+		exit(1);
+	}
+	std::cout << "Socket created: " << server_socket << "\n";
+
 	SOCKADDR_IN server_addr;
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORT_NUM);
+	server_addr.sin_port = htons(port_num);
 
 	//cout << "������ ������ �ּҸ� �Է��ϼ��� : ";
 	//cin >> SERVER_ADDR;
 
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 
-	std::cout << "Connecting to " << reinterpret_cast<sockaddr*>(&server_addr) << ":" << PORT_NUM << "\n";
-	int err = connect(server_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	std::cout << "Connecting to " << reinterpret_cast<sockaddr*>(&server_addr) << ":" << port_num << "\n";
+	err = connect(server_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 	if (0 != err) {
 		print_error("connect", WSAGetLastError());
 	}
@@ -242,7 +261,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		clientID = packet->id;
 		cout << clientID << endl;
-		mIsLoggedIn = true;
+		mIsLoggedIn = true; 
 		break;
 	}
 	case SC_LOGIN_FAIL: {
@@ -276,9 +295,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		CGameObject::Instantiate(obj, player->GetTransform());
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
-		
+
 		std::shared_ptr<CPlayerStateMachine> stateMachine{};
-		if(packet->player_class == (UINT8)PLAYER_CLASS::ARCHER) {
+		if (packet->player_class == (UINT8)PLAYER_CLASS::ARCHER) {
 			stateMachine = player->AddComponent<CArcherState>();
 		}
 		else if (packet->player_class == (UINT8)PLAYER_CLASS::FIGHTER) {
@@ -291,7 +310,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "Unknown player class: " << (int)packet->player_class << std::endl;
 			return;
 		}
-		
+
 		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 		player->SetStateMachine(stateMachine);
 
@@ -320,8 +339,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (sceneType == INSTANCE(CSceneManager).GetCurSceneType()) break; // 이미 같은 씬이면 리턴
-		
-		scene->FadeIn(0.5f, {0.f,0.f,0.f,0.f}, [sceneType]() {
+
+		scene->FadeIn(0.5f, { 0.f,0.f,0.f,0.f }, [sceneType]() {
 			INSTANCE(CSceneManager).RequestSceneChange(sceneType);
 			});
 
@@ -350,7 +369,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			player->GetTransform()->SetLocalPosition({ packet->x[i], packet->y[i], packet->z[i] });
 			player->GetTransform()->SetLocalRotationY(packet->look_y[i]);
 			auto playerState = player->GetStateMachine();
-			
+
 			if (playerState && playerState->GetState() != packet->state[i])
 				playerState->SetState(packet->state[i]);
 		}
@@ -409,7 +428,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		switch ((ITEM_TYPE)packet->skill_type)
 		{
 		case ITEM_TYPE::FIRE_ENCHANT: {
-		break;
+			break;
 		}
 		case ITEM_TYPE::FIRE_EXPLOSION: {
 			break;
@@ -421,7 +440,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			if (auto state = std::dynamic_pointer_cast<CPlayerStateMachine>(mPlayer->GetStateMachine())) {
 				state->ActivateShield(true);
 			}
-			for(auto& pair : mOtherPlayers) {
+			for (auto& pair : mOtherPlayers) {
 				if (auto state = std::dynamic_pointer_cast<CPlayerStateMachine>(pair.second->GetStateMachine())) {
 					state->ActivateShield(true);
 				}
@@ -442,7 +461,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 
-		std::string objName[(int)PROJECTILE_TYPE::PROJECTILE_END] 
+		std::string objName[(int)PROJECTILE_TYPE::PROJECTILE_END]
 			= { "Arrow", "FireBall", "IceBall", "GrassBall", "MagicBall" };
 		auto projectile = RESOURCE.GetPrefab(objName[(int)packet->projectile_type]);
 		if (!projectile) {
@@ -468,8 +487,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_PROJECTILE_POS: {
 		SC_PROJECTILE_POS_PACKET* packet = reinterpret_cast<SC_PROJECTILE_POS_PACKET*>(packet_ptr);
-		
-		if(mProjectiles.contains(packet->projectile_id)) {
+
+		if (mProjectiles.contains(packet->projectile_id)) {
 			//Quaternion local_rot = Quaternion::LookRotation(Vec3(packet->dir_x, packet->dir_y, packet->dir_z));
 			//mProjectiles[packet->projectile_id]->GetTransform()->SetLocalRotation(local_rot);
 			mProjectiles[packet->projectile_id]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
@@ -529,15 +548,15 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			mEnemies[packet->monsterId]->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 
 			Quaternion local_rot = Quaternion::LookRotation(Vec3(packet->look_x, packet->look_y, packet->look_z));
-			mEnemies[packet->monsterId]->GetTransform()->SetLocalRotation(local_rot); 
+			mEnemies[packet->monsterId]->GetTransform()->SetLocalRotation(local_rot);
 			// cout << "몬스터 look : " << packet->look_x << ", " << packet->look_y << ", " << packet->look_z << endl;
-			
-			auto monsterState =  mEnemies[packet->monsterId]->GetStateMachine();
+
+			auto monsterState = mEnemies[packet->monsterId]->GetStateMachine();
 			//cout << "Monster State : " << (int)monsterState->GetState() << endl;
 
-			if (monsterState && monsterState->GetState() != packet->monster_state){
+			if (monsterState && monsterState->GetState() != packet->monster_state) {
 				monsterState->SetState(packet->monster_state);
-				cout << "몬스터 상태" << monsterState->GetState() << endl;	
+				cout << "몬스터 상태" << monsterState->GetState() << endl;
 			}
 		}
 		break;
@@ -595,8 +614,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 				}
 			}
 		}
+		break;
 	}
-			  break;
 	case SC_MAKE_POTAL: {
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (!scene) {
@@ -612,6 +631,25 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 			scene->AddObject(portalObject);
 		}
+		break;
+	}
+	case SC_LOBBY_ROOM_PLAYER_COUNT: {
+		SC_LOBBY_ROOM_PLAYER_COUNT_PACKET* packet = reinterpret_cast<SC_LOBBY_ROOM_PLAYER_COUNT_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
+
+		// 방 인원수 ui에 적용하는 부분
+		break;
+	}
+	case SC_LOBBY_SERVER_OUT: {
+		Connect(PORT_NUM);
+
+		// 여기 clientID는 선택 직업 자리임
+		// 근데 직업 선택하는거 넣으면 여기는 아예 뺄 것
+		send_cs_game_server_login_packet(clientID);
 		break;
 	}
 	default:

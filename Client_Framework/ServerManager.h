@@ -34,7 +34,7 @@ public:
 public:
 	void Initialize();
 	void Destroy();
-	void Connect();
+	void Connect(int port_num);
 	void Client_Login();
 	bool InitPlayerAndCamera();
 	void RegisterPlayerInScene(class CScene* scene);
@@ -105,6 +105,28 @@ public:
 		p.type = CS_CHANGE_STATE;
 		p.id = clientID;
 		p.state = state;
+		Send_Packet(&p);
+	}
+	void send_cs_game_server_login_packet(uint8_t player_class) {
+		CS_GAME_SERVER_LOGIN_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_GAME_SERVER_LOGIN;
+		p.id = clientID;
+		p.player_class = player_class;
+		Send_Packet(&p);
+	}
+	void send_cs_select_class_packet(uint8_t player_class) {
+		CS_SELECT_CLASS_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_SELECT_CLASS;
+		p.player_class = player_class;
+		Send_Packet(&p);
+	}
+	void send_cs_click_button_packet(uint8_t button) {
+		CS_CLICK_BUTTON_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_CLICK_BUTTON;
+		p.button_type = button;
 		Send_Packet(&p);
 	}
 };

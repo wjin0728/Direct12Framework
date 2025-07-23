@@ -155,3 +155,16 @@ enum class MONSTER_STATE : UINT8
 
 	end
 };
+
+enum class BUTTON_TYPE : UINT8
+{
+	ROOM1,
+	ROOM2,
+	ROOM3,
+	ROOM4,
+	ROOM5,
+	ROOM6,
+	MAIN_UI_GAME_START,
+
+	BUTTON_END
+};

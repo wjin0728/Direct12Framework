@@ -128,12 +128,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="OVER_PLUS.cpp" />
     <ClCompile Include="PlayerCharacter.cpp" />
     <ClCompile Include="SESSION.cpp" />
     <ClCompile Include="Tem_server.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="OVER_PLUS.h" />
     <ClInclude Include="PlayerCharacter.h" />
     <ClInclude Include="SESSION.h" />
     <ClInclude Include="Lobbystdafx.h" />

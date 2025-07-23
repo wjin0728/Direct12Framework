@@ -1,12 +1,12 @@
 #pragma once
 
+constexpr int LOBBY_PORT_NUM = 3999;
 constexpr int PORT_NUM = 4000;
 constexpr int NAME_SIZE = 20;
 constexpr int CHAT_SIZE = 300;
 
 constexpr int MAX_USER = 3;
 constexpr int MAX_ITEM = 5;
-
 
 
 constexpr int MAX_HP_FIGHTER = 1500;
@@ -27,6 +27,9 @@ constexpr char CS_000 = 7;
 constexpr char CS_CHANGE_SCENE = 8;
 constexpr char CS_CHANGE_STATE = 9;
 constexpr char CS_ATTACK = 10;
+constexpr char CS_GAME_SERVER_LOGIN = 11;
+constexpr char CS_SELECT_CLASS = 12;
+constexpr char CS_CLICK_BUTTON = 13;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -52,6 +55,8 @@ constexpr char SC_ADD_EFFECT = 22;
 constexpr char SC_REMOVE_WATERSHIELD = 23;
 constexpr char SC_HP = 24;
 constexpr char SC_MAKE_POTAL = 25;
+constexpr char SC_LOBBY_ROOM_PLAYER_COUNT = 26;
+constexpr char SC_LOBBY_SERVER_OUT = 27;
 
 
 #pragma pack (push, 1)
@@ -66,6 +71,11 @@ struct PACKET {
 
 struct CS_LOGIN_PACKET : PACKET {
 	char			name[NAME_SIZE];
+};
+
+struct CS_GAME_SERVER_LOGIN_PACKET : PACKET {
+	short 			id;
+	uint8_t			player_class;
 };
 
 struct CS_CHAT_PACKET : PACKET {
@@ -120,6 +130,16 @@ struct CS_CHANGE_STATE_PACKET : PACKET {
 
 struct CS_ATTACK_PACKET : PACKET {
 	short 			id;
+};
+
+struct CS_SELECT_CLASS_PACKET : PACKET {
+	short 			id; 
+	uint8_t			player_class; 
+};
+
+struct CS_CLICK_BUTTON_PACKET : PACKET {
+	short 			id;
+	uint8_t			button_type; // 0: ready, 1: cancel
 };
 
 // ----------------------------------------------------------------------------------
@@ -244,5 +264,11 @@ struct SC_HP_PACKET : PACKET {
 };
 
 struct SC_MAKE_POTAL_PACKET : PACKET {};
+
+struct SC_LOBBY_ROOM_PLAYER_COUNT_PACKET : PACKET {
+	char room_cnt[6]{ 0, 0, 0, 0, 0, 0 };
+};
+
+struct SC_LOBBY_SERVER_OUT_PACKET : PACKET { };
 
 #pragma pack (pop)

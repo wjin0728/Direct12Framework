@@ -176,7 +176,7 @@ void CPlayerController::OnKeyEvents()
 
 	switch (currentState)
 	{
-	case PLAYER_STATE::IDLE:
+	case PLAYER_STATE::IDLE: {
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ATTACK);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
@@ -224,7 +224,7 @@ void CPlayerController::OnKeyEvents()
 		if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
 		if (INPUT.IsKeyPress(KEY_TYPE::A)) dir |= 0x04;
 
-		if(dir != 0) {
+		if (dir != 0) {
 			INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
 			mStateMachine->SetState((UINT8)PLAYER_STATE::RUN);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
@@ -232,12 +232,13 @@ void CPlayerController::OnKeyEvents()
 			return;
 		}
 		break;
-	case PLAYER_STATE::RUN:
+	}
+	case PLAYER_STATE::RUN: {
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
 			//INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
 			mStateMachine->SetState((UINT8)PLAYER_STATE::RUNATTACK);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUNATTACK);
-			
+
 			if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 			if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
 			if (INPUT.IsKeyPress(KEY_TYPE::D)) dir |= 0x01;
@@ -300,6 +301,7 @@ void CPlayerController::OnKeyEvents()
 		}
 		INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
 		break;
+	}
 	case PLAYER_STATE::ATTACK:
 		break;
 	case PLAYER_STATE::RUNATTACK:
