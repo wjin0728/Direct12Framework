@@ -115,6 +115,7 @@ void GameManager::Worker_thread()
 			ZeroMemory(&accept_over._over, sizeof(accept_over._over));
 			int addr_size = sizeof(SOCKADDR_IN);
 			AcceptEx(server_socket, client_socket, accept_over._send_buf, 0, addr_size + 16, addr_size + 16, 0, &accept_over._over);
+			clients[client_id].send_login_info_packet();
 			break;
 		}
 		case OP_RECV: {
@@ -169,13 +170,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 {
 	switch (packet[2]) {
 	case CS_LOGIN: {
-		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet); {
-			lock_guard<mutex> ll{ clients[c_id]._s_lock };
-			clients[c_id]._state = ST_INGAME;
-		}
-
-		clients[c_id].send_login_info_packet();
-		cout << "login : " << c_id << endl;
+		//CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet); {
+		//	lock_guard<mutex> ll{ clients[c_id]._s_lock };
+		//	clients[c_id]._state = ST_INGAME;
+		//}
 		break;
 	}
 	case CS_CLICK_BUTTON: {
@@ -185,6 +183,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 		{
 		case S_BUTTON_TYPE::MAIN_UI_GAME_START: {
 			clients[c_id].send_room_player_count_packet(Room_Cnt);
+
+
 			clients[c_id].send_lobby_server_out_packet();
 			break;
 		}

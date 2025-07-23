@@ -114,7 +114,8 @@ void ServerManager::Client_Login()
 
 	Send_Packet(&p);
 
-	Recv_Loop();
+	Recv_Packet();
+	//Recv_Loop();
 	//std::thread recv_thread{ [this]() { Recv_Loop(); } };
 	//recv_thread.detach();
 }
@@ -213,7 +214,7 @@ void CALLBACK ServerManager::recv_callback(DWORD err, DWORD recv_size, LPWSAOVER
 		return;
 	}
 	char* buf = over->_wsabuf.buf;
-	char recv_buf[CHAT_SIZE * 2];
+	char recv_buf[/*CHAT_SIZE * 2*/60000];
 
 	if (sm->save_data_size > 0) { 
 		memcpy(recv_buf, sm->save_buf, sm->save_data_size);
@@ -286,7 +287,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		if (clientID == packet->id) {
 			player = mPlayer;
 			player->GetCutScene()->SetClass((PLAYER_CLASS)packet->player_class);
-			RenderOK = 1;
+			//RenderOK = 1;
 		}
 		else {
 			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
@@ -330,6 +331,11 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		if (clientID != packet->id) {
 			scene->AddObject(player);
+		}
+
+		if (!RenderOK) {
+				RenderOK = true;
+				INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
 		}
 		break;
 	}

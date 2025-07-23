@@ -29,8 +29,6 @@ void CMainMenu::Start()
         {
             auto fadeFunction = []() {
                 INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)BUTTON_TYPE::MAIN_UI_GAME_START);
-
-                INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOADING, false);
 			};
 
             button->SetOnClick([fadeFunction]() {

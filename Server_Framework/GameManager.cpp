@@ -41,7 +41,7 @@ GameManager::GameManager()
 
 	S_Accept();
 
-	scene_type = S_SCENE_TYPE::MAINSTAGE1;
+	scene_type = S_SCENE_TYPE::LOBBY;
 
 	spawn_points[(int)S_SCENE_TYPE::LOBBY] = Vec3(4.803865f, 0.4409764f, 8.894886f);
 	spawn_points[(int)S_SCENE_TYPE::MAINSTAGE1] = Vec3(45.2f, 4.2f, 42.f);
