@@ -66,7 +66,7 @@ void Monster::Update()
     SetTarget();
 }
 
-void Monster::TakeDamage(int damage)
+void Monster::TakeDamage(int damage, bool do_hit_raction)
 {
     if (_barrier > 0) {
         _barrier -= damage;
@@ -76,10 +76,10 @@ void Monster::TakeDamage(int damage)
         _hp -= damage;
         if (_hp < 0) _hp = 0;
     }
-    if (_hp > 0) {
+    if (_hp > 0 && do_hit_raction) {
         SetState(S_MONSTER_STATE::GETHIT);
     }
-    else {
+    else if (_hp <= 0) {
 		SetState(S_MONSTER_STATE::DEATH);
     }
 }

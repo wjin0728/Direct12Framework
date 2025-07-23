@@ -376,16 +376,14 @@ void CPlayerController::OnKeyEvents()
 void CPlayerController::CastingSkill()
 {
 	INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
-	switch (mSkill)
-	{
+	switch (mSkill) {
 	case FIRE_ENCHANT:
 	case WATER_HEAL:
 	case WATER_SHIELD:
 	case GRASS_WEAKEN:
 		INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
 		break;
-	case FIRE_EXPLOSION:
-	{
+	case FIRE_EXPLOSION: {
 		if (mTargetEnemy.lock()) {
 			auto explosionPrefab = INSTANCE(CResourceManager).GetPrefab("Explosion");
 			if (explosionPrefab) {

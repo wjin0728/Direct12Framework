@@ -39,7 +39,9 @@ public:
 			OnEnterState(currentState);
 		}
 	}
+	void SetHit(bool isHit) { mIsHit = isHit; }
 	UINT8 GetState() const { return currentState; }
+	float GetHealth() const { return mHealth; }
 	std::weak_ptr<CAnimationController> GetAnimationController() const { return mAnimationController; }
 
 protected:

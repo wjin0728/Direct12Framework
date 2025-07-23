@@ -97,7 +97,7 @@ public:
 
     void Update();
 
-    void TakeDamage(int damage);
+    void TakeDamage(int damage, bool do_hit_raction);
 
     bool IsPlayerInRange(PlayerCharacter* target) const;
     bool IsPlayerTooMuchClose() const;

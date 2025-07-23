@@ -617,6 +617,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			if (it != mEnemies.end()) {
 				auto enemyState = std::dynamic_pointer_cast<CEnemyState>(it->second->GetStateMachine());
 				if (enemyState) {
+					if (enemyState->GetHealth() > packet->hp) {
+						enemyState->SetHit(true);
+						enemyState->SetHitFactor(1.f);
+					}
 					enemyState->UpdateHealth(packet->hp);
 				}
 			}

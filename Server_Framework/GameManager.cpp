@@ -274,7 +274,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		if (S_FIRE_EXPLOSION == p->skill_enum) {
 			for (auto& cl : clients[ServerNumber]) {
 				if (cl.second._state != ST_INGAME) continue;
-				Monsters[ServerNumber][p->target_id].TakeDamage(10);
+				Monsters[ServerNumber][p->target_id].TakeDamage(10, true);
 				cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, p->target_id, Monsters[ServerNumber][p->target_id]._hp, 0);
 			}
 		}
@@ -283,6 +283,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 	}
 	case CS_SKILL_NONTARGET: {
 		CS_SKILL_NONTARGET_PACKET* p = reinterpret_cast<CS_SKILL_NONTARGET_PACKET*>(packet);
+		std::cout << "CS_SKILL_NONTARGET_PACKET skill_enum : " << p->skill_enum << std::endl;
 
 		if (S_FIRE_ENCHANT == p->skill_enum) {
 			clients[ServerNumber][c_id]._player._on_FireEnchant = true;
@@ -292,8 +293,12 @@ void GameManager::Process_packet(int c_id, char* packet)
 				cl.second._player._hp = min((cl.second._player._hp + WATER_HEAL_AMT), cl.second._player.PlayerMaxHp());
 		}
 		else if (S_WATER_SHIELD == p->skill_enum) {
-			for (auto& cl : clients[ServerNumber])
+			for (auto& cl : clients[ServerNumber]) {
 				cl.second._player._barrier = 2; // 워터실드!!!!!!!
+				cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, c_id, cl.second._player._hp, cl.second._player._barrier);
+				cl.second.send_use_skill_packet(S_WATER_SHIELD, c_id);
+				std::cout << "Water Shield activated for player " << c_id << std::endl;
+			}
 		}
 		else if (S_GRASS_WEAKEN == p->skill_enum) {
 			clients[ServerNumber][c_id]._player._on_GrassWeaken = true;
@@ -515,7 +520,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				if (mon.second._remove || mon.second._state == S_MONSTER_STATE::UNDERGROUND || mon.second._state == S_MONSTER_STATE::DEATH || mon.second._state == S_MONSTER_STATE::SPAWN) continue; // 몬스터가 제거된 경우는 패스
 				mon.second.LocalTransform();
 				if (player.OnFighterBasicAttack(mon.second._boundingbox)) {
-					mon.second.TakeDamage(5);
+					mon.second.TakeDamage(5, false);
 					for (auto& cl : clients[ServerNumber]) {
 						if (cl.second._state != ST_INGAME) continue;
 						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
@@ -679,7 +684,7 @@ void GameManager::Update() {
 				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
 				if (proj.second._remove) continue; // 투사체가 제거된 경우는 패스
 				if (monster._boundingbox.Intersects(proj.second._boundingbox)) {
-					monster.TakeDamage(proj.second._damage);
+					monster.TakeDamage(proj.second._damage, false);
 					for (auto& cl : clients[ServerNumber]) {
 						if (cl.second._state != ST_INGAME) continue;
 						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, ms.first, monster._hp, 0);

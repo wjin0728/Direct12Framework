@@ -89,6 +89,7 @@ void SESSION::send_use_skill_packet(S_ITEM_TYPE skill_type, int player_id)
 	p.size = sizeof(p);
 	p.player_id = player_id;
 	p.skill_type = skill_type;
+	do_send(&p);
 }
 
 void SESSION::send_change_scene_packet(uint8_t scene)

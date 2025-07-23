@@ -74,13 +74,15 @@ public:
 		p.id = clientID;
 		p.skill_enum = skill;
 		p.target_id = target_id;
+		Send_Packet(&p);
 	}
 	void send_cS_skill_nontarget_packet(uint8_t skill) {
 		CS_SKILL_TARGET_PACKET p;
 		p.size = sizeof(p);
-		p.type = CS_SKILL_TARGET;
+		p.type = CS_SKILL_NONTARGET;
 		p.id = clientID;
 		p.skill_enum = skill;
+		Send_Packet(&p);
 	}
 	void send_cs_mouse_ldown_packet(Vec3 dir) {
 		CS_MOUSE_LDOWN_PACKET p;
