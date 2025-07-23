@@ -182,3 +182,11 @@ void SESSION::send_hp_packet(S_OBJECT_TYPE type, int id, int hp, int shield)
 	p.shield = shield;
 	do_send(&p);
 }
+
+void SESSION::send_make_potal_packet()
+{
+	SC_HP_PACKET p;
+	p.type = SC_MAKE_POTAL;
+	p.size = sizeof(p);
+	do_send(&p);
+}

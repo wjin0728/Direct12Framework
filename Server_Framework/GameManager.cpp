@@ -331,140 +331,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		// 몬스터 생성
 		case 1: {
-			{
-				Monster ms{ S_ENEMY_TYPE::GRASS_SMALL };
-				ms._pos = ms._spawn_pos = Vec3(50.f, 0.f, 50.f);
-				ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
-				ms._hp = ms._max_hp = 50.f;
-				ms.LocalTransform();
-				for (auto& cl : clients[ServerNumber]) {
-					ms._Player[cl.first] = &cl.second._player;
-				}
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
-				for (auto& cl : clients[ServerNumber]) {
-					if (cl.second._state != ST_INGAME) continue;
-					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
-					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
-				}
-
-				auto func0 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
-					for (auto& cl : clients[ServerNumber]) {
-						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
-						if (Vec2::IsInRadius(player_pos, center, 2.f)) {
-							cl.second._player.TakeDamage(100);
-							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
-						}
-					}
-				};
-				auto func1 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
-					for (auto& cl : clients[ServerNumber]) {
-						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
-						if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
-							cl.second._player.TakeDamage(100);
-							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
-						}
-					}
-				};
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
-				//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
-
-				Monster_cnt[ServerNumber]++;
-			}
-
-			{
-				Monster ms{ S_ENEMY_TYPE::GRASS_BIG };
-				ms._pos = ms._spawn_pos = Vec3(55.f, 0.f, 50.f);
-				ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
-				ms._hp = ms._max_hp = 100.f;
-				ms.LocalTransform();
-				for (auto& cl : clients[ServerNumber]) {
-					ms._Player[cl.first] = &cl.second._player;
-				}
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;			
-				for (auto& cl : clients[ServerNumber]) {
-					if (cl.second._state != ST_INGAME) continue;
-					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
-					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
-				}
-
-				auto func0 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.f, 2.85f);
-					for (auto& cl : clients[ServerNumber]) {
-						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
-						if (Vec2::IsInRadius(player_pos, center, 1.f)) {
-							cl.second._player.TakeDamage(150);
-							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
-						}
-					}
-				};
-				auto func1 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(1.25f, 1.25f);
-					for (auto& cl : clients[ServerNumber]) {
-						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
-						if (Vec2::IsInRadius(player_pos, center, 2.f)) {
-							cl.second._player.TakeDamage(150);
-							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
-						}
-					}
-				};
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func0);
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func1);
-				//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
-
-				Monster_cnt[ServerNumber]++;
-			}
-
-			{
-				Monster ms{ S_ENEMY_TYPE::GRASS_SMALL };
-				ms._pos = ms._spawn_pos = Vec3(60.f, 0.f, 50.f);
-				ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
-				ms._hp = ms._max_hp = 50.f;
-				ms.LocalTransform();
-				for (auto& cl : clients[ServerNumber]) {
-					ms._Player[cl.first] = &cl.second._player;
-				}
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
-				for (auto& cl : clients[ServerNumber]) {
-					if (cl.second._state != ST_INGAME) continue;
-					cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
-					cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
-				}
-
-				auto func0 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
-					for (auto& cl : clients[ServerNumber]) {
-						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
-						if (Vec2::IsInRadius(player_pos, center, 2.f)) {
-							cl.second._player.TakeDamage(100);
-							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
-						}
-					}
-				};
-				auto func1 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
-					for (auto& cl : clients[ServerNumber]) {
-						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
-						if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
-							cl.second._player.TakeDamage(100);
-							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
-							std::cout << "맞았다!!!!!!!!" << std::endl;
-						}
-					}
-				};
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
-				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
-				//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
-
-				Monster_cnt[ServerNumber]++;
-			}
+			InitializeMonsters(scene_type);
 			break;
 		}
 		// 씬 전환
@@ -602,11 +469,25 @@ bool GameManager::CanMove(float x, float z)
 	return false;
 }
 
-void GameManager::Update() {
+void GameManager::Update()
+{
+	//int deadMonsterCnt = 0;
+	//for (auto& ms : Monsters[ServerNumber]) {
+	//	if (!ms.second._wave) {
+	//		std::cout << "Monster " << ms.first << " is not in wave." << std::endl;
+	//		deadMonsterCnt++;
+	//	}
+	//}
+
 	for (auto& cl : clients[ServerNumber]) {
 		auto& player = cl.second._player;
 
-		if (cl.second._state != ST_INGAME) continue;
+		if (cl.second._state == ST_INGAME) {
+			//if (deadMonsterCnt == 3) {
+			//	cl.second.send_make_potal_packet();
+			//}
+		}
+		else continue;
 		player.Update();
 
 		if (player._class == S_PLAYER_CLASS::FIGHTER && player.currentState == &PlayerState::UltimateState::GetInstance()) {
@@ -677,6 +558,9 @@ void GameManager::Update() {
 
 		monster.Update();
 		monster.AvoidCollision(Monsters[ServerNumber]);
+
+		float terrainHeight = terrain[(int)scene_type].GetHeight(monster._pos.x, monster._pos.z);
+		monster._pos.y = terrainHeight;
 
 		// 몬스터 - 투사체 충돌 체크
 		if (monster._hp >= 0 && monster._state != S_MONSTER_STATE::UNDERGROUND && monster._state != S_MONSTER_STATE::DEATH) {
@@ -805,7 +689,8 @@ void GameManager::SendAllProjectilesPosPacket()
 	}
 }
 
-void GameManager::CreateItem(Monster* monster) {
+void GameManager::CreateItem(Monster* monster)
+{
 	float terrainHeight = terrain[(int)scene_type].GetHeight(monster->_pos.x, monster->_pos.z);
 
 	items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(monster->_pos.x, terrainHeight + 0.3, monster->_pos.z);
@@ -819,4 +704,560 @@ void GameManager::CreateItem(Monster* monster) {
 	}
 
 	Item_cnt[ServerNumber]++;
+}
+
+void GameManager::InitializeMonsters(S_SCENE_TYPE scene_type)
+{
+	switch (scene_type) {
+	case S_SCENE_TYPE::MAINSTAGE1: {
+		InitializeGrassMonsters();
+		break;
+	}
+	case S_SCENE_TYPE::MAINSTAGE2: {
+		InitializeWaterMonsters();
+		break;
+	}
+	case S_SCENE_TYPE::MAINSTAGE3: {
+		InitializeFireMonsters();
+		break;
+	}
+	}
+}
+
+void GameManager::InitializeGrassMonsters()
+{
+	{
+		Monster ms{ S_ENEMY_TYPE::GRASS_SMALL };
+		ms._pos = ms._spawn_pos = Vec3(50.f, 0.f, 50.f);
+		ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+		ms._hp = ms._max_hp = 50.f;
+		ms.LocalTransform();
+		for (auto& cl : clients[ServerNumber]) {
+			ms._Player[cl.first] = &cl.second._player;
+		}
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
+			cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+		}
+
+		auto func0 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 2.f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		auto func1 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+				
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
+		Monster_cnt[ServerNumber]++;
+	}
+
+	{
+		Monster ms{ S_ENEMY_TYPE::GRASS_BIG };
+		ms._pos = ms._spawn_pos = Vec3(55.f, 0.f, 50.f);
+		ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+		ms._hp = ms._max_hp = 100.f;
+		ms.LocalTransform();
+		for (auto& cl : clients[ServerNumber]) {
+			ms._Player[cl.first] = &cl.second._player;
+		}
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
+			cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+		}
+
+		auto func0 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.f, 2.85f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 1.f)) {
+					cl.second._player.TakeDamage(150);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		auto func1 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(1.25f, 1.25f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 2.f)) {
+					cl.second._player.TakeDamage(150);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func0);
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func1);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
+		Monster_cnt[ServerNumber]++;
+	}
+
+	{
+		Monster ms{ S_ENEMY_TYPE::GRASS_SMALL };
+		ms._pos = ms._spawn_pos = Vec3(60.f, 0.f, 50.f);
+		ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+		ms._hp = ms._max_hp = 50.f;
+		ms.LocalTransform();
+		for (auto& cl : clients[ServerNumber]) {
+			ms._Player[cl.first] = &cl.second._player;
+		}
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
+			cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+		}
+
+		auto func0 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 2.f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		auto func1 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
+		Monster_cnt[ServerNumber]++;
+	}
+}
+void GameManager::InitializeWaterMonsters()
+{
+	{
+		Monster ms{ S_ENEMY_TYPE::WATER_SMALL };
+		ms._pos = ms._spawn_pos = Vec3(29.4f, 0.f, 35.6f);
+		ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+		ms._hp = ms._max_hp = 50.f;
+		ms.LocalTransform();
+		for (auto& cl : clients[ServerNumber]) {
+			ms._Player[cl.first] = &cl.second._player;
+		}
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
+			cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+		}
+
+		auto func0 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 2.f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		auto func1 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
+		Monster_cnt[ServerNumber]++;
+	}
+
+	{
+		Monster ms{ S_ENEMY_TYPE::WATER_BIG };
+		ms._pos = ms._spawn_pos = Vec3(31.33f, 0.f, 33.24f);
+		ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+		ms._hp = ms._max_hp = 100.f;
+		ms.LocalTransform();
+		for (auto& cl : clients[ServerNumber]) {
+			ms._Player[cl.first] = &cl.second._player;
+		}
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
+			cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+		}
+
+		auto func0 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.f, 2.85f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 1.f)) {
+					cl.second._player.TakeDamage(150);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		auto func1 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(1.25f, 1.25f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 2.f)) {
+					cl.second._player.TakeDamage(150);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func0);
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func1);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
+		Monster_cnt[ServerNumber]++;
+	}
+
+	{
+		Monster ms{ S_ENEMY_TYPE::WATER_SMALL };
+		ms._pos = ms._spawn_pos = Vec3(32.3f, 0.f, 29.f);
+		ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+		ms._hp = ms._max_hp = 50.f;
+		ms.LocalTransform();
+		for (auto& cl : clients[ServerNumber]) {
+			ms._Player[cl.first] = &cl.second._player;
+		}
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
+			cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+		}
+
+		auto func0 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 2.f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		auto func1 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
+		Monster_cnt[ServerNumber]++;
+	}
+}
+void GameManager::InitializeFireMonsters()
+{
+	{
+		Monster ms{ S_ENEMY_TYPE::FIRE_SMALL };
+		ms._pos = ms._spawn_pos = Vec3(23.3f, 1.f, 43.8f);
+		ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+		ms._hp = ms._max_hp = 50.f;
+		ms.LocalTransform();
+		for (auto& cl : clients[ServerNumber]) {
+			ms._Player[cl.first] = &cl.second._player;
+		}
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
+			cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+		}
+
+		auto func0 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 2.f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		auto func1 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
+		Monster_cnt[ServerNumber]++;
+	}
+
+	{
+		Monster ms{ S_ENEMY_TYPE::FIRE_BIG };
+		ms._pos = ms._spawn_pos = Vec3(27.8f, 1.f, 43.9f);
+		ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+		ms._hp = ms._max_hp = 100.f;
+		ms.LocalTransform();
+		for (auto& cl : clients[ServerNumber]) {
+			ms._Player[cl.first] = &cl.second._player;
+		}
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
+			cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+		}
+
+		auto func0 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.f, 2.85f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 1.f)) {
+					cl.second._player.TakeDamage(150);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		auto func1 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(1.25f, 1.25f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 2.f)) {
+					cl.second._player.TakeDamage(150);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func0);
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func1);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
+		Monster_cnt[ServerNumber]++;
+	}
+
+	{
+		Monster ms{ S_ENEMY_TYPE::FIRE_SMALL };
+		ms._pos = ms._spawn_pos = Vec3(32.6f, 1.f, 43.65f);
+		ms._look_dir = ms._spawn_dir = Vec3(0.f, 0.f, 1.f);
+		ms._hp = ms._max_hp = 50.f;
+		ms.LocalTransform();
+		for (auto& cl : clients[ServerNumber]) {
+			ms._Player[cl.first] = &cl.second._player;
+		}
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]] = ms;
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			cl.second._player._Monster[Monster_cnt[ServerNumber]] = &Monsters[ServerNumber][Monster_cnt[ServerNumber]];
+			cl.second.send_add_monster_packet(Monsters[ServerNumber][Monster_cnt[ServerNumber]], Monster_cnt[ServerNumber]);
+		}
+
+		auto func0 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 2.f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		auto func1 = [this](class Monster* monster) {
+			Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._player._state == S_PLAYER_STATE::JUMP ||
+					cl.second._player._state == S_PLAYER_STATE::GATHERING ||
+					cl.second._player._state == S_PLAYER_STATE::GETHIT ||
+					cl.second._player._state == S_PLAYER_STATE::DEATH ||
+					cl.second._player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+				if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
+					cl.second._player.TakeDamage(100);
+					cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
+			}
+			};
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
+		Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
+		//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
+
+		Monster_cnt[ServerNumber]++;
+	}
 }
