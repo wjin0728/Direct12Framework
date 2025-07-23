@@ -12,6 +12,7 @@
 #include"UIRenderer.h"
 #include"ResourceManager.h"
 #include"Button.h"
+#include"ServerManager.h"
 
 CMainMenu::CMainMenu()
 {
@@ -27,20 +28,20 @@ void CMainMenu::Start()
         if (auto button = startButtonObj->GetComponent<CButton>())
         {
             auto fadeFunction = []() {
-                INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOADING, false);
-				};
+                INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)BUTTON_TYPE::MAIN_UI_GAME_START);
+			};
 
             button->SetOnClick([fadeFunction]() {
                 INSTANCE(CSceneManager).GetCurScene()->FadeIn(0.5f, {0.f,0.f,0.f, 0.f}, fadeFunction);
             });
-				}
+		}
     }
     if (auto exitButtonObj = owner->FindChildByName("Exit")) {
         if (auto button = exitButtonObj->GetComponent<CButton>())
         {
             auto exitFunction = []() {
                 ::PostQuitMessage(0);
-                };
+            };
             button->SetOnClick(exitFunction);
         }
     }

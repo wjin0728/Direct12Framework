@@ -105,9 +105,15 @@ public:
 			cl.second._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 			cl.second._player.InitializeTarget();
 		}
+
+		//InitializeMonsters(scene_type);
 	}
 
 	void CreateItem(Monster* monster);
+	void InitializeMonsters(S_SCENE_TYPE scene_type);
+	void InitializeGrassMonsters();
+	void InitializeWaterMonsters();
+	void InitializeFireMonsters();
 
 private:
 	void Update();

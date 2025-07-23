@@ -182,11 +182,11 @@ MonsterState::UndergroundState& MonsterState::UndergroundState::GetInstance() { 
 
 void MonsterState::UndergroundState::Enter(Monster* monster) {
 	//cout << "UndergroundState Entered!" << endl;
+	monster->_pos = monster->_spawn_pos;
 	if (!monster->_wave) {
 		monster->_remove = true;
 		return;
 	}
-	monster->_pos = monster->_spawn_pos;
 	monster->_look_dir = monster->_spawn_dir;
 	monster->_target = nullptr;
 	monster->_hp = monster->_max_hp;
@@ -201,7 +201,7 @@ void MonsterState::UndergroundState::Update(Monster* monster) {
 }
 
 void MonsterState::UndergroundState::Exit(Monster* monster) {
-	monster->_pos.y = 5.f;
+	//monster->_pos.y = 5.f;
 }
 
 
@@ -214,6 +214,7 @@ MonsterState::SpawnState& MonsterState::SpawnState::GetInstance() { static Monst
 
 void MonsterState::SpawnState::Enter(Monster* monster) {
 	cout << "SpawnState Entered!" << endl;
+	monster->_pos = monster->_spawn_pos;
 	monster->SetVelocity(0, 0, 0);
 	SpawnTimer = monster->_animations[(int)S_MONSTER_STATE::SPAWN].mLength;
 }

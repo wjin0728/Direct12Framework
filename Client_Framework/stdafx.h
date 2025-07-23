@@ -23,6 +23,7 @@
 #include <memory>
 #include <fstream>
 #include <filesystem>
+#include <string>
 #include <chrono>
 #include <random>
 #include <array>

@@ -55,10 +55,10 @@ void CLoadScene::Update()
 		resourceMgr.ProcessGPULoadQueue(3);
 		if (resourceMgr.IsGPULoadQueueEmpty())
 		{
-			CircularFadeIn(1.f, { 0.0,0.0,0.0,1.f }, []() {
-				INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MAINSTAGE1, false);
-				});
 			mIsLoading = false;
+			CircularFadeIn(1.f, { 0.0,0.0,0.0,1.f }, []() {
+				INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MENU, false);
+				});
 		}
 
 	}

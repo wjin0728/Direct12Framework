@@ -89,6 +89,7 @@ void SESSION::send_use_skill_packet(S_ITEM_TYPE skill_type, int player_id)
 	p.size = sizeof(p);
 	p.player_id = player_id;
 	p.skill_type = skill_type;
+	do_send(&p);
 }
 
 void SESSION::send_change_scene_packet(uint8_t scene)
@@ -179,5 +180,13 @@ void SESSION::send_hp_packet(S_OBJECT_TYPE type, int id, int hp, int shield)
 	p.object_id = id;
 	p.hp = hp;
 	p.shield = shield;
+	do_send(&p);
+}
+
+void SESSION::send_make_potal_packet()
+{
+	SC_HP_PACKET p;
+	p.type = SC_MAKE_POTAL;
+	p.size = sizeof(p);
 	do_send(&p);
 }

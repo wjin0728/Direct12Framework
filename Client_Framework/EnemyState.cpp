@@ -4,6 +4,7 @@
 #include"Transform.h"
 #include"ResourceManager.h"
 #include"HealthSystem.h"
+#include "Timer.h"
 
 const float CEnemyState::MAX_HEALTH = 100.f;
 
@@ -35,6 +36,19 @@ void CEnemyState::Update()
 	if (!controller) {
 		return;
 	}
+
+	if (mIsHit) {
+		mHitProgress += DELTA_TIME;
+		float hitFactor = 1.f - (mHitProgress / 0.666f);
+		if (hitFactor >= 0.f) {
+			GetTransform()->SetHitFactor(hitFactor);
+		}
+		else {
+			mHitProgress = -ANIMATION_CALLBACK_EPSILON;
+			SetHit(false);
+		}
+	}
+
 	MONSTER_STATE state = (MONSTER_STATE)currentState;
 	switch (state)
 	{
@@ -95,8 +109,7 @@ void CEnemyState::OnEnterState(UINT8 state)
 	case MONSTER_STATE::end:
 		break;
 	case MONSTER_STATE::GETHIT:
-		mIsHit = true;
-		GetTransform()->SetHitFactor(1.f);
+		SetHit(true);
 		break;
 	default:
 		break;
@@ -123,8 +136,6 @@ void CEnemyState::OnExitState(UINT8 state)
 	case MONSTER_STATE::PROJECTILE_ATTACK:
 		break;
 	case MONSTER_STATE::GETHIT:
-		mIsHit = false;
-		GetTransform()->SetHitFactor(0.f);
 		break;
 	case MONSTER_STATE::DEATH:
 		if (mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(false);
@@ -134,6 +145,12 @@ void CEnemyState::OnExitState(UINT8 state)
 	default:
 		break;
 	}
+}
+
+void CEnemyState::SetHitFactor(float hitFactor)
+{
+	auto transform = GetTransform();
+	transform->SetHitFactor(hitFactor);
 }
 
 void CGrassSmallState::Awake()

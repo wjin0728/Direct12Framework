@@ -27,12 +27,19 @@ void SESSION::send_login_info_packet()
 	do_send(&p);
 }
 
-void SESSION::send_add_player_packet(SESSION* client)
+void SESSION::send_room_player_count_packet(char* room_cnt)
 {
-	SC_ADD_PLAYER_PACKET p;
-	p.id = client->_id;
-	p.size = sizeof(p);
-	p.type = SC_ADD_PLAYER;
-	p.player_class = (uint8_t)client->_player._class;
+	SC_LOBBY_ROOM_PLAYER_COUNT_PACKET p;
+	memcpy(p.room_cnt, room_cnt, sizeof(p.room_cnt));
+	p.size = sizeof(SC_LOBBY_ROOM_PLAYER_COUNT_PACKET);
+	p.type = SC_LOBBY_ROOM_PLAYER_COUNT;
+	do_send(&p);
+}
+
+void SESSION::send_lobby_server_out_packet()
+{
+	SC_LOBBY_SERVER_OUT_PACKET p;
+	p.size = sizeof(SC_LOBBY_SERVER_OUT_PACKET);
+	p.type = SC_LOBBY_SERVER_OUT;
 	do_send(&p);
 }

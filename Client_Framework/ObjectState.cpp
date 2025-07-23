@@ -193,7 +193,7 @@ void CPlayerStateMachine::UpdateHealth(float newHealth, int newSheild)
 	owner->TriggerEvent("OnFaceChanged", { hpRatio >= 0.3f });
 
 	mShieldHealth = newSheild;
-	std::cout << "실드 사용, 남은 실드: " << mShieldHealth << std::endl;
+	std::cout << "HP: " << mHealth << ", 남은 실드: " << mShieldHealth << std::endl;
 }
 
 void CArcherState::Awake()

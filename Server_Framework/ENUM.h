@@ -128,3 +128,16 @@ enum class S_EFFECT_TYPE : UINT8
 	dd,
 	ss
 };
+
+enum class S_BUTTON_TYPE : UINT8
+{
+	ROOM1,
+	ROOM2,
+	ROOM3,
+	ROOM4,
+	ROOM5,
+	ROOM6,
+	MAIN_UI_GAME_START,
+
+	BUTTON_END
+};

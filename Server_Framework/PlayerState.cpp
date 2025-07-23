@@ -164,7 +164,8 @@ void PlayerState::SkillState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::SkillState::Update(PlayerCharacter* player) {
-	//cout << "Skill 업데이트 중!" << endl;
+    player->SetVelocity(0, 0, 0); // 스킬 중 이동 멈춤
+    //cout << "Skill 업데이트 중!" << endl;
 }
 
 void PlayerState::SkillState::Exit(PlayerCharacter* player) {}

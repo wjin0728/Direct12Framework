@@ -7,6 +7,7 @@ class CEnemyState :
 protected:
 	static const float MAX_HEALTH;
     std::weak_ptr<class CTransform> mAttackSocket;
+	float mHitProgress = -ANIMATION_CALLBACK_EPSILON;
 
 public:
     CEnemyState() : CEntityState((UINT8)MONSTER_STATE::IDLE) {}
@@ -23,6 +24,7 @@ public:
 
 	virtual ENEMY_TYPE GetEnemyType() const = 0;
 
+    void SetHitFactor(float hitFactor);
 };
 
 class CGrassBigState :

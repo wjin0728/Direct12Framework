@@ -213,6 +213,8 @@ namespace DirectX
             static Vector2 TransformNormal(const Vector2& v, const Matrix& m) noexcept;
             static void TransformNormal(_In_reads_(count) const Vector2* varray, size_t count, const Matrix& m, _Out_writes_(count) Vector2* resultArray) noexcept;
 
+            static bool IsInRadius(const Vector2& v1, const Vector2& v2, float radius) noexcept;
+
             // Constants
             static const Vector2 Zero;
             static const Vector2 One;
