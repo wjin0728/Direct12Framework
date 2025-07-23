@@ -342,27 +342,23 @@ void GameManager::Process_packet(int c_id, char* packet)
 				}
 
 				auto func0 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(1.f, 4.5f);
+					Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
 					for (auto& cl : clients[ServerNumber]) {
-						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						//std::cout << "distance : " << distance << std::endl;
-						if (distance < 16.f) {
+						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+						if (Vec2::IsInRadius(player_pos, center, 2.f)) {
 							cl.second._player.TakeDamage(100);
 							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
-
 							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
 				};
 				auto func1 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.f, 3.f);
+					Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
 					for (auto& cl : clients[ServerNumber]) {
-						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						//std::cout << "distance : " << distance << std::endl;
-						if (distance < 5.f) {
+						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+						if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
 							cl.second._player.TakeDamage(100);
 							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
-
 							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
@@ -391,27 +387,27 @@ void GameManager::Process_packet(int c_id, char* packet)
 				}
 
 				auto func0 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.f, 5.f);
+					Vec2 center = monster->GetWorldOffsetPosition(0.f, 2.85f);
 					for (auto& cl : clients[ServerNumber]) {
-						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						std::cout << "distance : " << distance << std::endl;
-						if (distance < 16.f) {
+						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+						if (Vec2::IsInRadius(player_pos, center, 1.f)) {
 							cl.second._player.TakeDamage(150);
+							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
 							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
-					};
+				};
 				auto func1 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(6.f, 6.f);
+					Vec2 center = monster->GetWorldOffsetPosition(1.25f, 1.25f);
 					for (auto& cl : clients[ServerNumber]) {
-						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						std::cout << "distance : " << distance << std::endl;
-						if (distance < 100.f) {
+						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+						if (Vec2::IsInRadius(player_pos, center, 2.f)) {
 							cl.second._player.TakeDamage(150);
+							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
 							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
-					};
+				};
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func0);
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func1);
 				//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
@@ -436,27 +432,27 @@ void GameManager::Process_packet(int c_id, char* packet)
 				}
 
 				auto func0 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(2.f, 9.f);
+					Vec2 center = monster->GetWorldOffsetPosition(0.2f, 0.9f);
 					for (auto& cl : clients[ServerNumber]) {
-						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						//std::cout << "distance : " << distance << std::endl;
-						if (distance < 200.f) {
+						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+						if (Vec2::IsInRadius(player_pos, center, 2.f)) {
 							cl.second._player.TakeDamage(100);
-							//std::cout << "맞았다!!!!!!!!" << std::endl;
+							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
-					};
+				};
 				auto func1 = [this](class Monster* monster) {
-					Vec2 center = monster->GetWorldOffsetPosition(0.f, 6.f);
+					Vec2 center = monster->GetWorldOffsetPosition(0.f, 0.7f);
 					for (auto& cl : clients[ServerNumber]) {
-						float distance = (Vec2(cl.second._player._pos.x, cl.second._player._pos.z) - center).LengthSquared();
-						//std::cout << "distance : " << distance << std::endl;
-						if (distance < 30.f) {
+						Vec2 player_pos = Vec2(cl.second._player._pos.x, cl.second._player._pos.z);
+						if (Vec2::IsInRadius(player_pos, center, 0.8f)) {
 							cl.second._player.TakeDamage(100);
-							//std::cout << "맞았다!!!!!!!!" << std::endl;
+							cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
+							std::cout << "맞았다!!!!!!!!" << std::endl;
 						}
 					}
-					};
+				};
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func1);
 				Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", func0);
 				//Monsters[ServerNumber][Monster_cnt[ServerNumber]].AddAnimationEvent(S_MONSTER_STATE::PROJECTILE_ATTACK, "Attack", func1);
@@ -617,7 +613,10 @@ void GameManager::Update() {
 			for (auto& it : items[ServerNumber]) {
 				if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
 					it.second.LocalTransform();
-				if (player._boundingbox.Intersects(it.second._boundingbox)) {
+
+				Vec2 itemPos = Vec2(it.second._pos.x, it.second._pos.z);
+				Vec2 playerPos = Vec2(player._pos.x, player._pos.z);
+				if (Vec2::IsInRadius(itemPos, playerPos, 1.f)) {
 					for (auto& cl : clients[ServerNumber]) {
 						if (cl.second._state != ST_INGAME) continue;
 						cl.second.send_remove_item_packet(it.first, cl.first, it.second._item_type);
