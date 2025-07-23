@@ -836,6 +836,17 @@ inline void Vector2::TransformNormal(const Vector2* varray, size_t count, const 
     XMVector2TransformNormalStream(resultArray, sizeof(XMFLOAT2), varray, sizeof(XMFLOAT2), count, M);
 }
 
+inline bool Vector2::IsInRadius(const Vector2& v1, const Vector2& v2, float radius) noexcept
+{
+    using namespace DirectX;
+    XMVECTOR x1 = XMLoadFloat2(&v1);
+    XMVECTOR x2 = XMLoadFloat2(&v2);
+    XMVECTOR V = XMVectorSubtract(x2, x1);
+    XMVECTOR X = XMVector2LengthSq(V);
+
+    return XMVectorGetX(X) <= radius * radius;
+}
+
 
 /****************************************************************************
  *

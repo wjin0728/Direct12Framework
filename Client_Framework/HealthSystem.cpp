@@ -82,7 +82,7 @@ void CHealthSystem::LateUpdate()
 			edge->SetPosition(screenPos);
 		}
 	}
-	mPrevHealth = lerp(mPrevHealth, mHealth, 5.f * DELTA_TIME);
+	mPrevHealth = lerp(mPrevHealth, mHealth, 3.f * DELTA_TIME);
 	UpdateHealthBar();
 }
 

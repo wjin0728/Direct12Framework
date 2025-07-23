@@ -182,11 +182,11 @@ MonsterState::UndergroundState& MonsterState::UndergroundState::GetInstance() { 
 
 void MonsterState::UndergroundState::Enter(Monster* monster) {
 	//cout << "UndergroundState Entered!" << endl;
+	monster->_pos = monster->_spawn_pos;
 	if (!monster->_wave) {
 		monster->_remove = true;
 		return;
 	}
-	monster->_pos = monster->_spawn_pos;
 	monster->_look_dir = monster->_spawn_dir;
 	monster->_target = nullptr;
 	monster->_hp = monster->_max_hp;

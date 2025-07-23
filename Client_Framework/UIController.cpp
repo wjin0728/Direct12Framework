@@ -127,6 +127,35 @@ void CPlayerHUD::Start()
         }
     );
 
+
+    if (auto interactionUI = owner->FindChildByName("InteractionUI")) {
+		interactionUI->SetActive(false);
+        if (auto renderer = interactionUI->GetComponent<CUIRenderer>())
+        {
+            renderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+        }
+        mPlayer.lock()->AddEvent("OnItemTargeted", [interactionUI](const std::vector<std::any>& args) {
+            if (args.size() < 1) return;
+            bool isActive = std::any_cast<bool>(args[0]);
+            interactionUI->SetActive(isActive);
+            if(isActive)
+            {
+                if(auto renderer = interactionUI->GetComponent<CUIRenderer>())
+                {
+					Vec2 screenPos = std::any_cast<Vec2>(args[1]);
+					renderer->SetPosition(screenPos);
+				}
+			}
+			});
+    }
+
+
+
+
+
+
+
+
     for (int i = 0; auto& player : mOtherPlayers)
     {
         BindPlayerToUI(mOtherPlayers[i++].lock(), "Player" + std::to_string(i));

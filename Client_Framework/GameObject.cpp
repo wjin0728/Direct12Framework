@@ -103,7 +103,7 @@ void CGameObject::LateUpdate()
 void CGameObject::SetActive(bool active)
 {
 	mActive = active;
-	if (mActive) {
+	if (mActive && !misAwake) {
 		for (auto& component : mComponents) {
 			component->EnqueueAwake();
 		}
