@@ -55,9 +55,9 @@ float4 PS_Sprite(VS_OUTPUT input) : SV_Target
         else if (fillAmount2 <= uv.x && uv.x <= fillAmount)
             return float4(1.f, 1.f, 1.f, finalColor.a);
         
-        //float time = uiData.floatData2;
-        //float wave = sin(uv.x * 20 + time * 5) * 0.5;
-        //float newY = uv.y + wave;
+        float time = uiData.floatData2;
+        float wave = sin(uv.x * 20 + time * 5) * 0.5;
+        float newY = uv.y + wave;
         
         float t = saturate(uv.x / fillAmount);
         float4 color = lerp(finalColor, color2, t);

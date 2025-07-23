@@ -77,6 +77,7 @@ void CPlayerController::Update()
 	}
 	
 	LockOnTarget();
+	InteractWithItem();
 	OnKeyEvents();
 	// auto transform = GetTransform();
 	// float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
@@ -116,7 +117,12 @@ void CPlayerController::InteractWithItem()
 	auto camera = INSTANCE(CRenderManager).GetCamera("MainCamera");
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	auto& items = scene->GetObjectsWithType(OBJECT_TYPE::ITEM);
+	float maxInteractRange = 1.f; // Maximum interaction range
+	float sqMaxInteractRange = maxInteractRange * maxInteractRange;
 	float minDistance = FLT_MAX;
+
+	auto prevTargetItem = mTargetItem.lock();
+	mTargetItem.reset();
 	for (const auto& item : items) {
 		BoundingSphere objBS = item->GetRootBoundingSphere();
 		if (!camera->IsInFrustum(objBS, FORWARD)) continue;
@@ -124,11 +130,35 @@ void CPlayerController::InteractWithItem()
 		Vec3 toItem = itemTransform->GetWorldPosition() - GetTransform()->GetWorldPosition();
 		toItem.y = 0.f;
 		float distance = toItem.LengthSquared();
-		if (distance < minDistance) {
+		if (distance < minDistance && distance < sqMaxInteractRange) {
 			minDistance = distance;
-			//mTargetItem = item;
+			mTargetItem = item;
 		}
 	}
+
+	if(auto targetItem = mTargetItem.lock()) {
+		Vec3 itemPos = targetItem->GetTransform()->GetWorldPosition();
+		Vec3 playerPos = GetTransform()->GetWorldPosition();
+		playerPos.y += 0.7f; 
+		//화면기준 아이템이 플레이어 왼쪽에 있는지 오른	쪽에 있는지 판단
+		Vec2 itemPosCS = camera->TransformToNDC(itemPos);
+		Vec2 playerPosCS = camera->TransformToNDC(playerPos);
+
+		float offset = 0.2f;
+
+		if (itemPosCS.x < playerPosCS.x) {
+			playerPosCS.x -= offset; // 플레이어 왼쪽에 아이템이 있을 때
+		} else {
+			playerPosCS.x += offset; // 플레이어 오른쪽에 아이템이 있을 때
+		}
+		owner->TriggerEvent("OnItemTargeted", { true, playerPosCS });
+	}
+	else {
+		if (prevTargetItem) {
+			owner->TriggerEvent("OnItemTargeted", { false, Vec2(0.f, 0.f) });
+		}
+	}
+
 }
 
 void CPlayerController::LateUpdate()
@@ -210,8 +240,15 @@ void CPlayerController::OnKeyEvents()
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
+			if (auto item = mTargetItem.lock()) {
+				if (item->GetName() == "SkillItem") {
+					mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
+					INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
+				}
+				else if (item->GetName() == "Portal") {
+					//서버에 포탈 이동 요청
+				}
+			}
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
@@ -274,10 +311,17 @@ void CPlayerController::OnKeyEvents()
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
-			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
-			return;
+			if (auto item = mTargetItem.lock()) {
+				if (item->GetName() == "SkillItem") {
+					mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
+					INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
+					INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+					return;
+				}
+				else if (item->GetName() == "Portal") {
+					//서버에 포탈 이동 요청
+				}
+			}
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);

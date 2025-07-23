@@ -16,6 +16,7 @@ private:
 	std::weak_ptr<class CTerrain> mTerrain{};
 
 	std::weak_ptr<class CGameObject> mTargetEnemy{};
+	std::weak_ptr<class CGameObject> mTargetItem{};
 	std::weak_ptr<class CTargetMarker> mTargetMarker{};
 
 	

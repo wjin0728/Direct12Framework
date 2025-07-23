@@ -372,6 +372,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 		auto itemObj = CGameObject::Instantiate(item);
 		itemObj->SetTag("Item");
+		itemObj->SetName("SkillItem");
 		itemObj->SetRenderLayer(RENDER_LAYER::Opaque);
 		itemObj->SetObjectType(OBJECT_TYPE::ITEM);
 		itemObj->SetStatic(false);
@@ -606,10 +607,12 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto portal = RESOURCE.GetPrefab("Portal");
 		if (portal) {
 			auto portalObject = CGameObject::Instantiate(portal);
-			portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(47.92172f, 6.699f, 36.38293f));
+			portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(65.111f, 4.913f, 45.11095f));
 			auto particle = portalObject->GetComponent<CParticleAttach>();
 			particle->SetLoop(true);
-
+			portalObject->SetObjectType(OBJECT_TYPE::ITEM);
+			portalObject->SetTag("Portal");
+			portalObject->SetName("Portal");
 			scene->AddObject(portalObject);
 		}
 		break;
