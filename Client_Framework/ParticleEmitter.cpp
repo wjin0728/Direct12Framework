@@ -56,7 +56,6 @@ CParticleEmitter::CParticleEmitter(UINT maxParticleNum)
 	mParticles.reserve(maxParticleNum);
 	mSpawnData.reserve(maxParticleNum*1.5);
 	mTimeSinceLastEmit = 0.f;
-	mIsActive = false;
 }
 
 CParticleEmitter::~CParticleEmitter()
@@ -71,7 +70,6 @@ void CParticleEmitter::Initialize(ParticleProperties* particleProperties)
 {
 	mParticleProperties = particleProperties;
 	if (mParticleProperties->maxParticles <= 0) {
-		mIsActive = false;
 		return;
 	}
 	mBurstRec.clear();
@@ -98,9 +96,9 @@ void CParticleEmitter::Initialize(ParticleProperties* particleProperties)
 
 void CParticleEmitter::Release()
 {
+	std::cout << "Particle emitter ended and  released." << std::endl;
 	mTimeSinceLastEmit = 0.f;
 	mTotalTime = 0.f;
-	mIsActive = false;
 	mIsPlaying = false;
 	mIsPaused = false;
 	mLastEmitPosW = Vec3(0.f, 0.f, 0.f);
@@ -112,7 +110,7 @@ void CParticleEmitter::Release()
 
 int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr, CCamera* camera)
 {
-	if (!mIsActive || mParticleProperties->maxParticles <= 0) {
+	if (mParticleProperties->maxParticles <= 0) {
 		return 0;
 	}
 	EmitParticles();
@@ -237,7 +235,6 @@ void CParticleEmitter::Play(const Vec3& pos)
 void CParticleEmitter::Play()
 {
 	if (mParticleProperties == nullptr || mParticleProperties->maxParticles <= 0) {
-		mIsActive = false;
 		return;
 	}
 	mIsPlaying = true;
@@ -271,24 +268,31 @@ void CParticleEmitter::Resume()
 
 void CParticleEmitter::Reset()
 {
-	
-}
-
-void CParticleEmitter::Stop(bool reset)
-{
-	mIsActive = false;
 	mIsPlaying = false;
 	mIsPaused = false;
 	mTimeSinceLastEmit = 0.f;
 	mTotalTime = 0.f;
-	if (reset) {
-		for (auto& particle : mParticles) {
-			particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
-			particle.Age = 1.f;
-		}
+	for (auto& particle : mParticles) {
+		particle.ResetDataIndex = RandomNumberGenerator::RandInt(0, mSpawnData.size() - 1);
+		particle.Age = 1.f;
 	}
+	mBurstRec.clear();
+	mBurstRec.resize(mParticleProperties->bursts.size(), BurstRecord(true, 0, 0.f));
 	mLastEmitPosW = Vec3(0.f, 0.f, 0.f);
 	mEmitterTransform = Matrix::Identity;
+}
+
+void CParticleEmitter::Stop(bool reset)
+{
+	if(reset) {
+		Reset();
+	}
+	else {
+		mIsPaused = false;
+		mIsLooping = false;
+		mTimeSinceLastEmit = 0.f;
+		mTotalTime = mParticleProperties->duration;
+	}
 }
 
 void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, ParticleProperties& properties)

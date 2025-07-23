@@ -629,7 +629,6 @@ public:
 
 	bool mIsPlaying = false;
 	bool mIsPaused = false;
-	bool mIsActive = false;
 	bool mIsLooping = false;
 
 public:

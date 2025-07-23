@@ -12,6 +12,7 @@ private:
 
 	bool mReserve = true;
 	bool mLoop = false;
+	bool mIsPlaying = false;
 
 public:
 	bool mCanEmit = true;
@@ -29,7 +30,6 @@ public:
 	virtual void LateUpdate() override;
 
 public:
-	void InitializeParticleEmitter();
 	void Play();
 	void Stop();
 	void Reserve(bool reserve);

@@ -8,7 +8,6 @@
 CParticleAttach::CParticleAttach(const CParticleAttach& other)
 {
 	mParticleEmitterName = other.mParticleEmitterName;
-	mParticleEmitter = nullptr;
 	mCanEmit = other.mCanEmit;
 	mLoop = other.mLoop;
 	mReserve = other.mReserve;
@@ -18,19 +17,14 @@ CParticleAttach::~CParticleAttach()
 {
 	if (mParticleEmitter)
 	{
-		mParticleEmitter->mParticleAttach = nullptr;
-		mParticleEmitter->mIsLooping = false;
+		mParticleEmitter->Stop(false);
 		mParticleEmitter = nullptr;
+		std::cout << "ParticleAttachComponent Destroyed: " << mParticleEmitterName << std::endl;
 	}
 }
 
 void CParticleAttach::Awake()
 {
-	if (mParticleEmitter == nullptr && mCanEmit)
-	{
-		mParticleEmitter = INSTANCE(CParticleManager).GetAvailableParticleEmitter(mParticleEmitterName);
-	}
-	if(mParticleEmitter) mParticleEmitter->mParticleAttach = this;
 }
 
 void CParticleAttach::Start()
@@ -50,38 +44,26 @@ void CParticleAttach::LateUpdate()
 	if (transform == nullptr || mParticleEmitter == nullptr)
 		return;
 	mParticleEmitter->mEmitterTransform = transform->GetWorldMat();
-
-
+	mIsPlaying = mParticleEmitter->mIsPlaying;
 }
 
-void CParticleAttach::InitializeParticleEmitter()
-{
-	if (mParticleEmitter == nullptr && mCanEmit)
-	{
-		mParticleEmitter = INSTANCE(CParticleManager).GetAvailableParticleEmitter(mParticleEmitterName);
-	}
-	if (mParticleEmitter) mParticleEmitter->mParticleAttach = this;
-}
+
 
 void CParticleAttach::Play()
 {
-	InitializeParticleEmitter();
-
-	if (mParticleEmitter) {
-		if (mParticleEmitter->mIsPlaying && mLoop) return; // If already playing and looping, do nothing
-		if (mParticleEmitter->mIsPlaying && !mLoop) {
-			mParticleEmitter->Stop(); 
-		}
-		mParticleEmitter->mEmitterTransform = GetTransform()->GetWorldMat();
-
-		
-		INSTANCE(CParticleManager).PlayParticleEmitter(mParticleEmitter);
-		mParticleEmitter->mIsLooping = mLoop;
+	if (mIsPlaying && mLoop) {
+		std::cout << "Particle emitter is already playing and looping: " << mParticleEmitterName << std::endl;
+		return;
 	}
+	std::cout << "Play particle emitter: " << mParticleEmitterName << std::endl;
+	mParticleEmitter = INSTANCE(CParticleManager).PlayParticleEmitter(mParticleEmitterName, GetTransform()->GetWorldMat(), mLoop);
 }
 
 void CParticleAttach::Stop()
 {
+	if (mParticleEmitter->mIsPlaying) {
+		mParticleEmitter->Stop();
+	}
 }
 
 void CParticleAttach::Reserve(bool reserve)
@@ -102,14 +84,8 @@ void CParticleAttach::SetLoop(bool loop)
 	if (mParticleEmitter)
 	{
 		mParticleEmitter->mIsLooping = loop;
-		if (loop)
+		if (!loop)
 		{
-			mParticleEmitter->mIsPlaying = true;
-		}
-		else
-		{
-			mParticleEmitter->mIsPlaying = false;
-			mParticleEmitter->mParticleAttach = nullptr;
 			mParticleEmitter = nullptr;
 		}
 	}

@@ -44,7 +44,6 @@ void CParticleManager::Update()
 		}
 	}
 	if (mParticleCount > 0) {
-		//sort the particles based on their distance to the camera
 		if (!mMainCamera) return;
 		ParticleVertex* particleVertices = reinterpret_cast<ParticleVertex*>(mParticleVertexBuffer->mappedData);
 		std::sort(particleVertices, particleVertices + mParticleCount, [&](const ParticleVertex& a, const ParticleVertex& b) {
@@ -61,6 +60,8 @@ void CParticleManager::Render()
 	mParticleVertexBuffer->BindToShader();
 	mParticleShader->SetPipelineState(CMDLIST);
 
+	if (mParticleCount > 500)
+		int i = 0;
 	CMDLIST->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	CMDLIST->DrawInstanced(4, mParticleCount, 0, 0);
 }
@@ -88,7 +89,7 @@ void CParticleManager::AddParticleProperties(const std::string& name, const Part
 CParticleEmitter* CParticleManager::GetAvailableParticleEmitter()
 {
 	for (auto& emitter : mParticleEmitterPool) {
-		if (!emitter->mIsActive && !emitter->mParticleAttach) {
+		if (!emitter->mIsPlaying && (emitter->mActiveParticleCount == 0)) {
 			return emitter.get();
 		}
 	}
@@ -115,15 +116,14 @@ void CParticleManager::ReleaseParticleEmitter(CParticleEmitter* emitter)
 	auto it = std::find(mActiveParticleEmitters.begin(), mActiveParticleEmitters.end(), emitter);
 	if (it != mActiveParticleEmitters.end()) {
 		mActiveParticleEmitters.erase(it);
-		emitter->mIsActive = false;
+		emitter->Release();
 	}
 }
 
 void CParticleManager::ReleaseAllParticleEmitters()
 {
-	for (auto& emitter : mActiveParticleEmitters) {
+	for (auto& emitter : mParticleEmitterPool) {
 		emitter->Release();
-		emitter->mIsActive = false;
 	}
 	mActiveParticleEmitters.clear();
 	mParticleCount = 0;
@@ -132,9 +132,8 @@ void CParticleManager::ReleaseAllParticleEmitters()
 void CParticleManager::PlayParticleEmitter(CParticleEmitter* emitter)
 {
 	if (emitter) {
-		emitter->mIsActive = true;
+		if(!emitter->mIsPlaying) mActiveParticleEmitters.push_back(emitter);
 		emitter->Play();
-		mActiveParticleEmitters.push_back(emitter);
 	}
 }
 
@@ -146,12 +145,10 @@ CParticleEmitter* CParticleManager::PlayParticleEmitter(const std::string& name,
 		if (it == mParticlePropertiesMap.end()) {
 			throw std::runtime_error("Particle properties with name '" + name + "' not found.");
 		}
-		emitter->Release();
+		mActiveParticleEmitters.push_back(emitter);
 		emitter->Initialize(it->second.get());
-		emitter->mIsActive = true;
 		emitter->mIsLooping = looping;
 		emitter->Play(position);
-		mActiveParticleEmitters.push_back(emitter);
 		return emitter;
 	}
 	return nullptr;
@@ -165,12 +162,9 @@ CParticleEmitter* CParticleManager::PlayParticleEmitter(const std::string& name,
 		if (it == mParticlePropertiesMap.end()) {
 			throw std::runtime_error("Particle properties with name '" + name + "' not found.");
 		}
-		emitter->Release();
-		emitter->Initialize(it->second.get());
-		emitter->mIsActive = true;
+		mActiveParticleEmitters.push_back(emitter);
 		emitter->mIsLooping = looping;
 		emitter->Play(mat);
-		mActiveParticleEmitters.push_back(emitter);
 		return emitter;
 	}
 	return nullptr;
