@@ -534,6 +534,18 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		case ENEMY_TYPE::GRASS_BIG:
 			stateMachine = monsterObj->AddComponent<CGrassBigState>();
 			break;
+		case ENEMY_TYPE::WATER_SMALL:
+			stateMachine = monsterObj->AddComponent<CWaterSmallState>();
+			break;
+		case ENEMY_TYPE::WATER_BIG:
+			stateMachine = monsterObj->AddComponent<CWaterBigState>();
+			break;
+		case ENEMY_TYPE::FIRE_SMALL:
+			stateMachine = monsterObj->AddComponent<CFireSmallState>();
+			break;
+		case ENEMY_TYPE::FIRE_BIG:
+			stateMachine = monsterObj->AddComponent<CFireBigState>();
+			break;
 		default:
 			break;
 		}
