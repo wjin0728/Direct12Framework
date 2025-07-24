@@ -38,3 +38,5 @@ using SimpleMath::Matrix;
 
 // 고정 틱 간격 (60Hz)
 constexpr float TICK_INTERVAL = 1.0f / 60.0f; // 약 0.016667초
+
+constexpr float SPAWN_INTERVAL = 5.f; // 몬스터 스폰 간격 (초 단위)
