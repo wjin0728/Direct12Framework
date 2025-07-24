@@ -9,6 +9,11 @@
 #include <chrono>
 
 	//#include "OVER_PLUS.h"
+struct MonsterWave {
+	int current_wave = 0;
+	bool waveInProgress = false;
+};
+
 
 class GameManager
 {
@@ -35,6 +40,7 @@ public:
 	array<int, 6> Item_cnt = { 0, 0, 0, 0, 0, 0 };
 	array<int, 6> Monster_cnt = { 0, 0, 0, 0, 0, 0 };
 	array<int, 6> Projectile_cnt = { 0, 0, 0, 0, 0, 0 };
+	array<MonsterWave, 6> MonsterWaves; // 각 서버의 몬스터 웨이브 정보
 
 	GameManager();
 	~GameManager();
@@ -95,6 +101,8 @@ public:
 		Monster_cnt[ServerNumber] = 0;
 		Item_cnt[ServerNumber] = 0;
 		Projectile_cnt[ServerNumber] = 0;
+		MonsterWaves[ServerNumber].current_wave = 0;
+		MonsterWaves[ServerNumber].waveInProgress = false;
 		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
 
 		for (auto& cl : clients[ServerNumber]) {
@@ -106,14 +114,12 @@ public:
 			cl.second._player.InitializeTarget();
 		}
 
-		//InitializeMonsters(scene_type);
+		cout << "Scene changed to: " << (int)scene_type << endl;
 	}
 
 	void CreateItem(Monster* monster);
-	void InitializeMonsters(S_SCENE_TYPE scene_type);
-	void InitializeGrassMonsters();
-	void InitializeWaterMonsters();
-	void InitializeFireMonsters();
+	void InitializeMonsterWave();
+	void InitializeMonster(S_ENEMY_TYPE type, Vec3 position);
 
 private:
 	void Update();

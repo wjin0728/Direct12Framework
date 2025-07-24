@@ -60,7 +60,8 @@ void PlayerState::BasicAttackState::Enter(PlayerCharacter* player) {
 
 void PlayerState::BasicAttackState::Update(PlayerCharacter* player) {
 	attackTimer += TICK_INTERVAL;   
-	// cout << "BasicAttack 업데이트 중!" << endl;
+    player->SetVelocity(0, 0, 0); // 속도 0으로 설정
+    // cout << "BasicAttack 업데이트 중!" << endl;
 
     if (player->_target) {
         Vec3 direction = player->_target->_pos - player->_pos;
@@ -195,6 +196,7 @@ void PlayerState::UltimateState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::UltimateState::Update(PlayerCharacter* player) {
+    player->SetVelocity(0, 0, 0); // 속도 0으로 설정
     if (player->_class == S_PLAYER_CLASS::FIGHTER) {
         ultimateTimer += TICK_INTERVAL;
 
@@ -225,6 +227,7 @@ void PlayerState::GatheringState::Enter(PlayerCharacter* player) {
 }
 
 void PlayerState::GatheringState::Update(PlayerCharacter* player) {
+    player->SetVelocity(0, 0, 0); // 속도 0으로 설정
 }
 
 void PlayerState::GatheringState::Exit(PlayerCharacter* player) {

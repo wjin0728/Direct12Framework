@@ -5,7 +5,8 @@ class CEnemyState :
     public CEntityState
 {
 protected:
-	static const float MAX_HEALTH;
+	static const float MAX_BIG_HEALTH;
+    static const float MAX_SMALL_HEALTH;
     std::weak_ptr<class CTransform> mAttackSocket;
 	float mHitProgress = -ANIMATION_CALLBACK_EPSILON;
 

@@ -6,7 +6,8 @@
 #include"HealthSystem.h"
 #include "Timer.h"
 
-const float CEnemyState::MAX_HEALTH = 100.f;
+const float CEnemyState::MAX_BIG_HEALTH = 100.f;
+const float CEnemyState::MAX_SMALL_HEALTH = 50.f;
 
 void CEnemyState::Awake()
 {
@@ -153,12 +154,15 @@ void CEnemyState::SetHitFactor(float hitFactor)
 	transform->SetHitFactor(hitFactor);
 }
 
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
+
 void CGrassSmallState::Awake()
 {
 	CEnemyState::Awake();
 	auto healthSystem = owner->GetComponentFromHierarchy<CHealthSystem>();
-	mHealth = 50.f;
-	mMaxHealth = 50.f;
+	mHealth = mMaxHealth = MAX_SMALL_HEALTH;
 }
 
 void CGrassSmallState::Start()
@@ -170,7 +174,7 @@ void CGrassSmallState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 0.7f });
+		healthSystem->SetHealthBarScale({ mHealth / MAX_SMALL_HEALTH, 0.7f });
 
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
@@ -200,11 +204,14 @@ void CGrassSmallState::OnExitState(UINT8 state)
 	CEnemyState::OnExitState(state);
 }
 
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
+
 void CGrassBigState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_BIG_HEALTH;
 }
 
 void CGrassBigState::Start()
@@ -216,7 +223,7 @@ void CGrassBigState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+		healthSystem->SetHealthBarScale({ mHealth / MAX_BIG_HEALTH, 1.f });
 
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
@@ -248,15 +255,12 @@ void CGrassBigState::OnExitState(UINT8 state)
 
 /// <summary>
 /// ////////////////////////////////////////////////////////////////////////
-///
 /// </summary>
-/// 
-/// 
+
 void CWaterBigState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_BIG_HEALTH;
 }
 
 void CWaterBigState::Start()
@@ -268,7 +272,7 @@ void CWaterBigState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+		healthSystem->SetHealthBarScale({ mHealth / MAX_BIG_HEALTH, 1.f });
 
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
@@ -299,15 +303,14 @@ void CWaterBigState::OnExitState(UINT8 state)
 	CEnemyState::OnExitState(state);
 }
 
-
-//////////////////////////////////////////////////////////////////
-///
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
 
 void CWaterSmallState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_SMALL_HEALTH;
 }
 
 void CWaterSmallState::Start()
@@ -319,7 +322,7 @@ void CWaterSmallState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+		healthSystem->SetHealthBarScale({ mHealth / MAX_SMALL_HEALTH, 1.f });
 
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
@@ -358,8 +361,7 @@ void CWaterSmallState::OnExitState(UINT8 state)
 void CFireBigState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_BIG_HEALTH;
 }
 
 void CFireBigState::Start()
@@ -371,7 +373,7 @@ void CFireBigState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+		healthSystem->SetHealthBarScale({ mHealth / MAX_BIG_HEALTH, 1.f });
 
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
@@ -409,8 +411,7 @@ void CFireBigState::OnExitState(UINT8 state)
 void CFireSmallState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_SMALL_HEALTH;
 }
 
 void CFireSmallState::Start()
@@ -421,7 +422,7 @@ void CFireSmallState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+		healthSystem->SetHealthBarScale({ mHealth / MAX_SMALL_HEALTH, 1.f });
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
 			transform->SetLocalPosition({ 0.f, 4.f, 0.f });

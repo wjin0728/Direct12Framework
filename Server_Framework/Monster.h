@@ -12,7 +12,6 @@ public:
     S_MONSTER_STATE	_state;
 	bool _remove = false;
 	bool _drop_item = false;
-    int _wave = 1;
     Vec3 _spawn_pos{};
     Vec3 _spawn_dir{};
 
@@ -49,37 +48,44 @@ public:
         currentState(&MonsterState::UndergroundState::GetInstance()),
         _state(S_MONSTER_STATE::UNDERGROUND),
         _look_dir(Vec3(0, 0, 1)),
-        _hp(100),
+        _spawn_dir(Vec3(0, 0, 1)),
         _barrier(0),
         _on_FireEnchant(false),
-        _on_GrassWeaken(false) {
+        _on_GrassWeaken(false)
+    {
         switch (monster_type) {
         case S_ENEMY_TYPE::FIRE_SMALL: {
 			ReadAnimationInfo("Animations/FireSmall.bin");
+            _hp = _max_hp = 50.f;
             break;
         }
         case S_ENEMY_TYPE::FIRE_BIG: {
             ReadAnimationInfo("Animations/FireBig.bin");
+            _hp = _max_hp = 100.f;
             break;
         }
         case S_ENEMY_TYPE::WATER_SMALL: {
             ReadAnimationInfo("Animations/WaterSmall.bin");
+            _hp = _max_hp = 50.f;
             break;
         }
         case S_ENEMY_TYPE::WATER_BIG: {
             ReadAnimationInfo("Animations/WaterBig.bin");
+            _hp = _max_hp = 100.f;
             break;
         }
         case S_ENEMY_TYPE::GRASS_SMALL: {
             ReadAnimationInfo("Animations/GrassSmall.bin");
             _boundingbox.Center = XMFLOAT3(0, 0.83, 0);
             _boundingbox.Extents = Vec3(0.73, 1.27, 0.76) / 2.f;
+            _hp = _max_hp = 50.f;
             break;
         }
         case S_ENEMY_TYPE::GRASS_BIG: {
             ReadAnimationInfo("Animations/GrassBig.bin");
             _boundingbox.Center = XMFLOAT3(0, 1.72, 0);
             _boundingbox.Extents = Vec3(1.61, 2.71, 1.21) / 2.f;
+            _hp = _max_hp = 100.f;
             break;
         }
         }

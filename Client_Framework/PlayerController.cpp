@@ -64,8 +64,7 @@ void CPlayerController::Update()
 				auto camera = mCamera.lock()->GetTransform();
 				Vec3 camForward = camera->GetWorldLook();
 				INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
-				mStateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-				INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
+				INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::IDLE);
 			}
 		}
 		mFreeLook = !mFreeLook;
@@ -211,13 +210,11 @@ void CPlayerController::OnKeyEvents()
 	{
 	case PLAYER_STATE::IDLE: {
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::ATTACK);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::ATTACK);
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::JUMP);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::JUMP);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::JUMP);
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
@@ -245,8 +242,7 @@ void CPlayerController::OnKeyEvents()
 		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
 			if (auto item = mTargetItem.lock()) {
 				if (item->GetName() == "SkillItem") {
-					mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
-					INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
+					INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::GATHERING);
 				}
 				else if (item->GetName() == "Portal") {
 					//서버에 포탈 이동 요청
@@ -254,8 +250,7 @@ void CPlayerController::OnKeyEvents()
 			}
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::ULTIMATE);
 			return;
 		}
 
@@ -266,8 +261,7 @@ void CPlayerController::OnKeyEvents()
 
 		if (dir != 0) {
 			INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
-			mStateMachine->SetState((UINT8)PLAYER_STATE::RUN);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::RUN);
 			moveKeyPressed = true;
 			return;
 		}
@@ -276,8 +270,7 @@ void CPlayerController::OnKeyEvents()
 	case PLAYER_STATE::RUN: {
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
 			//INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
-			mStateMachine->SetState((UINT8)PLAYER_STATE::RUNATTACK);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUNATTACK);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::RUNATTACK);
 
 			if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 			if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
@@ -289,8 +282,7 @@ void CPlayerController::OnKeyEvents()
 		}
 
 		if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::JUMP);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::JUMP);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::JUMP);
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
@@ -317,8 +309,7 @@ void CPlayerController::OnKeyEvents()
 		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
 			if (auto item = mTargetItem.lock()) {
 				if (item->GetName() == "SkillItem") {
-					mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
-					INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
+					INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::GATHERING);
 					INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
 					return;
 				}
@@ -328,8 +319,7 @@ void CPlayerController::OnKeyEvents()
 			}
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
 			//mStateMachine->ActivateShield(false);
 			return;
@@ -342,8 +332,7 @@ void CPlayerController::OnKeyEvents()
 
 		if (dir == 0) {
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
-			mStateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::IDLE);
 			return;
 		}
 		INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);

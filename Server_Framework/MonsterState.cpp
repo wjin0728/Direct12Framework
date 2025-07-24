@@ -165,7 +165,6 @@ void MonsterState::DeathState::Enter(Monster* monster) {
 void MonsterState::DeathState::Update(Monster* monster) {
 	deathTimer -= TICK_INTERVAL;
 	if (deathTimer <= 0) {
-		--monster->_wave;
 		monster->SetState(S_MONSTER_STATE::UNDERGROUND);
 	}
 }
@@ -182,16 +181,11 @@ MonsterState::UndergroundState& MonsterState::UndergroundState::GetInstance() { 
 
 void MonsterState::UndergroundState::Enter(Monster* monster) {
 	//cout << "UndergroundState Entered!" << endl;
-	monster->_pos = monster->_spawn_pos;
-	if (!monster->_wave) {
+	if (monster->_drop_item) {
 		monster->_remove = true;
 		return;
 	}
-	monster->_look_dir = monster->_spawn_dir;
-	monster->_target = nullptr;
-	monster->_hp = monster->_max_hp;
 	monster->SetVelocity(0, 0, 0);
-	monster->LocalTransform();
 }
 
 void MonsterState::UndergroundState::Update(Monster* monster) {
@@ -214,7 +208,6 @@ MonsterState::SpawnState& MonsterState::SpawnState::GetInstance() { static Monst
 
 void MonsterState::SpawnState::Enter(Monster* monster) {
 	cout << "SpawnState Entered!" << endl;
-	monster->_pos = monster->_spawn_pos;
 	monster->SetVelocity(0, 0, 0);
 	SpawnTimer = monster->_animations[(int)S_MONSTER_STATE::SPAWN].mLength;
 }
