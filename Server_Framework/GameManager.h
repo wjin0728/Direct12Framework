@@ -13,7 +13,14 @@ struct MonsterWave {
 	int current_wave = 0;
 	float wave_timer = SPAWN_INTERVAL;
 	float spawn_timer = SPAWN_INTERVAL;
-	bool is_end = false;
+	bool is_end = false; // 웨이브 종료 여부
+	bool make_potal = false; // 포탈 생성 여부
+};
+
+struct MonsterAttackInfo {
+	Vec2 offset;
+	float radius;
+	int damage;
 };
 
 class GameManager
@@ -108,6 +115,7 @@ public:
 		MonsterWaves[ServerNumber].wave_timer = SPAWN_INTERVAL;
 		MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
 		MonsterWaves[ServerNumber].is_end = false;
+		MonsterWaves[ServerNumber].make_potal = false;
 
 		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
 
@@ -118,14 +126,70 @@ public:
 			cl.second._player._barrier = 0;
 			cl.second._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 			cl.second._player.InitializeTarget();
+			cl.second._player._ready_for_next_stage = false;
 		}
 
 		cout << "Scene changed to: " << (int)scene_type << endl;
 	}
+	void ChangeScene() {
+		switch (scene_type) {
+		case S_SCENE_TYPE::LOBBY:
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAIN_STAGE_1);
+			break;
+		case S_SCENE_TYPE::MAIN_STAGE_1:
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAIN_STAGE_2);
+			break;
+		case S_SCENE_TYPE::MAIN_STAGE_2:
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAIN_STAGE_3);
+			break;
+		case S_SCENE_TYPE::MAIN_STAGE_3:
+			ChangeScene((uint8_t)S_SCENE_TYPE::BOSS_STAGE);
+			break;
+		case S_SCENE_TYPE::BOSS_STAGE:
+			ChangeScene((uint8_t)S_SCENE_TYPE::ENDING);
+			break;
+		}
+	}
 
 	void CreateItem(Monster* monster);
+
 	void InitializeMonsterWave();
 	void InitializeMonster(S_ENEMY_TYPE type, Vec3 position);
+
+	std::function<void(Monster*)> MakeAttackEvent(Vec2 offset, float radius, int damage);
+
+	void UpdateWave();
+	void HandleWaveEnd(MonsterWave& wave);
+	void HandleWaveInProgress(MonsterWave& wave);
+	bool IsAllPlayerReady(); // 모든 플레이어가 다음 스테이지 준비 상태인지 확인
+	void ClearMonstersAndMakePortal();
+
+	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
+		{ S_ENEMY_TYPE::GRASS_SMALL, {
+			{ {0.f, 0.7f}, 0.8f, 100 },
+			{ {0.2f, 0.9f}, 2.f, 100 },
+		}},
+		{ S_ENEMY_TYPE::GRASS_BIG, {
+			{ {0.f, 2.85f}, 1.f, 150 },
+			{ {1.25f, 1.25f}, 2.f, 150 },
+		}},
+		{ S_ENEMY_TYPE::WATER_SMALL, {
+			{ {0.f, 1.f}, 1.f, 100 },
+			{ {0.f, 1.7f}, 0.85f, 100 },
+		}},
+		{ S_ENEMY_TYPE::WATER_BIG, {
+			{ {0.f, 2.5f}, 1.9f, 150 },
+			{ {0.f, 0.f}, 2.5f, 150 },
+		}},
+		{ S_ENEMY_TYPE::FIRE_SMALL, {
+			{ {0.f, 2.f}, 0.75f, 100 },
+			{ {0.f, 0.8f}, 1.1f, 100 },
+		}},
+		{ S_ENEMY_TYPE::FIRE_BIG, {
+			{ {0.8f, 1.15f}, 1.5f, 150 },
+			{ {0.f, 2.3f}, 1.f, 150 },
+		}},
+	};
 
 private:
 	void Update();

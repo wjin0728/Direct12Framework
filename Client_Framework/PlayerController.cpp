@@ -245,7 +245,8 @@ void CPlayerController::OnKeyEvents()
 					INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::GATHERING);
 				}
 				else if (item->GetName() == "Portal") {
-					//서버에 포탈 이동 요청
+					mReadyForNextStage = !mReadyForNextStage; // Toggle ready state for next stage
+					INSTANCE(ServerManager).send_cs_ready_for_next_stage_packet(mReadyForNextStage);
 				}
 			}
 		}
@@ -314,7 +315,8 @@ void CPlayerController::OnKeyEvents()
 					return;
 				}
 				else if (item->GetName() == "Portal") {
-					//서버에 포탈 이동 요청
+					mReadyForNextStage = !mReadyForNextStage; // Toggle ready state for next stage
+					INSTANCE(ServerManager).send_cs_ready_for_next_stage_packet(mReadyForNextStage);
 				}
 			}
 		}

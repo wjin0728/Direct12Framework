@@ -45,7 +45,6 @@ void PlayerCharacter::SetState(PlayerStateMachine* newState)
 void PlayerCharacter::SetState(uint8_t newState)
 {
 	//if (newState == (uint8_t)_state) return;
-    _time = 0.0f;
 
     switch ((S_PLAYER_STATE)newState) {
     case S_PLAYER_STATE::IDLE:
@@ -88,10 +87,10 @@ void PlayerCharacter::SetState(uint8_t newState)
         break;
     }
 }
+
 void PlayerCharacter::Update() 
 {
 	if (currentState) currentState->Update(this);
-    _time += TICK_INTERVAL;
 	LocalTransform();
 }
 

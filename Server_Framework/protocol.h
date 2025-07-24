@@ -31,6 +31,7 @@ constexpr char CS_GAME_SERVER_LOGIN = 11;
 constexpr char CS_SELECT_CLASS = 12;
 constexpr char CS_CLICK_BUTTON = 13;
 constexpr char CS_HP = 14;
+constexpr char CS_READY_FOR_NEXT_STAGE = 15;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -146,6 +147,11 @@ struct CS_CLICK_BUTTON_PACKET : PACKET {
 struct CS_HP_PACKET : PACKET {
 	short object_id;
 	short hp;
+};
+
+struct CS_READY_FOR_NEXT_STAGE_PACKET : PACKET {
+	short id;
+	bool ready; // true: ready, false: cancel
 };
 
 // ----------------------------------------------------------------------------------
