@@ -181,24 +181,18 @@ MonsterState::UndergroundState& MonsterState::UndergroundState::GetInstance() { 
 
 void MonsterState::UndergroundState::Enter(Monster* monster) {
 	//cout << "UndergroundState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0);
 	if (monster->_drop_item) {
 		monster->_remove = true;
 		monster->_pos.y = -5.f;
 		return;
 	}
-	monster->SetVelocity(0, 0, 0);
-	UndergroundTimer = monster->_animations[(int)S_MONSTER_STATE::UNDERGROUND].mLength;
 }
 
 void MonsterState::UndergroundState::Update(Monster* monster) {
-	UndergroundTimer -= TICK_INTERVAL;
-	if (UndergroundTimer <= 0) {
-		monster->SetState(S_MONSTER_STATE::SPAWN);
-	}
 }
 
 void MonsterState::UndergroundState::Exit(Monster* monster) {
-	//monster->_pos.y = 5.f;
 }
 
 

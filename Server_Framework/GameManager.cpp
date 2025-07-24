@@ -551,7 +551,7 @@ void GameManager::Update()
 		monster.Update();
 		monster.AvoidCollision(Monsters[ServerNumber]);
 
-		if (monster._state == S_MONSTER_STATE::RUN) {
+		if (monster._state == S_MONSTER_STATE::RUN || monster._state == S_MONSTER_STATE::SPAWN) {
 			float terrainHeight = terrain[(int)scene_type].GetHeight(monster._pos.x, monster._pos.z);
 			monster._pos.y = terrainHeight;
 		}
@@ -573,6 +573,7 @@ void GameManager::Update()
 		}
 	}
 
+	// 몬스터 웨이브 관리
 	if (S_SCENE_TYPE::MAINSTAGE1 <= scene_type && scene_type < S_SCENE_TYPE::END) {
 		auto& wave = MonsterWaves[ServerNumber];
 
@@ -586,14 +587,23 @@ void GameManager::Update()
 				}
 			}
 			else {
-				wave.spawn_timer -= TICK_INTERVAL;
-				if (wave.spawn_timer <= 0.f) {
+				wave.wave_timer -= TICK_INTERVAL;
+				if (wave.wave_timer <= 0.f) {
 					InitializeMonsterWave();
 					std::cout << wave.current_wave << " wave started." << endl;
 				}
 			}
 		}
 		else {
+			if (wave.spawn_timer > 0) {
+				wave.spawn_timer -= TICK_INTERVAL;
+				if (wave.spawn_timer <= 0.f) {
+					for (auto& mon : Monsters[ServerNumber]) {
+						mon.second.SetState(S_MONSTER_STATE::SPAWN);
+					}
+				}
+			}
+
 			wave.is_end = true;
 			for (auto& [id, monster] : Monsters[ServerNumber]) {
 				if (!monster._remove || !monster._drop_item) {
@@ -733,19 +743,27 @@ void GameManager::CreateItem(Monster* monster)
 
 void GameManager::InitializeMonsterWave()
 {
+	if (Monster_cnt[ServerNumber]) {
+		for (auto& cl : clients[ServerNumber]) {
+			for (int i = 0; i < Monster_cnt[ServerNumber]; ++i) {
+				cl.second.send_remove_monster_packet(i);
+			}
+		}
+	}
+
 	Monsters[ServerNumber].clear();
 	Monster_cnt[ServerNumber] = 0;
 
 	switch (scene_type) {
 	case S_SCENE_TYPE::MAINSTAGE1: {
 		if (MonsterWaves[ServerNumber].current_wave == 0) {
-			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, 5.f, 50.f));
-			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(55.f, 5.f, 50.f));
+			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, -5.f, 50.f));
+			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(55.f, -5.f, 50.f));
 		}
 		else if (MonsterWaves[ServerNumber].current_wave == 1) {
-			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, 5.f, 50.f));
-			InitializeMonster(S_ENEMY_TYPE::GRASS_BIG, Vec3(55.5f, 5.f, 50.f));
-			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(60.f, 5.f, 50.f));
+			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, -5.f, 50.f));
+			InitializeMonster(S_ENEMY_TYPE::GRASS_BIG, Vec3(55.5f, -5.f, 50.f));
+			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(60.f, -5.f, 50.f));
 		}
 		break;
 	}
@@ -777,13 +795,14 @@ void GameManager::InitializeMonsterWave()
 
 	MonsterWaves[ServerNumber].current_wave++;
 	MonsterWaves[ServerNumber].is_end = false;
+	MonsterWaves[ServerNumber].wave_timer = SPAWN_INTERVAL;
 	MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
 }
 
 void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 {
 	Monster ms{ type };
-	ms._pos = ms._spawn_pos = position;
+	ms._pos = position;
 	ms.LocalTransform();
 	for (auto& cl : clients[ServerNumber]) {
 		ms._Player[cl.first] = &cl.second._player;

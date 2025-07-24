@@ -75,6 +75,7 @@ void Monster::TakeDamage(int damage, bool do_hit_raction)
     else {
         _hp -= damage;
         if (_hp < 0) _hp = 0;
+		std::cout << "Monster HP: " << _hp << std::endl;
     }
     if (_hp > 0 && do_hit_raction) {
         SetState(S_MONSTER_STATE::GETHIT);

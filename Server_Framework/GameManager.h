@@ -11,6 +11,7 @@
 	//#include "OVER_PLUS.h"
 struct MonsterWave {
 	int current_wave = 0;
+	float wave_timer = SPAWN_INTERVAL;
 	float spawn_timer = SPAWN_INTERVAL;
 	bool is_end = false;
 };
@@ -104,6 +105,7 @@ public:
 		Projectile_cnt[ServerNumber] = 0;
 
 		MonsterWaves[ServerNumber].current_wave = 0;
+		MonsterWaves[ServerNumber].wave_timer = SPAWN_INTERVAL;
 		MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
 		MonsterWaves[ServerNumber].is_end = false;
 
