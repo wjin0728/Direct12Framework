@@ -86,6 +86,7 @@ public:
 		float nearPlane = 1.01f, float farPlane = 1000.f, float fovAngle = 60.f);
 	static std::shared_ptr<CGameObject> CreateCameraObject(const std::string& tag, Vec2 rtSize, float nearPlane, float farPlane, Vec2 size);
 	static std::shared_ptr<CGameObject> CreateUIObject(const std::string& shader, const std::string& texture, Vec2 pos, Vec2 size, float depth = 1.f);
+	static std::shared_ptr<CGameObject> CreateTrailObject(bool isViewAligned, const std::string& texture, float width, float duration, float minDistance = 0.01f);
 	//�⺻ ������ ���� ���� ������Ʈ�� �����Ѵ�.
 	static std::shared_ptr<CGameObject> CreateTerrainObject(std::ifstream& ifs);
 	//���̳ʸ� ������ ���� ������Ʈ�� �����Ѵ�.

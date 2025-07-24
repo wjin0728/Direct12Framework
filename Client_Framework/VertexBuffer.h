@@ -1,5 +1,4 @@
 #pragma once
-#include"DX12Manager.h"
 #include"UploadBuffer.h"
 
 class CVertexBuffer : public CStructedBuffer
@@ -17,6 +16,7 @@ private:
 	bool mIsDynamic = false;
 
 public:
+	bool mIsActive = false;
 	CVertexBuffer() : CStructedBuffer(D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER) {}
 	virtual ~CVertexBuffer() = default;
 
@@ -26,6 +26,12 @@ public:
 
 	void UpdateVertexBuffer(const void* data, UINT size);
 	void SetVertexBuffer() const;
+
+	void ClearBuffer()
+	{
+		mVertexBufferView = {};
+		mIsActive = false;
+	}
 
 public:
 	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() const { return mVertexBufferView; }

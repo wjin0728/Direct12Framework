@@ -13,15 +13,18 @@
 #include "Scene.h"
 #include"Timer.h"
 #include"VertexBuffer.h"
+#include"FrameResource.h"
 
-CTrailRenderer::CTrailRenderer()
+
+CTrailRenderer::CTrailRenderer(bool isViewAligned)
 {
-	mVertexCount = 0;
+    mVertexCount = 0;
     mDuration = 0.2f;
     mTotalTime = 0.0f;
-	mWidth = 0.7f; 
-	mMinDstance = 0.2f;
-	mMaxPoints = 1000; 
+    mWidth = 0.7f;
+    mMinDstance = 0.2f;
+    mMaxPoints = 100;
+    mISViewAligned = isViewAligned;
     mTrailPoints.reserve(mMaxPoints);
 }
 
@@ -41,16 +44,13 @@ CTrailRenderer::CTrailRenderer(const CTrailRenderer& other)
 
 CTrailRenderer::~CTrailRenderer()
 {
+	INSTANCE(CDX12Manager).GetCurFrameResource()->ReturnDynamicVertexBuffer(mVertexBuffer);
 }
 
 void CTrailRenderer::Awake()
 {
 	CRenderer::Awake();
-    mVertexBuffer = std::make_unique<CVertexBuffer>();
-
-    INSTANCE(CDX12Manager).OpenCommandList();
-    mVertexBuffer->Initialize(0, sizeof(TrailVertex), mMaxPoints * 2, nullptr, true);
-    INSTANCE(CDX12Manager).CloseCommandList();
+    mVertexBuffer = INSTANCE(CDX12Manager).GetCurFrameResource()->GetDynamicVertexBuffer();
 
     owner->SetRenderLayer(RENDER_LAYER::Transparent);
 
@@ -62,7 +62,9 @@ void CTrailRenderer::Awake()
 void CTrailRenderer::Start()
 {
 	CRenderer::Start();
-	int idx = m_materials[0]->GetProperty<UINT>("normalTexIdx");
+	//int idx = m_materials[0]->GetProperty<UINT>("normalTexIdx");
+	int texIdx = mBlendMaskTexture ? mBlendMaskTexture->GetSrvIndex() : -1;
+    m_materials[0]->SetProperty("normalTexIdx", texIdx);
 }
 
 void CTrailRenderer::Update()
@@ -75,6 +77,7 @@ void CTrailRenderer::LateUpdate()
 	Vec3 worldPos = transform->GetWorldPosition();
 
     if (mActive) {
+
         if (mTrailPoints.empty()) {
             mTrailPoints.push_back({ worldPos, mTotalTime, 0.9f });
             mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
@@ -93,6 +96,8 @@ void CTrailRenderer::LateUpdate()
             mTrailPoints.push_back({ worldPos, mTotalTime, 1.f });
         }
     }
+
+	float deltaTime = DELTA_TIME;
     if (mTotalTime >= mDuration) {
         float cutTime = mTotalTime - mDuration; 
 
@@ -103,6 +108,8 @@ void CTrailRenderer::LateUpdate()
             if (tail.time <= cutTime && cutTime <= tailNext.time) {
                 float timeDiff = tailNext.time - tail.time;
                 float ratio = (cutTime - tail.time) * 2 / timeDiff;
+
+
 
                 ratio = std::clamp(ratio, 0.0f, 1.0f);
                 tail.position = Vec3::Lerp(tail.position, tailNext.position, ratio);
@@ -137,27 +144,24 @@ void CTrailRenderer::Render(class CCamera* camera, int pass)
 
 void CTrailRenderer::SetBlendMaskTexture(const std::string& name)
 {
+    mBlendMaskTexture = INSTANCE(CResourceManager).Get<CTexture>(name);
+	if (!mBlendMaskTexture) return;
+    if (m_materials.empty()) return;
     auto material = m_materials[0];
-    if (material) {
-        auto texture = INSTANCE(CResourceManager).Get<CTexture>(name);
-        if (texture) {
-			UINT blendTexIdx = texture->GetSrvIndex();
-            material->SetProperty("normalTexIdx", blendTexIdx);
-        }
-	}
+    if (!material) return;
+	int idx = mBlendMaskTexture->GetSrvIndex();
+    material->SetProperty("normalTexIdx", idx);
 }
 
 void CTrailRenderer::UpdateVertices()
 {
     if (mTrailPoints.size() < 3)
         return;
-	auto camera = INSTANCE(CRenderManager).GetMainCamera();
-    if(!camera) return;
 
     std::vector<TrailPoint> smoothTrailPoints{};
-	const int segmentPerPair = 4; 
+    const int segmentPerPair = 4;
 
-    if (mTrailPoints.size() >= 4) { 
+    if (mTrailPoints.size() >= 4) {
         for (int i = 1; i < mTrailPoints.size() - 2; ++i) {
             for (int s = 0; s < segmentPerPair; ++s) {
                 float t = (float)s / segmentPerPair;
@@ -181,37 +185,48 @@ void CTrailRenderer::UpdateVertices()
     else smoothTrailPoints = mTrailPoints;
 
     TrailVertex* vertices = reinterpret_cast<TrailVertex*>(mVertexBuffer->mappedData);
-	if (!vertices) return;
-    if(smoothTrailPoints.size() < 2) return;
-	auto transform = GetTransform();
+    if (!vertices) return;
+    if (smoothTrailPoints.size() < 2) return;
+    auto transform = GetTransform();
     mVertexCount = 0;
 
     float uvStep = 1.0f / (smoothTrailPoints.size() - 1);
-    Vec3 right = transform->GetWorldLook();
+	
+    auto camera = INSTANCE(CRenderManager).GetMainCamera();
+    if (!camera) return;
+	Vec3 camPosition = camera->GetTransform()->GetWorldPosition();
+
     for (size_t i = 0; i < smoothTrailPoints.size(); ++i)
     {
-        Vec3 direction;
+        Vec3 forward = mISViewAligned ? (camPosition - smoothTrailPoints[i].position).GetNormalized() : transform->GetWorldLook();
+        Vec3 right;
         if (i == 0) {
-            direction = (smoothTrailPoints[i+1].position - smoothTrailPoints[i].position).GetNormalized();
+            right = (smoothTrailPoints[i + 1].position - smoothTrailPoints[i].position).GetNormalized();
         }
         else if (i == (smoothTrailPoints.size() - 1))
-            direction = -transform->GetWorldRight();
+            {
+            right = (smoothTrailPoints[i].position - smoothTrailPoints[i - 1].position).GetNormalized();
+		}
         else {
             Vec3 dir1 = (smoothTrailPoints[i].position - smoothTrailPoints[i - 1].position).GetNormalized();
             Vec3 dir2 = (smoothTrailPoints[i + 1].position - smoothTrailPoints[i].position).GetNormalized();
-            direction = (dir1 + dir2).GetNormalized();
+            right = (dir1 + dir2).GetNormalized();
         }
 
-        Vec3 up = direction.Cross(right).GetNormalized();
-		float t = i * uvStep;
-		Vec3 offset = up * mWidth * lerp(0.2f, 1.f, t); 
-		float alpha = smoothTrailPoints[i].alpha * std::lerp(0.0f, 1.f, t); 
-		alpha = std::pow(alpha, 0.8f); 
+        Vec3 up = forward.Cross(right).GetNormalized();
+        float t = i * uvStep;
+		float scale = std::lerp(0.2f, 1.f, t);
+		scale = std::pow(scale, 0.4f); 
+        Vec3 offset = up * mWidth * scale;
+        float alpha = smoothTrailPoints[i].alpha * std::lerp(0.0f, 1.f, t);;
+        alpha = std::pow(alpha, 0.8f);
         float uvY = i * uvStep;
 
         vertices[mVertexCount++] = { smoothTrailPoints[i].position + offset, Vec2(1, uvY), smoothTrailPoints[i].time, Color(1.f,1.f,1.f,alpha) };
         vertices[mVertexCount++] = { smoothTrailPoints[i].position - offset, Vec2(0, uvY), smoothTrailPoints[i].time, Color(1.f,1.f,1.f,alpha) };
     }
+
+    
 
 	mVertexBuffer->UpdateVertexBuffer(nullptr, mVertexCount);
 }

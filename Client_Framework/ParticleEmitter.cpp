@@ -96,7 +96,6 @@ void CParticleEmitter::Initialize(ParticleProperties* particleProperties)
 
 void CParticleEmitter::Release()
 {
-	std::cout << "Particle emitter ended and  released." << std::endl;
 	mTimeSinceLastEmit = 0.f;
 	mTotalTime = 0.f;
 	mIsPlaying = false;
@@ -146,6 +145,7 @@ int CParticleEmitter::UpdateParticles(ParticleVertex* dataPtr, CCamera* camera)
 		dataPtr[mActiveParticleCount].rotation = particle.rotation;
 		dataPtr[mActiveParticleCount].albedoTexIdx = mParticleProperties->textureIdx;
 		dataPtr[mActiveParticleCount].distanceToCamera = (dataPtr[mActiveParticleCount].position - cameraPos).Dot(cameraForward);
+		dataPtr[mActiveParticleCount].alignment = mParticleProperties->alignment;
 
 		if (mParticleProperties->useTextureSheetAnimation) {
 			float t = mParticleProperties->texSheetAnimationCurve.GetRandomValue(particle.Age);
@@ -302,6 +302,9 @@ void ParticleProperties::ReadParticlePropertiesFromFile(std::ifstream& ifs, Part
 	std::string token;
 	while (true) {
 		ReadDateFromFile(ifs, token);
+		if (token == "<Alignment>:") {
+			ReadDateFromFile(ifs, properties.alignment);
+		}
 		if (token == "<Burst>:") {
 			int burstCount = 0;
 			ReadDateFromFile(ifs, burstCount);

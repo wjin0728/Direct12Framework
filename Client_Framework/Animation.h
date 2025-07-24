@@ -35,6 +35,9 @@ public:
     using Event = std::function<void(float)>;
 
     void Register(const std::string& name, Event event) {
+        if (mEvents.find(name) == mEvents.end()) {
+            mEvents[name] = std::vector<Event>();
+		}
         mEvents[name].emplace_back(event);
     }
 

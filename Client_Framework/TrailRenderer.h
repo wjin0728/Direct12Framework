@@ -31,12 +31,16 @@ private:
 	int mMaxPoints;
 	int mVertexCount; 
 
+	bool mISViewAligned = false; 
+
 	std::vector<TrailPoint> mTrailPoints;
-    std::unique_ptr<CVertexBuffer> mVertexBuffer{};
+	CVertexBuffer* mVertexBuffer{};
+
+	std::shared_ptr<class CTexture> mBlendMaskTexture = nullptr;
     
 public:
 	bool mActive = false; 
-    CTrailRenderer();
+	CTrailRenderer(bool isViewAligned = false);
 	CTrailRenderer(const CTrailRenderer& other);
     virtual ~CTrailRenderer();
 

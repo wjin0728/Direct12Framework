@@ -4,9 +4,9 @@
 cbuffer MaterialData : register(b5)
 {
     float4 ForwardColor;
-    uint ForwardTexIdx;
+    int ForwardTexIdx;
     
-    uint normalTexIdx;
+    int normalTexIdx;
     float smoothness;
     float metallic;
     

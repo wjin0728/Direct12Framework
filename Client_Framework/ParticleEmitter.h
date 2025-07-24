@@ -470,7 +470,7 @@ struct ShapeModule
 		case ShapeType::Circle:
 		{
 			float theta = RandomNumberGenerator::RandFloat(0, XM_2PI);
-			float r = radius * sqrtf(RandomNumberGenerator::RandFloat(0.0f, 1.0f));
+			float r = radius;
 			float x = r * cosf(theta);
 			float y = r * sinf(theta);
 			return Vec3::Transform(Vec3(x, y, 0), transform);
@@ -573,6 +573,7 @@ struct ParticleVertex
 	int frameIdx;
 	int tileX;
 	int tileY;
+	int alignment;
 };
 
 struct ParticleProperties
@@ -594,6 +595,7 @@ struct ParticleProperties
 	int tileX;
 	int tileY;
 	int cycleTime = 0; 
+	int alignment = 0; // 0: View aligned, 1: World aligned, 2: Local aligned
 
 	std::shared_ptr<MinMaxGradient> colorOverTimeGradient = nullptr;
 	bool useColorOverTime = false;

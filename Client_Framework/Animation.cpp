@@ -347,6 +347,7 @@ void CAnimationController::AddAnimationEvent(const std::string& animName, const 
 			if(key->mName == name) {
 				handler->Register(name, event);
 			}
+			break;
 		}
 	}
 }

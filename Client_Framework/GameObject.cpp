@@ -16,6 +16,7 @@
 #include"Light.h"
 #include"ContinuousRotation.h"
 #include"UIRenderer.h"
+#include"TrailRenderer.h"
 #include"RenderManager.h"
 #include"ParticleAttach.h"
 #include"ParticleManager.h"
@@ -297,6 +298,22 @@ std::shared_ptr<CGameObject> CGameObject::CreateUIObject(const std::string& shad
 
 	object->SetRenderLayer(RENDER_LAYER::UI);
 
+	return object;
+}
+
+std::shared_ptr<CGameObject> CGameObject::CreateTrailObject(bool isViewAligned, const std::string& texture, float width, float duration, float minDistance)
+{
+	std::shared_ptr<CGameObject> object = std::make_shared<CGameObject>();
+	object->mTag = "Trail";
+	auto renderer = object->AddComponent<CTrailRenderer>(isViewAligned);
+	object->mRenderer = renderer;
+	renderer->SetBlendMaskTexture(texture);
+	renderer->SetWidth(width);
+	renderer->SetDuration(duration);
+	renderer->SetMinDistance(minDistance);
+	renderer->mActive = true;
+
+	object->SetRenderLayer(RENDER_LAYER::Transparent);
 	return object;
 }
 
@@ -886,7 +903,7 @@ std::shared_ptr<CGameObject> CGameObject::AddBoneSocket(const std::string& boneN
 		std::cerr << "Bone not found: " << boneName << std::endl;
 		return nullptr;
 	}
-	bone->AddChild(socket);
+	socket->SetParent(bone);
 	return socket;
 }
 

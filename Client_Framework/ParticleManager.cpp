@@ -117,6 +117,7 @@ void CParticleManager::ReleaseParticleEmitter(CParticleEmitter* emitter)
 	if (it != mActiveParticleEmitters.end()) {
 		mActiveParticleEmitters.erase(it);
 		emitter->Release();
+		std::cout << "Particle Emitter Released. Active Emitters: " << mActiveParticleEmitters.size() << std::endl;
 	}
 }
 
@@ -146,6 +147,7 @@ CParticleEmitter* CParticleManager::PlayParticleEmitter(const std::string& name,
 			throw std::runtime_error("Particle properties with name '" + name + "' not found.");
 		}
 		mActiveParticleEmitters.push_back(emitter);
+		std::cout << "Active Particle Emitters: " << mActiveParticleEmitters.size() << std::endl;
 		emitter->Initialize(it->second.get());
 		emitter->mIsLooping = looping;
 		emitter->Play(position);
@@ -163,6 +165,7 @@ CParticleEmitter* CParticleManager::PlayParticleEmitter(const std::string& name,
 			throw std::runtime_error("Particle properties with name '" + name + "' not found.");
 		}
 		mActiveParticleEmitters.push_back(emitter);
+		std::cout << "Active Particle Emitters: " << mActiveParticleEmitters.size() << std::endl;
 		emitter->mIsLooping = looping;
 		emitter->Play(mat);
 		return emitter;

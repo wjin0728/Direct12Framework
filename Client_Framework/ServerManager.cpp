@@ -16,6 +16,7 @@
 #include "CutScene.h"
 #include "ParticleAttach.h"
 #include "ParticleManager.h"
+#include "TrailRenderer.h"
 
 void ServerManager::Initialize()
 {
@@ -480,6 +481,13 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		projectileObj->SetRenderLayer(RENDER_LAYER::Opaque);
 		if(objName[(int)packet->projectile_type] == "MagicBall") 
 			projectileObj->SetRenderLayer(RENDER_LAYER::Transparent);
+
+		if (objName[(int)packet->projectile_type] == "Arrow") {
+			if (auto trailObj = CGameObject::CreateTrailObject(true, "ArrowTrail", 0.04, 0.15f, 0.5f)) {
+				trailObj->SetParent(projectileObj);
+			}
+
+		}
 		if (packet->user_friendly)
 			projectileObj->SetObjectType(OBJECT_TYPE::PLAYER_PROJECTILE);
 		else
