@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "VertexBuffer.h"
 #include"DX12Manager.h"
+#include"DX12Manager.h"
 
 
 void CVertexBuffer::UpdateVertexBuffer(const void* data, UINT size)

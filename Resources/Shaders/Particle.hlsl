@@ -13,6 +13,7 @@ struct ParticleVertex
     int frameIdx;
     int tileX;
     int tileY;
+    int alignment;
 };
 
 StructuredBuffer<ParticleVertex> vertexBuffer : register(t0, space5);
@@ -82,4 +83,4 @@ float4 PS_Forward(VS_OUTPUT input) : SV_Target
     color.a *= saturate(abs(linearFragmentDepth - linearSceneDepth) / 0.2f);
     
     return color;
-    }
+}

@@ -4,9 +4,9 @@
 cbuffer MaterialData : register(b5)
 {
     float4 ForwardColor;
-    uint ForwardTexIdx;
+    int ForwardTexIdx;
     
-    uint normalTexIdx;
+    int normalTexIdx;
     float smoothness;
     float metallic;
     
@@ -49,20 +49,23 @@ VS_OUTPUT VS_Forward(VS_INPUT input)
 float4 PS_Forward(VS_OUTPUT input) : SV_Target
 {
     float4 color = input.color;
-    float4 texColor = diffuseMap[ForwardTexIdx].Sample(linearClamp, input.uv);
-    float alpha = diffuseMap[normalTexIdx].Sample(linearClamp, input.uv).r;
-    texColor = float4(1.0, 1.0, 1.0, 1.0);
+    float4 texColor = float4(1.0, 1.0, 1.0, 1.0);
+    float alpha = 1.0;
+    if (normalTexIdx >= 0)
+    {
+        alpha = diffuseMap[normalTexIdx].Sample(linearClamp, input.uv).r;
+    }
     
     float2 screenUV = GetNormalizedScreenSpaceUV(input.pos);
     float sceneDepth = GetNormalizedSceneDepth(screenUV);
     float linearSceneDepth = GetCameraDepth(sceneDepth);
     float linearFragmentDepth = GetCameraDepth(input.pos.z);
     
-    float depth = saturate((linearSceneDepth - linearFragmentDepth) / 0.5);
+    float depth = saturate((linearSceneDepth - linearFragmentDepth) / 0.2);
     
     
     color = color * texColor;
-    color.a *= alpha * depth;
+    color.a *= alpha;
     //color.rgb = GammaDecoding(color.rgb);
     return color;
 }

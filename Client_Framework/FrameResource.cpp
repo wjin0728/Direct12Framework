@@ -6,6 +6,7 @@
 #include"Material.h"
 #include"SkinnedMesh.h"
 #include"ShadowManager.h"
+#include"TrailRenderer.h"
 
 CFrameResource::CFrameResource()
 {
@@ -31,6 +32,11 @@ CFrameResource::CFrameResource()
 
 	mInstancingBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::OBJECT)] = std::make_shared<CInstancingBuffer>();
 	mInstancingBuffers[static_cast<UINT>(INSTANCE_BUFFER_TYPE::OBJECT)]->Initialize(0, sizeof(IBObjectData), 10000);
+
+	for (auto& buffer : mDynamicVertexBufferPool) {
+		buffer = std::make_unique<CVertexBuffer>();
+		buffer->Initialize(0, sizeof(TrailVertex), 1000, nullptr, true);
+	}
 }
 
 
@@ -55,6 +61,24 @@ void CFrameResource::BindStructedBuffers()
 		if (mStructedBuffers[i]) {
 			mStructedBuffers[i]->BindToShader();
 		}
+	}
+}
+
+CVertexBuffer* CFrameResource::GetDynamicVertexBuffer()
+{
+	for (auto& buffer : mDynamicVertexBufferPool) {
+		if (buffer && !buffer->mIsActive) {
+			buffer->mIsActive = true;
+			return buffer.get();
+		}
+	}
+	return nullptr;
+}
+
+void CFrameResource::ReturnDynamicVertexBuffer(CVertexBuffer* pBuffer)
+{
+	if (pBuffer) {
+		pBuffer->mIsActive = false;
 	}
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include"stdafx.h"
 #include"UploadBuffer.h"
+#include"VertexBuffer.h"
 
 
 
@@ -16,6 +17,8 @@ private: //상수 버퍼
 	std::array<std::shared_ptr<CStructedBuffer>, (UINT)STRUCTED_BUFFER_TYPE::END> mStructedBuffers{};
 	std::array<std::shared_ptr<CInstancingBuffer>, (UINT)INSTANCE_BUFFER_TYPE::END> mInstancingBuffers{};
 
+	std::array<std::unique_ptr<class CVertexBuffer>, 100> mDynamicVertexBufferPool{}; //동적 버퍼 풀
+
 public: //펜스
 	UINT64 fence{};
 
@@ -30,5 +33,8 @@ public:
 
 public:
 	void BindStructedBuffers();
+
+	CVertexBuffer* GetDynamicVertexBuffer();
+	void ReturnDynamicVertexBuffer(CVertexBuffer* pBuffer);
 };
 

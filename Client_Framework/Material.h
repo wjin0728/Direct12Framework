@@ -22,9 +22,9 @@ struct PropertyInfo
 struct CommonProperties
 {
 	Vec4 mainColor{};
-	UINT mainTexIdx = -1;
+	int mainTexIdx = -1;
 
-	UINT normalTexIdx = -1;
+	int normalTexIdx = -1;
 	float smoothness{};
 	float metallic{};
 	Vec4 vec4Data0{}; 

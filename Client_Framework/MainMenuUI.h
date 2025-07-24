@@ -6,7 +6,17 @@ class CMainMenu :
     public CComponent
 {
 public:
-	std::unordered_map<std::string, std::weak_ptr<class CUIRenderer>> mUIRenderers{};
+	enum class EMenuState
+	{
+		Title,
+		Settings,
+		RoomSelect
+	};
+private:
+	EMenuState mCurrentState = EMenuState::Title;
+	std::shared_ptr<CGameObject> mTitleUI;
+	std::shared_ptr<CGameObject> mSettingsUI;
+	std::shared_ptr<CGameObject> mRoomSelectUI;
 
 public:
 	CMainMenu();
@@ -19,6 +29,18 @@ public:
 	virtual void Start();
 	virtual void Update();
 	virtual void LateUpdate();
+
+	void InitializeTitleUI();
+	void InitializeSettingsUI();
+	void InitializeRoomSelectUI();
+
+	void ChangeMenuState(EMenuState newState);
+	void OnClickStartButton();
+	void OnClickExitButton();
+
+	void OnClickSettingsButton();
+
+	void OnClickBackButton();
 
 };
 

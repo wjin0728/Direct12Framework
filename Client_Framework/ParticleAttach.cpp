@@ -19,7 +19,6 @@ CParticleAttach::~CParticleAttach()
 	{
 		mParticleEmitter->Stop(false);
 		mParticleEmitter = nullptr;
-		std::cout << "ParticleAttachComponent Destroyed: " << mParticleEmitterName << std::endl;
 	}
 }
 
@@ -55,10 +54,8 @@ void CParticleAttach::LateUpdate()
 void CParticleAttach::Play()
 {
 	if (mIsPlaying && mLoop) {
-		std::cout << "Particle emitter is already playing and looping: " << mParticleEmitterName << std::endl;
 		return;
 	}
-	std::cout << "Play particle emitter: " << mParticleEmitterName << std::endl;
 	mParticleEmitter = INSTANCE(CParticleManager).PlayParticleEmitter(mParticleEmitterName, GetTransform()->GetWorldMat(), mLoop);
 }
 
