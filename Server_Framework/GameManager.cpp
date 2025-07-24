@@ -204,7 +204,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		if (0 == c_id)
-			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::MAGE);
+			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
 		else if (1 == c_id)
 			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::ARCHER);
 		else if (2 == c_id)
@@ -442,6 +442,11 @@ void GameManager::Process_packet(int c_id, char* packet)
 		//clients[ServerNumber][p->id]._player.SetLookDir(angle);
 		break;
 	}
+	case CS_HP: {
+		CS_HP_PACKET* p = reinterpret_cast<CS_HP_PACKET*>(packet);
+		Monsters[ServerNumber][p->object_id].TakeDamage(p->hp, false);
+		break;
+	}
 	}
 }
 
@@ -472,14 +477,9 @@ bool GameManager::CanMove(float x, float z)
 void GameManager::Update()
 {
 	for (auto& cl : clients[ServerNumber]) {
+		if (cl.second._state != ST_INGAME) continue;
 		auto& player = cl.second._player;
 
-		if (cl.second._state == ST_INGAME) {
-			//if (deadMonsterCnt == 3) {
-			//	cl.second.send_make_potal_packet();
-			//}
-		}
-		else continue;
 		player.Update();
 
 		if (player._class == S_PLAYER_CLASS::FIGHTER && player.currentState == &PlayerState::UltimateState::GetInstance()) {
@@ -554,7 +554,6 @@ void GameManager::Update()
 		if (monster._state == S_MONSTER_STATE::RUN) {
 			float terrainHeight = terrain[(int)scene_type].GetHeight(monster._pos.x, monster._pos.z);
 			monster._pos.y = terrainHeight;
-			
 		}
 
 		// 몬스터 - 투사체 충돌 체크
@@ -575,25 +574,32 @@ void GameManager::Update()
 	}
 
 	if (S_SCENE_TYPE::MAINSTAGE1 <= scene_type && scene_type < S_SCENE_TYPE::END) {
-		bool allItemsDropped = true;
-		for (auto& [id, monster] : Monsters[ServerNumber]) {
-			if (!monster._remove || !monster._drop_item) {
-				allItemsDropped = false;
-				break;
-			}
-		}
-		if (allItemsDropped) {
-			// 모든 웨이브가 끝났으면 포탈 생성
-			if (MonsterWaves[ServerNumber].current_wave == 2) {
+		auto& wave = MonsterWaves[ServerNumber];
+
+		if (wave.is_end) {
+			if (wave.current_wave == 2) {
 				for (auto& cl : clients[ServerNumber]) {
 					if (cl.second._state != ST_INGAME) continue;
+					Monsters[ServerNumber].clear();
+					Monster_cnt[ServerNumber] = 0;
 					cl.second.send_make_potal_packet();
 				}
 			}
-			// 아니면 다음 웨이브로
 			else {
-				InitializeMonsterWave();
-				std::cout << MonsterWaves[ServerNumber].current_wave << " wave started." << endl;
+				wave.spawn_timer -= TICK_INTERVAL;
+				if (wave.spawn_timer <= 0.f) {
+					InitializeMonsterWave();
+					std::cout << wave.current_wave << " wave started." << endl;
+				}
+			}
+		}
+		else {
+			wave.is_end = true;
+			for (auto& [id, monster] : Monsters[ServerNumber]) {
+				if (!monster._remove || !monster._drop_item) {
+					wave.is_end = false;
+					break;
+				}
 			}
 		}
 	}
@@ -770,6 +776,8 @@ void GameManager::InitializeMonsterWave()
 	}
 
 	MonsterWaves[ServerNumber].current_wave++;
+	MonsterWaves[ServerNumber].is_end = false;
+	MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
 }
 
 void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)

@@ -11,9 +11,9 @@
 	//#include "OVER_PLUS.h"
 struct MonsterWave {
 	int current_wave = 0;
-	bool waveInProgress = false;
+	float spawn_timer = SPAWN_INTERVAL;
+	bool is_end = false;
 };
-
 
 class GameManager
 {
@@ -98,11 +98,15 @@ public:
 		Monsters[ServerNumber].clear();
 		items[ServerNumber].clear();
 		Projectiles[ServerNumber].clear();
+
 		Monster_cnt[ServerNumber] = 0;
 		Item_cnt[ServerNumber] = 0;
 		Projectile_cnt[ServerNumber] = 0;
+
 		MonsterWaves[ServerNumber].current_wave = 0;
-		MonsterWaves[ServerNumber].waveInProgress = false;
+		MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
+		MonsterWaves[ServerNumber].is_end = false;
+
 		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
 
 		for (auto& cl : clients[ServerNumber]) {

@@ -99,6 +99,7 @@ namespace MonsterState
         void Exit(Monster* monster) override;
     private:
         UndergroundState() {}
+        float UndergroundTimer;
     };
 
     // Spawn ป๓ลย

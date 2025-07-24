@@ -30,6 +30,7 @@ constexpr char CS_ATTACK = 10;
 constexpr char CS_GAME_SERVER_LOGIN = 11;
 constexpr char CS_SELECT_CLASS = 12;
 constexpr char CS_CLICK_BUTTON = 13;
+constexpr char CS_HP = 14;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -140,6 +141,11 @@ struct CS_SELECT_CLASS_PACKET : PACKET {
 struct CS_CLICK_BUTTON_PACKET : PACKET {
 	short 			id;
 	uint8_t			button_type; // 0: ready, 1: cancel
+};
+
+struct CS_HP_PACKET : PACKET {
+	short object_id;
+	short hp;
 };
 
 // ----------------------------------------------------------------------------------

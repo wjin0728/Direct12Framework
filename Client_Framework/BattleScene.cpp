@@ -79,6 +79,7 @@ void CBattleScene::Update()
 		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
 		for (auto& monster : monsters) {
 			monster->GetStateMachine()->GetHit(10.f);
+			INSTANCE(ServerManager).send_hp_packet(monster->mID, 10);
 		}
 	}
 	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
