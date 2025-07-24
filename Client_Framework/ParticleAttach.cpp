@@ -45,6 +45,9 @@ void CParticleAttach::LateUpdate()
 		return;
 	mParticleEmitter->mEmitterTransform = transform->GetWorldMat();
 	mIsPlaying = mParticleEmitter->mIsPlaying;
+	if (!mParticleEmitter->mIsPlaying) {
+		mParticleEmitter = nullptr;
+	}
 }
 
 

@@ -454,8 +454,8 @@ void CMageState::Start()
 
 	auto controller = mAnimationController.lock();
 
-	/*controller->AddAnimationEvent("Attack", "Attack", func0);
-	controller->AddAnimationEvent("RunAttack", "Attack", func0);*/
+	controller->AddAnimationEvent("Attack", "Attack", func0);
+	controller->AddAnimationEvent("RunAttack", "Attack", func0);
 	if (!controller) {
 		return;
 	}
@@ -535,8 +535,6 @@ void CMageState::OnEnterState(UINT8 state)
 	case PLAYER_STATE::JUMP:
 		break;
 	case PLAYER_STATE::SKILL:
-		if (cutscene && !cutscene->GetEnable())
-			cutscene->PlayCutScene();
 		break;
 	case PLAYER_STATE::ULTIMATE:
 		if (cutscene && !cutscene->GetEnable())
