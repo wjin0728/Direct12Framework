@@ -150,6 +150,8 @@ public:
 	std::shared_ptr<T> GetComponentFromHierarchy();
 	template<typename T>
 	void GetAllComponentsFromHierarchy(std::vector<std::shared_ptr<T>>& components);
+	template<typename T>
+	std::shared_ptr<T> GetChildComponent(const std::string& childName);
 
 	template<typename T>
 	void RemoveComponent();
@@ -256,6 +258,14 @@ inline void CGameObject::GetAllComponentsFromHierarchy(std::vector<std::shared_p
 	for (auto& child : mChildren) {
 		child->GetAllComponentsFromHierarchy<T>(components);
 	}
+}
+
+template<typename T>
+inline std::shared_ptr<T> CGameObject::GetChildComponent(const std::string& childName)
+{
+	if (auto child = FindChildByName(childName))
+		return child->GetComponent<T>();
+	return nullptr;
 }
 
 template<typename T>

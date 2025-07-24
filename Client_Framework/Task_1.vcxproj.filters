@@ -280,6 +280,10 @@
     <ClInclude Include="InteractIcon.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
+    <ClInclude Include="LobbyUI.h">
+      <Filter>GameObject\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="TPCameraState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -503,6 +507,12 @@
     </ClCompile>
     <ClCompile Include="InteractIcon.cpp">
       <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="LobbyUI.cpp">
+      <Filter>GameObject\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="TPCameraState.cpp">
+      <Filter>Client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

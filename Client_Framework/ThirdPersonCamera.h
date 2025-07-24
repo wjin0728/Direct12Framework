@@ -1,20 +1,6 @@
 #pragma once
 #include "Component.h"
-
-struct CameraParams {
-	Vec3 trackingPosition{};
-    Vec2 framing{};
-    float distance{};
-    float pitch{};
-    float yaw{};
-};
-
-struct CameraBlend {
-	Vec2 framing;
-	float pitch;
-	float yaw;
-	float distance;
-};
+#include"TPCameraState.h"
 
 class CThirdPersonCamera : public CComponent, public std::enable_shared_from_this<CThirdPersonCamera>
 {
@@ -27,9 +13,9 @@ private:
 	Vec3 mOriginalPosition{};
 	bool mIsHit{ false };
 	bool mCanRotate{ true };
+	std::shared_ptr<class CGameObject> mTarget{};
 
 	std::weak_ptr<class CCamera> mCamera{};
-	std::shared_ptr<class CGameObject> mTarget{};
 	std::weak_ptr<class CTerrain> mTerrain{};
 
 public:
