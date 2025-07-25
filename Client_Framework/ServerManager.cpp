@@ -466,6 +466,28 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		break;
 	}
+	case SC_ADD_EFFECT: {
+		SC_ADD_EFFECT_PACKET* packet = reinterpret_cast<SC_ADD_EFFECT_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
+
+		auto effect = RESOURCE.GetPrefab("FireExplosion");
+		if (!effect) {
+			std::cout << "effect is nullptr" << std::endl;
+			break;
+		}
+		auto effectObj = CGameObject::Instantiate(effect);
+		effectObj->SetTag("Effect");
+		effectObj->SetRenderLayer(RENDER_LAYER::Transparent);
+		effectObj->SetStatic(false);
+		effectObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		effectObj->GetTransform()->SetLocalRotationY(packet->look_y);
+		scene->AddObject(effectObj);
+		break;
+	}
 	case SC_ADD_PROJECTILE: {
 		SC_ADD_PROJECTILE_PACKET* packet = reinterpret_cast<SC_ADD_PROJECTILE_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();

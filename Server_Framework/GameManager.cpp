@@ -276,6 +276,12 @@ void GameManager::Process_packet(int c_id, char* packet)
 				if (cl.second._state != ST_INGAME) continue;
 				Monsters[ServerNumber][p->target_id].TakeDamage(10, true);
 				cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, p->target_id, Monsters[ServerNumber][p->target_id]._hp, 0);
+				for (auto& cl : clients[ServerNumber]) {
+					if (cl.second._state != ST_INGAME) continue;
+					Vec3 pos = Monsters[ServerNumber][p->target_id]._pos;
+					pos.y += 1.5f; 
+					cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::EXPLOSION, pos);
+				}
 			}
 		}
 		else if (S_GRASS_VINE == p->skill_enum) {}
@@ -401,7 +407,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
 
 			proj._pos = player._pos;
-			proj._pos.y += 0.3f;
+			proj._pos.y += 0.5f;
 
 			direction.x = sin(player._look_dir.y * degToRad); // 1.0
 			direction.y = 0.0f;
@@ -419,7 +425,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
 
 			proj._pos = player._pos;
-			proj._pos.y += 0.3f;
+			proj._pos.y += 0.5f;
 
 			direction.x = sin(player._look_dir.y * degToRad); // 1.0
 			direction.y = 0.0f;
