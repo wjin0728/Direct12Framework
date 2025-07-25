@@ -325,7 +325,7 @@ void CWaterSmallState::Start()
 
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
-			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+			transform->SetLocalPosition({ 0.f, 3.f, 0.f });
 		}
 	}
 }
@@ -424,7 +424,7 @@ void CFireSmallState::Start()
 		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 0.7f });
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
-			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+			transform->SetLocalPosition({ 0.f, 3.f, 0.f });
 		}
 	}
 }
@@ -450,3 +450,48 @@ void CFireSmallState::OnExitState(UINT8 state)
 	CEnemyState::OnExitState(state);
 }
 
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
+
+void CBossState::Awake()
+{
+	CEnemyState::Awake();
+	mHealth = mMaxHealth = MAX_HEALTH * 3.f;
+}
+
+void CBossState::Start()
+{
+	CEnemyState::Start();
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+	auto healthSystem = mHealthSystem.lock();
+	if (healthSystem) {
+		healthSystem->SetMaxHealth(mHealth);
+		healthSystem->SetHealth(mHealth);
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 2.f });
+		auto transform = healthSystem->GetTransform();
+		if (transform) {
+			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+		}
+	}
+}
+
+void CBossState::Update()
+{
+	CEnemyState::Update();
+}
+
+void CBossState::OnEnterState(UINT8 state)
+{
+	CEnemyState::OnEnterState(state);
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	controller->SetTrackAnimationSet((int)state);
+}
+
+void CBossState::OnExitState(UINT8 state)
+{
+	CEnemyState::OnExitState(state);
+}

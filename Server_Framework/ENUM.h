@@ -59,6 +59,7 @@ enum class S_ENEMY_TYPE : UINT8
 	FIRE_BIG,
 	WATER_SMALL,
 	WATER_BIG,
+	BOSS,
 
 	s_end
 };
@@ -71,7 +72,6 @@ enum class S_SCENE_TYPE : UINT8
 	MAIN_STAGE_1,
 	MAIN_STAGE_2,
 	MAIN_STAGE_3,
-	BOSS_STAGE,
 	ENDING,
 
 	END

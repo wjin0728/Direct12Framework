@@ -757,6 +757,9 @@ void GameManager::InitializeMonsterWave()
 			InitializeMonster(S_ENEMY_TYPE::FIRE_BIG, Vec3(27.8f, 1.7f, 43.9f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(32.6f, 2.1f, 43.65f));
 		}
+		else if (MonsterWaves[ServerNumber].current_wave == 2) {
+			InitializeMonster(S_ENEMY_TYPE::BOSS, Vec3(27.8f, 1.7f, 43.9f));
+		}
 		break;
 	}
 	}
@@ -820,7 +823,7 @@ std::function<void(Monster*)> GameManager::MakeAttackEvent(Vec2 offset, float ra
 
 void GameManager::UpdateWave()
 {
-	if (scene_type < S_SCENE_TYPE::MAIN_STAGE_1 || scene_type >= S_SCENE_TYPE::END) return;
+	if (scene_type < S_SCENE_TYPE::MAIN_STAGE_1 || scene_type > S_SCENE_TYPE::MAIN_STAGE_3) return;
 
 	auto& wave = MonsterWaves[ServerNumber];
 
@@ -833,17 +836,14 @@ void GameManager::UpdateWave()
 }
 void GameManager::HandleWaveEnd(MonsterWave& wave)
 {
-	if (wave.current_wave == 2) { // 2웨이브까지 클리어하면 포탈 생성
+	bool isFinalWave = (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && wave.current_wave == 3) || (scene_type != S_SCENE_TYPE::MAIN_STAGE_3 && wave.current_wave == 2);
+
+	if (isFinalWave) {
 		if (!wave.make_potal) {
-			for (auto& [_, cl] : clients[ServerNumber]) {
-				if (cl._state != ST_INGAME) continue;
-				cl.send_make_potal_packet();
-			}
+			MakePortal();
 			wave.make_potal = true;
 		}
-		//else if (IsAllPlayerReady()) {
-		//	ChangeScene();
-		//}
+		// else if (IsAllPlayerReady()) ChangeScene();
 	}
 	else {
 		wave.wave_timer -= TICK_INTERVAL;
@@ -884,4 +884,11 @@ bool GameManager::IsAllPlayerReady()
 		break;
 	}
 	return all_ready;
+}
+void GameManager::MakePortal()
+{
+	for (auto& [_, cl] : clients[ServerNumber]) {
+		if (cl._state != ST_INGAME) continue;
+		cl.send_make_potal_packet();
+	}
 }

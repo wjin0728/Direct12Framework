@@ -109,3 +109,16 @@ class CFireSmallState :
     virtual void OnExitState(UINT8 state) override;
     virtual ENEMY_TYPE GetEnemyType() const override { return ENEMY_TYPE::FIRE_SMALL; };
 };
+
+class CBossState :
+    public CEnemyState
+{
+public:
+    virtual ~CBossState() {}
+    virtual void Awake() override;
+    virtual void Start() override;
+    virtual void Update() override;
+    virtual void OnEnterState(UINT8 state) override;
+    virtual void OnExitState(UINT8 state) override;
+    virtual ENEMY_TYPE GetEnemyType() const override { return ENEMY_TYPE::BOSS; };
+};

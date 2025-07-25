@@ -143,9 +143,6 @@ public:
 			ChangeScene((uint8_t)S_SCENE_TYPE::MAIN_STAGE_3);
 			break;
 		case S_SCENE_TYPE::MAIN_STAGE_3:
-			ChangeScene((uint8_t)S_SCENE_TYPE::BOSS_STAGE);
-			break;
-		case S_SCENE_TYPE::BOSS_STAGE:
 			ChangeScene((uint8_t)S_SCENE_TYPE::ENDING);
 			break;
 		}
@@ -162,6 +159,7 @@ public:
 	void HandleWaveEnd(MonsterWave& wave);
 	void HandleWaveInProgress(MonsterWave& wave);
 	bool IsAllPlayerReady(); // 모든 플레이어가 다음 스테이지 준비 상태인지 확인
+	void MakePortal(); // 포탈 생성
 
 	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
 		{ S_ENEMY_TYPE::GRASS_SMALL, {
