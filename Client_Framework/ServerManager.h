@@ -31,6 +31,8 @@ public:
 
 	mutex object_lock;
 
+	std::unordered_map<std::string, std::function<void(std::vector<std::any>)>> mEventMap;
+
 public:
 	void Initialize();
 	void Destroy();
@@ -130,5 +132,12 @@ public:
 		p.type = CS_CLICK_BUTTON;
 		p.button_type = button;
 		Send_Packet(&p);
+	}
+
+	void AddEvent(const std::string& name, std::function<void(std::vector<std::any>)> func) {
+		mEventMap[name] = func;
+	}
+	void TriggerEvent(const std::string& name, const std::vector<std::any>& args) {
+		if (mEventMap.count(name)) mEventMap[name](args);
 	}
 };

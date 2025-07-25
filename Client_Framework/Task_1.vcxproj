@@ -167,6 +167,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CBData.h" />
     <ClInclude Include="CEntityState.h" />
+    <ClInclude Include="ClassSelect.h" />
     <ClInclude Include="ContinuousRotation.h" />
     <ClInclude Include="EnemyState.h" />
     <ClInclude Include="Enums.h" />
@@ -243,6 +244,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CEntityState.cpp" />
+    <ClCompile Include="ClassSelect.cpp" />
     <ClCompile Include="ContinuousRotation.cpp" />
     <ClCompile Include="CutScene.cpp" />
     <ClCompile Include="EnemyState.cpp" />
@@ -395,6 +397,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\Shaders\Scrolling.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Shaders\LitOutline.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

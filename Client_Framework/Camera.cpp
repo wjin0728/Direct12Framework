@@ -6,11 +6,11 @@
 #include"DX12Manager.h"
 #include"FrameResource.h"
 #include"UploadBuffer.h"
-#include"GameObject.h"
 #include"MeshRenderer.h"
 #include"RenderManager.h"
 #include"ShadowManager.h"
 #include"ParticleManager.h"
+#include"InputManager.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -38,11 +38,10 @@ void CCamera::SetCameraType(CameraType type)
 	mCameraType = type;
 	if (mCameraType == CameraType::Perspective)
 	{
-		BoundingFrustum::CreateFromMatrix(mFrustumView, mPerspectiveProjectMat);
+		BoundingFrustum::CreateFromMatrix(mFrustumView, mCommonPerspectiveProjectMat);
 	}
 	else if (mCameraType == CameraType::Orthographic)
 	{
-		BoundingFrustum::CreateFromMatrix(mFrustumView, mOrthographicProjectMat);
 	}
 }
 
@@ -155,10 +154,11 @@ void CCamera::GenerateReverseZOrthographicProjectionMatrix(float nearPlane, floa
 							0.0f, 0.0f, -1.0f, 0.0f,
 							0.0f, 0.0f,  1.0f, 1.0f };
 	mCommonOrthographicProjectMat = Matrix::CreateOrthographic(width, height, nearPlane, farPlane);
-	BoundingFrustum::CreateFromMatrix(mFrustumView, mCommonOrthographicProjectMat);
 	mNearZ = nearPlane;
 	mFarZ = farPlane;
-	mOrthographicProjectMat = cmmonOrthographicMat * reverse_z;
+	mOrthographicHeight = height;
+	mOrthographicWidth = width;
+	mOrthographicProjectMat = mCommonOrthographicProjectMat * reverse_z;
 }
 
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ, float fMaxZ)
@@ -246,4 +246,23 @@ Vec2 CCamera::TransformToNDC(const Vec3& worldPos) const
 	Vec4 screenPos = Vec4::Transform(Vec4(worldPos.x, worldPos.y, worldPos.z, 1), mViewPerspectiveProjectMat);
 	screenPos /= screenPos.w; 
 	return Vec2(screenPos.x, screenPos.y);
+}
+
+Ray CCamera::GetRayFromMousePosition() const
+{
+	Vec2 mousePos = INPUT.GetMousePosition();
+	Vec2 ndcPos = Vec2((mousePos.x / mViewport.Width) * 2.0f - 1.0f, 1.0f - (mousePos.y / mViewport.Height) * 2.0f);
+	Vec4 rayCS = Vec4(ndcPos.x, ndcPos.y, 1.0f, 1.0f);
+
+	Matrix mInvProjection = mCameraType == CameraType::Perspective ? mPerspectiveProjectMat.Invert() : mOrthographicProjectMat.Invert();
+	Vec4 rayVS = Vec4::Transform(rayCS, mInvProjection);
+	rayVS.z = 1.0f;
+	rayVS.w = 0.0f;
+
+	Vec3 rayDir = Vec3(rayVS.x, rayVS.y, rayVS.z);
+	rayDir = Vec3::Transform(rayDir, mInverseViewMat);
+	rayDir.Normalize();
+	Vec3 cameraPosition = GetTransform()->GetWorldPosition();
+
+	return Ray(cameraPosition, rayDir);
 }

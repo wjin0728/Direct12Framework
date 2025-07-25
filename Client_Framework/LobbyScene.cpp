@@ -18,6 +18,7 @@
 #include"InstancingGroup.h"
 #include"ServerManager.h"
 #include"Light.h"
+#include"ClassSelect.h"
 
 CLobbyScene::CLobbyScene()
 {
@@ -30,6 +31,14 @@ void CLobbyScene::Initialize()
 	LoadSceneFromFile(SCENE_PATH("Lobby"));
 	CLight::SetVolumes();
 
+	auto lobbyUI = RESOURCE.GetPrefab("LobbyUI");
+	if (lobbyUI) {
+		auto uiObject = CGameObject::Instantiate(lobbyUI);
+		uiObject->SetName("LobbyUI");
+		uiObject->AddComponent<CClassSelectUI>();
+		AddObjectImmediately(uiObject);
+	}
+
 	auto mainPlayer = FindObjectWithName("MainPlayer");
 	if (mainPlayer) {
 		auto playerController = mainPlayer->GetComponent<CPlayerController>();
@@ -39,7 +48,7 @@ void CLobbyScene::Initialize()
 	}
 	if(auto camera = FindObjectWithName("MainCamera")) {
 		if(auto cameraCmp = camera->GetComponent<CCamera>()) {
-			float size = 4.f * 2.f;
+			float size = 2.f * 2.f;
 			Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
 			float aspect = rtSize.x / rtSize.y;
 			//cameraCmp->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 130.f, 60.f);
@@ -48,8 +57,8 @@ void CLobbyScene::Initialize()
 		}
 		auto transform = camera->GetTransform();
 		if (transform) {
-			transform->SetLocalPosition	({ 5.09, 2.679f, 6.98 });
-			transform->SetLocalRotation({ 12.102, 49.1, -0.591 });
+			transform->SetLocalPosition	({ 5.182, 2.994, 7.055 });
+			transform->SetLocalRotation({ 20.578, 49.1, 0.f });
 		}
 		auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
 		if (thirdPersonCamera) {

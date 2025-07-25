@@ -287,12 +287,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 
 		std::shared_ptr<CGameObject> player{};
-		if (clientID == packet->id) {
-			player = mPlayer;
-			player->GetCutScene()->SetClass((PLAYER_CLASS)packet->player_class);
-			//RenderOK = 1;
-		}
-		else {
+		if (clientID != packet->id) {
 			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
 			player = mOtherPlayers[packet->id];
 		}

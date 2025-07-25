@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "SceneManager.h"
-#include"DX12Manager.h"
 #include "Scene.h"
+#include"DX12Manager.h"
 #include"LobbyScene.h"
 #include"BattleScene.h"
 #include"MainScene.h"

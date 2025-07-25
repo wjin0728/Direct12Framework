@@ -23,6 +23,9 @@ private:
 	float mAspectRatio{};
 	float mFovAngle = 90.0f;
 	float mProjectRectDist = 1.0f;
+
+	float mOrthographicWidth = 1.0f;
+	float mOrthographicHeight = 1.0f;
 		  
 	Matrix mInverseViewMat = Matrix::Identity;
 
@@ -95,4 +98,6 @@ public:
 
 	Vec2 TransformToScreenSpace(const Vec3& worldPos) const;
 	Vec2 TransformToNDC(const Vec3& worldPos) const;
+
+	Ray GetRayFromMousePosition() const;
 };

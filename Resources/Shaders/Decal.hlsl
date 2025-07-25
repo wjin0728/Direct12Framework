@@ -44,6 +44,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float3 scenePosWS = GetScenePositionWS(screenUV);
     if (scenePosWS.x <= -99999.f) discard;
     
+    invWorldMat = transpose(invWorldMat);
     float3 localPos = mul(float4(scenePosWS, 1.0f), invWorldMat).xyz;
     
     if (localPos.x < -0.5f || localPos.x > 0.5f ||
