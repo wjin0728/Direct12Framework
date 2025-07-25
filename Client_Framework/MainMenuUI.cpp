@@ -108,27 +108,27 @@ void CMainMenu::InitializeRoomSelectUI()
 {
     if (auto button = mRoomSelectUI->GetChildComponent<CButton>("Room1"))
     {
-        button->SetOnClick([this]() { /*클릭 시 실행될 코드*/ });
+        button->SetOnClick([this]() { INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)BUTTON_TYPE::ROOM1); });
     }
     if (auto button = mRoomSelectUI->GetChildComponent<CButton>("Room2"))
     {
-        button->SetOnClick([this]() {  /*클릭 시 실행될 코드*/ });
+        button->SetOnClick([this]() {  INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)BUTTON_TYPE::ROOM2); });
 	}
     if (auto button = mRoomSelectUI->GetChildComponent<CButton>("Room3"))
     {
-        button->SetOnClick([this]() {  /*클릭 시 실행될 코드*/ });
+        button->SetOnClick([this]() {  INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)BUTTON_TYPE::ROOM3); });
     }
     if (auto button = mRoomSelectUI->GetChildComponent<CButton>("Room4"))
     {
-        button->SetOnClick([this]() {  /*클릭 시 실행될 코드*/ });
+        button->SetOnClick([this]() {  INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)BUTTON_TYPE::ROOM4); });
 	}
     if (auto button = mRoomSelectUI->GetChildComponent<CButton>("Room5"))
     {
-        button->SetOnClick([this]() {  /*클릭 시 실행될 코드*/ });
+        button->SetOnClick([this]() {  INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)BUTTON_TYPE::ROOM5); });
     }
     if (auto button = mRoomSelectUI->GetChildComponent<CButton>("Room6"))
     {
-        button->SetOnClick([this]() {  /*클릭 시 실행될 코드*/ });
+        button->SetOnClick([this]() {  INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)BUTTON_TYPE::ROOM6); });
     }
 }
 
