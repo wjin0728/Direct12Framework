@@ -42,17 +42,22 @@ void CBattleScene::Initialize()
 		uiObject->AddComponent<CPlayerHUD>(1);
 		AddObjectImmediately(uiObject);
 	}
-	/*auto portal = RESOURCE.GetPrefab("Portal");
-	if (portal) {
-		auto portalObject = CGameObject::Instantiate(portal);
-		portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(47.92172f, 6.699f, 36.38293f));
-		auto particle = portalObject->GetComponent<CParticleAttach>();
-		particle->SetLoop(true);
-
-		AddObjectImmediately(portalObject);
-	}*/
 	CLight::SetVolumes();
 
+	auto mainPlayer = FindObjectWithName("MainPlayer");
+	if (mainPlayer) {
+		auto playerController = mainPlayer->GetComponent<CPlayerController>();
+		if (playerController) {
+			playerController->ChangeControllMode(CPlayerController::ControllMode::LockOn);
+		}
+	}
+	if (auto camera = FindObjectWithTag("MainCamera")) {
+		auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
+		if (thirdPersonCamera) {
+			thirdPersonCamera->SetDefaultCameraParams();
+			thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FollowTarget);
+		}
+	}
 
 	INPUT.FixMousePosition(true);
 	FadeOut(0.5f, { 0.0,0.0,0.0,1.f });
@@ -130,6 +135,21 @@ void CBattle2Scene::Initialize()
 		AddObjectImmediately(uiObject);
 	}
 
+	auto mainPlayer = FindObjectWithName("MainPlayer");
+	if (mainPlayer) {
+		auto playerController = mainPlayer->GetComponent<CPlayerController>();
+		if (playerController) {
+			playerController->ChangeControllMode(CPlayerController::ControllMode::LockOn);
+		}
+	}
+	if (auto camera = FindObjectWithTag("MainCamera")) {
+		auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
+		if (thirdPersonCamera) {
+			thirdPersonCamera->SetDefaultCameraParams();
+			thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FollowTarget);
+		}
+	}
+
 	INPUT.FixMousePosition(true);
 	FadeOut(0.5f, { 0.0,0.0,0.0,1.f });
 }
@@ -198,6 +218,26 @@ void CBattle3Scene::Initialize()
 		uiObject->SetName("MainUI");
 		uiObject->AddComponent<CPlayerHUD>(3);
 		AddObjectImmediately(uiObject);
+	}
+
+	auto mainPlayer = FindObjectWithName("MainPlayer");
+
+	if (mainPlayer) {
+		auto playerController = mainPlayer->GetComponent<CPlayerController>();
+		if (playerController) {
+			playerController->ChangeControllMode(CPlayerController::ControllMode::LockOn);
+		}
+	}
+	if (auto camera = FindObjectWithTag("MainCamera")) {
+		if (auto cameraCmp = camera->GetComponent<CCamera>()) {
+			cameraCmp->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 150.f, 60.f);
+			cameraCmp->SetCameraType(CCamera::CameraType::Perspective);
+		}
+		auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
+		if (thirdPersonCamera) {
+			thirdPersonCamera->SetDefaultCameraParams();
+			thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FollowTarget);
+		}
 	}
 
 	INPUT.FixMousePosition(true);

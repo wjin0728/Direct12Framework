@@ -384,7 +384,7 @@ void CShadowManager::Update()
 {
 	if(!mViewCamera || !mLightCamera) return;
 
-	const Matrix& viewCamProjection = mViewCamera->GetPerspectiveProjectMat();
+	const Matrix& viewCamProjection = mViewCamera->GetProjectionMat();
 	const Matrix& viewCamView = mViewCamera->GetViewMat();
 	const Matrix& lightCamView = mLightCamera->GetViewMat();
 

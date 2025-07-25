@@ -124,8 +124,8 @@ void ServerManager::Client_Login()
 bool ServerManager::InitPlayerAndCamera()
 {
 	mPlayer = std::make_shared<CGameObject>();
-	mPlayer->SetTag("Player");
-	mPlayer->SetName("Player");
+	mPlayer->SetTag("MainPlayer");
+	mPlayer->SetName("MainPlayer");
 	mPlayer->SetRenderLayer(RENDER_LAYER::Opaque);
 	mPlayer->SetStatic(false);
 
@@ -149,12 +149,14 @@ bool ServerManager::InitPlayerAndCamera()
 
 #ifdef REVERSE_Z
 	camera->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 150.f, 60.f);
+	//camera->GenerateReverseZOrthographicProjectionMatrix(0.5f, 100.f, rtSize.x, rtSize.y);
 #elif // REVERSE_Z
 	camera->GeneratePerspectiveProjectionMatrix(1.f, 100.f, 60.f);
 #endif // REVERSE_Z
 
 	auto playerFollower = mMainCamera->AddComponent<CThirdPersonCamera>();
 	playerFollower->SetTarget(mPlayer);
+	playerFollower->SetCamera(camera);
 	playerController->SetCamera(camera);
 	cutScene->SetThirdPersonCamera(playerFollower);
 
@@ -294,6 +296,8 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
 			player = mOtherPlayers[packet->id];
 		}
+
+
 		CGameObject::Instantiate(obj, player->GetTransform());
 		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
 		player->GetTransform()->SetLocalRotationY(packet->look_y);
@@ -358,6 +362,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			if (auto state = std::dynamic_pointer_cast<CPlayerStateMachine>(pair.second->GetStateMachine())) {
 				state->ActivateShield(false);
 			}
+		}
+		mPlayer->SetActive(false);
+		for (auto& pair : mOtherPlayers) {
+			pair.second->SetActive(false);
 		}
 		break;
 	}

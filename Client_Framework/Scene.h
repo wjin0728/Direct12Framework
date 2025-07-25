@@ -80,6 +80,7 @@ public:
 	void CreatePrefabs(std::ifstream& ifs, std::unordered_map<std::string, std::shared_ptr<CGameObject>>& prefabs);
 
 	std::shared_ptr<CGameObject> FindObjectWithTag(const std::string& tag);
+	std::shared_ptr<CGameObject> FindObjectWithName(const std::string& name);
 
 	void ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB);
 

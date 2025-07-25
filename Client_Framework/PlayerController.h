@@ -5,22 +5,29 @@
 
 class CPlayerController : public CComponent
 {
+public:
+	enum class ControllMode
+	{
+		None,
+		FreeLook, // Free look mode, camera follows the player
+		LockOn,   // Lock on mode, camera focuses on a target
+		ClassSelection // Class selection mode, camera is static
+	};
 private:
+	ControllMode mControllMode = ControllMode::None;
 	ITEM_TYPE mSkill = ITEM_TYPE::item_end;
 	PLAYER_CLASS mClass = PLAYER_CLASS::ARCHER;
 
 	std::shared_ptr<class CPlayerStateMachine> mStateMachine{};
 	std::shared_ptr<class CCutScene> mCutScene{};
-	std::shared_ptr<class CRigidBody> rigidBody{};
 	std::weak_ptr<class CCamera> mCamera{};
 	std::weak_ptr<class CTerrain> mTerrain{};
 
 	std::weak_ptr<class CGameObject> mTargetEnemy{};
 	std::weak_ptr<class CGameObject> mTargetItem{};
-	std::weak_ptr<class CTargetMarker> mTargetMarker{};
 
 	
-
+	bool mActive = true;
 	bool moveKeyPressed = false;
 	bool mFreeLook = false;
 	bool mCastingSkill = false;
@@ -44,7 +51,6 @@ public:
 
 	void SetStateMachine(const std::shared_ptr<class CPlayerStateMachine>& StateMachine) { mStateMachine = StateMachine; }
 	void SetChildAnimationController();
-	void SetRigidBody(const std::shared_ptr<class CRigidBody>& rigidBody) { this->rigidBody = rigidBody; }
 	void SetCamera(const std::shared_ptr<class CCamera>& camera) { mCamera = camera; }
 	void SetTerrain(const std::shared_ptr<class CTerrain>& terrain) { mTerrain = terrain; }
 	void SetSkill(ITEM_TYPE skill);
@@ -55,9 +61,12 @@ public:
 
 	void OnKeyEvents();
 
+	void SetActive(bool active) { mActive = active; };
+	void ChangeControllMode(ControllMode mode);
 private:
 	void CastingSkill();
 	void LockOnTarget();
 	void InteractWithItem();
+
 };
 

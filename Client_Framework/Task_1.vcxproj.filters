@@ -261,11 +261,7 @@
       <Filter>GameObject\Component</Filter>
     </ClInclude>
     <ClInclude Include="MainMenuUI.h" />
-    <ClInclude Include="MainScene.h" />
     <ClInclude Include="Button.h">
-      <Filter>GameObject\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="CutScene.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
     <ClInclude Include="Portal.h">
@@ -280,10 +276,9 @@
     <ClInclude Include="InteractIcon.h">
       <Filter>GameObject\Component</Filter>
     </ClInclude>
-    <ClInclude Include="LobbyUI.h">
-      <Filter>GameObject\Component</Filter>
+    <ClInclude Include="MainScene.h">
+      <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="TPCameraState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Scene.cpp">
@@ -487,9 +482,6 @@
     <ClCompile Include="MainMenuUI.cpp">
       <Filter>Client</Filter>
     </ClCompile>
-    <ClCompile Include="MainScene.cpp">
-      <Filter>Client</Filter>
-    </ClCompile>
     <ClCompile Include="Portal.cpp">
       <Filter>Client</Filter>
     </ClCompile>
@@ -508,11 +500,8 @@
     <ClCompile Include="InteractIcon.cpp">
       <Filter>GameObject\Component</Filter>
     </ClCompile>
-    <ClCompile Include="LobbyUI.cpp">
-      <Filter>GameObject\Component</Filter>
-    </ClCompile>
-    <ClCompile Include="TPCameraState.cpp">
-      <Filter>Client</Filter>
+    <ClCompile Include="MainScene.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

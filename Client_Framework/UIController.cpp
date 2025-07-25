@@ -21,6 +21,16 @@
 #include"ResourceManager.h"
 #include"ParticleAttach.h"
 #include"HealthSystem.h"
+#include"Button.h"
+
+CPlayerHUD::CPlayerHUD(const CPlayerHUD& other)
+{
+    mPlayer = other.mPlayer;
+    mOtherPlayers = other.mOtherPlayers;
+    mStage = other.mStage;
+    mPlayerHUD = nullptr;
+	mSettingsUI = nullptr;
+}
 
 void CPlayerHUD::Awake()
 {
@@ -32,6 +42,48 @@ void CPlayerHUD::Start()
     ElementType elementType{ ElementType::end };
 
     mPlayer = INSTANCE(ServerManager).mPlayer;
+    for (auto& player : INSTANCE(ServerManager).mOtherPlayers)
+    {
+        mOtherPlayers.push_back(player.second);
+	}
+
+    mPlayerHUD = owner->FindChildByName("PlayerHUD");
+	mSettingsUI = owner->FindChildByName("SettingMenuUI");
+
+    
+    if (mPlayerHUD) {
+        InitializePlayerHUD();
+        mPlayerHUD->SetActive(true);
+    }
+    if (mSettingsUI) {
+		InitializeSettingUI();
+        mSettingsUI->SetActive(false);
+	}
+}
+
+void CPlayerHUD::Update()
+{
+    if (INPUT.IsKeyDown(KEY_TYPE::ESCAPE)) {
+        if (mUIState == UIState::InGame) {
+           INSTANCE(CSceneManager).GetCurScene()->CircularFadeIn(1.f, { 0.0,0.0,0.0,1.f }, []() {
+                INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MENU, false);
+                });
+        }
+        else {
+            OnClickResumeButton();
+        }
+    }
+}
+
+void CPlayerHUD::LateUpdate()
+{
+}
+
+void CPlayerHUD::InitializePlayerHUD()
+{
+    PLAYER_CLASS playerClass{ PLAYER_CLASS::end };
+    ElementType elementType{ ElementType::end };
+
     auto mainPlayer = mPlayer.lock();
     if (!mainPlayer) return;
     if (auto playerState = mainPlayer->GetComponent<CPlayerStateMachine>())
@@ -43,7 +95,7 @@ void CPlayerHUD::Start()
     std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
     std::array<std::string, 4> elementNames = { "Void", "Grass", "Water", "Fire" };
 
-	std::shared_ptr<CUIRenderer> mainPlayerBackgroundRenderer = nullptr;
+    std::shared_ptr<CUIRenderer> mainPlayerBackgroundRenderer = nullptr;
     std::shared_ptr<CUIRenderer> skillIconRenderer = nullptr;
     std::shared_ptr<CUIRenderer> ultimateBackgroundRenderer = nullptr;
 
@@ -94,13 +146,13 @@ void CPlayerHUD::Start()
     if (auto skill = owner->FindChildByName("Skill")) {
         if (skillIconRenderer = skill->GetComponent<CUIRenderer>())
         {
-			ITEM_TYPE skillType = mPlayer.lock()->GetComponent<CPlayerController>()->GetSkill();
-            std::string skillName{"Background"};
+            ITEM_TYPE skillType = mPlayer.lock()->GetComponent<CPlayerController>()->GetSkill();
+            std::string skillName{ "Background" };
             if (skillType == ITEM_TYPE::FIRE_EXPLOSION) skillName = "Explosion";
             else if (skillType == ITEM_TYPE::GRASS_VINE) skillName = "Vine";
             else if (skillType == ITEM_TYPE::WATER_SHIELD) skillName = "Shield";
             skillIconRenderer->SetTexture("Skill_" + skillName);
-		}
+        }
 
     }
     mPlayer.lock()->AddEvent("OnSkillChanged", [mainPlayerBackgroundRenderer, skillIconRenderer, ultimateBackgroundRenderer](const std::vector<std::any>& args) {
@@ -119,17 +171,23 @@ void CPlayerHUD::Start()
         ultimateBackgroundRenderer->SetColor(elementColor);
         mainPlayerBackgroundRenderer->SetColor(elementColor);
 
-        std::string skillName{"Background"};
+        std::string skillName{ "Background" };
         if (skillType == (UINT8)ITEM_TYPE::FIRE_EXPLOSION) skillName = "Explosion";
         else if (skillType == (UINT8)ITEM_TYPE::GRASS_VINE) skillName = "Vine";
         else if (skillType == (UINT8)ITEM_TYPE::WATER_SHIELD) skillName = "Shield";
-		skillIconRenderer->SetTexture("Skill_" + skillName);
+        skillIconRenderer->SetTexture("Skill_" + skillName);
         }
     );
 
+    if (auto stageUI = owner->GetChildComponent<CUIRenderer>("Title"))
+    {
+        stageUI->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+        stageUI->SetTexture("Title_Stage" + std::to_string(mStage));
+    }
+
 
     if (auto interactionUI = owner->FindChildByName("InteractionUI")) {
-		interactionUI->SetActive(false);
+        interactionUI->SetActive(false);
         if (auto renderer = interactionUI->GetComponent<CUIRenderer>())
         {
             renderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
@@ -138,19 +196,31 @@ void CPlayerHUD::Start()
             if (args.size() < 1) return;
             bool isActive = std::any_cast<bool>(args[0]);
             interactionUI->SetActive(isActive);
-            if(isActive)
+            if (isActive)
             {
-                if(auto renderer = interactionUI->GetComponent<CUIRenderer>())
+                if (auto renderer = interactionUI->GetComponent<CUIRenderer>())
                 {
-					Vec2 screenPos = std::any_cast<Vec2>(args[1]);
-					renderer->SetPosition(screenPos);
-				}
-			}
-			});
+                    Vec2 screenPos = std::any_cast<Vec2>(args[1]);
+                    renderer->SetPosition(screenPos);
+                }
+            }
+            });
     }
 
-
-
+    if (auto targetMarker = owner->FindChildByName("TargetMarker"))
+    {
+        auto targetMarkerRenderer = targetMarker->GetComponent<CUIRenderer>();
+        if (auto marker = targetMarker->AddComponent<CTargetMarker>())
+        {
+            targetMarkerRenderer->mIsVisible = false;
+            mPlayer.lock()->AddEvent("OnTargetChanged", [marker](const std::vector<std::any>& args) {
+                if (args.size() < 1) return;
+                auto target = std::any_cast<std::shared_ptr<CGameObject>>(args[0]);
+                bool isActive = std::any_cast<bool>(args[0]);
+                marker->SetTarget(target);
+                });
+        }
+    }
 
 
 
@@ -160,16 +230,43 @@ void CPlayerHUD::Start()
     {
         BindPlayerToUI(mOtherPlayers[i++].lock(), "Player" + std::to_string(i));
     }
-
 }
 
-void CPlayerHUD::Update()
+void CPlayerHUD::InitializeSettingUI()
 {
+    if (!mSettingsUI) return;
+    if (auto button = mSettingsUI->GetChildComponent<CButton>("ResumeUI"))
+    {
+        button->SetOnClick([this]() { OnClickResumeButton(); });
+	}
+    if (auto button = mSettingsUI->GetChildComponent<CButton>("ExitUI"))
+    {
+        button->SetOnClick([this]() { OnClickResumeButton(); });
+    }
 }
 
-void CPlayerHUD::LateUpdate()
+void CPlayerHUD::ChangeState(UIState newState)
 {
+    if (mUIState == newState) return;
+    switch (newState)
+    {
+    case UIState::InGame:
+        mSettingsUI->SetActive(false);
+        break;
+    case UIState::Settings:
+        mSettingsUI->SetActive(true);
+        break;
+    default:
+        break;
+    }
+    mUIState = newState;
 }
+
+void CPlayerHUD::OnClickResumeButton()
+{
+	ChangeState(UIState::InGame);
+}
+
 
 void CPlayerHUD::BindPlayerToUI(const std::shared_ptr<class CGameObject>& player, const std::string& name)
 {

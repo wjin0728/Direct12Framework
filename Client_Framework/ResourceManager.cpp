@@ -76,11 +76,11 @@ bool CResourceManager::LoadSceneResourcesFromFile(const std::string& fileName)
 bool CResourceManager::LoadPlayerObjects()
 {
 	LoadPrefabFromFile("Archer");
-	/*LoadPrefabFromFile("Fighter");
+	LoadPrefabFromFile("Fighter");
 	LoadPrefabFromFile("Mage");
 	LoadPrefabFromFile("HP_Background");
 	LoadPrefabFromFile("MainUI");
-	LoadPrefabFromFile("Portal");*/
+	LoadPrefabFromFile("Portal");
 	return true;
 }
 
@@ -569,9 +569,9 @@ void CResourceManager::BackgroundLoadingThread()
 	LoadDefaultMeshes();
 	LoadDefaultShaders();
 	LoadDefaultMaterials();
-	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
-	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle2Resources.bin");
-	//LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle3Resources.bin");
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle1Resources.bin");
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle2Resources.bin");
+	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\Battle3Resources.bin");
 	LoadSceneResourcesFromFile("..\\Resources\\Scenes\\LobbyResources.bin");
 	LoadPlayerObjects();
 	LoadEnemyObjects();

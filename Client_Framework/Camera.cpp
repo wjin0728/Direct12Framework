@@ -33,6 +33,19 @@ std::shared_ptr<CComponent> CCamera::Clone()
 	return copy;
 }
 
+void CCamera::SetCameraType(CameraType type)
+{
+	mCameraType = type;
+	if (mCameraType == CameraType::Perspective)
+	{
+		BoundingFrustum::CreateFromMatrix(mFrustumView, mPerspectiveProjectMat);
+	}
+	else if (mCameraType == CameraType::Orthographic)
+	{
+		BoundingFrustum::CreateFromMatrix(mFrustumView, mOrthographicProjectMat);
+	}
+}
+
 void CCamera::GenerateViewMatrix()
 {
 	auto transform = GetTransform(); 
@@ -118,11 +131,11 @@ void CCamera::GenerateReverseZPerspectiveProjectionMatrix(float nearPlane, float
 	mAspectRatio = (float(mViewport.Width) / float(mViewport.Height));
 	mNearZ = nearPlane;
 	mFarZ = farPlane;
-	Matrix commonPerspectiveMat = Matrix::CreatePerspectiveFieldOfView(XMConvertToRadians(fovAngle), mAspectRatio, nearPlane, farPlane);
-	BoundingFrustum::CreateFromMatrix(mFrustumView, commonPerspectiveMat);
+	mCommonPerspectiveProjectMat = Matrix::CreatePerspectiveFieldOfView(XMConvertToRadians(fovAngle), mAspectRatio, nearPlane, farPlane);
+	BoundingFrustum::CreateFromMatrix(mFrustumView, mCommonPerspectiveProjectMat);
 	SetFOVAngle(fovAngle);
 
-	mPerspectiveProjectMat = commonPerspectiveMat * reverse_z;
+	mPerspectiveProjectMat = mCommonPerspectiveProjectMat * reverse_z;
 }
 
 void CCamera::GenerateOrthographicProjectionMatrix(float nearPlane, float farPlane, float width, float height)
@@ -133,6 +146,19 @@ void CCamera::GenerateOrthographicProjectionMatrix(float nearPlane, float farPla
 	mFarZ = farPlane;
 
 	BoundingFrustum::CreateFromMatrix(mFrustumView, mOrthographicProjectMat);
+}
+
+void CCamera::GenerateReverseZOrthographicProjectionMatrix(float nearPlane, float farPlane, float width, float height)
+{
+	Matrix reverse_z = { 1.0f, 0.0f,  0.0f, 0.0f,
+							0.0f, 1.0f,  0.0f, 0.0f,
+							0.0f, 0.0f, -1.0f, 0.0f,
+							0.0f, 0.0f,  1.0f, 1.0f };
+	mCommonOrthographicProjectMat = Matrix::CreateOrthographic(width, height, nearPlane, farPlane);
+	BoundingFrustum::CreateFromMatrix(mFrustumView, mCommonOrthographicProjectMat);
+	mNearZ = nearPlane;
+	mFarZ = farPlane;
+	mOrthographicProjectMat = cmmonOrthographicMat * reverse_z;
 }
 
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ, float fMaxZ)

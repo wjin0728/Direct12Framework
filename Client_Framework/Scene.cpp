@@ -130,6 +130,9 @@ void CScene::CreatePrefabs(std::ifstream& ifs, std::unordered_map<std::string, s
 
 	for(int i=0; i< prefabNum; i++) {
 		auto prefab = CGameObject::CreateObjectFromFile(ifs, prefabs);
+		if(prefabs.contains(prefab->GetName())) {
+			continue;
+		}
 		prefabs[prefab->GetName()] = prefab;
 	}
 }
@@ -139,6 +142,20 @@ std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::string& tag)
 	std::shared_ptr<CGameObject> obj = nullptr;
 
 	return obj;
+}
+
+std::shared_ptr<CGameObject> CScene::FindObjectWithName(const std::string& name)
+{
+	std::shared_ptr<CGameObject> object = nullptr;
+	for (const auto& obj : mObjects) {
+		if (obj->GetName() == name) {
+			return obj;
+		}
+		if(object = obj->FindChildByName(name)) {
+			return object;
+		}
+	}
+	return object;
 }
 
 void CScene::ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB)

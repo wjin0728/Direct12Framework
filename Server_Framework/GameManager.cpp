@@ -401,7 +401,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
 
 			proj._pos = player._pos;
-			proj._pos.y += 0.3f;
+			proj._pos.y += 0.4f;
 
 			direction.x = sin(player._look_dir.y * degToRad); // 1.0
 			direction.y = 0.0f;
@@ -419,7 +419,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
 
 			proj._pos = player._pos;
-			proj._pos.y += 0.3f;
+			proj._pos.y += 0.4f;
 
 			direction.x = sin(player._look_dir.y * degToRad); // 1.0
 			direction.y = 0.0f;

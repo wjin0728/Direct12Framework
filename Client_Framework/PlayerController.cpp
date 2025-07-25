@@ -27,64 +27,57 @@ CPlayerController::~CPlayerController()
 
 void CPlayerController::Awake()
 {
-	mSkill = FIRE_EXPLOSION; // Default skill, can be changed later
+	mSkill = item_end; // Default skill, can be changed later
 }
 
 void CPlayerController::Start()
 {
-	if (!rigidBody) rigidBody = GetOwner()->GetComponent<CRigidBody>();
 	if (!mStateMachine) mStateMachine = owner->GetComponentFromHierarchy<CPlayerStateMachine>();
 
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mTerrain = scene->GetTerrain();
-	SetClass(mStateMachine->GetClass());
-	auto controller = owner->GetComponentFromHierarchy<CAnimationController>();
 
-	auto targetUIObj = CGameObject::CreateUIObject("Sprite", "TargetMarker", { 0.f,0.f }, { 80.f,80.f });
-	if (targetUIObj) {
-		mTargetMarker = targetUIObj->AddComponent<CTargetMarker>();
-		owner->AddChild(targetUIObj);
-		targetUIObj->SetActive(true);
+	if(mStateMachine) SetClass(mStateMachine->GetClass());
+
+	if(auto controller = owner->GetComponentFromHierarchy<CAnimationController>()) {
+		auto func = [](float time) {
+			INSTANCE(ServerManager).send_cs_attack_packet();
+			std::cout << "Do attack packet sent!" << std::endl;
+			};
+		controller->AddAnimationEvent("Attack", "Attack", func);
+		controller->AddAnimationEvent("RunAttack", "Attack", func);
 	}
-
-	auto func = [](float time) {
-		INSTANCE(ServerManager).send_cs_attack_packet();
-		std::cout << "Do attack packet sent!" << std::endl;
-		};
-	controller->AddAnimationEvent("Attack", "Attack", func);
-	controller->AddAnimationEvent("RunAttack", "Attack", func);
 }
 
 void CPlayerController::Update()
 {
-	if (INPUT.IsKeyDown(KEY_TYPE::F1)) {
-		if (!mFreeLook) {
-			if (moveKeyPressed == true) {
-				moveKeyPressed = false;
-				auto camera = mCamera.lock()->GetTransform();
-				Vec3 camForward = camera->GetWorldLook();
-				INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
-				mStateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-				INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
-			}
-		}
-		mFreeLook = !mFreeLook;
-	}
-
-	if (mFreeLook) {
-		// Handle free look camera logic here if needed
-		return;
+	
+	switch (mControllMode)
+	{
+	case CPlayerController::ControllMode::None:
+		break;
+	case CPlayerController::ControllMode::FreeLook:
+		break;
+	case CPlayerController::ControllMode::LockOn:
+		LockOnTarget();
+		InteractWithItem();
+		OnKeyEvents();
+		break;
+	case CPlayerController::ControllMode::ClassSelection:
+		break;
+	default:
+		break;
 	}
 	
-	LockOnTarget();
-	InteractWithItem();
-	OnKeyEvents();
-	// auto transform = GetTransform();
-	// float terrainHeight = mTerrain.lock()->GetHeight(transform->GetWorldPosition().x, transform->GetWorldPosition().z);
 
-	// Vec3 pos = transform->GetWorldPosition();
-	// pos.y = terrainHeight;
-	// transform->SetLocalPosition(pos);
+	if (INPUT.IsKeyDown(KEY_TYPE::F1)) {
+		if (mControllMode == ControllMode::LockOn)
+			ChangeControllMode(ControllMode::FreeLook);
+	}
+	else if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
+		if(mControllMode == ControllMode::FreeLook)
+			ChangeControllMode(ControllMode::LockOn);
+	}
 }
 
 void CPlayerController::LockOnTarget()
@@ -109,7 +102,7 @@ void CPlayerController::LockOnTarget()
 			mTargetEnemy = enemy;
 		}
 	}
-	mTargetMarker.lock()->SetTarget(mTargetEnemy.lock());
+	owner->TriggerEvent("OnEnemyTargeted", { mTargetEnemy.lock() });
 }
 
 void CPlayerController::InteractWithItem()
@@ -162,6 +155,33 @@ void CPlayerController::InteractWithItem()
 		}
 	}
 
+}
+
+void CPlayerController::ChangeControllMode(ControllMode mode)
+{
+	if (mode == mControllMode) return;
+	switch (mControllMode)
+	{
+	case CPlayerController::ControllMode::None:
+
+		break;
+	case CPlayerController::ControllMode::FreeLook:
+		break;
+	case CPlayerController::ControllMode::LockOn:
+		break;
+	case CPlayerController::ControllMode::ClassSelection:
+		break;
+	default:
+		break;
+	}
+	mControllMode = mode;
+	if (moveKeyPressed == true) {
+		moveKeyPressed = false;
+		auto camera = mCamera.lock()->GetTransform();
+		Vec3 camForward = camera->GetWorldLook();
+		INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+		INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::IDLE);
+	}
 }
 
 void CPlayerController::LateUpdate()

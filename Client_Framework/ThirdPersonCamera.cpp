@@ -16,7 +16,6 @@ CThirdPersonCamera::CThirdPersonCamera()
 	, mTarget{}
 	, mTerrain{}
 {
-	mFreeLook = false;
 }
 
 CThirdPersonCamera::~CThirdPersonCamera()
@@ -31,17 +30,19 @@ void CThirdPersonCamera::Start()
 {
 	auto scene = INSTANCE(CSceneManager).GetCurScene();
 	mTerrain = scene->GetTerrain();
-	mFreeLook = false;
+	mCameraMode = CameraMode::FixedPosition;
 	if(!mCamera.lock()) mCamera = GetOwner()->GetComponent<CCamera>();
 
-	mCameraParams.trackingPosition = mTarget->GetTransform()->GetWorldPosition();
-	mCameraParams.distance = 5.f;
-	mCameraParams.framing = Vec2(0.f, -0.6f);
-	mCameraParams.yaw = 0.f;
-	mCameraParams.pitch = 25.f;
+	mDefaultCameraParams.trackingPosition = mTarget->GetTransform()->GetWorldPosition();
+	mDefaultCameraParams.distance = 5.f;
+	mDefaultCameraParams.framing = Vec2(0.f, -0.6f);
+	mDefaultCameraParams.yaw = 0.f;
+	mDefaultCameraParams.pitch = 25.f;
 
+	mCameraParams = mDefaultCameraParams;
 	mDeadZoneSize = { -0.05f, 0.05f};
-	SetCameraParams(mCameraParams);
+
+	if(mCameraMode == CameraMode::FollowTarget) SetCameraParams(mCameraParams);
 
 }
 
@@ -51,47 +52,65 @@ void CThirdPersonCamera::Update()
 	float deltaTime = DELTA_TIME;
 	float speed = deltaTime * 5.f;
 
-	if (INPUT.IsKeyDown(KEY_TYPE::F1)) {
-		mFreeLook = !mFreeLook;
+	switch (mCameraMode)
+	{
+	case CThirdPersonCamera::CameraMode::FreeLook:
+		if (!mIsPlayingCutScene) FreeMovement();
+		break;
+	case CThirdPersonCamera::CameraMode::FollowTarget:
+		if(!mIsPlayingCutScene) FollowTarget(speed, deltaTime);
+		break;
+	case CThirdPersonCamera::CameraMode::FixedPosition:
+
+		break;
+	default:
+		break;
 	}
-	
-	if (mFreeLook) FreeMovement();
-	else if (!mIsPlayingCutScene) FollowTarget(speed, deltaTime);
+
+	if (INPUT.IsKeyDown(KEY_TYPE::F1)) {
+		ChangeCameraMode(CameraMode::FreeLook);
+	}
+	else if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
+		ChangeCameraMode(CameraMode::FollowTarget);
+	} else if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+		ChangeCameraMode(CameraMode::FixedPosition);
+	}
+
 	//RaycastObjects();
 
-	if (mFreeLook && mTarget)
-	{
-		auto camTransform = GetTransform();
-		auto targetTransform = mTarget->GetTransform();
+	//if (mFreeLook && mTarget)
+	//{
+	//	auto camTransform = GetTransform();
+	//	auto targetTransform = mTarget->GetTransform();
 
-		Matrix targetWorld = targetTransform->GetWorldMat();
-		Matrix targetWorldInv = targetWorld.Invert();
+	//	Matrix targetWorld = targetTransform->GetWorldMat();
+	//	Matrix targetWorldInv = targetWorld.Invert();
 
-		Matrix camWorld = camTransform->GetWorldMat();
+	//	Matrix camWorld = camTransform->GetWorldMat();
 
-		// 카메라의 월드 변환을 타겟의 월드 기준으로 변환
-		Matrix relativeMatrix = camWorld * targetWorldInv;
+	//	// 카메라의 월드 변환을 타겟의 월드 기준으로 변환
+	//	Matrix relativeMatrix = camWorld * targetWorldInv;
 
-		Vec3 relativePos = Vec3(relativeMatrix._41, relativeMatrix._42, relativeMatrix._43);
+	//	Vec3 relativePos = Vec3(relativeMatrix._41, relativeMatrix._42, relativeMatrix._43);
 
-		Quaternion relativeRot;
-		Vec3 scale, pos;
-		relativeMatrix.Decompose(scale, relativeRot, pos);
+	//	Quaternion relativeRot;
+	//	Vec3 scale, pos;
+	//	relativeMatrix.Decompose(scale, relativeRot, pos);
 
-		/*std::cout << "==============================" << std::endl;
-		std::cout << "Position: "
-			<< relativePos.x << ", "
-			<< relativePos.y << ", "
-			<< relativePos.z << std::endl;
+	//	std::cout << "==============================" << std::endl;
+	//	std::cout << "Position: "
+	//		<< relativePos.x << ", "
+	//		<< relativePos.y << ", "
+	//		<< relativePos.z << std::endl;
 
-		std::cout << "Rotation: "
-			<< relativeRot.x << ", "
-			<< relativeRot.y << ", "
-			<< relativeRot.z << ", "
-			<< relativeRot.w << std::endl;
+	//	std::cout << "Rotation: "
+	//		<< relativeRot.x << ", "
+	//		<< relativeRot.y << ", "
+	//		<< relativeRot.z << ", "
+	//		<< relativeRot.w << std::endl;
 
-		std::cout << "==============================" << std::endl;*/
-	}
+	//	std::cout << "==============================" << std::endl;
+	//}
 
 	auto transform = GetTransform();
 	Vec3 camPos = transform->GetWorldPosition();
@@ -178,6 +197,13 @@ void CThirdPersonCamera::FreeMovement()
 	Quaternion rotation = Quaternion::CreateFromYawPitchRoll(rotationY * degToRad, rotationX * degToRad, 0);
 	transform->SetLocalRotation(rotation);
 	transform->SetLocalPosition(position);
+}
+
+void CThirdPersonCamera::SetDefaultCameraParams()
+{
+	mCameraParams = mDefaultCameraParams;
+	SetCameraParams(mCameraParams);
+	mIsHit = false;
 }
 
 void CThirdPersonCamera::LateUpdate()

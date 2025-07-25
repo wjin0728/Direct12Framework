@@ -6,14 +6,24 @@ class CPlayerHUD :
     public CComponent
 {
 public:
+	enum class UIState
+	{
+		InGame,
+		Settings
+	};
+	UIState mUIState = UIState::InGame;
+
 	std::weak_ptr<class CGameObject> mPlayer;
-	std::array<std::weak_ptr<class CGameObject>, 2> mOtherPlayers{};
+	std::vector<std::weak_ptr<class CGameObject>> mOtherPlayers{};
 	int mStage = 0;
 
-	std::unordered_map<std::string, std::weak_ptr<class CUIRenderer>> mUIRenderers{};
+	std::shared_ptr<class CGameObject> mPlayerHUD;
+	std::shared_ptr<class CGameObject> mSettingsUI;
+
 
 public:
 	CPlayerHUD() = default;
+	CPlayerHUD(const CPlayerHUD& other);
 	CPlayerHUD(int stage) : mStage(stage) {}
 	~CPlayerHUD() = default;
 
@@ -26,6 +36,14 @@ public:
 	virtual void LateUpdate();
 
 public:
+	void InitializePlayerHUD();
+	void InitializeSettingUI();
+
+	void ChangeState(UIState newState);
+	void OnClickResumeButton();
+	void OnClickExitButton();
+
 	void BindPlayerToUI(const std::shared_ptr<CGameObject>& player, const std::string& name);
+
 };
 

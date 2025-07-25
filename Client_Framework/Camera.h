@@ -9,9 +9,17 @@ public:
 	virtual ~CCamera();
 	virtual std::shared_ptr<CComponent> Clone();
 
+	enum class CameraType
+	{
+		Perspective,
+		Orthographic
+	};
+
 private:
+	CameraType mCameraType = CameraType::Perspective;
 	float mNearZ{};
 	float mFarZ{};
+
 	float mAspectRatio{};
 	float mFovAngle = 90.0f;
 	float mProjectRectDist = 1.0f;
@@ -30,6 +38,9 @@ public:
 	Matrix mPerspectiveProjectMat = Matrix::Identity;
 	Matrix mViewPerspectiveProjectMat = Matrix::Identity;
 
+	Matrix mCommonPerspectiveProjectMat = Matrix::Identity;
+	Matrix mCommonOrthographicProjectMat = Matrix::Identity;
+
 	Matrix mOrthographicProjectMat = Matrix::Identity;
 	Matrix mViewOrthographicProjectMat = Matrix::Identity;
 
@@ -41,10 +52,13 @@ public:
 	virtual void LateUpdate();
 
 public:
+	void SetCameraType(CameraType type);
+	CameraType GetCameraType() const { return mCameraType; }
 	void GenerateViewMatrix();
 	void GeneratePerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle);
 	void GenerateReverseZPerspectiveProjectionMatrix(float nearPlane, float farPlane, float fovAngle);
 	void GenerateOrthographicProjectionMatrix(float nearPlane, float farPlane, float width, float height);
+	void GenerateReverseZOrthographicProjectionMatrix(float nearPlane, float farPlane, float width, float height);	
 	void SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ = 0.0f, float fMaxZ = 1.0f);
 	void SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom);
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* cmdList);
@@ -55,6 +69,10 @@ public:
 	bool IsInFrustum(std::shared_ptr<class CGameObject> obj);
 
 	void SetFOVAngle(float fovAngle);
+	void SetNear(float nearZ) { mNearZ = nearZ; }
+	void SetFar(float farZ) { mFarZ = farZ; }
+	void SetAspect(float aspectRatio) { mAspectRatio = aspectRatio; }
+	void SetProjectRectDist(float dist) { mProjectRectDist = dist; }
 
 	float GetNear() const { return mNearZ; }
 	float GetFar() const { return mFarZ; }
@@ -69,10 +87,11 @@ public:
 
 	Matrix GetViewMat() const { return mViewMat; }
 	Matrix GetInverseViewMat() const { return mInverseViewMat; }
-	Matrix GetViewProjMat() const { return mViewPerspectiveProjectMat; }
+	Matrix GetViewProjMat() const { return mCameraType == CameraType::Perspective ? mViewPerspectiveProjectMat : mViewOrthographicProjectMat; }
 	Matrix GetViewOrthoProjMat() const { return mViewOrthographicProjectMat; }
 	Matrix GetPerspectiveProjectMat() const { return mPerspectiveProjectMat; }
 	Matrix GetOrthographicProjectionMat() const { return mOrthographicProjectMat; }
+	Matrix GetProjectionMat() const { return mCameraType == CameraType::Perspective ? mPerspectiveProjectMat : mOrthographicProjectMat; }
 
 	Vec2 TransformToScreenSpace(const Vec3& worldPos) const;
 	Vec2 TransformToNDC(const Vec3& worldPos) const;

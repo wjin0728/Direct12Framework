@@ -57,7 +57,7 @@ void CLoadScene::Update()
 		{
 			mIsLoading = false;
 			CircularFadeIn(1.f, { 0.0,0.0,0.0,1.f }, []() {
-				INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::MENU, false);
+				INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
 				});
 		}
 

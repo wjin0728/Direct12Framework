@@ -30,7 +30,35 @@ void CLobbyScene::Initialize()
 	LoadSceneFromFile(SCENE_PATH("Lobby"));
 	CLight::SetVolumes();
 
+	auto mainPlayer = FindObjectWithName("MainPlayer");
+	if (mainPlayer) {
+		auto playerController = mainPlayer->GetComponent<CPlayerController>();
+		if (playerController) {
+			playerController->ChangeControllMode(CPlayerController::ControllMode::ClassSelection);
+		}
+	}
+	if(auto camera = FindObjectWithName("MainCamera")) {
+		if(auto cameraCmp = camera->GetComponent<CCamera>()) {
+			float size = 4.f * 2.f;
+			Vec2 rtSize = INSTANCE(CDX12Manager).GetRenderTargetSize();
+			float aspect = rtSize.x / rtSize.y;
+			//cameraCmp->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 130.f, 60.f);
+			cameraCmp->GenerateReverseZOrthographicProjectionMatrix(0.5f, 100.f, size * aspect, size);
+			cameraCmp->SetCameraType(CCamera::CameraType::Orthographic);
+		}
+		auto transform = camera->GetTransform();
+		if (transform) {
+			transform->SetLocalPosition	({ 5.09, 2.679f, 6.98 });
+			transform->SetLocalRotation({ 12.102, 49.1, -0.591 });
+		}
+		auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
+		if (thirdPersonCamera) {
+			//thirdPersonCamera->SetDefaultCameraParams();
+			thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FixedPosition);
+		}
+	}
 
+	INPUT.FixMousePosition(true);
 }
 
 void CLobbyScene::Update()
@@ -68,4 +96,5 @@ void CLobbyScene::RenderScene()
 	mRenderMgr->RenderLightingPass();
 	mRenderMgr->RenderForwardPass();
 	mRenderMgr->RenderFinalPass();
+	mRenderMgr->RenderUIPass();
 }

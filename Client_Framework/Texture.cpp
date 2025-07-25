@@ -62,7 +62,7 @@ void CTexture::LoadFromFile(const std::string& _fileName)
 		if (hr < 0) {
 			MessageBoxA(nullptr, (_fileName + "don't exist in file!").c_str(), nullptr, MB_OK);
 		}
-		ThrowIfFailed(hr);
+		//ThrowIfFailed(hr);
 	}
 	else {
 		vSubresources.push_back(D3D12_SUBRESOURCE_DATA());
@@ -71,7 +71,7 @@ void CTexture::LoadFromFile(const std::string& _fileName)
 		if (hr < 0) {
 			MessageBoxA(nullptr, (_fileName + "don't exist in file!").c_str(), nullptr, MB_OK);
 		}
-		ThrowIfFailed(hr);
+		//ThrowIfFailed(hr);
 	}
 	
 	texResource->SetName(BinaryReader::stringToWstring(name).c_str());
