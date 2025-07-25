@@ -344,6 +344,11 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_CHANGE_SCENE_PACKET* packet = reinterpret_cast<SC_CHANGE_SCENE_PACKET*>(packet_ptr);
 		SCENE_TYPE sceneType = (SCENE_TYPE)packet->change_scene;
 
+		// 오브젝트 초기화
+		mEnemies.clear();
+		mItems.clear();
+		mProjectiles.clear();
+
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (sceneType == INSTANCE(CSceneManager).GetCurSceneType()) break; // 이미 같은 씬이면 리턴
 
@@ -597,8 +602,20 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "Current scene is nullptr" << std::endl;
 			break;
 		}
-		scene->RemoveObject(mEnemies[packet->monster_id]);
-		mEnemies.erase(packet->monster_id);
+
+		auto it = mEnemies.find(packet->monster_id);
+		if (it == mEnemies.end()) {
+			std::cout << "[SC_REMOVE_MONSTER] monster_id " << packet->monster_id << " not found in mEnemies" << std::endl;
+			break;
+		}
+		if (!it->second) {
+			std::cout << "[SC_REMOVE_MONSTER] mEnemies[" << packet->monster_id << "] is nullptr" << std::endl;
+			mEnemies.erase(it);
+			break;
+		}
+		std::cout << "Removing monster with ID: " << packet->monster_id << std::endl;
+		scene->RemoveObject(it->second);
+		mEnemies.erase(it);
 		break;
 	}
 	case SC_REMOVE_PROJECTILE: {

@@ -448,8 +448,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		break;
 	}
 	case CS_READY_FOR_NEXT_STAGE: {
-		CS_READY_FOR_NEXT_STAGE_PACKET* p = reinterpret_cast<CS_READY_FOR_NEXT_STAGE_PACKET*>(packet);
-		clients[ServerNumber][c_id]._player._ready_for_next_stage = p->ready;
+		ChangeScene();
 		break;
 	}
 	}
@@ -836,12 +835,15 @@ void GameManager::HandleWaveEnd(MonsterWave& wave)
 {
 	if (wave.current_wave == 2) { // 2웨이브까지 클리어하면 포탈 생성
 		if (!wave.make_potal) {
-			ClearMonstersAndMakePortal();
+			for (auto& [_, cl] : clients[ServerNumber]) {
+				if (cl._state != ST_INGAME) continue;
+				cl.send_make_potal_packet();
+			}
 			wave.make_potal = true;
 		}
-		else if (IsAllPlayerReady()) {
-			ChangeScene();
-		}
+		//else if (IsAllPlayerReady()) {
+		//	ChangeScene();
+		//}
 	}
 	else {
 		wave.wave_timer -= TICK_INTERVAL;
@@ -882,14 +884,4 @@ bool GameManager::IsAllPlayerReady()
 		break;
 	}
 	return all_ready;
-}
-void GameManager::ClearMonstersAndMakePortal()
-{
-	Monsters[ServerNumber].clear();
-	Monster_cnt[ServerNumber] = 0;
-
-	for (auto& [_, cl] : clients[ServerNumber]) {
-		if (cl._state != ST_INGAME) continue;
-		cl.send_make_potal_packet();
-	}
 }

@@ -162,7 +162,6 @@ public:
 	void HandleWaveEnd(MonsterWave& wave);
 	void HandleWaveInProgress(MonsterWave& wave);
 	bool IsAllPlayerReady(); // 모든 플레이어가 다음 스테이지 준비 상태인지 확인
-	void ClearMonstersAndMakePortal();
 
 	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
 		{ S_ENEMY_TYPE::GRASS_SMALL, {

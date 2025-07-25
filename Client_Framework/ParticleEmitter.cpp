@@ -291,7 +291,7 @@ void CParticleEmitter::Stop(bool reset)
 		mIsPaused = false;
 		mIsLooping = false;
 		mTimeSinceLastEmit = 0.f;
-		mTotalTime = mParticleProperties->duration;
+		mTotalTime = mParticleProperties ? mParticleProperties->duration : 0.f;
 	}
 }
 
