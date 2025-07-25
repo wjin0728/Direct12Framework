@@ -1,0 +1,118 @@
+#ifndef BossMonsterStateMachine_H
+#define BossMonsterStateMachine_H
+
+#include "stdafx.h"
+
+// 전방 선언
+class Monster;
+
+// 상태 머신의 추상 기본 클래스
+class BossMonsterStateMachine {
+public:
+    virtual ~BossMonsterStateMachine() {}
+    virtual void Enter(Monster* monster) = 0;
+    virtual void Update(Monster* monster) = 0;
+    virtual void Exit(Monster* monster) = 0;
+
+    int pattern_cnt = 3;
+};
+
+namespace BossMonsterState
+{
+    // Idle 상태
+    class IdleState : public BossMonsterStateMachine {
+    public:
+        static IdleState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        IdleState() {}
+        float idleTimer = 0.0f; // 기본 대기 시간
+    };
+
+    // Run 상태
+    class RunState : public BossMonsterStateMachine {
+    public:
+        static RunState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        RunState() {}
+    };
+
+    // BasicAttack 상태
+    class AttackState : public BossMonsterStateMachine {
+    public:
+        static AttackState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        AttackState() {}
+        float attackTimer;
+    };
+
+    // SkillAttack 상태
+    class SkillState : public BossMonsterStateMachine {
+    public:
+        static SkillState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        SkillState() {}
+        float skillTimer;
+    };
+
+    // Hit 상태
+    class HitState : public BossMonsterStateMachine {
+    public:
+        static HitState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        HitState() {}
+        float hitTimer;
+    };
+
+    // Death 상태
+    class DeathState : public BossMonsterStateMachine {
+    public:
+        static DeathState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        DeathState() {}
+        float deathTimer;
+    };
+
+    // underground 상태
+    class UndergroundState : public BossMonsterStateMachine {
+    public:
+        static UndergroundState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        UndergroundState() {}
+        float UndergroundTimer = 0.f;
+    };
+
+    // Spawn 상태
+    class SpawnState : public BossMonsterStateMachine {
+    public:
+        static SpawnState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        SpawnState() {}
+        float SpawnTimer;
+    };
+}
+
+#endif

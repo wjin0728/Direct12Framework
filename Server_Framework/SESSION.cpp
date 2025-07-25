@@ -115,6 +115,9 @@ void SESSION::send_add_projectile_packet(Projectile proj, int id)
 	p.dir_y = proj._velocity.y;
 	p.dir_z = proj._velocity.z;
 	p.user_friendly = proj._user_frinedly;
+	cout << "Projectile ID: " << id << ", Position: ("
+		<< p.x << ", " << p.y << ", " << p.z << "), Direction: ("
+		<< p.dir_x << ", " << p.dir_y << ", " << p.dir_z << ")" << endl;
 	do_send(&p);
 }
 
