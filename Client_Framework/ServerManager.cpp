@@ -675,7 +675,21 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto portal = RESOURCE.GetPrefab("Portal");
 		if (portal) {
 			auto portalObject = CGameObject::Instantiate(portal);
-			portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(65.111f, 4.913f, 45.11095f));
+
+			switch (INSTANCE(CSceneManager).GetCurSceneType()) {
+				case SCENE_TYPE::MAIN_STAGE_1: {
+					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(65.111f, 4.913f, 45.11095f));
+					break;
+				}
+				case SCENE_TYPE::MAIN_STAGE_2: {
+					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(21.4895f, 2.f, 55.8328f));
+					break;
+				}
+				case SCENE_TYPE::MAIN_STAGE_3: {
+					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(26.6849f, 3.f, 53.2355f));
+					break;
+				}
+			}
 			auto particle = portalObject->GetComponent<CParticleAttach>();
 			particle->SetLoop(true);
 			portalObject->SetObjectType(OBJECT_TYPE::ITEM);

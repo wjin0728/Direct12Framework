@@ -213,6 +213,10 @@ CAnimationController::CAnimationController(const CAnimationController& other) : 
 
 CAnimationController::~CAnimationController()
 {
+	if (mBoneTransformIdx >= 0) {
+		INSTANCE(CObjectPoolManager).ReturnBoneTransformIdx(mBoneTransformIdx);
+		mBoneTransformIdx = -1; // Reset to default value
+	}
 }
 
 void CAnimationController::Awake()
