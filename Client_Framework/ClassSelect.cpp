@@ -50,6 +50,8 @@ void CClassSelectUI::Start()
 	mClassCharacters[0] = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("Archer");
 	mClassCharacters[1] = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("Fighter");
 	mClassCharacters[2] = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("Mage");
+
+	mWaitingRoomUI->SetActive(false);
 }
 
 void CClassSelectUI::Update()
@@ -189,9 +191,6 @@ void CClassSelectUI::OnClickSelectButton(int classType)
 	stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 	player->SetStateMachine(stateMachine);
 
-	stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-	player->SetStateMachine(stateMachine);
-
 	auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
 	if (shieldPrefab) {
 		auto shieldObj = CGameObject::Instantiate(shieldPrefab, player->GetTransform());
@@ -205,6 +204,7 @@ void CClassSelectUI::OnClickSelectButton(int classType)
 	if (playerController) {
 		playerController->ChangeControllMode(CPlayerController::ControllMode::LockOn);
 		playerController->SetStateMachine(stateMachine);
+		playerController->SetChildAnimationController();
 	}
 	if (auto camera = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("MainCamera")) {
 		if (auto cameraCmp = camera->GetComponent<CCamera>()) {

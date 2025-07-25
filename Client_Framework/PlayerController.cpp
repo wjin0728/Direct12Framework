@@ -190,6 +190,14 @@ void CPlayerController::LateUpdate()
 
 void CPlayerController::SetChildAnimationController()
 {
+	if (auto controller = owner->GetComponentFromHierarchy<CAnimationController>()) {
+		auto func = [](float time) {
+			INSTANCE(ServerManager).send_cs_attack_packet();
+			std::cout << "Do attack packet sent!" << std::endl;
+			};
+		controller->AddAnimationEvent("Attack", "Attack", func);
+		controller->AddAnimationEvent("RunAttack", "Attack", func);
+	}
 }
 
 void CPlayerController::SetSkill(ITEM_TYPE skill)
