@@ -272,16 +272,25 @@ void GameManager::Process_packet(int c_id, char* packet)
 		CS_SKILL_TARGET_PACKET* p = reinterpret_cast<CS_SKILL_TARGET_PACKET*>(packet);
 
 		if (S_FIRE_EXPLOSION == p->skill_enum) {
+			for (auto& mon : Monsters[ServerNumber]) {
+				if (mon.second._remove || mon.second._state == S_MONSTER_STATE::UNDERGROUND || mon.second._state == S_MONSTER_STATE::DEATH || mon.second._state == S_MONSTER_STATE::SPAWN) continue;
+				Vec3 pos = mon.second._pos;
+				pos.y += 1.5f;
+
+				BoundingSphere sphere(pos, 0.7f);
+				if (sphere.Intersects(mon.second._boundingbox)) {
+					mon.second.TakeDamage(10, true);
+					for (auto& cl : clients[ServerNumber]) {
+						if (cl.second._state != ST_INGAME) continue;
+						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
+					}
+				}
+			}
 			for (auto& cl : clients[ServerNumber]) {
 				if (cl.second._state != ST_INGAME) continue;
-				Monsters[ServerNumber][p->target_id].TakeDamage(10, true);
-				cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, p->target_id, Monsters[ServerNumber][p->target_id]._hp, 0);
-				for (auto& cl : clients[ServerNumber]) {
-					if (cl.second._state != ST_INGAME) continue;
-					Vec3 pos = Monsters[ServerNumber][p->target_id]._pos;
-					pos.y += 1.5f; 
-					cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::EXPLOSION, pos);
-				}
+				Vec3 pos = Monsters[ServerNumber][p->target_id]._pos;
+				pos.y += 1.5f;
+				cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::EXPLOSION, pos);
 			}
 		}
 		else if (S_GRASS_VINE == p->skill_enum) {}
@@ -407,7 +416,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
 
 			proj._pos = player._pos;
-			proj._pos.y += 0.5f;
+			proj._pos.y += 0.6f;
 
 			direction.x = sin(player._look_dir.y * degToRad); // 1.0
 			direction.y = 0.0f;

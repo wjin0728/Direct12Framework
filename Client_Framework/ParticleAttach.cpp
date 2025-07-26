@@ -53,6 +53,7 @@ void CParticleAttach::LateUpdate()
 
 void CParticleAttach::Play()
 {
+	if (!mCanEmit) return;
 	if (mIsPlaying && mLoop) {
 		return;
 	}

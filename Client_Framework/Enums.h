@@ -60,6 +60,7 @@ enum OBJECT_TYPE : UINT8
 	ENEMY_PROJECTILE,
 	OBSTACLE,
 	TRIGGER,
+	EFFECT,
 
 	end
 };
@@ -142,6 +143,13 @@ enum class PLAYER_STATE : UINT8
 
 	end
 };
+
+enum class EFFECT_TYPE : UINT8
+{
+	EXPLOSION,
+	ss
+};
+
 
 enum class MONSTER_STATE : UINT8
 {

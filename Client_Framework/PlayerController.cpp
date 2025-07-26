@@ -142,16 +142,15 @@ void CPlayerController::InteractWithItem()
 		Vec3 itemPos = targetItem->GetTransform()->GetWorldPosition();
 		Vec3 playerPos = GetTransform()->GetWorldPosition();
 		playerPos.y += 0.7f; 
-		//화면기준 아이템이 플레이어 왼쪽에 있는지 오른	쪽에 있는지 판단
 		Vec2 itemPosCS = camera->TransformToNDC(itemPos);
 		Vec2 playerPosCS = camera->TransformToNDC(playerPos);
 
 		float offset = 0.2f;
 
 		if (itemPosCS.x < playerPosCS.x) {
-			playerPosCS.x -= offset; // 플레이어 왼쪽에 아이템이 있을 때
+			playerPosCS.x -= offset; 
 		} else {
-			playerPosCS.x += offset; // 플레이어 오른쪽에 아이템이 있을 때
+			playerPosCS.x += offset; 
 		}
 		owner->TriggerEvent("OnItemTargeted", { true, playerPosCS });
 	}
@@ -379,22 +378,7 @@ void CPlayerController::CastingSkill()
 		break;
 	case FIRE_EXPLOSION: {
 		if (mTargetEnemy.lock()) {
-			auto explosionPrefab = INSTANCE(CResourceManager).GetPrefab("Explosion");
-			if (explosionPrefab) {
-				auto explosionObj = CGameObject::Instantiate(explosionPrefab);
-
-				auto camera = mCamera.lock()->GetTransform();
-				Vec3 camForward = camera->GetWorldLook();
-				Vec3 explosionPos = mTargetEnemy.lock()->GetRootBoundingSphere().Center;
-				explosionPos -= camForward * 0.1f; 
-
-				explosionObj->GetTransform()->SetLocalPosition(explosionPos);
-				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
-				auto explosionParticle = explosionObj->GetComponent<CParticleAttach>();
-				if (explosionParticle) {
-					explosionParticle->Reserve(true);
-				}
-			}
+			
 			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
 		}
 		break;

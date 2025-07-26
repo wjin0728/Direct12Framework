@@ -473,19 +473,32 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "Current scene is nullptr" << std::endl;
 			break;
 		}
+		EFFECT_TYPE effectType = (EFFECT_TYPE)packet->effect_type;
+		Vec3 effectPos = { packet->x, packet->y, packet->z };
+		switch (effectType)
+		{
+		case EFFECT_TYPE::EXPLOSION:
+		{
+			auto explosionPrefab = INSTANCE(CResourceManager).GetPrefab("Explosion");
+			if (explosionPrefab) {
+				auto explosionObj = CGameObject::Instantiate(explosionPrefab);
 
-		auto effect = RESOURCE.GetPrefab("FireExplosion");
-		if (!effect) {
-			std::cout << "effect is nullptr" << std::endl;
+				auto transform = mMainCamera->GetTransform();
+				Vec3 camForward = transform->GetWorldLook();
+				Vec3 explosionPos = effectPos;
+				explosionPos -= camForward * 0.1f;
+
+				explosionObj->SetObjectType(OBJECT_TYPE::EFFECT);
+				explosionObj->GetTransform()->SetLocalPosition(explosionPos);
+				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
+			}
+		}
+			break;
+		case EFFECT_TYPE::ss:
+			break;
+		default:
 			break;
 		}
-		auto effectObj = CGameObject::Instantiate(effect);
-		effectObj->SetTag("Effect");
-		effectObj->SetRenderLayer(RENDER_LAYER::Transparent);
-		effectObj->SetStatic(false);
-		effectObj->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-		effectObj->GetTransform()->SetLocalRotationY(packet->look_y);
-		scene->AddObject(effectObj);
 		break;
 	}
 	case SC_ADD_PROJECTILE: {

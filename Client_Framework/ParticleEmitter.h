@@ -627,7 +627,6 @@ public:
 
 	Vec3 mLastEmitPosW = Vec3(0, 0, 0);
 	Matrix mEmitterTransform = Matrix::Identity;
-	class CParticleAttach* mParticleAttach = nullptr;
 
 	bool mIsPlaying = false;
 	bool mIsPaused = false;
@@ -655,6 +654,7 @@ public:
 	void Stop(bool reset = true);
 
 	bool IsEnded() const {
+		if (!mParticleProperties) return true;
 		return !mIsLooping && (mTotalTime >= mParticleProperties->duration) && (mActiveParticleCount == 0);
 	}
 
