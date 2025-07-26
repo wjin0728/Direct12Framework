@@ -204,7 +204,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 
 		if (0 == c_id)
-			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::ARCHER);
+			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
 		else if (1 == c_id)
 			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
 		else if (2 == c_id)
@@ -519,13 +519,15 @@ void GameManager::Update()
 
 		player.Update();
 
-		if (player._class == S_PLAYER_CLASS::FIGHTER && player.currentState == &PlayerState::UltimateState::GetInstance()) {
-			float terrainHeight = terrain[(int)scene_type].GetHeight(player._pos.x, player._pos.z);
-			player._pos.y = terrainHeight + player._data;
+		switch (player._state) {
+		case S_PLAYER_STATE::ULTIMATE: { // 전사 궁극기 점프 처리
+			if (player._class == S_PLAYER_CLASS::FIGHTER) {
+				float terrainHeight = terrain[(int)scene_type].GetHeight(player._pos.x, player._pos.z);
+				player._pos.y = terrainHeight + player._data;
+			}
+			break;
 		}
-
-		// 플레이어 - 아이템 충돌 체크
-		if (player._state == S_PLAYER_STATE::GATHERING && !items.empty()) {
+		case S_PLAYER_STATE::GATHERING: { // 아이템 획득 처리
 			for (auto& it : items[ServerNumber]) {
 				if (it.second._item_type > S_ITEM_TYPE::S_GRASS_WEAKEN)
 					it.second.LocalTransform();
@@ -542,6 +544,8 @@ void GameManager::Update()
 					break;
 				}
 			}
+			break;
+		}
 		}
 
 		if (player.HasMoveInput()) {
@@ -782,16 +786,16 @@ void GameManager::InitializeMonsterWave()
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_3: {
 		if (MonsterWaves[ServerNumber].current_wave == 0) {
-			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 1.8f, 43.8f));
-			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(27.8f, 1.7f, 43.9f));
+			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 0.f, 43.8f));
+			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(27.8f, 0.f, 43.9f));
 		}
 		else if (MonsterWaves[ServerNumber].current_wave == 1) {
-			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 1.8f, 43.8f));
-			InitializeMonster(S_ENEMY_TYPE::FIRE_BIG, Vec3(27.8f, 1.7f, 43.9f));
-			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(32.6f, 2.1f, 43.65f));
+			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 0.f, 43.8f));
+			InitializeMonster(S_ENEMY_TYPE::FIRE_BIG, Vec3(27.8f, 0.f, 43.9f));
+			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(32.6f, 0.f, 43.65f));
 		}
 		else if (MonsterWaves[ServerNumber].current_wave == 2) {
-			InitializeMonster(S_ENEMY_TYPE::BOSS, Vec3(27.8f, 1.7f, 43.9f));
+			InitializeMonster(S_ENEMY_TYPE::BOSS, Vec3(27.8f, 0.f, 43.9f));
 		}
 		break;
 	}

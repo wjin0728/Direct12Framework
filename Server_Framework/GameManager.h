@@ -15,6 +15,14 @@ struct MonsterWave {
 	float spawn_timer = SPAWN_INTERVAL;
 	bool is_end = false; // 웨이브 종료 여부
 	bool make_potal = false; // 포탈 생성 여부
+
+	void Initialize() {
+		current_wave = 0;
+		wave_timer = SPAWN_INTERVAL;
+		spawn_timer = SPAWN_INTERVAL;
+		is_end = false;
+		make_potal = false;
+	}
 };
 
 struct MonsterAttackInfo {
@@ -111,11 +119,7 @@ public:
 		Item_cnt[ServerNumber] = 0;
 		Projectile_cnt[ServerNumber] = 0;
 
-		MonsterWaves[ServerNumber].current_wave = 0;
-		MonsterWaves[ServerNumber].wave_timer = SPAWN_INTERVAL;
-		MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
-		MonsterWaves[ServerNumber].is_end = false;
-		MonsterWaves[ServerNumber].make_potal = false;
+		MonsterWaves[ServerNumber].Initialize(); // 웨이브 상태 초기화
 
 		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
 
@@ -163,8 +167,8 @@ public:
 
 	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
 		{ S_ENEMY_TYPE::GRASS_SMALL, {
-			{ {0.f, 0.7f}, 0.8f, 100 },
 			{ {0.2f, 0.9f}, 2.f, 100 },
+			{ {0.f, 0.7f}, 0.8f, 100 },
 		}},
 		{ S_ENEMY_TYPE::GRASS_BIG, {
 			{ {0.f, 2.85f}, 1.f, 150 },
