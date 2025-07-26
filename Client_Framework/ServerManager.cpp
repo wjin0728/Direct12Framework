@@ -290,9 +290,41 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		if (clientID != packet->id) {
 			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
 			player = mOtherPlayers[packet->id];
-		}
 
-		TriggerEvent("SelectClass", { packet->player_class });
+			CGameObject::Instantiate(obj, player->GetTransform());
+			player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+			player->GetTransform()->SetLocalRotationY(packet->look_y);
+
+			std::shared_ptr<CPlayerStateMachine> stateMachine{};
+			if (packet->player_class == (UINT8)PLAYER_CLASS::ARCHER) {
+				stateMachine = player->AddComponent<CArcherState>();
+			}
+			else if (packet->player_class == (UINT8)PLAYER_CLASS::FIGHTER) {
+				stateMachine = player->AddComponent<CWarriorState>();
+			}
+			else if (packet->player_class == (UINT8)PLAYER_CLASS::MAGE) {
+				stateMachine = player->AddComponent<CMageState>();
+			}
+			else {
+				std::cout << "Unknown player class: " << (int)packet->player_class << std::endl;
+				return;
+			}
+
+			stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
+			player->SetStateMachine(stateMachine);
+
+			auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
+			if (shieldPrefab) {
+				auto shieldObj = CGameObject::Instantiate(shieldPrefab, player->GetTransform());
+				shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
+				shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
+				stateMachine->SetShield(shieldObj);
+				stateMachine->ActivateShield(false);
+			}
+		}
+		else {
+			TriggerEvent("SelectClass", { packet->player_class });
+		}
 		
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (!scene) {

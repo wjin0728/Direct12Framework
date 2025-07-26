@@ -121,4 +121,12 @@ private:
 	void LogTickDelay(long long microseconds) {
 		printf("Tick %llu delayed: %lld us\n", current_tick, microseconds);
 	}
+
+	bool IsClassOK(S_PLAYER_CLASS class_type) const {
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			if (cl.second._player._class == class_type) return false;
+		}
+		return true;
+	};
 };

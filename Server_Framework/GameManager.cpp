@@ -428,6 +428,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 		case (uint8_t)S_BUTTON_TYPE::ARCHER:
 		case (uint8_t)S_BUTTON_TYPE::FIGHTER:
 		case (uint8_t)S_BUTTON_TYPE::MAGE: {
+			if (!IsClassOK((S_PLAYER_CLASS)p->button_type)) break;
+
 			clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)(p->button_type));
 
 			// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
