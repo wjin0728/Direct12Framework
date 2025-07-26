@@ -279,66 +279,13 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_ADD_PLAYER: {
 		SC_ADD_PLAYER_PACKET* packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet_ptr);
-		std::string objName[3] = { "Archer", "Fighter", "Mage" };
-		auto obj = RESOURCE.GetPrefab(objName[packet->player_class]);
-		if (!obj) {
-			std::cout << "obj is nullptr" << std::endl;
-			break;
-		}
 
 		std::shared_ptr<CGameObject> player{};
 		if (clientID != packet->id) {
 			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
 			player = mOtherPlayers[packet->id];
-
-			CGameObject::Instantiate(obj, player->GetTransform());
-			player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-			player->GetTransform()->SetLocalRotationY(packet->look_y);
-
-			std::shared_ptr<CPlayerStateMachine> stateMachine{};
-			if (packet->player_class == (UINT8)PLAYER_CLASS::ARCHER) {
-				stateMachine = player->AddComponent<CArcherState>();
-			}
-			else if (packet->player_class == (UINT8)PLAYER_CLASS::FIGHTER) {
-				stateMachine = player->AddComponent<CWarriorState>();
-			}
-			else if (packet->player_class == (UINT8)PLAYER_CLASS::MAGE) {
-				stateMachine = player->AddComponent<CMageState>();
-			}
-			else {
-				std::cout << "Unknown player class: " << (int)packet->player_class << std::endl;
-				return;
-			}
-
-			stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-			player->SetStateMachine(stateMachine);
-
-			auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
-			if (shieldPrefab) {
-				auto shieldObj = CGameObject::Instantiate(shieldPrefab, player->GetTransform());
-				shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
-				shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
-				stateMachine->SetShield(shieldObj);
-				stateMachine->ActivateShield(false);
-			}
 		}
-		else {
-			TriggerEvent("SelectClass", { packet->player_class });
-		}
-		
-		auto scene = INSTANCE(CSceneManager).GetCurScene();
-		if (!scene) {
-			std::cout << "Current scene is nullptr" << std::endl;
-			break;
-		}
-		if (clientID != packet->id) {
-			scene->AddObject(player);
-		}
-
-		/*if (!RenderOK) {
-			RenderOK = true;
-			INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
-		}*/
+		TriggerEvent("SelectClass", { packet->player_class, packet->id });
 		break;
 	}
 	case SC_CHANGE_SCENE: {

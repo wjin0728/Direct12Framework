@@ -43,10 +43,73 @@ GameManager::GameManager()
 
 	scene_type = S_SCENE_TYPE::LOBBY;
 
-	spawn_points[(int)S_SCENE_TYPE::LOBBY] = Vec3(4.803865f, 0.4409764f, 8.894886f);
-	spawn_points[(int)S_SCENE_TYPE::MAINSTAGE1] = Vec3(45.2f, 4.2f, 42.f);
-	spawn_points[(int)S_SCENE_TYPE::MAINSTAGE2] = Vec3(5.075171f, 2.164612f, 25.88103f);
-	spawn_points[(int)S_SCENE_TYPE::MAINSTAGE3] = Vec3(26.92197f, 1.299845, 6.873069);
+	std::ifstream lobbySpawnData("..\\Resources\\Scenes\\LobbySpawnData.bin", std::ios::binary);
+	if (!lobbySpawnData) {
+		std::cerr << "Failed to open lobby spawn data file.\n";
+	}
+	std::string token;
+	while (1) {
+		BinaryReader::ReadDateFromFile(lobbySpawnData, token);
+		if (token == "<Archer>") {
+			Vec3 spawnPoint;
+			Quaternion spawnRot;
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::ARCHER].pos = spawnPoint;
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::ARCHER].rot = spawnRot;
+		}
+		else if (token == "<Fighter>") {
+			Vec3 spawnPoint;
+			Quaternion spawnRot;
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::FIGHTER].pos = spawnPoint;
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::FIGHTER].rot = spawnRot;
+		}
+		else if (token == "<Mage>") {
+			Vec3 spawnPoint;
+			Quaternion spawnRot;
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::MAGE].pos = spawnPoint;
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::MAGE].rot = spawnRot;
+		}
+		if (token == "</SpawnData>") break;
+	}
+
+	for (int i = (int)S_SCENE_TYPE::MAINSTAGE1; i < (int)S_SCENE_TYPE::END; i++) {
+		std::ifstream battleSpawnData("..\\Resources\\Scenes\\Battle" + std::to_string(i - (int)S_SCENE_TYPE::MAINSTAGE1 + 1) + "SpawnData.bin", std::ios::binary);
+		std::string token;
+		while (1) {
+			BinaryReader::ReadDateFromFile(lobbySpawnData, token);
+			if (token == "<Archer>") {
+				Vec3 spawnPoint;
+				Quaternion spawnRot;
+				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
+				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+				spawnDatas[i][(int)S_PLAYER_CLASS::ARCHER].pos = spawnPoint;
+				spawnDatas[i][(int)S_PLAYER_CLASS::ARCHER].rot = spawnRot;
+			}
+			else if (token == "<Fighter>") {
+				Vec3 spawnPoint;
+				Quaternion spawnRot;
+				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
+				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+				spawnDatas[i][(int)S_PLAYER_CLASS::FIGHTER].pos = spawnPoint;
+				spawnDatas[i][(int)S_PLAYER_CLASS::FIGHTER].rot = spawnRot;
+			}
+			else if (token == "<Mage>") {
+				Vec3 spawnPoint;
+				Quaternion spawnRot;
+				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
+				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+				spawnDatas[i][(int)S_PLAYER_CLASS::MAGE].pos = spawnPoint;
+				spawnDatas[i][(int)S_PLAYER_CLASS::MAGE].rot = spawnRot;
+			}
+			if (token == "</SpawnData>") break;
+		}
+	}
+
 }
 GameManager::~GameManager()
 {
@@ -205,7 +268,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		//clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)p->player_class);
 
-		clients[ServerNumber][c_id]._player._pos = spawn_points[(int)scene_type];
+		clients[ServerNumber][c_id]._player._pos = spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)clients[ServerNumber][c_id]._player._class].pos;
 		cout << "login : " << c_id << endl;
 		break;
 	}
@@ -431,6 +494,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 			if (!IsClassOK((S_PLAYER_CLASS)p->button_type)) break;
 
 			clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)(p->button_type));
+			clients[ServerNumber][c_id]._player._pos = spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)clients[ServerNumber][c_id]._player._class].pos;
+			clients[ServerNumber][c_id]._player._rotation = spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)clients[ServerNumber][c_id]._player._class].rot;
 
 			// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
 			for (auto& cl : clients[ServerNumber]) {

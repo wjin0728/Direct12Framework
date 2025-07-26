@@ -67,7 +67,7 @@ void CLobbyScene::Initialize()
 		}
 	}
 
-	INPUT.FixMousePosition(true);
+	INPUT.FixMousePosition(false);
 }
 
 void CLobbyScene::Update()

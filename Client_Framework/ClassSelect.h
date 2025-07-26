@@ -17,9 +17,9 @@ private:
 	std::shared_ptr<CGameObject> mClassSelectUI = nullptr;
 	std::shared_ptr<CGameObject> mSettingsUI = nullptr;
 	std::shared_ptr<CGameObject> mWaitingRoomUI = nullptr;
-
-	std::array<std::shared_ptr<CGameObject>, 3> mClassChoices = { nullptr, nullptr, nullptr };
+	
 	std::array<std::shared_ptr<CGameObject>, 3> mClassCharacters = { nullptr, nullptr, nullptr };
+	std::vector<PLAYER_CLASS> mSelectedClasses;
 
 	CCamera* mCamera = nullptr;
 

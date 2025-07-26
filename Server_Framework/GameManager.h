@@ -13,6 +13,11 @@
 class GameManager
 {
 public:
+	struct SpawnData {
+		Vec3 pos;
+		Quaternion rot;
+	};
+
 	SOCKET server_socket, client_socket;
 	HANDLE h_iocp;
 	OVER_PLUS accept_over;
@@ -22,7 +27,7 @@ public:
 	uint64_t current_tick = 0;
 
 	array<Terrain, (int)S_SCENE_TYPE::END> terrain;
-	array<Vec3, (int)S_SCENE_TYPE::END> spawn_points; // 각 씬의 스폰 포인트
+	array<array<SpawnData, (int)S_SCENE_TYPE::END>, (int)PLAYER_CLASS::end> spawnDatas; // 각 씬의 스폰 포인트
 	S_SCENE_TYPE scene_type = S_SCENE_TYPE::LOBBY; // 현재 씬 타입
 
 	array<unordered_map<int, Item>, 6> items;
@@ -98,7 +103,8 @@ public:
 		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
 
 		for (auto& cl : clients[ServerNumber]) {
-			cl.second._player._pos = spawn_points[(int)scene_type];
+			cl.second._player._pos = spawnDatas[(int)scene_type][(int)cl.second._player._class].pos;
+			cl.second._player._rotation = spawnDatas[(int)scene_type][(int)cl.second._player._class].rot;
 			cl.second._player._velocity = Vec3::Zero;
 			cl.second._player._hp = cl.second._player.PlayerMaxHp();
 			cl.second._player._barrier = 0;

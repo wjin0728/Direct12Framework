@@ -56,89 +56,106 @@ void CClassSelectUI::Start()
 	auto& sm = INSTANCE(ServerManager);
 	sm.AddEvent("SelectClass", [this](std::vector<std::any> any) {
 		auto player = INSTANCE(ServerManager).mPlayer;
+		auto& otherPlayers = INSTANCE(ServerManager).mOtherPlayers;
 		if (!player) return;
-
 		if (any.size() < 1) return;
+
 		uint8_t classType = std::any_cast<uint8_t>(any[0]);
-
-		std::cout << "Selected class: " << classType << endl;
-
 		Vec3 position = mClassCharacters[classType]->GetTransform()->GetLocalPosition();
 		Vec3 rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
 		Vec3 scale = mClassCharacters[classType]->GetTransform()->GetLocalScale();
 
-		player->GetTransform()->SetLocalPosition(position);
-		player->GetTransform()->SetLocalRotation(rotation);
-		player->GetTransform()->SetLocalScale(scale);
+
+		short playerId = std::any_cast<short>(any[1]);
+		if (playerId < 0 || playerId >= otherPlayers.size()) return;
+		std::shared_ptr<CGameObject> playerObj{};
+		if (playerId == INSTANCE(ServerManager).clientID) {
+			playerObj = player;
+		}
+		else {
+			playerObj = otherPlayers[playerId];
+			mSelectedClasses.push_back((PLAYER_CLASS)classType);
+		}
+
+		std::cout << "Selected class: " << classType << endl;
+
+		playerObj->GetTransform()->SetLocalPosition(position);
+		playerObj->GetTransform()->SetLocalRotation(rotation);
+		playerObj->GetTransform()->SetLocalScale(scale);
 
 		mClassCharacters[classType]->GetTransform()->SetLocalPosition({ 0.f, 0.f, 0.f });
 		mClassCharacters[classType]->GetTransform()->SetLocalRotation({ 0.f, 0.f, 0.f });
 		mClassCharacters[classType]->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
-		mClassCharacters[classType]->SetParent(player);
+		mClassCharacters[classType]->SetParent(playerObj);
 
 
-		player->GetCutScene()->SetClass((PLAYER_CLASS)classType);
+		playerObj->GetCutScene()->SetClass((PLAYER_CLASS)classType);
 		std::shared_ptr<CPlayerStateMachine> stateMachine{};
 		if (classType == (UINT8)PLAYER_CLASS::ARCHER) {
-			stateMachine = player->AddComponent<CArcherState>();
+			stateMachine = playerObj->AddComponent<CArcherState>();
 		}
 		else if (classType == (UINT8)PLAYER_CLASS::FIGHTER) {
-			stateMachine = player->AddComponent<CWarriorState>();
+			stateMachine = playerObj->AddComponent<CWarriorState>();
 		}
 		else if (classType == (UINT8)PLAYER_CLASS::MAGE) {
-			stateMachine = player->AddComponent<CMageState>();
+			stateMachine = playerObj->AddComponent<CMageState>();
 		}
 
 		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-		player->SetStateMachine(stateMachine);
+		playerObj->SetStateMachine(stateMachine);
 
 		auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
 		if (shieldPrefab) {
-			auto shieldObj = CGameObject::Instantiate(shieldPrefab, player->GetTransform());
+			auto shieldObj = CGameObject::Instantiate(shieldPrefab, playerObj->GetTransform());
 			shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
 			shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
 			stateMachine->SetShield(shieldObj);
 			stateMachine->ActivateShield(false);
 		}
 
-		auto playerController = player->GetComponent<CPlayerController>();
-		if (playerController) {
-			playerController->ChangeControllMode(CPlayerController::ControllMode::LockOn);
-			playerController->SetStateMachine(stateMachine);
-			playerController->SetChildAnimationController();
-		}
-		if (auto camera = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("MainCamera")) {
-			if (auto cameraCmp = camera->GetComponent<CCamera>()) {
-				cameraCmp->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 150.f, 60.f);
-				cameraCmp->SetCameraType(CCamera::CameraType::Perspective);
+		if (playerId == INSTANCE(ServerManager).clientID) {
+			auto playerController = playerObj->GetComponent<CPlayerController>();
+			if (playerController) {
+				playerController->ChangeControllMode(CPlayerController::ControllMode::LockOn);
+				playerController->SetStateMachine(stateMachine);
+				playerController->SetChildAnimationController();
 			}
-			auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
-			if (thirdPersonCamera) {
-				thirdPersonCamera->SetDefaultCameraParams();
-				thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FollowTarget);
+			if (auto camera = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("MainCamera")) {
+				if (auto cameraCmp = camera->GetComponent<CCamera>()) {
+					cameraCmp->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 150.f, 60.f);
+					cameraCmp->SetCameraType(CCamera::CameraType::Perspective);
+				}
+				auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
+				if (thirdPersonCamera) {
+					thirdPersonCamera->SetDefaultCameraParams();
+					thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FollowTarget);
+				}
 			}
 		}
 
-		ChangeMenuState(EMenuState::WaitingRoom);
+		std::string buttonName = "SelectBound" + std::to_string(classType + 1);
+		if (auto button = mClassSelectUI->FindChildByName(buttonName)) {
+			button->SetActive(false);
+		}
+
+		if (mCurrentState == EMenuState::WaitingRoom) {
+			std::string playerName = "Player" + std::to_string(mSelectedClasses.size());
+			if (auto player1 = owner->GetChildComponent<CUIRenderer>(playerName)) {
+				auto& serverManager = INSTANCE(ServerManager);
+				std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
+				if (any.size() < 1) return;
+				if (player1) {
+					player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+					player1->SetTexture("Player_" + classNames[classType] + "_Normal");
+				}
+			}
+		}
 		}
 	);
 }
 
 void CClassSelectUI::Update()
 {
-	if(INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-		if (mCamera)
-		{
-			Ray ray = mCamera->GetRayFromMousePosition();
-			for (auto& character : mClassCharacters) {
-				BoundingSphere sphere = character->GetRootBoundingSphere();
-				float distance{ 0.0f };
-				if (sphere.Intersects(ray.position, ray.direction, distance)) {
-					std::cout << "Character " << character->GetName() << " is hovered." << std::endl;
-				}
-			}
-		}
-	}
 }
 
 void CClassSelectUI::LateUpdate()
@@ -161,6 +178,17 @@ void CClassSelectUI::ChangeMenuState(EMenuState newState)
     case EMenuState::WaitingRoom:
 		mClassSelectUI->SetActive(false);
 		mWaitingRoomUI->SetActive(true);
+		for (int i = 0; i < mSelectedClasses.size();i++) {
+			std::string playerName = "Player" + std::to_string(mSelectedClasses.size());
+			if (auto player1 = owner->GetChildComponent<CUIRenderer>(playerName)) {
+				auto& serverManager = INSTANCE(ServerManager);
+				std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
+				if (player1) {
+					player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+					player1->SetTexture("Player_" + classNames[i] + "_Normal");
+				}
+			}
+		}
         break;
     default:
         break;
@@ -194,7 +222,7 @@ void CClassSelectUI::InitializeWaitingRoomUI()
 {
 	if (auto player1 = owner->GetChildComponent<CUIRenderer>("Player1")) {
 		auto& serverManager = INSTANCE(ServerManager);
-		serverManager.AddEvent("PlayerJoined", [player1](std::vector<std::any> any) {
+		serverManager.AddEvent("Player1Joined", [player1](std::vector<std::any> any) {
 			std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
 			if (any.size() < 1) return;
 			int playerClass = std::any_cast<int>(any[0]);
@@ -207,7 +235,7 @@ void CClassSelectUI::InitializeWaitingRoomUI()
 	}
 	if (auto player2 = owner->GetChildComponent<CUIRenderer>("Player2")) {
 		auto& serverManager = INSTANCE(ServerManager);
-		serverManager.AddEvent("PlayerJoined", [player2](std::vector<std::any> any) {
+		serverManager.AddEvent("Player2Joined", [player2](std::vector<std::any> any) {
 			std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
 			if (any.size() < 1) return;
 			int playerClass = std::any_cast<int>(any[0]);
@@ -229,6 +257,9 @@ void CClassSelectUI::OnClickExitButton()
 void CClassSelectUI::OnClickSelectButton(int classType)
 {
 	INSTANCE(ServerManager).send_cs_click_button_packet(classType);
+	ChangeMenuState(EMenuState::WaitingRoom);
+
+	INPUT.FixMousePosition(true);
 }
 
 void CClassSelectUI::OnClickSettingsButton()

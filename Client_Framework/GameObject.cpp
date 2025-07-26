@@ -412,7 +412,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 	std::string token{};
 
 	while (true) {
-		ReadDateFromFile(inFile, token);
+		BinaryReader::ReadDateFromFile(inFile, token);
 		if (token == "<Prefab>:") {
 			std::string prefabName{};
 			ReadDateFromFile(inFile, prefabName);
