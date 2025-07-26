@@ -23,6 +23,7 @@ public:
 
     array<PlayerCharacter*, 3>_Player; // 플레이어 타겟
     PlayerCharacter* _target = nullptr;
+	Vec3 _attack_pos = Vec3(0, 0, 0); // 보스 기본공격 위치
 
     vector<AnimationInfo> _animations{}; // 애니메이션 정보들 (S_MONSTER_STATE 순서대로 들어감)
     vector<CAnimationEventHandler> mEventHandler;
@@ -84,6 +85,13 @@ public:
             _hp = 100.f;
             break;
         }
+        case S_ENEMY_TYPE::BOSS: {
+            ReadAnimationInfo("Animations/Boss.bin");
+            _orignalboundingbox.Center = XMFLOAT3(0, 1.91, 0);
+            _orignalboundingbox.Extents = Vec3(1.87, 3.84, 1.51) / 2.f;
+            _hp = 300.f;
+            break;
+        }
         }
         _active = false;
     }
@@ -104,7 +112,9 @@ public:
     bool IsPlayerInRange(PlayerCharacter* target) const;
     bool IsPlayerTooMuchClose() const;
 
-    void SetTarget();
+    void UpdateTarget();
+	void SetRandomTarget();
+	void ResetTarget() { _target = nullptr; }
 
     Vec2 GetWorldOffsetPosition(float local_x, float local_z) {
         Vec3 forward = _look_dir;

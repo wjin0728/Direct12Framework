@@ -58,6 +58,9 @@ public:
 	array<int, 6> Projectile_cnt = { 0, 0, 0, 0, 0, 0 };
 	array<MonsterWave, 6> MonsterWaves; // 각 서버의 몬스터 웨이브 정보
 
+	const float boss_item_spawn_interval = 15.f; // 보스 아이템 생성 간격 (초 단위)
+	float boss_item_timer = boss_item_spawn_interval; // 보스 아이템 생성 타이머
+
 	GameManager();
 	~GameManager();
 
@@ -152,7 +155,8 @@ public:
 		}
 	}
 
-	void CreateItem(Monster* monster);
+	void CreateItem(float x, float z);
+	void CreateItemAtRandomPosition();
 
 	void InitializeMonsterWave();
 	void InitializeMonster(S_ENEMY_TYPE type, Vec3 position);
@@ -189,7 +193,7 @@ public:
 		{ S_ENEMY_TYPE::FIRE_BIG, {
 			{ {0.8f, 1.15f}, 1.5f, 150 },
 			{ {0.f, 2.3f}, 1.f, 150 },
-		}},
+		}}
 	};
 
 private:

@@ -2,25 +2,15 @@
 #define BossMonsterStateMachine_H
 
 #include "stdafx.h"
+#include "Monster.h"
 
 // 전방 선언
 class Monster;
 
-// 상태 머신의 추상 기본 클래스
-class BossMonsterStateMachine {
-public:
-    virtual ~BossMonsterStateMachine() {}
-    virtual void Enter(Monster* monster) = 0;
-    virtual void Update(Monster* monster) = 0;
-    virtual void Exit(Monster* monster) = 0;
-
-    int pattern_cnt = 3;
-};
-
 namespace BossMonsterState
 {
     // Idle 상태
-    class IdleState : public BossMonsterStateMachine {
+    class IdleState : public MonsterStateMachine {
     public:
         static IdleState& GetInstance();
         void Enter(Monster* monster) override;
@@ -28,22 +18,24 @@ namespace BossMonsterState
         void Exit(Monster* monster) override;
     private:
         IdleState() {}
-        float idleTimer = 0.0f; // 기본 대기 시간
+        float idleTimer = 0.0f;
     };
 
-    // Run 상태
-    class RunState : public BossMonsterStateMachine {
+    // Targeting 상태
+    class TargetingState : public MonsterStateMachine {
     public:
-        static RunState& GetInstance();
+        static TargetingState& GetInstance();
         void Enter(Monster* monster) override;
         void Update(Monster* monster) override;
         void Exit(Monster* monster) override;
     private:
-        RunState() {}
+        TargetingState() {}
+        float targetingTimer = 0.0f; // 타겟팅 타이머
+        float targetingDelay = 0.0f; // 타겟팅 딜레이 시간
     };
 
     // BasicAttack 상태
-    class AttackState : public BossMonsterStateMachine {
+    class AttackState : public MonsterStateMachine {
     public:
         static AttackState& GetInstance();
         void Enter(Monster* monster) override;
@@ -55,7 +47,7 @@ namespace BossMonsterState
     };
 
     // SkillAttack 상태
-    class SkillState : public BossMonsterStateMachine {
+    class SkillState : public MonsterStateMachine {
     public:
         static SkillState& GetInstance();
         void Enter(Monster* monster) override;
@@ -67,7 +59,7 @@ namespace BossMonsterState
     };
 
     // Hit 상태
-    class HitState : public BossMonsterStateMachine {
+    class HitState : public MonsterStateMachine {
     public:
         static HitState& GetInstance();
         void Enter(Monster* monster) override;
@@ -79,7 +71,7 @@ namespace BossMonsterState
     };
 
     // Death 상태
-    class DeathState : public BossMonsterStateMachine {
+    class DeathState : public MonsterStateMachine {
     public:
         static DeathState& GetInstance();
         void Enter(Monster* monster) override;
@@ -91,7 +83,7 @@ namespace BossMonsterState
     };
 
     // underground 상태
-    class UndergroundState : public BossMonsterStateMachine {
+    class UndergroundState : public MonsterStateMachine {
     public:
         static UndergroundState& GetInstance();
         void Enter(Monster* monster) override;
@@ -103,7 +95,7 @@ namespace BossMonsterState
     };
 
     // Spawn 상태
-    class SpawnState : public BossMonsterStateMachine {
+    class SpawnState : public MonsterStateMachine {
     public:
         static SpawnState& GetInstance();
         void Enter(Monster* monster) override;

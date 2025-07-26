@@ -43,6 +43,11 @@ GameManager::GameManager()
 
 	scene_type = S_SCENE_TYPE::LOBBY;
 
+	//spawn_points[(int)S_SCENE_TYPE::LOBBY] = { Vec3(4.803865f, 0.4409764f, 8.894886f), Vec3(), Vec3() };
+	//spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_1] = { Vec3(45.2f, 4.2f, 42.f), Vec3(), Vec3() };
+	//spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_2] = { Vec3(1.947089f, 12.48286f, 24.35838f), Vec3(1.267226f, 11.74326f, 25.1563f), Vec3(1.14057f, 12.14464f, 23.05893f) };
+	//spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_3] = { Vec3(23.4066f, 1.103329f, 6.356736f), Vec3(22.36104f, 1.228926f, 5.376029f), Vec3(24.56644f, 0.9770427f, 5.169536f) };
+	
 	spawn_points[(int)S_SCENE_TYPE::LOBBY] = Vec3(4.803865f, 0.4409764f, 8.894886f);
 	spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_1] = Vec3(45.2f, 4.2f, 42.f);
 	spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_2] = Vec3(5.075171f, 2.164612f, 25.88103f);
@@ -211,6 +216,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::MAGE);
 
 		clients[ServerNumber][c_id]._player.InitializeTarget();
+		clients[ServerNumber][c_id]._player._id = c_id;
 
 		clients[ServerNumber][c_id]._player._pos = spawn_points[(int)scene_type];
 		cout << "login : " << c_id << endl;
@@ -579,22 +585,33 @@ void GameManager::Update()
 		auto& monster = ms.second;
 
 		if (monster._remove) continue; // 몬스터가 제거된 경우는 패스
-		else if (monster._state == S_MONSTER_STATE::DEATH && !monster._drop_item) {
-			CreateItem(&monster);
-			monster._drop_item = true;
+		monster.Update();
+
+		// 일반 몬스터
+		if (monster._class != S_ENEMY_TYPE::BOSS) {
+			// 아이템 생성
+			if (monster._state == S_MONSTER_STATE::DEATH && !monster._drop_item) {
+				CreateItem(monster._pos.x, monster._pos.z);
+				monster._drop_item = true;
+			}
+
+			// 다른 몬스터와 충돌 회피
+			monster.AvoidCollision(Monsters[ServerNumber]);
+
+			// 몬스터 위치 업데이트
+			if (monster._state == S_MONSTER_STATE::RUN || monster._state == S_MONSTER_STATE::SPAWN) {
+				float terrainHeight = terrain[(int)scene_type].GetHeight(monster._pos.x, monster._pos.z);
+				monster._pos.y = terrainHeight;
+			}
+		}
+		// 보스 몬스터
+		else {
+
 		}
 
 		// 이벤트 처리
 		if (monster._state == S_MONSTER_STATE::ATTACK || monster._state == S_MONSTER_STATE::ATTACK2 || monster._state == S_MONSTER_STATE::PROJECTILE_ATTACK) {
 			monster.HandleCallback(monster.mEventHandler[(int)monster._state]);
-		}
-
-		monster.Update();
-		monster.AvoidCollision(Monsters[ServerNumber]);
-
-		if (monster._state == S_MONSTER_STATE::RUN || monster._state == S_MONSTER_STATE::SPAWN) {
-			float terrainHeight = terrain[(int)scene_type].GetHeight(monster._pos.x, monster._pos.z);
-			monster._pos.y = terrainHeight;
 		}
 
 		// 몬스터 - 투사체 충돌 체크
@@ -616,6 +633,16 @@ void GameManager::Update()
 
 	// 몬스터 웨이브 관리
 	UpdateWave();
+
+	// 보스 스테이지 처리
+	if (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && MonsterWaves[ServerNumber].current_wave == 3) {
+		// 아이템 생성
+		boss_item_timer -= TICK_INTERVAL;
+		if (boss_item_timer <= 0.f) {
+			CreateItemAtRandomPosition();
+			boss_item_timer = boss_item_spawn_interval; // 다음 아이템 생성 타이머 초기화
+		}
+	}
 
 	for (auto& proj : Projectiles[ServerNumber]) {
 		proj.second.Update();
@@ -727,11 +754,11 @@ void GameManager::SendAllProjectilesPosPacket()
 	}
 }
 
-void GameManager::CreateItem(Monster* monster)
+void GameManager::CreateItem(float x, float z)
 {
-	float terrainHeight = terrain[(int)scene_type].GetHeight(monster->_pos.x, monster->_pos.z);
+	float terrainHeight = terrain[(int)scene_type].GetHeight(x, z);
 
-	items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(monster->_pos.x, terrainHeight + 0.3, monster->_pos.z);
+	items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(x, terrainHeight + 0.3, z);
 	items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(rand() % 2 ? S_ITEM_TYPE::S_FIRE_EXPLOSION : S_ITEM_TYPE::S_WATER_SHIELD);
 	//items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(S_ITEM_TYPE::S_WATER_SHIELD);
 	items[ServerNumber][Item_cnt[ServerNumber]].LocalTransform();
@@ -742,6 +769,15 @@ void GameManager::CreateItem(Monster* monster)
 	}
 
 	Item_cnt[ServerNumber]++;
+}
+void GameManager::CreateItemAtRandomPosition()
+{
+	Vec2 randomPos{};
+	while (true) {
+		randomPos = terrain[(int)scene_type].GetRandomXZ();
+		if (CanMove(randomPos.x, randomPos.y)) break;
+	}
+	CreateItem(randomPos.x, randomPos.y);
 }
 
 void GameManager::InitializeMonsterWave()
@@ -795,7 +831,7 @@ void GameManager::InitializeMonsterWave()
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(32.6f, 0.f, 43.65f));
 		}
 		else if (MonsterWaves[ServerNumber].current_wave == 2) {
-			InitializeMonster(S_ENEMY_TYPE::BOSS, Vec3(27.8f, 0.f, 43.9f));
+			InitializeMonster(S_ENEMY_TYPE::BOSS, Vec3(22.27432f, 0.9705162f, 28.85343f));
 		}
 		break;
 	}
@@ -816,9 +852,21 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 	}
 
 	// 공격 이벤트 등록
-	const auto& infos = attackInfos[type];
-	ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", MakeAttackEvent(infos[0].offset, infos[0].radius, infos[0].damage));
-	ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", MakeAttackEvent(infos[1].offset, infos[1].radius, infos[1].damage));
+	if (type != S_ENEMY_TYPE::BOSS) { // 일반 몬스터인 경우
+		const auto& infos = attackInfos[type];
+		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", MakeAttackEvent(infos[0].offset, infos[0].radius, infos[0].damage));
+		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", MakeAttackEvent(infos[1].offset, infos[1].radius, infos[1].damage));
+	}
+	else { // 보스 몬스터인 경우
+		ms._drop_item = true; // 보스 몬스터는 아이템 드랍 설정
+
+		auto func = [this](Monster* monster) {
+			for (auto& cl : clients[ServerNumber]) {
+				cl.second.send_boss_set_target_packet(monster->_target->_id);
+			}
+		};
+		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func);
+	}
 
 	int monster_id = Monster_cnt[ServerNumber];
 	Monsters[ServerNumber][monster_id] = ms;

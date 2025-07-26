@@ -48,10 +48,10 @@ void PlayerState::BasicAttackState::Enter(PlayerCharacter* player) {
     case S_PLAYER_CLASS::FIGHTER:
         break;
 	case S_PLAYER_CLASS::ARCHER:
-        player->SetTarget();
+        player->UpdateTarget();
         break;
 	case S_PLAYER_CLASS::MAGE:
-        player->SetTarget();
+        player->UpdateTarget();
         break;
     default:
         break;
@@ -91,10 +91,10 @@ void PlayerState::RunAttackState::Enter(PlayerCharacter* player) {
     case S_PLAYER_CLASS::FIGHTER:
         break;
     case S_PLAYER_CLASS::ARCHER:
-        player->SetTarget();
+        player->UpdateTarget();
         break;
     case S_PLAYER_CLASS::MAGE:
-        player->SetTarget();
+        player->UpdateTarget();
         break;
     default:
         break;

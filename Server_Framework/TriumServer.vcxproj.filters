@@ -72,6 +72,9 @@
     <ClCompile Include="Projectile.cpp">
       <Filter>Object Class</Filter>
     </ClCompile>
+    <ClCompile Include="BossMonsterState.cpp">
+      <Filter>StateMachine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -118,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="Projectile.h">
       <Filter>Object Class</Filter>
+    </ClInclude>
+    <ClInclude Include="BossMonsterState.h">
+      <Filter>StateMachine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

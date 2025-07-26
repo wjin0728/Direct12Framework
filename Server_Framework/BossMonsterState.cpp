@@ -1,5 +1,4 @@
 #include "BossMonsterState.h"
-#include "Monster.h"
 #include "GameManager.h"
 
 // BossMonsterState::IdleState 구현         =========================================================================
@@ -9,7 +8,7 @@
 BossMonsterState::IdleState& BossMonsterState::IdleState::GetInstance() { static BossMonsterState::IdleState instance; return instance; }
 
 void BossMonsterState::IdleState::Enter(Monster* monster) {
-	//cout << "IdleState Entered!" << endl;
+	cout << "IdleState Entered!" << endl;
 	monster->SetVelocity(0, 0, 0); // 속도 0
 	idleTimer = 2.f;
 }
@@ -17,8 +16,9 @@ void BossMonsterState::IdleState::Enter(Monster* monster) {
 void BossMonsterState::IdleState::Update(Monster* monster) {
 	idleTimer -= TICK_INTERVAL; // 대기 시간 감소
 	if (idleTimer <= 0) {
+		monster->SetRandomTarget();
 		if (monster->_target) {
-			monster->SetState(S_MONSTER_STATE::RUN);
+			monster->SetState(&BossMonsterState::TargetingState::GetInstance());
 		}
 	}
 }
@@ -27,51 +27,38 @@ void BossMonsterState::IdleState::Exit(Monster* monster) {}
 
 
 
-// BossMonsterState::RunState 구현          =========================================================================
+// BossMonsterState::TargetingState 구현         =========================================================================
 
 
 
-BossMonsterState::RunState& BossMonsterState::RunState::GetInstance() { static BossMonsterState::RunState instance; return instance; }
+BossMonsterState::TargetingState& BossMonsterState::TargetingState::GetInstance() { static BossMonsterState::TargetingState instance; return instance; }
 
-void BossMonsterState::RunState::Enter(Monster* monster) {
-	//cout << "RunState Entered!" << endl;
-	// 이동 시작
+void BossMonsterState::TargetingState::Enter(Monster* monster) {
+	cout << "TargetingState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0); // 속도 0
+	targetingTimer = 3.f;
+	targetingDelay = 1.f;
 }
 
-void BossMonsterState::RunState::Update(Monster* monster) {
-	Vec3 pos = monster->_pos; // 현재 위치 저장
-	monster->_pos += monster->_velocity * TICK_INTERVAL;
-	//if (monster->gameManager.CanMove(pos.x, pos.z)) {
-	//	monster->_pos = pos; // 이동 가능하면 위치 업데이트
-	//}
-	//else {
-	//	monster->SetVelocity(0, 0, 0); // 이동 불가능하면 속도 0
-	//}
-
-
-	if (monster->IsPlayerTooMuchClose()) {
-		monster->SetState(S_MONSTER_STATE::ATTACK);
-		//     switch (rand() % pattern_cnt)
-		//     {
-		//     case 0: {
-		//         monster->SetState(S_MONSTER_STATE::ATTACK);
-				 //break;
-		//     }
-		//     case 1: {
-				 //monster->SetState(S_MONSTER_STATE::SKILL);
-				 //break;
-		//     }
-		//     case 2: {
-				 //monster->SetState(S_MONSTER_STATE::SKILL); // 원거리?
-				 //break;
-		//     }
-		//     default:
-		//         break;
-		//     }
+void BossMonsterState::TargetingState::Update(Monster* monster) {
+	if (targetingTimer > 0) {
+		monster->UpdateTarget();
+		targetingTimer -= TICK_INTERVAL;
+		if (targetingTimer <= 0) {
+			monster->_attack_pos = monster->_target->_pos; // 타겟팅 위치 저장
+		}
+	}
+	else {
+		targetingDelay -= TICK_INTERVAL; // 타겟팅 딜레이 감소
+		if (targetingDelay <= 0) {
+			monster->SetState(S_MONSTER_STATE::ATTACK);
+		}
 	}
 }
 
-void BossMonsterState::RunState::Exit(Monster* monster) {}
+void BossMonsterState::TargetingState::Exit(Monster* monster) {
+	monster->ResetTarget(); // 타겟 초기화
+}
 
 
 
@@ -84,13 +71,14 @@ BossMonsterState::AttackState& BossMonsterState::AttackState::GetInstance() { st
 void BossMonsterState::AttackState::Enter(Monster* monster) {
 	//cout << "BasicAttackState Entered!" << endl;
 
-	if (rand() % 2 == 0) {
-		attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK].mLength;
-	}
-	else {
-		attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK2].mLength;
-		monster->_state = S_MONSTER_STATE::ATTACK2;
-	}
+	attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK].mLength;
+	//if (rand() % 2 == 0) {
+	//	attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK].mLength;
+	//}
+	//else {
+	//	attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK2].mLength;
+	//	monster->_state = S_MONSTER_STATE::ATTACK2;
+	//}
 }
 
 void BossMonsterState::AttackState::Update(Monster* monster) {
@@ -158,7 +146,6 @@ BossMonsterState::DeathState& BossMonsterState::DeathState::GetInstance() { stat
 void BossMonsterState::DeathState::Enter(Monster* monster) {
 	//cout << "DeathState Entered!" << endl;
 	monster->SetVelocity(0, 0, 0);
-	monster->_drop_item = false;
 	deathTimer = monster->_animations[(int)S_MONSTER_STATE::DEATH].mLength;
 }
 
@@ -182,11 +169,9 @@ BossMonsterState::UndergroundState& BossMonsterState::UndergroundState::GetInsta
 void BossMonsterState::UndergroundState::Enter(Monster* monster) {
 	//cout << "UndergroundState Entered!" << endl;
 	monster->SetVelocity(0, 0, 0);
-	if (monster->_drop_item) {
-		monster->_remove = true;
-		monster->_pos.y = -5.f;
-		return;
-	}
+	monster->_remove = true;
+	monster->_pos.y = -5.f;
+	return;
 }
 
 void BossMonsterState::UndergroundState::Update(Monster* monster) {

@@ -193,3 +193,28 @@ void SESSION::send_make_potal_packet()
 	p.size = sizeof(p);
 	do_send(&p);
 }
+
+void SESSION::send_boss_set_target_packet(int id)
+{
+	SC_BOSS_SET_TARGET_PACKET p;
+	p.type = SC_BOSS_SET_TARGET;
+	p.size = sizeof(p);
+	p.target_id = id;
+	do_send(&p);
+}
+
+void SESSION::send_boss_target_lock_packet()
+{
+	SC_BOSS_TARGET_LOCK_PACKET p;
+	p.type = SC_BOSS_SET_TARGET;
+	p.size = sizeof(p);
+	do_send(&p);
+}
+
+void SESSION::send_boss_basic_attack_packet()
+{
+	SC_BOSS_BASIC_ATTACK_PACKET p;
+	p.type = SC_BOSS_SET_TARGET;
+	p.size = sizeof(p);
+	do_send(&p);
+}

@@ -28,5 +28,7 @@ public:
 	void LoadNavMap(const std::string& fileName);
 
 	float GetHeight(float fx, float fz);
+
+	Vec2 GetRandomXZ() const;
 };
 

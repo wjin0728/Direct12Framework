@@ -6,6 +6,8 @@
 class PlayerCharacter : public Object
 {
 public:
+	int					_id = -1; // Object ID, -1 means not assigned
+
 	Vec3				_look_dir; // 캐릭터가 보고있는 방향
 
 	S_PLAYER_CLASS	    _class;

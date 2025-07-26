@@ -63,7 +63,7 @@ void Monster::Update()
 	_animation_time += TICK_INTERVAL;
     if (currentState) currentState->Update(this);
     LocalTransform(); // 바운딩 박스 업데이트 해주기
-    SetTarget();
+    if (_class != S_ENEMY_TYPE::BOSS) UpdateTarget();
 }
 
 void Monster::TakeDamage(int damage, bool do_hit_raction)
@@ -98,8 +98,18 @@ bool Monster::IsPlayerTooMuchClose() const
     return (_target && (_pos - _target->_pos).LengthSquared() < pow(2.f, 2));
 }
 
-void Monster::SetTarget()
+void Monster::UpdateTarget()
 {
+	if (_class != S_ENEMY_TYPE::BOSS) {
+		if (_target) {
+			Vec3 direction = _target->_pos - _pos;
+			direction.y = 0.f;
+			direction.Normalize();
+			_look_dir = Vec3::Lerp(_look_dir, direction, 0.1f); // 부드러운 회전
+		}
+		return;
+	}
+
 	float minDistance = 5000.f; // 걍 큰 수
     PlayerCharacter* close_player = nullptr;
 	for (auto& player : _Player) {
@@ -122,6 +132,18 @@ void Monster::SetTarget()
 	}
 	else {
 		_target = nullptr; 
+	}
+}
+
+void Monster::SetRandomTarget()
+{
+	int randomIndex = rand() % _Player.size();
+
+	if (_Player[randomIndex] != nullptr) {
+		_target = _Player[randomIndex];
+	}
+	else {
+		_target = nullptr;
 	}
 }
 
