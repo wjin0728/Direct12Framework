@@ -210,7 +210,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		else if (2 == c_id)
 			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::MAGE);
 
-		//clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)p->player_class);
+		clients[ServerNumber][c_id]._player.InitializeTarget();
 
 		clients[ServerNumber][c_id]._player._pos = spawn_points[(int)scene_type];
 		cout << "login : " << c_id << endl;
@@ -273,7 +273,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		if (S_FIRE_EXPLOSION == p->skill_enum) {
 			for (auto& mon : Monsters[ServerNumber]) {
-				if (mon.second._remove || mon.second._state == S_MONSTER_STATE::UNDERGROUND || mon.second._state == S_MONSTER_STATE::DEATH || mon.second._state == S_MONSTER_STATE::SPAWN) continue;
+				if (mon.second.IsUnavailable()) continue;
 				Vec3 pos = mon.second._pos;
 				pos.y += 1.5f;
 
@@ -399,7 +399,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		case S_PLAYER_CLASS::FIGHTER: {
 			direction = player._velocity;
 			for (auto& mon : Monsters[ServerNumber]) {
-				if (mon.second._remove || mon.second._state == S_MONSTER_STATE::UNDERGROUND || mon.second._state == S_MONSTER_STATE::DEATH || mon.second._state == S_MONSTER_STATE::SPAWN) continue; // 몬스터가 제거된 경우는 패스
+				if (mon.second.IsUnavailable()) continue; // 몬스터가 제거된 경우는 패스
 				mon.second.LocalTransform();
 				if (player.OnFighterBasicAttack(mon.second._boundingbox)) {
 					mon.second.TakeDamage(5, false);
@@ -414,19 +414,27 @@ void GameManager::Process_packet(int c_id, char* packet)
 		case S_PLAYER_CLASS::ARCHER: {
 			cout << "Archer CS_ATTACK\n";
 			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
-
 			proj._pos = player._pos;
 			proj._pos.y += 0.6f;
 
-			direction.x = sin(player._look_dir.y * degToRad); // 1.0
-			direction.y = 0.0f;
-			direction.z = cos(player._look_dir.y * degToRad); // 0.0
-			proj._velocity = direction/3;
+			if (player._target == nullptr) { // 타겟 몬스터가 제거된 경우
+				direction.x = sin(player._look_dir.y * degToRad); // 1.0
+				direction.y = 0.0f;
+				direction.z = cos(player._look_dir.y * degToRad); // 0.0
+			}
+			else if (not player._target->IsUnavailable()) { // 타겟 몬스터가 있고 유효한 경우
+				Vec3 target_pos = Vec3{ player._target->_pos.x, player._target->_pos.y + 1.f, player._target->_pos.z };
+				direction = target_pos - proj._pos;
+			}
 
+			direction.Normalize();
+			proj._velocity = direction / 3.f;
 			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+			
 			for (auto& cl : clients[ServerNumber]) {
 				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
 			}
+
 			Projectile_cnt[ServerNumber]++;
 			break;
 		}
@@ -436,15 +444,24 @@ void GameManager::Process_packet(int c_id, char* packet)
 			proj._pos = player._pos;
 			proj._pos.y += 0.5f;
 
-			direction.x = sin(player._look_dir.y * degToRad); // 1.0
-			direction.y = 0.0f;
-			direction.z = cos(player._look_dir.y * degToRad); // 0.0
-			proj._velocity = direction / 4.f;
+			if (player._target == nullptr) { // 타겟 몬스터가 제거된 경우
+				direction.x = sin(player._look_dir.y * degToRad); // 1.0
+				direction.y = 0.0f;
+				direction.z = cos(player._look_dir.y * degToRad); // 0.0
+			}
+			else if (not player._target->IsUnavailable()) { // 타겟 몬스터가 있고 유효한 경우
+				Vec3 target_pos = Vec3{ player._target->_pos.x, player._target->_pos.y + 1.f, player._target->_pos.z };
+				direction = target_pos - proj._pos;
+			}
 
+			direction.Normalize();
+			proj._velocity = direction / 4.f;
 			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+
 			for (auto& cl : clients[ServerNumber]) {
 				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
 			}
+
 			Projectile_cnt[ServerNumber]++;
 			break;
 		}
@@ -576,7 +593,7 @@ void GameManager::Update()
 		}
 
 		// 몬스터 - 투사체 충돌 체크
-		if (monster._hp >= 0 && monster._state != S_MONSTER_STATE::UNDERGROUND && monster._state != S_MONSTER_STATE::DEATH) {
+		if (monster._hp >= 0 && not monster.IsUnavailable()) {
 			for (auto& proj : Projectiles[ServerNumber]) {
 				if (!proj.second._user_frinedly) continue; // 적이 쏜 projectile면 패스
 				if (proj.second._remove) continue; // 투사체가 제거된 경우는 패스
