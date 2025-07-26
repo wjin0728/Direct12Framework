@@ -67,7 +67,6 @@ void CClassSelectUI::Start()
 
 
 		short playerId = std::any_cast<short>(any[1]);
-		if (playerId < 0 || playerId >= otherPlayers.size()) return;
 		std::shared_ptr<CGameObject> playerObj{};
 		if (playerId == INSTANCE(ServerManager).clientID) {
 			playerObj = player;

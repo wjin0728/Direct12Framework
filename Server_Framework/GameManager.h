@@ -27,7 +27,7 @@ public:
 	uint64_t current_tick = 0;
 
 	array<Terrain, (int)S_SCENE_TYPE::END> terrain;
-	array<array<SpawnData, (int)S_SCENE_TYPE::END>, (int)PLAYER_CLASS::end> spawnDatas; // 각 씬의 스폰 포인트
+	array<array<SpawnData, (int)PLAYER_CLASS::end>, (int)S_SCENE_TYPE::END> spawnDatas; // 각 씬의 스폰 포인트
 	S_SCENE_TYPE scene_type = S_SCENE_TYPE::LOBBY; // 현재 씬 타입
 
 	array<unordered_map<int, Item>, 6> items;

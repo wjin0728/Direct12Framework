@@ -74,39 +74,41 @@ GameManager::GameManager()
 			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::MAGE].pos = spawnPoint;
 			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::MAGE].rot = spawnRot;
 		}
-		if (token == "</SpawnData>") break;
+		if (token == "</SpawnData>") 
+			break;
 	}
 
 	for (int i = (int)S_SCENE_TYPE::MAINSTAGE1; i < (int)S_SCENE_TYPE::END; i++) {
 		std::ifstream battleSpawnData("..\\Resources\\Scenes\\Battle" + std::to_string(i - (int)S_SCENE_TYPE::MAINSTAGE1 + 1) + "SpawnData.bin", std::ios::binary);
 		std::string token;
 		while (1) {
-			BinaryReader::ReadDateFromFile(lobbySpawnData, token);
+			BinaryReader::ReadDateFromFile(battleSpawnData, token);
 			if (token == "<Archer>") {
 				Vec3 spawnPoint;
 				Quaternion spawnRot;
-				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
-				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnPoint);
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnRot);
 				spawnDatas[i][(int)S_PLAYER_CLASS::ARCHER].pos = spawnPoint;
 				spawnDatas[i][(int)S_PLAYER_CLASS::ARCHER].rot = spawnRot;
 			}
 			else if (token == "<Fighter>") {
 				Vec3 spawnPoint;
 				Quaternion spawnRot;
-				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
-				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnPoint);
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnRot);
 				spawnDatas[i][(int)S_PLAYER_CLASS::FIGHTER].pos = spawnPoint;
 				spawnDatas[i][(int)S_PLAYER_CLASS::FIGHTER].rot = spawnRot;
 			}
 			else if (token == "<Mage>") {
 				Vec3 spawnPoint;
 				Quaternion spawnRot;
-				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
-				BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnPoint);
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnRot);
 				spawnDatas[i][(int)S_PLAYER_CLASS::MAGE].pos = spawnPoint;
 				spawnDatas[i][(int)S_PLAYER_CLASS::MAGE].rot = spawnRot;
 			}
-			if (token == "</SpawnData>") break;
+			if (token == "</SpawnData>") 
+				break;
 		}
 	}
 
