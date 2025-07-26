@@ -113,6 +113,113 @@ namespace MonsterState
         SpawnState() {}
         float SpawnTimer;
     };
+
+	/////////////////보스 상태 머신/////////////////
+
+    // Idle 상태
+    class BossIdleState : public MonsterStateMachine {
+    public:
+        static BossIdleState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        BossIdleState() {}
+        float idleTimer = 0.0f;
+    };
+
+    // Targeting 상태
+    class BossTargetingState : public MonsterStateMachine {
+    public:
+        static BossTargetingState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+
+        bool GetSendTarget() const { return sendTarget; }
+        void SetSendTarget(bool value) { sendTarget = value; }
+        bool GetSendTargetLock() const { return sendTargetLock; }
+        void SetSendTargetLock(bool value) { sendTargetLock = value; }
+    private:
+        BossTargetingState() {}
+        float targetingTimer = 0.0f; // 타겟팅 타이머
+        float targetingDelay = 0.0f; // 타겟팅 딜레이 시간
+        bool sendTarget = false;
+        bool sendTargetLock = false;
+    };
+
+    // BasicAttack 상태
+    class BossAttackState : public MonsterStateMachine {
+    public:
+        static BossAttackState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        BossAttackState() {}
+        float attackTimer;
+    };
+
+    // SkillAttack 상태
+    class BossSkillState : public MonsterStateMachine {
+    public:
+        static BossSkillState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        BossSkillState() {}
+        float skillTimer;
+    };
+
+    // Hit 상태
+    class BossHitState : public MonsterStateMachine {
+    public:
+        static BossHitState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        BossHitState() {}
+        float hitTimer;
+    };
+
+    // Death 상태
+    class BossDeathState : public MonsterStateMachine {
+    public:
+        static BossDeathState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        BossDeathState() {}
+        float deathTimer;
+    };
+
+    // underground 상태
+    class BossUndergroundState : public MonsterStateMachine {
+    public:
+        static BossUndergroundState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        BossUndergroundState() {}
+        float UndergroundTimer = 0.f;
+    };
+
+    // Spawn 상태
+    class BossSpawnState : public MonsterStateMachine {
+    public:
+        static BossSpawnState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        BossSpawnState() {}
+        float SpawnTimer;
+    };
+
 }
 
 #endif

@@ -28,10 +28,17 @@ namespace BossMonsterState
         void Enter(Monster* monster) override;
         void Update(Monster* monster) override;
         void Exit(Monster* monster) override;
-    private:
+
+		bool GetSendTarget() const { return sendTarget; }
+		void SetSendTarget(bool value) { sendTarget = value; }
+        bool GetSendTargetLock() const { return sendTargetLock; }
+        void SetSendTargetLock(bool value) { sendTargetLock = value; }
+     private:
         TargetingState() {}
         float targetingTimer = 0.0f; // 타겟팅 타이머
         float targetingDelay = 0.0f; // 타겟팅 딜레이 시간
+        bool sendTarget = false;
+		bool sendTargetLock = false;
     };
 
     // BasicAttack 상태

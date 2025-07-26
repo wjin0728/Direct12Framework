@@ -287,10 +287,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				mon.second.LocalTransform();
 				if (sphere.Intersects(mon.second._boundingbox)) {
 					mon.second.TakeDamage(10, true);
-					for (auto& cl : clients[ServerNumber]) {
-						if (cl.second._state != ST_INGAME) continue;
-						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
-					}
+					SendHPPacket((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
 				}
 			}
 			for (auto& cl : clients[ServerNumber]) {
@@ -317,7 +314,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		else if (S_WATER_SHIELD == p->skill_enum) {
 			for (auto& cl : clients[ServerNumber]) {
 				cl.second._player._barrier = 2; // 워터실드!!!!!!!
-				cl.second.send_hp_packet((S_OBJECT_TYPE)S_PLAYER, c_id, cl.second._player._hp, cl.second._player._barrier);
+				SendHPPacket((S_OBJECT_TYPE)S_PLAYER, c_id, cl.second._player._hp, cl.second._player._barrier);
 				cl.second.send_use_skill_packet(S_WATER_SHIELD, c_id);
 				std::cout << "Water Shield activated for player " << c_id << std::endl;
 			}
@@ -410,10 +407,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				mon.second.LocalTransform();
 				if (player.OnFighterBasicAttack(mon.second._boundingbox)) {
 					mon.second.TakeDamage(5, false);
-					for (auto& cl : clients[ServerNumber]) {
-						if (cl.second._state != ST_INGAME) continue;
-						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
-					}
+					SendHPPacket(S_OBJECT_TYPE::S_ENEMY, mon.first, mon.second._hp, 0);
 				}
 			}
 			break;
@@ -608,7 +602,24 @@ void GameManager::Update()
 		}
 		// 보스 몬스터
 		else {
+			// 타겟팅 상태 처리
+			auto& targeting_state = MonsterState::BossTargetingState::GetInstance();
+			if (monster.currentState == &targeting_state) {
 
+				if (not targeting_state.GetSendTarget()) { // 타겟 패킷이 아직 전송되지 않은 경우
+					for (auto& cl : clients[ServerNumber]) {
+						cl.second.send_boss_set_target_packet(monster._target->_id);
+					}
+					targeting_state.SetSendTarget(true);
+				}
+
+				if (not targeting_state.GetSendTargetLock() && monster._attack_pos != Vec3::Zero) { // 공격 위치가 확정되었고 패킷을 전송하지 않은 경우
+					for (auto& cl : clients[ServerNumber]) {
+						cl.second.send_boss_target_lock_packet();
+					}
+					targeting_state.SetSendTargetLock(true);
+				}
+			}
 		}
 
 		// 이벤트 처리
@@ -623,10 +634,7 @@ void GameManager::Update()
 				if (proj.second._remove) continue; // 투사체가 제거된 경우는 패스
 				if (monster._boundingbox.Intersects(proj.second._boundingbox)) {
 					monster.TakeDamage(proj.second._damage, false);
-					for (auto& cl : clients[ServerNumber]) {
-						if (cl.second._state != ST_INGAME) continue;
-						cl.second.send_hp_packet((S_OBJECT_TYPE)S_ENEMY, ms.first, monster._hp, 0);
-					}
+					SendHPPacket((S_OBJECT_TYPE)S_ENEMY, ms.first, monster._hp, 0);
 					proj.second._remove = true; // 투사체 제거
 				}
 			}
@@ -755,6 +763,20 @@ void GameManager::SendAllProjectilesPosPacket()
 		}
 	}
 }
+void GameManager::SendHPPacket(S_OBJECT_TYPE type, int id, int hp, int shield) {
+	for (auto& cl : clients[ServerNumber]) {
+		if (cl.second._state != ST_INGAME) continue;
+		cl.second.send_hp_packet(type, id, hp, shield);
+	}
+}
+void GameManager::SendMakePortalPacket()
+{
+	for (auto& [_, cl] : clients[ServerNumber]) {
+		if (cl._state != ST_INGAME) continue;
+		cl.send_make_potal_packet();
+		cout << "Send make portal packet to client " << cl._id << std::endl;
+	}
+}
 
 void GameManager::CreateItem(S_ENEMY_TYPE monster_type, float x, float z)
 {
@@ -881,10 +903,26 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 	}
 	else { // 보스 몬스터인 경우
 		ms._drop_item = true; // 보스 몬스터는 아이템 드랍 설정
+		float radius = 5.f; // 공격 범위
 
 		auto func = [this](Monster* monster) {
-			for (auto& cl : clients[ServerNumber]) {
-				cl.second.send_boss_set_target_packet(monster->_target->_id);
+			for (auto& [id, cl] : clients[ServerNumber]) {
+				auto& player = cl._player;
+
+				if (player._state == S_PLAYER_STATE::JUMP ||
+					player._state == S_PLAYER_STATE::GATHERING ||
+					player._state == S_PLAYER_STATE::GETHIT ||
+					player._state == S_PLAYER_STATE::DEATH ||
+					player._state == S_PLAYER_STATE::ULTIMATE)
+					continue;
+
+				Vec2 player_pos(player._pos.x, player._pos.z);
+				Vec2 attack_pos(monster->_attack_pos.x, monster->_attack_pos.z);
+				if (Vec2::IsInRadius(attack_pos, player_pos, 3.f)) {
+					player.TakeDamage(200);
+					SendHPPacket(S_OBJECT_TYPE::S_PLAYER, id, player._hp, player._barrier);
+					std::cout << "맞았다!!!!!!!!" << std::endl;
+				}
 			}
 		};
 		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", func);
@@ -919,9 +957,9 @@ std::function<void(Monster*)> GameManager::MakeAttackEvent(Vec2 offset, float ra
 				continue;
 
 			Vec2 player_pos(player._pos.x, player._pos.z);
-			if (Vec2::IsInRadius(player_pos, center, radius)) {
+			if (Vec2::IsInRadius(center, player_pos, radius)) {
 				player.TakeDamage(damage);
-				cl.send_hp_packet(S_OBJECT_TYPE::S_PLAYER, id, player._hp, player._barrier);
+				SendHPPacket(S_OBJECT_TYPE::S_PLAYER, id, player._hp, player._barrier);
 				std::cout << "맞았다!!!!!!!!" << std::endl;
 			}
 		}
@@ -945,9 +983,12 @@ void GameManager::HandleWaveEnd(MonsterWave& wave)
 {
 	bool isFinalWave = (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && wave.current_wave == 3) || (scene_type != S_SCENE_TYPE::MAIN_STAGE_3 && wave.current_wave == 2);
 
+	if (wave.current_wave == 2) {
+		cout << "Wave " << wave.current_wave << " is end." << endl;
+	}
 	if (isFinalWave) {
 		if (!wave.make_potal) {
-			MakePortal();
+			SendMakePortalPacket();
 			wave.make_potal = true;
 		}
 		// else if (IsAllPlayerReady()) ChangeScene();
@@ -991,11 +1032,4 @@ bool GameManager::IsAllPlayerReady()
 		break;
 	}
 	return all_ready;
-}
-void GameManager::MakePortal()
-{
-	for (auto& [_, cl] : clients[ServerNumber]) {
-		if (cl._state != ST_INGAME) continue;
-		cl.send_make_potal_packet();
-	}
 }

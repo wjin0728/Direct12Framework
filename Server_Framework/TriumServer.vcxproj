@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Client_Framework\SimpleMath.cpp" />
-    <ClCompile Include="BossMonsterState.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Monster.cpp" />
@@ -36,7 +35,6 @@
     <ClCompile Include="Tem_server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BossMonsterState.h" />
     <ClInclude Include="ENUM.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Item.h" />

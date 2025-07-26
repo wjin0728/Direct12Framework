@@ -104,6 +104,8 @@ public:
 
     void SetState(MonsterStateMachine* newState);
     void SetState(S_MONSTER_STATE newState);
+    void SetMonsterState(S_MONSTER_STATE newState);
+    void SetBossState(S_MONSTER_STATE newState);
 
     void Update();
 

@@ -38,6 +38,9 @@ void BossMonsterState::TargetingState::Enter(Monster* monster) {
 	monster->SetVelocity(0, 0, 0); // 속도 0
 	targetingTimer = 3.f;
 	targetingDelay = 1.f;
+	sendTarget = false;
+	sendTargetLock = false;
+	monster->_attack_pos = Vec3::Zero; // 공격 위치 초기화
 }
 
 void BossMonsterState::TargetingState::Update(Monster* monster) {

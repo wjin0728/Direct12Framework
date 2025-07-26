@@ -210,11 +210,3 @@ void SESSION::send_boss_target_lock_packet()
 	p.size = sizeof(p);
 	do_send(&p);
 }
-
-void SESSION::send_boss_basic_attack_packet()
-{
-	SC_BOSS_BASIC_ATTACK_PACKET p;
-	p.type = SC_BOSS_SET_TARGET;
-	p.size = sizeof(p);
-	do_send(&p);
-}

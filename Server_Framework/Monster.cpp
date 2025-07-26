@@ -24,38 +24,78 @@ void Monster::SetState(S_MONSTER_STATE newState)
 		for (auto& key : _animations[(int)S_MONSTER_STATE::PROJECTILE_ATTACK].mEventKeys) { key.mEnable = true; }
 	}
 
-    switch (newState) {
-    case S_MONSTER_STATE::IDLE:
-        _state = S_MONSTER_STATE::IDLE;
-        SetState(&MonsterState::IdleState::GetInstance());
-        break;
-    case S_MONSTER_STATE::RUN:
-        _state = S_MONSTER_STATE::RUN;
-        SetState(&MonsterState::RunState::GetInstance());
-        break;
-    case S_MONSTER_STATE::ATTACK:
-        _state = S_MONSTER_STATE::ATTACK;
-        SetState(&MonsterState::AttackState::GetInstance());
-        break;
+	if (_class == S_ENEMY_TYPE::BOSS) {
+		SetBossState(newState);
+	}
+	else {
+		SetMonsterState(newState);
+	}
+}
+void Monster::SetMonsterState(S_MONSTER_STATE newState)
+{
+	switch (newState) {
+	case S_MONSTER_STATE::IDLE:
+		_state = S_MONSTER_STATE::IDLE;
+		SetState(&MonsterState::IdleState::GetInstance());
+		break;
+	case S_MONSTER_STATE::RUN:
+		_state = S_MONSTER_STATE::RUN;
+		SetState(&MonsterState::RunState::GetInstance());
+		break;
+	case S_MONSTER_STATE::ATTACK:
+		_state = S_MONSTER_STATE::ATTACK;
+		SetState(&MonsterState::AttackState::GetInstance());
+		break;
 	case S_MONSTER_STATE::GETHIT:
 		_state = S_MONSTER_STATE::GETHIT;
 		SetState(&MonsterState::HitState::GetInstance());
 		break;
-    case S_MONSTER_STATE::DEATH:
-        _state = S_MONSTER_STATE::DEATH;
-        SetState(&MonsterState::DeathState::GetInstance());
-        break;
-    case S_MONSTER_STATE::SPAWN:
-        _state = S_MONSTER_STATE::SPAWN;
-        SetState(&MonsterState::SpawnState::GetInstance());
-        break;
+	case S_MONSTER_STATE::DEATH:
+		_state = S_MONSTER_STATE::DEATH;
+		SetState(&MonsterState::DeathState::GetInstance());
+		break;
+	case S_MONSTER_STATE::SPAWN:
+		_state = S_MONSTER_STATE::SPAWN;
+		SetState(&MonsterState::SpawnState::GetInstance());
+		break;
 	case S_MONSTER_STATE::UNDERGROUND:
 		_state = S_MONSTER_STATE::UNDERGROUND;
 		SetState(&MonsterState::UndergroundState::GetInstance());
 		break;
 	default:
-        break;
-    }
+		break;
+	}
+}
+void Monster::SetBossState(S_MONSTER_STATE newState)
+{
+	switch (newState) {
+	case S_MONSTER_STATE::IDLE:
+		_state = S_MONSTER_STATE::IDLE;
+		SetState(&MonsterState::BossIdleState::GetInstance());
+		break;
+	case S_MONSTER_STATE::ATTACK:
+		_state = S_MONSTER_STATE::ATTACK;
+		SetState(&MonsterState::BossAttackState::GetInstance());
+		break;
+	case S_MONSTER_STATE::GETHIT:
+		_state = S_MONSTER_STATE::GETHIT;
+		SetState(&MonsterState::BossHitState::GetInstance());
+		break;
+	case S_MONSTER_STATE::DEATH:
+		_state = S_MONSTER_STATE::DEATH;
+		SetState(&MonsterState::BossDeathState::GetInstance());
+		break;
+	case S_MONSTER_STATE::SPAWN:
+		_state = S_MONSTER_STATE::SPAWN;
+		SetState(&MonsterState::BossSpawnState::GetInstance());
+		break;
+	case S_MONSTER_STATE::UNDERGROUND:
+		_state = S_MONSTER_STATE::UNDERGROUND;
+		SetState(&MonsterState::BossUndergroundState::GetInstance());
+		break;
+	default:
+		break;
+	}
 }
 
 void Monster::Update()

@@ -75,6 +75,8 @@ public:
 	void SendAllMonstersPosPacket();
 	void SendAllItemsPosPacket();
 	void SendAllProjectilesPosPacket();
+	void SendHPPacket(S_OBJECT_TYPE type, int id, int hp, int shield);
+	void SendMakePortalPacket(); // 포탈 생성
 
 	static GameManager& GetInstance() {
 		static GameManager instance;
@@ -167,7 +169,6 @@ public:
 	void HandleWaveEnd(MonsterWave& wave);
 	void HandleWaveInProgress(MonsterWave& wave);
 	bool IsAllPlayerReady(); // 모든 플레이어가 다음 스테이지 준비 상태인지 확인
-	void MakePortal(); // 포탈 생성
 
 	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
 		{ S_ENEMY_TYPE::GRASS_SMALL, {

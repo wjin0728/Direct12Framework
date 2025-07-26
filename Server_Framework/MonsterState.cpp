@@ -217,3 +217,211 @@ void MonsterState::SpawnState::Update(Monster* monster) {
 }
 
 void MonsterState::SpawnState::Exit(Monster* monster) {}
+
+
+////////////////////////////////////////////////// 보스 상태 머신 ///////////////////////////////////////////////////////
+
+// MonsterState::BossIdleState 구현         =========================================================================
+
+
+
+MonsterState::BossIdleState& MonsterState::BossIdleState::GetInstance() { static MonsterState::BossIdleState instance; return instance; }
+
+void MonsterState::BossIdleState::Enter(Monster* monster) {
+	cout << "IdleState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0); // 속도 0
+	idleTimer = 2.f;
+}
+
+void MonsterState::BossIdleState::Update(Monster* monster) {
+	idleTimer -= TICK_INTERVAL; // 대기 시간 감소
+	if (idleTimer <= 0) {
+		monster->SetRandomTarget();
+		if (monster->_target) {
+			monster->SetState(&MonsterState::BossTargetingState::GetInstance());
+		}
+	}
+}
+
+void MonsterState::BossIdleState::Exit(Monster* monster) {}
+
+
+
+// MonsterState::BossTargetingState 구현         =========================================================================
+
+
+
+MonsterState::BossTargetingState& MonsterState::BossTargetingState::GetInstance() { static MonsterState::BossTargetingState instance; return instance; }
+
+void MonsterState::BossTargetingState::Enter(Monster* monster) {
+	cout << "TargetingState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0); // 속도 0
+	targetingTimer = 3.f;
+	targetingDelay = 1.f;
+	sendTarget = false;
+	sendTargetLock = false;
+	monster->_attack_pos = Vec3::Zero; // 공격 위치 초기화
+}
+
+void MonsterState::BossTargetingState::Update(Monster* monster) {
+	if (targetingTimer > 0) {
+		monster->UpdateTarget();
+		targetingTimer -= TICK_INTERVAL;
+		if (targetingTimer <= 0) {
+			monster->_attack_pos = monster->_target->_pos; // 타겟팅 위치 저장
+		}
+	}
+	else {
+		targetingDelay -= TICK_INTERVAL; // 타겟팅 딜레이 감소
+		if (targetingDelay <= 0) {
+			monster->SetState(S_MONSTER_STATE::ATTACK);
+		}
+	}
+}
+
+void MonsterState::BossTargetingState::Exit(Monster* monster) {
+	monster->ResetTarget(); // 타겟 초기화
+}
+
+
+
+// MonsterState::BossAttackState 구현  =========================================================================
+
+
+
+MonsterState::BossAttackState& MonsterState::BossAttackState::GetInstance() { static MonsterState::BossAttackState instance; return instance; }
+
+void MonsterState::BossAttackState::Enter(Monster* monster) {
+	//cout << "BasicAttackState Entered!" << endl;
+
+	attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK].mLength;
+	//if (rand() % 2 == 0) {
+	//	attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK].mLength;
+	//}
+	//else {
+	//	attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK2].mLength;
+	//	monster->_state = S_MONSTER_STATE::ATTACK2;
+	//}
+}
+
+void MonsterState::BossAttackState::Update(Monster* monster) {
+	attackTimer -= TICK_INTERVAL;
+	if (attackTimer <= 0) {
+		monster->SetState(S_MONSTER_STATE::IDLE);
+	}
+}
+
+void MonsterState::BossAttackState::Exit(Monster* monster) {}
+
+
+
+// MonsterState::BossSkillState 구현  =========================================================================
+
+
+
+MonsterState::BossSkillState& MonsterState::BossSkillState::GetInstance() { static MonsterState::BossSkillState instance; return instance; }
+
+void MonsterState::BossSkillState::Enter(Monster* monster) {
+	skillTimer = 2.0f; // 스킬 지속 시간 지정해주기
+}
+
+void MonsterState::BossSkillState::Update(Monster* monster) {
+	skillTimer -= TICK_INTERVAL;
+	if (skillTimer <= 0) {
+		monster->SetState(S_MONSTER_STATE::IDLE);
+	}
+}
+
+void MonsterState::BossSkillState::Exit(Monster* monster) {}
+
+
+
+// MonsterState::BossHitState 구현          =========================================================================
+
+
+
+MonsterState::BossHitState& MonsterState::BossHitState::GetInstance() { static MonsterState::BossHitState instance; return instance; }
+
+void MonsterState::BossHitState::Enter(Monster* monster) {
+	//cout << "HitState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0); // 이동 멈춤
+	hitTimer = monster->_animations[(int)S_MONSTER_STATE::GETHIT].mLength;
+}
+
+void MonsterState::BossHitState::Update(Monster* monster) {
+	hitTimer -= TICK_INTERVAL; // 히트 애니메이션 시간 감소
+	if (hitTimer <= 0) {
+		monster->SetState(monster->previousState); // 이전 상태로 돌아가기
+	}
+}
+
+void MonsterState::BossHitState::Exit(Monster* monster) {
+}
+
+
+
+// MonsterState::BossDeathState 구현          =========================================================================
+
+
+
+MonsterState::BossDeathState& MonsterState::BossDeathState::GetInstance() { static MonsterState::BossDeathState instance; return instance; }
+
+void MonsterState::BossDeathState::Enter(Monster* monster) {
+	//cout << "DeathState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0);
+	deathTimer = monster->_animations[(int)S_MONSTER_STATE::DEATH].mLength;
+}
+
+void MonsterState::BossDeathState::Update(Monster* monster) {
+	deathTimer -= TICK_INTERVAL;
+	if (deathTimer <= 0) {
+		monster->SetState(S_MONSTER_STATE::UNDERGROUND);
+	}
+}
+
+void MonsterState::BossDeathState::Exit(Monster* monster) {}
+
+
+
+// MonsterState::BossUndergroundState 구현          =========================================================================
+
+
+
+MonsterState::BossUndergroundState& MonsterState::BossUndergroundState::GetInstance() { static MonsterState::BossUndergroundState instance; return instance; }
+
+void MonsterState::BossUndergroundState::Enter(Monster* monster) {
+	//cout << "UndergroundState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0);
+	monster->_remove = true;
+	monster->_pos.y = -5.f;
+	return;
+}
+
+void MonsterState::BossUndergroundState::Update(Monster* monster) {
+}
+
+void MonsterState::BossUndergroundState::Exit(Monster* monster) {
+}
+
+
+
+// MonsterState::BossSpawnState 구현          =========================================================================
+
+
+
+MonsterState::BossSpawnState& MonsterState::BossSpawnState::GetInstance() { static MonsterState::BossSpawnState instance; return instance; }
+
+void MonsterState::BossSpawnState::Enter(Monster* monster) {
+	cout << "SpawnState Entered!" << endl;
+	monster->SetVelocity(0, 0, 0);
+	SpawnTimer = monster->_animations[(int)S_MONSTER_STATE::SPAWN].mLength;
+}
+
+void MonsterState::BossSpawnState::Update(Monster* monster) {
+	SpawnTimer -= TICK_INTERVAL;
+	if (SpawnTimer <= 0) {
+		monster->SetState(S_MONSTER_STATE::IDLE);
+	}
+}
+
+void MonsterState::BossSpawnState::Exit(Monster* monster) {}

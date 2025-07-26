@@ -560,7 +560,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 		std::string objName[(int)ENEMY_TYPE::ENEMY_END]
-			= { "GrassSmall", "GrassBig", "FireSmall", "FireBig", "WaterSmall", "WaterBig" };
+			= { "GrassSmall", "GrassBig", "FireSmall", "FireBig", "WaterSmall", "WaterBig", "Boss"};
 		ENEMY_TYPE enumType = (ENEMY_TYPE)packet->monster_type;
 		auto monster = RESOURCE.GetPrefab(objName[(int)enumType]);
 		if (!monster) {
@@ -595,6 +595,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		case ENEMY_TYPE::FIRE_BIG:
 			stateMachine = monsterObj->AddComponent<CFireBigState>();
+			break;
+		case ENEMY_TYPE::BOSS:
+			stateMachine = monsterObj->AddComponent<CBossState>();
 			break;
 		default:
 			break;
@@ -753,6 +756,18 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		send_cs_game_server_login_packet(clientID);
 
 		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
+		break;
+	}
+	case SC_BOSS_SET_TARGET: {
+		SC_BOSS_SET_TARGET_PACKET* packet = reinterpret_cast<SC_BOSS_SET_TARGET_PACKET*>(packet_ptr);
+		
+		
+		break;
+	}
+	case SC_BOSS_TARGET_LOCK: {
+		SC_BOSS_TARGET_LOCK_PACKET* packet = reinterpret_cast<SC_BOSS_TARGET_LOCK_PACKET*>(packet_ptr);
+
+
 		break;
 	}
 	default:
