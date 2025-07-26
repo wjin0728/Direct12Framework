@@ -591,7 +591,7 @@ void GameManager::Update()
 		if (monster._class != S_ENEMY_TYPE::BOSS) {
 			// 아이템 생성
 			if (monster._state == S_MONSTER_STATE::DEATH && !monster._drop_item) {
-				CreateItem(monster._pos.x, monster._pos.z);
+				CreateItem(monster._class, monster._pos.x, monster._pos.z);
 				monster._drop_item = true;
 			}
 
@@ -754,14 +754,34 @@ void GameManager::SendAllProjectilesPosPacket()
 	}
 }
 
-void GameManager::CreateItem(float x, float z)
+void GameManager::CreateItem(S_ENEMY_TYPE monster_type, float x, float z)
 {
 	float terrainHeight = terrain[(int)scene_type].GetHeight(x, z);
 
 	items[ServerNumber][Item_cnt[ServerNumber]].SetPosition(x, terrainHeight + 0.3, z);
-	items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(rand() % 2 ? S_ITEM_TYPE::S_FIRE_EXPLOSION : S_ITEM_TYPE::S_WATER_SHIELD);
 	//items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(S_ITEM_TYPE::S_WATER_SHIELD);
 	items[ServerNumber][Item_cnt[ServerNumber]].LocalTransform();
+
+	switch (monster_type)
+	{
+	case S_ENEMY_TYPE::GRASS_SMALL:
+	case S_ENEMY_TYPE::GRASS_BIG:	
+		items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(S_ITEM_TYPE::S_GRASS_VINE);
+		break;
+	case S_ENEMY_TYPE::FIRE_SMALL:
+	case S_ENEMY_TYPE::FIRE_BIG:
+		items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(S_ITEM_TYPE::S_FIRE_EXPLOSION);
+		break;
+	case S_ENEMY_TYPE::WATER_SMALL:
+	case S_ENEMY_TYPE::WATER_BIG:
+		items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(S_ITEM_TYPE::S_WATER_SHIELD);
+		break;
+	case S_ENEMY_TYPE::BOSS:
+		items[ServerNumber][Item_cnt[ServerNumber]].SetItemType(rand() % 2 ? S_ITEM_TYPE::S_FIRE_EXPLOSION : S_ITEM_TYPE::S_WATER_SHIELD);
+		break;
+	default:
+		break;
+	}
 
 	for (auto& cl : clients[ServerNumber]) {
 		if (cl.second._state != ST_INGAME) continue;
@@ -777,7 +797,7 @@ void GameManager::CreateItemAtRandomPosition()
 		randomPos = terrain[(int)scene_type].GetRandomXZ();
 		if (CanMove(randomPos.x, randomPos.y)) break;
 	}
-	CreateItem(randomPos.x, randomPos.y);
+	CreateItem(S_ENEMY_TYPE::BOSS, randomPos.x, randomPos.y);
 }
 
 void GameManager::InitializeMonsterWave()

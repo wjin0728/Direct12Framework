@@ -46,6 +46,19 @@ namespace BossMonsterState
         float attackTimer;
     };
 
+    // CastingState 상태
+    class CastingState : public MonsterStateMachine {
+    public:
+        static CastingState& GetInstance();
+        void Enter(Monster* monster) override;
+        void Update(Monster* monster) override;
+        void Exit(Monster* monster) override;
+    private:
+        CastingState() {}
+        float skillTimer;
+    };
+    
+
     // SkillAttack 상태
     class SkillState : public MonsterStateMachine {
     public:

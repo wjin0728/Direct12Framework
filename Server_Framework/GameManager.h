@@ -155,7 +155,7 @@ public:
 		}
 	}
 
-	void CreateItem(float x, float z);
+	void CreateItem(S_ENEMY_TYPE a, float x, float z);
 	void CreateItemAtRandomPosition();
 
 	void InitializeMonsterWave();
