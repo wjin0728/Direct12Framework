@@ -4,8 +4,8 @@
 void Monster::SetState(MonsterStateMachine* newState)
 {
     if (currentState) {
-        if (newState != &MonsterState::HitState::GetInstance()) {
-            previousState = _state; 
+        if (newState == &MonsterState::HitState::GetInstance() || newState == &MonsterState::BossHitState::GetInstance()) {
+            previousState = _state;
             // MonsterState::HitState로 갈 때는 현재 상태 저장
         }
         currentState->Exit(this);
@@ -35,32 +35,32 @@ void Monster::SetMonsterState(S_MONSTER_STATE newState)
 {
 	switch (newState) {
 	case S_MONSTER_STATE::IDLE:
-		_state = S_MONSTER_STATE::IDLE;
 		SetState(&MonsterState::IdleState::GetInstance());
+		_state = S_MONSTER_STATE::IDLE;
 		break;
 	case S_MONSTER_STATE::RUN:
-		_state = S_MONSTER_STATE::RUN;
 		SetState(&MonsterState::RunState::GetInstance());
+		_state = S_MONSTER_STATE::RUN;
 		break;
 	case S_MONSTER_STATE::ATTACK:
-		_state = S_MONSTER_STATE::ATTACK;
 		SetState(&MonsterState::AttackState::GetInstance());
+		_state = S_MONSTER_STATE::ATTACK;
 		break;
 	case S_MONSTER_STATE::GETHIT:
-		_state = S_MONSTER_STATE::GETHIT;
 		SetState(&MonsterState::HitState::GetInstance());
+		_state = S_MONSTER_STATE::GETHIT;
 		break;
 	case S_MONSTER_STATE::DEATH:
-		_state = S_MONSTER_STATE::DEATH;
 		SetState(&MonsterState::DeathState::GetInstance());
+		_state = S_MONSTER_STATE::DEATH;
 		break;
 	case S_MONSTER_STATE::SPAWN:
-		_state = S_MONSTER_STATE::SPAWN;
 		SetState(&MonsterState::SpawnState::GetInstance());
+		_state = S_MONSTER_STATE::SPAWN;
 		break;
 	case S_MONSTER_STATE::UNDERGROUND:
-		_state = S_MONSTER_STATE::UNDERGROUND;
 		SetState(&MonsterState::UndergroundState::GetInstance());
+		_state = S_MONSTER_STATE::UNDERGROUND;
 		break;
 	default:
 		break;
@@ -70,28 +70,28 @@ void Monster::SetBossState(S_MONSTER_STATE newState)
 {
 	switch (newState) {
 	case S_MONSTER_STATE::IDLE:
-		_state = S_MONSTER_STATE::IDLE;
 		SetState(&MonsterState::BossIdleState::GetInstance());
+		_state = S_MONSTER_STATE::IDLE;
 		break;
 	case S_MONSTER_STATE::ATTACK:
-		_state = S_MONSTER_STATE::ATTACK;
 		SetState(&MonsterState::BossAttackState::GetInstance());
+		_state = S_MONSTER_STATE::ATTACK;
 		break;
 	case S_MONSTER_STATE::GETHIT:
-		_state = S_MONSTER_STATE::GETHIT;
 		SetState(&MonsterState::BossHitState::GetInstance());
+		_state = S_MONSTER_STATE::GETHIT;
 		break;
 	case S_MONSTER_STATE::DEATH:
-		_state = S_MONSTER_STATE::DEATH;
 		SetState(&MonsterState::BossDeathState::GetInstance());
+		_state = S_MONSTER_STATE::DEATH;
 		break;
 	case S_MONSTER_STATE::SPAWN:
-		_state = S_MONSTER_STATE::SPAWN;
 		SetState(&MonsterState::BossSpawnState::GetInstance());
+		_state = S_MONSTER_STATE::SPAWN;
 		break;
 	case S_MONSTER_STATE::UNDERGROUND:
-		_state = S_MONSTER_STATE::UNDERGROUND;
 		SetState(&MonsterState::BossUndergroundState::GetInstance());
+		_state = S_MONSTER_STATE::UNDERGROUND;
 		break;
 	default:
 		break;
