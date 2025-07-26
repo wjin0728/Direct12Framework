@@ -200,7 +200,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 					client.second.send_room_player_count_packet(Room_Cnt);
 				}
 			}
-
 			clients[c_id].send_lobby_server_out_packet();
 			break;
 		}

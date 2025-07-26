@@ -203,6 +203,7 @@ void GameManager::Worker_thread()
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(client_socket), h_iocp, client_id, 0);
 				clients[ServerNumber][client_id].do_recv();
 				client_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+				clients[ServerNumber][client_id].send_login_info_packet();
 			}
 			else {
 				cout << "Max user exceeded.\n";
@@ -269,9 +270,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[ServerNumber][c_id]._state = ST_INGAME;
 		}
 
-		//clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)p->player_class);
-
 		cout << "login : " << c_id << endl;
+
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			if (cl.first == c_id) continue;
+			if (cl.second._player._class == S_PLAYER_CLASS::end) continue; // 클래스가 선택되지 않은 클라이언트는 제외
+			clients[ServerNumber][c_id].send_add_player_packet(&cl.second);
+			cout << "클라 " << cl.first << "의 정보 " << c_id << "에게 전송 완료" << endl;
+		}
 		break;
 	}
 	case CS_CHAT: {
@@ -495,6 +502,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		case (uint8_t)S_BUTTON_TYPE::MAGE: {
 			if (!IsClassOK((S_PLAYER_CLASS)p->button_type)) break;
 
+			cout << "Select Class >> " << p->button_type << endl;
 			clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)(p->button_type));
 			clients[ServerNumber][c_id]._player._pos = spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)clients[ServerNumber][c_id]._player._class].pos;
 			clients[ServerNumber][c_id]._player._rotation = spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)clients[ServerNumber][c_id]._player._class].rot;
@@ -503,12 +511,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 			for (auto& cl : clients[ServerNumber]) {
 				if (cl.second._state != ST_INGAME) continue;
 				cl.second.send_add_player_packet(&clients[ServerNumber][c_id]);
+				cout << "클라 " << c_id << "의 정보 " << cl.first << "에게 전송 완료" << endl;
 			}
 			// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
 			for (auto& cl : clients[ServerNumber]) {
 				if (cl.second._state != ST_INGAME) continue;
 				if (cl.first == c_id) continue;
+				if (cl.second._player._class == S_PLAYER_CLASS::end) continue; // 클래스가 선택되지 않은 클라이언트는 제외
 				clients[ServerNumber][c_id].send_add_player_packet(&cl.second);
+				cout << "클라 " << cl.first << "의 정보 " << c_id << "에게 전송 완료" << endl;
 			}
 
 			break;

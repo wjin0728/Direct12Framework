@@ -632,10 +632,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		break;
 	}
 	case SC_LOBBY_SERVER_OUT: {
-		Connect(PORT_NUM);
-
-		send_cs_game_server_login_packet();
 		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
+		Connect(PORT_NUM);
+		send_cs_game_server_login_packet();
 		break;
 	}
 	default:
