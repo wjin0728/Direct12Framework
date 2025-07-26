@@ -72,15 +72,15 @@ public:
         }
         case S_ENEMY_TYPE::GRASS_SMALL: {
             ReadAnimationInfo("Animations/GrassSmall.bin");
-            _boundingbox.Center = XMFLOAT3(0, 0.83, 0);
-            _boundingbox.Extents = Vec3(0.73, 1.27, 0.76) / 2.f;
+            _orignalboundingbox.Center = XMFLOAT3(0, 0.83, 0);
+            _orignalboundingbox.Extents = Vec3(0.73, 1.27, 0.76) / 2.f;
             _hp = 50.f;
             break;
         }
         case S_ENEMY_TYPE::GRASS_BIG: {
             ReadAnimationInfo("Animations/GrassBig.bin");
-            _boundingbox.Center = XMFLOAT3(0, 1.72, 0);
-            _boundingbox.Extents = Vec3(1.61, 2.71, 1.21) / 2.f;
+            _orignalboundingbox.Center = XMFLOAT3(0, 1.72, 0);
+            _orignalboundingbox.Extents = Vec3(1.61, 2.71, 1.21) / 2.f;
             _hp = 100.f;
             break;
         }

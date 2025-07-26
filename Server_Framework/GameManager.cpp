@@ -278,6 +278,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				pos.y += 1.5f;
 
 				BoundingSphere sphere(pos, 0.7f);
+				mon.second.LocalTransform();
 				if (sphere.Intersects(mon.second._boundingbox)) {
 					mon.second.TakeDamage(10, true);
 					for (auto& cl : clients[ServerNumber]) {

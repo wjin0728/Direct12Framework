@@ -22,8 +22,8 @@ public:
 		{
 		case S_PROJECTILE_TYPE::ARROW:
 			_damage = 5;
-			_boundingbox.Center = XMFLOAT3(0, 0, 0.2230943);
-			_boundingbox.Extents = Vec3(0.106043, 0.03977784, 0.6090841) / 4.f;
+			_orignalboundingbox.Center = XMFLOAT3(0, 0, 0.2230943);
+			_orignalboundingbox.Extents = Vec3(0.106043, 0.03977784, 0.6090841) / 4.f;
 			break;
 		case S_PROJECTILE_TYPE::FIREBALL:
 			break;
@@ -33,8 +33,8 @@ public:
 			break;
 		case S_PROJECTILE_TYPE::MAGIC_BALL:
 			_damage = 5;
-			_boundingbox.Center = XMFLOAT3(0, 0, 0);
-			_boundingbox.Extents = Vec3(0.8, 0.8, 0.8) / 2.f;
+			_orignalboundingbox.Center = XMFLOAT3(0, 0, 0);
+			_orignalboundingbox.Extents = Vec3(0.8, 0.8, 0.8) / 2.f;
 			break;
 		case S_PROJECTILE_TYPE::PROJECTILE_END:
 			break;
