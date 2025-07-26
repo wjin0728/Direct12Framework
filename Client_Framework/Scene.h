@@ -35,7 +35,7 @@ protected:
 	using ObjectList = std::vector<std::shared_ptr<CGameObject>>;
 
 	std::queue<std::shared_ptr<CGameObject>> mAddQueue{};
-	std::queue<std::shared_ptr<CGameObject>> mRemoveQueue{};
+	std::queue<CGameObject*> mRemoveQueue{};
 	std::queue<class CComponent*> mComponentStartQueue{};
 
 	ObjectList mObjects{};
@@ -86,7 +86,7 @@ public:
 
 	void AddObjectImmediately(std::shared_ptr<CGameObject> object, bool activate = false);
 	void AddObject(std::shared_ptr<CGameObject> object);
-	void RemoveObject(std::shared_ptr<CGameObject> object);
+	void DestroyObject(CGameObject* object);
 	void SetTerrain(std::shared_ptr<CTerrain> terrain);
 	
 	ObjectList& GetObjectsWithType(OBJECT_TYPE type) { return mObjectTypes[(UINT)type]; }
@@ -94,7 +94,6 @@ public:
 	std::shared_ptr<CTerrain> GetTerrain() { return mTerrain; }
 
 	void CollectVisibleObjects();
-	void AddRemoveQueue(std::shared_ptr<CGameObject> object);
 	void AddComponentToStartQueue(CComponent* component);
 
 	void CommitObjectChanges();

@@ -377,7 +377,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "Current scene is nullptr" << std::endl;
 			break;
 		}
-		scene->RemoveObject(mItems[packet->item_id]);
+		scene->DestroyObject(mItems[packet->item_id].get());
 		mItems.erase(packet->item_id);
 
 		cout << "삭제!";
@@ -549,7 +549,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "Current scene is nullptr" << std::endl;
 			break;
 		}
-		scene->RemoveObject(mEnemies[packet->monster_id]);
+		scene->DestroyObject(mEnemies[packet->monster_id].get());
 		mEnemies.erase(packet->monster_id);
 		break;
 	}
@@ -561,7 +561,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 		if (!mProjectiles.contains(packet->projectile_id)) break;
-		scene->RemoveObject(mProjectiles[packet->projectile_id]);
+		scene->DestroyObject(mProjectiles[packet->projectile_id].get());
 		mProjectiles.erase(packet->projectile_id);
 		break;
 	}

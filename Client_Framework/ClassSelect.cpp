@@ -85,10 +85,8 @@ void CClassSelectUI::Start()
 		mClassCharacters[classType]->GetTransform()->SetLocalPosition({ 0.f, 0.f, 0.f });
 		mClassCharacters[classType]->GetTransform()->SetLocalRotation({ 0.f, 0.f, 0.f });
 		mClassCharacters[classType]->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
-		mClassCharacters[classType]->SetParent(playerObj);
+		mClassCharacters[classType]->GetTransform()->SetParentInScene(playerObj->GetTransform());
 
-
-		playerObj->GetCutScene()->SetClass((PLAYER_CLASS)classType);
 		std::shared_ptr<CPlayerStateMachine> stateMachine{};
 		if (classType == (UINT8)PLAYER_CLASS::ARCHER) {
 			stateMachine = playerObj->AddComponent<CArcherState>();
