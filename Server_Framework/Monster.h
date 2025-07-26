@@ -118,4 +118,8 @@ public:
 
         return {result.x, result.z};
     }
+
+    bool IsUnavailable() {
+        return (_remove || _state == S_MONSTER_STATE::UNDERGROUND || _state == S_MONSTER_STATE::DEATH || _state == S_MONSTER_STATE::SPAWN);
+    }
 };

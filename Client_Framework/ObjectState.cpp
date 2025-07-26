@@ -42,9 +42,10 @@ void CPlayerStateMachine::Start()
 void CPlayerStateMachine::Update()
 {
 	auto controller = mAnimationController.lock();
-	if(!controller) {
+	if (!controller) {
 		return;
 	}
+
 	if (controller->mTrack->mType == ANIMATION_TYPE::END) {
 		switch ((PLAYER_STATE)currentState) {
 		case PLAYER_STATE::JUMP:
@@ -70,13 +71,14 @@ void CPlayerStateMachine::Update()
 	case PLAYER_STATE::JUMP:
 	case PLAYER_STATE::FALLING:
 	case PLAYER_STATE::GATHERING:
+		break;
 	case PLAYER_STATE::GETHIT:
 	{
 		float hitFactor = 1.f - (controller->mTrack->mTrackProgress * 4);
 		if (hitFactor < 0.f) hitFactor = 0.f;
 		GetTransform()->SetHitFactor(hitFactor);
-	}
 		break;
+	}
 	case PLAYER_STATE::ATTACK:
 	case PLAYER_STATE::SKILL:
 	case PLAYER_STATE::ULTIMATE:
@@ -224,7 +226,7 @@ void CArcherState::Update()
 		case PLAYER_STATE::DEATH:
 			break;
 		case PLAYER_STATE::RUNATTACK:
-		break;
+			break;
 		default:
 			break;
 		}

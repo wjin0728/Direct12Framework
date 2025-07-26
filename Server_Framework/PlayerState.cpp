@@ -69,7 +69,7 @@ void PlayerState::BasicAttackState::Update(PlayerCharacter* player) {
         direction.y = 0.f;
         direction.Normalize();
 
-        direction = Vec3::Lerp(look, direction, 0.4f);
+        direction = Vec3::Lerp(look, direction, 0.3f);
 
         Quaternion targetRot = Quaternion::LookRotation(direction);
         Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
@@ -117,7 +117,7 @@ void PlayerState::RunAttackState::Update(PlayerCharacter* player) {
         direction.y = 0.f;
         direction.Normalize();
 
-        direction = Vec3::Lerp(look, direction, 0.1f);
+        direction = Vec3::Lerp(look, direction, 0.3f);
 
         Quaternion targetRot = Quaternion::LookRotation(direction);
         Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;

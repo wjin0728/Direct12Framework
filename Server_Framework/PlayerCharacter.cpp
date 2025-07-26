@@ -118,7 +118,8 @@ void PlayerCharacter::SetTarget()
     Monster* close_monster = nullptr;
 
     for (auto& monster : _Monster) {
-        if (monster == nullptr || monster->_remove) continue;
+        if (monster == nullptr || monster->IsUnavailable()) continue;
+
         Vec3 monsterPos = monster->_pos;
         float distance = (_pos - monsterPos).LengthSquared();
 
@@ -147,7 +148,8 @@ bool PlayerCharacter::IsMonsterInRange(Monster* target) const
 //const std::array<float, 2>& center, float radius, const std::array<float, 2>& forward, float sectorAngle,
 //const std::vector<std::array<float, 2>>& rectCorners
 
-bool PlayerCharacter::OnFighterBasicAttack(BoundingOrientedBox& monster_box) {
+bool PlayerCharacter::OnFighterBasicAttack(BoundingOrientedBox& monster_box)
+{
     BoundingOrientedBox atbox;
     XMVECTOR center = XMLoadFloat3(&_boundingbox.Center);
     float yawRad = XMConvertToRadians(_look_dir.y); // _look_dir.y를 라디안으로

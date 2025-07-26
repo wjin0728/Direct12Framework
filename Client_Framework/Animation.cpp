@@ -348,10 +348,10 @@ void CAnimationController::AddAnimationEvent(const std::string& animName, const 
 			mEventHandler[set->mAnimationName] = handler;
 		}
 		for (auto& key : set->mEventKeys) {
-			if(key->mName == name) {
+			if (key->mName == name) {
 				handler->Register(name, event);
+				break;
 			}
-			break;
 		}
 	}
 }
