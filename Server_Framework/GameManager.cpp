@@ -110,6 +110,7 @@ GameManager::GameManager()
 		}
 	}
 
+	cout << "Spawn Point OK" << endl;
 }
 GameManager::~GameManager()
 {
@@ -268,7 +269,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		//clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)p->player_class);
 
-		clients[ServerNumber][c_id]._player._pos = spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)clients[ServerNumber][c_id]._player._class].pos;
 		cout << "login : " << c_id << endl;
 		break;
 	}
