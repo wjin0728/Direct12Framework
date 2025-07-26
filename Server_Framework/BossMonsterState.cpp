@@ -96,20 +96,23 @@ void BossMonsterState::AttackState::Exit(Monster* monster) {}
 
 
 
-BossMonsterState::SkillState& BossMonsterState::SkillState::GetInstance() { static BossMonsterState::SkillState instance; return instance; }
+BossMonsterState::CastingState& BossMonsterState::CastingState::GetInstance() { static BossMonsterState::CastingState instance; return instance; }
 
-void BossMonsterState::SkillState::Enter(Monster* monster) {
+void BossMonsterState::CastingState::Enter(Monster* monster) {
 	skillTimer = 2.0f; // 스킬 지속 시간 지정해주기
 }
 
-void BossMonsterState::SkillState::Update(Monster* monster) {
+void BossMonsterState::CastingState::Update(Monster* monster) {
 	skillTimer -= TICK_INTERVAL;
-	if (skillTimer <= 0) {
-		monster->SetState(S_MONSTER_STATE::IDLE);
+
+	switch (rand() % 3)
+	{
+	default:
+		break;
 	}
 }
 
-void BossMonsterState::SkillState::Exit(Monster* monster) {}
+void BossMonsterState::CastingState::Exit(Monster* monster) {}
 
 
 

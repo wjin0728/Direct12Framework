@@ -100,7 +100,7 @@ bool Monster::IsPlayerTooMuchClose() const
 
 void Monster::UpdateTarget()
 {
-	if (_class != S_ENEMY_TYPE::BOSS) {
+	if (_class == S_ENEMY_TYPE::BOSS) {
 		if (_target) {
 			Vec3 direction = _target->_pos - _pos;
 			direction.y = 0.f;

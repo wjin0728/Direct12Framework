@@ -510,6 +510,7 @@ bool GameManager::CanMove(float x, float z)
 	zIndex = static_cast<int>(zIndex);
 
 	int idx = xIndex + (zIndex * terrain[(int)scene_type].GetNavMapResolution());
+
 	if (terrain[(int)scene_type].mNavMapData[idx] != 0) {
 		return true;
 	}
@@ -558,10 +559,11 @@ void GameManager::Update()
 			Vec3 newPos = player._pos + (player._velocity * TICK_INTERVAL);
 
 			if (CanMove(newPos.x, newPos.z)) {
-				player._pos = newPos;
+				float terrainHeight = terrain[(int)scene_type].GetHeight(newPos.x, newPos.z);
+				if (terrainHeight < 2.99 && scene_type == S_SCENE_TYPE::MAIN_STAGE_1) continue;
+				newPos.y = terrainHeight;
 
-				float terrainHeight = terrain[(int)scene_type].GetHeight(player._pos.x, player._pos.z);
-				player._pos.y = terrainHeight;
+				player._pos = newPos;
 
 				float rotationSpeed = 10.f;
 				if (player._class != S_PLAYER_CLASS::ARCHER || player._state != S_PLAYER_STATE::RUNATTACK || !player._target) {
