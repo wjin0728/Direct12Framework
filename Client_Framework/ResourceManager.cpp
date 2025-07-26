@@ -79,7 +79,7 @@ bool CResourceManager::LoadPlayerObjects()
 	LoadPrefabFromFile("Fighter");
 	LoadPrefabFromFile("Mage");
 	LoadPrefabFromFile("HP_Background");
-	LoadPrefabFromFile("MainUI");
+	//LoadPrefabFromFile("MainUI");
 	LoadPrefabFromFile("LobbyUI");
 	LoadPrefabFromFile("Portal");
 	return true;

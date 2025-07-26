@@ -52,6 +52,76 @@ void CClassSelectUI::Start()
 	mClassCharacters[2] = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("Mage");
 
 	mWaitingRoomUI->SetActive(false);
+
+	auto& sm = INSTANCE(ServerManager);
+	sm.AddEvent("SelectClass", [this](std::vector<std::any> any) {
+		auto player = INSTANCE(ServerManager).mPlayer;
+		if (!player) return;
+
+		if (any.size() < 1) return;
+		uint8_t classType = std::any_cast<uint8_t>(any[0]);
+
+		std::cout << "Selected class: " << classType << endl;
+
+		Vec3 position = mClassCharacters[classType]->GetTransform()->GetLocalPosition();
+		Vec3 rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
+		Vec3 scale = mClassCharacters[classType]->GetTransform()->GetLocalScale();
+
+		player->GetTransform()->SetLocalPosition(position);
+		player->GetTransform()->SetLocalRotation(rotation);
+		player->GetTransform()->SetLocalScale(scale);
+
+		mClassCharacters[classType]->GetTransform()->SetLocalPosition({ 0.f, 0.f, 0.f });
+		mClassCharacters[classType]->GetTransform()->SetLocalRotation({ 0.f, 0.f, 0.f });
+		mClassCharacters[classType]->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
+		mClassCharacters[classType]->SetParent(player);
+
+
+		player->GetCutScene()->SetClass((PLAYER_CLASS)classType);
+		std::shared_ptr<CPlayerStateMachine> stateMachine{};
+		if (classType == (UINT8)PLAYER_CLASS::ARCHER) {
+			stateMachine = player->AddComponent<CArcherState>();
+		}
+		else if (classType == (UINT8)PLAYER_CLASS::FIGHTER) {
+			stateMachine = player->AddComponent<CWarriorState>();
+		}
+		else if (classType == (UINT8)PLAYER_CLASS::MAGE) {
+			stateMachine = player->AddComponent<CMageState>();
+		}
+
+		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
+		player->SetStateMachine(stateMachine);
+
+		auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
+		if (shieldPrefab) {
+			auto shieldObj = CGameObject::Instantiate(shieldPrefab, player->GetTransform());
+			shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
+			shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
+			stateMachine->SetShield(shieldObj);
+			stateMachine->ActivateShield(false);
+		}
+
+		auto playerController = player->GetComponent<CPlayerController>();
+		if (playerController) {
+			playerController->ChangeControllMode(CPlayerController::ControllMode::LockOn);
+			playerController->SetStateMachine(stateMachine);
+			playerController->SetChildAnimationController();
+		}
+		if (auto camera = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("MainCamera")) {
+			if (auto cameraCmp = camera->GetComponent<CCamera>()) {
+				cameraCmp->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 150.f, 60.f);
+				cameraCmp->SetCameraType(CCamera::CameraType::Perspective);
+			}
+			auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
+			if (thirdPersonCamera) {
+				thirdPersonCamera->SetDefaultCameraParams();
+				thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FollowTarget);
+			}
+		}
+
+		ChangeMenuState(EMenuState::WaitingRoom);
+		}
+	);
 }
 
 void CClassSelectUI::Update()
@@ -158,67 +228,7 @@ void CClassSelectUI::OnClickExitButton()
 
 void CClassSelectUI::OnClickSelectButton(int classType)
 {
-	std::cout << "Selected class: " << classType<<endl;
-	auto player = INSTANCE(ServerManager).mPlayer;
-	if (!player) return;
-
-	Vec3 position = mClassCharacters[classType]->GetTransform()->GetLocalPosition();
-	Vec3 rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
-	Vec3 scale = mClassCharacters[classType]->GetTransform()->GetLocalScale();
-
-	player->GetTransform()->SetLocalPosition(position);
-	player->GetTransform()->SetLocalRotation(rotation);
-	player->GetTransform()->SetLocalScale(scale);
-
-	mClassCharacters[classType]->GetTransform()->SetLocalPosition({ 0.f, 0.f, 0.f });
-	mClassCharacters[classType]->GetTransform()->SetLocalRotation({ 0.f, 0.f, 0.f });
-	mClassCharacters[classType]->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
-	mClassCharacters[classType]->SetParent(player);
-
-
-	player->GetCutScene()->SetClass((PLAYER_CLASS)classType);
-	std::shared_ptr<CPlayerStateMachine> stateMachine{};
-	if (classType == (UINT8)PLAYER_CLASS::ARCHER) {
-		stateMachine = player->AddComponent<CArcherState>();
-	}
-	else if (classType == (UINT8)PLAYER_CLASS::FIGHTER) {
-		stateMachine = player->AddComponent<CWarriorState>();
-	}
-	else if (classType == (UINT8)PLAYER_CLASS::MAGE) {
-		stateMachine = player->AddComponent<CMageState>();
-	}
-
-	stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-	player->SetStateMachine(stateMachine);
-
-	auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
-	if (shieldPrefab) {
-		auto shieldObj = CGameObject::Instantiate(shieldPrefab, player->GetTransform());
-		shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
-		shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
-		stateMachine->SetShield(shieldObj);
-		stateMachine->ActivateShield(false);
-	}
-
-	auto playerController = player->GetComponent<CPlayerController>();
-	if (playerController) {
-		playerController->ChangeControllMode(CPlayerController::ControllMode::LockOn);
-		playerController->SetStateMachine(stateMachine);
-		playerController->SetChildAnimationController();
-	}
-	if (auto camera = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("MainCamera")) {
-		if (auto cameraCmp = camera->GetComponent<CCamera>()) {
-			cameraCmp->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 150.f, 60.f);
-			cameraCmp->SetCameraType(CCamera::CameraType::Perspective);
-		}
-		auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
-		if (thirdPersonCamera) {
-			thirdPersonCamera->SetDefaultCameraParams();
-			thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FollowTarget);
-		}
-	}
-
-	ChangeMenuState(EMenuState::WaitingRoom);
+	INSTANCE(ServerManager).send_cs_click_button_packet(classType);
 }
 
 void CClassSelectUI::OnClickSettingsButton()

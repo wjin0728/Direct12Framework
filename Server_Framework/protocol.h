@@ -28,8 +28,7 @@ constexpr char CS_CHANGE_SCENE = 8;
 constexpr char CS_CHANGE_STATE = 9;
 constexpr char CS_ATTACK = 10;
 constexpr char CS_GAME_SERVER_LOGIN = 11;
-constexpr char CS_SELECT_CLASS = 12;
-constexpr char CS_CLICK_BUTTON = 13;
+constexpr char CS_CLICK_BUTTON = 12;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;
@@ -70,12 +69,10 @@ struct PACKET {
 
 
 struct CS_LOGIN_PACKET : PACKET {
-	char			name[NAME_SIZE];
 };
 
 struct CS_GAME_SERVER_LOGIN_PACKET : PACKET {
 	short 			id;
-	uint8_t			player_class;
 };
 
 struct CS_CHAT_PACKET : PACKET {
@@ -130,11 +127,6 @@ struct CS_CHANGE_STATE_PACKET : PACKET {
 
 struct CS_ATTACK_PACKET : PACKET {
 	short 			id;
-};
-
-struct CS_SELECT_CLASS_PACKET : PACKET {
-	short 			id; 
-	uint8_t			player_class; 
 };
 
 struct CS_CLICK_BUTTON_PACKET : PACKET {

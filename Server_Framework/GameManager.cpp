@@ -203,32 +203,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[ServerNumber][c_id]._state = ST_INGAME;
 		}
 
-		if (0 == c_id)
-			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::ARCHER);
-		else if (1 == c_id)
-			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
-		else if (2 == c_id)
-			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::MAGE);
-
 		//clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)p->player_class);
 
 		clients[ServerNumber][c_id]._player._pos = spawn_points[(int)scene_type];
 		cout << "login : " << c_id << endl;
-
-		// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
-		for (auto& cl : clients[ServerNumber]) {
-			if (cl.second._state != ST_INGAME) continue;
-			cl.second.send_add_player_packet(&clients[ServerNumber][c_id]);
-		}
-		// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
-		for (auto& cl : clients[ServerNumber]) {
-			if (cl.second._state != ST_INGAME) continue;
-			if (cl.first == c_id) continue;
-			clients[ServerNumber][c_id].send_add_player_packet(&cl.second);
-			cout << "Send add player " << c_id << " 에게 " << cl.first << endl;
-		}
-
-		clients[ServerNumber][c_id]._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 		break;
 	}
 	case CS_CHAT: {
@@ -440,6 +418,37 @@ void GameManager::Process_packet(int c_id, char* packet)
 		//Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
 		//clients[ServerNumber][p->id]._player._rotation = targetRot;
 		//clients[ServerNumber][p->id]._player.SetLookDir(angle);
+		break;
+	}
+	case CS_CLICK_BUTTON: {
+		CS_CLICK_BUTTON_PACKET* p = reinterpret_cast<CS_CLICK_BUTTON_PACKET*>(packet);
+
+		switch (p->button_type + (uint8_t)S_BUTTON_TYPE::ARCHER)
+		{
+		case (uint8_t)S_BUTTON_TYPE::ARCHER:
+		case (uint8_t)S_BUTTON_TYPE::FIGHTER:
+		case (uint8_t)S_BUTTON_TYPE::MAGE: {
+			clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)(p->button_type));
+
+			// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._state != ST_INGAME) continue;
+				cl.second.send_add_player_packet(&clients[ServerNumber][c_id]);
+			}
+			// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._state != ST_INGAME) continue;
+				if (cl.first == c_id) continue;
+				clients[ServerNumber][c_id].send_add_player_packet(&cl.second);
+			}
+
+			break;
+		}
+		default:
+			break;
+		}
+
+		clients[ServerNumber][c_id]._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 		break;
 	}
 	}
