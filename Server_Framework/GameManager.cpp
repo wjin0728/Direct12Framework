@@ -270,14 +270,14 @@ void GameManager::Process_packet(int c_id, char* packet)
 	}
 	case CS_SKILL_TARGET: {
 		CS_SKILL_TARGET_PACKET* p = reinterpret_cast<CS_SKILL_TARGET_PACKET*>(packet);
+		Vec3 pos = Monsters[ServerNumber][p->target_id]._pos;
+		pos.y += 1.5f;
+		BoundingSphere sphere(pos, 0.7f);
 
 		if (S_FIRE_EXPLOSION == p->skill_enum) {
 			for (auto& mon : Monsters[ServerNumber]) {
 				if (mon.second.IsUnavailable()) continue;
-				Vec3 pos = mon.second._pos;
-				pos.y += 1.5f;
-
-				BoundingSphere sphere(pos, 0.7f);
+			
 				mon.second.LocalTransform();
 				if (sphere.Intersects(mon.second._boundingbox)) {
 					mon.second.TakeDamage(10, true);
