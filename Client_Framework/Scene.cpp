@@ -73,7 +73,6 @@ void CScene::Start()
 
 void CScene::Update()
 {
-	FadeUpdate();
 	for (const auto& object : mObjects) {
 		object->Update();
 	}
@@ -89,6 +88,7 @@ void CScene::LateUpdate()
 	INSTANCE(CParticleManager).Update();
 	UpdatePassData();
 
+	FadeUpdate();
 }
 
 
