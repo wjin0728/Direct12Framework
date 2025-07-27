@@ -97,7 +97,14 @@ void PlayerCharacter::SetState(uint8_t newState)
 
 void PlayerCharacter::Update() 
 {
-	if (currentState) currentState->Update(this);
+    if (_on_CantMove && cant_move_time > 0.f) {
+        cant_move_time -= TICK_INTERVAL;
+        if (cant_move_time <= 0.f) {
+            _on_CantMove = false;
+            cant_move_time = 0.f;
+        }
+    }
+    if (currentState) currentState->Update(this);
 	LocalTransform();
 }
 
