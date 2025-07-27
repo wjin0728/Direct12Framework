@@ -93,6 +93,7 @@ bool CResourceManager::LoadEnemyObjects()
 	LoadPrefabFromFile("WaterSmall");
 	LoadPrefabFromFile("FireBig");
 	LoadPrefabFromFile("FireSmall");
+	LoadPrefabFromFile("IceBig");
 	LoadPrefabFromFile("Boss");
 	return true;
 }
@@ -113,6 +114,7 @@ bool CResourceManager::LoadProjectileObjects()
 	LoadPrefabFromFile("MagicBall");
 	LoadPrefabFromFile("Explosion");
 	LoadPrefabFromFile("SkillVine");
+	LoadPrefabFromFile("MageSkill");
 	return true;
 }
 

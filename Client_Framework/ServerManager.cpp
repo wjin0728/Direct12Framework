@@ -500,7 +500,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 
 		std::string objName[(int)PROJECTILE_TYPE::PROJECTILE_END]
-			= { "Arrow", "Arrow", "FireBall", "IceBall", "GrassBall", "MagicBall" };
+			= { "Arrow", "Arrow", "FireBall", "IceBall", "GrassBall", "MagicBall", "MageSkill"};
 		auto projectile = RESOURCE.GetPrefab(objName[(int)packet->projectile_type]);
 		if (!projectile) {
 			std::cout << "projectile is nullptr" << std::endl;
@@ -509,7 +509,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto projectileObj = CGameObject::Instantiate(projectile);
 		projectileObj->SetTag("Projectile");
 		projectileObj->SetRenderLayer(RENDER_LAYER::Opaque);
-		if(objName[(int)packet->projectile_type] == "MagicBall") 
+		if(objName[(int)packet->projectile_type] == "MagicBall" || objName[(int)packet->projectile_type] == "MageSkill")
 			projectileObj->SetRenderLayer(RENDER_LAYER::Transparent);
 
 		if (objName[(int)packet->projectile_type] == "Arrow") {
