@@ -174,7 +174,7 @@ public:
 	void CreateItem(S_ENEMY_TYPE a, float x, float z);
 	void CreateItemAtRandomPosition();
 
-	void InitializeMonsterWave();
+	void InitializeWave();
 	void InitializeMonster(S_ENEMY_TYPE type, Vec3 position);
 
 	std::function<void(Monster*)> MakeAttackEvent(Vec2 offset, float radius, int damage);
@@ -225,4 +225,11 @@ private:
 		}
 		return true;
 	};
+	bool IsAllPlayerReady() const {
+		for (auto& cl : clients[ServerNumber]) {
+			if (cl.second._state != ST_INGAME) continue;
+			if (cl.second._player._class == S_PLAYER_CLASS::end) return false;
+		}
+		return true;
+	}
 };

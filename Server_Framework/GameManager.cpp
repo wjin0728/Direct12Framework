@@ -415,7 +415,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		// 몬스터 생성
 		case 1: {
-			InitializeMonsterWave();
+			InitializeWave();
 			break;
 		}
 		// 씬 전환
@@ -580,6 +580,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 				//cout << "클라 " << cl.first << "의 정보 " << c_id << "에게 전송 완료" << endl;
 			}
 
+			if (IsAllPlayerReady()) { // 모든 플레이어가 클래스 선택을 완료한 경우
+				MonsterWaves[ServerNumber].wave_timer = -1.f; // 초기 웨이브 끝, S_INTRO 웨이브 시작
+			}
 			break;
 		}
 		default:
@@ -756,7 +759,7 @@ void GameManager::Update()
 	}
 
 	// 몬스터 웨이브 관리
-	UpdateWave();
+	if (clients[ServerNumber].size()) UpdateWave();
 
 	// 보스 스테이지 처리
 	if (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && MonsterWaves[ServerNumber].current_wave == 3) {
@@ -946,7 +949,7 @@ void GameManager::CreateItemAtRandomPosition()
 	CreateItem(S_ENEMY_TYPE::BOSS, randomPos.x, randomPos.y);
 }
 
-void GameManager::InitializeMonsterWave()
+void GameManager::InitializeWave()
 {
 	// 몬스터 초기화
 	if (Monsters[ServerNumber].size()) {
@@ -1144,9 +1147,9 @@ void GameManager::HandleWaveEnd(MonsterWave& wave)
 		// else if (IsAllPlayerReady()) ChangeScene();
 	}
 	else { // 아직 마지막 웨이브가 아니면 다음 웨이브로
-		wave.wave_timer -= TICK_INTERVAL;
+		if (scene_type != S_SCENE_TYPE::LOBBY) wave.wave_timer -= TICK_INTERVAL;
 		if (wave.wave_timer <= 0.f) {
-			InitializeMonsterWave();
+			InitializeWave();
 			std::cout << wave.current_wave << " wave started." << std::endl;
 		}
 	}
