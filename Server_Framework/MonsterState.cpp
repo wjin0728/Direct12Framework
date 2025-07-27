@@ -40,7 +40,7 @@ void MonsterState::RunState::Enter(Monster* monster) {
 
 void MonsterState::RunState::Update(Monster* monster) {
 	Vec3 pos = monster->_pos; // 현재 위치 저장
-	monster->_pos += monster->_velocity * TICK_INTERVAL;
+	monster->_pos += monster->_velocity * TICK_INTERVAL * (int)(!monster->_on_CantMove);
 	//if (monster->gameManager.CanMove(pos.x, pos.z)) {
 	//	monster->_pos = pos; // 이동 가능하면 위치 업데이트
 	//}

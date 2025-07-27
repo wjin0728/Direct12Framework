@@ -17,6 +17,7 @@
 #include "ParticleAttach.h"
 #include "ParticleManager.h"
 #include "TrailRenderer.h"
+#include"Vine.h"
 
 void ServerManager::Initialize()
 {
@@ -469,8 +470,19 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			}
 		}
 			break;
-		case EFFECT_TYPE::ss:
+		case EFFECT_TYPE::VINE: {
+			auto vinePrefab = INSTANCE(CResourceManager).GetPrefab("SkillVine");
+			if (vinePrefab) {
+				auto vineObj = CGameObject::Instantiate(vinePrefab);
+				vineObj->SetTag("VineEffect");
+				vineObj->SetName("VineEffect");
+				vineObj->AddComponent<CVine>();
+				vineObj->SetObjectType(OBJECT_TYPE::EFFECT);
+				vineObj->GetTransform()->SetLocalPosition(effectPos);
+				INSTANCE(CSceneManager).GetCurScene()->AddObject(vineObj);
+			}
 			break;
+		}
 		default:
 			break;
 		}
@@ -615,8 +627,20 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "Current scene is nullptr" << std::endl;
 			break;
 		}
-		scene->DestroyObject(mEnemies[packet->monster_id].get());
-		mEnemies.erase(packet->monster_id);
+
+		auto it = mEnemies.find(packet->monster_id);
+		if (it == mEnemies.end()) {
+			std::cout << "[SC_REMOVE_MONSTER] monster_id " << packet->monster_id << " not found in mEnemies" << std::endl;
+			break;
+		}
+		if (!it->second) {
+			std::cout << "[SC_REMOVE_MONSTER] mEnemies[" << packet->monster_id << "] is nullptr" << std::endl;
+			mEnemies.erase(it);
+			break;
+		}
+		std::cout << "Removing monster with ID: " << packet->monster_id << std::endl;
+		scene->DestroyObject(it->second.get());
+		mEnemies.erase(it);
 		break;
 	}
 	case SC_REMOVE_PROJECTILE: {
@@ -678,6 +702,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			auto portalObject = CGameObject::Instantiate(portal);
 
 			switch (INSTANCE(CSceneManager).GetCurSceneType()) {
+				case SCENE_TYPE::LOBBY: {
+					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(37.59f, 3.65f, 34.2f));
+					break;
+				}
 				case SCENE_TYPE::MAIN_STAGE_1: {
 					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(65.111f, 4.913f, 45.11095f));
 					break;

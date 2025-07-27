@@ -69,5 +69,6 @@ public:
 		mLocalMat._43 = _pos.z;
 		_orignalboundingbox.Transform(_boundingbox, mLocalMat);
 	};
+
 };
 
