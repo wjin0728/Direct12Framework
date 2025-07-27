@@ -55,6 +55,8 @@ public:
 	void send_make_potal_packet();
 	void send_boss_set_target_packet(int id);
 	void send_boss_target_lock_packet();
+	void send_make_message_packet(uint8_t w);
+	void send_logout_packet(int id);
 };
 
 #endif

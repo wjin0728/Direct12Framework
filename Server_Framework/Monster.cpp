@@ -21,7 +21,7 @@ void Monster::SetState(S_MONSTER_STATE newState)
 	if (newState == S_MONSTER_STATE::ATTACK) {
 		for (auto& key : _animations[(int)S_MONSTER_STATE::ATTACK].mEventKeys) { key.mEnable = true; }
 		for (auto& key : _animations[(int)S_MONSTER_STATE::ATTACK2].mEventKeys) { key.mEnable = true; }
-		for (auto& key : _animations[(int)S_MONSTER_STATE::PROJECTILE_ATTACK].mEventKeys) { key.mEnable = true; }
+		for (auto& key : _animations[(int)S_MONSTER_STATE::SKILL].mEventKeys) { key.mEnable = true; }
 	}
 
 	if (_class == S_ENEMY_TYPE::BOSS) {
@@ -123,12 +123,12 @@ void Monster::TakeDamage(int damage, bool do_hit_raction)
         _hp -= damage;
         if (_hp < 0) _hp = 0;
 		std::cout << "Monster HP: " << _hp << std::endl;
-    }
-    if (_hp > 0 && do_hit_raction) {
-        SetState(S_MONSTER_STATE::GETHIT);
-    }
-    else if (_hp <= 0) {
-		SetState(S_MONSTER_STATE::DEATH);
+		if (_hp > 0 && do_hit_raction) {
+			SetState(S_MONSTER_STATE::GETHIT);
+		}
+		else if (_hp <= 0) {
+			SetState(S_MONSTER_STATE::DEATH);
+		}
     }
 }
 

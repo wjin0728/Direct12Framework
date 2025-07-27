@@ -155,7 +155,7 @@ enum class MONSTER_STATE : UINT8
 	RUN,
 	ATTACK,
 	ATTACK2,
-	PROJECTILE_ATTACK,
+	SKILL,
 	GETHIT,
 	DEATH,
 
@@ -176,4 +176,15 @@ enum class BUTTON_TYPE : UINT8
 	MAGE,
 
 	BUTTON_END
+};
+
+enum WAVE_TYPE : UINT8
+{
+	INTRO, // 로비에만 있음
+	mm,
+	mMm,
+	BOSS,
+	OUTRO, // 불맵에만 있음
+
+	WAVE_END
 };

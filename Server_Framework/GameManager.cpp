@@ -415,7 +415,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		// 몬스터 생성
 		case 1: {
-			InitializeMonsterWave();
+			InitializeWave();
 			break;
 		}
 		// 씬 전환
@@ -580,6 +580,9 @@ void GameManager::Process_packet(int c_id, char* packet)
 				//cout << "클라 " << cl.first << "의 정보 " << c_id << "에게 전송 완료" << endl;
 			}
 
+			if (IsAllClassSelected()) { // 모든 플레이어가 클래스 선택을 완료한 경우
+				MonsterWaves[ServerNumber].wave_timer = -1.f; // 초기 웨이브 끝, S_INTRO 웨이브 시작
+			}
 			break;
 		}
 		default:
@@ -737,7 +740,7 @@ void GameManager::Update()
 		}
 
 		// 이벤트 처리
-		if (monster._state == S_MONSTER_STATE::ATTACK || monster._state == S_MONSTER_STATE::ATTACK2 || monster._state == S_MONSTER_STATE::PROJECTILE_ATTACK) {
+		if (monster._state == S_MONSTER_STATE::ATTACK || monster._state == S_MONSTER_STATE::ATTACK2 || monster._state == S_MONSTER_STATE::SKILL) {
 			monster.HandleCallback(monster.mEventHandler[(int)monster._state]);
 		}
 
@@ -756,7 +759,7 @@ void GameManager::Update()
 	}
 
 	// 몬스터 웨이브 관리
-	UpdateWave();
+	if (clients[ServerNumber].size()) UpdateWave();
 
 	// 보스 스테이지 처리
 	if (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && MonsterWaves[ServerNumber].current_wave == 3) {
@@ -888,7 +891,15 @@ void GameManager::SendMakePortalPacket()
 	for (auto& [_, cl] : clients[ServerNumber]) {
 		if (cl._state != ST_INGAME) continue;
 		cl.send_make_potal_packet();
-		cout << "Send make portal packet to client " << cl._id << std::endl;
+		//cout << "Send make portal packet to client " << cl._id << std::endl;
+	}
+}
+void GameManager::SendMakeMessagePacket(uint8_t wave_type)
+{
+	for (auto& [_, cl] : clients[ServerNumber]) {
+		if (cl._state != ST_INGAME) continue;
+		cl.send_make_message_packet(wave_type);
+		//cout << "Send make massege packet to client " << cl._id << std::endl;
 	}
 }
 
@@ -938,67 +949,82 @@ void GameManager::CreateItemAtRandomPosition()
 	CreateItem(S_ENEMY_TYPE::BOSS, randomPos.x, randomPos.y);
 }
 
-void GameManager::InitializeMonsterWave()
+void GameManager::InitializeWave()
 {
-	if (Monster_cnt[ServerNumber]) {
+	// 몬스터 초기화
+	if (Monsters[ServerNumber].size()) {
 		for (auto& cl : clients[ServerNumber]) {
 			for (int i = 0; i < Monster_cnt[ServerNumber]; ++i) {
 				cl.second.send_remove_monster_packet(i);
 			}
 		}
-	}
 
-	if (Monsters[ServerNumber].size()) {
 		Monsters[ServerNumber].clear();
 		Monster_cnt[ServerNumber] = 0;
 	}
 
+	auto cur_wave = MonsterWaves[ServerNumber].current_wave++;
+
 	switch (scene_type) {
+	case S_SCENE_TYPE::LOBBY: {
+		MonsterWaves[ServerNumber].message_count = 3;
+		break;
+	}
 	case S_SCENE_TYPE::MAIN_STAGE_1: {
-		if (MonsterWaves[ServerNumber].current_wave == 0) {
+		if (cur_wave == S_mm) {
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, -5.f, 50.f));
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(55.f, -5.f, 50.f));
 		}
-		else if (MonsterWaves[ServerNumber].current_wave == 1) {
+		else if (cur_wave == S_mMm) {
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, -5.f, 50.f));
 			InitializeMonster(S_ENEMY_TYPE::GRASS_BIG, Vec3(55.5f, -5.f, 50.f));
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(60.f, -5.f, 50.f));
 		}
+		MonsterWaves[ServerNumber].message_count = 1;
 		break;
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_2: {
-		if (MonsterWaves[ServerNumber].current_wave == 0) {
+		if (cur_wave == S_mm) {
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(29.4f, 0.f, 35.6f));
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(31.33f, 0.f, 33.24f));
 		}
-		else if (MonsterWaves[ServerNumber].current_wave == 1) {
+		else if (cur_wave == S_mMm) {
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(29.4f, 0.f, 35.6f));
 			InitializeMonster(S_ENEMY_TYPE::WATER_BIG, Vec3(31.33f, 0.f, 33.24f));
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(32.3f, 0.f, 29.f));
 		}
+		MonsterWaves[ServerNumber].message_count = 1;
 		break;
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_3: {
-		if (MonsterWaves[ServerNumber].current_wave == 0) {
+		if (cur_wave == S_mm) {
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 0.f, 43.8f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(27.8f, 0.f, 43.9f));
+			MonsterWaves[ServerNumber].message_count = 1;
 		}
-		else if (MonsterWaves[ServerNumber].current_wave == 1) {
+		else if (cur_wave == S_mMm) {
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 0.f, 43.8f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_BIG, Vec3(27.8f, 0.f, 43.9f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(32.6f, 0.f, 43.65f));
+			MonsterWaves[ServerNumber].message_count = 1;
 		}
-		else if (MonsterWaves[ServerNumber].current_wave == 2) {
+		else if (cur_wave == S_BOSS) {
 			InitializeMonster(S_ENEMY_TYPE::BOSS, Vec3(22.27432f, 0.9705162f, 28.85343f));
+			MonsterWaves[ServerNumber].message_count = 2;
+		}
+		else if (cur_wave == S_OUTRO) {
+			MonsterWaves[ServerNumber].message_count = 2;
 		}
 		break;
 	}
 	}
 
-	MonsterWaves[ServerNumber].current_wave++;
+	SendMakeMessagePacket((uint8_t)cur_wave);
+
 	MonsterWaves[ServerNumber].is_end = false;
-	MonsterWaves[ServerNumber].wave_timer = SPAWN_INTERVAL;
+	MonsterWaves[ServerNumber].wave_timer = WAVE_INTERVAL;
 	MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
+	MonsterWaves[ServerNumber].message_timer = MESSAGE_INTERVAL * (float)MonsterWaves[ServerNumber].message_count;
 }
 void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 {
@@ -1082,7 +1108,7 @@ std::function<void(Monster*)> GameManager::MakeAttackEvent(Vec2 offset, float ra
 
 void GameManager::UpdateWave()
 {
-	if (scene_type < S_SCENE_TYPE::MAIN_STAGE_1 || scene_type > S_SCENE_TYPE::MAIN_STAGE_3) return;
+	if (scene_type < S_SCENE_TYPE::LOBBY || scene_type > S_SCENE_TYPE::MAIN_STAGE_3) return;
 
 	auto& wave = MonsterWaves[ServerNumber];
 
@@ -1095,30 +1121,50 @@ void GameManager::UpdateWave()
 }
 void GameManager::HandleWaveEnd(MonsterWave& wave)
 {
-	bool isFinalWave = (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && wave.current_wave == 3) || (scene_type != S_SCENE_TYPE::MAIN_STAGE_3 && wave.current_wave == 2);
+	bool isFinalWave{};
 
-	if (wave.current_wave == 2) {
-		cout << "Wave " << wave.current_wave << " is end." << endl;
+	switch (scene_type) {
+		case S_SCENE_TYPE::LOBBY: {
+			isFinalWave = (wave.current_wave == S_INTRO);
+			break;
+		}
+		case S_SCENE_TYPE::MAIN_STAGE_1:
+		case S_SCENE_TYPE::MAIN_STAGE_2: {
+			isFinalWave = (wave.current_wave == S_mMm);
+			break;
+		}
+		case S_SCENE_TYPE::MAIN_STAGE_3: {
+			isFinalWave = (wave.current_wave == S_OUTRO);
+			break;
+		}
 	}
-	if (isFinalWave) {
+
+	if (isFinalWave) { // 마지막 웨이브가 끝났으면 포탈 생성
 		if (!wave.make_potal) {
 			SendMakePortalPacket();
 			wave.make_potal = true;
 		}
 		// else if (IsAllPlayerReady()) ChangeScene();
 	}
-	else {
-		wave.wave_timer -= TICK_INTERVAL;
+	else { // 아직 마지막 웨이브가 아니면 다음 웨이브로
+		if (scene_type != S_SCENE_TYPE::LOBBY) wave.wave_timer -= TICK_INTERVAL;
 		if (wave.wave_timer <= 0.f) {
-			InitializeMonsterWave();
+			InitializeWave();
 			std::cout << wave.current_wave << " wave started." << std::endl;
 		}
 	}
 }
 void GameManager::HandleWaveInProgress(MonsterWave& wave)
 {
-	// 스폰 타이머 처리
-	if (wave.spawn_timer > 0) {
+	if (wave.message_timer > 0) { // 메시지 타이머 처리
+		wave.message_timer -= TICK_INTERVAL;
+		if (wave.message_timer <= 0.f && wave.current_wave == S_INTRO || wave.current_wave == S_OUTRO) {
+			wave.is_end = true;
+		}
+		return;
+	} 
+	// 메시지 타이머가 끝났으면
+	else if (wave.spawn_timer > 0) { // 스폰 처리
 		wave.spawn_timer -= TICK_INTERVAL;
 		if (wave.spawn_timer <= 0.f) {
 			for (auto& [_, monster] : Monsters[ServerNumber]) {
@@ -1136,14 +1182,14 @@ void GameManager::HandleWaveInProgress(MonsterWave& wave)
 		}
 	}
 }
-bool GameManager::IsAllPlayerReady()
-{
-	bool all_ready = true;
-	for (auto& cl : clients[ServerNumber]) {
-		if (cl.second._state != ST_INGAME) continue;
-		if (cl.second._player._ready_for_next_stage == false)
-			all_ready = false;
-		break;
-	}
-	return all_ready;
-}
+//bool GameManager::IsAllPlayerReady()
+//{
+//	bool all_ready = true;
+//	for (auto& cl : clients[ServerNumber]) {
+//		if (cl.second._state != ST_INGAME) continue;
+//		if (cl.second._player._ready_for_next_stage == false)
+//			all_ready = false;
+//		break;
+//	}
+//	return all_ready;
+//}

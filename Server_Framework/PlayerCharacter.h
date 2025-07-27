@@ -27,7 +27,7 @@ public:
 	array<Monster*, 3> _Monster{}; // 몬스터 타겟
 	Monster* _target = nullptr;
 
-	bool _ready_for_next_stage = false; // 다음 스테이지 준비 완료 여부
+	//bool _ready_for_next_stage = false; // 다음 스테이지 준비 완료 여부
 
 	float _data = 0.0f; // 애니메이션 데이터
 

@@ -210,3 +210,21 @@ void SESSION::send_boss_target_lock_packet()
 	p.size = sizeof(p);
 	do_send(&p);
 }
+
+void SESSION::send_make_message_packet(uint8_t w)
+{
+	SC_MAKE_MESSAGE_PACKET p;
+	p.type = SC_MAKE_MESSAGE;
+	p.size = sizeof(p);
+	p.wave_type = w;
+	do_send(&p);
+}
+
+void SESSION::send_logout_packet(int id)
+{
+	SC_LOGOUT_PACKET p;
+	p.type = SC_LOGOUT;
+	p.size = sizeof(p);
+	p.id = id;
+	do_send(&p);
+}
