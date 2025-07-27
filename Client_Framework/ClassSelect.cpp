@@ -62,6 +62,8 @@ void CClassSelectUI::Start()
 			Vec3 rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
 			Vec3 scale = mClassCharacters[classType]->GetTransform()->GetLocalScale();
 
+			mSelectedClasses.push_back((PLAYER_CLASS)classType);
+
 
 			std::cout << "Selected class: " << classType << endl;
 
@@ -105,7 +107,6 @@ void CClassSelectUI::Start()
 		Vec3 rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
 		Vec3 scale = mClassCharacters[classType]->GetTransform()->GetLocalScale();
 
-
 		short playerId = std::any_cast<short>(any[1]);
 		std::shared_ptr<CGameObject> playerObj{};
 		if (playerId == INSTANCE(ServerManager).clientID) {
@@ -115,7 +116,7 @@ void CClassSelectUI::Start()
 			playerObj = otherPlayers[playerId];
 			mSelectedClasses.push_back((PLAYER_CLASS)classType);
 		}
-		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(player->GetStateMachine());
+		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(playerObj->GetStateMachine());
 
 		std::cout << "Selected class: " << classType << endl;
 

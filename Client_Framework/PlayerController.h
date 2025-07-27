@@ -33,6 +33,9 @@ private:
 	bool mCastingSkill = false;
 	float mMaxAttackRange = 9.0f;
 
+	float mUltimateSkillCooldown = 0.0f;
+	float mUltimateSkillCooldownTime = 5.0f;
+
 public:
 	CPlayerController() : CComponent() {};
 	CPlayerController(const CPlayerController& other) : CComponent(other) {}

@@ -140,6 +140,16 @@ void CPlayerHUD::InitializePlayerHUD()
             {
                 iconRenderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
                 iconRenderer->SetTexture("Ultimate_Icon_" + classNames[(UINT8)playerClass]);
+				auto& uiData = iconRenderer->GetUIData();
+                uiData.intData0 = 2;
+
+                mainPlayer->AddEvent("OnUltimateSkillCooldown", [iconRenderer](const std::vector<std::any>& args) {
+                    if (args.size() < 1) return;
+					float ultimateTimeRatio = std::any_cast<float>(args[0]);
+                    auto& uiData = iconRenderer->GetUIData();
+                    uiData.intData0 = 2;
+					uiData.floatData0 = ultimateTimeRatio;
+					});
             }
         }
     }

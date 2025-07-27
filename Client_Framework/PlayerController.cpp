@@ -47,6 +47,7 @@ void CPlayerController::Start()
 		controller->AddAnimationEvent("Attack", "Attack", func);
 		controller->AddAnimationEvent("RunAttack", "Attack", func);
 	}
+	mUltimateSkillCooldown = mUltimateSkillCooldownTime;
 }
 
 void CPlayerController::Update()
@@ -62,6 +63,13 @@ void CPlayerController::Update()
 		LockOnTarget();
 		InteractWithItem();
 		OnKeyEvents();
+
+		PLAYER_STATE currentState = (PLAYER_STATE)mStateMachine->GetState();
+		if (currentState != PLAYER_STATE::ULTIMATE) {
+			mUltimateSkillCooldown -= DELTA_TIME;
+			mUltimateSkillCooldown = std::max<float>(mUltimateSkillCooldown, 0.f);
+		}
+		owner->TriggerEvent("OnUltimateSkillCooldown", { 1 - (mUltimateSkillCooldown / mUltimateSkillCooldownTime) });
 		break;
 	case CPlayerController::ControllMode::ClassSelection:
 		break;
@@ -78,6 +86,8 @@ void CPlayerController::Update()
 		if(mControllMode == ControllMode::FreeLook)
 			ChangeControllMode(ControllMode::LockOn);
 	}
+
+
 }
 
 void CPlayerController::LockOnTarget()
@@ -282,8 +292,10 @@ void CPlayerController::OnKeyEvents()
 			}
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
+			if (mUltimateSkillCooldown > 0.f) return;
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
+			mUltimateSkillCooldown = mUltimateSkillCooldownTime;
 			return;
 		}
 
@@ -356,9 +368,11 @@ void CPlayerController::OnKeyEvents()
 			}
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
+			if (mUltimateSkillCooldown > 0.f) return;
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
+			mUltimateSkillCooldown = mUltimateSkillCooldownTime;
 			//mStateMachine->ActivateShield(false);
 			return;
 		}
@@ -442,4 +456,5 @@ void CPlayerController::CastingSkill()
 		}
 		break;
 	}
+	SetSkill(ITEM_TYPE::item_end);
 }
