@@ -1131,7 +1131,6 @@ void GameManager::InitializeWave()
 
 	MonsterWaves[ServerNumber].is_end = false;
 	MonsterWaves[ServerNumber].wave_timer = WAVE_INTERVAL;
-	MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
 	MonsterWaves[ServerNumber].message_timer = MESSAGE_INTERVAL * (float)MonsterWaves[ServerNumber].message_count;
 }
 void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
@@ -1181,7 +1180,10 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 	Monsters[ServerNumber][monster_id] = ms;
 
 	for (auto& [id, cl] : clients[ServerNumber]) {
-		if (cl._state != ST_INGAME) continue;
+		if (cl._state != ST_INGAME) {
+			cout << "엥" << endl;
+			continue;
+		}
 
 		cl._player._target = nullptr;
 		cl._player._Monster[monster_id] = &Monsters[ServerNumber][monster_id];
@@ -1271,14 +1273,12 @@ void GameManager::HandleWaveInProgress(MonsterWave& wave)
 		}
 		return;
 	}
-	// 메시지 타이머가 끝났으면
-	else if (wave.spawn_timer > 0) { // 스폰 처리
-		wave.spawn_timer -= TICK_INTERVAL;
-		if (wave.spawn_timer <= 0.f) {
-			for (auto& [_, monster] : Monsters[ServerNumber]) {
-				monster.SetState(S_MONSTER_STATE::SPAWN);
-			}
+	// 메시지 타이머가 끝났으면 스폰 처리
+	else if (not wave.is_spawn) {
+		for (auto& [_, monster] : Monsters[ServerNumber]) {
+			monster.SetState(S_MONSTER_STATE::SPAWN);
 		}
+		wave.is_spawn = true;
 	}
 
 	// 웨이브 종료 조건 확인
