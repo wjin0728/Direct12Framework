@@ -1062,7 +1062,7 @@ void GameManager::InitializeWave()
 		Monster_cnt[ServerNumber] = 0;
 	}
 
-	auto cur_wave = MonsterWaves[ServerNumber].current_wave++;
+	auto cur_wave = ++MonsterWaves[ServerNumber].current_wave;
 
 	switch (scene_type) {
 	case S_SCENE_TYPE::LOBBY: {

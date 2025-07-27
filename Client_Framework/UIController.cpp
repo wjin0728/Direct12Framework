@@ -269,7 +269,7 @@ void CPlayerHUD::InitializePlayerHUD()
                 renderer->SetAlpha(0.0f);
             }
             introUI->SetActive(true);
-            mentDisplay->StartDisplay(6.f, 1.5f, 0.6f);
+            mentDisplay->StartDisplay(4.5f, 1.f, 0.5f);
             });
     }
 

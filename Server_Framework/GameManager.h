@@ -185,33 +185,6 @@ public:
 	void HandleWaveInProgress(MonsterWave& wave);
 	//bool IsAllPlayerReady(); // 모든 플레이어가 다음 스테이지 준비 상태인지 확인
 
-	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
-		{ S_ENEMY_TYPE::GRASS_SMALL, {
-			{ {0.2f, 0.9f}, 2.f, M_SMALL_DAMAGE },
-			{ {0.f, 0.7f}, 0.8f, M_SMALL_DAMAGE },
-		}},
-		{ S_ENEMY_TYPE::GRASS_BIG, {
-			{ {0.f, 2.85f}, 1.f, M_BIG_DAMAGE },
-			{ {1.25f, 1.25f}, 2.f, M_BIG_DAMAGE },
-		}},
-		{ S_ENEMY_TYPE::WATER_SMALL, {
-			{ {0.f, 1.f}, 1.f, M_SMALL_DAMAGE },
-			{ {0.f, 1.7f}, 0.85f, M_SMALL_DAMAGE },
-		}},
-		{ S_ENEMY_TYPE::WATER_BIG, {
-			{ {0.f, 2.5f}, 1.9f, M_BIG_DAMAGE },
-			{ {0.f, 0.f}, 2.5f, M_BIG_DAMAGE },
-		}},
-		{ S_ENEMY_TYPE::FIRE_SMALL, {
-			{ {0.f, 2.f}, 0.75f, M_SMALL_DAMAGE },
-			{ {0.f, 0.8f}, 1.1f, M_SMALL_DAMAGE },
-		}},
-		{ S_ENEMY_TYPE::FIRE_BIG, {
-			{ {0.8f, 1.15f}, 1.5f, M_BIG_DAMAGE },
-			{ {0.f, 2.3f}, 1.f, M_BIG_DAMAGE },
-		}}
-	};
-
 private:
 	void Update();
 
@@ -233,4 +206,31 @@ private:
 		}*/
 		return !IsClassOK((S_PLAYER_CLASS)2);
 	}
+
+	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
+	{ S_ENEMY_TYPE::GRASS_SMALL, {
+		{ {0.2f, 0.9f}, 2.f, M_SMALL_DAMAGE },
+		{ {0.f, 0.7f}, 0.8f, M_SMALL_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::GRASS_BIG, {
+		{ {0.f, 2.85f}, 1.f, M_BIG_DAMAGE },
+		{ {1.25f, 1.25f}, 2.f, M_BIG_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::WATER_SMALL, {
+		{ {0.f, 1.f}, 1.f, M_SMALL_DAMAGE },
+		{ {0.f, 1.7f}, 0.85f, M_SMALL_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::WATER_BIG, {
+		{ {0.f, 2.5f}, 1.9f, M_BIG_DAMAGE },
+		{ {0.f, 0.f}, 2.5f, M_BIG_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::FIRE_SMALL, {
+		{ {0.f, 2.f}, 0.75f, M_SMALL_DAMAGE },
+		{ {0.f, 0.8f}, 1.1f, M_SMALL_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::FIRE_BIG, {
+		{ {0.8f, 1.15f}, 1.5f, M_BIG_DAMAGE },
+		{ {0.f, 2.3f}, 1.f, M_BIG_DAMAGE },
+	}}
+	};
 };

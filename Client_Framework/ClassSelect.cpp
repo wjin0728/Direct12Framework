@@ -272,7 +272,7 @@ void CClassSelectUI::InitializeWaitingRoomUI()
 		}
 		std::weak_ptr<CGameObject> introUIWeak = introUI;
 		sm.AddEvent("ShowMent", [introUIWeak](std::vector<std::any> any) {
-			if (!introUIWeak.expired()) return;
+			if (introUIWeak.expired()) return;
 			auto introUI = introUIWeak.lock();
 			if (!introUI) return;
 			if (any.size() < 1) return;
@@ -282,7 +282,7 @@ void CClassSelectUI::InitializeWaitingRoomUI()
 			}
 			introUI->SetActive(true);
 
-			introUI->GetComponent<CMentDisplay>()->StartDisplay(6.f, 1.5f, 0.6f);
+			introUI->GetComponent<CMentDisplay>()->StartDisplay(4.5f, 1.f, 0.5f);
 			});
 	}
 

@@ -60,10 +60,8 @@ public:
 		}
 	};
 	int PlayerMaxHp() {
-		if (S_PLAYER_CLASS::FIGHTER == _class)
-			return (_class == S_PLAYER_CLASS::FIGHTER)
-			? MAX_HP_FIGHTER : MAX_HP_ARCHER_MAGE;
-	};
+		return (_class == S_PLAYER_CLASS::FIGHTER) ? MAX_HP_FIGHTER : MAX_HP_ARCHER_MAGE;
+	}
 
 	void SetLookDir(float x, float y, float z) { _look_dir = Vec3(x, y, z); };
 	void SetLookDir(Vec3 dir) { _look_dir = dir; };
