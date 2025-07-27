@@ -32,7 +32,6 @@ constexpr char CS_SELECT_CLASS = 12;
 constexpr char CS_CLICK_BUTTON = 13;
 constexpr char CS_HP = 14;
 constexpr char CS_READY_FOR_NEXT_STAGE = 15;
-constexpr char CS_CLICK_BUTTON = 12;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_LOGIN_FAIL = 3;

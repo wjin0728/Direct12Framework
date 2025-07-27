@@ -78,8 +78,8 @@ GameManager::GameManager()
 			break;
 	}
 
-	for (int i = (int)S_SCENE_TYPE::MAINSTAGE1; i < (int)S_SCENE_TYPE::END; i++) {
-		std::ifstream battleSpawnData("..\\Resources\\Scenes\\Battle" + std::to_string(i - (int)S_SCENE_TYPE::MAINSTAGE1 + 1) + "SpawnData.bin", std::ios::binary);
+	for (int i = (int)S_SCENE_TYPE::MAIN_STAGE_1; i < (int)S_SCENE_TYPE::END; i++) {
+		std::ifstream battleSpawnData("..\\Resources\\Scenes\\Battle" + std::to_string(i - (int)S_SCENE_TYPE::MAIN_STAGE_1 + 1) + "SpawnData.bin", std::ios::binary);
 		std::string token;
 		while (1) {
 			BinaryReader::ReadDateFromFile(battleSpawnData, token);

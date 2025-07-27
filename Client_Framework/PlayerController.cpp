@@ -60,6 +60,7 @@ void CPlayerController::Update()
 	case CPlayerController::ControllMode::FreeLook:
 		break;
 	case CPlayerController::ControllMode::LockOn:
+	{
 		LockOnTarget();
 		InteractWithItem();
 		OnKeyEvents();
@@ -70,6 +71,7 @@ void CPlayerController::Update()
 			mUltimateSkillCooldown = std::max<float>(mUltimateSkillCooldown, 0.f);
 		}
 		owner->TriggerEvent("OnUltimateSkillCooldown", { 1 - (mUltimateSkillCooldown / mUltimateSkillCooldownTime) });
+	}
 		break;
 	case CPlayerController::ControllMode::ClassSelection:
 		break;

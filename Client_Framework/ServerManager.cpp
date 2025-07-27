@@ -715,9 +715,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
 		Connect(PORT_NUM);
 
-		// 여기 clientID는 선택 직업 자리임
-		// 근데 직업 선택하는거 넣으면 여기는 아예 뺄 것
-		send_cs_game_server_login_packet(clientID);
+		send_cs_game_server_login_packet();
 
 		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
 		break;
