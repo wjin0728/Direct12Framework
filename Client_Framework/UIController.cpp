@@ -22,6 +22,7 @@
 #include"ParticleAttach.h"
 #include"HealthSystem.h"
 #include"Button.h"
+#include"MentDisplay.h"
 
 CPlayerHUD::CPlayerHUD(const CPlayerHUD& other)
 {
@@ -231,7 +232,14 @@ void CPlayerHUD::InitializePlayerHUD()
         }
     }
 
+    if (auto introUI = owner->FindChildByName("IntroUI")) {
+        if (auto renderer = introUI->GetComponent<CUIRenderer>())
+        {
+            renderer->SetAlpha(0.0f);
 
+        }
+
+    }
 
 
 

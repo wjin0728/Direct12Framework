@@ -17,6 +17,7 @@
 #include"ServerManager.h"
 #include "ObjectState.h"
 #include "ThirdPersonCamera.h"
+#include "MentDisplay.h"
 
 
 CClassSelectUI::CClassSelectUI()
@@ -206,18 +207,22 @@ void CClassSelectUI::ChangeMenuState(EMenuState newState)
     case EMenuState::WaitingRoom:
 		mClassSelectUI->SetActive(false);
 		mWaitingRoomUI->SetActive(true);
-		for (int i = 0; i < mSelectedClasses.size();i++) {
-			std::string playerName = "Player" + std::to_string(mSelectedClasses.size());
-			if (auto player1 = owner->GetChildComponent<CUIRenderer>(playerName)) {
-				auto& serverManager = INSTANCE(ServerManager);
-				std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
-				if (player1) {
-					player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-					player1->SetTexture("Player_" + classNames[i] + "_Normal");
+		{
+			for (int i = 0; i < mSelectedClasses.size(); i++) {
+				std::string playerName = "Player" + std::to_string(mSelectedClasses.size());
+				if (auto player1 = owner->GetChildComponent<CUIRenderer>(playerName)) {
+					auto& serverManager = INSTANCE(ServerManager);
+					std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
+					if (player1) {
+						player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+						player1->SetTexture("Player_" + classNames[i] + "_Normal");
+					}
 				}
 			}
+			auto introUI = mWaitingRoomUI->FindChildByName("IntroUI");
+			introUI->SetActive(false);
+			break;
 		}
-        break;
     default:
         break;
     }
@@ -248,32 +253,30 @@ void CClassSelectUI::InitializeSettingsUI()
 
 void CClassSelectUI::InitializeWaitingRoomUI()
 {
-	if (auto player1 = owner->GetChildComponent<CUIRenderer>("Player1")) {
-		auto& serverManager = INSTANCE(ServerManager);
-		serverManager.AddEvent("Player1Joined", [player1](std::vector<std::any> any) {
-			std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
+	
+	if (auto introUI = mWaitingRoomUI->FindChildByName("IntroUI")) {
+		if(auto renderer = introUI->GetComponent<CUIRenderer>())
+		{
+			renderer->SetAlpha(0.0f);
+
+		}
+		auto ment = introUI->AddComponent<CMentDisplay>();
+		for(int i = 0; i < 3; i++) {
+			std::string texName = "intro" + std::to_string(i + 1);
+			ment->AddTexture(texName);
+		}
+		auto& sm = INSTANCE(ServerManager);
+		sm.AddEvent("ShowMent", [introUI](std::vector<std::any> any) {
 			if (any.size() < 1) return;
-			int playerClass = std::any_cast<int>(any[0]);
-			if (player1) {
-				player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-				player1->SetTexture("Player_" + classNames[playerClass] + "_Normal");
+			int index = std::any_cast<int>(any[0]);
+			if (auto renderer = introUI->GetComponent<CUIRenderer>()) {
+				renderer->SetAlpha(1.0f);
 			}
-			}
-		);
+			introUI->SetActive(true);
+			introUI->GetComponent<CMentDisplay>()->StartDisplay(4.f, 1.f, 0.5f);
+			});
 	}
-	if (auto player2 = owner->GetChildComponent<CUIRenderer>("Player2")) {
-		auto& serverManager = INSTANCE(ServerManager);
-		serverManager.AddEvent("Player2Joined", [player2](std::vector<std::any> any) {
-			std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
-			if (any.size() < 1) return;
-			int playerClass = std::any_cast<int>(any[0]);
-			if (player2) {
-				player2->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-				player2->SetTexture("Player_" + classNames[playerClass] + "_Normal");
-			}
-			}
-		);
-	}
+
 }
 
 

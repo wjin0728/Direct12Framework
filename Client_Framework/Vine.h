@@ -17,6 +17,9 @@ private:
 	float mMinPosY = 0.0f;
 	float mMaxPosY = 0.0f;
 
+	float mMinRotationY = 0.0f;
+	float mMaxRotationY = 0.0f;
+
 	Vec3 mMinScale = Vec3::Zero;
 	Vec3 mMaxScale = Vec3::Zero;
 

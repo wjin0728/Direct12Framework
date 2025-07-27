@@ -14,6 +14,7 @@ public:
 	float mDisplayTime = 0.0f;
 	float mTime = 0.0f;
 	float mFadeTime = 0.0f;
+	float mWaitTime = 0.0f;
 	int mCurrentTextureIndex = 0;
 
 public:
@@ -29,6 +30,15 @@ public:
 	virtual void LateUpdate() override;
 
     void AddTexture(const std::string& Name);
+    void StartDisplay(float DisplayTime, float FadeTime, float WaitTime = 0.0f)
+    {
+        mDisplayTime = DisplayTime;
+        mFadeTime = FadeTime;
+        mWaitTime = WaitTime;
+        mCurrentTextureIndex = 0;
+        mTime = 0.0f;
+        mAlpha = 0.0f;
+	}
 
 };
 
