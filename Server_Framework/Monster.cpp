@@ -77,6 +77,10 @@ void Monster::SetBossState(S_MONSTER_STATE newState)
 		SetState(&MonsterState::BossAttackState::GetInstance());
 		_state = S_MONSTER_STATE::ATTACK;
 		break;
+	case S_MONSTER_STATE::SKILL:
+		SetState(&MonsterState::BossAttackState::GetInstance());
+		_state = S_MONSTER_STATE::SKILL;
+		break;
 	case S_MONSTER_STATE::GETHIT:
 		SetState(&MonsterState::BossHitState::GetInstance());
 		_state = S_MONSTER_STATE::GETHIT;

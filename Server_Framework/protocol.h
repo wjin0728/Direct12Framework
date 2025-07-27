@@ -16,7 +16,7 @@ constexpr int WATER_HEAL_AMT = 300;
 constexpr int WATER_SHIELD_AMT = 2;
 
 constexpr float SPAWN_INTERVAL = 3.f; // 몬스터 스폰 간격 (초 단위)
-constexpr float WAVE_INTERVAL = 1.f; // 웨이브 시작 대기 간격 (초 단위)
+constexpr float WAVE_INTERVAL = 0.5f; // 웨이브 시작 대기 간격 (초 단위)
 constexpr float MESSAGE_INTERVAL = 5.f; // 메시지 출력 간격 (초 단위)
 
 constexpr int P_FIRE_EXPLOSION_DAMAGE = 15;

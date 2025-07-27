@@ -60,7 +60,7 @@ MonsterState::AttackState& MonsterState::AttackState::GetInstance() { static Mon
 void MonsterState::AttackState::Enter(Monster* monster) {
 	//cout << "BasicAttackState Entered!" << endl;
 
-	if (rand() % 2 == 0) {
+	if (rand() % 2) {
 		attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK].mLength;
 	}
 	else {
@@ -240,7 +240,6 @@ void MonsterState::BossTargetingState::Enter(Monster* monster) {
 }
 
 void MonsterState::BossTargetingState::Update(Monster* monster) {
-	static int pattern_cnt = 0; // 패턴 cnt
 	if (targetingTimer > 0) {
 		monster->UpdateTarget();
 		targetingTimer -= TICK_INTERVAL;
@@ -251,16 +250,19 @@ void MonsterState::BossTargetingState::Update(Monster* monster) {
 	else {
 		targetingDelay -= TICK_INTERVAL; // 타겟팅 딜레이 감소
 		if (targetingDelay <= 0) {
-			if (pattern_cnt % 3 == 2)
-				monster->SetState(&MonsterState::BossSkillState::GetInstance());
-			else
-				monster->SetState(&MonsterState::BossAttackState::GetInstance());
-			pattern_cnt++;
+			if (pattern_cnt == 2) {
+				monster->SetState(S_MONSTER_STATE::SKILL);
+				pattern_cnt = 0;
+			}
+			else {
+				monster->SetState(S_MONSTER_STATE::ATTACK);
+			}
 		}
 	}
 }
 
 void MonsterState::BossTargetingState::Exit(Monster* monster) {
+	pattern_cnt++;
 }
 
 
@@ -303,7 +305,9 @@ void MonsterState::BossAttackState::Exit(Monster* monster) {
 MonsterState::BossSkillState& MonsterState::BossSkillState::GetInstance() { static MonsterState::BossSkillState instance; return instance; }
 
 void MonsterState::BossSkillState::Enter(Monster* monster) {
-	skillTimer = 2.0f; // 스킬 지속 시간 지정해주기
+	skillTimer = monster->_animations[(int)S_MONSTER_STATE::SKILL].mLength;
+	sendSkill = false;
+
 	switch (rand() % 3)
 	{
 	case 0: { // 덩쿨 
@@ -320,7 +324,6 @@ void MonsterState::BossSkillState::Enter(Monster* monster) {
 				hit_client_id.emplace_back(player->_id); // 히트된 클라이언트 ID 저장
 			}
 		}
-		SetSendSkill(true); // 스킬 패킷 전송 플래그 설정
 		break;
 	}
 	case 1: { // 폭발
@@ -337,13 +340,11 @@ void MonsterState::BossSkillState::Enter(Monster* monster) {
 				hit_client_id.emplace_back(player->_id); // 히트된 클라이언트 ID 저장
 			}
 		}
-		SetSendSkill(true); // 스킬 패킷 전송 플래그 설정
 		break;
 	}
 	case 2: { // 힐
 		monster->_hp += 30; // 보스 HP 증가
 		SetSkillType(S_WATER_HEAL);
-		SetSendSkill(true); // 스킬 패킷 전송 플래그 설정
 		break;
 	}
 	default:

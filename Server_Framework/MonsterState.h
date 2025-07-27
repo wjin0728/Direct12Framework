@@ -146,6 +146,7 @@ namespace MonsterState
         float targetingDelay = 0.0f; // 타겟팅 딜레이 시간
         bool sendTarget = false;
         bool sendTargetLock = false;
+        int pattern_cnt = 0;
     };
 
     // BasicAttack 상태
