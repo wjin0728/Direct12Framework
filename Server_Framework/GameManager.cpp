@@ -322,7 +322,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 		CS_SKILL_TARGET_PACKET* p = reinterpret_cast<CS_SKILL_TARGET_PACKET*>(packet);
 		Vec3 pos = Monsters[ServerNumber][p->target_id]._pos;
 		
-
 		if (S_FIRE_EXPLOSION == p->skill_enum) {
 			pos.y += 1.5f;
 			BoundingSphere sphere(pos, 0.7f);
@@ -390,7 +389,81 @@ void GameManager::Process_packet(int c_id, char* packet)
 		break;
 	}
 	case CS_ULTIMATE_SKILL: {
-		CS_ULTIMATE_SKILL_PACKET* p = reinterpret_cast<CS_ULTIMATE_SKILL_PACKET*>(packet);
+		auto& player = clients[ServerNumber][c_id]._player;
+		if (!player._target || player._target->IsUnavailable()) break; // 타겟 몬스터가 없는 경우
+
+		switch (player._class)
+		{
+		case S_PLAYER_CLASS::FIGHTER: {
+			break;
+		}
+		case S_PLAYER_CLASS::ARCHER: {
+			cout << "Archer CS_ULTIMATE_SKILL\n";
+			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
+			proj._pos = player._pos;
+			proj._pos.y += 2.5f;
+
+			Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 1.f, 0.f };
+			Vec3 direction = target_pos - proj._pos;
+
+			direction.Normalize();
+			proj._velocity = direction / 3.f;
+
+			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+			SendAddProjectilePacket(proj, Projectile_cnt[ServerNumber]);
+			Projectile_cnt[ServerNumber]++;
+			break;
+		}
+		case S_PLAYER_CLASS::MAGE: {
+			cout << "Mage CS_ULTIMATE_SKILL\n";
+
+			const int num_projectiles = 5;
+			const float radius = 1.0f; // 오각형 반지름
+			const float height_offset = 1.f;
+
+			// 플레이어 위치 기준으로 시작
+			Vec3 center = player._pos;
+			center.y += height_offset;
+
+			// 플레이어의 바라보는 방향에 수직인 벡터 계산 (오각형을 회전시키기 위해)
+			Vec3 up{ 0.f, 1.f, 0.f };
+			Vec3 right = up.Cross(player._look_dir);
+			right.Normalize();
+
+			// 오각형 꼭짓점 각도
+			float angle_offset = XM_2PI / num_projectiles;
+
+			// 각 투사체 생성
+			for (int i = 0; i < num_projectiles; ++i) {
+				float angle = angle_offset * i;
+
+				// 로컬 공간에서의 오각형 점 위치
+				float local_x = cosf(angle) * radius;
+				float local_y = sinf(angle) * radius;
+
+				// 3D 공간에서의 투사체 위치 계산
+				Vec3 offset = right * local_x + up * local_y;
+				Vec3 spawn_pos = center + offset;
+
+				// 투사체 방향: 오각형 중심(플레이어 앞쪽)으로 날아가게
+				Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 1.f, 0.f };
+				Vec3 direction = target_pos - spawn_pos;
+				direction.Normalize();
+
+				Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
+				proj._pos = spawn_pos;
+				proj._velocity = direction / 3.f;
+
+				Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+				SendAddProjectilePacket(proj, Projectile_cnt[ServerNumber]);
+				Projectile_cnt[ServerNumber]++;
+				break;
+			}
+		}
+		default:
+			break;
+		}
+
 		break;
 	}
 	case CS_000: {
@@ -491,7 +564,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			cout << "Archer CS_ATTACK\n";
 			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
 			proj._pos = player._pos;
-			proj._pos.y += 0.6f;
+			proj._pos.y += 0.3f;
 
 			if (player._target == nullptr) { // 타겟 몬스터가 제거된 경우
 				direction.x = sin(player._look_dir.y * degToRad); // 1.0
@@ -499,18 +572,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 				direction.z = cos(player._look_dir.y * degToRad); // 0.0
 			}
 			else if (not player._target->IsUnavailable()) { // 타겟 몬스터가 있고 유효한 경우
-				Vec3 target_pos = Vec3{ player._target->_pos.x, player._target->_pos.y + 1.f, player._target->_pos.z };
+				Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 1.f, 0.f };
 				direction = target_pos - proj._pos;
 			}
 
 			direction.Normalize();
 			proj._velocity = direction / 3.f;
-			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
-			
-			for (auto& cl : clients[ServerNumber]) {
-				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
-			}
 
+			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
+			SendAddProjectilePacket(proj, Projectile_cnt[ServerNumber]);
 			Projectile_cnt[ServerNumber]++;
 			break;
 		}
@@ -518,7 +588,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
 
 			proj._pos = player._pos;
-			proj._pos.y += 0.5f;
+			proj._pos.y += 0.3f;
 
 			if (player._target == nullptr) { // 타겟 몬스터가 제거된 경우
 				direction.x = sin(player._look_dir.y * degToRad); // 1.0
@@ -526,18 +596,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 				direction.z = cos(player._look_dir.y * degToRad); // 0.0
 			}
 			else if (not player._target->IsUnavailable()) { // 타겟 몬스터가 있고 유효한 경우
-				Vec3 target_pos = Vec3{ player._target->_pos.x, player._target->_pos.y + 1.f, player._target->_pos.z };
+				Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 1.f, 0.f };
 				direction = target_pos - proj._pos;
 			}
 
 			direction.Normalize();
-			proj._velocity = direction / 4.f;
+			proj._velocity = direction / 3.f;
+
 			Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
-
-			for (auto& cl : clients[ServerNumber]) {
-				cl.second.send_add_projectile_packet(proj, Projectile_cnt[ServerNumber]);
-			}
-
+			SendAddProjectilePacket(proj, Projectile_cnt[ServerNumber]);
 			Projectile_cnt[ServerNumber]++;
 			break;
 		}
@@ -902,6 +969,13 @@ void GameManager::SendMakeMessagePacket(uint8_t wave_type)
 		//cout << "Send make massege packet to client " << cl._id << std::endl;
 	}
 }
+void GameManager::SendAddProjectilePacket(Projectile& proj, int proj_id) {
+	for (auto& [_, cl] : clients[ServerNumber]) {
+		if (cl._state != ST_INGAME) continue;
+		cl.send_add_projectile_packet(proj, proj_id);
+		//cout << "Send add projectile packet to client " << cl._id << std::endl;
+	}
+}
 
 void GameManager::CreateItem(S_ENEMY_TYPE monster_type, float x, float z)
 {
@@ -1150,7 +1224,7 @@ void GameManager::HandleWaveEnd(MonsterWave& wave)
 		if (scene_type != S_SCENE_TYPE::LOBBY) wave.wave_timer -= TICK_INTERVAL;
 		if (wave.wave_timer <= 0.f) {
 			InitializeWave();
-			std::cout << wave.current_wave << " wave started." << std::endl;
+			std::cout << wave.current_wave + 1 << " wave started." << std::endl;
 		}
 	}
 }
@@ -1162,7 +1236,7 @@ void GameManager::HandleWaveInProgress(MonsterWave& wave)
 			wave.is_end = true;
 		}
 		return;
-	} 
+	}
 	// 메시지 타이머가 끝났으면
 	else if (wave.spawn_timer > 0) { // 스폰 처리
 		wave.spawn_timer -= TICK_INTERVAL;

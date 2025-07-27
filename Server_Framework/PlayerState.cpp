@@ -193,10 +193,29 @@ void PlayerState::UltimateState::Enter(PlayerCharacter* player) {
     ultimateTimer = 0.f;
     player->_data = 0.f;
     player->SetVelocity(0, 0, 0); // 스킬 중 이동 멈춤
+    player->SetTarget();
+
+    if (player->_target) {
+        Vec3 direction = player->_target->_pos - player->_pos;
+        direction.y = 0.f;
+        direction.Normalize();
+
+        Quaternion targetRot = Quaternion::LookRotation(direction);
+        Vec3 angle = Vec3::GetAngleToQuaternion(targetRot) * radToDeg;
+
+        player->_rotation = targetRot;
+        player->SetLookDir(angle);
+
+        if (player->_class == S_PLAYER_CLASS::FIGHTER) {
+            startPos = player->_pos;
+            targetPos = player->_target->_pos;
+        }
+    }
 }
 
 void PlayerState::UltimateState::Update(PlayerCharacter* player) {
     player->SetVelocity(0, 0, 0); // 속도 0으로 설정
+
     if (player->_class == S_PLAYER_CLASS::FIGHTER) {
         ultimateTimer += TICK_INTERVAL;
 
@@ -205,6 +224,7 @@ void PlayerState::UltimateState::Update(PlayerCharacter* player) {
         float mid = 1.9;
         float end = 2.1;
         float maxHeight = 2.f;
+		float moveDuration = end - start;
 
         if (start <= ultimateTimer && ultimateTimer < peak)
             player->_data = -50.f * (ultimateTimer - peak) * (ultimateTimer - peak) + maxHeight;
@@ -212,6 +232,16 @@ void PlayerState::UltimateState::Update(PlayerCharacter* player) {
             player->_data = maxHeight;
         else if (mid <= ultimateTimer && ultimateTimer <= end)
             player->_data = -50.f * (ultimateTimer - mid) * (ultimateTimer - mid) + maxHeight;
+    
+        // 이동 진행
+        if (start <= ultimateTimer && ultimateTimer < end) {
+            float t = (ultimateTimer - start) / moveDuration;
+            t = std::clamp(t, 0.f, 1.f);
+
+            Vec3 flatMove = Vec3::Lerp(startPos, targetPos, t);
+            player->_pos.x = flatMove.x;
+            player->_pos.z = flatMove.z;
+        }
     }
 }
 

@@ -142,7 +142,7 @@ bool PlayerCharacter::IsMonsterInRange(Monster* target) const
 {
     if (target == nullptr) return false; // 타겟이 없으면 false
     float distance = (_pos - target->_pos).LengthSquared();
-    if (distance < pow(8.f, 2)) return true;
+    if (distance < pow(9.f, 2)) return true;
     return false;
 }
 

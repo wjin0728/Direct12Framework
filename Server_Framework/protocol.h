@@ -118,8 +118,6 @@ struct CS_SKILL_NONTARGET_PACKET : PACKET {
 
 struct CS_ULTIMATE_SKILL_PACKET : PACKET {
 	short 			id;
-	uint8_t			skill_enum;
-	short 			target_id;
 };
 
 
