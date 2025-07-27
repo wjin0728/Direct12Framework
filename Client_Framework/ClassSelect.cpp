@@ -132,7 +132,6 @@ void CClassSelectUI::Start()
 				}
 			}
 		}
-		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(playerObj->GetStateMachine());
 
 		std::cout << "Selected class: " << classType << endl;
 

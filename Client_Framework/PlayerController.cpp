@@ -188,7 +188,6 @@ void CPlayerController::ChangeControllMode(ControllMode mode)
 	switch (mControllMode)
 	{
 	case CPlayerController::ControllMode::None:
-
 		break;
 	case CPlayerController::ControllMode::FreeLook:
 		break;
