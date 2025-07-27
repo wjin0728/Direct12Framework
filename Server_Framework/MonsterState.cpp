@@ -309,7 +309,6 @@ MonsterState::BossSkillState& MonsterState::BossSkillState::GetInstance() { stat
 
 void MonsterState::BossSkillState::Enter(Monster* monster) {
 	skillTimer = monster->_animations[(int)S_MONSTER_STATE::SKILL].mLength;
-	sendSkill = false;
 
 	switch (rand() % 3)
 	{
@@ -353,13 +352,13 @@ void MonsterState::BossSkillState::Enter(Monster* monster) {
 	default:
 		break;
 	}
+
+	sendSkill = true;
 }
 
 void MonsterState::BossSkillState::Update(Monster* monster) {
-	skillTimer -= TICK_INTERVAL;
-	if (skillTimer <= 0) {
-		monster->SetState(S_MONSTER_STATE::IDLE);
-	}
+	if (!sendSkill)
+		monster->SetState(S_MONSTER_STATE::IDLE); // 스킬 사용 후 상태를 IDLE로 변경
 }
 
 void MonsterState::BossSkillState::Exit(Monster* monster) {
