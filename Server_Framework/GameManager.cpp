@@ -639,14 +639,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 				cl.second.send_add_player_packet(&clients[ServerNumber][c_id]);
 				//cout << "클라 " << c_id << "의 정보 " << cl.first << "에게 전송 완료" << endl;
 			}
-			// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
-			for (auto& cl : clients[ServerNumber]) {
-				if (cl.second._state != ST_INGAME) continue;
-				if (cl.first == c_id) continue;
-				if (cl.second._player._class == S_PLAYER_CLASS::end) continue; // 클래스가 선택되지 않은 클라이언트는 제외
-				clients[ServerNumber][c_id].send_add_player_packet(&cl.second);
-				//cout << "클라 " << cl.first << "의 정보 " << c_id << "에게 전송 완료" << endl;
-			}
 
 			if (IsAllClassSelected()) { // 모든 플레이어가 클래스 선택을 완료한 경우
 				MonsterWaves[ServerNumber].wave_timer = -1.f; // 초기 웨이브 끝, S_INTRO 웨이브 시작

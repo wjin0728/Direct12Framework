@@ -222,21 +222,6 @@ void CPlayerHUD::InitializePlayerHUD()
             });
     }
 
-    if (auto targetMarker = owner->FindChildByName("TargetMarker"))
-    {
-        auto targetMarkerRenderer = targetMarker->GetComponent<CUIRenderer>();
-        targetMarkerRenderer->SetTexture("TargetMarker");
-        if (auto marker = targetMarker->AddComponent<CTargetMarker>())
-        {
-            targetMarkerRenderer->mIsVisible = false;
-            mPlayer.lock()->AddEvent("OnEnemyTargeted", [marker](const std::vector<std::any>& args) {
-                if (args.size() < 1) return;
-                auto target = std::any_cast<std::shared_ptr<CGameObject>>(args[0]);
-                marker->SetTarget(target);
-                });
-        }
-    }
-
     if (auto introUI = owner->FindChildByName("IntroUI")) {
         introUI->SetActive(false);
         if (auto renderer = introUI->GetComponent<CUIRenderer>())

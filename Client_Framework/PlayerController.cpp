@@ -130,7 +130,6 @@ void CPlayerController::LockOnTarget()
 			mTargetEnemy = enemy;
 		}
 	}
-	owner->TriggerEvent("OnEnemyTargeted", { mTargetEnemy.lock()});
 }
 
 void CPlayerController::InteractWithItem()
@@ -462,6 +461,7 @@ void CPlayerController::CastingSkill()
 	case FIRE_EXPLOSION: {
 		if (mTargetEnemy.lock()) {
 			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
+
 		}
 		else return;
 		break;
@@ -473,6 +473,6 @@ void CPlayerController::CastingSkill()
 		else return; 
 		break;
 	}
-	SetSkill(mSkill);
+	SetSkill(ITEM_TYPE::item_end);
 	INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
 }
