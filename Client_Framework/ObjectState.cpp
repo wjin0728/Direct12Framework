@@ -171,10 +171,11 @@ void CPlayerStateMachine::CreateParticleEvent()
 {
 	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
 	auto controller = mAnimationController.lock();
-	auto func = [this](float time) {
+	auto transform = GetTransform();
+	auto func = [transform](float time) {
 		INSTANCE(CParticleManager).PlayParticleEmitter(
 			"FootDust",
-			owner->GetTransform()->GetWorldMat()
+			transform->GetWorldMat()
 		);
 		};
 	controller->AddAnimationEvent("Run", "Dust", func);
