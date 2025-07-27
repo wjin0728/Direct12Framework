@@ -225,10 +225,10 @@ private:
 		}
 		return true;
 	};
-	bool IsAllPlayerReady() const {
-		for (auto& cl : clients[ServerNumber]) {
-			if (cl.second._state != ST_INGAME) continue;
-			if (cl.second._player._class == S_PLAYER_CLASS::end) return false;
+	bool IsAllClassSelected() const {
+		for (int i = 0; i < (int)S_PLAYER_CLASS::end; ++i) {
+			if (IsClassOK((S_PLAYER_CLASS)i))
+				return false;
 		}
 		return true;
 	}

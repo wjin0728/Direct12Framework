@@ -580,7 +580,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				//cout << "클라 " << cl.first << "의 정보 " << c_id << "에게 전송 완료" << endl;
 			}
 
-			if (IsAllPlayerReady()) { // 모든 플레이어가 클래스 선택을 완료한 경우
+			if (IsAllClassSelected()) { // 모든 플레이어가 클래스 선택을 완료한 경우
 				MonsterWaves[ServerNumber].wave_timer = -1.f; // 초기 웨이브 끝, S_INTRO 웨이브 시작
 			}
 			break;
@@ -1158,10 +1158,8 @@ void GameManager::HandleWaveInProgress(MonsterWave& wave)
 {
 	if (wave.message_timer > 0) { // 메시지 타이머 처리
 		wave.message_timer -= TICK_INTERVAL;
-		if (wave.message_timer <= 0.f) {
-			if (wave.current_wave == S_INTRO || wave.current_wave == S_OUTRO) { // 몬스터 웨이브가 아닐 경우
-				wave.is_end = true;
-			}
+		if (wave.message_timer <= 0.f && wave.current_wave == S_INTRO || wave.current_wave == S_OUTRO) {
+			wave.is_end = true;
 		}
 		return;
 	} 

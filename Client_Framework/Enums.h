@@ -180,11 +180,11 @@ enum class BUTTON_TYPE : UINT8
 
 enum WAVE_TYPE : UINT8
 {
-	INTRO,
+	INTRO, // 로비에만 있음
 	mm,
 	mMm,
 	BOSS,
-	OUTRO,
+	OUTRO, // 불맵에만 있음
 
 	WAVE_END
 };
