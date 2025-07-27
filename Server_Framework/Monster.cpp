@@ -188,7 +188,7 @@ void Monster::SetRandomTarget()
 	vector<int> available_index;
 
 	for (int i = 0; auto& player : _Player) {
-		if (player && player->_state != S_PLAYER_STATE::DEATH) {
+		if (player && player->_state != S_PLAYER_STATE::DEATH && player->_id != -1) {
 			available_index.push_back(i);
 		}
 		++i;

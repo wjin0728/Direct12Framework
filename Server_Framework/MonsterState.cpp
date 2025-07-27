@@ -261,7 +261,6 @@ void MonsterState::BossTargetingState::Update(Monster* monster) {
 }
 
 void MonsterState::BossTargetingState::Exit(Monster* monster) {
-	monster->ResetTarget(); // 타겟 초기화
 }
 
 
@@ -292,7 +291,8 @@ void MonsterState::BossAttackState::Update(Monster* monster) {
 	}
 }
 
-void MonsterState::BossAttackState::Exit(Monster* monster) {}
+void MonsterState::BossAttackState::Exit(Monster* monster) {
+}
 
 
 
@@ -324,7 +324,6 @@ void MonsterState::BossSkillState::Enter(Monster* monster) {
 		break;
 	}
 	case 1: { // 폭발
-	
 		Vec3 pos = monster->_target->_pos;
 		pos.y += 1.5f;
 		BoundingSphere sphere(pos, 0.7f);
@@ -359,7 +358,8 @@ void MonsterState::BossSkillState::Update(Monster* monster) {
 	}
 }
 
-void MonsterState::BossSkillState::Exit(Monster* monster) {}
+void MonsterState::BossSkillState::Exit(Monster* monster) {
+}
 
 
 

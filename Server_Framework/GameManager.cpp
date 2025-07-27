@@ -1132,6 +1132,7 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 	ms.LocalTransform();
 	for (auto& cl : clients[ServerNumber]) {
 		ms._Player[cl.first] = &cl.second._player;
+		ms._Player[cl.first]->_id = cl.first;
 	}
 
 	// 공격 이벤트 등록
