@@ -41,7 +41,9 @@ public:
 	void SetShader(const std::string& name);
 	void SetUIData(const CBUIData& data) { mUIData = data; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetColor(const Vec4& color) { mUIData.color = color; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
-	void SetAlpha(float alpha) { mUIData.color.w = alpha; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
+	void SetAlpha(float alpha) { 
+		alpha = std::clamp(alpha, 0.0f, 1.0f);
+		mUIData.color.w = alpha; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetType(int type) { mUIData.type = type; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetTextureIdx(int idx) { mUIData.textureIdx = idx; mUIDirtyFrame = FRAME_RESOURCE_COUNT; }
 	void SetTexture(const std::string& name);

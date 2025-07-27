@@ -19,6 +19,9 @@ void CVine::Start()
 	transform->MoveUp(-mOffset);
 	mMinPosY = transform->GetLocalPosition().y;
 
+	mMinRotationY = 0;
+	mMaxRotationY = 360.f;
+
 	mTotalDuration = 3.f;
 	mTransitionDuration = 0.5f;
 	mTime = 0.f;
@@ -51,6 +54,9 @@ void CVine::Update()
 		float y = mMinPosY + (mMaxPosY - mMinPosY) * t;
 		y = lerp(y, mMaxPosY, t);
 		transform->SetLocalPositionY(y);
+		float rotateY = mMinRotationY + (mMaxRotationY - mMinRotationY) * t;
+		rotateY = lerp(rotateY, mMaxRotationY, t);
+		transform->SetLocalRotationY(rotateY);
 	}
 	else if (mTime <= mTotalDuration - mTransitionDuration) {
 		transform->SetLocalScale(mMaxScale);
@@ -65,6 +71,9 @@ void CVine::Update()
 		float y = mMaxPosY + (mMinPosY - mMaxPosY) * t;
 		y = lerp(y, mMinPosY, t);
 		transform->SetLocalPositionY(y);
+		float rotateY = mMaxRotationY + (mMinRotationY - mMaxRotationY) * t;
+		rotateY = lerp(rotateY, mMinRotationY, t);
+		transform->SetLocalRotationY(rotateY);
 	}
 
 

@@ -23,6 +23,9 @@ void CMentDisplay::Start()
 	mUIRenderer = owner->GetComponent<CUIRenderer>();
 	mAlpha = 1.0f;
 	mTime = 0.0f;
+	mFadeTime = 1.f;
+	mDisplayTime = 4.f;
+	mWaitTime = 0.5f;
 	mCurrentTextureIndex = 0;
 
 	mUIRenderer.lock()->SetTexture(mTextures[mCurrentTextureIndex]);
@@ -30,36 +33,35 @@ void CMentDisplay::Start()
 
 void CMentDisplay::Update()
 {
-	float deltaTime = DELTA_TIME;
-	//fade in
-	if (mAlpha < 1.0f)
-	{
-		mAlpha += 0.01f;
-		if (mAlpha > 1.0f)
-		{
-			mAlpha = 1.0f;
-		}
-		mUIRenderer.lock()->SetAlpha(mAlpha);
-	}
+    float deltaTime = DELTA_TIME;
+    mTime += deltaTime;
 
-	if(mAlpha >= 1.0f)
-	{
-		mTime += deltaTime;
-		if (mTime >= 2.0f) // Change texture every 2 seconds
-		{
-			mCurrentTextureIndex++;
-			if (mCurrentTextureIndex >= mTextures.size())
-			{
-				mCurrentTextureIndex = 0; // Loop back to the first texture
-			}
-			mUIRenderer.lock()->SetTexture(mTextures[mCurrentTextureIndex]);
-			mTime = 0.0f; // Reset time
-		}
-	}
-	else
-	{
-		mUIRenderer.lock()->SetAlpha(mAlpha);
-	}
+    if (mTime <= mFadeTime) {
+        mAlpha = mTime / mFadeTime;
+    }
+    else if (mTime <= mDisplayTime - mFadeTime) {
+        mAlpha = 1.0f;
+    }
+    else if (mTime <= mDisplayTime) {
+        float fadeOutTime = mTime - (mDisplayTime - mFadeTime);
+        mAlpha = 1.0f - (fadeOutTime / mFadeTime);
+    }
+    else if (mTime <= mDisplayTime + mWaitTime) {
+        mAlpha = 0.0f;
+    }
+    else {
+        mTime = 0.0f;
+        mCurrentTextureIndex++;
+        if (mCurrentTextureIndex >= mTextures.size()) {
+            mCurrentTextureIndex = 0;
+            owner->SetActive(false);
+            return;
+        }
+        mUIRenderer.lock()->SetTexture(mTextures[mCurrentTextureIndex]);
+    }
+
+    // Apply alpha
+    mUIRenderer.lock()->SetAlpha(mAlpha);
 }
 
 void CMentDisplay::LateUpdate()

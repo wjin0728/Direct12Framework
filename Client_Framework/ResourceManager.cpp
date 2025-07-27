@@ -229,6 +229,27 @@ void CResourceManager::LoadDefaultTexture()
 		tex->AssignedSRVIndex();
 		Add(tex);
 	}
+	{
+		auto name = "intro1";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "intro2";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "intro3";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
 }
 
 void CResourceManager::LoadDefaultMaterials()
