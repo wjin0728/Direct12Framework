@@ -74,7 +74,7 @@ using SimpleMath::Color;
 #include "Enums.h"
 #include "CBData.h"
 
-#define _DEBUG
+//#define _DEBUG
 
 #define FRAMEBUFFER_WIDTH		2000
 #define FRAMEBUFFER_HEIGHT		1200

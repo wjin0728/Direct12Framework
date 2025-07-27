@@ -15,7 +15,6 @@ constexpr int MAX_HP_ARCHER_MAGE = 1200;
 constexpr int WATER_HEAL_AMT = 300;
 constexpr int WATER_SHIELD_AMT = 2;
 
-constexpr float SPAWN_INTERVAL = 3.f; // 몬스터 스폰 간격 (초 단위)
 constexpr float WAVE_INTERVAL = 0.5f; // 웨이브 시작 대기 간격 (초 단위)
 constexpr float MESSAGE_INTERVAL = 5.f; // 메시지 출력 간격 (초 단위)
 
@@ -78,6 +77,7 @@ constexpr char SC_BOSS_SET_TARGET = 28;
 constexpr char SC_BOSS_TARGET_LOCK = 29;
 constexpr char SC_MAKE_MESSAGE = 30;
 constexpr char SC_LOGOUT = 31;
+
 
 
 #pragma pack (push, 1)
@@ -304,6 +304,15 @@ struct SC_MAKE_MESSAGE_PACKET : PACKET {
 
 struct SC_LOGOUT_PACKET : PACKET {
 	short id;
+};
+
+struct SC_RE_LOGIN_PACKET : PACKET {
+	short id;
+	uint8_t player_class;
+	float x, y, z;
+	float look_y;
+	uint8_t state;
+	uint8_t sence_type;
 };
 
 #pragma pack (pop)

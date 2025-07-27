@@ -13,11 +13,11 @@ struct MonsterWave {
 	int current_wave = -1;
 
 	float wave_timer = WAVE_INTERVAL;
-	float spawn_timer = SPAWN_INTERVAL;
 	float message_timer = 0.f; // 메시지 타이머
 	int message_count = 0; // 메시지 카운트
 
 	bool is_end = true; // 웨이브 종료 여부
+	bool is_spawn = false; // 스폰 여부
 	bool make_potal = false; // 포탈 생성 여부
 
 	void Initialize(S_SCENE_TYPE scene_type) {
@@ -25,8 +25,9 @@ struct MonsterWave {
 			current_wave = -1;
 		else
 			current_wave = 0;
+
 		wave_timer = WAVE_INTERVAL;
-		spawn_timer = SPAWN_INTERVAL;
+		is_spawn = false;
 		is_end = true;
 		make_potal = false;
 	}
@@ -152,6 +153,7 @@ public:
 			cl.second._player.InitializeTarget();
 			cl.second._player._is_revival = true;
 			//cl.second._player._ready_for_next_stage = false;
+			SendHPPacket(S_OBJECT_TYPE::S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
 		}
 
 		cout << "Scene changed to: " << (int)scene_type << endl;
@@ -201,11 +203,11 @@ private:
 		return true;
 	};
 	bool IsAllClassSelected() const {
-		/*for (int i = 0; i < (int)S_PLAYER_CLASS::end; ++i) {
+		for (int i = 0; i < (int)S_PLAYER_CLASS::end; ++i) {
 			if (IsClassOK((S_PLAYER_CLASS)i))
 				return false;
-		}*/
-		return !IsClassOK((S_PLAYER_CLASS)2);
+		}
+		return true;
 	}
 
 	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {

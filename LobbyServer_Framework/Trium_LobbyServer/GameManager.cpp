@@ -191,9 +191,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 		case S_BUTTON_TYPE::ROOM4:
 		case S_BUTTON_TYPE::ROOM5:
 		case S_BUTTON_TYPE::ROOM6: {
-			if (Room_Cnt[(int)p->button_type] >= 3) { return; }
-
-			Room_Cnt[(int)p->button_type]++;
+			//if (Room_Cnt[(int)p->button_type] >= 3) { return; }
+			//Room_Cnt[(int)p->button_type]++;
 
 			for (auto& client : clients) {
 				if (client.second._state == ST_INGAME) {

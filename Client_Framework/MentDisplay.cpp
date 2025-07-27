@@ -28,11 +28,13 @@ void CMentDisplay::Start()
 	mWaitTime = 0.5f;
 	mCurrentTextureIndex = 0;
 
-	mUIRenderer.lock()->SetTexture(mTextures[mCurrentTextureIndex]);
 }
 
 void CMentDisplay::Update()
 {
+    if (mTextures.empty()) {
+        return; // No textures to display
+	}
     float deltaTime = DELTA_TIME;
     mTime += deltaTime;
 
@@ -76,4 +78,18 @@ void CMentDisplay::AddTexture(const std::string& Name)
 		return;
 	}
 	mTextures.push_back(texture);
+}
+
+void CMentDisplay::StartDisplay(float DisplayTime, float FadeTime, float WaitTime)
+{
+    mDisplayTime = DisplayTime;
+    mFadeTime = FadeTime;
+    mWaitTime = WaitTime;
+    mCurrentTextureIndex = 0;
+    mTime = 0.0f;
+    mAlpha = 0.0f;
+    if (!mTextures.empty()) {
+        mUIRenderer.lock()->SetTexture(mTextures[mCurrentTextureIndex]);
+        owner->SetActive(true);
+    } 
 }

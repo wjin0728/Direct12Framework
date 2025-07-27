@@ -81,8 +81,10 @@ void CPlayerController::Update()
 
 		PLAYER_STATE currentState = (PLAYER_STATE)mStateMachine->GetState();
 		if (currentState != PLAYER_STATE::ULTIMATE) {
-			mUltimateSkillCooldown -= DELTA_TIME;
-			mUltimateSkillCooldown = std::max<float>(mUltimateSkillCooldown, 0.f);
+			mUltimateSkillCooldown += DELTA_TIME;
+			if (mUltimateSkillCooldown > mUltimateSkillCooldownTime) {
+				mUltimateSkillCooldown = mUltimateSkillCooldownTime;
+			}
 		}
 		owner->TriggerEvent("OnUltimateSkillCooldown", { 1 - (mUltimateSkillCooldown / mUltimateSkillCooldownTime) });
 	}
@@ -317,10 +319,10 @@ void CPlayerController::OnKeyEvents()
 			}
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
-			if (mUltimateSkillCooldown > 0.f) return;
+			if (mUltimateSkillCooldown < mUltimateSkillCooldownTime) return;
 			if (!mTargetEnemy.lock()) return;
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
-			mUltimateSkillCooldown = mUltimateSkillCooldownTime;
+			mUltimateSkillCooldown = 0;
 			return;
 		}
 
@@ -390,12 +392,12 @@ void CPlayerController::OnKeyEvents()
 			}
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
-			if (mUltimateSkillCooldown > 0.f) return;
+			if (mUltimateSkillCooldown < mUltimateSkillCooldownTime) return;
 			if (!mTargetEnemy.lock()) return;
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
-			mUltimateSkillCooldown = mUltimateSkillCooldownTime;
+			mUltimateSkillCooldown = 0;
 			//mStateMachine->ActivateShield(false);
 			return;
 		}
