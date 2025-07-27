@@ -458,8 +458,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
 				SendAddProjectilePacket(proj, Projectile_cnt[ServerNumber]);
 				Projectile_cnt[ServerNumber]++;
-				break;
 			}
+			break;
 		}
 		default:
 			break;
