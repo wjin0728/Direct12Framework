@@ -758,7 +758,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_MAKE_MESSAGE: {
 		SC_MAKE_MESSAGE_PACKET* packet = reinterpret_cast<SC_MAKE_MESSAGE_PACKET*>(packet_ptr);
-
+		TriggerEvent("ShowMent", { packet->wave_type });
 		break;
 	}
 	default:

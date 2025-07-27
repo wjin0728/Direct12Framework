@@ -116,6 +116,19 @@ void CClassSelectUI::Start()
 		else {
 			playerObj = otherPlayers[playerId];
 			mSelectedClasses.push_back((PLAYER_CLASS)classType);
+
+			if (mCurrentState == EMenuState::WaitingRoom) {
+				std::string playerName = "Player" + std::to_string(mSelectedClasses.size());
+				if (auto player1 = owner->GetChildComponent<CUIRenderer>(playerName)) {
+					auto& serverManager = INSTANCE(ServerManager);
+					std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
+					if (any.size() < 1) return;
+					if (player1) {
+						player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+						player1->SetTexture("Player_" + classNames[classType] + "_Normal");
+					}
+				}
+			}
 		}
 		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(playerObj->GetStateMachine());
 
@@ -167,18 +180,7 @@ void CClassSelectUI::Start()
 			button->SetActive(false);
 		}
 
-		if (mCurrentState == EMenuState::WaitingRoom) {
-			std::string playerName = "Player" + std::to_string(mSelectedClasses.size());
-			if (auto player1 = owner->GetChildComponent<CUIRenderer>(playerName)) {
-				auto& serverManager = INSTANCE(ServerManager);
-				std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
-				if (any.size() < 1) return;
-				if (player1) {
-					player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-					player1->SetTexture("Player_" + classNames[classType] + "_Normal");
-				}
-			}
-		}
+	
 		}
 	);
 }
@@ -220,7 +222,7 @@ void CClassSelectUI::ChangeMenuState(EMenuState newState)
 				}
 			}
 			auto introUI = mWaitingRoomUI->FindChildByName("IntroUI");
-			//introUI->SetActive(false);
+			introUI->SetActive(false);
 			break;
 		}
     default:
@@ -266,11 +268,12 @@ void CClassSelectUI::InitializeWaitingRoomUI()
 			ment->AddTexture(texName);
 		}
 		auto& sm = INSTANCE(ServerManager);
-		sm.AddEvent("ShowMent", [introUI](std::vector<std::any> any) {
+		sm.AddEvent("ShowMent", [introUI, this](std::vector<std::any> any) {
 			if (any.size() < 1) return;
-			int index = std::any_cast<int>(any[0]);
+			WAVE_TYPE waveType = (WAVE_TYPE)std::any_cast<UINT8>(any[0]);
+			if (waveType != WAVE_TYPE::INTRO) return;
 			if (auto renderer = introUI->GetComponent<CUIRenderer>()) {
-				renderer->SetAlpha(1.0f);
+				renderer->SetAlpha(0.0f);
 			}
 			introUI->SetActive(true);
 			introUI->GetComponent<CMentDisplay>()->StartDisplay(6.f, 1.5f, 0.6f);
