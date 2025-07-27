@@ -55,6 +55,10 @@ void CPlayerHUD::Start()
     if (mPlayerHUD) {
         InitializePlayerHUD();
         mPlayerHUD->SetActive(true);
+        auto introUI = owner->FindChildByName("IntroUI");
+        if (introUI) {
+            introUI->SetActive(false);
+		}
     }
     if (mSettingsUI) {
 		InitializeSettingUI();
@@ -234,16 +238,13 @@ void CPlayerHUD::InitializePlayerHUD()
     }
 
     if (auto introUI = owner->FindChildByName("IntroUI")) {
+        introUI->SetActive(false);
         if (auto renderer = introUI->GetComponent<CUIRenderer>())
         {
             renderer->SetAlpha(0.0f);
 
         }
         auto ment = introUI->AddComponent<CMentDisplay>();
-        for (int i = 0; i < 3; i++) {
-            std::string texName = "intro" + std::to_string(i + 1);
-            ment->AddTexture(texName);
-        }
         auto& sm = INSTANCE(ServerManager);
         sm.AddEvent("ShowMent", [introUI, this](std::vector<std::any> any) {
             if (any.size() < 1) return;
@@ -330,7 +331,7 @@ void CPlayerHUD::BindPlayerToUI(const std::shared_ptr<class CGameObject>& player
 
     std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
 
-    if (auto player = owner->FindChildByName("name"))
+    if (auto player = owner->FindChildByName(name))
     {
         if (auto playerRenderer = player->GetComponent<CUIRenderer>()) {
             playerRenderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });

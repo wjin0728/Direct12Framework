@@ -451,7 +451,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Vec3 direction = target_pos - spawn_pos;
 				direction.Normalize();
 
-				Projectile proj{ 1, S_PROJECTILE_TYPE::MAGIC_BALL };
+				Projectile proj{ 1, S_PROJECTILE_TYPE::ULTIMATE_MAGIC_BALL };
 				proj._pos = spawn_pos;
 				proj._velocity = direction / 3.f;
 
@@ -731,9 +731,9 @@ void GameManager::Update()
 				Vec2 itemPos = Vec2(it.second._pos.x, it.second._pos.z);
 				Vec2 playerPos = Vec2(player._pos.x, player._pos.z);
 				if (Vec2::IsInRadius(itemPos, playerPos, 1.f)) {
-					for (auto& cl : clients[ServerNumber]) {
-						if (cl.second._state != ST_INGAME) continue;
-						cl.second.send_remove_item_packet(it.first, cl.first, it.second._item_type);
+					for (auto& client : clients[ServerNumber]) {
+						if (client.second._state != ST_INGAME) continue;
+						client.second.send_remove_item_packet(it.first, cl.first, it.second._item_type);
 					}
 					//cout << "cl : " << cl.first << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
 					items[ServerNumber].erase(it.first);

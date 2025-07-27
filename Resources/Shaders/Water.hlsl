@@ -273,8 +273,11 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float depthFactor = baseFalloff + _ShallowFalloff;
     
     float3 shallowColor = (_ShallowColour.rgb);
+    shallowColor = GammaDecoding(shallowColor);
     float3 deepColor = (_DeepColour.rgb);
+    deepColor = GammaDecoding(deepColor);
     float3 veryDeepColor = (_VeryDeepColour.rgb);
+    veryDeepColor = GammaDecoding(veryDeepColor);
     
     float3 shallowBlend = lerp(shallowColor, deepColor, depthFactor);
     float3 deepBlend = lerp(deepColor, veryDeepColor, saturate(baseFalloff - 1.0));
@@ -299,6 +302,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     float foamDepthMask = saturate(pow(depthDiff + _FoamShoreline, _FoamFalloff));
     
     float3 foamColor = _FoamColor.rgb;
+    foamColor = GammaDecoding(foamColor);   
     float2 panner166 = (0.1 * totalTime * float2(1, 0) + worldPosition.xz);
     float2 panner22 = (0.1 * totalTime * float2(-1, 0) + worldPosition.xz);
     float perlin1 = snoise(float3((panner166 * 1.5), 0.0));
@@ -348,7 +352,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_TARGET
     lightingData.shadowFactor = CalcShadowFactor(input.ShadowPosH);
     
     SurfaceData surfaceData = (SurfaceData) 0;
-    surfaceData.albedo = GammaDecoding(waterAlbedo.rgb);
+    surfaceData.albedo = waterAlbedo.rgb;
     surfaceData.metallic = 0.f;
     surfaceData.smoothness = smoothness;
     surfaceData.specular = 0.5f;

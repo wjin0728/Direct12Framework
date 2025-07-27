@@ -67,7 +67,6 @@ void CClassSelectUI::Start()
 
 			mSelectedClasses.push_back((PLAYER_CLASS)classType);
 
-
 			std::cout << "Selected class: " << classType << endl;
 
 			player.second->GetTransform()->SetLocalPosition(position);
@@ -220,7 +219,7 @@ void CClassSelectUI::ChangeMenuState(EMenuState newState)
 					std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
 					if (player1) {
 						player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-						player1->SetTexture("Player_" + classNames[i] + "_Normal");
+						player1->SetTexture("Player_" + classNames[(int)mSelectedClasses[i]] + "_Normal");
 					}
 				}
 			}

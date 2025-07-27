@@ -60,7 +60,7 @@ void CBattleScene::Initialize()
 	}
 
 	INPUT.FixMousePosition(true);
-	FadeOut(0.5f, { 0.0,0.0,0.0,1.f });
+	CircularFadeOut(0.5f, { 0.0,0.0,0.0,1.f });
 }
 
 void CBattleScene::Update()

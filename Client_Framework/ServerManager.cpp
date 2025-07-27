@@ -325,7 +325,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (sceneType == INSTANCE(CSceneManager).GetCurSceneType()) break; // 이미 같은 씬이면 리턴
 
-		scene->FadeIn(0.5f, { 0.f,0.f,0.f,0.f }, [sceneType]() {
+		scene->AlwaysFade(0.2f, { 0.f,0.f,0.f,0.f }, [sceneType]() {
 			INSTANCE(CSceneManager).RequestSceneChange(sceneType);
 			});
 
@@ -399,7 +399,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_REMOVE_ITEM: {
 		SC_REMOVE_ITEM_PACKET* packet = reinterpret_cast<SC_REMOVE_ITEM_PACKET*>(packet_ptr);
 
-		if (packet->player_id == -1) {} // 단순 삭제면 바로 넘기기
+		if (packet->player_id != clientID) {} // 단순 삭제면 바로 넘기기
 		else mPlayer->GetPlayerController()->SetSkill((ITEM_TYPE)packet->item_type);
 
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
@@ -743,10 +743,15 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		break;
 	}
 	case SC_LOBBY_SERVER_OUT: {
-		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
-		Connect(PORT_NUM);
-
-		send_cs_game_server_login_packet();
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
+		scene->FadeIn(0.5f, { 0.f,0.f,0.f,0.f }, [this]() {
+			INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
+			});
+		
 		break;
 	}
 	case SC_BOSS_SET_TARGET: {

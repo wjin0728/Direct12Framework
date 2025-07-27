@@ -27,6 +27,11 @@ CLobbyScene::CLobbyScene()
 
 void CLobbyScene::Initialize()
 {// Load default resources
+
+	INSTANCE(ServerManager).Connect(PORT_NUM);
+
+	INSTANCE(ServerManager).send_cs_game_server_login_packet();
+
 	INSTANCE(ServerManager).Client_Login();
 	INSTANCE(ServerManager).RegisterPlayerInScene(this);
 	LoadSceneFromFile(SCENE_PATH("Lobby"));
@@ -69,7 +74,7 @@ void CLobbyScene::Initialize()
 	}
 
 
-	
+	CircularFadeOut(0.5f, { 0.0,0.0,0.0,1.f });
 
 	INPUT.FixMousePosition(false);
 }

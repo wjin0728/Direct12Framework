@@ -170,6 +170,31 @@ void CPlayerStateMachine::OnExitState(UINT8 state)
 	}
 }
 
+void CPlayerStateMachine::ActivateShield(bool activate)
+{
+	if (auto shield = mShield.lock()) {
+		shield->SetActive(activate);
+
+		if (activate) {
+			mShieldHealth = 3;
+			mShieldDuration = mShieldDurationMax; 
+			if(auto particle = shield->GetComponentFromHierarchy<CParticleAttach>()) {
+				particle->mCanEmit = true;
+				particle->SetLoop(true);
+				particle->Play();
+			}
+		}
+		else {
+			mShieldHealth = 0;
+			mShieldDuration = -1.f;
+			if(auto particle = shield->GetComponentFromHierarchy<CParticleAttach>()) {
+				particle->mCanEmit = false;
+				particle->Stop();
+			}
+		}
+	}
+}
+
 void CPlayerStateMachine::CreateParticleEvent()
 {
 	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
@@ -416,24 +441,25 @@ void CWarriorState::CreateParticleEvent()
 		socket->SetRenderer(mTrail.lock());
 		socket->SetActive(true);
 	}
-	auto func0 = [this](float time) {
-		if (mTrail.expired()) {
+	std::weak_ptr<CTrailRenderer> trail = mTrail;
+	auto func0 = [trail](float time) {
+		if (trail.expired()) {
 			return;
 		}
-		auto trail = mTrail.lock();
-		if (trail) {
-			trail->mActive = true;
-			trail->ResetTrail();
-			trail->SetDuration(0.2f);
+		auto trailRenderer = trail.lock();
+		if (trailRenderer) {
+			trailRenderer->mActive = true;
+			trailRenderer->ResetTrail();
+			trailRenderer->SetDuration(0.2f);
 		}
 		};
-	auto func1 = [this](float time) {
-		if (mTrail.expired()) {
+	auto func1 = [trail](float time) {
+		if (trail.expired()) {
 			return;
 		}
-		auto trail = mTrail.lock();
-		if (trail) {
-			trail->mActive = false;
+		auto trailRenderer = trail.lock();
+		if (trailRenderer) {
+			trailRenderer->mActive = false;
 		}
 		};
 	auto controller = mAnimationController.lock();
@@ -444,9 +470,8 @@ void CWarriorState::CreateParticleEvent()
 	controller->AddAnimationEvent("Ultimate", "AttackStart", func0);
 	controller->AddAnimationEvent("Ultimate", "AttackEnd", func1);
 
-	auto trail = mTrail.lock();
-	if (trail) {
-		trail->SetBlendMaskTexture("WeaponTrail");
+	if (mTrail.lock()) {
+		mTrail.lock()->SetBlendMaskTexture("WeaponTrail");
 	}
 }
 
@@ -459,22 +484,8 @@ void CMageState::Awake()
 void CMageState::Start()
 {
 	CPlayerStateMachine::Start();
-	mStaffParticle = owner->GetComponentFromHierarchy<CParticleAttach>();
-
-	auto func0 = [this](float time) {
-		if (mStaffParticle.expired()) {
-			return;
-		}
-		auto staff = mStaffParticle.lock();
-		if (staff) {
-			staff->Play();
-		}
-		};
-
 	auto controller = mAnimationController.lock();
-
-	controller->AddAnimationEvent("Attack", "Attack", func0);
-	controller->AddAnimationEvent("RunAttack", "Attack", func0);
+	
 	if (!controller) {
 		return;
 	}
@@ -587,4 +598,20 @@ void CMageState::OnExitState(UINT8 state)
 void CMageState::CreateParticleEvent()
 {
 	CPlayerStateMachine::CreateParticleEvent();
+	mStaffParticle = owner->GetComponentFromHierarchy<CParticleAttach>();
+
+	std::weak_ptr<CParticleAttach> staff = mStaffParticle;
+	auto func0 = [staff](float time) {
+		if (staff.expired()) {
+			return;
+		}
+		auto staffParticle = staff.lock();
+		if (staffParticle) {
+			staffParticle->Play();
+		}
+		};
+
+	auto controller = mAnimationController.lock();
+	controller->AddAnimationEvent("Attack", "Attack", func0);
+	controller->AddAnimationEvent("RunAttack", "Attack", func0);
 }

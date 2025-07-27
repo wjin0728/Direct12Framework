@@ -86,9 +86,9 @@ void CScene::LateUpdate()
 	INSTANCE(CRenderManager).UpdateInstancingGroup();
 	INSTANCE(CShadowManager).Update();
 	INSTANCE(CParticleManager).Update();
+	FadeUpdate();
 	UpdatePassData();
 
-	FadeUpdate();
 }
 
 
@@ -216,7 +216,7 @@ void CScene::DestroyObjectImmediately(CGameObject* object)
 		mObjects.erase(itr);
 	}
 	auto type = object->GetObjectType();
-	if (type > OBJECT_TYPE::NONE && type < OBJECT_TYPE::end) {
+	if (type > OBJECT_TYPE::PLAYER && type < OBJECT_TYPE::end) {
 		auto itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
 			[object](const std::shared_ptr<CGameObject>& ptr) { return ptr.get() == object; });
 		if (itr != mObjectTypes[type].end()) {
@@ -316,9 +316,12 @@ void CScene::FadeUpdate()
 			alpha = 1.f - (mFadeTime / mFadeDuration);
 		}
 		mFadeColor.w = std::clamp(alpha, 0.f, 1.f);
+		if( mFadeState == FadeState::Fullscreen) {
+			mFadeColor.w = 1.f;
+		}
 		if (mFadeTime >= mFadeDuration) {
 			mFadeColor.w = (mFadeState == FadeState::In) ? 1.f : 0.f;
-			mFadeState = FadeState::None;
+			if(mFadeState == FadeState::Out) mFadeState = FadeState::None;
 			if (mOnFadeFinish) {
 				mOnFadeFinish();
 				mOnFadeFinish = nullptr;
@@ -334,9 +337,12 @@ void CScene::FadeUpdate()
 			radius = 1.f - (mFadeTime / mFadeDuration);
 		}
 		mFadeColor.w = std::clamp(radius, 0.f, 1.f);
+		if (mFadeState == FadeState::Fullscreen) {
+			mFadeColor.w = 1.f;
+		}
 		if (mFadeTime >= mFadeDuration) {
 			mFadeColor.w = (mFadeState == FadeState::Out) ? 1.f : 0.f;
-			mFadeState = FadeState::None;
+			if (mFadeState == FadeState::Out) mFadeState = FadeState::None;
 			if (mOnFadeFinish) {
 				mOnFadeFinish();
 				mOnFadeFinish = nullptr;
@@ -367,6 +373,17 @@ void CScene::FadeOut(float duration, const Color& color, std::function<void()> o
 	mFadeType = FadeType::Default;
 }
 
+void CScene::AlwaysFade(float duration, const Color& color, std::function<void()> onFinish)
+{
+	mFadeColor = color;
+	mFadeDuration = duration;
+	mFadeTime = 0.f;
+	mOnFadeFinish = onFinish;
+	mFadeColor.w = 1.f;
+	mFadeState = FadeState::Fullscreen;
+	mFadeType = FadeType::Default;
+}
+
 void CScene::CircularFadeIn(float duration, const Color& color, std::function<void()> onFinish)
 {
 	mFadeColor = color;
@@ -388,6 +405,18 @@ void CScene::CircularFadeOut(float duration, const Color& color, std::function<v
 	mFadeState = FadeState::Out;
 	mFadeType = FadeType::Circular;
 }
+
+void CScene::CircularAlwaysFade(float duration, const Color& color, std::function<void()> onFinish)
+{
+	mFadeColor = color;
+	mFadeDuration = duration;
+	mFadeTime = 0.f;
+	mOnFadeFinish = onFinish;
+	mFadeColor.w = 1.f; 
+	mFadeState = FadeState::Fullscreen;
+	mFadeType = FadeType::Circular;
+}
+
 
 void CScene::RemoveObjects()
 {
