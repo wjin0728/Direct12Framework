@@ -167,9 +167,19 @@ namespace MonsterState
         void Enter(Monster* monster) override;
         void Update(Monster* monster) override;
         void Exit(Monster* monster) override;
+
+		S_ITEM_TYPE GetSkillType() const { return skillType; }
+		void SetSkillType(S_ITEM_TYPE type) { skillType = type; }
+		bool GetSendSkill() const { return sendSkill; }
+		void SetSendSkill(bool value) { sendSkill = value; }
+
+		std::vector<int> hit_client_id; // 스킬 맞은 플레이어 ID들
+
     private:
         BossSkillState() {}
         float skillTimer;
+		S_ITEM_TYPE skillType = S_ITEM_TYPE::S_item_end; // 스킬 타입
+        bool sendSkill = false;
     };
 
     // Hit 상태

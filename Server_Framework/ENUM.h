@@ -125,7 +125,7 @@ enum class S_EFFECT_TYPE : UINT8
 {
 	EXPLOSION,
 	VINE,
-	ss
+	end
 };
 
 enum class S_BUTTON_TYPE : UINT8

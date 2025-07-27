@@ -18,6 +18,9 @@ public:
 
 	int					_hp;
 	int					_barrier;
+	bool				_on_CantMove;
+	float				cant_move_time = 0.f;
+	
 
 	PlayerStateMachine*		currentState;	
 	PlayerStateMachine*		previousState;

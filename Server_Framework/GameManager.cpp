@@ -805,6 +805,29 @@ void GameManager::Update()
 					targeting_state.SetSendTargetLock(true);
 				}
 			}
+
+			auto& skill_state = MonsterState::BossSkillState::GetInstance();
+			if (monster.currentState == &skill_state) {
+				if (skill_state.GetSendSkill()) {
+					Vec3 pos = monster._target->_pos;
+					for (auto& cl : clients[ServerNumber]) {
+						for (auto& hitid : skill_state.hit_client_id) {
+							SendHPPacket((S_OBJECT_TYPE)S_PLAYER, hitid, clients[ServerNumber][hitid]._player._hp, clients[ServerNumber][hitid]._player._barrier);
+						}
+						if (skill_state.GetSkillType() == S_GRASS_VINE) {
+							cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::VINE, pos);
+						}
+						else if (skill_state.GetSkillType() == S_FIRE_EXPLOSION) {
+							pos.y += 1.5f;
+							cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::EXPLOSION, pos);
+						}
+						else if (skill_state.GetSkillType() == S_WATER_HEAL) {
+
+						}
+					}
+					skill_state.SetSendSkill(false);
+				}
+			}
 		}
 
 		// 이벤트 처리
