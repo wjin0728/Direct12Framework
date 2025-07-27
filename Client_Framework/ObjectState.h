@@ -50,6 +50,7 @@ public:
         }
 	}
 
+	virtual void CreateParticleEvent();
     virtual void GetHit(float damage) override;
     virtual void Heal(float amount) override;
     virtual void UpdateHealth(float newHealth, int newSheild);

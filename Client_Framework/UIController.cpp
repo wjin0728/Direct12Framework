@@ -239,7 +239,35 @@ void CPlayerHUD::InitializePlayerHUD()
             renderer->SetAlpha(0.0f);
 
         }
-
+        auto ment = introUI->AddComponent<CMentDisplay>();
+        for (int i = 0; i < 3; i++) {
+            std::string texName = "intro" + std::to_string(i + 1);
+            ment->AddTexture(texName);
+        }
+        auto& sm = INSTANCE(ServerManager);
+        sm.AddEvent("ShowMent", [introUI, this](std::vector<std::any> any) {
+            if (any.size() < 1) return;
+            WAVE_TYPE waveType = (WAVE_TYPE)std::any_cast<UINT8>(any[0]);
+			if (waveType == WAVE_TYPE::WAVE_END) return;
+			auto mentDisplay = introUI->GetComponent<CMentDisplay>();
+            if (waveType == WAVE_TYPE::mm) {
+				mentDisplay->ClearTextures();
+                mentDisplay->AddTexture("intro1");
+            }
+            else if (waveType == WAVE_TYPE::mMm) {
+                mentDisplay->ClearTextures();
+                mentDisplay->AddTexture("intro2");
+            }
+            else if (waveType == WAVE_TYPE::OUTRO) {
+                mentDisplay->ClearTextures();
+                mentDisplay->AddTexture("intro3");
+			}
+            if (auto renderer = introUI->GetComponent<CUIRenderer>()) {
+                renderer->SetAlpha(0.0f);
+            }
+            introUI->SetActive(true);
+            mentDisplay->StartDisplay(6.f, 1.5f, 0.6f);
+            });
     }
 
 

@@ -53,6 +53,8 @@ void CClassSelectUI::Start()
 	mClassCharacters[2] = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("Mage");
 
 	mWaitingRoomUI->SetActive(false);
+	auto introUI = mWaitingRoomUI->FindChildByName("IntroUI");
+	introUI->SetActive(false);
 
 	auto& otherPlayers = INSTANCE(ServerManager).mOtherPlayers;
 	for (auto& player : otherPlayers) {
@@ -79,6 +81,7 @@ void CClassSelectUI::Start()
 
 
 			playerState->SetState((UINT8)PLAYER_STATE::IDLE);
+			playerState->CreateParticleEvent();
 
 			auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
 			if (shieldPrefab) {
@@ -131,6 +134,7 @@ void CClassSelectUI::Start()
 			}
 		}
 		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(playerObj->GetStateMachine());
+		playerState->CreateParticleEvent();
 
 		std::cout << "Selected class: " << classType << endl;
 

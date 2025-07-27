@@ -176,6 +176,20 @@ void CPlayerStateMachine::OnExitState(UINT8 state)
 	}
 }
 
+void CPlayerStateMachine::CreateParticleEvent()
+{
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+	auto controller = mAnimationController.lock();
+	auto func = [this](float time) {
+		INSTANCE(CParticleManager).PlayParticleEmitter(
+			"FootDust",
+			owner->GetTransform()->GetWorldMat()
+		);
+		};
+	controller->AddAnimationEvent("Run", "Dust", func);
+	controller->AddAnimationEvent("RunAttack", "Dust", func);
+}
+
 void CPlayerStateMachine::GetHit(float damage)
 {
 	CEntityState::GetHit(damage);

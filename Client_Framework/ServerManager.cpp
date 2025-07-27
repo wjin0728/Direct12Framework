@@ -295,6 +295,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		else {
 			player = mPlayer;
 			mPlayer->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+			mPlayer->GetTransform()->SetLocalRotationY(packet->look_y);
 		}
 		std::shared_ptr<CPlayerStateMachine> stateMachine{};
 		if (packet->player_class == (UINT8)PLAYER_CLASS::ARCHER) {

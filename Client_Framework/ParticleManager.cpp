@@ -25,7 +25,9 @@ void CParticleManager::LoadParticleProperties()
 {
 	//LoadParticleProperties("DeathSmoke", OBJECT_PATH("FX_Smoke"));
 	LoadParticleProperties("FootDust", OBJECT_PATH("FootDust"));
-	LoadParticleProperties("MonsterAttack", OBJECT_PATH("MonsterAttack"));
+	//LoadParticleProperties("MonsterAttack", OBJECT_PATH("MonsterAttack"));
+	//LoadParticleProperties("MonsterDeath", OBJECT_PATH("MonsterDeath"));
+	LoadParticleProperties("ArrowHit", OBJECT_PATH("ArrowHit"));
 }
 
 void CParticleManager::Update()
