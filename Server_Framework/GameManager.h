@@ -143,8 +143,8 @@ public:
 		MonsterWaves[ServerNumber].Initialize(scene_type); // 웨이브 상태 초기화
 
 		for (auto& cl : clients[ServerNumber]) {
-			cl.second._player._pos = spawnDatas[(int)scene_type][(int)cl.second._player._class].pos;
-			cl.second._player._rotation = spawnDatas[(int)scene_type][(int)cl.second._player._class].rot;
+			cl.second._player._pos = cl.second._player._spawn_pos = spawnDatas[(int)scene_type][(int)cl.second._player._class].pos;
+			cl.second._player._rotation = cl.second._player._spawn_rotation = spawnDatas[(int)scene_type][(int)cl.second._player._class].rot;
 			cl.second._player._velocity = Vec3::Zero;
 			cl.second._player._hp = cl.second._player.PlayerMaxHp();
 			cl.second._player._barrier = 0;

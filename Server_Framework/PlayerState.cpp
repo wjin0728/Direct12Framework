@@ -275,5 +275,6 @@ void PlayerState::DeathState::Update(PlayerCharacter* player) {
 }
 
 void PlayerState::DeathState::Exit(PlayerCharacter* player) {
-    player->_active = false;
+    player->_pos = player->_spawn_pos;
+    player->_rotation = player->_spawn_rotation;
 }

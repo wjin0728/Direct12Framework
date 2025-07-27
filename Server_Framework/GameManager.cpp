@@ -700,9 +700,9 @@ bool GameManager::CanMove(float x, float z)
 void GameManager::Update()
 {
 	for (auto& cl : clients[ServerNumber]) {
-		if (cl.second._state != ST_INGAME) continue;
-		if (not cl.second._player._active) continue;
 		auto& player = cl.second._player;
+		if (cl.second._state != ST_INGAME) continue;
+		if (player._state == S_PLAYER_STATE::DEATH) continue;
 
 		player.Update();
 
@@ -1125,8 +1125,6 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 		auto func = [this](Monster* monster) {
 			for (auto& [id, cl] : clients[ServerNumber]) {
 				auto& player = cl._player;
-				if (not player._active) continue; // 플레이어가 없으면 패스
-
 				if (player._state == S_PLAYER_STATE::JUMP ||
 					player._state == S_PLAYER_STATE::GATHERING ||
 					player._state == S_PLAYER_STATE::GETHIT ||
@@ -1166,8 +1164,6 @@ std::function<void(Monster*)> GameManager::MakeAttackEvent(Vec2 offset, float ra
 		Vec2 center = monster->GetWorldOffsetPosition(offset.x, offset.y);
 		for (auto& [id, cl] : clients[ServerNumber]) {
 			auto& player = cl._player;
-			if (not player._active) continue; // 플레이어가 없으면 패스
-
 			if (player._state == S_PLAYER_STATE::JUMP ||
 				player._state == S_PLAYER_STATE::GATHERING ||
 				player._state == S_PLAYER_STATE::GETHIT ||
