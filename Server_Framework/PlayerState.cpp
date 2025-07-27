@@ -16,7 +16,8 @@ void PlayerState::IdleState::Update(PlayerCharacter* player) {
     }
 }
 
-void PlayerState::IdleState::Exit(PlayerCharacter* player) {}
+void PlayerState::IdleState::Exit(PlayerCharacter* player) {
+}
 
 // PlayerState::RunState 구현
 PlayerState::RunState& PlayerState::RunState::GetInstance() { static PlayerState::RunState instance; return instance; }
@@ -196,6 +197,9 @@ void PlayerState::UltimateState::Enter(PlayerCharacter* player) {
     player->SetTarget();
 
     if (player->_target) {
+        player->_target->SetState(S_MONSTER_STATE::IDLE);
+        player->_target->_active = false;
+
         Vec3 direction = player->_target->_pos - player->_pos;
         direction.y = 0.f;
         direction.Normalize();
@@ -247,6 +251,7 @@ void PlayerState::UltimateState::Update(PlayerCharacter* player) {
 
 void PlayerState::UltimateState::Exit(PlayerCharacter* player) {
     player->_data = 0.f;
+    player->_target->_active = true;
 }
 
 // PlayerState::GatheringState 구현
@@ -261,4 +266,20 @@ void PlayerState::GatheringState::Update(PlayerCharacter* player) {
 }
 
 void PlayerState::GatheringState::Exit(PlayerCharacter* player) {
+}
+
+// PlayerState::DeathState 구현
+PlayerState::DeathState& PlayerState::DeathState::GetInstance() { static PlayerState::DeathState instance; return instance; }
+
+void PlayerState::DeathState::Enter(PlayerCharacter* player) {
+    player->SetVelocity(0, 0, 0);
+}
+
+void PlayerState::DeathState::Update(PlayerCharacter* player) {
+    player->SetVelocity(0, 0, 0); // 속도 0으로 설정
+}
+
+void PlayerState::DeathState::Exit(PlayerCharacter* player) {
+    player->_pos = player->_spawn_pos;
+    player->_rotation = player->_spawn_rotation;
 }

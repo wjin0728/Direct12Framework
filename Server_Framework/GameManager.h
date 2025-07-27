@@ -13,20 +13,21 @@ struct MonsterWave {
 	int current_wave = -1;
 
 	float wave_timer = WAVE_INTERVAL;
-	float spawn_timer = SPAWN_INTERVAL;
-	float message_timer = 0.f; // ¸Þ½ÃÁö Å¸ÀÌ¸Ó
-	int message_count = 0; // ¸Þ½ÃÁö Ä«¿îÆ®
+	float message_timer = 0.f; // ï¿½Þ½ï¿½ï¿½ï¿½ Å¸ï¿½Ì¸ï¿½
+	int message_count = 0; // ï¿½Þ½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½Æ®
 
-	bool is_end = true; // ¿þÀÌºê Á¾·á ¿©ºÎ
-	bool make_potal = false; // Æ÷Å» »ý¼º ¿©ºÎ
+	bool is_end = true; // ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	bool is_spawn = false; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	bool make_potal = false; // ï¿½ï¿½Å» ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 	void Initialize(S_SCENE_TYPE scene_type) {
-		if (scene_type == S_SCENE_TYPE::LOBBY) // ·Îºñ¸¸ Intro »ç¿ë
+		if (scene_type == S_SCENE_TYPE::LOBBY) // ï¿½Îºï¿½ Intro ï¿½ï¿½ï¿½
 			current_wave = -1;
 		else
 			current_wave = 0;
+
 		wave_timer = WAVE_INTERVAL;
-		spawn_timer = SPAWN_INTERVAL;
+		is_spawn = false;
 		is_end = true;
 		make_potal = false;
 	}
@@ -55,23 +56,23 @@ public:
 	uint64_t current_tick = 0;
 
 	array<Terrain, (int)S_SCENE_TYPE::END> terrain;
-	array<array<SpawnData, (int)PLAYER_CLASS::end>, (int)S_SCENE_TYPE::END> spawnDatas; // °¢ ¾ÀÀÇ ½ºÆù Æ÷ÀÎÆ®
-	S_SCENE_TYPE scene_type = S_SCENE_TYPE::LOBBY; // ÇöÀç ¾À Å¸ÀÔ
+	array<array<SpawnData, (int)PLAYER_CLASS::end>, (int)S_SCENE_TYPE::END> spawnDatas; // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
+	S_SCENE_TYPE scene_type = S_SCENE_TYPE::LOBBY; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Å¸ï¿½ï¿½
 
 	array<unordered_map<int, Item>, 6> items;
 	array<unordered_map<int, Monster>, 6> Monsters; 
 	array<unordered_map<int, SESSION>, 6> clients;
-	array<unordered_map<int, Projectile>, 6> Projectiles; // °¢ ¼­¹ö¿¡ ¿¬°áµÈ Å¬¶óÀÌ¾ðÆ® ID ÁýÇÕ
+	array<unordered_map<int, Projectile>, 6> Projectiles; // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ® ID ï¿½ï¿½ï¿½ï¿½
 
-	int ServerNumber = 0; // ÀÓ½Ã·Î ¾µ ¼­¹ö ¹øÈ£
+	int ServerNumber = 0; // ï¿½Ó½Ã·ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È£
 
 	array<int, 6> Item_cnt = { 0, 0, 0, 0, 0, 0 };
 	array<int, 6> Monster_cnt = { 0, 0, 0, 0, 0, 0 };
 	array<int, 6> Projectile_cnt = { 0, 0, 0, 0, 0, 0 };
-	array<MonsterWave, 6> MonsterWaves; // °¢ ¼­¹öÀÇ ¸ó½ºÅÍ ¿þÀÌºê Á¤º¸
+	array<MonsterWave, 6> MonsterWaves; // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½
 
-	const float boss_item_spawn_interval = 15.f; // º¸½º ¾ÆÀÌÅÛ »ý¼º °£°Ý (ÃÊ ´ÜÀ§)
-	float boss_item_timer = boss_item_spawn_interval; // º¸½º ¾ÆÀÌÅÛ »ý¼º Å¸ÀÌ¸Ó
+	const float boss_item_spawn_interval = 15.f; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+	float boss_item_timer = boss_item_spawn_interval; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½Ì¸ï¿½
 
 	GameManager();
 	~GameManager();
@@ -88,7 +89,7 @@ public:
 	void SendAllItemsPosPacket();
 	void SendAllProjectilesPosPacket();
 	void SendHPPacket(S_OBJECT_TYPE type, int id, int hp, int shield);
-	void SendMakePortalPacket(); // Æ÷Å» »ý¼º
+	void SendMakePortalPacket(); // ï¿½ï¿½Å» ï¿½ï¿½ï¿½ï¿½
 	void SendMakeMessagePacket(uint8_t wave_type);
 	void SendAddProjectilePacket(Projectile& proj, int proj_id);
 
@@ -119,19 +120,19 @@ public:
 
 	int Get_new_Client_id();
 
-	bool CanMove(float x, float z); // ÁöÇü °Ë»ç
+	bool CanMove(float x, float z); // ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½
 	void ChangeScene(uint8_t scene) {
-		if (scene >= (uint8_t)S_SCENE_TYPE::END) return; // À¯È¿ÇÏÁö ¾ÊÀº ¾À Å¸ÀÔ Ã¼Å©
+		if (scene >= (uint8_t)S_SCENE_TYPE::END) return; // ï¿½ï¿½È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Å¸ï¿½ï¿½ Ã¼Å©
 		if (scene_type == (S_SCENE_TYPE)scene) 
-			return; // ÇöÀç ¾À°ú µ¿ÀÏÇÑ ¾ÀÀ¸·Î ÀüÈ¯ ½Ãµµ ¹æÁö
+			return; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ï¿½
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			cl.second.send_change_scene_packet(scene);
 		}
 
-		scene_type = (S_SCENE_TYPE)scene; // ¾À Å¸ÀÔ ¾÷µ¥ÀÌÆ®
+		scene_type = (S_SCENE_TYPE)scene; // ï¿½ï¿½ Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
 
-		// ¾À ÀüÈ¯ ÈÄ, ¸ó½ºÅÍ, ¾ÆÀÌÅÛ ÃÊ±âÈ­
+		// ï¿½ï¿½ ï¿½ï¿½È¯ ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
 		Monsters[ServerNumber].clear();
 		items[ServerNumber].clear();
 		Projectiles[ServerNumber].clear();
@@ -140,17 +141,19 @@ public:
 		Item_cnt[ServerNumber] = 0;
 		Projectile_cnt[ServerNumber] = 0;
 
-		MonsterWaves[ServerNumber].Initialize(scene_type); // ¿þÀÌºê »óÅÂ ÃÊ±âÈ­
+		MonsterWaves[ServerNumber].Initialize(scene_type); // ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
 
 		for (auto& cl : clients[ServerNumber]) {
-			cl.second._player._pos = spawnDatas[(int)scene_type][(int)cl.second._player._class].pos;
-			cl.second._player._rotation = spawnDatas[(int)scene_type][(int)cl.second._player._class].rot;
+			cl.second._player._pos = cl.second._player._spawn_pos = spawnDatas[(int)scene_type][(int)cl.second._player._class].pos;
+			cl.second._player._rotation = cl.second._player._spawn_rotation = spawnDatas[(int)scene_type][(int)cl.second._player._class].rot;
 			cl.second._player._velocity = Vec3::Zero;
 			cl.second._player._hp = cl.second._player.PlayerMaxHp();
 			cl.second._player._barrier = 0;
 			cl.second._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 			cl.second._player.InitializeTarget();
+			cl.second._player._is_revival = true;
 			//cl.second._player._ready_for_next_stage = false;
+			SendHPPacket(S_OBJECT_TYPE::S_PLAYER, cl.first, cl.second._player._hp, cl.second._player._barrier);
 		}
 
 		cout << "Scene changed to: " << (int)scene_type << endl;
@@ -183,34 +186,7 @@ public:
 	void UpdateWave();
 	void HandleWaveEnd(MonsterWave& wave);
 	void HandleWaveInProgress(MonsterWave& wave);
-	//bool IsAllPlayerReady(); // ¸ðµç ÇÃ·¹ÀÌ¾î°¡ ´ÙÀ½ ½ºÅ×ÀÌÁö ÁØºñ »óÅÂÀÎÁö È®ÀÎ
-
-	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
-		{ S_ENEMY_TYPE::GRASS_SMALL, {
-			{ {0.2f, 0.9f}, 2.f, 100 },
-			{ {0.f, 0.7f}, 0.8f, 100 },
-		}},
-		{ S_ENEMY_TYPE::GRASS_BIG, {
-			{ {0.f, 2.85f}, 1.f, 150 },
-			{ {1.25f, 1.25f}, 2.f, 150 },
-		}},
-		{ S_ENEMY_TYPE::WATER_SMALL, {
-			{ {0.f, 1.f}, 1.f, 100 },
-			{ {0.f, 1.7f}, 0.85f, 100 },
-		}},
-		{ S_ENEMY_TYPE::WATER_BIG, {
-			{ {0.f, 2.5f}, 1.9f, 150 },
-			{ {0.f, 0.f}, 2.5f, 150 },
-		}},
-		{ S_ENEMY_TYPE::FIRE_SMALL, {
-			{ {0.f, 2.f}, 0.75f, 100 },
-			{ {0.f, 0.8f}, 1.1f, 100 },
-		}},
-		{ S_ENEMY_TYPE::FIRE_BIG, {
-			{ {0.8f, 1.15f}, 1.5f, 150 },
-			{ {0.f, 2.3f}, 1.f, 150 },
-		}}
-	};
+	//bool IsAllPlayerReady(); // ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Øºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 
 private:
 	void Update();
@@ -233,4 +209,31 @@ private:
 		}
 		return true;
 	}
+
+	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
+	{ S_ENEMY_TYPE::GRASS_SMALL, {
+		{ {0.2f, 0.9f}, 2.f, M_SMALL_DAMAGE },
+		{ {0.f, 0.7f}, 0.8f, M_SMALL_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::GRASS_BIG, {
+		{ {0.f, 2.85f}, 1.f, M_BIG_DAMAGE },
+		{ {1.25f, 1.25f}, 2.f, M_BIG_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::WATER_SMALL, {
+		{ {0.f, 1.f}, 1.f, M_SMALL_DAMAGE },
+		{ {0.f, 1.7f}, 0.85f, M_SMALL_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::WATER_BIG, {
+		{ {0.f, 2.5f}, 1.9f, M_BIG_DAMAGE },
+		{ {0.f, 0.f}, 2.5f, M_BIG_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::FIRE_SMALL, {
+		{ {0.f, 2.f}, 0.75f, M_SMALL_DAMAGE },
+		{ {0.f, 0.8f}, 1.1f, M_SMALL_DAMAGE },
+	}},
+	{ S_ENEMY_TYPE::FIRE_BIG, {
+		{ {0.8f, 1.15f}, 1.5f, M_BIG_DAMAGE },
+		{ {0.f, 2.3f}, 1.f, M_BIG_DAMAGE },
+	}}
+	};
 };

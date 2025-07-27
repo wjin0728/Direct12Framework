@@ -33,9 +33,12 @@ void PlayerCharacter::OnSkillGrassVine()
 void PlayerCharacter::SetState(PlayerStateMachine* newState) 
 {
 	if (currentState) {
-		if (newState != &PlayerState::HitState::GetInstance()) {
-			previousState = currentState; // HitState로 전환 시 현재 상태 저장
-		}
+		//if (newState != &PlayerState::HitState::GetInstance()) {
+		//	previousState = currentState; // HitState로 전환 시 현재 상태 저장
+		//}
+        if (currentState == &PlayerState::DeathState::GetInstance()) {
+            _is_revival = true;
+        }
 		currentState->Exit(this);
 	}
 	currentState = newState;
@@ -82,6 +85,10 @@ void PlayerCharacter::SetState(uint8_t newState)
     case S_PLAYER_STATE::GETHIT:
         _state = S_PLAYER_STATE::GETHIT;
         SetState(&PlayerState::HitState::GetInstance());
+        break;
+    case S_PLAYER_STATE::DEATH:
+        _state = S_PLAYER_STATE::DEATH;
+        SetState(&PlayerState::DeathState::GetInstance());
         break;
     default:
         break;

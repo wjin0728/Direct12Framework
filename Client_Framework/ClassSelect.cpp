@@ -281,7 +281,7 @@ void CClassSelectUI::InitializeWaitingRoomUI()
 			}
 			introUI->SetActive(true);
 
-			introUI->GetComponent<CMentDisplay>()->StartDisplay(6.f, 1.5f, 0.6f);
+			introUI->GetComponent<CMentDisplay>()->StartDisplay(4.5f, 1.f, 0.5f);
 			});
 	}
 

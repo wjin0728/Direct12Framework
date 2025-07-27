@@ -272,6 +272,26 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		cout << "login : " << c_id << endl;
 
+		if (scene_type != S_SCENE_TYPE::LOBBY) {
+			//현재 씬으로 변경하도록 하기
+			clients[ServerNumber][c_id].send_change_scene_packet((uint8_t)scene_type);
+
+			// 있는 몬스터 추가해주기
+			for (auto& mon : Monsters[ServerNumber]) {
+				if (mon.second.IsUnavailable()) continue;
+				clients[ServerNumber][c_id].send_add_monster_packet(mon.second, mon.first);
+			}
+			// 있는 아이템 추가해주기
+			for (auto& item : items[ServerNumber]) {
+				clients[ServerNumber][c_id].send_drop_item_packet(item.second, item.first);
+			}
+			// 있는 프로젝타일 추가해주기
+			for (auto& proj : Projectiles[ServerNumber]) {
+				clients[ServerNumber][c_id].send_add_projectile_packet(proj.second, proj.first);
+			}
+			clients[ServerNumber][c_id].send_add_player_packet(&clients[ServerNumber][c_id]);
+		}
+
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			if (cl.first == c_id) continue;
@@ -521,7 +541,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
-			//cl.second.send_change_scene_packet(p->change_scene);
+			cl.second.send_change_scene_packet(p->change_scene);
 		}
 		break;
 	}
@@ -530,6 +550,8 @@ void GameManager::Process_packet(int c_id, char* packet)
 
 		if (p->state != (uint8_t)clients[ServerNumber][p->id]._player._state)
 			clients[ServerNumber][p->id]._player.SetState(p->state);
+
+
 		break;
 	}
 	case CS_ATTACK: {
@@ -654,7 +676,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 	}
 	case CS_HP: {
 		CS_HP_PACKET* p = reinterpret_cast<CS_HP_PACKET*>(packet);
-		Monsters[ServerNumber][p->object_id].TakeDamage(p->hp, false);
+		for (auto& monster : Monsters[ServerNumber]) {
+			monster.second.TakeDamage(p->hp, false);
+			SendHPPacket(S_OBJECT_TYPE::S_ENEMY, monster.first, monster.second._hp, monster.second._barrier);
+		}
 		break;
 	}
 	case CS_READY_FOR_NEXT_STAGE: {
@@ -692,8 +717,15 @@ bool GameManager::CanMove(float x, float z)
 void GameManager::Update()
 {
 	for (auto& cl : clients[ServerNumber]) {
-		if (cl.second._state != ST_INGAME) continue;
 		auto& player = cl.second._player;
+		if (cl.second._state != ST_INGAME) continue;
+		if (player._state == S_PLAYER_STATE::DEATH) continue;
+
+		if (player._is_revival) {
+			player.ResetHPtoMax();
+			SendHPPacket((S_OBJECT_TYPE)S_PLAYER, cl.first, player._hp, player._barrier);
+			player._is_revival = false;
+		}
 
 		player.Update();
 
@@ -797,6 +829,29 @@ void GameManager::Update()
 					targeting_state.SetSendTargetLock(true);
 				}
 			}
+
+			auto& skill_state = MonsterState::BossSkillState::GetInstance();
+			if (monster.currentState == &skill_state) {
+				if (skill_state.GetSendSkill()) {
+					Vec3 pos = monster._target->_pos;
+					for (auto& cl : clients[ServerNumber]) {
+						for (auto& hitid : skill_state.hit_client_id) {
+							SendHPPacket((S_OBJECT_TYPE)S_PLAYER, hitid, clients[ServerNumber][hitid]._player._hp, clients[ServerNumber][hitid]._player._barrier);
+						}
+						if (skill_state.GetSkillType() == S_GRASS_VINE) {
+							cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::VINE, pos);
+						}
+						else if (skill_state.GetSkillType() == S_FIRE_EXPLOSION) {
+							pos.y += 1.5f;
+							cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::EXPLOSION, pos);
+						}
+						else if (skill_state.GetSkillType() == S_WATER_HEAL) {
+
+						}
+					}
+					skill_state.SetSendSkill(false);
+				}
+			}
 		}
 
 		// 이벤트 처리
@@ -822,7 +877,7 @@ void GameManager::Update()
 	if (clients[ServerNumber].size()) UpdateWave();
 
 	// 보스 스테이지 처리
-	if (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && MonsterWaves[ServerNumber].current_wave == 3) {
+	if (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && MonsterWaves[ServerNumber].current_wave == S_BOSS) {
 		// 아이템 생성
 		boss_item_timer -= TICK_INTERVAL;
 		if (boss_item_timer <= 0.f) {
@@ -1030,7 +1085,7 @@ void GameManager::InitializeWave()
 		Monster_cnt[ServerNumber] = 0;
 	}
 
-	auto cur_wave = MonsterWaves[ServerNumber].current_wave++;
+	auto cur_wave = ++MonsterWaves[ServerNumber].current_wave;
 
 	switch (scene_type) {
 	case S_SCENE_TYPE::LOBBY: {
@@ -1089,8 +1144,8 @@ void GameManager::InitializeWave()
 	SendMakeMessagePacket((uint8_t)cur_wave);
 
 	MonsterWaves[ServerNumber].is_end = false;
+	MonsterWaves[ServerNumber].is_spawn = false;
 	MonsterWaves[ServerNumber].wave_timer = WAVE_INTERVAL;
-	MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
 	MonsterWaves[ServerNumber].message_timer = MESSAGE_INTERVAL * (float)MonsterWaves[ServerNumber].message_count;
 }
 void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
@@ -1100,6 +1155,7 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 	ms.LocalTransform();
 	for (auto& cl : clients[ServerNumber]) {
 		ms._Player[cl.first] = &cl.second._player;
+		ms._Player[cl.first]->_id = cl.first;
 	}
 
 	// 공격 이벤트 등록
@@ -1107,6 +1163,7 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 		const auto& infos = attackInfos[type];
 		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", MakeAttackEvent(infos[0].offset, infos[0].radius, infos[0].damage));
 		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", MakeAttackEvent(infos[1].offset, infos[1].radius, infos[1].damage));
+		//ms.AddAnimationEvent(S_MONSTER_STATE::SKILL, "Attack", MakeAttackEvent(infos[1].offset, infos[1].radius, infos[1].damage));
 	}
 	else { // 보스 몬스터인 경우
 		ms._drop_item = true; // 보스 몬스터는 아이템 드랍 설정
@@ -1115,7 +1172,6 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 		auto func = [this](Monster* monster) {
 			for (auto& [id, cl] : clients[ServerNumber]) {
 				auto& player = cl._player;
-
 				if (player._state == S_PLAYER_STATE::JUMP ||
 					player._state == S_PLAYER_STATE::GATHERING ||
 					player._state == S_PLAYER_STATE::GETHIT ||
@@ -1126,7 +1182,7 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 				Vec2 player_pos(player._pos.x, player._pos.z);
 				Vec2 attack_pos(monster->_attack_pos.x, monster->_attack_pos.z);
 				if (Vec2::IsInRadius(attack_pos, player_pos, 3.f)) {
-					player.TakeDamage(200);
+					player.TakeDamage(M_BOSS_DAMAGE);
 					SendHPPacket(S_OBJECT_TYPE::S_PLAYER, id, player._hp, player._barrier);
 					std::cout << "맞았다!!!!!!!!" << std::endl;
 				}
@@ -1139,12 +1195,16 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 	Monsters[ServerNumber][monster_id] = ms;
 
 	for (auto& [id, cl] : clients[ServerNumber]) {
-		if (cl._state != ST_INGAME) continue;
+		if (cl._state != ST_INGAME) {
+			cout << "엥" << endl;
+			continue;
+		}
 
 		cl._player._target = nullptr;
 		cl._player._Monster[monster_id] = &Monsters[ServerNumber][monster_id];
 		cl.send_add_monster_packet(Monsters[ServerNumber][monster_id], monster_id);
 	}
+	std::cout << "Monster " << (int)type << " is initialized" << std::endl;
 
 	Monster_cnt[ServerNumber]++;
 }
@@ -1155,7 +1215,6 @@ std::function<void(Monster*)> GameManager::MakeAttackEvent(Vec2 offset, float ra
 		Vec2 center = monster->GetWorldOffsetPosition(offset.x, offset.y);
 		for (auto& [id, cl] : clients[ServerNumber]) {
 			auto& player = cl._player;
-
 			if (player._state == S_PLAYER_STATE::JUMP ||
 				player._state == S_PLAYER_STATE::GATHERING ||
 				player._state == S_PLAYER_STATE::GETHIT ||
@@ -1217,7 +1276,7 @@ void GameManager::HandleWaveEnd(MonsterWave& wave)
 		if (scene_type != S_SCENE_TYPE::LOBBY) wave.wave_timer -= TICK_INTERVAL;
 		if (wave.wave_timer <= 0.f) {
 			InitializeWave();
-			std::cout << wave.current_wave + 1 << " wave started." << std::endl;
+			std::cout << wave.current_wave << " wave started." << std::endl;
 		}
 	}
 }
@@ -1230,14 +1289,12 @@ void GameManager::HandleWaveInProgress(MonsterWave& wave)
 		}
 		return;
 	}
-	// 메시지 타이머가 끝났으면
-	else if (wave.spawn_timer > 0) { // 스폰 처리
-		wave.spawn_timer -= TICK_INTERVAL;
-		if (wave.spawn_timer <= 0.f) {
-			for (auto& [_, monster] : Monsters[ServerNumber]) {
-				monster.SetState(S_MONSTER_STATE::SPAWN);
-			}
+	// 메시지 타이머가 끝났으면 스폰 처리
+	else if (not wave.is_spawn) {
+		for (auto& [_, monster] : Monsters[ServerNumber]) {
+			monster.SetState(S_MONSTER_STATE::SPAWN);
 		}
+		wave.is_spawn = true;
 	}
 
 	// 웨이브 종료 조건 확인

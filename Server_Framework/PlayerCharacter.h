@@ -9,15 +9,21 @@ public:
 	int					_id = -1; // Object ID, -1 means not assigned
 
 	Vec3				_look_dir; // 캐릭터가 보고있는 방향
+	Vec3				_spawn_pos;
+	Quaternion			_spawn_rotation;
 
 	S_PLAYER_CLASS	    _class;
 	S_ITEM_TYPE			_skill;
 	S_PLAYER_STATE		_state;
 	bool				_on_FireEnchant;
 	bool				_on_GrassWeaken;
+	bool				_is_revival = false; // 부활했을때
 
 	int					_hp;
 	int					_barrier;
+	bool				_on_CantMove;
+	float				cant_move_time = 0.f;
+	
 
 	PlayerStateMachine*		currentState;	
 	PlayerStateMachine*		previousState;
@@ -44,6 +50,9 @@ public:
 
 	void SetClass(S_PLAYER_CLASS class_type) {
 		_class = class_type;
+		ResetHPtoMax();
+	}
+	void ResetHPtoMax() {
 		if (S_PLAYER_CLASS::FIGHTER == _class) {
 			_hp = MAX_HP_FIGHTER;
 		}
@@ -53,12 +62,10 @@ public:
 		else if (S_PLAYER_CLASS::MAGE == _class) {
 			_hp = MAX_HP_ARCHER_MAGE;
 		}
-	};
+	}
 	int PlayerMaxHp() {
-		if (S_PLAYER_CLASS::FIGHTER == _class)
-			return (_class == S_PLAYER_CLASS::FIGHTER)
-			? MAX_HP_FIGHTER : MAX_HP_ARCHER_MAGE;
-	};
+		return (_class == S_PLAYER_CLASS::FIGHTER) ? MAX_HP_FIGHTER : MAX_HP_ARCHER_MAGE;
+	}
 
 	void SetLookDir(float x, float y, float z) { _look_dir = Vec3(x, y, z); };
 	void SetLookDir(Vec3 dir) { _look_dir = dir; };

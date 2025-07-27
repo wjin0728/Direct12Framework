@@ -80,20 +80,15 @@ void CBattleScene::Update()
 				renderPasstype = i;
 		}
 	}*/
-	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
-		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		for (auto& monster : monsters) {
-			monster->GetStateMachine()->GetHit(10.f);
-			INSTANCE(ServerManager).send_hp_packet(monster->mID, 10);
-			std::cout << "Monster ID: " << monster->mID << " took 10 damage." << std::endl;
-		}
+	if (INPUT.IsKeyDown(KEY_TYPE::F4)) {
+		INSTANCE(ServerManager).send_hp_packet(10);
 	}
-	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
-		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		for (auto& monster : monsters) {
-			monster->GetStateMachine()->Heal(10.f);
-		}
-	}
+	//if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+	//	auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
+	//	for (auto& monster : monsters) {
+	//		monster->GetStateMachine()->Heal(10.f);
+	//	}
+	//}
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();
 	}*/
@@ -173,20 +168,16 @@ void CBattle2Scene::Update()
 				renderPasstype = i;
 		}
 	}*/
-	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
+	if (INPUT.IsKeyDown(KEY_TYPE::F4)) {
 		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		for (auto& monster : monsters) {
-			monster->GetStateMachine()->GetHit(10.f);
-			INSTANCE(ServerManager).send_hp_packet(monster->mID, 10);
-			std::cout << "Monster ID: " << monster->mID << " took 10 damage." << std::endl;
-		}
+		INSTANCE(ServerManager).send_hp_packet(10);
 	}
-	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
-		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		for (auto& monster : monsters) {
-			monster->GetStateMachine()->Heal(10.f);
-		}
-	}
+	//if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+	//	auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
+	//	for (auto& monster : monsters) {
+	//		monster->GetStateMachine()->Heal(10.f);
+	//	}
+	//}
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();
 	}*/
@@ -271,20 +262,15 @@ void CBattle3Scene::Update()
 				renderPasstype = i;
 		}
 	}*/
-	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
-		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		for (auto& monster : monsters) {
-			monster->GetStateMachine()->GetHit(10.f);
-			INSTANCE(ServerManager).send_hp_packet(monster->mID, 10);
-			std::cout << "Monster ID: " << monster->mID << " took 10 damage." << std::endl;
-		}
+	if (INPUT.IsKeyDown(KEY_TYPE::F4)) {
+		INSTANCE(ServerManager).send_hp_packet(10);
 	}
-	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
-		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		for (auto& monster : monsters) {
-			monster->GetStateMachine()->Heal(10.f);
-		}
-	}
+	//if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+	//	auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
+	//	for (auto& monster : monsters) {
+	//		monster->GetStateMachine()->Heal(10.f);
+	//	}
+	//}
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();
 	}*/

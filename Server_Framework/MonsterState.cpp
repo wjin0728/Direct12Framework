@@ -15,7 +15,7 @@ void MonsterState::IdleState::Enter(Monster* monster) {
 }
 
 void MonsterState::IdleState::Update(Monster* monster) {
-	idleTimer -= TICK_INTERVAL; // 대기 시간 감소
+	if (monster->_active) idleTimer -= TICK_INTERVAL; // 대기 시간 감소
 	if (idleTimer <= 0) {
 		if (monster->_target) {
 			monster->SetState(S_MONSTER_STATE::RUN);
@@ -41,33 +41,9 @@ void MonsterState::RunState::Enter(Monster* monster) {
 void MonsterState::RunState::Update(Monster* monster) {
 	Vec3 pos = monster->_pos; // 현재 위치 저장
 	monster->_pos += monster->_velocity * TICK_INTERVAL * (int)(!monster->_on_CantMove);
-	//if (monster->gameManager.CanMove(pos.x, pos.z)) {
-	//	monster->_pos = pos; // 이동 가능하면 위치 업데이트
-	//}
-	//else {
-	//	monster->SetVelocity(0, 0, 0); // 이동 불가능하면 속도 0
-	//}
-
 
 	if (monster->IsPlayerTooMuchClose()) {
         monster->SetState(S_MONSTER_STATE::ATTACK);
-   //     switch (rand() % pattern_cnt)
-   //     {
-   //     case 0: {
-   //         monster->SetState(S_MONSTER_STATE::ATTACK);
-			//break;
-   //     }
-   //     case 1: {
-			//monster->SetState(S_MONSTER_STATE::SKILL);
-			//break;
-   //     }
-   //     case 2: {
-			//monster->SetState(S_MONSTER_STATE::SKILL); // 원거리?
-			//break;
-   //     }
-   //     default:
-   //         break;
-   //     }
 	}
 }
 
@@ -84,7 +60,7 @@ MonsterState::AttackState& MonsterState::AttackState::GetInstance() { static Mon
 void MonsterState::AttackState::Enter(Monster* monster) {
 	//cout << "BasicAttackState Entered!" << endl;
 
-	if (rand() % 2 == 0) {
+	if (rand() % 2) {
 		attackTimer = monster->_animations[(int)S_MONSTER_STATE::ATTACK].mLength;
 	}
 	else {
@@ -274,13 +250,19 @@ void MonsterState::BossTargetingState::Update(Monster* monster) {
 	else {
 		targetingDelay -= TICK_INTERVAL; // 타겟팅 딜레이 감소
 		if (targetingDelay <= 0) {
-			monster->SetState(S_MONSTER_STATE::ATTACK);
+			if (pattern_cnt == 2) {
+				monster->SetState(S_MONSTER_STATE::SKILL);
+				pattern_cnt = 0;
+			}
+			else {
+				monster->SetState(S_MONSTER_STATE::ATTACK);
+			}
 		}
 	}
 }
 
 void MonsterState::BossTargetingState::Exit(Monster* monster) {
-	monster->ResetTarget(); // 타겟 초기화
+	pattern_cnt++;
 }
 
 
@@ -311,7 +293,8 @@ void MonsterState::BossAttackState::Update(Monster* monster) {
 	}
 }
 
-void MonsterState::BossAttackState::Exit(Monster* monster) {}
+void MonsterState::BossAttackState::Exit(Monster* monster) {
+}
 
 
 
@@ -322,7 +305,51 @@ void MonsterState::BossAttackState::Exit(Monster* monster) {}
 MonsterState::BossSkillState& MonsterState::BossSkillState::GetInstance() { static MonsterState::BossSkillState instance; return instance; }
 
 void MonsterState::BossSkillState::Enter(Monster* monster) {
-	skillTimer = 2.0f; // 스킬 지속 시간 지정해주기
+	skillTimer = monster->_animations[(int)S_MONSTER_STATE::SKILL].mLength;
+	sendSkill = false;
+
+	switch (rand() % 3)
+	{
+	case 0: { // 덩쿨 
+		Vec3 pos = monster->_target->_pos;
+		BoundingBox box(pos, Vec3(4.46f, 1.2f, 4.46f) / 2.f);
+		box.Center.y += 0.3f;
+		for (auto& player : monster->_Player) {
+			player->LocalTransform();
+			if (box.Intersects(player->_boundingbox)) {
+				player->TakeDamage(P_GRASS_VINE_DAMAGE);
+				player->cant_move_time = 4.f; // 2초간 이동 불가
+				player->_on_CantMove = true;
+				SetSkillType(S_GRASS_VINE);
+				hit_client_id.emplace_back(player->_id); // 히트된 클라이언트 ID 저장
+			}
+		}
+		break;
+	}
+	case 1: { // 폭발
+		Vec3 pos = monster->_target->_pos;
+		pos.y += 1.5f;
+		BoundingSphere sphere(pos, 0.7f);
+		for (auto& player : monster->_Player) {
+			if (player->_hp > 0) continue;
+
+			player->LocalTransform();
+			if (sphere.Intersects(player->_boundingbox)) {
+				player->TakeDamage(P_FIRE_EXPLOSION_DAMAGE);
+				SetSkillType(S_FIRE_EXPLOSION);
+				hit_client_id.emplace_back(player->_id); // 히트된 클라이언트 ID 저장
+			}
+		}
+		break;
+	}
+	case 2: { // 힐
+		monster->_hp += 30; // 보스 HP 증가
+		SetSkillType(S_WATER_HEAL);
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 void MonsterState::BossSkillState::Update(Monster* monster) {
@@ -332,7 +359,8 @@ void MonsterState::BossSkillState::Update(Monster* monster) {
 	}
 }
 
-void MonsterState::BossSkillState::Exit(Monster* monster) {}
+void MonsterState::BossSkillState::Exit(Monster* monster) {
+}
 
 
 

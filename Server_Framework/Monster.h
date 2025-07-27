@@ -94,7 +94,7 @@ public:
             break;
         }
         }
-        _active = false;
+        //_active = false;
     }
 
     void AvoidCollision(const unordered_map<int, Monster>& monsters);

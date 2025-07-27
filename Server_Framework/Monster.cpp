@@ -77,6 +77,10 @@ void Monster::SetBossState(S_MONSTER_STATE newState)
 		SetState(&MonsterState::BossAttackState::GetInstance());
 		_state = S_MONSTER_STATE::ATTACK;
 		break;
+	case S_MONSTER_STATE::SKILL:
+		SetState(&MonsterState::BossAttackState::GetInstance());
+		_state = S_MONSTER_STATE::SKILL;
+		break;
 	case S_MONSTER_STATE::GETHIT:
 		SetState(&MonsterState::BossHitState::GetInstance());
 		_state = S_MONSTER_STATE::GETHIT;
@@ -161,7 +165,8 @@ void Monster::UpdateTarget()
     PlayerCharacter* close_player = nullptr;
 	for (auto& player : _Player) {
 		if (player == nullptr) continue; // 플레이어가 없으면 패스
-        Vec3 playerPos = player->_pos;
+		if (player->_state == S_PLAYER_STATE::DEATH) continue; // 플레이어가 없으면 패스
+		Vec3 playerPos = player->_pos;
 		float distance = (_pos - playerPos).LengthSquared();
 		// cout << distance << endl;
 		if (distance < minDistance) {
@@ -184,10 +189,19 @@ void Monster::UpdateTarget()
 
 void Monster::SetRandomTarget()
 {
-	int randomIndex = rand() % _Player.size();
+	vector<int> available_index;
 
-	if (_Player[randomIndex] != nullptr) {
-		_target = _Player[randomIndex];
+	for (int i = 0; auto& player : _Player) {
+		if (player && player->_state != S_PLAYER_STATE::DEATH && player->_id != -1) {
+			available_index.push_back(i);
+		}
+		++i;
+	}
+
+	if (available_index.size()) {
+		int randomIndex{};
+		randomIndex = rand() % available_index.size();
+		_target = _Player[available_index[randomIndex]];
 	}
 	else {
 		_target = nullptr;

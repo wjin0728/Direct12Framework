@@ -125,6 +125,18 @@ namespace PlayerState
         GatheringState() {}
         float GatheringTimer;
     };
+
+    // Death ป๓ลย
+    class DeathState : public PlayerStateMachine {
+    public:
+        static DeathState& GetInstance();
+        void Enter(PlayerCharacter* player) override;
+        void Update(PlayerCharacter* player) override;
+        void Exit(PlayerCharacter* player) override;
+    private:
+        DeathState() {}
+        float DeathTimer;
+    };
 }
 
 #endif
