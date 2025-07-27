@@ -250,17 +250,20 @@ void CPlayerHUD::InitializePlayerHUD()
             WAVE_TYPE waveType = (WAVE_TYPE)std::any_cast<UINT8>(any[0]);
 			if (waveType == WAVE_TYPE::WAVE_END) return;
 			auto mentDisplay = introUI->GetComponent<CMentDisplay>();
-            if (waveType == WAVE_TYPE::mm) {
+            if (waveType == WAVE_TYPE::mm || waveType == WAVE_TYPE::mMm) {
 				mentDisplay->ClearTextures();
-                mentDisplay->AddTexture("intro1");
+				std::string waveName = "stage" + std::to_string(mStage) + "_" + std::to_string((UINT8)waveType);
+                mentDisplay->AddTexture(waveName);
             }
-            else if (waveType == WAVE_TYPE::mMm) {
+            else if (waveType == WAVE_TYPE::BOSS) {
                 mentDisplay->ClearTextures();
-                mentDisplay->AddTexture("intro2");
+                mentDisplay->AddTexture("boss1");
+                mentDisplay->AddTexture("boss2");
             }
             else if (waveType == WAVE_TYPE::OUTRO) {
                 mentDisplay->ClearTextures();
-                mentDisplay->AddTexture("intro3");
+                mentDisplay->AddTexture("bossEnding1");
+				mentDisplay->AddTexture("bossEnding2");
 			}
             if (auto renderer = introUI->GetComponent<CUIRenderer>()) {
                 renderer->SetAlpha(0.0f);

@@ -132,6 +132,13 @@ public:
 		p.ready = ready;
 		Send_Packet(&p);
 	}
+	void send_cs_ultimate_skill_packet() {
+		CS_ULTIMATE_SKILL_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_ULTIMATE_SKILL;
+		p.id = clientID;
+		Send_Packet(&p);
+	}
 
 	// 몬스터 죽이기 위한 편의용 패킷
 	void send_hp_packet(int id, int hp) {

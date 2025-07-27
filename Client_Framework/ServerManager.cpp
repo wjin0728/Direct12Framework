@@ -498,7 +498,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 
 		std::string objName[(int)PROJECTILE_TYPE::PROJECTILE_END]
-			= { "Arrow", "FireBall", "IceBall", "GrassBall", "MagicBall" };
+			= { "Arrow", "Arrow", "FireBall", "IceBall", "GrassBall", "MagicBall" };
 		auto projectile = RESOURCE.GetPrefab(objName[(int)packet->projectile_type]);
 		if (!projectile) {
 			std::cout << "projectile is nullptr" << std::endl;

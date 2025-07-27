@@ -39,13 +39,26 @@ void CPlayerController::Start()
 
 	if(mStateMachine) SetClass(mStateMachine->GetClass());
 
-	if(auto controller = owner->GetComponentFromHierarchy<CAnimationController>()) {
+	if (auto controller = owner->GetComponentFromHierarchy<CAnimationController>()) {
 		auto func = [](float time) {
 			INSTANCE(ServerManager).send_cs_attack_packet();
 			std::cout << "Do attack packet sent!" << std::endl;
 			};
 		controller->AddAnimationEvent("Attack", "Attack", func);
 		controller->AddAnimationEvent("RunAttack", "Attack", func);
+
+		auto func2 = [this](float time) {
+			CastingSkill();
+			std::cout << "Do skill packet sent!" << std::endl;
+			};
+		controller->AddAnimationEvent("Skill", "Skill", func2);
+
+		auto func3 = [this](float time) {
+			if (!mTargetEnemy.lock()) return;
+			INSTANCE(ServerManager).send_cs_ultimate_skill_packet();
+			std::cout << "Do ultimate skill packet sent!" << std::endl;
+			};
+		controller->AddAnimationEvent("Ultimate", "Ultimate", func3);
 	}
 	mUltimateSkillCooldownTime = 5.f;
 	mUltimateSkillCooldown = 0.f;
@@ -209,6 +222,19 @@ void CPlayerController::SetChildAnimationController()
 			};
 		controller->AddAnimationEvent("Attack", "Attack", func);
 		controller->AddAnimationEvent("RunAttack", "Attack", func);
+
+		auto func2 = [this](float time) {
+			CastingSkill();
+			std::cout << "Do skill packet sent!" << std::endl;
+			};
+		controller->AddAnimationEvent("Skill", "Skill", func2);
+
+		auto func3 = [this](float time) {
+			if (!mTargetEnemy.lock()) return;
+			INSTANCE(ServerManager).send_cs_ultimate_skill_packet();
+			std::cout << "Do ultimate skill packet sent!" << std::endl;
+			};
+		controller->AddAnimationEvent("Ultimate", "Ultimate", func3);
 	}
 }
 
@@ -293,7 +319,7 @@ void CPlayerController::OnKeyEvents()
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			if (mUltimateSkillCooldown > 0.f) return;
-			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
+			if (!mTargetEnemy.lock()) return;
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
 			mUltimateSkillCooldown = mUltimateSkillCooldownTime;
 			return;
@@ -366,6 +392,7 @@ void CPlayerController::OnKeyEvents()
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::R)) {
 			if (mUltimateSkillCooldown > 0.f) return;
+			if (!mTargetEnemy.lock()) return;
 			mStateMachine->SetState((UINT8)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ULTIMATE);
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
@@ -416,7 +443,11 @@ void CPlayerController::OnKeyEvents()
 
 void CPlayerController::CastingSkill()
 {
-	if (mSkill == ITEM_TYPE::item_end) return;
+	if (mSkill == ITEM_TYPE::item_end)
+	{
+		SetSkill(ITEM_TYPE::item_end);
+		return;
+	}
 
 	switch (mSkill) {
 	case FIRE_ENCHANT:
@@ -428,7 +459,6 @@ void CPlayerController::CastingSkill()
 		break;
 	case FIRE_EXPLOSION: {
 		if (mTargetEnemy.lock()) {
-			
 			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
 		}
 		else return;
@@ -441,6 +471,6 @@ void CPlayerController::CastingSkill()
 		else return; 
 		break;
 	}
-	SetSkill(ITEM_TYPE::item_end);
+	SetSkill(mSkill);
 	INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
 }

@@ -98,6 +98,8 @@ namespace PlayerState
     private:
         UltimateState() {}
         float ultimateTimer;
+        Vec3 startPos;
+        Vec3 targetPos;
     };
 
     // Hit ป๓ลย
