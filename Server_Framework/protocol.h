@@ -61,6 +61,8 @@ constexpr char SC_LOBBY_ROOM_PLAYER_COUNT = 26;
 constexpr char SC_LOBBY_SERVER_OUT = 27;
 constexpr char SC_BOSS_SET_TARGET = 28;
 constexpr char SC_BOSS_TARGET_LOCK = 29;
+constexpr char SC_MESSAGE = 30;
+constexpr char SC_LOGOUT = 31;
 
 
 #pragma pack (push, 1)
@@ -283,5 +285,13 @@ struct SC_BOSS_SET_TARGET_PACKET : PACKET {
 };
 
 struct SC_BOSS_TARGET_LOCK_PACKET : PACKET {};
+
+struct SC_MESSAGE_PACKET : PACKET {
+	uint8_t message;
+};
+
+struct SC_LOGOUT_PACKET : PACKET {
+	short id;
+};
 
 #pragma pack (pop)
