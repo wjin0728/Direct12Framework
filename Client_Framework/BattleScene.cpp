@@ -80,7 +80,7 @@ void CBattleScene::Update()
 				renderPasstype = i;
 		}
 	}*/
-	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
+	if (INPUT.IsKeyDown(KEY_TYPE::F4)) {
 		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
 		for (auto& monster : monsters) {
 			monster->GetStateMachine()->GetHit(10.f);
@@ -88,12 +88,12 @@ void CBattleScene::Update()
 			std::cout << "Monster ID: " << monster->mID << " took 10 damage." << std::endl;
 		}
 	}
-	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
-		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		for (auto& monster : monsters) {
-			monster->GetStateMachine()->Heal(10.f);
-		}
-	}
+	//if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+	//	auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
+	//	for (auto& monster : monsters) {
+	//		monster->GetStateMachine()->Heal(10.f);
+	//	}
+	//}
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();
 	}*/
@@ -173,7 +173,7 @@ void CBattle2Scene::Update()
 				renderPasstype = i;
 		}
 	}*/
-	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
+	if (INPUT.IsKeyDown(KEY_TYPE::F4)) {
 		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
 		for (auto& monster : monsters) {
 			monster->GetStateMachine()->GetHit(10.f);
@@ -181,12 +181,12 @@ void CBattle2Scene::Update()
 			std::cout << "Monster ID: " << monster->mID << " took 10 damage." << std::endl;
 		}
 	}
-	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
-		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		for (auto& monster : monsters) {
-			monster->GetStateMachine()->Heal(10.f);
-		}
-	}
+	//if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+	//	auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
+	//	for (auto& monster : monsters) {
+	//		monster->GetStateMachine()->Heal(10.f);
+	//	}
+	//}
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();
 	}*/
@@ -271,7 +271,7 @@ void CBattle3Scene::Update()
 				renderPasstype = i;
 		}
 	}*/
-	if (INPUT.IsKeyDown(KEY_TYPE::F2)) {
+	if (INPUT.IsKeyDown(KEY_TYPE::F4)) {
 		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
 		for (auto& monster : monsters) {
 			monster->GetStateMachine()->GetHit(10.f);
@@ -279,12 +279,12 @@ void CBattle3Scene::Update()
 			std::cout << "Monster ID: " << monster->mID << " took 10 damage." << std::endl;
 		}
 	}
-	if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
-		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		for (auto& monster : monsters) {
-			monster->GetStateMachine()->Heal(10.f);
-		}
-	}
+	//if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
+	//	auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
+	//	for (auto& monster : monsters) {
+	//		monster->GetStateMachine()->Heal(10.f);
+	//	}
+	//}
 	/*else if (INPUT.IsKeyDown(KEY_TYPE::L)) {
 		INPUT.ChangeMouseState();
 	}*/

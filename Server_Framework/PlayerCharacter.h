@@ -17,6 +17,7 @@ public:
 	S_PLAYER_STATE		_state;
 	bool				_on_FireEnchant;
 	bool				_on_GrassWeaken;
+	bool				_is_revival = false; // 부활했을때
 
 	int					_hp;
 	int					_barrier;
@@ -49,6 +50,9 @@ public:
 
 	void SetClass(S_PLAYER_CLASS class_type) {
 		_class = class_type;
+		ResetHPtoMax();
+	}
+	void ResetHPtoMax() {
 		if (S_PLAYER_CLASS::FIGHTER == _class) {
 			_hp = MAX_HP_FIGHTER;
 		}
@@ -58,7 +62,7 @@ public:
 		else if (S_PLAYER_CLASS::MAGE == _class) {
 			_hp = MAX_HP_ARCHER_MAGE;
 		}
-	};
+	}
 	int PlayerMaxHp() {
 		return (_class == S_PLAYER_CLASS::FIGHTER) ? MAX_HP_FIGHTER : MAX_HP_ARCHER_MAGE;
 	}

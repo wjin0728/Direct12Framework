@@ -663,6 +663,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_HP: {
 		CS_HP_PACKET* p = reinterpret_cast<CS_HP_PACKET*>(packet);
 		Monsters[ServerNumber][p->object_id].TakeDamage(p->hp, false);
+		SendHPPacket(S_OBJECT_TYPE::S_ENEMY, p->object_id, p->hp, 0);
 		break;
 	}
 	case CS_READY_FOR_NEXT_STAGE: {
@@ -703,6 +704,12 @@ void GameManager::Update()
 		auto& player = cl.second._player;
 		if (cl.second._state != ST_INGAME) continue;
 		if (player._state == S_PLAYER_STATE::DEATH) continue;
+
+		if (player._is_revival) {
+			player.ResetHPtoMax();
+			SendHPPacket((S_OBJECT_TYPE)S_PLAYER, cl.first, player._hp, player._barrier);
+			player._is_revival = false;
+		}
 
 		player.Update();
 

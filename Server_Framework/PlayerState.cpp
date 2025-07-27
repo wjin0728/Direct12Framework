@@ -16,7 +16,8 @@ void PlayerState::IdleState::Update(PlayerCharacter* player) {
     }
 }
 
-void PlayerState::IdleState::Exit(PlayerCharacter* player) {}
+void PlayerState::IdleState::Exit(PlayerCharacter* player) {
+}
 
 // PlayerState::RunState ±¸Çö
 PlayerState::RunState& PlayerState::RunState::GetInstance() { static PlayerState::RunState instance; return instance; }

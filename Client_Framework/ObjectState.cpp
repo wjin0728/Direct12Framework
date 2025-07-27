@@ -13,7 +13,10 @@
 
 void CPlayerStateMachine::Awake()
 {
-
+	mShieldHealth = 0;
+	mShieldDuration = 0.f;
+	mIsDead = false;
+	mIsHit = false;
 }
 
 void CPlayerStateMachine::Start()
@@ -44,10 +47,8 @@ void CPlayerStateMachine::Update()
 		case PLAYER_STATE::ATTACK:
 		case PLAYER_STATE::SKILL:
 		case PLAYER_STATE::ULTIMATE:
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
-			break;
 		case PLAYER_STATE::DEATH:
-			// 플레이어 사망처리
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			break;
 		case PLAYER_STATE::RUNATTACK:
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
@@ -158,6 +159,7 @@ void CPlayerStateMachine::OnExitState(UINT8 state)
 		mIsHit = false;
 		break;
 	case PLAYER_STATE::DEATH:
+		mIsDead = false;
 		break;
 	case PLAYER_STATE::JUMP:
 		break;
@@ -210,6 +212,7 @@ void CPlayerStateMachine::UpdateHealth(float newHealth, int newSheild)
 void CArcherState::Awake()
 {
 	CPlayerStateMachine::Awake();
+	mClass = PLAYER_CLASS::ARCHER;
 }
 
 void CArcherState::Start()
@@ -285,6 +288,7 @@ void CArcherState::CreateParticleEvent()
 void CWarriorState::Awake()
 {
 	CPlayerStateMachine::Awake();
+	mClass = PLAYER_CLASS::FIGHTER;
 }
 
 void CWarriorState::Start()
@@ -450,12 +454,6 @@ void CMageState::Awake()
 {
 	CPlayerStateMachine::Awake();
 	mClass = PLAYER_CLASS::MAGE;
-	mMaxHealth = MAX_HP_ARCHER_MAGE;
-	mHealth = mMaxHealth;
-	mShieldHealth = 0;
-	mShieldDuration = 0.f;
-	mIsDead = false;
-	mIsHit = false;
 }
 
 void CMageState::Start()
@@ -527,12 +525,12 @@ void CMageState::Update()
 
 void CMageState::OnEnterState(UINT8 state)
 {
+	CPlayerStateMachine::OnEnterState(state);
 	auto controller = mAnimationController.lock();
 	if (!controller) {
 		return;
 	}
-	controller->SetTrackAnimationSet((int)state);
-	auto cutscene = owner->GetComponentFromHierarchy<CCutScene>();
+
 	switch ((PLAYER_STATE)state) {
 	case PLAYER_STATE::IDLE:
 		break;
@@ -543,21 +541,14 @@ void CMageState::OnEnterState(UINT8 state)
 	case PLAYER_STATE::RUNATTACK:
 		break;
 	case PLAYER_STATE::GETHIT:
-		mIsHit = true;
-		mIsInvisible = true;
-		GetTransform()->SetHitFactor(1.f);
 		break;
 	case PLAYER_STATE::DEATH:
-		mIsHit = false;
-		mIsDead = true;
 		break;
 	case PLAYER_STATE::JUMP:
 		break;
 	case PLAYER_STATE::SKILL:
 		break;
 	case PLAYER_STATE::ULTIMATE:
-		if (cutscene && !cutscene->GetEnable())
-			cutscene->PlayCutScene();
 		break;
 	default:
 		break;
@@ -566,6 +557,7 @@ void CMageState::OnEnterState(UINT8 state)
 
 void CMageState::OnExitState(UINT8 state)
 {
+	CPlayerStateMachine::OnExitState(state);
 	auto controller = mAnimationController.lock();
 	if (!controller) {
 		return;
@@ -580,9 +572,6 @@ void CMageState::OnExitState(UINT8 state)
 	case PLAYER_STATE::RUNATTACK:
 		break;
 	case PLAYER_STATE::GETHIT:
-		mIsInvisible = false;
-		GetTransform()->SetHitFactor(0.f);
-		mIsHit = false;
 		break;
 	case PLAYER_STATE::DEATH:
 		break;

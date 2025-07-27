@@ -150,6 +150,7 @@ public:
 			cl.second._player._barrier = 0;
 			cl.second._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 			cl.second._player.InitializeTarget();
+			cl.second._player._is_revival = true;
 			//cl.second._player._ready_for_next_stage = false;
 		}
 
