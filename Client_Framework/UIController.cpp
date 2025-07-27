@@ -17,8 +17,8 @@
 #include "CutScene.h"
 #include"RenderManager.h"
 #include"UIRenderer.h"
-#include"TargetMarker.h"
 #include"ResourceManager.h"
+#include"TargetMarker.h"
 #include"ParticleAttach.h"
 #include"HealthSystem.h"
 #include"Button.h"
@@ -223,11 +223,10 @@ void CPlayerHUD::InitializePlayerHUD()
         if (auto marker = targetMarker->AddComponent<CTargetMarker>())
         {
             targetMarkerRenderer->mIsVisible = false;
-            mPlayer.lock()->AddEvent("OnTargetChanged", [marker](const std::vector<std::any>& args) {
+            mPlayer.lock()->AddEvent("OnEnemyTargeted", [marker](const std::vector<std::any>& args) {
                 if (args.size() < 1) return;
-                auto target = std::any_cast<std::shared_ptr<CGameObject>>(args[0]);
-                bool isActive = std::any_cast<bool>(args[0]);
-                marker->SetTarget(target);
+                auto target = std::any_cast<std::weak_ptr<CGameObject>>(args[0]);
+                marker->SetTarget(target.lock());
                 });
         }
     }

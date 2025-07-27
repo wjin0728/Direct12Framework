@@ -47,7 +47,8 @@ void CPlayerController::Start()
 		controller->AddAnimationEvent("Attack", "Attack", func);
 		controller->AddAnimationEvent("RunAttack", "Attack", func);
 	}
-	mUltimateSkillCooldown = mUltimateSkillCooldownTime;
+	mUltimateSkillCooldownTime = 5.f;
+	mUltimateSkillCooldown = 0.f;
 }
 
 void CPlayerController::Update()
@@ -276,6 +277,7 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(5);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
+			if (mSkill == ITEM_TYPE::item_end) return;
 			CastingSkill();
 			return;
 		}
@@ -346,6 +348,7 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(4);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
+			if (mSkill == ITEM_TYPE::item_end) return;
 			CastingSkill();
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
 			return;

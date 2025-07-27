@@ -70,8 +70,8 @@ float4 PS_Sprite(VS_OUTPUT input) : SV_Target
     else if (uiData.intData0 == 2) 
     {
         float fillAmount = uiData.floatData0;
-        if(uv.y > fillAmount)
-            finalColor.a *= 0.2f;
+        if(uv.y < fillAmount)
+            finalColor.a *= 0.1f;
 
     }
  

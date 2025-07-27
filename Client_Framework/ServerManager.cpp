@@ -744,8 +744,6 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		Connect(PORT_NUM);
 
 		send_cs_game_server_login_packet();
-
-		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
 		break;
 	}
 	case SC_BOSS_SET_TARGET: {

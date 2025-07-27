@@ -59,7 +59,7 @@ void CClassSelectUI::Start()
 			auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(player.second->GetStateMachine());
 			uint8_t classType = (uint8_t)playerState->GetClass();
 			Vec3 position = mClassCharacters[classType]->GetTransform()->GetLocalPosition();
-			Vec3 rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
+			Quaternion rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
 			Vec3 scale = mClassCharacters[classType]->GetTransform()->GetLocalScale();
 
 			mSelectedClasses.push_back((PLAYER_CLASS)classType);
@@ -104,7 +104,7 @@ void CClassSelectUI::Start()
 
 		uint8_t classType = std::any_cast<uint8_t>(any[0]);
 		Vec3 position = mClassCharacters[classType]->GetTransform()->GetLocalPosition();
-		Vec3 rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
+		Quaternion rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
 		Vec3 scale = mClassCharacters[classType]->GetTransform()->GetLocalScale();
 
 		short playerId = std::any_cast<short>(any[1]);
@@ -155,7 +155,7 @@ void CClassSelectUI::Start()
 				}
 				auto thirdPersonCamera = camera->GetComponent<CThirdPersonCamera>();
 				if (thirdPersonCamera) {
-					thirdPersonCamera->SetDefaultCameraParams();
+					//thirdPersonCamera->SetDefaultCameraParams();
 					thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FollowTarget);
 				}
 			}

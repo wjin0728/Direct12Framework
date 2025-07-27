@@ -30,6 +30,8 @@ public:
 class CGrassBigState :
     public CEnemyState
 {
+protected:
+    std::weak_ptr<class CTransform> mAttackPoint;
 public:
 	virtual ~CGrassBigState() {}
 	virtual void Awake() override;
