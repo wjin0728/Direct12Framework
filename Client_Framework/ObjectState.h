@@ -34,21 +34,7 @@ public:
     PLAYER_CLASS GetClass() const { return mClass; }
 	void SetShield(std::weak_ptr<class CGameObject> shield) { mShield = shield; }
 	void SetShieldHealth(int health) { mShieldHealth = health; }
-    void ActivateShield(bool activate)
-    {
-        if (auto shield = mShield.lock()) {
-            shield->SetActive(activate);
-
-            if (activate) {
-                mShieldHealth = 3;
-                mShieldDuration = mShieldDurationMax; // Reset shield duration when activated
-			}
-            else {
-                mShieldHealth = 0;
-                mShieldDuration = -1.f;
-            }
-        }
-	}
+    void ActivateShield(bool activate);
 
 	virtual void CreateParticleEvent();
     virtual void GetHit(float damage) override;

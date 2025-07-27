@@ -58,12 +58,13 @@ void CParticleAttach::Play()
 	if (mIsPlaying && mLoop) {
 		return;
 	}
+	std::cout << "Playing ParticleEmitter: " << mParticleEmitterName << std::endl;
 	mParticleEmitter = INSTANCE(CParticleManager).PlayParticleEmitter(mParticleEmitterName, GetTransform()->GetWorldMat(), mLoop);
 }
 
 void CParticleAttach::Stop()
 {
-	if (mParticleEmitter->mIsPlaying) {
+	if (mParticleEmitter&&mParticleEmitter->mIsPlaying) {
 		mParticleEmitter->Stop();
 	}
 }

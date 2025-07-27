@@ -16,13 +16,14 @@ enum class FadeState
 {
 	In,
 	Out,
+	Fullscreen,
 	None
 };
 
 enum class FadeType
 {
 	Default,
-	Circular, 
+	Circular,
 	End
 };
 
@@ -102,9 +103,12 @@ public:
 	void FadeUpdate();
 	void FadeIn(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
 	void FadeOut(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
+	void AlwaysFade(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
 
 	void CircularFadeIn(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
 	void CircularFadeOut(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
+	void CircularAlwaysFade(float duration = 0.5f, const Color& color = Color(0.0f, 0.0f, 0.0f, 1.0f), std::function<void()> onFinish = nullptr);
+
 
 protected:
 	void UpdatePassData();

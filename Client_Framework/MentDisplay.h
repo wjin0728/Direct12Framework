@@ -29,22 +29,8 @@ public:
     virtual void Update() override;
 	virtual void LateUpdate() override;
 
-    void ClearTextures()
-    {
-        mTextures.clear();
-        mCurrentTextureIndex = 0;
-        mAlpha = 0.0f;
-	}
     void AddTexture(const std::string& Name);
-    void StartDisplay(float DisplayTime, float FadeTime, float WaitTime = 0.0f)
-    {
-        mDisplayTime = DisplayTime;
-        mFadeTime = FadeTime;
-        mWaitTime = WaitTime;
-        mCurrentTextureIndex = 0;
-        mTime = 0.0f;
-        mAlpha = 0.0f;
-	}
+    void StartDisplay(float DisplayTime, float FadeTime, float WaitTime = 0.0f);
     void ClearTextures()
     {
         mTextures.clear();
