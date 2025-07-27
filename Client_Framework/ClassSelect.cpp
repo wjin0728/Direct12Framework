@@ -220,7 +220,7 @@ void CClassSelectUI::ChangeMenuState(EMenuState newState)
 				}
 			}
 			auto introUI = mWaitingRoomUI->FindChildByName("IntroUI");
-			introUI->SetActive(false);
+			//introUI->SetActive(false);
 			break;
 		}
     default:
@@ -273,7 +273,7 @@ void CClassSelectUI::InitializeWaitingRoomUI()
 				renderer->SetAlpha(1.0f);
 			}
 			introUI->SetActive(true);
-			introUI->GetComponent<CMentDisplay>()->StartDisplay(4.f, 1.f, 0.5f);
+			introUI->GetComponent<CMentDisplay>()->StartDisplay(6.f, 1.5f, 0.6f);
 			});
 	}
 
