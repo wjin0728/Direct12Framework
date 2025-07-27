@@ -133,8 +133,6 @@ void CClassSelectUI::Start()
 				}
 			}
 		}
-		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(playerObj->GetStateMachine());
-		playerState->CreateParticleEvent();
 
 		std::cout << "Selected class: " << classType << endl;
 
@@ -148,6 +146,8 @@ void CClassSelectUI::Start()
 		mClassCharacters[classType]->GetTransform()->SetParentInScene(playerObj->GetTransform());
 
 		
+		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(playerObj->GetStateMachine());
+		playerState->CreateParticleEvent();
 		playerState->SetState((UINT8)PLAYER_STATE::IDLE);
 
 		auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
