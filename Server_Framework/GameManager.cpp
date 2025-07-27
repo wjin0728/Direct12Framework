@@ -662,8 +662,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 	}
 	case CS_HP: {
 		CS_HP_PACKET* p = reinterpret_cast<CS_HP_PACKET*>(packet);
-		Monsters[ServerNumber][p->object_id].TakeDamage(p->hp, false);
-		SendHPPacket(S_OBJECT_TYPE::S_ENEMY, p->object_id, p->hp, 0);
+		for (auto& monster : Monsters[ServerNumber]) {
+			monster.second.TakeDamage(p->hp, false);
+			SendHPPacket(S_OBJECT_TYPE::S_ENEMY, monster.first, monster.second._hp, 0);
+		}
 		break;
 	}
 	case CS_READY_FOR_NEXT_STAGE: {

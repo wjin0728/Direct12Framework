@@ -141,11 +141,10 @@ public:
 	}
 
 	// 몬스터 죽이기 위한 편의용 패킷
-	void send_hp_packet(int id, int hp) {
+	void send_hp_packet(int hp) {
 		CS_HP_PACKET p;
 		p.type = CS_HP;
 		p.size = sizeof(p);
-		p.object_id = id;
 		p.hp = hp;
 		Send_Packet(&p);
 	}

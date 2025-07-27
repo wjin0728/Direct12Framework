@@ -155,7 +155,6 @@ struct CS_CLICK_BUTTON_PACKET : PACKET {
 };
 
 struct CS_HP_PACKET : PACKET {
-	short object_id;
 	short hp;
 };
 
