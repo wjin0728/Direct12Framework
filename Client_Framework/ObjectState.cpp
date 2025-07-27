@@ -50,7 +50,6 @@ void CPlayerStateMachine::Update()
 		switch ((PLAYER_STATE)currentState) {
 		case PLAYER_STATE::JUMP:
 		case PLAYER_STATE::GATHERING:
-		case PLAYER_STATE::GETHIT:
 		case PLAYER_STATE::ATTACK:
 		case PLAYER_STATE::SKILL:
 		case PLAYER_STATE::ULTIMATE:
@@ -60,6 +59,10 @@ void CPlayerStateMachine::Update()
 			break;
 		case PLAYER_STATE::RUNATTACK:
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
+			break;
+		case PLAYER_STATE::GETHIT:
+			GetTransform()->SetHitFactor(0.f);
+			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			break;
 		default:
 			break;

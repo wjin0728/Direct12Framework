@@ -30,20 +30,7 @@ class CFreeCameraState : public ICameraState
 	bool IsTransitioning() const override { return false; }
 };
 
-struct CameraParams {
-	Vec3 trackingPosition{};
-	Vec2 framing{};
-	float distance{};
-	float pitch{};
-	float yaw{};
-};
 
-struct CameraBlend {
-	Vec2 framing;
-	float pitch;
-	float yaw;
-	float distance;
-};
 
 class CTargetCameraState : public ICameraState
 {

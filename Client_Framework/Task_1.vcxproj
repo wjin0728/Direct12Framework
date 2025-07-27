@@ -167,8 +167,8 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CBData.h" />
     <ClInclude Include="CEntityState.h" />
+    <ClInclude Include="ClassSelect.h" />
     <ClInclude Include="ContinuousRotation.h" />
-    <ClInclude Include="CutScene.h" />
     <ClInclude Include="EnemyState.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="HealthSystem.h" />
@@ -178,8 +178,8 @@
     <ClInclude Include="CResource.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingGroup.h" />
+    <ClInclude Include="MentDisplay.h" />
     <ClInclude Include="Vine.h" />
-    <ClInclude Include="LobbyUI.h" />
     <ClInclude Include="MainMenuUI.h" />
     <ClInclude Include="MainScene.h" />
     <ClInclude Include="Portal.h" />
@@ -202,7 +202,6 @@
     <ClInclude Include="SkinnedMeshRenderer.h" />
     <ClInclude Include="TargetMarker.h" />
     <ClInclude Include="ThirdPersonCamera.h" />
-    <ClInclude Include="TPCameraState.h" />
     <ClInclude Include="TrailRenderer.h" />
     <ClInclude Include="UIController.h" />
     <ClInclude Include="UIRenderer.h" />
@@ -246,6 +245,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CEntityState.cpp" />
+    <ClCompile Include="ClassSelect.cpp" />
     <ClCompile Include="ContinuousRotation.cpp" />
     <ClCompile Include="CutScene.cpp" />
     <ClCompile Include="EnemyState.cpp" />
@@ -255,8 +255,8 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
+    <ClCompile Include="MentDisplay.cpp" />
     <ClCompile Include="Vine.cpp" />
-    <ClCompile Include="LobbyUI.cpp" />
     <ClCompile Include="MainMenuUI.cpp" />
     <ClCompile Include="Portal.cpp" />
     <ClCompile Include="RenderManager.cpp" />
@@ -278,7 +278,6 @@
     <ClCompile Include="SkinnedMeshRenderer.cpp" />
     <ClCompile Include="TargetMarker.cpp" />
     <ClCompile Include="ThirdPersonCamera.cpp" />
-    <ClCompile Include="TPCameraState.cpp" />
     <ClCompile Include="TrailRenderer.cpp" />
     <ClCompile Include="UIController.cpp" />
     <ClCompile Include="UIRenderer.cpp" />
@@ -400,6 +399,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\Shaders\Scrolling.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Shaders\LitOutline.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

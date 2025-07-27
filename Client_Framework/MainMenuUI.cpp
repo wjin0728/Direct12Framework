@@ -13,9 +13,18 @@
 #include"ResourceManager.h"
 #include"Button.h"
 #include"ServerManager.h"
+#include "UIController.h"
 
 CMainMenu::CMainMenu()
 {
+}
+
+CMainMenu::CMainMenu(const CMainMenu& other)
+{
+    mCurrentState = other.mCurrentState;
+    mTitleUI = nullptr;
+	mSettingsUI = nullptr;
+	mRoomSelectUI = nullptr;
 }
 
 void CMainMenu::Awake()

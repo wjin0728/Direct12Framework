@@ -130,6 +130,9 @@ void CScene::CreatePrefabs(std::ifstream& ifs, std::unordered_map<std::string, s
 
 	for(int i=0; i< prefabNum; i++) {
 		auto prefab = CGameObject::CreateObjectFromFile(ifs, prefabs);
+		if(prefabs.contains(prefab->GetName())) {
+			continue;
+		}
 		prefabs[prefab->GetName()] = prefab;
 	}
 }
@@ -139,6 +142,20 @@ std::shared_ptr<CGameObject> CScene::FindObjectWithTag(const std::string& tag)
 	std::shared_ptr<CGameObject> obj = nullptr;
 
 	return obj;
+}
+
+std::shared_ptr<CGameObject> CScene::FindObjectWithName(const std::string& name)
+{
+	std::shared_ptr<CGameObject> object = nullptr;
+	for (const auto& obj : mObjects) {
+		if (obj->GetName() == name) {
+			return obj;
+		}
+		if(object = obj->FindChildByName(name)) {
+			return object;
+		}
+	}
+	return object;
 }
 
 void CScene::ExpandSceneAABB(std::shared_ptr<CGameObject> obj, BoundingBox& sceneAABB)
@@ -186,7 +203,7 @@ void CScene::AddObject(std::shared_ptr<CGameObject> object)
 void CScene::DestroyObject(CGameObject* object)
 {
 	if (object) {
-		object->SetActive(false);
+		auto itr = findByRawPointer(mObjects, object);
 		mRemoveQueue.push(object);
 	}
 }
@@ -245,15 +262,6 @@ void CScene::CollectVisibleObjects()
 {
 	for (const auto& object : mObjects) {
 		object->RegisterRenderer();
-	}
-}
-
-void CScene::AddRemoveQueue(CGameObject* object)
-{
-	if (object) {
-		object->SetActive(false);
-		auto itr = findByRawPointer(mObjects, object);
-		mRemoveQueue.push(object);
 	}
 }
 
@@ -369,15 +377,13 @@ void CScene::RemoveObjects()
 	while (!mRemoveQueue.empty()) {
 		auto object = mRemoveQueue.front();
 		mRemoveQueue.pop();
-		if (!object) continue;
-		object->SetActive(false);
 		auto itr = findByRawPointer(mObjects, object);
 		if (itr != mObjects.end()) {
 			mObjects.erase(itr);
 		}
 
 		auto type = object->GetObjectType();
-		if (type != OBJECT_TYPE::NONE) {
+		if (type > OBJECT_TYPE::NONE && type < OBJECT_TYPE::end) {
 			auto itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
 				[object](const std::shared_ptr<CGameObject>& ptr) { return ptr.get() == object; });
 			if (itr != mObjectTypes[type].end()) {

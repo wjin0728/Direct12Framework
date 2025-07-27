@@ -589,6 +589,9 @@ int CMaterial::GetTextureIdx(std::ifstream& inFile)
 	std::string name{};
 	BinaryReader::ReadDateFromFile(inFile, name);
 
+	if(name == "UnityWhite")
+		int i{}; // Debugging line, remove if not needed
+
 	if (name == "null") 
 		return -1;
 

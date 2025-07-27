@@ -5,6 +5,10 @@
 #include"ResourceManager.h"
 #include"HealthSystem.h"
 #include "Timer.h"
+#include"Camera.h"
+#include"RenderManager.h"
+#include "GameObject.h"
+#include"ParticleManager.h"
 
 const float CEnemyState::MAX_HEALTH = 100.f;
 
@@ -136,6 +140,7 @@ void CEnemyState::OnExitState(UINT8 state)
 	case MONSTER_STATE::SKILL:
 		break;
 	case MONSTER_STATE::GETHIT:
+		GetTransform()->SetHitFactor(0.f);
 		break;
 	case MONSTER_STATE::DEATH:
 		if (mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(false);
@@ -217,6 +222,23 @@ void CGrassBigState::Start()
 {
 	CEnemyState::Start();
 	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+
+	mAttackPoint = owner->FindChildByName("RigLArmPalm")->GetTransform();
+	auto func1 = [this](float time) {
+		if (auto attackPoint = mAttackPoint.lock()) {
+			auto transform = attackPoint->GetTransform();
+			if (transform) {
+				Vec3 position = transform->GetWorldPosition();
+				Vec3 forward = transform->GetWorldLook();
+				position -= forward * 0.4f;
+				INSTANCE(CParticleManager).PlayParticleEmitter(
+					"MonsterAttack",
+					position
+				);
+			}
+		}
+		};
+	mAnimationController.lock()->AddAnimationEvent("Attack", "Attack", func1);
 
 	auto healthSystem = mHealthSystem.lock();
 	if (healthSystem) {

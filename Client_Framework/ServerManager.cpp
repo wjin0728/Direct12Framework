@@ -125,8 +125,8 @@ void ServerManager::Client_Login()
 bool ServerManager::InitPlayerAndCamera()
 {
 	mPlayer = std::make_shared<CGameObject>();
-	mPlayer->SetTag("Player");
-	mPlayer->SetName("Player");
+	mPlayer->SetTag("MainPlayer");
+	mPlayer->SetName("MainPlayer");
 	mPlayer->SetRenderLayer(RENDER_LAYER::Opaque);
 	mPlayer->SetStatic(false);
 
@@ -150,12 +150,14 @@ bool ServerManager::InitPlayerAndCamera()
 
 #ifdef REVERSE_Z
 	camera->GenerateReverseZPerspectiveProjectionMatrix(0.1f, 150.f, 60.f);
+	//camera->GenerateReverseZOrthographicProjectionMatrix(0.5f, 100.f, rtSize.x, rtSize.y);
 #elif // REVERSE_Z
 	camera->GeneratePerspectiveProjectionMatrix(1.f, 100.f, 60.f);
 #endif // REVERSE_Z
 
 	auto playerFollower = mMainCamera->AddComponent<CThirdPersonCamera>();
 	playerFollower->SetTarget(mPlayer);
+	playerFollower->SetCamera(camera);
 	playerController->SetCamera(camera);
 	cutScene->SetThirdPersonCamera(playerFollower);
 
@@ -278,27 +280,22 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_ADD_PLAYER: {
 		SC_ADD_PLAYER_PACKET* packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(packet_ptr);
-		std::string objName[3] = { "Archer", "Fighter", "Mage" };
-		auto obj = RESOURCE.GetPrefab(objName[packet->player_class]);
-		if (!obj) {
-			std::cout << "obj is nullptr" << std::endl;
-			break;
-		}
 
 		std::shared_ptr<CGameObject> player{};
-		if (clientID == packet->id) {
-			player = mPlayer;
-			player->GetCutScene()->SetClass((PLAYER_CLASS)packet->player_class);
-			//RenderOK = 1;
-		}
-		else {
+		if (clientID != packet->id) {
 			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
 			player = mOtherPlayers[packet->id];
+			auto scene = INSTANCE(CSceneManager).GetCurScene();
+			if (!scene) {
+				std::cout << "Current scene is nullptr" << std::endl;
+				break;
+			}
+			scene->AddObject(player);
 		}
-		CGameObject::Instantiate(obj, player->GetTransform());
-		player->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
-		player->GetTransform()->SetLocalRotationY(packet->look_y);
-
+		else {
+			player = mPlayer;
+			mPlayer->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		}
 		std::shared_ptr<CPlayerStateMachine> stateMachine{};
 		if (packet->player_class == (UINT8)PLAYER_CLASS::ARCHER) {
 			stateMachine = player->AddComponent<CArcherState>();
@@ -309,36 +306,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		else if (packet->player_class == (UINT8)PLAYER_CLASS::MAGE) {
 			stateMachine = player->AddComponent<CMageState>();
 		}
-		else {
-			std::cout << "Unknown player class: " << (int)packet->player_class << std::endl;
-			return;
-		}
-
-		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
 		player->SetStateMachine(stateMachine);
+		
 
-		auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
-		if (shieldPrefab) {
-			auto shieldObj = CGameObject::Instantiate(shieldPrefab, player->GetTransform());
-			shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
-			shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
-			stateMachine->SetShield(shieldObj);
-			stateMachine->ActivateShield(false);
-		}
-
-		auto scene = INSTANCE(CSceneManager).GetCurScene();
-		if (!scene) {
-			std::cout << "Current scene is nullptr" << std::endl;
-			break;
-		}
-		if (clientID != packet->id) {
-			scene->AddObject(player);
-		}
-
-		if (!RenderOK) {
-				RenderOK = true;
-				INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
-		}
+		TriggerEvent("SelectClass", { packet->player_class, packet->id });
 		break;
 	}
 	case SC_CHANGE_SCENE: {
@@ -364,6 +335,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			if (auto state = std::dynamic_pointer_cast<CPlayerStateMachine>(pair.second->GetStateMachine())) {
 				state->ActivateShield(false);
 			}
+		}
+		mPlayer->SetActive(false);
+		for (auto& pair : mOtherPlayers) {
+			pair.second->SetActive(false);
 		}
 		break;
 	}
@@ -765,13 +740,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		break;
 	}
 	case SC_LOBBY_SERVER_OUT: {
+		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
 		Connect(PORT_NUM);
 
-		// 여기 clientID는 선택 직업 자리임
-		// 근데 직업 선택하는거 넣으면 여기는 아예 뺄 것
-		send_cs_game_server_login_packet(clientID);
-
-		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
+		send_cs_game_server_login_packet();
 		break;
 	}
 	case SC_BOSS_SET_TARGET: {

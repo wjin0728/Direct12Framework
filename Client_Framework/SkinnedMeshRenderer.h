@@ -5,6 +5,8 @@ class CSkinnedMesh;
 class CTransform;
 class CAnimationController;
 
+
+
 class CSkinnedMeshRenderer : public CRenderer
 {
 private:
@@ -34,5 +36,6 @@ public:
     void SetSkinnedMesh(const std::shared_ptr<CSkinnedMesh>& mesh);
     void SetSkinnedMesh(const std::string& name);
     std::shared_ptr<CSkinnedMesh> GetSkinnedMesh() const { return mSkinnedMesh; }
+
 };
 

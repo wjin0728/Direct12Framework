@@ -170,10 +170,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 {
 	switch (packet[2]) {
 	case CS_LOGIN: {
-		//CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet); {
-		//	lock_guard<mutex> ll{ clients[c_id]._s_lock };
-		//	clients[c_id]._state = ST_INGAME;
-		//}
+		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet); {
+			lock_guard<mutex> ll{ clients[c_id]._s_lock };
+			clients[c_id]._state = ST_INGAME;
+		}
 		break;
 	}
 	case CS_CLICK_BUTTON: {
@@ -196,10 +196,10 @@ void GameManager::Process_packet(int c_id, char* packet)
 			Room_Cnt[(int)p->button_type]++;
 
 			for (auto& client : clients) {
-				if (client.second._state != ST_INGAME) continue;
-				client.second.send_room_player_count_packet(Room_Cnt);
+				if (client.second._state == ST_INGAME) {
+					client.second.send_room_player_count_packet(Room_Cnt);
+				}
 			}
-
 			clients[c_id].send_lobby_server_out_packet();
 			break;
 		}

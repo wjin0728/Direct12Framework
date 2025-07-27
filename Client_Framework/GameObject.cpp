@@ -412,7 +412,7 @@ std::shared_ptr<CGameObject> CGameObject::InitFromFile(std::ifstream& inFile, st
 	std::string token{};
 
 	while (true) {
-		ReadDateFromFile(inFile, token);
+		BinaryReader::ReadDateFromFile(inFile, token);
 		if (token == "<Prefab>:") {
 			std::string prefabName{};
 			ReadDateFromFile(inFile, prefabName);
@@ -621,9 +621,14 @@ void CGameObject::CreateUIrendererFromFile(std::ifstream& inFile)
 
 	auto uiRenderer = AddComponent<CUIRenderer>();
 	mRenderer = uiRenderer;
-	std::string path = TEXTURE_PATH(textureName);
-	auto mainTex = std::make_shared<CTexture>(textureName, path);
-	RESOURCE.Add(mainTex);
+
+	std::shared_ptr<CTexture> mainTex = nullptr;	
+	if (textureName != "null") {
+		std::string path = TEXTURE_PATH(textureName);
+		mainTex = std::make_shared<CTexture>(textureName, path);
+		RESOURCE.Add(mainTex);
+	}
+	
 	uiRenderer->SetTexture(mainTex);
 	uiRenderer->SetSize(size);
 	uiRenderer->SetType(0);

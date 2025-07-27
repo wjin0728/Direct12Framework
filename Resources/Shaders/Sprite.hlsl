@@ -39,8 +39,11 @@ float4 PS_Sprite(VS_OUTPUT input) : SV_Target
     
     CBUIData uiData = UIData[idx0];
     float4 color = uiData.color;
-    texColor = diffuseMap[uiData.textureIdx].SampleLevel(linearClamp, uv, 0);
-    texColor.rgb = GammaDecoding(texColor.rgb);
+    if (uiData.textureIdx >= 0)
+    {
+        texColor = diffuseMap[uiData.textureIdx].SampleLevel(linearClamp, uv, 0);
+        texColor.rgb = GammaDecoding(texColor.rgb);
+    }
     float4 finalColor = texColor * color;
     float4 color2 = finalColor * 0.5f;
     color2.a = finalColor.a;
@@ -54,18 +57,23 @@ float4 PS_Sprite(VS_OUTPUT input) : SV_Target
             return float4(1.f, 1.f, 1.f, finalColor.a * 0.4f);
         else if (fillAmount2 <= uv.x && uv.x <= fillAmount)
             return float4(1.f, 1.f, 1.f, finalColor.a);
-        
+    
         float time = uiData.floatData2;
         float wave = sin(uv.x * 20 + time * 5) * 0.5;
         float newY = uv.y + wave;
-        
+    
         float t = saturate(uv.x / fillAmount);
         float4 color = lerp(finalColor, color2, t);
-        
+    
         return color;
     }
+    else if (uiData.intData0 == 2) 
+    {
+        float fillAmount = uiData.floatData0;
+        if(uv.y < fillAmount)
+            finalColor.a *= 0.1f;
+
+    }
  
-    //finalColor.rgb = ToneMapping(finalColor.rgb);
-    //finalColor.rgb = GammaEncoding(finalColor.rgb);
     return finalColor;
 }

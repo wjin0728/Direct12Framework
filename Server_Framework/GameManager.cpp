@@ -43,15 +43,76 @@ GameManager::GameManager()
 
 	scene_type = S_SCENE_TYPE::LOBBY;
 
-	//spawn_points[(int)S_SCENE_TYPE::LOBBY] = { Vec3(4.803865f, 0.4409764f, 8.894886f), Vec3(), Vec3() };
-	//spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_1] = { Vec3(45.2f, 4.2f, 42.f), Vec3(), Vec3() };
-	//spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_2] = { Vec3(1.947089f, 12.48286f, 24.35838f), Vec3(1.267226f, 11.74326f, 25.1563f), Vec3(1.14057f, 12.14464f, 23.05893f) };
-	//spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_3] = { Vec3(23.4066f, 1.103329f, 6.356736f), Vec3(22.36104f, 1.228926f, 5.376029f), Vec3(24.56644f, 0.9770427f, 5.169536f) };
-	
-	spawn_points[(int)S_SCENE_TYPE::LOBBY] = Vec3(4.803865f, 0.4409764f, 8.894886f);
-	spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_1] = Vec3(45.2f, 4.2f, 42.f);
-	spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_2] = Vec3(5.075171f, 2.164612f, 25.88103f);
-	spawn_points[(int)S_SCENE_TYPE::MAIN_STAGE_3] = Vec3(26.92197f, 1.299845, 6.873069);
+	std::ifstream lobbySpawnData("..\\Resources\\Scenes\\LobbySpawnData.bin", std::ios::binary);
+	if (!lobbySpawnData) {
+		std::cerr << "Failed to open lobby spawn data file.\n";
+	}
+	std::string token;
+	while (1) {
+		BinaryReader::ReadDateFromFile(lobbySpawnData, token);
+		if (token == "<Archer>") {
+			Vec3 spawnPoint;
+			Quaternion spawnRot;
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::ARCHER].pos = spawnPoint;
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::ARCHER].rot = spawnRot;
+		}
+		else if (token == "<Fighter>") {
+			Vec3 spawnPoint;
+			Quaternion spawnRot;
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::FIGHTER].pos = spawnPoint;
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::FIGHTER].rot = spawnRot;
+		}
+		else if (token == "<Mage>") {
+			Vec3 spawnPoint;
+			Quaternion spawnRot;
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnPoint);
+			BinaryReader::ReadDateFromFile(lobbySpawnData, spawnRot);
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::MAGE].pos = spawnPoint;
+			spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)S_PLAYER_CLASS::MAGE].rot = spawnRot;
+		}
+		if (token == "</SpawnData>") 
+			break;
+	}
+
+	for (int i = (int)S_SCENE_TYPE::MAIN_STAGE_1; i < (int)S_SCENE_TYPE::ENDING; i++) {
+		std::ifstream battleSpawnData("..\\Resources\\Scenes\\Battle" + std::to_string(i - (int)S_SCENE_TYPE::MAIN_STAGE_1 + 1) + "SpawnData.bin", std::ios::binary);
+		std::string token;
+		while (1) {
+			BinaryReader::ReadDateFromFile(battleSpawnData, token);
+			if (token == "<Archer>") {
+				Vec3 spawnPoint;
+				Quaternion spawnRot;
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnPoint);
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnRot);
+				spawnDatas[i][(int)S_PLAYER_CLASS::ARCHER].pos = spawnPoint;
+				spawnDatas[i][(int)S_PLAYER_CLASS::ARCHER].rot = spawnRot;
+			}
+			else if (token == "<Fighter>") {
+				Vec3 spawnPoint;
+				Quaternion spawnRot;
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnPoint);
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnRot);
+				spawnDatas[i][(int)S_PLAYER_CLASS::FIGHTER].pos = spawnPoint;
+				spawnDatas[i][(int)S_PLAYER_CLASS::FIGHTER].rot = spawnRot;
+			}
+			else if (token == "<Mage>") {
+				Vec3 spawnPoint;
+				Quaternion spawnRot;
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnPoint);
+				BinaryReader::ReadDateFromFile(battleSpawnData, spawnRot);
+				spawnDatas[i][(int)S_PLAYER_CLASS::MAGE].pos = spawnPoint;
+				spawnDatas[i][(int)S_PLAYER_CLASS::MAGE].rot = spawnRot;
+			}
+			if (token == "</SpawnData>") 
+				break;
+		}
+	}
+
+	cout << "Spawn Point OK" << endl;
 }
 GameManager::~GameManager()
 {
@@ -142,6 +203,7 @@ void GameManager::Worker_thread()
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(client_socket), h_iocp, client_id, 0);
 				clients[ServerNumber][client_id].do_recv();
 				client_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+				clients[ServerNumber][client_id].send_login_info_packet();
 			}
 			else {
 				cout << "Max user exceeded.\n";
@@ -208,33 +270,15 @@ void GameManager::Process_packet(int c_id, char* packet)
 			clients[ServerNumber][c_id]._state = ST_INGAME;
 		}
 
-		if (0 == c_id)
-			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
-		else if (1 == c_id)
-			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::FIGHTER);
-		else if (2 == c_id)
-			clients[ServerNumber][c_id]._player.SetClass(S_PLAYER_CLASS::MAGE);
-
-		clients[ServerNumber][c_id]._player.InitializeTarget();
-		clients[ServerNumber][c_id]._player._id = c_id;
-
-		clients[ServerNumber][c_id]._player._pos = spawn_points[(int)scene_type];
 		cout << "login : " << c_id << endl;
 
-		// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
-		for (auto& cl : clients[ServerNumber]) {
-			if (cl.second._state != ST_INGAME) continue;
-			cl.second.send_add_player_packet(&clients[ServerNumber][c_id]);
-		}
-		// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
 		for (auto& cl : clients[ServerNumber]) {
 			if (cl.second._state != ST_INGAME) continue;
 			if (cl.first == c_id) continue;
+			if (cl.second._player._class == S_PLAYER_CLASS::end) continue; // 클래스가 선택되지 않은 클라이언트는 제외
 			clients[ServerNumber][c_id].send_add_player_packet(&cl.second);
-			cout << "Send add player " << c_id << " 에게 " << cl.first << endl;
+			cout << "클라 " << cl.first << "의 정보 " << c_id << "에게 전송 완료" << endl;
 		}
-
-		clients[ServerNumber][c_id]._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 		break;
 	}
 	case CS_CHAT: {
@@ -506,6 +550,45 @@ void GameManager::Process_packet(int c_id, char* packet)
 		//clients[ServerNumber][p->id]._player.SetLookDir(angle);
 		break;
 	}
+	case CS_CLICK_BUTTON: {
+		CS_CLICK_BUTTON_PACKET* p = reinterpret_cast<CS_CLICK_BUTTON_PACKET*>(packet);
+
+		switch (p->button_type + (uint8_t)S_BUTTON_TYPE::ARCHER)
+		{
+		case (uint8_t)S_BUTTON_TYPE::ARCHER:
+		case (uint8_t)S_BUTTON_TYPE::FIGHTER:
+		case (uint8_t)S_BUTTON_TYPE::MAGE: {
+			if (!IsClassOK((S_PLAYER_CLASS)p->button_type)) break;
+
+			//cout << "Select Class >> " << p->button_type << endl;
+			clients[ServerNumber][c_id]._player.SetClass((S_PLAYER_CLASS)(p->button_type));
+			clients[ServerNumber][c_id]._player._pos = spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)clients[ServerNumber][c_id]._player._class].pos;
+			clients[ServerNumber][c_id]._player._rotation = spawnDatas[(int)S_SCENE_TYPE::LOBBY][(int)clients[ServerNumber][c_id]._player._class].rot;
+
+			// 지금 login한 클라이언트 정보 -> 다른 클라이언트에게 전송
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._state != ST_INGAME) continue;
+				cl.second.send_add_player_packet(&clients[ServerNumber][c_id]);
+				//cout << "클라 " << c_id << "의 정보 " << cl.first << "에게 전송 완료" << endl;
+			}
+			// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._state != ST_INGAME) continue;
+				if (cl.first == c_id) continue;
+				if (cl.second._player._class == S_PLAYER_CLASS::end) continue; // 클래스가 선택되지 않은 클라이언트는 제외
+				clients[ServerNumber][c_id].send_add_player_packet(&cl.second);
+				//cout << "클라 " << cl.first << "의 정보 " << c_id << "에게 전송 완료" << endl;
+			}
+
+			break;
+		}
+		default:
+			break;
+		}
+
+		clients[ServerNumber][c_id]._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
+		break;
+	}
 	case CS_HP: {
 		CS_HP_PACKET* p = reinterpret_cast<CS_HP_PACKET*>(packet);
 		Monsters[ServerNumber][p->object_id].TakeDamage(p->hp, false);
@@ -571,7 +654,7 @@ void GameManager::Update()
 						if (cl.second._state != ST_INGAME) continue;
 						cl.second.send_remove_item_packet(it.first, cl.first, it.second._item_type);
 					}
-					cout << "cl : " << cl.first << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
+					//cout << "cl : " << cl.first << "랑 item : " << it.first << " 충돌~!!!!!!!!!!!!!!!" << endl;
 					items[ServerNumber].erase(it.first);
 					break;
 				}

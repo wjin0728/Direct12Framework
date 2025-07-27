@@ -95,9 +95,6 @@ void CTransform::SetParentInScene(std::shared_ptr<CTransform> parent, bool isKee
 		if (scene) {
 			scene->DestroyObject(owner);
 		}
-		else {
-			ownerObj->SetActive(false);
-		}
 	}
 
 	UpdateWorldMatrix();
@@ -149,6 +146,11 @@ void CTransform::SetParent(std::shared_ptr<CTransform> parent, bool isKeepLocalM
 
 		if (isKeepLocalMat) {
 			mLocalMat = mWorldMat * parent->GetWorldMat().Invert();
+			mDirtyFlag = true;
+		}
+
+		if (isKeepLocalMat) {
+			mLocalMat = mWorldMat;
 			mDirtyFlag = true;
 		}
 	}

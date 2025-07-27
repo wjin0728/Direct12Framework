@@ -74,12 +74,10 @@ struct PACKET {
 
 
 struct CS_LOGIN_PACKET : PACKET {
-	char			name[NAME_SIZE];
 };
 
 struct CS_GAME_SERVER_LOGIN_PACKET : PACKET {
 	short 			id;
-	uint8_t			player_class;
 };
 
 struct CS_CHAT_PACKET : PACKET {
@@ -134,11 +132,6 @@ struct CS_CHANGE_STATE_PACKET : PACKET {
 
 struct CS_ATTACK_PACKET : PACKET {
 	short 			id;
-};
-
-struct CS_SELECT_CLASS_PACKET : PACKET {
-	short 			id; 
-	uint8_t			player_class; 
 };
 
 struct CS_CLICK_BUTTON_PACKET : PACKET {

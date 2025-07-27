@@ -1,13 +1,35 @@
 #pragma once
 #include "Component.h"
-#include"TPCameraState.h"
+
+struct CameraParams {
+	Vec3 trackingPosition{};
+	Vec2 framing{};
+	float distance{};
+	float pitch{};
+	float yaw{};
+};
+
+struct CameraBlend {
+	Vec2 framing;
+	float pitch;
+	float yaw;
+	float distance;
+};
 
 class CThirdPersonCamera : public CComponent, public std::enable_shared_from_this<CThirdPersonCamera>
 {
+public:
+	enum class CameraMode
+	{
+		FreeLook,
+		FollowTarget,
+		FixedPosition
+	};
 private:
-	bool mFreeLook{ false };
+	CameraMode mCameraMode{ CameraMode::FollowTarget };
 	bool mIsPlayingCutScene{ false };
 
+	CameraParams mDefaultCameraParams;
 	CameraParams mCameraParams;
 	Vec2 mDeadZoneSize{};
 	Vec3 mOriginalPosition{};
@@ -31,6 +53,7 @@ public:
 	virtual void LateUpdate() override;
 
 public:
+	void SetCamera(const std::shared_ptr<class CCamera>& camera) { mCamera = camera; }
 	void SetTarget(const std::shared_ptr<CGameObject>& target) { mTarget = target; }
 	void SetTerrain(const std::shared_ptr<CTerrain>& terrain) { mTerrain = terrain; }
 	void SetCanRotate(bool canRotate) { mCanRotate = canRotate; }
@@ -47,5 +70,8 @@ public:
 	void RaycastObjects();
 	void FollowTarget(float speed, float deltaTime);
 	void FreeMovement();
+
+	void SetDefaultCameraParams();
+	void ChangeCameraMode(CameraMode mode) { mCameraMode = mode; }
 };
 

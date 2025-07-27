@@ -80,6 +80,7 @@ bool CResourceManager::LoadPlayerObjects()
 	LoadPrefabFromFile("Mage");
 	LoadPrefabFromFile("HP_Background");
 	LoadPrefabFromFile("MainUI");
+	LoadPrefabFromFile("LobbyUI");
 	LoadPrefabFromFile("Portal");
 	return true;
 }

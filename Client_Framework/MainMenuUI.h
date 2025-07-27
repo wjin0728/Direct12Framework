@@ -20,6 +20,7 @@ private:
 
 public:
 	CMainMenu();
+	CMainMenu(const CMainMenu& other);
 	virtual ~CMainMenu() = default;
 
 	virtual std::shared_ptr<CComponent> Clone() override { return std::make_shared<CMainMenu>(*this); }
@@ -35,8 +36,8 @@ public:
 	void InitializeRoomSelectUI();
 
 	void ChangeMenuState(EMenuState newState);
-	void OnClickStartButton();
 	void OnClickExitButton();
+	void OnClickStartButton();
 
 	void OnClickSettingsButton();
 

@@ -124,9 +124,6 @@ void CUIRenderer::SetShader(const std::string& name)
 void CUIRenderer::SetTexture(const std::string& name)
 {
 	int srvIndex = RESOURCE.GetTextureIndex(name);
-	if (srvIndex < 0) {
-		return;
-	}
 	mUIData.textureIdx = srvIndex;
 	mUIDirtyFrame = FRAME_RESOURCE_COUNT;
 }
@@ -134,6 +131,7 @@ void CUIRenderer::SetTexture(const std::string& name)
 void CUIRenderer::SetTexture(const std::shared_ptr<class CTexture>& texture)
 {
 	if (!texture) {
+		mUIData.textureIdx = -1; mUIDirtyFrame = FRAME_RESOURCE_COUNT;
 		return;
 	}
 	mUIData.textureIdx = texture->GetSrvIndex(); mUIDirtyFrame = FRAME_RESOURCE_COUNT;

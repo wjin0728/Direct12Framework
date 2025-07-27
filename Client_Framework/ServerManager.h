@@ -31,6 +31,8 @@ public:
 
 	mutex object_lock;
 
+	std::unordered_map<std::string, std::function<void(std::vector<std::any>)>> mEventMap;
+
 public:
 	void Initialize();
 	void Destroy();
@@ -109,19 +111,11 @@ public:
 		p.state = state;
 		Send_Packet(&p);
 	}
-	void send_cs_game_server_login_packet(uint8_t player_class) {
+	void send_cs_game_server_login_packet() {
 		CS_GAME_SERVER_LOGIN_PACKET p;
 		p.size = sizeof(p);
 		p.type = CS_GAME_SERVER_LOGIN;
 		p.id = clientID;
-		p.player_class = player_class;
-		Send_Packet(&p);
-	}
-	void send_cs_select_class_packet(uint8_t player_class) {
-		CS_SELECT_CLASS_PACKET p;
-		p.size = sizeof(p);
-		p.type = CS_SELECT_CLASS;
-		p.player_class = player_class;
 		Send_Packet(&p);
 	}
 	void send_cs_click_button_packet(uint8_t button) {
@@ -147,5 +141,12 @@ public:
 		p.object_id = id;
 		p.hp = hp;
 		Send_Packet(&p);
+	}
+
+	void AddEvent(const std::string& name, std::function<void(std::vector<std::any>)> func) {
+		mEventMap[name] = func;
+	}
+	void TriggerEvent(const std::string& name, const std::vector<std::any>& args) {
+		if (mEventMap.count(name)) mEventMap[name](args);
 	}
 };
