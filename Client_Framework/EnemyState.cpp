@@ -490,10 +490,10 @@ void CBossState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 2.f });
+		healthSystem->SetHealthBarScale({ 2.f, 2.f });
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
-			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+			transform->SetLocalPosition({ 0.f, 8.f, 0.f });
 		}
 	}
 }

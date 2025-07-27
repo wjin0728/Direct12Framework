@@ -42,6 +42,9 @@ void MonsterState::RunState::Update(Monster* monster) {
 	Vec3 pos = monster->_pos; // 현재 위치 저장
 	monster->_pos += monster->_velocity * TICK_INTERVAL * (int)(!monster->_on_CantMove);
 
+	if (monster->_target == nullptr) {
+		monster->SetState(S_MONSTER_STATE::IDLE);
+	}
 	if (monster->IsPlayerTooMuchClose()) {
         monster->SetState(S_MONSTER_STATE::ATTACK);
 	}

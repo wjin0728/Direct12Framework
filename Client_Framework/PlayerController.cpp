@@ -304,7 +304,14 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(5);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-			CastingSkill();
+			if (mSkill != WATER_SHIELD) {
+				if (mTargetEnemy.lock()) {
+					INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
+				}
+			}
+			else {
+				INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
+			}
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
@@ -374,7 +381,14 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(4);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-			CastingSkill();
+			if (mSkill != WATER_SHIELD) {
+				if (mTargetEnemy.lock()) {
+					INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
+				}
+			}
+			else {
+				INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
+			}
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
 			return;
 		}
@@ -473,5 +487,5 @@ void CPlayerController::CastingSkill()
 		break;
 	}
 	SetSkill(mSkill);
-	INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
+	//INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
 }
