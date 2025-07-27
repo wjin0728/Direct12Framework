@@ -103,13 +103,14 @@ void PlayerCharacter::TakeDamage(int damage)
 	else {
 		_hp -= damage;
 		if (_hp < 0) _hp = 0;
+
+	    if (_hp > 0) {
+            SetState((uint8_t)S_PLAYER_STATE::GETHIT);
+        }
+	    else {
+		    SetState((uint8_t)S_PLAYER_STATE::DEATH);
+	    }
     }
-	if (_hp > 0) {
-        SetState((uint8_t)S_PLAYER_STATE::GETHIT);
-    }
-	else {
-		// »ç¸Á Ã³¸®
-	}
 }
 
 void PlayerCharacter::SetTarget()
