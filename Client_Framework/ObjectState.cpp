@@ -56,6 +56,7 @@ void CPlayerStateMachine::Update()
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			break;
 		case PLAYER_STATE::DEATH:
+			// 플레이어 사망처리
 			break;
 		case PLAYER_STATE::RUNATTACK:
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);

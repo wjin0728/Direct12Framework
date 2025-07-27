@@ -176,9 +176,9 @@ void CPlayerHUD::InitializePlayerHUD()
         UINT8 elementType = std::any_cast<UINT8>(args[1]);
         Color elementColor = { 1.0f, 1.0f, 1.0f, 1.0f };
         if (elementType == (UINT)ElementType::Void) elementColor = { 1.f, 1.f, 1.f, 1.0f };
-        else if (elementType == (UINT)ElementType::Grass) elementColor = { 0.1196f, 0.9921f, 0.3235f, 1.0f };
-        else if (elementType == (UINT)ElementType::Water) elementColor = { 0.1764f, 0.1372f, 0.9921f, 1.0f };
-        else if (elementType == (UINT)ElementType::Fire) elementColor = { 1.f, 0.17f, 0.1443396f, 1.0f };
+        else if (elementType == (UINT)ElementType::Grass) elementColor = { 0.3608f, 1.f, 0.3922f, 1.0f };
+        else if (elementType == (UINT)ElementType::Water) elementColor = { 0.3608f, 0.7961f, 1.f, 1.0f };
+        else if (elementType == (UINT)ElementType::Fire) elementColor = { 1.f, 0.4196f, 0.3608f, 1.0f };
         ultimateBackgroundRenderer->SetColor(elementColor);
         mainPlayerBackgroundRenderer->SetColor(elementColor);
 

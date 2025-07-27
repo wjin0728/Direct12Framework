@@ -161,7 +161,8 @@ void Monster::UpdateTarget()
     PlayerCharacter* close_player = nullptr;
 	for (auto& player : _Player) {
 		if (player == nullptr) continue; // 플레이어가 없으면 패스
-        Vec3 playerPos = player->_pos;
+		if (not player->_active) continue; // 플레이어가 없으면 패스
+		Vec3 playerPos = player->_pos;
 		float distance = (_pos - playerPos).LengthSquared();
 		// cout << distance << endl;
 		if (distance < minDistance) {
@@ -184,10 +185,19 @@ void Monster::UpdateTarget()
 
 void Monster::SetRandomTarget()
 {
-	int randomIndex = rand() % _Player.size();
+	vector<int> available_index;
 
-	if (_Player[randomIndex] != nullptr) {
-		_target = _Player[randomIndex];
+	for (int i = 0; auto& player : _Player) {
+		if (player && player->_active) {
+			available_index.push_back(i);
+		}
+		++i;
+	}
+
+	if (available_index.size()) {
+		int randomIndex{};
+		randomIndex = rand() % available_index.size();
+		_target = _Player[available_index[randomIndex]];
 	}
 	else {
 		_target = nullptr;

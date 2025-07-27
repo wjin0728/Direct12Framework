@@ -701,6 +701,7 @@ void GameManager::Update()
 {
 	for (auto& cl : clients[ServerNumber]) {
 		if (cl.second._state != ST_INGAME) continue;
+		if (not cl.second._player._active) continue;
 		auto& player = cl.second._player;
 
 		player.Update();
@@ -830,7 +831,7 @@ void GameManager::Update()
 	if (clients[ServerNumber].size()) UpdateWave();
 
 	// 보스 스테이지 처리
-	if (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && MonsterWaves[ServerNumber].current_wave == 3) {
+	if (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && MonsterWaves[ServerNumber].current_wave == S_BOSS) {
 		// 아이템 생성
 		boss_item_timer -= TICK_INTERVAL;
 		if (boss_item_timer <= 0.f) {
@@ -1115,6 +1116,7 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 		const auto& infos = attackInfos[type];
 		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", MakeAttackEvent(infos[0].offset, infos[0].radius, infos[0].damage));
 		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", MakeAttackEvent(infos[1].offset, infos[1].radius, infos[1].damage));
+		//ms.AddAnimationEvent(S_MONSTER_STATE::SKILL, "Attack", MakeAttackEvent(infos[1].offset, infos[1].radius, infos[1].damage));
 	}
 	else { // 보스 몬스터인 경우
 		ms._drop_item = true; // 보스 몬스터는 아이템 드랍 설정
@@ -1123,6 +1125,7 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 		auto func = [this](Monster* monster) {
 			for (auto& [id, cl] : clients[ServerNumber]) {
 				auto& player = cl._player;
+				if (not player._active) continue; // 플레이어가 없으면 패스
 
 				if (player._state == S_PLAYER_STATE::JUMP ||
 					player._state == S_PLAYER_STATE::GATHERING ||
@@ -1134,7 +1137,7 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 				Vec2 player_pos(player._pos.x, player._pos.z);
 				Vec2 attack_pos(monster->_attack_pos.x, monster->_attack_pos.z);
 				if (Vec2::IsInRadius(attack_pos, player_pos, 3.f)) {
-					player.TakeDamage(200);
+					player.TakeDamage(M_BOSS_DAMAGE);
 					SendHPPacket(S_OBJECT_TYPE::S_PLAYER, id, player._hp, player._barrier);
 					std::cout << "맞았다!!!!!!!!" << std::endl;
 				}
@@ -1163,6 +1166,7 @@ std::function<void(Monster*)> GameManager::MakeAttackEvent(Vec2 offset, float ra
 		Vec2 center = monster->GetWorldOffsetPosition(offset.x, offset.y);
 		for (auto& [id, cl] : clients[ServerNumber]) {
 			auto& player = cl._player;
+			if (not player._active) continue; // 플레이어가 없으면 패스
 
 			if (player._state == S_PLAYER_STATE::JUMP ||
 				player._state == S_PLAYER_STATE::GATHERING ||

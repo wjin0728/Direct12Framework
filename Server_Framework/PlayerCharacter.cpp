@@ -83,6 +83,10 @@ void PlayerCharacter::SetState(uint8_t newState)
         _state = S_PLAYER_STATE::GETHIT;
         SetState(&PlayerState::HitState::GetInstance());
         break;
+    case S_PLAYER_STATE::DEATH:
+        _state = S_PLAYER_STATE::DEATH;
+        SetState(&PlayerState::DeathState::GetInstance());
+        break;
     default:
         break;
     }

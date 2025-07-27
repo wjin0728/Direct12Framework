@@ -48,5 +48,8 @@ constexpr int P_GRASS_VINE_DAMAGE = 5;
 
 constexpr int P_FIGHTER_DAMAGE = 10;
 constexpr int P_ARROW_MAGICBALL_DAMAGE = 5;
-
 constexpr int P_ULTIMAGE_DAMAGE = 25;
+
+constexpr int M_SMALL_DAMAGE = 50;
+constexpr int M_BIG_DAMAGE = 100;
+constexpr int M_BOSS_DAMAGE = 200;
