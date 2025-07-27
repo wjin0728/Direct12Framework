@@ -208,6 +208,23 @@ void CScene::DestroyObject(CGameObject* object)
 	}
 }
 
+void CScene::DestroyObjectImmediately(CGameObject* object)
+{
+	if (!object) return;
+	auto itr = findByRawPointer(mObjects, object);
+	if (itr != mObjects.end()) {
+		mObjects.erase(itr);
+	}
+	auto type = object->GetObjectType();
+	if (type > OBJECT_TYPE::NONE && type < OBJECT_TYPE::end) {
+		auto itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
+			[object](const std::shared_ptr<CGameObject>& ptr) { return ptr.get() == object; });
+		if (itr != mObjectTypes[type].end()) {
+			mObjectTypes[type].erase(itr);
+		}
+	}
+}
+
 void CScene::SetTerrain(std::shared_ptr<CTerrain> terrain)
 {
 	mTerrain = terrain;

@@ -263,7 +263,7 @@ void CPlayerHUD::InitializePlayerHUD()
             else if (waveType == WAVE_TYPE::OUTRO) {
                 mentDisplay->ClearTextures();
                 mentDisplay->AddTexture("bossEnding1");
-				mentDisplay->AddTexture("bossEnding2");
+                mentDisplay->AddTexture("bossEnding2");
 			}
             if (auto renderer = introUI->GetComponent<CUIRenderer>()) {
                 renderer->SetAlpha(0.0f);

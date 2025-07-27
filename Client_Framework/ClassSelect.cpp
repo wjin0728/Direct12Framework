@@ -119,7 +119,6 @@ void CClassSelectUI::Start()
 		else {
 			playerObj = otherPlayers[playerId];
 			mSelectedClasses.push_back((PLAYER_CLASS)classType);
-
 			if (mCurrentState == EMenuState::WaitingRoom) {
 				std::string playerName = "Player" + std::to_string(mSelectedClasses.size());
 				if (auto player1 = owner->GetChildComponent<CUIRenderer>(playerName)) {
@@ -133,6 +132,7 @@ void CClassSelectUI::Start()
 				}
 			}
 		}
+		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(playerObj->GetStateMachine());
 
 		std::cout << "Selected class: " << classType << endl;
 
@@ -184,7 +184,7 @@ void CClassSelectUI::Start()
 			button->SetActive(false);
 		}
 
-	
+		
 		}
 	);
 }
@@ -259,7 +259,7 @@ void CClassSelectUI::InitializeSettingsUI()
 
 void CClassSelectUI::InitializeWaitingRoomUI()
 {
-	
+	auto& sm = INSTANCE(ServerManager);
 	if (auto introUI = mWaitingRoomUI->FindChildByName("IntroUI")) {
 		if(auto renderer = introUI->GetComponent<CUIRenderer>())
 		{
@@ -271,16 +271,41 @@ void CClassSelectUI::InitializeWaitingRoomUI()
 			std::string texName = "intro" + std::to_string(i + 1);
 			ment->AddTexture(texName);
 		}
-		auto& sm = INSTANCE(ServerManager);
-		sm.AddEvent("ShowMent", [introUI, this](std::vector<std::any> any) {
+		std::weak_ptr<CGameObject> introUIWeak = introUI;
+		sm.AddEvent("ShowMent", [introUIWeak](std::vector<std::any> any) {
+			if (!introUIWeak.expired()) return;
+			auto introUI = introUIWeak.lock();
+			if (!introUI) return;
 			if (any.size() < 1) return;
 			WAVE_TYPE waveType = (WAVE_TYPE)std::any_cast<UINT8>(any[0]);
-			if (waveType != WAVE_TYPE::INTRO) return;
 			if (auto renderer = introUI->GetComponent<CUIRenderer>()) {
 				renderer->SetAlpha(0.0f);
 			}
 			introUI->SetActive(true);
+
 			introUI->GetComponent<CMentDisplay>()->StartDisplay(6.f, 1.5f, 0.6f);
+			});
+	}
+
+	if (auto interactionUI = owner->FindChildByName("InteractionUI")) {
+		interactionUI->SetActive(false);
+		if (auto renderer = interactionUI->GetComponent<CUIRenderer>())
+		{
+			renderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		}
+		if(sm.mPlayer)
+			sm.mPlayer->AddEvent("OnItemTargeted", [interactionUI](const std::vector<std::any>& args) {
+			if (args.size() < 1) return;
+			bool isActive = std::any_cast<bool>(args[0]);
+			interactionUI->SetActive(isActive);
+			if (isActive)
+			{
+				if (auto renderer = interactionUI->GetComponent<CUIRenderer>())
+				{
+					Vec2 screenPos = std::any_cast<Vec2>(args[1]);
+					renderer->SetPosition(screenPos);
+				}
+			}
 			});
 	}
 
