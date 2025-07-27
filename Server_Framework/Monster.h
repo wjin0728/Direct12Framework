@@ -89,7 +89,7 @@ public:
         case S_ENEMY_TYPE::BOSS: {
             ReadAnimationInfo("Animations/Boss.bin");
             _orignalboundingbox.Center = XMFLOAT3(0, 1.91, 0);
-            _orignalboundingbox.Extents = Vec3(1.87, 3.84, 1.51) / 2.f;
+            _orignalboundingbox.Extents = Vec3(1.87, 6.f, 1.51) / 2.f;
             _hp = 300.f;
             break;
         }

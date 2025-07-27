@@ -363,7 +363,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		else if (S_GRASS_VINE == p->skill_enum) {
 			BoundingBox box(pos, Vec3(4.46f, 1.2f, 4.46f)/2.f);
-			box.Center.y += 0.3f; 
+			box.Center.y += 0.3f;
 			for (auto& mon : Monsters[ServerNumber]) {
 				if (mon.second.IsUnavailable()) continue;
 				mon.second.LocalTransform();
@@ -841,7 +841,7 @@ void GameManager::Update()
 			auto& skill_state = MonsterState::BossSkillState::GetInstance();
 			if (monster.currentState == &skill_state) {
 				if (skill_state.GetSendSkill()) {
-					Vec3 pos = monster._target->_pos;
+					Vec3 pos = monster._attack_pos;
 					for (auto& cl : clients[ServerNumber]) {
 						for (auto& hitid : skill_state.hit_client_id) {
 							SendHPPacket((S_OBJECT_TYPE)S_PLAYER, hitid, clients[ServerNumber][hitid]._player._hp, clients[ServerNumber][hitid]._player._barrier);

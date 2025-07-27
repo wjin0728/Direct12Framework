@@ -236,7 +236,7 @@ void MonsterState::BossTargetingState::Enter(Monster* monster) {
 	cout << "TargetingState Entered!" << endl;
 	monster->SetVelocity(0, 0, 0); // 속도 0
 	targetingTimer = 3.f;
-	targetingDelay = 1.f;
+	targetingDelay = 0.75f;
 	sendTarget = false;
 	sendTargetLock = false;
 	monster->_attack_pos = Vec3::Zero; // 공격 위치 초기화
@@ -253,13 +253,14 @@ void MonsterState::BossTargetingState::Update(Monster* monster) {
 	else {
 		targetingDelay -= TICK_INTERVAL; // 타겟팅 딜레이 감소
 		if (targetingDelay <= 0) {
-			if (pattern_cnt == 2) {
-				monster->SetState(S_MONSTER_STATE::SKILL);
-				pattern_cnt = 0;
-			}
-			else {
-				monster->SetState(S_MONSTER_STATE::ATTACK);
-			}
+			monster->SetState(S_MONSTER_STATE::SKILL);
+			//if (pattern_cnt == 2) {
+			//	monster->SetState(S_MONSTER_STATE::SKILL);
+			//	pattern_cnt = 0;
+			//}
+			//else {
+			//	monster->SetState(S_MONSTER_STATE::ATTACK);
+			//}
 		}
 	}
 }
@@ -313,13 +314,21 @@ void MonsterState::BossSkillState::Enter(Monster* monster) {
 	switch (rand() % 3)
 	{
 	case 0: { // 덩쿨 
-		Vec3 pos = monster->_target->_pos;
+		Vec3 pos = monster->_attack_pos;
 		BoundingBox box(pos, Vec3(4.46f, 1.2f, 4.46f) / 2.f);
 		box.Center.y += 0.3f;
 		for (auto& player : monster->_Player) {
+			if (!player) continue;
+			if (player->_state == S_PLAYER_STATE::JUMP ||
+				player->_state == S_PLAYER_STATE::GATHERING ||
+				player->_state == S_PLAYER_STATE::GETHIT ||
+				player->_state == S_PLAYER_STATE::DEATH ||
+				player->_state == S_PLAYER_STATE::ULTIMATE)
+				continue;
+
 			player->LocalTransform();
 			if (box.Intersects(player->_boundingbox)) {
-				player->TakeDamage(P_GRASS_VINE_DAMAGE);
+				player->TakeDamage(M_GRASS_VINE_DAMAGE);
 				player->cant_move_time = 4.f; // 2초간 이동 불가
 				player->_on_CantMove = true;
 				SetSkillType(S_GRASS_VINE);
@@ -329,15 +338,21 @@ void MonsterState::BossSkillState::Enter(Monster* monster) {
 		break;
 	}
 	case 1: { // 폭발
-		Vec3 pos = monster->_target->_pos;
+		Vec3 pos = monster->_attack_pos;
 		pos.y += 1.5f;
 		BoundingSphere sphere(pos, 0.7f);
 		for (auto& player : monster->_Player) {
-			if (player->_hp > 0) continue;
+			if (!player) continue;
+			if (player->_state == S_PLAYER_STATE::JUMP ||
+				player->_state == S_PLAYER_STATE::GATHERING ||
+				player->_state == S_PLAYER_STATE::GETHIT ||
+				player->_state == S_PLAYER_STATE::DEATH ||
+				player->_state == S_PLAYER_STATE::ULTIMATE)
+				continue;
 
 			player->LocalTransform();
 			if (sphere.Intersects(player->_boundingbox)) {
-				player->TakeDamage(P_FIRE_EXPLOSION_DAMAGE);
+				player->TakeDamage(M_FIRE_EXPLOSION_DAMAGE);
 				SetSkillType(S_FIRE_EXPLOSION);
 				hit_client_id.emplace_back(player->_id); // 히트된 클라이언트 ID 저장
 			}
@@ -357,8 +372,10 @@ void MonsterState::BossSkillState::Enter(Monster* monster) {
 }
 
 void MonsterState::BossSkillState::Update(Monster* monster) {
-	if (!sendSkill)
-		monster->SetState(S_MONSTER_STATE::IDLE); // 스킬 사용 후 상태를 IDLE로 변경
+	skillTimer -= TICK_INTERVAL;
+	if (skillTimer <= 0) {
+		monster->SetState(S_MONSTER_STATE::IDLE);
+	}
 }
 
 void MonsterState::BossSkillState::Exit(Monster* monster) {
