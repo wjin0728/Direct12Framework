@@ -284,7 +284,30 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		if (clientID != packet->id) {
 			AddNewPlayer(packet->id, { packet->x, packet->y, packet->z });
 			player = mOtherPlayers[packet->id];
+			auto scene = INSTANCE(CSceneManager).GetCurScene();
+			if (!scene) {
+				std::cout << "Current scene is nullptr" << std::endl;
+				break;
+			}
+			scene->AddObject(player);
 		}
+		else {
+			player = mPlayer;
+			mPlayer->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+		}
+		std::shared_ptr<CPlayerStateMachine> stateMachine{};
+		if (packet->player_class == (UINT8)PLAYER_CLASS::ARCHER) {
+			stateMachine = player->AddComponent<CArcherState>();
+		}
+		else if (packet->player_class == (UINT8)PLAYER_CLASS::FIGHTER) {
+			stateMachine = player->AddComponent<CWarriorState>();
+		}
+		else if (packet->player_class == (UINT8)PLAYER_CLASS::MAGE) {
+			stateMachine = player->AddComponent<CMageState>();
+		}
+		player->SetStateMachine(stateMachine);
+		
+
 		TriggerEvent("SelectClass", { packet->player_class, packet->id });
 		break;
 	}

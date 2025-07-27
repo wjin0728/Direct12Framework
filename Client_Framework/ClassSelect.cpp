@@ -53,6 +53,46 @@ void CClassSelectUI::Start()
 
 	mWaitingRoomUI->SetActive(false);
 
+	auto& otherPlayers = INSTANCE(ServerManager).mOtherPlayers;
+	for (auto& player : otherPlayers) {
+		if (player.second) {
+			auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(player.second->GetStateMachine());
+			uint8_t classType = (uint8_t)playerState->GetClass();
+			Vec3 position = mClassCharacters[classType]->GetTransform()->GetLocalPosition();
+			Vec3 rotation = mClassCharacters[classType]->GetTransform()->GetLocalRotation();
+			Vec3 scale = mClassCharacters[classType]->GetTransform()->GetLocalScale();
+
+
+			std::cout << "Selected class: " << classType << endl;
+
+			player.second->GetTransform()->SetLocalPosition(position);
+			player.second->GetTransform()->SetLocalRotation(rotation);
+			player.second->GetTransform()->SetLocalScale(scale);
+
+			mClassCharacters[classType]->GetTransform()->SetLocalPosition({ 0.f, 0.f, 0.f });
+			mClassCharacters[classType]->GetTransform()->SetLocalRotation({ 0.f, 0.f, 0.f });
+			mClassCharacters[classType]->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
+			mClassCharacters[classType]->GetTransform()->SetParentInScene(player.second->GetTransform());
+
+
+			playerState->SetState((UINT8)PLAYER_STATE::IDLE);
+
+			auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
+			if (shieldPrefab) {
+				auto shieldObj = CGameObject::Instantiate(shieldPrefab, player.second->GetTransform());
+				shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
+				shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
+				playerState->SetShield(shieldObj);
+				playerState->ActivateShield(false);
+			}
+
+			std::string buttonName = "SelectBound" + std::to_string(classType + 1);
+			if (auto button = mClassSelectUI->FindChildByName(buttonName)) {
+				button->SetActive(false);
+			}
+		}
+	}
+
 	auto& sm = INSTANCE(ServerManager);
 	sm.AddEvent("SelectClass", [this](std::vector<std::any> any) {
 		auto player = INSTANCE(ServerManager).mPlayer;
@@ -75,6 +115,7 @@ void CClassSelectUI::Start()
 			playerObj = otherPlayers[playerId];
 			mSelectedClasses.push_back((PLAYER_CLASS)classType);
 		}
+		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(player->GetStateMachine());
 
 		std::cout << "Selected class: " << classType << endl;
 
@@ -87,34 +128,23 @@ void CClassSelectUI::Start()
 		mClassCharacters[classType]->GetTransform()->SetLocalScale({ 1.f, 1.f, 1.f });
 		mClassCharacters[classType]->GetTransform()->SetParentInScene(playerObj->GetTransform());
 
-		std::shared_ptr<CPlayerStateMachine> stateMachine{};
-		if (classType == (UINT8)PLAYER_CLASS::ARCHER) {
-			stateMachine = playerObj->AddComponent<CArcherState>();
-		}
-		else if (classType == (UINT8)PLAYER_CLASS::FIGHTER) {
-			stateMachine = playerObj->AddComponent<CWarriorState>();
-		}
-		else if (classType == (UINT8)PLAYER_CLASS::MAGE) {
-			stateMachine = playerObj->AddComponent<CMageState>();
-		}
-
-		stateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-		playerObj->SetStateMachine(stateMachine);
+		
+		playerState->SetState((UINT8)PLAYER_STATE::IDLE);
 
 		auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
 		if (shieldPrefab) {
 			auto shieldObj = CGameObject::Instantiate(shieldPrefab, playerObj->GetTransform());
 			shieldObj->SetRenderLayer(RENDER_LAYER::Transparent);
 			shieldObj->GetTransform()->SetLocalPosition({ 0.f, 0.6f, 0.f });
-			stateMachine->SetShield(shieldObj);
-			stateMachine->ActivateShield(false);
+			playerState->SetShield(shieldObj);
+			playerState->ActivateShield(false);
 		}
 
 		if (playerId == INSTANCE(ServerManager).clientID) {
 			auto playerController = playerObj->GetComponent<CPlayerController>();
 			if (playerController) {
 				playerController->ChangeControllMode(CPlayerController::ControllMode::LockOn);
-				playerController->SetStateMachine(stateMachine);
+				playerController->SetStateMachine(playerState);
 				playerController->SetChildAnimationController();
 			}
 			if (auto camera = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("MainCamera")) {

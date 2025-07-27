@@ -18,6 +18,7 @@
 #include"InstancingGroup.h"
 #include"ServerManager.h"
 #include"Light.h"
+#include"ObjectState.h"
 #include"ClassSelect.h"
 
 CLobbyScene::CLobbyScene()
@@ -66,6 +67,9 @@ void CLobbyScene::Initialize()
 			thirdPersonCamera->ChangeCameraMode(CThirdPersonCamera::CameraMode::FixedPosition);
 		}
 	}
+
+
+	
 
 	INPUT.FixMousePosition(false);
 }
