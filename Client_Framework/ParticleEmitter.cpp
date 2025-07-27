@@ -9,7 +9,7 @@
 
 Vec3 Gradient::EvaluateColor(float t) const
 {
-	if (colorKeys.empty()) return Color(1, 1, 1, 1);
+	if (colorKeys.empty()) return Vec3(1, 1, 1);
 
 	if (t <= colorKeys.front().time) return colorKeys.front().color;
 	if (t >= colorKeys.back().time)  return colorKeys.back().color;

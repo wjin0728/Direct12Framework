@@ -105,7 +105,7 @@ CMesh::CMesh(std::ifstream& inFile)
 void CMesh::CreateVertexBuffer()
 {
 	mVertexBuffer = std::make_shared<CVertexBuffer>();
-	mVertexBuffer->CreateBuffer(vertices);
+	mVertexBuffer->CreateBuffer(vertices, DEVICE, CMDLIST);
 }
 
 void CMesh::CreateIndexBuffers()

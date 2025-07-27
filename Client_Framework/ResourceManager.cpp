@@ -250,6 +250,17 @@ void CResourceManager::LoadDefaultTexture()
 		tex->AssignedSRVIndex();
 		Add(tex);
 	}
+	{
+		for (int i = 1; i <= 3; i++) {
+			for (int j = 1; j <= 2; j++) {
+				auto name = "stage" + std::to_string(i) + "_" + std::to_string(j);
+				std::string path = TEXTURE_PATH(name);
+				auto tex = std::make_shared<CTexture>(name, path);
+				tex->AssignedSRVIndex();
+				Add(tex);
+			}
+		}
+	}
 }
 
 void CResourceManager::LoadDefaultMaterials()

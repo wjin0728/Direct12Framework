@@ -19,6 +19,7 @@ CParticleAttach::~CParticleAttach()
 	{
 		mParticleEmitter->Stop(false);
 		mParticleEmitter = nullptr;
+		std::cout << "ParticleEmitter " << mParticleEmitterName << " stopped and cleared." << std::endl;
 	}
 }
 

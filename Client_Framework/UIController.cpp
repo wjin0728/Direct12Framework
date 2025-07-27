@@ -221,13 +221,14 @@ void CPlayerHUD::InitializePlayerHUD()
     if (auto targetMarker = owner->FindChildByName("TargetMarker"))
     {
         auto targetMarkerRenderer = targetMarker->GetComponent<CUIRenderer>();
+        targetMarkerRenderer->SetTexture("TargetMarker");
         if (auto marker = targetMarker->AddComponent<CTargetMarker>())
         {
             targetMarkerRenderer->mIsVisible = false;
             mPlayer.lock()->AddEvent("OnEnemyTargeted", [marker](const std::vector<std::any>& args) {
                 if (args.size() < 1) return;
-                auto target = std::any_cast<std::weak_ptr<CGameObject>>(args[0]);
-                marker->SetTarget(target.lock());
+                auto target = std::any_cast<std::shared_ptr<CGameObject>>(args[0]);
+                marker->SetTarget(target);
                 });
         }
     }
@@ -238,7 +239,38 @@ void CPlayerHUD::InitializePlayerHUD()
             renderer->SetAlpha(0.0f);
 
         }
-
+        auto ment = introUI->AddComponent<CMentDisplay>();
+        for (int i = 0; i < 3; i++) {
+            std::string texName = "intro" + std::to_string(i + 1);
+            ment->AddTexture(texName);
+        }
+        auto& sm = INSTANCE(ServerManager);
+        sm.AddEvent("ShowMent", [introUI, this](std::vector<std::any> any) {
+            if (any.size() < 1) return;
+            WAVE_TYPE waveType = (WAVE_TYPE)std::any_cast<UINT8>(any[0]);
+			if (waveType == WAVE_TYPE::WAVE_END) return;
+			auto mentDisplay = introUI->GetComponent<CMentDisplay>();
+            if (waveType == WAVE_TYPE::mm || waveType == WAVE_TYPE::mMm) {
+				mentDisplay->ClearTextures();
+				std::string waveName = "stage" + std::to_string(mStage) + "_" + std::to_string((UINT8)waveType);
+                mentDisplay->AddTexture(waveName);
+            }
+            else if (waveType == WAVE_TYPE::BOSS) {
+                mentDisplay->ClearTextures();
+                mentDisplay->AddTexture("boss1");
+                mentDisplay->AddTexture("boss2");
+            }
+            else if (waveType == WAVE_TYPE::OUTRO) {
+                mentDisplay->ClearTextures();
+                mentDisplay->AddTexture("bossEnding1");
+                mentDisplay->AddTexture("bossEnding2");
+			}
+            if (auto renderer = introUI->GetComponent<CUIRenderer>()) {
+                renderer->SetAlpha(0.0f);
+            }
+            introUI->SetActive(true);
+            mentDisplay->StartDisplay(6.f, 1.5f, 0.6f);
+            });
     }
 
 

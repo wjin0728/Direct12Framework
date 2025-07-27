@@ -22,7 +22,7 @@ public:
 
 public:
 	template<typename T>
-	void CreateBuffer(const std::vector<T>& vertices, UINT slot = 0, bool isDynamic = false);
+	void CreateBuffer(const std::vector<T>& vertices, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, UINT slot = 0, bool isDynamic = false);
 
 	void UpdateVertexBuffer(const void* data, UINT size);
 	void SetVertexBuffer() const;
@@ -38,7 +38,7 @@ public:
 };
 
 template<typename T>
-inline void CVertexBuffer::CreateBuffer(const std::vector<T>& vertices, UINT slot, bool isDynamic)
+inline void CVertexBuffer::CreateBuffer(const std::vector<T>& vertices, ID3D12Device* device, ID3D12GraphicsCommandList* cmdList, UINT slot, bool isDynamic)
 {
 	if (vertices.empty()) return;
 	mIsDynamic = isDynamic;
@@ -48,7 +48,7 @@ inline void CVertexBuffer::CreateBuffer(const std::vector<T>& vertices, UINT slo
 
 	bufferSize = dataSize * dataNum;
 
-	buffer = CreateBufferResource(DEVICE, CMDLIST, (void*)vertices.data(), bufferSize,
+	buffer = CreateBufferResource(device, cmdList, (void*)vertices.data(), bufferSize,
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &uploadBuffer);
 
 	mVertexBufferView.BufferLocation = buffer->GetGPUVirtualAddress();

@@ -21,9 +21,9 @@ struct Gradient {
 	Vec3 EvaluateColor(float t) const;
 	float EvaluateAlpha(float t) const;
 	Color Evaluate(float t) const {
-		Color color = EvaluateColor(t);
-		color.w = EvaluateAlpha(t);
-		return color;
+		Vec3 albedo = EvaluateColor(t);
+		float alpha = EvaluateAlpha(t);
+		return Color(albedo.x, albedo.y, albedo.z, alpha);
 	}
 
 	static void ReadGradientFromFile(std::ifstream& ifs, Gradient& gradient) {

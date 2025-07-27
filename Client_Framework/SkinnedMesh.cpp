@@ -91,7 +91,7 @@ std::shared_ptr<CSkinnedMesh> CSkinnedMesh::CreateSkinnedMeshFromFile(const std:
 
 void CSkinnedMesh::CreateSkinnedVertexBuffer() {
 	mSkinnedVertexBuffer = std::make_shared<CVertexBuffer>();
-	mSkinnedVertexBuffer->CreateBuffer(mSkinnedData);
+	mSkinnedVertexBuffer->CreateBuffer(mSkinnedData, DEVICE, CMDLIST);
 }
 
 void CSkinnedMesh::Render(ID3D12GraphicsCommandList* cmdList)
