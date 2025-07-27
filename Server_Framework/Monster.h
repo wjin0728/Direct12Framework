@@ -16,7 +16,8 @@ public:
     int _hp;
     int _barrier;
     bool _on_FireEnchant;
-    bool _on_GrassWeaken;
+    bool _on_CantMove;
+	float cant_move_time = 0.f;
 
     MonsterStateMachine* currentState;
     S_MONSTER_STATE previousState;
@@ -38,7 +39,7 @@ public:
         _hp(100),
         _barrier(0),
         _on_FireEnchant(false),
-        _on_GrassWeaken(false) {
+        _on_CantMove(false) {
     }
     Monster(S_ENEMY_TYPE monster_type) :
         Object(S_OBJECT_TYPE::S_ENEMY),
@@ -48,7 +49,7 @@ public:
         _look_dir(Vec3(0, 0, 1)),
         _barrier(0),
         _on_FireEnchant(false),
-        _on_GrassWeaken(false)
+        _on_CantMove(false)
     {
         switch (monster_type) {
         case S_ENEMY_TYPE::FIRE_SMALL: {

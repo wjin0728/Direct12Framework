@@ -93,7 +93,7 @@ void CTransform::SetParentInScene(std::shared_ptr<CTransform> parent, bool isKee
 		}
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (scene) {
-			scene->RemoveObject(ownerObj);
+			scene->DestroyObject(owner);
 		}
 		else {
 			ownerObj->SetActive(false);

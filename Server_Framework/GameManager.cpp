@@ -277,16 +277,17 @@ void GameManager::Process_packet(int c_id, char* packet)
 	case CS_SKILL_TARGET: {
 		CS_SKILL_TARGET_PACKET* p = reinterpret_cast<CS_SKILL_TARGET_PACKET*>(packet);
 		Vec3 pos = Monsters[ServerNumber][p->target_id]._pos;
-		pos.y += 1.5f;
-		BoundingSphere sphere(pos, 0.7f);
+		
 
 		if (S_FIRE_EXPLOSION == p->skill_enum) {
+			pos.y += 1.5f;
+			BoundingSphere sphere(pos, 0.7f);
 			for (auto& mon : Monsters[ServerNumber]) {
 				if (mon.second.IsUnavailable()) continue;
 			
 				mon.second.LocalTransform();
 				if (sphere.Intersects(mon.second._boundingbox)) {
-					mon.second.TakeDamage(10, true);
+					mon.second.TakeDamage(15, true);
 					SendHPPacket((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
 				}
 			}
@@ -297,7 +298,27 @@ void GameManager::Process_packet(int c_id, char* packet)
 				cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::EXPLOSION, pos);
 			}
 		}
-		else if (S_GRASS_VINE == p->skill_enum) {}
+		else if (S_GRASS_VINE == p->skill_enum) {
+			BoundingBox box(pos, Vec3(4.46f, 1.2f, 4.46f)/2.f);
+			box.Center.y += 0.3f; 
+			for (auto& mon : Monsters[ServerNumber]) {
+				if (mon.second.IsUnavailable()) continue;
+				mon.second.LocalTransform();
+				if (box.Intersects(mon.second._boundingbox)) {
+					mon.second.TakeDamage(5, true);
+					mon.second.cant_move_time = 4.f; // 2초간 이동 불가
+					mon.second._on_CantMove = true;
+					SendHPPacket((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
+
+					std::cout << "Monster " << mon.first << " hit by Grass Vine skill." << std::endl;
+				}
+			}
+			for (auto& cl : clients[ServerNumber]) {
+				if (cl.second._state != ST_INGAME) continue;
+				Vec3 pos = Monsters[ServerNumber][p->target_id]._pos;
+				cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::VINE, pos);
+			}
+		}
 		break;
 	}
 	case CS_SKILL_NONTARGET: {
@@ -402,10 +423,20 @@ void GameManager::Process_packet(int c_id, char* packet)
 		{
 		case S_PLAYER_CLASS::FIGHTER: {
 			direction = player._velocity;
+			Matrix mLocalMat = Matrix::CreateFromQuaternion(player._rotation);
+			mLocalMat._41 = player._pos.x;
+			mLocalMat._42 = player._pos.y;
+			mLocalMat._43 = player._pos.z;
+			BoundingOrientedBox originAtbox;
+			BoundingOrientedBox atbox;
+			atbox.Extents = Vec3(1.557609f, 1.032651f, 1.580357f) / 2.f;
+			atbox.Center = { 0, 0.533f, 0.828f };
+			originAtbox.Transform(atbox, mLocalMat);
+
 			for (auto& mon : Monsters[ServerNumber]) {
 				if (mon.second.IsUnavailable()) continue; // 몬스터가 제거된 경우는 패스
 				mon.second.LocalTransform();
-				if (player.OnFighterBasicAttack(mon.second._boundingbox)) {
+				if (atbox.Intersects(mon.second._boundingbox)) {
 					mon.second.TakeDamage(5, false);
 					SendHPPacket(S_OBJECT_TYPE::S_ENEMY, mon.first, mon.second._hp, 0);
 				}

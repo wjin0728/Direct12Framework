@@ -183,20 +183,11 @@ void CScene::AddObject(std::shared_ptr<CGameObject> object)
 	mAddQueue.push(object);
 }
 
-void CScene::RemoveObject(std::shared_ptr<CGameObject> object)
+void CScene::DestroyObject(CGameObject* object)
 {
-	auto itr = findByRawPointer(mObjects, object.get());
-	if (itr != mObjects.end()) {
-		mObjects.erase(itr);
-	}
-
-	auto type = object->GetObjectType();
-	if (type != OBJECT_TYPE::NONE) {
-		auto itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
-			[object](const std::shared_ptr<CGameObject>& ptr) { return ptr == object; });
-		if (itr != mObjectTypes[type].end()) {
-			mObjectTypes[type].erase(itr);
-		}
+	if (object) {
+		object->SetActive(false);
+		mRemoveQueue.push(object);
 	}
 }
 
@@ -257,11 +248,11 @@ void CScene::CollectVisibleObjects()
 	}
 }
 
-void CScene::AddRemoveQueue(std::shared_ptr<CGameObject> object)
+void CScene::AddRemoveQueue(CGameObject* object)
 {
 	if (object) {
 		object->SetActive(false);
-		auto itr = findByRawPointer(mObjects, object.get());
+		auto itr = findByRawPointer(mObjects, object);
 		mRemoveQueue.push(object);
 	}
 }
@@ -378,7 +369,21 @@ void CScene::RemoveObjects()
 	while (!mRemoveQueue.empty()) {
 		auto object = mRemoveQueue.front();
 		mRemoveQueue.pop();
-		RemoveObject(object);
+		if (!object) continue;
+		object->SetActive(false);
+		auto itr = findByRawPointer(mObjects, object);
+		if (itr != mObjects.end()) {
+			mObjects.erase(itr);
+		}
+
+		auto type = object->GetObjectType();
+		if (type != OBJECT_TYPE::NONE) {
+			auto itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
+				[object](const std::shared_ptr<CGameObject>& ptr) { return ptr.get() == object; });
+			if (itr != mObjectTypes[type].end()) {
+				mObjectTypes[type].erase(itr);
+			}
+		}
 	}
 }
 

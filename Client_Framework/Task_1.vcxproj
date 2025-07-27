@@ -178,7 +178,7 @@
     <ClInclude Include="CResource.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingGroup.h" />
-    <ClInclude Include="InteractIcon.h" />
+    <ClInclude Include="Vine.h" />
     <ClInclude Include="LobbyUI.h" />
     <ClInclude Include="MainMenuUI.h" />
     <ClInclude Include="MainScene.h" />
@@ -255,7 +255,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingGroup.cpp" />
-    <ClCompile Include="InteractIcon.cpp" />
+    <ClCompile Include="Vine.cpp" />
     <ClCompile Include="LobbyUI.cpp" />
     <ClCompile Include="MainMenuUI.cpp" />
     <ClCompile Include="Portal.cpp" />

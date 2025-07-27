@@ -123,6 +123,7 @@ enum class S_PROJECTILE_TYPE : UINT8
 enum class S_EFFECT_TYPE : UINT8
 {
 	EXPLOSION,
+	VINE,
 	ss
 };
 
