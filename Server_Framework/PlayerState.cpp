@@ -197,6 +197,9 @@ void PlayerState::UltimateState::Enter(PlayerCharacter* player) {
     player->SetTarget();
 
     if (player->_target) {
+        player->_target->SetState(S_MONSTER_STATE::IDLE);
+        player->_target->_active = false;
+
         Vec3 direction = player->_target->_pos - player->_pos;
         direction.y = 0.f;
         direction.Normalize();
@@ -248,6 +251,7 @@ void PlayerState::UltimateState::Update(PlayerCharacter* player) {
 
 void PlayerState::UltimateState::Exit(PlayerCharacter* player) {
     player->_data = 0.f;
+    player->_target->_active = true;
 }
 
 // PlayerState::GatheringState ±¸Çö

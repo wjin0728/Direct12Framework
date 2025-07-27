@@ -15,7 +15,7 @@ void MonsterState::IdleState::Enter(Monster* monster) {
 }
 
 void MonsterState::IdleState::Update(Monster* monster) {
-	idleTimer -= TICK_INTERVAL; // 대기 시간 감소
+	if (monster->_active) idleTimer -= TICK_INTERVAL; // 대기 시간 감소
 	if (idleTimer <= 0) {
 		if (monster->_target) {
 			monster->SetState(S_MONSTER_STATE::RUN);

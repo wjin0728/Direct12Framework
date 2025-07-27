@@ -202,11 +202,11 @@ private:
 		return true;
 	};
 	bool IsAllClassSelected() const {
-		for (int i = 0; i < (int)S_PLAYER_CLASS::end; ++i) {
-			if (IsClassOK((S_PLAYER_CLASS)i))
-				return false;
-		}
-		return true;
+		//for (int i = 0; i < (int)S_PLAYER_CLASS::end; ++i) {
+		//	if (IsClassOK((S_PLAYER_CLASS)i))
+		//		return false;
+		//}
+		return !IsClassOK((S_PLAYER_CLASS)2);
 	}
 
 	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {

@@ -1130,6 +1130,7 @@ void GameManager::InitializeWave()
 	SendMakeMessagePacket((uint8_t)cur_wave);
 
 	MonsterWaves[ServerNumber].is_end = false;
+	MonsterWaves[ServerNumber].is_spawn = false;
 	MonsterWaves[ServerNumber].wave_timer = WAVE_INTERVAL;
 	MonsterWaves[ServerNumber].message_timer = MESSAGE_INTERVAL * (float)MonsterWaves[ServerNumber].message_count;
 }
@@ -1180,15 +1181,13 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 	Monsters[ServerNumber][monster_id] = ms;
 
 	for (auto& [id, cl] : clients[ServerNumber]) {
-		if (cl._state != ST_INGAME) {
-			cout << "엥" << endl;
-			continue;
-		}
+		if (cl._state != ST_INGAME) continue;
 
 		cl._player._target = nullptr;
 		cl._player._Monster[monster_id] = &Monsters[ServerNumber][monster_id];
 		cl.send_add_monster_packet(Monsters[ServerNumber][monster_id], monster_id);
 	}
+	std::cout << "Monster " << (int)type << " is initialized" << std::endl;
 
 	Monster_cnt[ServerNumber]++;
 }
@@ -1260,7 +1259,7 @@ void GameManager::HandleWaveEnd(MonsterWave& wave)
 		if (scene_type != S_SCENE_TYPE::LOBBY) wave.wave_timer -= TICK_INTERVAL;
 		if (wave.wave_timer <= 0.f) {
 			InitializeWave();
-			std::cout << wave.current_wave + 1 << " wave started." << std::endl;
+			std::cout << wave.current_wave << " wave started." << std::endl;
 		}
 	}
 }
