@@ -62,7 +62,7 @@ void CEnemyState::Update()
 		break;
 	case MONSTER_STATE::ATTACK:
 		break;
-	case MONSTER_STATE::PROJECTILE_ATTACK:
+	case MONSTER_STATE::SKILL:
 		break;
 	case MONSTER_STATE::GETHIT:
 	{
@@ -101,7 +101,7 @@ void CEnemyState::OnEnterState(UINT8 state)
 		if (mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(false);
 		break;
 	case MONSTER_STATE::ATTACK:
-	case MONSTER_STATE::PROJECTILE_ATTACK:
+	case MONSTER_STATE::SKILL:
 		break;
 	case MONSTER_STATE::DEATH:
 		mIsDead = true;
@@ -133,7 +133,7 @@ void CEnemyState::OnExitState(UINT8 state)
 		break;
 	case MONSTER_STATE::ATTACK:
 		break;
-	case MONSTER_STATE::PROJECTILE_ATTACK:
+	case MONSTER_STATE::SKILL:
 		break;
 	case MONSTER_STATE::GETHIT:
 		break;

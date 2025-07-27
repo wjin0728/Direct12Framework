@@ -654,7 +654,7 @@ void GameManager::Update()
 		}
 
 		// 이벤트 처리
-		if (monster._state == S_MONSTER_STATE::ATTACK || monster._state == S_MONSTER_STATE::ATTACK2 || monster._state == S_MONSTER_STATE::PROJECTILE_ATTACK) {
+		if (monster._state == S_MONSTER_STATE::ATTACK || monster._state == S_MONSTER_STATE::ATTACK2 || monster._state == S_MONSTER_STATE::SKILL) {
 			monster.HandleCallback(monster.mEventHandler[(int)monster._state]);
 		}
 

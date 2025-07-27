@@ -21,7 +21,7 @@ void Monster::SetState(S_MONSTER_STATE newState)
 	if (newState == S_MONSTER_STATE::ATTACK) {
 		for (auto& key : _animations[(int)S_MONSTER_STATE::ATTACK].mEventKeys) { key.mEnable = true; }
 		for (auto& key : _animations[(int)S_MONSTER_STATE::ATTACK2].mEventKeys) { key.mEnable = true; }
-		for (auto& key : _animations[(int)S_MONSTER_STATE::PROJECTILE_ATTACK].mEventKeys) { key.mEnable = true; }
+		for (auto& key : _animations[(int)S_MONSTER_STATE::SKILL].mEventKeys) { key.mEnable = true; }
 	}
 
 	if (_class == S_ENEMY_TYPE::BOSS) {
