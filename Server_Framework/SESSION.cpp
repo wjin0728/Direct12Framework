@@ -211,12 +211,12 @@ void SESSION::send_boss_target_lock_packet()
 	do_send(&p);
 }
 
-void SESSION::send_message_packet(uint8_t m)
+void SESSION::send_make_message_packet(uint8_t w)
 {
-	SC_MESSAGE_PACKET p;
-	p.type = SC_MESSAGE;
+	SC_MAKE_MESSAGE_PACKET p;
+	p.type = SC_MAKE_MESSAGE;
 	p.size = sizeof(p);
-	p.message = m;
+	p.wave_type = w;
 	do_send(&p);
 }
 

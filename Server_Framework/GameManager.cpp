@@ -888,7 +888,15 @@ void GameManager::SendMakePortalPacket()
 	for (auto& [_, cl] : clients[ServerNumber]) {
 		if (cl._state != ST_INGAME) continue;
 		cl.send_make_potal_packet();
-		cout << "Send make portal packet to client " << cl._id << std::endl;
+		//cout << "Send make portal packet to client " << cl._id << std::endl;
+	}
+}
+void GameManager::SendMakeMessagePacket(uint8_t wave_type)
+{
+	for (auto& [_, cl] : clients[ServerNumber]) {
+		if (cl._state != ST_INGAME) continue;
+		cl.send_make_message_packet(wave_type);
+		//cout << "Send make massege packet to client " << cl._id << std::endl;
 	}
 }
 
@@ -957,13 +965,14 @@ void GameManager::InitializeMonsterWave()
 	switch (scene_type) {
 	case S_SCENE_TYPE::LOBBY: {
 		if (prev_wave == -1) {
-			// 클라한테 메시지 띄우라고 보내기
+			SendMakeMessagePacket((uint8_t)scene_type);
 			MonsterWaves[ServerNumber].message_count = 3;
 		}
 		break;
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_1: {
 		if (prev_wave == -1) {
+			SendMakeMessagePacket((uint8_t)scene_type);
 			MonsterWaves[ServerNumber].message_count = 2;
 		}
 		else if (prev_wave == S_INTRO) {
@@ -979,6 +988,7 @@ void GameManager::InitializeMonsterWave()
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_2: {
 		if (prev_wave == -1) {
+			SendMakeMessagePacket((uint8_t)scene_type);
 			MonsterWaves[ServerNumber].message_count = 2;
 		}
 		else if (prev_wave == S_INTRO) {
@@ -994,6 +1004,7 @@ void GameManager::InitializeMonsterWave()
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_3: {
 		if (prev_wave == -1) {
+			SendMakeMessagePacket((uint8_t)scene_type);
 			MonsterWaves[ServerNumber].message_count = 2;
 		}
 		else if (prev_wave == S_INTRO) {
@@ -1113,7 +1124,8 @@ void GameManager::UpdateWave()
 }
 void GameManager::HandleWaveEnd(MonsterWave& wave)
 {
-	bool isFinalWave;
+	bool isFinalWave{};
+
 	switch (scene_type) {
 		case S_SCENE_TYPE::LOBBY: {
 			isFinalWave = (wave.current_wave == S_INTRO);
@@ -1147,22 +1159,29 @@ void GameManager::HandleWaveEnd(MonsterWave& wave)
 }
 void GameManager::HandleWaveInProgress(MonsterWave& wave)
 {
-	// 스폰 타이머 처리
-	if (wave.spawn_timer > 0) {
-		wave.spawn_timer -= TICK_INTERVAL;
-		if (wave.spawn_timer <= 0.f) {
-			for (auto& [_, monster] : Monsters[ServerNumber]) {
-				monster.SetState(S_MONSTER_STATE::SPAWN);
-			}
+	if (wave.current_wave == S_INTRO) {
+		wave.message_timer -= TICK_INTERVAL;
+		if (wave.message_timer <= 0.f) {
+			wave.is_end = true;
 		}
 	}
+	else { // 몬스터 웨이브일 때
+		if (wave.spawn_timer > 0) { // 스폰 처리
+			wave.spawn_timer -= TICK_INTERVAL;
+			if (wave.spawn_timer <= 0.f) {
+				for (auto& [_, monster] : Monsters[ServerNumber]) {
+					monster.SetState(S_MONSTER_STATE::SPAWN);
+				}
+			}
+		}
 
-	// 웨이브 종료 조건 확인
-	wave.is_end = true;
-	for (auto& [_, monster] : Monsters[ServerNumber]) {
-		if (!monster._remove || !monster._drop_item) {
-			wave.is_end = false;
-			break;
+		// 웨이브 종료 조건 확인
+		wave.is_end = true;
+		for (auto& [_, monster] : Monsters[ServerNumber]) {
+			if (!monster._remove || !monster._drop_item) {
+				wave.is_end = false;
+				break;
+			}
 		}
 	}
 }

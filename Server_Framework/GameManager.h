@@ -86,6 +86,7 @@ public:
 	void SendAllProjectilesPosPacket();
 	void SendHPPacket(S_OBJECT_TYPE type, int id, int hp, int shield);
 	void SendMakePortalPacket(); // Æ÷Å» »ý¼º
+	void SendMakeMessagePacket(uint8_t wave_type);
 
 	static GameManager& GetInstance() {
 		static GameManager instance;
