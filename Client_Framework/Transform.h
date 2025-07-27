@@ -78,6 +78,9 @@ public:
 		mLocalRotation = Quaternion::CreateFromYawPitchRoll(rotation * degToRad);
 		mLocalEulerAngle = rotation; mDirtyFlag = true;
 	};
+	void SetLocalPositionX(float x) { SetLocalPosition({ x, mLocalPosition.y, mLocalPosition.z }); }
+	void SetLocalPositionY(float y) { SetLocalPosition({ mLocalPosition.x, y, mLocalPosition.z }); }
+	void SetLocalPositionZ(float z) { SetLocalPosition({ mLocalPosition.x, mLocalPosition.y, z }); }
 	void SetLocalRotation(const Quaternion& rotation) {
 		mLocalRotation = rotation; mLocalEulerAngle = Vec3::GetAngleToQuaternion(rotation)* radToDeg; mDirtyFlag = true; }
 	void SetLocalRotationX(float angle) { SetLocalRotation({ angle, mLocalEulerAngle.y, mLocalEulerAngle.z }); }

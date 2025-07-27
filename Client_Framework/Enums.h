@@ -142,6 +142,7 @@ enum class PLAYER_STATE : UINT8
 enum class EFFECT_TYPE : UINT8
 {
 	EXPLOSION,
+	VINE,
 	ss
 };
 

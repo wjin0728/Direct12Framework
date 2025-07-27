@@ -152,16 +152,17 @@ bool PlayerCharacter::IsMonsterInRange(Monster* target) const
 bool PlayerCharacter::OnFighterBasicAttack(BoundingOrientedBox& monster_box)
 {
     BoundingOrientedBox atbox;
+    atbox.Extents = Vec3(1.557609f, 1.032651f, 1.580357f) / 2.f;
+	atbox.Center = { 0, 0.533f, 0.828f }; 
     XMVECTOR center = XMLoadFloat3(&_boundingbox.Center);
     float yawRad = XMConvertToRadians(_look_dir.y); // _look_dir.y를 라디안으로
     XMVECTOR forward = XMVectorSet(sinf(yawRad), 0.0f, cosf(yawRad), 0.0f); // 방향 벡터
     forward = XMVector3Normalize(forward); // 정규화
-    float offset = 0.2f; // 전사 앞 거리
+    float offset = 0.5f; // 전사 앞 거리
 
     XMVECTOR attackBoxCenter = XMVectorAdd(center, XMVectorScale(forward, offset));
     XMStoreFloat3(&atbox.Center, attackBoxCenter);
 
-    atbox.Extents = Vec3(0.6801331f, 1.110679f, 0.5878519f) / 4.f;
 
     atbox.Orientation = _rotation; // _rotation 사용
 

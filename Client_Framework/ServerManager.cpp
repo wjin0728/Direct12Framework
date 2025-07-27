@@ -17,6 +17,7 @@
 #include "ParticleAttach.h"
 #include "ParticleManager.h"
 #include "TrailRenderer.h"
+#include"Vine.h"
 
 void ServerManager::Initialize()
 {
@@ -430,7 +431,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "Current scene is nullptr" << std::endl;
 			break;
 		}
-		scene->RemoveObject(mItems[packet->item_id]);
+		scene->DestroyObject(mItems[packet->item_id].get());
 		mItems.erase(packet->item_id);
 
 		cout << "삭제!";
@@ -494,8 +495,19 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			}
 		}
 			break;
-		case EFFECT_TYPE::ss:
+		case EFFECT_TYPE::VINE: {
+			auto vinePrefab = INSTANCE(CResourceManager).GetPrefab("SkillVine");
+			if (vinePrefab) {
+				auto vineObj = CGameObject::Instantiate(vinePrefab);
+				vineObj->SetTag("VineEffect");
+				vineObj->SetName("VineEffect");
+				vineObj->AddComponent<CVine>();
+				vineObj->SetObjectType(OBJECT_TYPE::EFFECT);
+				vineObj->GetTransform()->SetLocalPosition(effectPos);
+				INSTANCE(CSceneManager).GetCurScene()->AddObject(vineObj);
+			}
 			break;
+		}
 		default:
 			break;
 		}
@@ -652,7 +664,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 		std::cout << "Removing monster with ID: " << packet->monster_id << std::endl;
-		scene->RemoveObject(it->second);
+		scene->DestroyObject(it->second.get());
 		mEnemies.erase(it);
 		break;
 	}
@@ -664,7 +676,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 		if (!mProjectiles.contains(packet->projectile_id)) break;
-		scene->RemoveObject(mProjectiles[packet->projectile_id]);
+		scene->DestroyObject(mProjectiles[packet->projectile_id].get());
 		mProjectiles.erase(packet->projectile_id);
 		break;
 	}
@@ -715,6 +727,10 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			auto portalObject = CGameObject::Instantiate(portal);
 
 			switch (INSTANCE(CSceneManager).GetCurSceneType()) {
+				case SCENE_TYPE::LOBBY: {
+					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(37.59f, 3.65f, 34.2f));
+					break;
+				}
 				case SCENE_TYPE::MAIN_STAGE_1: {
 					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(65.111f, 4.913f, 45.11095f));
 					break;

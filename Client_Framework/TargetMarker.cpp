@@ -51,7 +51,7 @@ void CTargetMarker::LateUpdate()
 		}
 		mLockTime = std::min<float>(mLockTime, 1.f);
 		float targetSize = lerp(mOriginalSize * 2, mOriginalSize, mLockTime);
-		Color targetColor = Color::Lerp(Color(1.f,1.f,1.f,1.f), Color(1.f, 0.f, 0.f, 1.f), mLockTime);
+		Color targetColor = Color::Lerp(Color(1.f,1.f,1.f,0.5f), Color(0.03f, 0.956f, 0.f, 1.f), mLockTime);
 		renderer->SetSize({ targetSize, targetSize });
 		renderer->SetColor(targetColor);
 	}

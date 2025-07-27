@@ -101,6 +101,13 @@ void Monster::SetBossState(S_MONSTER_STATE newState)
 void Monster::Update()
 {
 	_animation_time += TICK_INTERVAL;
+	if (_on_CantMove&&cant_move_time>0.f) {
+		cant_move_time -= TICK_INTERVAL;
+		if (cant_move_time <= 0.f) {
+			_on_CantMove = false;
+			cant_move_time = 0.f;
+		}
+	}
     if (currentState) currentState->Update(this);
     LocalTransform(); // 바운딩 박스 업데이트 해주기
     if (_class != S_ENEMY_TYPE::BOSS) UpdateTarget();

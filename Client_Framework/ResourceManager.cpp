@@ -111,6 +111,7 @@ bool CResourceManager::LoadProjectileObjects()
 	LoadPrefabFromFile("Iceball");
 	LoadPrefabFromFile("MagicBall");
 	LoadPrefabFromFile("Explosion");
+	LoadPrefabFromFile("SkillVine");
 	return true;
 }
 
