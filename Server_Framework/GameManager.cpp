@@ -330,7 +330,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			
 				mon.second.LocalTransform();
 				if (sphere.Intersects(mon.second._boundingbox)) {
-					mon.second.TakeDamage(15, true);
+					mon.second.TakeDamage(P_FIRE_EXPLOSION_DAMAGE, true);
 					SendHPPacket((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
 				}
 			}
@@ -348,7 +348,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				if (mon.second.IsUnavailable()) continue;
 				mon.second.LocalTransform();
 				if (box.Intersects(mon.second._boundingbox)) {
-					mon.second.TakeDamage(5, true);
+					mon.second.TakeDamage(P_GRASS_VINE_DAMAGE, true);
 					mon.second.cant_move_time = 4.f; // 2초간 이동 불가
 					mon.second._on_CantMove = true;
 					SendHPPacket((S_OBJECT_TYPE)S_ENEMY, mon.first, mon.second._hp, 0);
@@ -395,11 +395,12 @@ void GameManager::Process_packet(int c_id, char* packet)
 		switch (player._class)
 		{
 		case S_PLAYER_CLASS::FIGHTER: {
+			player._target->TakeDamage(P_ULTIMAGE_DAMAGE, true); // 전사 궁극기: 타겟 몬스터에게 50의 피해
 			break;
 		}
 		case S_PLAYER_CLASS::ARCHER: {
 			cout << "Archer CS_ULTIMATE_SKILL\n";
-			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
+			Projectile proj{ 1, S_PROJECTILE_TYPE::ULTIMATE_ARROW };
 			proj._pos = player._pos;
 			proj._pos.y += 2.5f;
 
@@ -554,7 +555,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 				if (mon.second.IsUnavailable()) continue; // 몬스터가 제거된 경우는 패스
 				mon.second.LocalTransform();
 				if (atbox.Intersects(mon.second._boundingbox)) {
-					mon.second.TakeDamage(5, false);
+					mon.second.TakeDamage(P_FIGHTER_DAMAGE, false);
 					SendHPPacket(S_OBJECT_TYPE::S_ENEMY, mon.first, mon.second._hp, 0);
 				}
 			}
