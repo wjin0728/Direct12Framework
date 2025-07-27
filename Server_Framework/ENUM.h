@@ -142,3 +142,14 @@ enum class S_BUTTON_TYPE : UINT8
 
 	BUTTON_END
 };
+
+enum S_WAVE_TYPE : UINT8
+{
+	S_INTRO,
+	S_mm,
+	S_mMm,
+	S_BOSS,
+	S_OUTRO,
+
+	S_WAVE_END
+};

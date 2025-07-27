@@ -940,26 +940,37 @@ void GameManager::CreateItemAtRandomPosition()
 
 void GameManager::InitializeMonsterWave()
 {
-	if (Monster_cnt[ServerNumber]) {
+	// 몬스터 초기화
+	if (Monsters[ServerNumber].size()) {
 		for (auto& cl : clients[ServerNumber]) {
 			for (int i = 0; i < Monster_cnt[ServerNumber]; ++i) {
 				cl.second.send_remove_monster_packet(i);
 			}
 		}
-	}
 
-	if (Monsters[ServerNumber].size()) {
 		Monsters[ServerNumber].clear();
 		Monster_cnt[ServerNumber] = 0;
 	}
 
+	auto prev_wave = MonsterWaves[ServerNumber].current_wave;
+
 	switch (scene_type) {
+	case S_SCENE_TYPE::LOBBY: {
+		if (prev_wave == -1) {
+			// 클라한테 메시지 띄우라고 보내기
+			MonsterWaves[ServerNumber].message_count = 3;
+		}
+		break;
+	}
 	case S_SCENE_TYPE::MAIN_STAGE_1: {
-		if (MonsterWaves[ServerNumber].current_wave == 0) {
+		if (prev_wave == -1) {
+			MonsterWaves[ServerNumber].message_count = 2;
+		}
+		else if (prev_wave == S_INTRO) {
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, -5.f, 50.f));
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(55.f, -5.f, 50.f));
 		}
-		else if (MonsterWaves[ServerNumber].current_wave == 1) {
+		else if (prev_wave == S_mm) {
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, -5.f, 50.f));
 			InitializeMonster(S_ENEMY_TYPE::GRASS_BIG, Vec3(55.5f, -5.f, 50.f));
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(60.f, -5.f, 50.f));
@@ -967,11 +978,14 @@ void GameManager::InitializeMonsterWave()
 		break;
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_2: {
-		if (MonsterWaves[ServerNumber].current_wave == 0) {
+		if (prev_wave == -1) {
+			MonsterWaves[ServerNumber].message_count = 2;
+		}
+		else if (prev_wave == S_INTRO) {
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(29.4f, 0.f, 35.6f));
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(31.33f, 0.f, 33.24f));
 		}
-		else if (MonsterWaves[ServerNumber].current_wave == 1) {
+		else if (prev_wave == S_mm) {
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(29.4f, 0.f, 35.6f));
 			InitializeMonster(S_ENEMY_TYPE::WATER_BIG, Vec3(31.33f, 0.f, 33.24f));
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(32.3f, 0.f, 29.f));
@@ -979,16 +993,19 @@ void GameManager::InitializeMonsterWave()
 		break;
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_3: {
-		if (MonsterWaves[ServerNumber].current_wave == 0) {
+		if (prev_wave == -1) {
+			MonsterWaves[ServerNumber].message_count = 2;
+		}
+		else if (prev_wave == S_INTRO) {
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 0.f, 43.8f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(27.8f, 0.f, 43.9f));
 		}
-		else if (MonsterWaves[ServerNumber].current_wave == 1) {
+		else if (prev_wave == S_mm) {
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 0.f, 43.8f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_BIG, Vec3(27.8f, 0.f, 43.9f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(32.6f, 0.f, 43.65f));
 		}
-		else if (MonsterWaves[ServerNumber].current_wave == 2) {
+		else if (prev_wave == S_mMm) {
 			InitializeMonster(S_ENEMY_TYPE::BOSS, Vec3(22.27432f, 0.9705162f, 28.85343f));
 		}
 		break;
@@ -997,8 +1014,9 @@ void GameManager::InitializeMonsterWave()
 
 	MonsterWaves[ServerNumber].current_wave++;
 	MonsterWaves[ServerNumber].is_end = false;
-	MonsterWaves[ServerNumber].wave_timer = SPAWN_INTERVAL;
+	MonsterWaves[ServerNumber].wave_timer = WAVE_INTERVAL;
 	MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
+	MonsterWaves[ServerNumber].message_timer = MESSAGE_INTERVAL * (float)MonsterWaves[ServerNumber].message_count;
 }
 void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 {
@@ -1082,7 +1100,7 @@ std::function<void(Monster*)> GameManager::MakeAttackEvent(Vec2 offset, float ra
 
 void GameManager::UpdateWave()
 {
-	if (scene_type < S_SCENE_TYPE::MAIN_STAGE_1 || scene_type > S_SCENE_TYPE::MAIN_STAGE_3) return;
+	if (scene_type < S_SCENE_TYPE::LOBBY || scene_type > S_SCENE_TYPE::MAIN_STAGE_3) return;
 
 	auto& wave = MonsterWaves[ServerNumber];
 
@@ -1095,19 +1113,31 @@ void GameManager::UpdateWave()
 }
 void GameManager::HandleWaveEnd(MonsterWave& wave)
 {
-	bool isFinalWave = (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && wave.current_wave == 3) || (scene_type != S_SCENE_TYPE::MAIN_STAGE_3 && wave.current_wave == 2);
-
-	if (wave.current_wave == 2) {
-		cout << "Wave " << wave.current_wave << " is end." << endl;
+	bool isFinalWave;
+	switch (scene_type) {
+		case S_SCENE_TYPE::LOBBY: {
+			isFinalWave = (wave.current_wave == S_INTRO);
+			break;
+		}
+		case S_SCENE_TYPE::MAIN_STAGE_1:
+		case S_SCENE_TYPE::MAIN_STAGE_2: {
+			isFinalWave = (wave.current_wave == S_mMm);
+			break;
+		}
+		case S_SCENE_TYPE::MAIN_STAGE_3: {
+			isFinalWave = (wave.current_wave == S_BOSS);
+			break;
+		}
 	}
-	if (isFinalWave) {
+
+	if (isFinalWave) { // 마지막 웨이브가 끝났으면 포탈 생성
 		if (!wave.make_potal) {
 			SendMakePortalPacket();
 			wave.make_potal = true;
 		}
 		// else if (IsAllPlayerReady()) ChangeScene();
 	}
-	else {
+	else { // 아직 마지막 웨이브가 아니면 다음 웨이브로
 		wave.wave_timer -= TICK_INTERVAL;
 		if (wave.wave_timer <= 0.f) {
 			InitializeMonsterWave();
@@ -1136,14 +1166,14 @@ void GameManager::HandleWaveInProgress(MonsterWave& wave)
 		}
 	}
 }
-bool GameManager::IsAllPlayerReady()
-{
-	bool all_ready = true;
-	for (auto& cl : clients[ServerNumber]) {
-		if (cl.second._state != ST_INGAME) continue;
-		if (cl.second._player._ready_for_next_stage == false)
-			all_ready = false;
-		break;
-	}
-	return all_ready;
-}
+//bool GameManager::IsAllPlayerReady()
+//{
+//	bool all_ready = true;
+//	for (auto& cl : clients[ServerNumber]) {
+//		if (cl.second._state != ST_INGAME) continue;
+//		if (cl.second._player._ready_for_next_stage == false)
+//			all_ready = false;
+//		break;
+//	}
+//	return all_ready;
+//}

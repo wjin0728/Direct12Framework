@@ -10,17 +10,21 @@
 
 	//#include "OVER_PLUS.h"
 struct MonsterWave {
-	int current_wave = 0;
-	float wave_timer = SPAWN_INTERVAL;
+	int current_wave = -1;
+
+	float wave_timer = WAVE_INTERVAL;
 	float spawn_timer = SPAWN_INTERVAL;
-	bool is_end = false; // 웨이브 종료 여부
+	float message_timer = 0.f; // 메시지 타이머
+	int message_count = 0; // 메시지 카운트
+
+	bool is_end = true; // 웨이브 종료 여부
 	bool make_potal = false; // 포탈 생성 여부
 
 	void Initialize() {
-		current_wave = 0;
+		current_wave = -1;
 		wave_timer = SPAWN_INTERVAL;
 		spawn_timer = SPAWN_INTERVAL;
-		is_end = false;
+		is_end = true;
 		make_potal = false;
 	}
 };
@@ -120,6 +124,8 @@ public:
 			cl.second.send_change_scene_packet(scene);
 		}
 
+		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
+
 		// 씬 전환 후, 몬스터, 아이템 초기화
 		Monsters[ServerNumber].clear();
 		items[ServerNumber].clear();
@@ -131,8 +137,6 @@ public:
 
 		MonsterWaves[ServerNumber].Initialize(); // 웨이브 상태 초기화
 
-		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
-
 		for (auto& cl : clients[ServerNumber]) {
 			cl.second._player._pos = spawnDatas[(int)scene_type][(int)cl.second._player._class].pos;
 			cl.second._player._rotation = spawnDatas[(int)scene_type][(int)cl.second._player._class].rot;
@@ -141,7 +145,7 @@ public:
 			cl.second._player._barrier = 0;
 			cl.second._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 			cl.second._player.InitializeTarget();
-			cl.second._player._ready_for_next_stage = false;
+			//cl.second._player._ready_for_next_stage = false;
 		}
 
 		cout << "Scene changed to: " << (int)scene_type << endl;
@@ -174,7 +178,7 @@ public:
 	void UpdateWave();
 	void HandleWaveEnd(MonsterWave& wave);
 	void HandleWaveInProgress(MonsterWave& wave);
-	bool IsAllPlayerReady(); // 모든 플레이어가 다음 스테이지 준비 상태인지 확인
+	//bool IsAllPlayerReady(); // 모든 플레이어가 다음 스테이지 준비 상태인지 확인
 
 	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
 		{ S_ENEMY_TYPE::GRASS_SMALL, {
