@@ -70,6 +70,8 @@ public:
 
     virtual void OnEnterState(UINT8 state) override;
     virtual void OnExitState(UINT8 state) override;
+
+    virtual void CreateParticleEvent() override;
 };
 
 class CWarriorState : public CPlayerStateMachine
@@ -85,6 +87,8 @@ public:
     virtual void Update() override;
     virtual void OnEnterState(UINT8 state) override;
     virtual void OnExitState(UINT8 state) override;
+
+    virtual void CreateParticleEvent() override;
 };
 
 class CMageState : public CPlayerStateMachine
@@ -100,4 +104,6 @@ public:
     virtual void Update() override;
     virtual void OnEnterState(UINT8 state) override;
     virtual void OnExitState(UINT8 state) override;
+
+    virtual void CreateParticleEvent() override;
 };
