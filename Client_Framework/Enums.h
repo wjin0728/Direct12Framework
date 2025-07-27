@@ -177,3 +177,14 @@ enum class BUTTON_TYPE : UINT8
 
 	BUTTON_END
 };
+
+enum WAVE_TYPE : UINT8
+{
+	INTRO,
+	mm,
+	mMm,
+	BOSS,
+	OUTRO,
+
+	WAVE_END
+};

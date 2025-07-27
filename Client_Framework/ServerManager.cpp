@@ -749,12 +749,15 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_BOSS_SET_TARGET: {
 		SC_BOSS_SET_TARGET_PACKET* packet = reinterpret_cast<SC_BOSS_SET_TARGET_PACKET*>(packet_ptr);
 		
-		
 		break;
 	}
 	case SC_BOSS_TARGET_LOCK: {
 		SC_BOSS_TARGET_LOCK_PACKET* packet = reinterpret_cast<SC_BOSS_TARGET_LOCK_PACKET*>(packet_ptr);
 
+		break;
+	}
+	case SC_MAKE_MESSAGE: {
+		SC_MAKE_MESSAGE_PACKET* packet = reinterpret_cast<SC_MAKE_MESSAGE_PACKET*>(packet_ptr);
 
 		break;
 	}

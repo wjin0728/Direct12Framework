@@ -20,9 +20,12 @@ struct MonsterWave {
 	bool is_end = true; // 웨이브 종료 여부
 	bool make_potal = false; // 포탈 생성 여부
 
-	void Initialize() {
-		current_wave = -1;
-		wave_timer = SPAWN_INTERVAL;
+	void Initialize(S_SCENE_TYPE scene_type) {
+		if (scene_type == S_SCENE_TYPE::LOBBY) // 로비만 Intro 사용
+			current_wave = -1;
+		else
+			current_wave = 0;
+		wave_timer = WAVE_INTERVAL;
 		spawn_timer = SPAWN_INTERVAL;
 		is_end = true;
 		make_potal = false;
@@ -136,7 +139,7 @@ public:
 		Item_cnt[ServerNumber] = 0;
 		Projectile_cnt[ServerNumber] = 0;
 
-		MonsterWaves[ServerNumber].Initialize(); // 웨이브 상태 초기화
+		MonsterWaves[ServerNumber].Initialize(scene_type); // 웨이브 상태 초기화
 
 		for (auto& cl : clients[ServerNumber]) {
 			cl.second._player._pos = spawnDatas[(int)scene_type][(int)cl.second._player._class].pos;

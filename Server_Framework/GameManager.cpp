@@ -960,70 +960,64 @@ void GameManager::InitializeMonsterWave()
 		Monster_cnt[ServerNumber] = 0;
 	}
 
-	auto prev_wave = MonsterWaves[ServerNumber].current_wave;
+	auto cur_wave = MonsterWaves[ServerNumber].current_wave++;
 
 	switch (scene_type) {
 	case S_SCENE_TYPE::LOBBY: {
-		if (prev_wave == -1) {
-			SendMakeMessagePacket((uint8_t)scene_type);
-			MonsterWaves[ServerNumber].message_count = 3;
-		}
+		MonsterWaves[ServerNumber].message_count = 3;
 		break;
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_1: {
-		if (prev_wave == -1) {
-			SendMakeMessagePacket((uint8_t)scene_type);
-			MonsterWaves[ServerNumber].message_count = 2;
-		}
-		else if (prev_wave == S_INTRO) {
+		if (cur_wave == S_mm) {
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, -5.f, 50.f));
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(55.f, -5.f, 50.f));
 		}
-		else if (prev_wave == S_mm) {
+		else if (cur_wave == S_mMm) {
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(50.f, -5.f, 50.f));
 			InitializeMonster(S_ENEMY_TYPE::GRASS_BIG, Vec3(55.5f, -5.f, 50.f));
 			InitializeMonster(S_ENEMY_TYPE::GRASS_SMALL, Vec3(60.f, -5.f, 50.f));
 		}
+		MonsterWaves[ServerNumber].message_count = 1;
 		break;
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_2: {
-		if (prev_wave == -1) {
-			SendMakeMessagePacket((uint8_t)scene_type);
-			MonsterWaves[ServerNumber].message_count = 2;
-		}
-		else if (prev_wave == S_INTRO) {
+		if (cur_wave == S_mm) {
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(29.4f, 0.f, 35.6f));
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(31.33f, 0.f, 33.24f));
 		}
-		else if (prev_wave == S_mm) {
+		else if (cur_wave == S_mMm) {
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(29.4f, 0.f, 35.6f));
 			InitializeMonster(S_ENEMY_TYPE::WATER_BIG, Vec3(31.33f, 0.f, 33.24f));
 			InitializeMonster(S_ENEMY_TYPE::WATER_SMALL, Vec3(32.3f, 0.f, 29.f));
 		}
+		MonsterWaves[ServerNumber].message_count = 1;
 		break;
 	}
 	case S_SCENE_TYPE::MAIN_STAGE_3: {
-		if (prev_wave == -1) {
-			SendMakeMessagePacket((uint8_t)scene_type);
-			MonsterWaves[ServerNumber].message_count = 2;
-		}
-		else if (prev_wave == S_INTRO) {
+		if (cur_wave == S_mm) {
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 0.f, 43.8f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(27.8f, 0.f, 43.9f));
+			MonsterWaves[ServerNumber].message_count = 1;
 		}
-		else if (prev_wave == S_mm) {
+		else if (cur_wave == S_mMm) {
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(23.3f, 0.f, 43.8f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_BIG, Vec3(27.8f, 0.f, 43.9f));
 			InitializeMonster(S_ENEMY_TYPE::FIRE_SMALL, Vec3(32.6f, 0.f, 43.65f));
+			MonsterWaves[ServerNumber].message_count = 1;
 		}
-		else if (prev_wave == S_mMm) {
+		else if (cur_wave == S_BOSS) {
 			InitializeMonster(S_ENEMY_TYPE::BOSS, Vec3(22.27432f, 0.9705162f, 28.85343f));
+			MonsterWaves[ServerNumber].message_count = 2;
+		}
+		else if (cur_wave == S_OUTRO) {
+			MonsterWaves[ServerNumber].message_count = 2;
 		}
 		break;
 	}
 	}
 
-	MonsterWaves[ServerNumber].current_wave++;
+	SendMakeMessagePacket((uint8_t)cur_wave);
+
 	MonsterWaves[ServerNumber].is_end = false;
 	MonsterWaves[ServerNumber].wave_timer = WAVE_INTERVAL;
 	MonsterWaves[ServerNumber].spawn_timer = SPAWN_INTERVAL;
@@ -1137,7 +1131,7 @@ void GameManager::HandleWaveEnd(MonsterWave& wave)
 			break;
 		}
 		case S_SCENE_TYPE::MAIN_STAGE_3: {
-			isFinalWave = (wave.current_wave == S_BOSS);
+			isFinalWave = (wave.current_wave == S_OUTRO);
 			break;
 		}
 	}
@@ -1159,29 +1153,31 @@ void GameManager::HandleWaveEnd(MonsterWave& wave)
 }
 void GameManager::HandleWaveInProgress(MonsterWave& wave)
 {
-	if (wave.current_wave == S_INTRO) {
+	if (wave.message_timer > 0) { // 메시지 타이머 처리
 		wave.message_timer -= TICK_INTERVAL;
 		if (wave.message_timer <= 0.f) {
-			wave.is_end = true;
+			if (wave.current_wave == S_INTRO || wave.current_wave == S_OUTRO) { // 몬스터 웨이브가 아닐 경우
+				wave.is_end = true;
+			}
+		}
+		return;
+	} 
+	// 메시지 타이머가 끝났으면
+	else if (wave.spawn_timer > 0) { // 스폰 처리
+		wave.spawn_timer -= TICK_INTERVAL;
+		if (wave.spawn_timer <= 0.f) {
+			for (auto& [_, monster] : Monsters[ServerNumber]) {
+				monster.SetState(S_MONSTER_STATE::SPAWN);
+			}
 		}
 	}
-	else { // 몬스터 웨이브일 때
-		if (wave.spawn_timer > 0) { // 스폰 처리
-			wave.spawn_timer -= TICK_INTERVAL;
-			if (wave.spawn_timer <= 0.f) {
-				for (auto& [_, monster] : Monsters[ServerNumber]) {
-					monster.SetState(S_MONSTER_STATE::SPAWN);
-				}
-			}
-		}
 
-		// 웨이브 종료 조건 확인
-		wave.is_end = true;
-		for (auto& [_, monster] : Monsters[ServerNumber]) {
-			if (!monster._remove || !monster._drop_item) {
-				wave.is_end = false;
-				break;
-			}
+	// 웨이브 종료 조건 확인
+	wave.is_end = true;
+	for (auto& [_, monster] : Monsters[ServerNumber]) {
+		if (!monster._remove || !monster._drop_item) {
+			wave.is_end = false;
+			break;
 		}
 	}
 }
