@@ -9,6 +9,27 @@
 #include <chrono>
 
 	//#include "OVER_PLUS.h"
+struct MonsterWave {
+	int current_wave = 0;
+	float wave_timer = SPAWN_INTERVAL;
+	float spawn_timer = SPAWN_INTERVAL;
+	bool is_end = false; // 웨이브 종료 여부
+	bool make_potal = false; // 포탈 생성 여부
+
+	void Initialize() {
+		current_wave = 0;
+		wave_timer = SPAWN_INTERVAL;
+		spawn_timer = SPAWN_INTERVAL;
+		is_end = false;
+		make_potal = false;
+	}
+};
+
+struct MonsterAttackInfo {
+	Vec2 offset;
+	float radius;
+	int damage;
+};
 
 class GameManager
 {
@@ -40,6 +61,10 @@ public:
 	array<int, 6> Item_cnt = { 0, 0, 0, 0, 0, 0 };
 	array<int, 6> Monster_cnt = { 0, 0, 0, 0, 0, 0 };
 	array<int, 6> Projectile_cnt = { 0, 0, 0, 0, 0, 0 };
+	array<MonsterWave, 6> MonsterWaves; // 각 서버의 몬스터 웨이브 정보
+
+	const float boss_item_spawn_interval = 15.f; // 보스 아이템 생성 간격 (초 단위)
+	float boss_item_timer = boss_item_spawn_interval; // 보스 아이템 생성 타이머
 
 	GameManager();
 	~GameManager();
@@ -55,6 +80,8 @@ public:
 	void SendAllMonstersPosPacket();
 	void SendAllItemsPosPacket();
 	void SendAllProjectilesPosPacket();
+	void SendHPPacket(S_OBJECT_TYPE type, int id, int hp, int shield);
+	void SendMakePortalPacket(); // 포탈 생성
 
 	static GameManager& GetInstance() {
 		static GameManager instance;
@@ -97,9 +124,13 @@ public:
 		Monsters[ServerNumber].clear();
 		items[ServerNumber].clear();
 		Projectiles[ServerNumber].clear();
+
 		Monster_cnt[ServerNumber] = 0;
 		Item_cnt[ServerNumber] = 0;
 		Projectile_cnt[ServerNumber] = 0;
+
+		MonsterWaves[ServerNumber].Initialize(); // 웨이브 상태 초기화
+
 		scene_type = (S_SCENE_TYPE)scene; // 씬 타입 업데이트
 
 		for (auto& cl : clients[ServerNumber]) {
@@ -110,16 +141,67 @@ public:
 			cl.second._player._barrier = 0;
 			cl.second._player.SetState((UINT8)S_PLAYER_STATE::IDLE);
 			cl.second._player.InitializeTarget();
+			cl.second._player._ready_for_next_stage = false;
 		}
 
-		//InitializeMonsters(scene_type);
+		cout << "Scene changed to: " << (int)scene_type << endl;
+	}
+	void ChangeScene() {
+		switch (scene_type) {
+		case S_SCENE_TYPE::LOBBY:
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAIN_STAGE_1);
+			break;
+		case S_SCENE_TYPE::MAIN_STAGE_1:
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAIN_STAGE_2);
+			break;
+		case S_SCENE_TYPE::MAIN_STAGE_2:
+			ChangeScene((uint8_t)S_SCENE_TYPE::MAIN_STAGE_3);
+			break;
+		case S_SCENE_TYPE::MAIN_STAGE_3:
+			ChangeScene((uint8_t)S_SCENE_TYPE::ENDING);
+			break;
+		}
 	}
 
-	void CreateItem(Monster* monster);
-	void InitializeMonsters(S_SCENE_TYPE scene_type);
-	void InitializeGrassMonsters();
-	void InitializeWaterMonsters();
-	void InitializeFireMonsters();
+	void CreateItem(S_ENEMY_TYPE a, float x, float z);
+	void CreateItemAtRandomPosition();
+
+	void InitializeMonsterWave();
+	void InitializeMonster(S_ENEMY_TYPE type, Vec3 position);
+
+	std::function<void(Monster*)> MakeAttackEvent(Vec2 offset, float radius, int damage);
+
+	void UpdateWave();
+	void HandleWaveEnd(MonsterWave& wave);
+	void HandleWaveInProgress(MonsterWave& wave);
+	bool IsAllPlayerReady(); // 모든 플레이어가 다음 스테이지 준비 상태인지 확인
+
+	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
+		{ S_ENEMY_TYPE::GRASS_SMALL, {
+			{ {0.2f, 0.9f}, 2.f, 100 },
+			{ {0.f, 0.7f}, 0.8f, 100 },
+		}},
+		{ S_ENEMY_TYPE::GRASS_BIG, {
+			{ {0.f, 2.85f}, 1.f, 150 },
+			{ {1.25f, 1.25f}, 2.f, 150 },
+		}},
+		{ S_ENEMY_TYPE::WATER_SMALL, {
+			{ {0.f, 1.f}, 1.f, 100 },
+			{ {0.f, 1.7f}, 0.85f, 100 },
+		}},
+		{ S_ENEMY_TYPE::WATER_BIG, {
+			{ {0.f, 2.5f}, 1.9f, 150 },
+			{ {0.f, 0.f}, 2.5f, 150 },
+		}},
+		{ S_ENEMY_TYPE::FIRE_SMALL, {
+			{ {0.f, 2.f}, 0.75f, 100 },
+			{ {0.f, 0.8f}, 1.1f, 100 },
+		}},
+		{ S_ENEMY_TYPE::FIRE_BIG, {
+			{ {0.8f, 1.15f}, 1.5f, 150 },
+			{ {0.f, 2.3f}, 1.f, 150 },
+		}}
+	};
 
 private:
 	void Update();

@@ -115,14 +115,14 @@ void CMainMenu::InitializeSettingsUI()
 
 void CMainMenu::InitializeRoomSelectUI()
 {
-    for (int i = 0; i < 6; ++i)
+    for(int i= 0; i < 6; ++i)
     {
         std::string buttonName = "Room" + std::to_string(i + 1);
         if (auto button = mRoomSelectUI->GetChildComponent<CButton>(buttonName))
         {
-            button->SetOnClick([this, i]() { INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)(BUTTON_TYPE::ROOM1)+i); });
+            button->SetOnClick([this, i]() { INSTANCE(ServerManager).send_cs_click_button_packet((uint8_t)(BUTTON_TYPE::ROOM1) + i); });
         }
-    }
+	}
 }
 
 

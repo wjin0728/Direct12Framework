@@ -146,16 +146,15 @@ void CPlayerController::InteractWithItem()
 		Vec3 itemPos = targetItem->GetTransform()->GetWorldPosition();
 		Vec3 playerPos = GetTransform()->GetWorldPosition();
 		playerPos.y += 0.7f; 
-		//화면기준 아이템이 플레이어 왼쪽에 있는지 오른	쪽에 있는지 판단
 		Vec2 itemPosCS = camera->TransformToNDC(itemPos);
 		Vec2 playerPosCS = camera->TransformToNDC(playerPos);
 
 		float offset = 0.2f;
 
 		if (itemPosCS.x < playerPosCS.x) {
-			playerPosCS.x -= offset; // 플레이어 왼쪽에 아이템이 있을 때
+			playerPosCS.x -= offset; 
 		} else {
-			playerPosCS.x += offset; // 플레이어 오른쪽에 아이템이 있을 때
+			playerPosCS.x += offset; 
 		}
 		owner->TriggerEvent("OnItemTargeted", { true, playerPosCS });
 	}
@@ -249,13 +248,11 @@ void CPlayerController::OnKeyEvents()
 	{
 	case PLAYER_STATE::IDLE: {
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::ATTACK);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::ATTACK);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::ATTACK);
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::JUMP);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::JUMP);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::JUMP);
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
@@ -283,11 +280,11 @@ void CPlayerController::OnKeyEvents()
 		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
 			if (auto item = mTargetItem.lock()) {
 				if (item->GetName() == "SkillItem") {
-					mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
-					INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
+					INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::GATHERING);
 				}
 				else if (item->GetName() == "Portal") {
-					//서버에 포탈 이동 요청
+					mReadyForNextStage = !mReadyForNextStage; // Toggle ready state for next stage
+					INSTANCE(ServerManager).send_cs_ready_for_next_stage_packet(mReadyForNextStage);
 				}
 			}
 		}
@@ -306,8 +303,7 @@ void CPlayerController::OnKeyEvents()
 
 		if (dir != 0) {
 			INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
-			mStateMachine->SetState((UINT8)PLAYER_STATE::RUN);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::RUN);
 			moveKeyPressed = true;
 			return;
 		}
@@ -316,8 +312,7 @@ void CPlayerController::OnKeyEvents()
 	case PLAYER_STATE::RUN: {
 		if (INPUT.IsKeyDown(KEY_TYPE::LBUTTON)) {
 			//INSTANCE(ServerManager).send_cs_mouse_ldown_packet(camForward);
-			mStateMachine->SetState((UINT8)PLAYER_STATE::RUNATTACK);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUNATTACK);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::RUNATTACK);
 
 			if (INPUT.IsKeyPress(KEY_TYPE::W)) dir |= 0x08;
 			if (INPUT.IsKeyPress(KEY_TYPE::S)) dir |= 0x02;
@@ -329,8 +324,7 @@ void CPlayerController::OnKeyEvents()
 		}
 
 		if (INPUT.IsKeyDown(KEY_TYPE::SPACE)) {
-			mStateMachine->SetState((UINT8)PLAYER_STATE::JUMP);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::JUMP);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::JUMP);
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::F)) /*임시 아이템 생성*/ {
@@ -357,13 +351,13 @@ void CPlayerController::OnKeyEvents()
 		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
 			if (auto item = mTargetItem.lock()) {
 				if (item->GetName() == "SkillItem") {
-					mStateMachine->SetState((UINT8)PLAYER_STATE::GATHERING);
-					INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::GATHERING);
+					INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::GATHERING);
 					INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
 					return;
 				}
 				else if (item->GetName() == "Portal") {
-					//서버에 포탈 이동 요청
+					mReadyForNextStage = !mReadyForNextStage; // Toggle ready state for next stage
+					INSTANCE(ServerManager).send_cs_ready_for_next_stage_packet(mReadyForNextStage);
 				}
 			}
 		}
@@ -384,8 +378,7 @@ void CPlayerController::OnKeyEvents()
 
 		if (dir == 0) {
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
-			mStateMachine->SetState((UINT8)PLAYER_STATE::IDLE);
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
+			INSTANCE(ServerManager).send_cs_change_state_packet((UINT8)PLAYER_STATE::IDLE);
 			return;
 		}
 		INSTANCE(ServerManager).send_cs_move_packet(dir, camForward);
@@ -430,22 +423,7 @@ void CPlayerController::CastingSkill()
 		break;
 	case FIRE_EXPLOSION: {
 		if (mTargetEnemy.lock()) {
-			auto explosionPrefab = INSTANCE(CResourceManager).GetPrefab("Explosion");
-			if (explosionPrefab) {
-				auto explosionObj = CGameObject::Instantiate(explosionPrefab);
-
-				auto camera = mCamera.lock()->GetTransform();
-				Vec3 camForward = camera->GetWorldLook();
-				Vec3 explosionPos = mTargetEnemy.lock()->GetRootBoundingSphere().Center;
-				explosionPos -= camForward * 0.1f; 
-
-				explosionObj->GetTransform()->SetLocalPosition(explosionPos);
-				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
-				auto explosionParticle = explosionObj->GetComponent<CParticleAttach>();
-				if (explosionParticle) {
-					explosionParticle->Reserve(true);
-				}
-			}
+			
 			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
 		}
 		break;

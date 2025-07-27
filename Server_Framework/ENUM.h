@@ -59,6 +59,7 @@ enum class S_ENEMY_TYPE : UINT8
 	FIRE_BIG,
 	WATER_SMALL,
 	WATER_BIG,
+	BOSS,
 
 	s_end
 };
@@ -68,9 +69,10 @@ enum class S_SCENE_TYPE : UINT8
 	MENU,
 	LOADING,
 	LOBBY,
-	MAINSTAGE1,
-	MAINSTAGE2,
-	MAINSTAGE3,
+	MAIN_STAGE_1,
+	MAIN_STAGE_2,
+	MAIN_STAGE_3,
+	ENDING,
 
 	END
 };
@@ -79,12 +81,7 @@ enum class S_PLAYER_STATE : UINT8
 {
 	IDLE,
 	RUN,
-	RUNBACK,
-	RUNL,
-	RUNR,
-
 	JUMP,
-	FALLING,
 	GATHERING,
 	GETHIT,
 	DEATH,
@@ -125,7 +122,7 @@ enum class S_PROJECTILE_TYPE : UINT8
 
 enum class S_EFFECT_TYPE : UINT8
 {
-	dd,
+	EXPLOSION,
 	ss
 };
 

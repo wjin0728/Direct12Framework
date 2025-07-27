@@ -45,7 +45,6 @@ void PlayerCharacter::SetState(PlayerStateMachine* newState)
 void PlayerCharacter::SetState(uint8_t newState)
 {
 	//if (newState == (uint8_t)_state) return;
-    _time = 0.0f;
 
     switch ((S_PLAYER_STATE)newState) {
     case S_PLAYER_STATE::IDLE:
@@ -88,10 +87,10 @@ void PlayerCharacter::SetState(uint8_t newState)
         break;
     }
 }
+
 void PlayerCharacter::Update() 
 {
 	if (currentState) currentState->Update(this);
-    _time += TICK_INTERVAL;
 	LocalTransform();
 }
 
@@ -104,13 +103,14 @@ void PlayerCharacter::TakeDamage(int damage)
 	else {
 		_hp -= damage;
 		if (_hp < 0) _hp = 0;
+
+	    if (_hp > 0) {
+            SetState((uint8_t)S_PLAYER_STATE::GETHIT);
+        }
+	    else {
+		    SetState((uint8_t)S_PLAYER_STATE::DEATH);
+	    }
     }
-	if (_hp > 0) {
-        SetState((uint8_t)S_PLAYER_STATE::GETHIT);
-    }
-	else {
-		// 사망 처리
-	}
 }
 
 void PlayerCharacter::SetTarget()
@@ -119,7 +119,8 @@ void PlayerCharacter::SetTarget()
     Monster* close_monster = nullptr;
 
     for (auto& monster : _Monster) {
-        if (monster == nullptr || monster->_remove) continue;
+        if (monster == nullptr || monster->IsUnavailable()) continue;
+
         Vec3 monsterPos = monster->_pos;
         float distance = (_pos - monsterPos).LengthSquared();
 
@@ -148,7 +149,8 @@ bool PlayerCharacter::IsMonsterInRange(Monster* target) const
 //const std::array<float, 2>& center, float radius, const std::array<float, 2>& forward, float sectorAngle,
 //const std::vector<std::array<float, 2>>& rectCorners
 
-bool PlayerCharacter::OnFighterBasicAttack(BoundingOrientedBox& monster_box) {
+bool PlayerCharacter::OnFighterBasicAttack(BoundingOrientedBox& monster_box)
+{
     BoundingOrientedBox atbox;
     XMVECTOR center = XMLoadFloat3(&_boundingbox.Center);
     float yawRad = XMConvertToRadians(_look_dir.y); // _look_dir.y를 라디안으로

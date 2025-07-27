@@ -42,25 +42,23 @@ void CPlayerStateMachine::Start()
 void CPlayerStateMachine::Update()
 {
 	auto controller = mAnimationController.lock();
-	if(!controller) {
+	if (!controller) {
 		return;
 	}
+
 	if (controller->mTrack->mType == ANIMATION_TYPE::END) {
 		switch ((PLAYER_STATE)currentState) {
 		case PLAYER_STATE::JUMP:
-		case PLAYER_STATE::FALLING:
 		case PLAYER_STATE::GATHERING:
 		case PLAYER_STATE::GETHIT:
 		case PLAYER_STATE::ATTACK:
 		case PLAYER_STATE::SKILL:
 		case PLAYER_STATE::ULTIMATE:
-			SetState((UINT8)PLAYER_STATE::IDLE);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::IDLE);
 			break;
 		case PLAYER_STATE::DEATH:
 			break;
 		case PLAYER_STATE::RUNATTACK:
-			SetState((UINT8)PLAYER_STATE::RUN);
 			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::RUN);
 			break;
 		default:
@@ -70,15 +68,15 @@ void CPlayerStateMachine::Update()
 
 	switch ((PLAYER_STATE)currentState) {
 	case PLAYER_STATE::JUMP:
-	case PLAYER_STATE::FALLING:
 	case PLAYER_STATE::GATHERING:
+		break;
 	case PLAYER_STATE::GETHIT:
 	{
 		float hitFactor = 1.f - (controller->mTrack->mTrackProgress * 4);
 		if (hitFactor < 0.f) hitFactor = 0.f;
 		GetTransform()->SetHitFactor(hitFactor);
-	}
 		break;
+	}
 	case PLAYER_STATE::ATTACK:
 	case PLAYER_STATE::SKILL:
 	case PLAYER_STATE::ULTIMATE:
@@ -216,7 +214,6 @@ void CArcherState::Update()
 	if (controller->mTrack->mType == ANIMATION_TYPE::END) {
 		switch ((PLAYER_STATE)currentState) {
 		case PLAYER_STATE::JUMP:
-		case PLAYER_STATE::FALLING:
 		case PLAYER_STATE::GATHERING:
 		case PLAYER_STATE::GETHIT:
 		case PLAYER_STATE::ATTACK:
@@ -226,7 +223,7 @@ void CArcherState::Update()
 		case PLAYER_STATE::DEATH:
 			break;
 		case PLAYER_STATE::RUNATTACK:
-		break;
+			break;
 		default:
 			break;
 		}
@@ -291,7 +288,6 @@ void CWarriorState::Start()
 	if (controller->mTrack->mType == ANIMATION_TYPE::END) {
 		switch ((PLAYER_STATE)currentState) {
 		case PLAYER_STATE::JUMP:
-		case PLAYER_STATE::FALLING:
 		case PLAYER_STATE::GATHERING:
 		case PLAYER_STATE::GETHIT:
 		case PLAYER_STATE::ATTACK:
@@ -329,6 +325,8 @@ void CWarriorState::Start()
 	controller->AddAnimationEvent("Attack", "AttackEnd", func1);
 	controller->AddAnimationEvent("RunAttack", "AttackStart", func0);
 	controller->AddAnimationEvent("RunAttack", "AttackEnd", func1);
+	controller->AddAnimationEvent("Ultimate", "AttackStart", func0);
+	controller->AddAnimationEvent("Ultimate", "AttackEnd", func1);
 
 	auto trail = mTrail.lock();
 	if (trail) {
@@ -356,9 +354,7 @@ void CWarriorState::OnEnterState(UINT8 state)
 	case PLAYER_STATE::ATTACK:
 		break;
 	case PLAYER_STATE::RUNATTACK:
-	{
-	}
-	break;
+		break;
 	case PLAYER_STATE::GETHIT:
 		break;
 	case PLAYER_STATE::DEATH:
@@ -369,12 +365,12 @@ void CWarriorState::OnEnterState(UINT8 state)
 		break;
 	case PLAYER_STATE::ULTIMATE:
 	{
-		auto trail = mTrail.lock();
-		if (trail) {
-			trail->mActive = true;
-			trail->ResetTrail();
-			trail->SetDuration(1.0f);
-		}
+		//auto trail = mTrail.lock();
+		//if (trail) {
+		//	trail->mActive = true;
+		//	trail->ResetTrail();
+		//	trail->SetDuration(1.0f);
+		//}
 	}
 	break;
 	default:
@@ -462,7 +458,6 @@ void CMageState::Start()
 	if (controller->mTrack->mType == ANIMATION_TYPE::END) {
 		switch ((PLAYER_STATE)currentState) {
 		case PLAYER_STATE::JUMP:
-		case PLAYER_STATE::FALLING:
 		case PLAYER_STATE::GATHERING:
 		case PLAYER_STATE::GETHIT:
 		case PLAYER_STATE::ATTACK:
@@ -489,7 +484,6 @@ void CMageState::Update()
 	if (controller->mTrack->mType == ANIMATION_TYPE::END) {
 		switch ((PLAYER_STATE)currentState) {
 		case PLAYER_STATE::JUMP:
-		case PLAYER_STATE::FALLING:
 		case PLAYER_STATE::GATHERING:
 		case PLAYER_STATE::GETHIT:
 		case PLAYER_STATE::ATTACK:

@@ -79,7 +79,7 @@ bool CResourceManager::LoadPlayerObjects()
 	LoadPrefabFromFile("Fighter");
 	LoadPrefabFromFile("Mage");
 	LoadPrefabFromFile("HP_Background");
-	//LoadPrefabFromFile("MainUI");
+	LoadPrefabFromFile("MainUI");
 	LoadPrefabFromFile("LobbyUI");
 	LoadPrefabFromFile("Portal");
 	return true;
@@ -87,12 +87,13 @@ bool CResourceManager::LoadPlayerObjects()
 
 bool CResourceManager::LoadEnemyObjects()
 {
-	/*LoadPrefabFromFile("GrassSmall");
+	LoadPrefabFromFile("GrassSmall");
 	LoadPrefabFromFile("GrassBig");
 	LoadPrefabFromFile("WaterBig");
 	LoadPrefabFromFile("WaterSmall");
 	LoadPrefabFromFile("FireBig");
-	LoadPrefabFromFile("FireSmall");*/
+	LoadPrefabFromFile("FireSmall");
+	LoadPrefabFromFile("Boss");
 	return true;
 }
 

@@ -4,8 +4,8 @@
 void Monster::SetState(MonsterStateMachine* newState)
 {
     if (currentState) {
-        if (newState != &MonsterState::HitState::GetInstance()) {
-            previousState = _state; 
+        if (newState == &MonsterState::HitState::GetInstance() || newState == &MonsterState::BossHitState::GetInstance()) {
+            previousState = _state;
             // MonsterState::HitState로 갈 때는 현재 상태 저장
         }
         currentState->Exit(this);
@@ -24,38 +24,78 @@ void Monster::SetState(S_MONSTER_STATE newState)
 		for (auto& key : _animations[(int)S_MONSTER_STATE::PROJECTILE_ATTACK].mEventKeys) { key.mEnable = true; }
 	}
 
-    switch (newState) {
-    case S_MONSTER_STATE::IDLE:
-        _state = S_MONSTER_STATE::IDLE;
-        SetState(&MonsterState::IdleState::GetInstance());
-        break;
-    case S_MONSTER_STATE::RUN:
-        _state = S_MONSTER_STATE::RUN;
-        SetState(&MonsterState::RunState::GetInstance());
-        break;
-    case S_MONSTER_STATE::ATTACK:
-        _state = S_MONSTER_STATE::ATTACK;
-        SetState(&MonsterState::AttackState::GetInstance());
-        break;
-	case S_MONSTER_STATE::GETHIT:
-		_state = S_MONSTER_STATE::GETHIT;
-		SetState(&MonsterState::HitState::GetInstance());
+	if (_class == S_ENEMY_TYPE::BOSS) {
+		SetBossState(newState);
+	}
+	else {
+		SetMonsterState(newState);
+	}
+}
+void Monster::SetMonsterState(S_MONSTER_STATE newState)
+{
+	switch (newState) {
+	case S_MONSTER_STATE::IDLE:
+		SetState(&MonsterState::IdleState::GetInstance());
+		_state = S_MONSTER_STATE::IDLE;
 		break;
-    case S_MONSTER_STATE::DEATH:
-        _state = S_MONSTER_STATE::DEATH;
-        SetState(&MonsterState::DeathState::GetInstance());
-        break;
-    case S_MONSTER_STATE::SPAWN:
-        _state = S_MONSTER_STATE::SPAWN;
-        SetState(&MonsterState::SpawnState::GetInstance());
-        break;
+	case S_MONSTER_STATE::RUN:
+		SetState(&MonsterState::RunState::GetInstance());
+		_state = S_MONSTER_STATE::RUN;
+		break;
+	case S_MONSTER_STATE::ATTACK:
+		SetState(&MonsterState::AttackState::GetInstance());
+		_state = S_MONSTER_STATE::ATTACK;
+		break;
+	case S_MONSTER_STATE::GETHIT:
+		SetState(&MonsterState::HitState::GetInstance());
+		_state = S_MONSTER_STATE::GETHIT;
+		break;
+	case S_MONSTER_STATE::DEATH:
+		SetState(&MonsterState::DeathState::GetInstance());
+		_state = S_MONSTER_STATE::DEATH;
+		break;
+	case S_MONSTER_STATE::SPAWN:
+		SetState(&MonsterState::SpawnState::GetInstance());
+		_state = S_MONSTER_STATE::SPAWN;
+		break;
 	case S_MONSTER_STATE::UNDERGROUND:
-		_state = S_MONSTER_STATE::UNDERGROUND;
 		SetState(&MonsterState::UndergroundState::GetInstance());
+		_state = S_MONSTER_STATE::UNDERGROUND;
 		break;
 	default:
-        break;
-    }
+		break;
+	}
+}
+void Monster::SetBossState(S_MONSTER_STATE newState)
+{
+	switch (newState) {
+	case S_MONSTER_STATE::IDLE:
+		SetState(&MonsterState::BossIdleState::GetInstance());
+		_state = S_MONSTER_STATE::IDLE;
+		break;
+	case S_MONSTER_STATE::ATTACK:
+		SetState(&MonsterState::BossAttackState::GetInstance());
+		_state = S_MONSTER_STATE::ATTACK;
+		break;
+	case S_MONSTER_STATE::GETHIT:
+		SetState(&MonsterState::BossHitState::GetInstance());
+		_state = S_MONSTER_STATE::GETHIT;
+		break;
+	case S_MONSTER_STATE::DEATH:
+		SetState(&MonsterState::BossDeathState::GetInstance());
+		_state = S_MONSTER_STATE::DEATH;
+		break;
+	case S_MONSTER_STATE::SPAWN:
+		SetState(&MonsterState::BossSpawnState::GetInstance());
+		_state = S_MONSTER_STATE::SPAWN;
+		break;
+	case S_MONSTER_STATE::UNDERGROUND:
+		SetState(&MonsterState::BossUndergroundState::GetInstance());
+		_state = S_MONSTER_STATE::UNDERGROUND;
+		break;
+	default:
+		break;
+	}
 }
 
 void Monster::Update()
@@ -63,7 +103,7 @@ void Monster::Update()
 	_animation_time += TICK_INTERVAL;
     if (currentState) currentState->Update(this);
     LocalTransform(); // 바운딩 박스 업데이트 해주기
-    SetTarget();
+    if (_class != S_ENEMY_TYPE::BOSS) UpdateTarget();
 }
 
 void Monster::TakeDamage(int damage, bool do_hit_raction)
@@ -75,6 +115,7 @@ void Monster::TakeDamage(int damage, bool do_hit_raction)
     else {
         _hp -= damage;
         if (_hp < 0) _hp = 0;
+		std::cout << "Monster HP: " << _hp << std::endl;
     }
     if (_hp > 0 && do_hit_raction) {
         SetState(S_MONSTER_STATE::GETHIT);
@@ -97,8 +138,18 @@ bool Monster::IsPlayerTooMuchClose() const
     return (_target && (_pos - _target->_pos).LengthSquared() < pow(2.f, 2));
 }
 
-void Monster::SetTarget()
+void Monster::UpdateTarget()
 {
+	if (_class == S_ENEMY_TYPE::BOSS) {
+		if (_target) {
+			Vec3 direction = _target->_pos - _pos;
+			direction.y = 0.f;
+			direction.Normalize();
+			_look_dir = Vec3::Lerp(_look_dir, direction, 0.1f); // 부드러운 회전
+		}
+		return;
+	}
+
 	float minDistance = 5000.f; // 걍 큰 수
     PlayerCharacter* close_player = nullptr;
 	for (auto& player : _Player) {
@@ -121,6 +172,18 @@ void Monster::SetTarget()
 	}
 	else {
 		_target = nullptr; 
+	}
+}
+
+void Monster::SetRandomTarget()
+{
+	int randomIndex = rand() % _Player.size();
+
+	if (_Player[randomIndex] != nullptr) {
+		_target = _Player[randomIndex];
+	}
+	else {
+		_target = nullptr;
 	}
 }
 

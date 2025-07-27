@@ -115,6 +115,9 @@ void SESSION::send_add_projectile_packet(Projectile proj, int id)
 	p.dir_y = proj._velocity.y;
 	p.dir_z = proj._velocity.z;
 	p.user_friendly = proj._user_frinedly;
+	cout << "Projectile ID: " << id << ", Position: ("
+		<< p.x << ", " << p.y << ", " << p.z << "), Direction: ("
+		<< p.dir_x << ", " << p.dir_y << ", " << p.dir_z << ")" << endl;
 	do_send(&p);
 }
 
@@ -187,6 +190,23 @@ void SESSION::send_make_potal_packet()
 {
 	SC_HP_PACKET p;
 	p.type = SC_MAKE_POTAL;
+	p.size = sizeof(p);
+	do_send(&p);
+}
+
+void SESSION::send_boss_set_target_packet(int id)
+{
+	SC_BOSS_SET_TARGET_PACKET p;
+	p.type = SC_BOSS_SET_TARGET;
+	p.size = sizeof(p);
+	p.target_id = id;
+	do_send(&p);
+}
+
+void SESSION::send_boss_target_lock_packet()
+{
+	SC_BOSS_TARGET_LOCK_PACKET p;
+	p.type = SC_BOSS_SET_TARGET;
 	p.size = sizeof(p);
 	do_send(&p);
 }

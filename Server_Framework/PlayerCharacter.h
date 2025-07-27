@@ -6,16 +6,18 @@
 class PlayerCharacter : public Object
 {
 public:
+	int					_id = -1; // Object ID, -1 means not assigned
+
 	Vec3				_look_dir; // 캐릭터가 보고있는 방향
 
 	S_PLAYER_CLASS	    _class;
-	int					_hp;
 	S_ITEM_TYPE			_skill;
 	S_PLAYER_STATE		_state;
-
-	int					_barrier;
 	bool				_on_FireEnchant;
 	bool				_on_GrassWeaken;
+
+	int					_hp;
+	int					_barrier;
 
 	PlayerStateMachine*		currentState;	
 	PlayerStateMachine*		previousState;
@@ -25,7 +27,8 @@ public:
 	array<Monster*, 3> _Monster{}; // 몬스터 타겟
 	Monster* _target = nullptr;
 
-	float _time = 0.0f; // 애니메이션 재생 시간
+	bool _ready_for_next_stage = false; // 다음 스테이지 준비 완료 여부
+
 	float _data = 0.0f; // 애니메이션 데이터
 
 	PlayerCharacter() :

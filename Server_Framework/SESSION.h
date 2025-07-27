@@ -53,6 +53,8 @@ public:
 	void send_remove_watershield_packet(int id);
 	void send_hp_packet(S_OBJECT_TYPE type, int id, int hp, int shield);
 	void send_make_potal_packet();
+	void send_boss_set_target_packet(int id);
+	void send_boss_target_lock_packet();
 };
 
 #endif

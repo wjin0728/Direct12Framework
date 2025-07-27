@@ -153,12 +153,15 @@ void CEnemyState::SetHitFactor(float hitFactor)
 	transform->SetHitFactor(hitFactor);
 }
 
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
+
 void CGrassSmallState::Awake()
 {
 	CEnemyState::Awake();
 	auto healthSystem = owner->GetComponentFromHierarchy<CHealthSystem>();
-	mHealth = 50.f;
-	mMaxHealth = 50.f;
+	mHealth = mMaxHealth = MAX_HEALTH / 2.f;
 }
 
 void CGrassSmallState::Start()
@@ -200,11 +203,14 @@ void CGrassSmallState::OnExitState(UINT8 state)
 	CEnemyState::OnExitState(state);
 }
 
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
+
 void CGrassBigState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_HEALTH;
 }
 
 void CGrassBigState::Start()
@@ -248,15 +254,12 @@ void CGrassBigState::OnExitState(UINT8 state)
 
 /// <summary>
 /// ////////////////////////////////////////////////////////////////////////
-///
 /// </summary>
-/// 
-/// 
+
 void CWaterBigState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_HEALTH;
 }
 
 void CWaterBigState::Start()
@@ -299,15 +302,14 @@ void CWaterBigState::OnExitState(UINT8 state)
 	CEnemyState::OnExitState(state);
 }
 
-
-//////////////////////////////////////////////////////////////////
-///
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
 
 void CWaterSmallState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_HEALTH / 2.f;
 }
 
 void CWaterSmallState::Start()
@@ -319,11 +321,11 @@ void CWaterSmallState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 0.7f });
 
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
-			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+			transform->SetLocalPosition({ 0.f, 3.f, 0.f });
 		}
 	}
 }
@@ -358,8 +360,7 @@ void CWaterSmallState::OnExitState(UINT8 state)
 void CFireBigState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_HEALTH;
 }
 
 void CFireBigState::Start()
@@ -409,8 +410,7 @@ void CFireBigState::OnExitState(UINT8 state)
 void CFireSmallState::Awake()
 {
 	CEnemyState::Awake();
-	mHealth = 100.f;
-	mMaxHealth = 100.f;
+	mHealth = mMaxHealth = MAX_HEALTH / 2.f;
 }
 
 void CFireSmallState::Start()
@@ -421,10 +421,10 @@ void CFireSmallState::Start()
 	if (healthSystem) {
 		healthSystem->SetMaxHealth(mHealth);
 		healthSystem->SetHealth(mHealth);
-		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 1.f });
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 0.7f });
 		auto transform = healthSystem->GetTransform();
 		if (transform) {
-			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+			transform->SetLocalPosition({ 0.f, 3.f, 0.f });
 		}
 	}
 }
@@ -450,3 +450,48 @@ void CFireSmallState::OnExitState(UINT8 state)
 	CEnemyState::OnExitState(state);
 }
 
+/// <summary>
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// </summary>
+
+void CBossState::Awake()
+{
+	CEnemyState::Awake();
+	mHealth = mMaxHealth = MAX_HEALTH * 3.f;
+}
+
+void CBossState::Start()
+{
+	CEnemyState::Start();
+	mAnimationController = owner->GetComponentFromHierarchy<CAnimationController>();
+	auto healthSystem = mHealthSystem.lock();
+	if (healthSystem) {
+		healthSystem->SetMaxHealth(mHealth);
+		healthSystem->SetHealth(mHealth);
+		healthSystem->SetHealthBarScale({ mHealth / MAX_HEALTH, 2.f });
+		auto transform = healthSystem->GetTransform();
+		if (transform) {
+			transform->SetLocalPosition({ 0.f, 4.f, 0.f });
+		}
+	}
+}
+
+void CBossState::Update()
+{
+	CEnemyState::Update();
+}
+
+void CBossState::OnEnterState(UINT8 state)
+{
+	CEnemyState::OnEnterState(state);
+	auto controller = mAnimationController.lock();
+	if (!controller) {
+		return;
+	}
+	controller->SetTrackAnimationSet((int)state);
+}
+
+void CBossState::OnExitState(UINT8 state)
+{
+	CEnemyState::OnExitState(state);
+}

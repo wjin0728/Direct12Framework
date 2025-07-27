@@ -84,3 +84,9 @@ float Terrain::GetHeight(float fx, float fz)
 
 	return fHeight;
 }
+
+Vec2 Terrain::GetRandomXZ() const {
+    float x = Offset.x + static_cast<float>(rand()) / RAND_MAX * scale.x;
+    float z = Offset.z + static_cast<float>(rand()) / RAND_MAX * scale.z;
+    return Vec2(x, z);
+}

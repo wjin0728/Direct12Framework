@@ -28,6 +28,10 @@ constexpr char CS_CHANGE_SCENE = 8;
 constexpr char CS_CHANGE_STATE = 9;
 constexpr char CS_ATTACK = 10;
 constexpr char CS_GAME_SERVER_LOGIN = 11;
+constexpr char CS_SELECT_CLASS = 12;
+constexpr char CS_CLICK_BUTTON = 13;
+constexpr char CS_HP = 14;
+constexpr char CS_READY_FOR_NEXT_STAGE = 15;
 constexpr char CS_CLICK_BUTTON = 12;
 
 constexpr char SC_LOGIN_INFO = 2;
@@ -56,6 +60,8 @@ constexpr char SC_HP = 24;
 constexpr char SC_MAKE_POTAL = 25;
 constexpr char SC_LOBBY_ROOM_PLAYER_COUNT = 26;
 constexpr char SC_LOBBY_SERVER_OUT = 27;
+constexpr char SC_BOSS_SET_TARGET = 28;
+constexpr char SC_BOSS_TARGET_LOCK = 29;
 
 
 #pragma pack (push, 1)
@@ -132,6 +138,16 @@ struct CS_ATTACK_PACKET : PACKET {
 struct CS_CLICK_BUTTON_PACKET : PACKET {
 	short 			id;
 	uint8_t			button_type; // 0: ready, 1: cancel
+};
+
+struct CS_HP_PACKET : PACKET {
+	short object_id;
+	short hp;
+};
+
+struct CS_READY_FOR_NEXT_STAGE_PACKET : PACKET {
+	short id;
+	bool ready; // true: ready, false: cancel
 };
 
 // ----------------------------------------------------------------------------------
@@ -262,5 +278,11 @@ struct SC_LOBBY_ROOM_PLAYER_COUNT_PACKET : PACKET {
 };
 
 struct SC_LOBBY_SERVER_OUT_PACKET : PACKET { };
+
+struct SC_BOSS_SET_TARGET_PACKET : PACKET {
+	int target_id;
+};
+
+struct SC_BOSS_TARGET_LOCK_PACKET : PACKET {};
 
 #pragma pack (pop)

@@ -31,6 +31,8 @@ private:
 	bool moveKeyPressed = false;
 	bool mFreeLook = false;
 	bool mCastingSkill = false;
+	bool mReadyForNextStage = false;
+
 	float mMaxAttackRange = 9.0f;
 
 	float mUltimateSkillCooldown = 0.0f;

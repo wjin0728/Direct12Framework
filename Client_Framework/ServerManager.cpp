@@ -315,6 +315,11 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		SC_CHANGE_SCENE_PACKET* packet = reinterpret_cast<SC_CHANGE_SCENE_PACKET*>(packet_ptr);
 		SCENE_TYPE sceneType = (SCENE_TYPE)packet->change_scene;
 
+		// 오브젝트 초기화
+		mEnemies.clear();
+		mItems.clear();
+		mProjectiles.clear();
+
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (sceneType == INSTANCE(CSceneManager).GetCurSceneType()) break; // 이미 같은 씬이면 리턴
 
@@ -436,6 +441,41 @@ void ServerManager::Using_Packet(char* packet_ptr)
 
 		break;
 	}
+	case SC_ADD_EFFECT: {
+		SC_ADD_EFFECT_PACKET* packet = reinterpret_cast<SC_ADD_EFFECT_PACKET*>(packet_ptr);
+		auto scene = INSTANCE(CSceneManager).GetCurScene();
+		if (!scene) {
+			std::cout << "Current scene is nullptr" << std::endl;
+			break;
+		}
+		EFFECT_TYPE effectType = (EFFECT_TYPE)packet->effect_type;
+		Vec3 effectPos = { packet->x, packet->y, packet->z };
+		switch (effectType)
+		{
+		case EFFECT_TYPE::EXPLOSION:
+		{
+			auto explosionPrefab = INSTANCE(CResourceManager).GetPrefab("Explosion");
+			if (explosionPrefab) {
+				auto explosionObj = CGameObject::Instantiate(explosionPrefab);
+
+				auto transform = mMainCamera->GetTransform();
+				Vec3 camForward = transform->GetWorldLook();
+				Vec3 explosionPos = effectPos;
+				explosionPos -= camForward * 0.1f;
+
+				explosionObj->SetObjectType(OBJECT_TYPE::EFFECT);
+				explosionObj->GetTransform()->SetLocalPosition(explosionPos);
+				INSTANCE(CSceneManager).GetCurScene()->AddObject(explosionObj);
+			}
+		}
+			break;
+		case EFFECT_TYPE::ss:
+			break;
+		default:
+			break;
+		}
+		break;
+	}
 	case SC_ADD_PROJECTILE: {
 		SC_ADD_PROJECTILE_PACKET* packet = reinterpret_cast<SC_ADD_PROJECTILE_PACKET*>(packet_ptr);
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
@@ -495,7 +535,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 		std::string objName[(int)ENEMY_TYPE::ENEMY_END]
-			= { "GrassSmall", "GrassBig", "FireSmall", "FireBig", "WaterSmall", "WaterBig" };
+			= { "GrassSmall", "GrassBig", "FireSmall", "FireBig", "WaterSmall", "WaterBig", "Boss"};
 		ENEMY_TYPE enumType = (ENEMY_TYPE)packet->monster_type;
 		auto monster = RESOURCE.GetPrefab(objName[(int)enumType]);
 		if (!monster) {
@@ -530,6 +570,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		case ENEMY_TYPE::FIRE_BIG:
 			stateMachine = monsterObj->AddComponent<CFireBigState>();
+			break;
+		case ENEMY_TYPE::BOSS:
+			stateMachine = monsterObj->AddComponent<CBossState>();
 			break;
 		default:
 			break;
@@ -633,7 +676,21 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto portal = RESOURCE.GetPrefab("Portal");
 		if (portal) {
 			auto portalObject = CGameObject::Instantiate(portal);
-			portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(65.111f, 4.913f, 45.11095f));
+
+			switch (INSTANCE(CSceneManager).GetCurSceneType()) {
+				case SCENE_TYPE::MAIN_STAGE_1: {
+					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(65.111f, 4.913f, 45.11095f));
+					break;
+				}
+				case SCENE_TYPE::MAIN_STAGE_2: {
+					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(21.4895f, 2.f, 55.8328f));
+					break;
+				}
+				case SCENE_TYPE::MAIN_STAGE_3: {
+					portalObject->GetTransform()->SetLocalPosition(XMFLOAT3(26.6849f, 3.f, 53.2355f));
+					break;
+				}
+			}
 			auto particle = portalObject->GetComponent<CParticleAttach>();
 			particle->SetLoop(true);
 			portalObject->SetObjectType(OBJECT_TYPE::ITEM);
@@ -657,7 +714,24 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	case SC_LOBBY_SERVER_OUT: {
 		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
 		Connect(PORT_NUM);
-		send_cs_game_server_login_packet();
+
+		// 여기 clientID는 선택 직업 자리임
+		// 근데 직업 선택하는거 넣으면 여기는 아예 뺄 것
+		send_cs_game_server_login_packet(clientID);
+
+		INSTANCE(CSceneManager).RequestSceneChange(SCENE_TYPE::LOBBY, false);
+		break;
+	}
+	case SC_BOSS_SET_TARGET: {
+		SC_BOSS_SET_TARGET_PACKET* packet = reinterpret_cast<SC_BOSS_SET_TARGET_PACKET*>(packet_ptr);
+		
+		
+		break;
+	}
+	case SC_BOSS_TARGET_LOCK: {
+		SC_BOSS_TARGET_LOCK_PACKET* packet = reinterpret_cast<SC_BOSS_TARGET_LOCK_PACKET*>(packet_ptr);
+
+
 		break;
 	}
 	default:

@@ -125,6 +125,23 @@ public:
 		p.button_type = button;
 		Send_Packet(&p);
 	}
+	void send_cs_ready_for_next_stage_packet(bool ready) {
+		CS_READY_FOR_NEXT_STAGE_PACKET p;
+		p.size = sizeof(p);
+		p.type = CS_READY_FOR_NEXT_STAGE;
+		p.ready = ready;
+		Send_Packet(&p);
+	}
+
+	// 몬스터 죽이기 위한 편의용 패킷
+	void send_hp_packet(int id, int hp) {
+		CS_HP_PACKET p;
+		p.type = CS_HP;
+		p.size = sizeof(p);
+		p.object_id = id;
+		p.hp = hp;
+		Send_Packet(&p);
+	}
 
 	void AddEvent(const std::string& name, std::function<void(std::vector<std::any>)> func) {
 		mEventMap[name] = func;
