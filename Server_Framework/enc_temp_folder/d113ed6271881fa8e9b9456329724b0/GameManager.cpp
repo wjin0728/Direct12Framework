@@ -700,9 +700,8 @@ bool GameManager::CanMove(float x, float z)
 void GameManager::Update()
 {
 	for (auto& cl : clients[ServerNumber]) {
-		auto& player = cl.second._player;
 		if (cl.second._state != ST_INGAME) continue;
-		if (player._state == S_PLAYER_STATE::DEATH) continue;
+		auto& player = cl.second._player;
 
 		player.Update();
 
@@ -806,29 +805,6 @@ void GameManager::Update()
 					targeting_state.SetSendTargetLock(true);
 				}
 			}
-
-			auto& skill_state = MonsterState::BossSkillState::GetInstance();
-			if (monster.currentState == &skill_state) {
-				if (skill_state.GetSendSkill()) {
-					Vec3 pos = monster._target->_pos;
-					for (auto& cl : clients[ServerNumber]) {
-						for (auto& hitid : skill_state.hit_client_id) {
-							SendHPPacket((S_OBJECT_TYPE)S_PLAYER, hitid, clients[ServerNumber][hitid]._player._hp, clients[ServerNumber][hitid]._player._barrier);
-						}
-						if (skill_state.GetSkillType() == S_GRASS_VINE) {
-							cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::VINE, pos);
-						}
-						else if (skill_state.GetSkillType() == S_FIRE_EXPLOSION) {
-							pos.y += 1.5f;
-							cl.second.send_add_effect_packet((int)S_EFFECT_TYPE::EXPLOSION, pos);
-						}
-						else if (skill_state.GetSkillType() == S_WATER_HEAL) {
-
-						}
-					}
-					skill_state.SetSendSkill(false);
-				}
-			}
 		}
 
 		// 이벤트 처리
@@ -854,7 +830,7 @@ void GameManager::Update()
 	if (clients[ServerNumber].size()) UpdateWave();
 
 	// 보스 스테이지 처리
-	if (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && MonsterWaves[ServerNumber].current_wave == S_BOSS) {
+	if (scene_type == S_SCENE_TYPE::MAIN_STAGE_3 && MonsterWaves[ServerNumber].current_wave == 3) {
 		// 아이템 생성
 		boss_item_timer -= TICK_INTERVAL;
 		if (boss_item_timer <= 0.f) {
@@ -1139,7 +1115,6 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 		const auto& infos = attackInfos[type];
 		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK, "Attack", MakeAttackEvent(infos[0].offset, infos[0].radius, infos[0].damage));
 		ms.AddAnimationEvent(S_MONSTER_STATE::ATTACK2, "Attack", MakeAttackEvent(infos[1].offset, infos[1].radius, infos[1].damage));
-		//ms.AddAnimationEvent(S_MONSTER_STATE::SKILL, "Attack", MakeAttackEvent(infos[1].offset, infos[1].radius, infos[1].damage));
 	}
 	else { // 보스 몬스터인 경우
 		ms._drop_item = true; // 보스 몬스터는 아이템 드랍 설정
@@ -1148,6 +1123,7 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 		auto func = [this](Monster* monster) {
 			for (auto& [id, cl] : clients[ServerNumber]) {
 				auto& player = cl._player;
+
 				if (player._state == S_PLAYER_STATE::JUMP ||
 					player._state == S_PLAYER_STATE::GATHERING ||
 					player._state == S_PLAYER_STATE::GETHIT ||
@@ -1158,7 +1134,7 @@ void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 				Vec2 player_pos(player._pos.x, player._pos.z);
 				Vec2 attack_pos(monster->_attack_pos.x, monster->_attack_pos.z);
 				if (Vec2::IsInRadius(attack_pos, player_pos, 3.f)) {
-					player.TakeDamage(M_BOSS_DAMAGE);
+					player.TakeDamage(200);
 					SendHPPacket(S_OBJECT_TYPE::S_PLAYER, id, player._hp, player._barrier);
 					std::cout << "맞았다!!!!!!!!" << std::endl;
 				}
@@ -1187,6 +1163,7 @@ std::function<void(Monster*)> GameManager::MakeAttackEvent(Vec2 offset, float ra
 		Vec2 center = monster->GetWorldOffsetPosition(offset.x, offset.y);
 		for (auto& [id, cl] : clients[ServerNumber]) {
 			auto& player = cl._player;
+
 			if (player._state == S_PLAYER_STATE::JUMP ||
 				player._state == S_PLAYER_STATE::GATHERING ||
 				player._state == S_PLAYER_STATE::GETHIT ||

@@ -295,6 +295,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		else {
 			player = mPlayer;
 			mPlayer->GetTransform()->SetLocalPosition({ packet->x, packet->y, packet->z });
+			mPlayer->GetTransform()->SetLocalRotationY(packet->look_y);
 		}
 		std::shared_ptr<CPlayerStateMachine> stateMachine{};
 		if (packet->player_class == (UINT8)PLAYER_CLASS::ARCHER) {
@@ -406,7 +407,9 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			std::cout << "Current scene is nullptr" << std::endl;
 			break;
 		}
-		scene->DestroyObject(mItems[packet->item_id].get());
+
+		CGameObject* itemObj = mItems[packet->item_id].get();
+		scene->DestroyObjectImmediately(itemObj);
 		mItems.erase(packet->item_id);
 
 		cout << "삭제!";
@@ -639,7 +642,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 		std::cout << "Removing monster with ID: " << packet->monster_id << std::endl;
-		scene->DestroyObject(it->second.get());
+		scene->DestroyObjectImmediately(it->second.get());
 		mEnemies.erase(it);
 		break;
 	}
@@ -651,7 +654,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 			break;
 		}
 		if (!mProjectiles.contains(packet->projectile_id)) break;
-		scene->DestroyObject(mProjectiles[packet->projectile_id].get());
+		scene->DestroyObjectImmediately(mProjectiles[packet->projectile_id].get());
 		mProjectiles.erase(packet->projectile_id);
 		break;
 	}
@@ -758,7 +761,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_MAKE_MESSAGE: {
 		SC_MAKE_MESSAGE_PACKET* packet = reinterpret_cast<SC_MAKE_MESSAGE_PACKET*>(packet_ptr);
-
+		TriggerEvent("ShowMent", { packet->wave_type });
 		break;
 	}
 	default:

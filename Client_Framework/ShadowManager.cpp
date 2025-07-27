@@ -443,8 +443,8 @@ void CShadowManager::Update()
 		float minZ = viewFrustumCornersLSMin.z;
 		Vec2 worldUnitsPerTexel{};
 
-		Vec2 lightProjectionMin = viewFrustumCornersLSMin;
-		Vec2 lightProjectionMax = viewFrustumCornersLSMax;
+		Vec2 lightProjectionMin = { viewFrustumCornersLSMin.x, viewFrustumCornersLSMin.y };
+		Vec2 lightProjectionMax = { viewFrustumCornersLSMax.x, viewFrustumCornersLSMax.y };
 		if (mFitToScene)
 		{
 			Vec3 maxDiagonal = viewFrustumCornersWS[0] - viewFrustumCornersWS[6];

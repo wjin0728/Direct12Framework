@@ -176,7 +176,7 @@ void CQuadTree::CreateGridMesh(std::shared_ptr<Node>& node)
 	node->mVertexBuffer = std::make_shared<CVertexBuffer>();
 
 	INSTANCE(CDX12Manager).OpenCommandList();
-	node->mVertexBuffer->CreateBuffer(node->mVertices);
+	node->mVertexBuffer->CreateBuffer(node->mVertices, DEVICE, CMDLIST);
 	INSTANCE(CDX12Manager).CloseCommandList();
 }
 

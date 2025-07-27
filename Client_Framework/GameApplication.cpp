@@ -51,8 +51,8 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	TIMER.Initilaize();
 	INPUT.Initialize(mHwnd);
 
-	INSTANCE(CShadowManager).Initialize(3, 2048.f * 2.f);
-	INSTANCE(CParticleManager).Initialize(1000);
+	INSTANCE(CShadowManager).Initialize(3, 1024.f * 2.f);
+	INSTANCE(CParticleManager).Initialize(100);
 	RESOURCE.LoadDefaultTexture();
 	INSTANCE(CParticleManager).LoadParticleProperties();
 	INSTANCE(ServerManager).Connect(LOBBY_PORT_NUM);

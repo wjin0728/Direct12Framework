@@ -53,6 +53,8 @@ void CClassSelectUI::Start()
 	mClassCharacters[2] = INSTANCE(CSceneManager).GetCurScene()->FindObjectWithName("Mage");
 
 	mWaitingRoomUI->SetActive(false);
+	auto introUI = mWaitingRoomUI->FindChildByName("IntroUI");
+	introUI->SetActive(false);
 
 	auto& otherPlayers = INSTANCE(ServerManager).mOtherPlayers;
 	for (auto& player : otherPlayers) {
@@ -79,6 +81,7 @@ void CClassSelectUI::Start()
 
 
 			playerState->SetState((UINT8)PLAYER_STATE::IDLE);
+			playerState->CreateParticleEvent();
 
 			auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
 			if (shieldPrefab) {
@@ -116,8 +119,19 @@ void CClassSelectUI::Start()
 		else {
 			playerObj = otherPlayers[playerId];
 			mSelectedClasses.push_back((PLAYER_CLASS)classType);
+			if (mCurrentState == EMenuState::WaitingRoom) {
+				std::string playerName = "Player" + std::to_string(mSelectedClasses.size());
+				if (auto player1 = owner->GetChildComponent<CUIRenderer>(playerName)) {
+					auto& serverManager = INSTANCE(ServerManager);
+					std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
+					if (any.size() < 1) return;
+					if (player1) {
+						player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+						player1->SetTexture("Player_" + classNames[classType] + "_Normal");
+					}
+				}
+			}
 		}
-		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(playerObj->GetStateMachine());
 
 		std::cout << "Selected class: " << classType << endl;
 
@@ -131,6 +145,8 @@ void CClassSelectUI::Start()
 		mClassCharacters[classType]->GetTransform()->SetParentInScene(playerObj->GetTransform());
 
 		
+		auto playerState = std::dynamic_pointer_cast<CPlayerStateMachine>(playerObj->GetStateMachine());
+		playerState->CreateParticleEvent();
 		playerState->SetState((UINT8)PLAYER_STATE::IDLE);
 
 		auto shieldPrefab = RESOURCE.GetPrefab("Water_Shield");
@@ -167,18 +183,7 @@ void CClassSelectUI::Start()
 			button->SetActive(false);
 		}
 
-		if (mCurrentState == EMenuState::WaitingRoom) {
-			std::string playerName = "Player" + std::to_string(mSelectedClasses.size());
-			if (auto player1 = owner->GetChildComponent<CUIRenderer>(playerName)) {
-				auto& serverManager = INSTANCE(ServerManager);
-				std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
-				if (any.size() < 1) return;
-				if (player1) {
-					player1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-					player1->SetTexture("Player_" + classNames[classType] + "_Normal");
-				}
-			}
-		}
+		
 		}
 	);
 }
@@ -253,7 +258,7 @@ void CClassSelectUI::InitializeSettingsUI()
 
 void CClassSelectUI::InitializeWaitingRoomUI()
 {
-	
+	auto& sm = INSTANCE(ServerManager);
 	if (auto introUI = mWaitingRoomUI->FindChildByName("IntroUI")) {
 		if(auto renderer = introUI->GetComponent<CUIRenderer>())
 		{
@@ -265,15 +270,41 @@ void CClassSelectUI::InitializeWaitingRoomUI()
 			std::string texName = "intro" + std::to_string(i + 1);
 			ment->AddTexture(texName);
 		}
-		auto& sm = INSTANCE(ServerManager);
-		sm.AddEvent("ShowMent", [introUI](std::vector<std::any> any) {
+		std::weak_ptr<CGameObject> introUIWeak = introUI;
+		sm.AddEvent("ShowMent", [introUIWeak](std::vector<std::any> any) {
+			if (!introUIWeak.expired()) return;
+			auto introUI = introUIWeak.lock();
+			if (!introUI) return;
 			if (any.size() < 1) return;
-			int index = std::any_cast<int>(any[0]);
+			WAVE_TYPE waveType = (WAVE_TYPE)std::any_cast<UINT8>(any[0]);
 			if (auto renderer = introUI->GetComponent<CUIRenderer>()) {
-				renderer->SetAlpha(1.0f);
+				renderer->SetAlpha(0.0f);
 			}
 			introUI->SetActive(true);
-			introUI->GetComponent<CMentDisplay>()->StartDisplay(4.f, 1.f, 0.5f);
+
+			introUI->GetComponent<CMentDisplay>()->StartDisplay(6.f, 1.5f, 0.6f);
+			});
+	}
+
+	if (auto interactionUI = owner->FindChildByName("InteractionUI")) {
+		interactionUI->SetActive(false);
+		if (auto renderer = interactionUI->GetComponent<CUIRenderer>())
+		{
+			renderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		}
+		if(sm.mPlayer)
+			sm.mPlayer->AddEvent("OnItemTargeted", [interactionUI](const std::vector<std::any>& args) {
+			if (args.size() < 1) return;
+			bool isActive = std::any_cast<bool>(args[0]);
+			interactionUI->SetActive(isActive);
+			if (isActive)
+			{
+				if (auto renderer = interactionUI->GetComponent<CUIRenderer>())
+				{
+					Vec2 screenPos = std::any_cast<Vec2>(args[1]);
+					renderer->SetPosition(screenPos);
+				}
+			}
 			});
 	}
 

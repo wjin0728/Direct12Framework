@@ -262,3 +262,19 @@ void PlayerState::GatheringState::Update(PlayerCharacter* player) {
 
 void PlayerState::GatheringState::Exit(PlayerCharacter* player) {
 }
+
+// PlayerState::DeathState 구현
+PlayerState::DeathState& PlayerState::DeathState::GetInstance() { static PlayerState::DeathState instance; return instance; }
+
+void PlayerState::DeathState::Enter(PlayerCharacter* player) {
+    player->SetVelocity(0, 0, 0);
+}
+
+void PlayerState::DeathState::Update(PlayerCharacter* player) {
+    player->SetVelocity(0, 0, 0); // 속도 0으로 설정
+}
+
+void PlayerState::DeathState::Exit(PlayerCharacter* player) {
+    player->_pos = player->_spawn_pos;
+    player->_rotation = player->_spawn_rotation;
+}

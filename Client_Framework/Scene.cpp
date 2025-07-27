@@ -73,7 +73,6 @@ void CScene::Start()
 
 void CScene::Update()
 {
-	FadeUpdate();
 	for (const auto& object : mObjects) {
 		object->Update();
 	}
@@ -89,6 +88,7 @@ void CScene::LateUpdate()
 	INSTANCE(CParticleManager).Update();
 	UpdatePassData();
 
+	FadeUpdate();
 }
 
 
@@ -205,6 +205,23 @@ void CScene::DestroyObject(CGameObject* object)
 	if (object) {
 		auto itr = findByRawPointer(mObjects, object);
 		mRemoveQueue.push(object);
+	}
+}
+
+void CScene::DestroyObjectImmediately(CGameObject* object)
+{
+	if (!object) return;
+	auto itr = findByRawPointer(mObjects, object);
+	if (itr != mObjects.end()) {
+		mObjects.erase(itr);
+	}
+	auto type = object->GetObjectType();
+	if (type > OBJECT_TYPE::NONE && type < OBJECT_TYPE::end) {
+		auto itr = std::find_if(mObjectTypes[type].begin(), mObjectTypes[type].end(),
+			[object](const std::shared_ptr<CGameObject>& ptr) { return ptr.get() == object; });
+		if (itr != mObjectTypes[type].end()) {
+			mObjectTypes[type].erase(itr);
+		}
 	}
 }
 

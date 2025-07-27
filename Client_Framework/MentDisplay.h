@@ -39,6 +39,12 @@ public:
         mTime = 0.0f;
         mAlpha = 0.0f;
 	}
-
+    void ClearTextures()
+    {
+        mTextures.clear();
+        mCurrentTextureIndex = 0;
+        mAlpha = 0.0f;
+        mTime = 0.0f;
+	}
 };
 

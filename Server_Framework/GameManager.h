@@ -143,8 +143,8 @@ public:
 		MonsterWaves[ServerNumber].Initialize(scene_type); // 웨이브 상태 초기화
 
 		for (auto& cl : clients[ServerNumber]) {
-			cl.second._player._pos = spawnDatas[(int)scene_type][(int)cl.second._player._class].pos;
-			cl.second._player._rotation = spawnDatas[(int)scene_type][(int)cl.second._player._class].rot;
+			cl.second._player._pos = cl.second._player._spawn_pos = spawnDatas[(int)scene_type][(int)cl.second._player._class].pos;
+			cl.second._player._rotation = cl.second._player._spawn_rotation = spawnDatas[(int)scene_type][(int)cl.second._player._class].rot;
 			cl.second._player._velocity = Vec3::Zero;
 			cl.second._player._hp = cl.second._player.PlayerMaxHp();
 			cl.second._player._barrier = 0;
@@ -187,28 +187,28 @@ public:
 
 	std::map<S_ENEMY_TYPE, std::vector<MonsterAttackInfo>> attackInfos = {
 		{ S_ENEMY_TYPE::GRASS_SMALL, {
-			{ {0.2f, 0.9f}, 2.f, 100 },
-			{ {0.f, 0.7f}, 0.8f, 100 },
+			{ {0.2f, 0.9f}, 2.f, M_SMALL_DAMAGE },
+			{ {0.f, 0.7f}, 0.8f, M_SMALL_DAMAGE },
 		}},
 		{ S_ENEMY_TYPE::GRASS_BIG, {
-			{ {0.f, 2.85f}, 1.f, 150 },
-			{ {1.25f, 1.25f}, 2.f, 150 },
+			{ {0.f, 2.85f}, 1.f, M_BIG_DAMAGE },
+			{ {1.25f, 1.25f}, 2.f, M_BIG_DAMAGE },
 		}},
 		{ S_ENEMY_TYPE::WATER_SMALL, {
-			{ {0.f, 1.f}, 1.f, 100 },
-			{ {0.f, 1.7f}, 0.85f, 100 },
+			{ {0.f, 1.f}, 1.f, M_SMALL_DAMAGE },
+			{ {0.f, 1.7f}, 0.85f, M_SMALL_DAMAGE },
 		}},
 		{ S_ENEMY_TYPE::WATER_BIG, {
-			{ {0.f, 2.5f}, 1.9f, 150 },
-			{ {0.f, 0.f}, 2.5f, 150 },
+			{ {0.f, 2.5f}, 1.9f, M_BIG_DAMAGE },
+			{ {0.f, 0.f}, 2.5f, M_BIG_DAMAGE },
 		}},
 		{ S_ENEMY_TYPE::FIRE_SMALL, {
-			{ {0.f, 2.f}, 0.75f, 100 },
-			{ {0.f, 0.8f}, 1.1f, 100 },
+			{ {0.f, 2.f}, 0.75f, M_SMALL_DAMAGE },
+			{ {0.f, 0.8f}, 1.1f, M_SMALL_DAMAGE },
 		}},
 		{ S_ENEMY_TYPE::FIRE_BIG, {
-			{ {0.8f, 1.15f}, 1.5f, 150 },
-			{ {0.f, 2.3f}, 1.f, 150 },
+			{ {0.8f, 1.15f}, 1.5f, M_BIG_DAMAGE },
+			{ {0.f, 2.3f}, 1.f, M_BIG_DAMAGE },
 		}}
 	};
 
@@ -227,10 +227,10 @@ private:
 		return true;
 	};
 	bool IsAllClassSelected() const {
-		for (int i = 0; i < (int)S_PLAYER_CLASS::end; ++i) {
+		/*for (int i = 0; i < (int)S_PLAYER_CLASS::end; ++i) {
 			if (IsClassOK((S_PLAYER_CLASS)i))
 				return false;
-		}
-		return true;
+		}*/
+		return !IsClassOK((S_PLAYER_CLASS)2);
 	}
 };

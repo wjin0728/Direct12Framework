@@ -60,7 +60,6 @@ void CMentDisplay::Update()
         mUIRenderer.lock()->SetTexture(mTextures[mCurrentTextureIndex]);
     }
 
-    // Apply alpha
     mUIRenderer.lock()->SetAlpha(mAlpha);
 }
 

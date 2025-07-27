@@ -38,7 +38,7 @@ void CCutScene::InitializeFighterCutScene()
     Vec3 scale, translation;
     Quaternion rotation;
     Matrix camWorld;
-    auto& transform = mThirdPersonCamera->GetTransform();
+    auto transform = mThirdPersonCamera->GetTransform();
 
     camWorld = GetPositionFromRelative(Vec3{ 1.27789, 1.11734, 1.92968 }, Quaternion{ -0.0333761, 0.94699, -0.104699, -0.301884 });
     camWorld.Decompose(scale, rotation, translation);
@@ -86,7 +86,7 @@ void CCutScene::InitializeMageCutScene()
     Vec3 scale, translation;
     Quaternion rotation;
     Matrix camWorld;
-    auto& transform = mThirdPersonCamera->GetTransform();
+    auto transform = mThirdPersonCamera->GetTransform();
 
     camWorld = GetPositionFromRelative(Vec3{ 0.220673, 0.71169, 2.19035 }, Quaternion{ 0.00203271, 0.997964, 0.0437918, -0.0463231 });
     camWorld.Decompose(scale, rotation, translation);
@@ -131,7 +131,7 @@ void CCutScene::InitializeArcherCutScene()
     Vec3 scale, translation;
     Quaternion rotation;
     Matrix camWorld;
-    auto& transform = mThirdPersonCamera->GetTransform();
+    auto transform = mThirdPersonCamera->GetTransform();
 
     camWorld = GetPositionFromRelative(Vec3{ -0.0274296, 0.581093, 4.65343 }, Quaternion{ 0.0038204, 0.984563, 0.173641, -0.0216622 });
     camWorld.Decompose(scale, rotation, translation);

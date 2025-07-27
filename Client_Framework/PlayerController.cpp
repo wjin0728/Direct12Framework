@@ -128,7 +128,7 @@ void CPlayerController::LockOnTarget()
 			mTargetEnemy = enemy;
 		}
 	}
-	owner->TriggerEvent("OnEnemyTargeted", { mTargetEnemy.lock() });
+	owner->TriggerEvent("OnEnemyTargeted", { mTargetEnemy.lock()});
 }
 
 void CPlayerController::InteractWithItem()
@@ -188,7 +188,6 @@ void CPlayerController::ChangeControllMode(ControllMode mode)
 	switch (mControllMode)
 	{
 	case CPlayerController::ControllMode::None:
-
 		break;
 	case CPlayerController::ControllMode::FreeLook:
 		break;
@@ -303,10 +302,7 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(5);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-			if (mSkill == ITEM_TYPE::item_end) return;
-			if (!mTargetEnemy.lock()) return;
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
-			//CastingSkill();
+			CastingSkill();
 			return;
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::Q)) {
@@ -376,10 +372,7 @@ void CPlayerController::OnKeyEvents()
 			INSTANCE(ServerManager).send_cs_000_packet(4);
 		}
 		if (INPUT.IsKeyDown(KEY_TYPE::E)) {
-			if (mSkill == ITEM_TYPE::item_end) return;
-			if (!mTargetEnemy.lock()) return;
-			INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
-			//CastingSkill();
+			CastingSkill();
 			INSTANCE(ServerManager).send_cs_move_packet(0, camForward);
 			return;
 		}
@@ -449,25 +442,34 @@ void CPlayerController::OnKeyEvents()
 
 void CPlayerController::CastingSkill()
 {
-	//INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
+	if (mSkill == ITEM_TYPE::item_end)
+	{
+		SetSkill(ITEM_TYPE::item_end);
+		return;
+	}
+
 	switch (mSkill) {
 	case FIRE_ENCHANT:
 	case WATER_HEAL:
 	case WATER_SHIELD:
 	case GRASS_WEAKEN:
 		INSTANCE(ServerManager).send_cS_skill_nontarget_packet(mSkill);
+
 		break;
 	case FIRE_EXPLOSION: {
 		if (mTargetEnemy.lock()) {
 			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
 		}
+		else return;
 		break;
 	}
 	case GRASS_VINE:
 		if (mTargetEnemy.lock()) {
 			INSTANCE(ServerManager).send_cS_skill_target_packet(mSkill, mTargetEnemy.lock()->mID);
 		}
+		else return; 
 		break;
 	}
-	SetSkill(ITEM_TYPE::item_end);
+	SetSkill(mSkill);
+	INSTANCE(ServerManager).send_cs_change_state_packet((uint8_t)PLAYER_STATE::SKILL);
 }
