@@ -260,7 +260,24 @@ void CPlayerHUD::InitializePlayerHUD()
             });
     }
 
-
+    if (auto dieUI = owner->FindChildByName("DieUI")) {
+        dieUI->SetActive(false);
+        if (auto renderer = dieUI->GetComponent<CUIRenderer>())
+        {
+            renderer->SetAlpha(0.0f);
+        }
+		auto ment = dieUI->AddComponent<CMentDisplay>();
+        mPlayer.lock()->AddEvent("OnDeath", [dieUI, ment](const std::vector<std::any>& args) {
+            if (args.size() < 1) return;
+            if (auto renderer = dieUI->GetComponent<CUIRenderer>()) {
+                renderer->SetAlpha(0.0f);
+            }
+            dieUI->SetActive(true);
+            ment->ClearTextures();
+            ment->AddTexture("Die");
+            ment->StartDisplay(5.f, 1.f, 0.5f);
+			});
+    }
 
 }
 

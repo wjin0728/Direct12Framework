@@ -123,6 +123,7 @@ void CPlayerStateMachine::OnEnterState(UINT8 state)
 	case PLAYER_STATE::DEATH:
 		mIsHit = false;
 		mIsDead = true;
+		owner->TriggerEvent("OnDeath", { });
 		break;
 	case PLAYER_STATE::JUMP:
 		break;
