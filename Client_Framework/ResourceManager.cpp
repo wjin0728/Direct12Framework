@@ -254,6 +254,48 @@ void CResourceManager::LoadDefaultTexture()
 		Add(tex);
 	}
 	{
+		auto name = "boss1";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "boss2";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "bossEnding1";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "bossEnding2";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "Clear";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "Die";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
 		for (int i = 1; i <= 3; i++) {
 			for (int j = 1; j <= 2; j++) {
 				auto name = "stage" + std::to_string(i) + "_" + std::to_string(j);

@@ -69,6 +69,7 @@ public:
     float GetWidth() const { return mWidth; }
 	float GetDuration() const { return mDuration; }
 	void SetBlendMaskTexture(const std::string& name);
+	void SetColor(const Color& color);
 
 
 	void UpdateVertices();

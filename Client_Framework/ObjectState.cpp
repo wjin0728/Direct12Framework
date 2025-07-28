@@ -466,6 +466,21 @@ void CWarriorState::CreateParticleEvent()
 			trailRenderer->mActive = true;
 			trailRenderer->ResetTrail();
 			trailRenderer->SetDuration(0.2f);
+			trailRenderer->SetWidth(0.7f);
+			trailRenderer->SetColor(Vec4(1.f, 1.f, 1.f, 1.f));
+		}
+		};
+	auto funcU = [trail](float time) {
+		if (trail.expired()) {
+			return;
+		}
+		auto trailRenderer = trail.lock();
+		if (trailRenderer) {
+			trailRenderer->mActive = true;
+			trailRenderer->ResetTrail();
+			trailRenderer->SetDuration(0.3f);
+			trailRenderer->SetWidth(1.5f);
+			trailRenderer->SetColor(Vec4(1.f, 0.5f, 0.f, 1.f));
 		}
 		};
 	auto func1 = [trail](float time) {
@@ -482,7 +497,9 @@ void CWarriorState::CreateParticleEvent()
 	controller->AddAnimationEvent("Attack", "AttackEnd", func1);
 	controller->AddAnimationEvent("RunAttack", "AttackStart", func0);
 	controller->AddAnimationEvent("RunAttack", "AttackEnd", func1);
-	controller->AddAnimationEvent("Ultimate", "AttackStart", func0);
+
+
+	controller->AddAnimationEvent("Ultimate", "AttackStart", funcU);
 	controller->AddAnimationEvent("Ultimate", "AttackEnd", func1);
 
 	if (mTrail.lock()) {

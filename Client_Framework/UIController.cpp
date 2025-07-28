@@ -250,6 +250,7 @@ void CPlayerHUD::InitializePlayerHUD()
                 mentDisplay->ClearTextures();
                 mentDisplay->AddTexture("bossEnding1");
                 mentDisplay->AddTexture("bossEnding2");
+                mentDisplay->AddTexture("Clear");
 			}
             if (auto renderer = introUI->GetComponent<CUIRenderer>()) {
                 renderer->SetAlpha(0.0f);
