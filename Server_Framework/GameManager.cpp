@@ -424,7 +424,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			proj._pos = player._pos;
 			proj._pos.y += 2.5f;
 
-			Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 1.f, 0.f };
+			Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 0.6f, 0.f };
 			Vec3 direction = target_pos - proj._pos;
 
 			direction.Normalize();
@@ -436,19 +436,21 @@ void GameManager::Process_packet(int c_id, char* packet)
 			break;
 		}
 		case S_PLAYER_CLASS::MAGE: {
+			
 			cout << "Mage CS_ULTIMATE_SKILL\n";
 
 			const int num_projectiles = 5;
-			const float radius = 1.0f; // 오각형 반지름
-			const float height_offset = 1.f;
+			const float radius = 1.5f; // 오각형 반지름
+			const float height_offset = 2.5f;
 
-			// 플레이어 위치 기준으로 시작
-			Vec3 center = player._pos;
+			Vec3 look = { sin(player._look_dir.y * degToRad), 0.0f, cos(player._look_dir.y * degToRad) };
+			look.Normalize();
+			Vec3 center = player._pos - look * 1.5f;
 			center.y += height_offset;
 
 			// 플레이어의 바라보는 방향에 수직인 벡터 계산 (오각형을 회전시키기 위해)
 			Vec3 up{ 0.f, 1.f, 0.f };
-			Vec3 right = up.Cross(player._look_dir);
+			Vec3 right = up.Cross(look);
 			right.Normalize();
 
 			// 오각형 꼭짓점 각도
@@ -466,14 +468,17 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Vec3 offset = right * local_x + up * local_y;
 				Vec3 spawn_pos = center + offset;
 
+
 				// 투사체 방향: 오각형 중심(플레이어 앞쪽)으로 날아가게
-				Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 1.f, 0.f };
+				Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 0.0f, 0.f };
 				Vec3 direction = target_pos - spawn_pos;
 				direction.Normalize();
 
 				Projectile proj{ 1, S_PROJECTILE_TYPE::ULTIMATE_MAGIC_BALL };
 				proj._pos = spawn_pos;
 				proj._velocity = direction / 3.f;
+				proj._user_frinedly = true; 
+				proj._damage = 10;
 
 				Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
 				SendAddProjectilePacket(proj, Projectile_cnt[ServerNumber]);

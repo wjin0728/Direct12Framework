@@ -27,8 +27,8 @@ public:
 			break;
 		case S_PROJECTILE_TYPE::ULTIMATE_ARROW:
 			_damage = P_ULTIMAGE_DAMAGE;
-			_orignalboundingbox.Center = XMFLOAT3(0, 0, 0.2230943);
-			_orignalboundingbox.Extents = Vec3(0.106043, 0.03977784, 0.6090841) / 4.f;
+			_orignalboundingbox.Center = XMFLOAT3(0, 0, 0.11);
+			_orignalboundingbox.Extents = Vec3(0.26, 0.07, 0.88) / 4.f;
 			break;
 		case S_PROJECTILE_TYPE::FIREBALL:
 			break;
@@ -40,6 +40,11 @@ public:
 			_damage = P_ARROW_MAGICBALL_DAMAGE;
 			_orignalboundingbox.Center = XMFLOAT3(0, 0, 0);
 			_orignalboundingbox.Extents = Vec3(0.8, 0.8, 0.8) / 2.f;
+			break;
+		case S_PROJECTILE_TYPE::ULTIMATE_MAGIC_BALL:
+			_damage = 5;
+			_orignalboundingbox.Center = XMFLOAT3(-0.02f, 0.071f, 0.1076725);
+			_orignalboundingbox.Extents = Vec3(0.35) * Vec3(0.41, 0.76, 0.55) / 2.f;
 			break;
 		case S_PROJECTILE_TYPE::PROJECTILE_END:
 			break;

@@ -261,10 +261,6 @@ void CPlayerHUD::InitializePlayerHUD()
 
 
 
-    for (int i = 0; auto& player : mOtherPlayers)
-    {
-        BindPlayerToUI(mOtherPlayers[i].lock(), "Player" + std::to_string(i + 1));
-    }
 }
 
 void CPlayerHUD::InitializeSettingUI()
@@ -303,39 +299,4 @@ void CPlayerHUD::OnClickResumeButton()
 }
 
 
-void CPlayerHUD::BindPlayerToUI(const std::shared_ptr<class CGameObject>& player, const std::string& name)
-{
-	if (!player) return;
-	if (name.empty()) return;
 
-	PLAYER_CLASS playerClass{ PLAYER_CLASS::end };
-    if (auto playerState = player->GetComponent<CPlayerStateMachine>())
-    {
-        playerClass = playerState->GetClass();
-    }
-
-    std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
-
-    if (auto player = owner->FindChildByName(name))
-    {
-        if (auto playerRenderer = player->GetComponent<CUIRenderer>()) {
-            playerRenderer->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-            playerRenderer->SetTexture("Player_" + classNames[(UINT8)playerClass] + "_Normal");
-            mOtherPlayers[0].lock()->AddEvent("OnFaceChanged", [playerRenderer, playerClass](const std::vector<std::any>& args) {
-                if (args.size() < 1) return;
-                bool isNormal = std::any_cast<bool>(args[0]);
-                std::array<std::string, 3> classNames = { "Archer", "Fighter", "Mage" };
-                std::string faceType = isNormal ? "_Normal" : "_Sad";
-                playerRenderer->SetTexture("Player_" + classNames[(UINT8)playerClass] + faceType);
-                });
-        }
-        if (auto hpBar = player->FindChildByName("HealthBar")) {
-            hpBar->SetTag(classNames[(UINT8)playerClass] + "Heahtbar");
-            auto healthSystem = hpBar->AddComponent<CHealthSystem>();
-            //healthSystem->BindOwner(player);
-            healthSystem->ViewHealthBar(true);
-            healthSystem->SetRenderToWorld(false);
-            healthSystem->SetHealthBarColor({ 0.0f, 0.8f, 0.f, 1.f });
-        }
-    }
-}

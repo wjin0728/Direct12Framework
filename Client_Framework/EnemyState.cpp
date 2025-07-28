@@ -70,9 +70,6 @@ void CEnemyState::Update()
 		break;
 	case MONSTER_STATE::GETHIT:
 	{
-		float hitFactor = 1.f - (controller->mTrack->mTrackProgress * 3);
-		if (hitFactor < 0.f) hitFactor = 0.f;
-		GetTransform()->SetHitFactor(hitFactor);
 		break;
 	}
 	case MONSTER_STATE::DEATH:
@@ -94,6 +91,7 @@ void CEnemyState::OnEnterState(UINT8 state)
 	{
 	case MONSTER_STATE::IDLE:
 	case MONSTER_STATE::RUN:
+		GetTransform()->SetHitFactor(0.f);
 		break;
 	case MONSTER_STATE::SPAWN:
 		if (mHealthSystem.lock()) mHealthSystem.lock()->ViewHealthBar(false);
@@ -106,6 +104,7 @@ void CEnemyState::OnEnterState(UINT8 state)
 		break;
 	case MONSTER_STATE::ATTACK:
 	case MONSTER_STATE::SKILL:
+		GetTransform()->SetHitFactor(0.f);
 		break;
 	case MONSTER_STATE::DEATH:
 		mIsDead = true;

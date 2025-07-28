@@ -308,6 +308,21 @@ void CArcherState::OnExitState(UINT8 state)
 void CArcherState::CreateParticleEvent()
 {
 	CPlayerStateMachine::CreateParticleEvent();
+
+	std::weak_ptr<CParticleAttach> particle = owner->GetComponentFromHierarchy<CParticleAttach>();
+
+	auto func0 = [particle](float time) {
+		if (particle.expired()) {
+			return;
+		}
+		auto arrowParticle = particle.lock();
+		if (arrowParticle) {
+			arrowParticle->Play();
+		}
+		};
+
+	auto controller = mAnimationController.lock();
+	controller->AddAnimationEvent("Ultimate", "Ultimate", func0);
 }
 
 void CWarriorState::Awake()

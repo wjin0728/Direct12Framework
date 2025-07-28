@@ -115,6 +115,7 @@ bool CResourceManager::LoadProjectileObjects()
 	LoadPrefabFromFile("Explosion");
 	LoadPrefabFromFile("SkillVine");
 	LoadPrefabFromFile("MageSkill");
+	LoadPrefabFromFile("UltimateArrow");
 	return true;
 }
 
