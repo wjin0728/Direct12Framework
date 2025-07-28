@@ -416,6 +416,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		{
 		case S_PLAYER_CLASS::FIGHTER: {
 			player._target->TakeDamage(P_ULTIMAGE_DAMAGE, true); // 전사 궁극기: 타겟 몬스터에게 50의 피해
+			SendHPPacket(S_OBJECT_TYPE::S_ENEMY, player._target->_id, player._target->_hp, 0);
 			break;
 		}
 		case S_PLAYER_CLASS::ARCHER: {
@@ -592,7 +593,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			cout << "Archer CS_ATTACK\n";
 			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
 			proj._pos = player._pos;
-			proj._pos.y += 0.3f;
+			proj._pos.y += 0.5f;
 
 			if (player._target == nullptr) { // 타겟 몬스터가 제거된 경우
 				direction.x = sin(player._look_dir.y * degToRad); // 1.0
@@ -1156,6 +1157,7 @@ void GameManager::InitializeWave()
 void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 {
 	Monster ms{ type };
+	ms._id = Monster_cnt[ServerNumber];
 	ms._pos = position;
 	ms.LocalTransform();
 	for (auto& cl : clients[ServerNumber]) {
