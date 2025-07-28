@@ -1,0 +1,56 @@
+#pragma once
+#include "Object.h"
+class Projectile :
+    public Object
+{
+public:
+	float _speed = 0.5f; // 발사 속도
+	bool _user_frinedly;
+	S_PROJECTILE_TYPE _p_type = S_PROJECTILE_TYPE::PROJECTILE_END;
+	int _damage = 0; // 데미지
+	bool _remove = false; // 제거 여부
+
+	Projectile() :
+		Object(S_OBJECT_TYPE::S_PLAYER_PROJECTILE),
+		_user_frinedly(1) {
+	}
+	Projectile(bool user_frinedly, S_PROJECTILE_TYPE type) :
+		Object(S_OBJECT_TYPE::S_PLAYER_PROJECTILE),
+		_user_frinedly(user_frinedly),
+		_p_type(type) {
+		switch (type)
+		{
+		case S_PROJECTILE_TYPE::ARROW:
+			_damage = P_ARROW_MAGICBALL_DAMAGE;
+			_orignalboundingbox.Center = XMFLOAT3(0, 0, 0.2230943);
+			_orignalboundingbox.Extents = Vec3(0.106043, 0.03977784, 0.6090841) / 4.f;
+			break;
+		case S_PROJECTILE_TYPE::ULTIMATE_ARROW:
+			_damage = P_ULTIMAGE_DAMAGE;
+			_orignalboundingbox.Center = XMFLOAT3(0, 0, 0.2230943);
+			_orignalboundingbox.Extents = Vec3(0.106043, 0.03977784, 0.6090841) / 4.f;
+			break;
+		case S_PROJECTILE_TYPE::FIREBALL:
+			break;
+		case S_PROJECTILE_TYPE::ICEBALL:
+			break;
+		case S_PROJECTILE_TYPE::GRASSBALL:
+			break;
+		case S_PROJECTILE_TYPE::MAGIC_BALL:
+			_damage = P_ARROW_MAGICBALL_DAMAGE;
+			_orignalboundingbox.Center = XMFLOAT3(0, 0, 0);
+			_orignalboundingbox.Extents = Vec3(0.8, 0.8, 0.8) / 2.f;
+			break;
+		case S_PROJECTILE_TYPE::PROJECTILE_END:
+			break;
+		default:
+			break;
+		}
+
+	}
+	void Update() {
+		_pos += (_velocity * _speed);
+		LocalTransform(); // 바운딩 박스 업데이트 해주기
+	}
+};
+

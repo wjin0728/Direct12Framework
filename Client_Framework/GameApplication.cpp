@@ -12,7 +12,7 @@
 #include"RenderManager.h"
 #include "Light.h"
 
-//#define USE_FULLSCREEN
+#define USE_FULLSCREEN
 #define SCREEN_WIDTH 1600
 #define SCREEN_HEIGHT 900
 
