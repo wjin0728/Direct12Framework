@@ -5,6 +5,8 @@
 
 class Monster : public Object {
 public:
+    int _id;
+    
     Vec3 _look_dir;
     Vec3 _speed{2, 0, 2};
 
