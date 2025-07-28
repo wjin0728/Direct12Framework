@@ -59,7 +59,26 @@ public:
 	void SetCamera(const std::shared_ptr<class CCamera>& camera) { mCamera = camera; }
 	void SetTerrain(const std::shared_ptr<class CTerrain>& terrain) { mTerrain = terrain; }
 	void SetSkill(ITEM_TYPE skill);
-	void SetClass(PLAYER_CLASS playerClass) { mClass = playerClass; };
+	void SetClass(PLAYER_CLASS playerClass) { 
+		mClass = playerClass; 
+		switch (mClass)
+		{
+		case PLAYER_CLASS::ARCHER:
+			mMaxAttackRange = 10.0f;
+			break;
+		case PLAYER_CLASS::FIGHTER:
+			mMaxAttackRange = 8.0f;
+			break;
+		case PLAYER_CLASS::MAGE:
+			mMaxAttackRange = 10.0f; // Example range for Mage
+			break;
+		case PLAYER_CLASS::end:
+			break;
+		default:
+			break;
+		}
+	
+	};
 	void SetCutScene(const std::shared_ptr<class CCutScene>& cutScene) { mCutScene = cutScene; }
 
 	void SetState(PLAYER_STATE state);

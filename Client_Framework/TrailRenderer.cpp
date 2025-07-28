@@ -65,6 +65,7 @@ void CTrailRenderer::Start()
 	//int idx = m_materials[0]->GetProperty<UINT>("normalTexIdx");
 	int texIdx = mBlendMaskTexture ? mBlendMaskTexture->GetSrvIndex() : -1;
     m_materials[0]->SetProperty("normalTexIdx", texIdx);
+	SetColor(Color(1.f, 1.f, 1.f, 1.f)); // Default color
 }
 
 void CTrailRenderer::Update()
@@ -151,6 +152,14 @@ void CTrailRenderer::SetBlendMaskTexture(const std::string& name)
     if (!material) return;
 	int idx = mBlendMaskTexture->GetSrvIndex();
     material->SetProperty("normalTexIdx", idx);
+}
+
+void CTrailRenderer::SetColor(const Color& color)
+{
+    if (m_materials.empty()) return;
+    auto material = m_materials[0];
+    if (!material) return;
+	material->SetProperty("mainColor", color);
 }
 
 void CTrailRenderer::UpdateVertices()

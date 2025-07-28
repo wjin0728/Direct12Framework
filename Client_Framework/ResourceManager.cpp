@@ -93,6 +93,7 @@ bool CResourceManager::LoadEnemyObjects()
 	LoadPrefabFromFile("WaterSmall");
 	LoadPrefabFromFile("FireBig");
 	LoadPrefabFromFile("FireSmall");
+	LoadPrefabFromFile("IceBig");
 	LoadPrefabFromFile("Boss");
 	return true;
 }
@@ -113,6 +114,8 @@ bool CResourceManager::LoadProjectileObjects()
 	LoadPrefabFromFile("MagicBall");
 	LoadPrefabFromFile("Explosion");
 	LoadPrefabFromFile("SkillVine");
+	LoadPrefabFromFile("MageSkill");
+	LoadPrefabFromFile("UltimateArrow");
 	return true;
 }
 
@@ -245,6 +248,48 @@ void CResourceManager::LoadDefaultTexture()
 	}
 	{
 		auto name = "intro3";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "boss1";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "boss2";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "bossEnding1";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "bossEnding2";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "Clear";
+		std::string path = TEXTURE_PATH(name);
+		auto tex = std::make_shared<CTexture>(name, path);
+		tex->AssignedSRVIndex();
+		Add(tex);
+	}
+	{
+		auto name = "Die";
 		std::string path = TEXTURE_PATH(name);
 		auto tex = std::make_shared<CTexture>(name, path);
 		tex->AssignedSRVIndex();

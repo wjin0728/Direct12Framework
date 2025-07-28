@@ -52,7 +52,7 @@ bool CGameApplication::Initialize(HINSTANCE hInstance, WNDPROC wndProc, int cmdS
 	INPUT.Initialize(mHwnd);
 
 	INSTANCE(CShadowManager).Initialize(3, 1024.f * 2.f);
-	INSTANCE(CParticleManager).Initialize(100);
+	INSTANCE(CParticleManager).Initialize(300);
 	RESOURCE.LoadDefaultTexture();
 	INSTANCE(CParticleManager).LoadParticleProperties();
 	INSTANCE(ServerManager).Connect(LOBBY_PORT_NUM);
