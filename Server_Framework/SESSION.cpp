@@ -206,7 +206,7 @@ void SESSION::send_boss_set_target_packet(int id)
 void SESSION::send_boss_target_lock_packet()
 {
 	SC_BOSS_TARGET_LOCK_PACKET p;
-	p.type = SC_BOSS_SET_TARGET;
+	p.type = SC_BOSS_TARGET_LOCK;
 	p.size = sizeof(p);
 	do_send(&p);
 }
