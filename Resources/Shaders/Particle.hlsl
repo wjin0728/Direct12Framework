@@ -48,8 +48,8 @@ VS_OUTPUT VS_Forward(uint billboardVertex : SV_VertexID, uint instanceId : SV_In
     
     corner = lerp(float2(-0.5, 0.5), float2(0.5, -0.5), output.uv) * input.size;
     corner = float2(
-        corner.x * cos(input.rotation) - corner.y * sin(input.rotation),
-        corner.x * sin(input.rotation) + corner.y * cos(input.rotation)
+        corner.x * cos(-input.rotation) - corner.y * sin(-input.rotation),
+        corner.x * sin(-input.rotation) + corner.y * cos(-input.rotation)
     );
     float3 position = mul(float3(corner, 0), (float3x3) invViewMat) + input.position;
     

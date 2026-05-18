@@ -366,7 +366,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 	}
 	case SC_DROP_ITEM: {
 		SC_DROP_ITEM_PACKET* packet = reinterpret_cast<SC_DROP_ITEM_PACKET*>(packet_ptr);
-		cout << "packet._pos : " << packet->x << ", " << packet->y << ", " << packet->z << endl;
+		//cout << "packet._pos : " << packet->x << ", " << packet->y << ", " << packet->z << endl;
 		auto scene = INSTANCE(CSceneManager).GetCurScene();
 		if (!scene) {
 			std::cout << "Current scene is nullptr" << std::endl;
@@ -500,7 +500,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		}
 
 		std::string objName[(int)PROJECTILE_TYPE::PROJECTILE_END]
-			= { "Arrow", "Arrow", "FireBall", "IceBall", "GrassBall", "MagicBall" };
+			= { "Arrow", "UltimateArrow", "FireBall", "IceBall", "GrassBall", "MagicBall", "MageSkill"};
 		auto projectile = RESOURCE.GetPrefab(objName[(int)packet->projectile_type]);
 		if (!projectile) {
 			std::cout << "projectile is nullptr" << std::endl;
@@ -509,7 +509,7 @@ void ServerManager::Using_Packet(char* packet_ptr)
 		auto projectileObj = CGameObject::Instantiate(projectile);
 		projectileObj->SetTag("Projectile");
 		projectileObj->SetRenderLayer(RENDER_LAYER::Opaque);
-		if(objName[(int)packet->projectile_type] == "MagicBall") 
+		if(objName[(int)packet->projectile_type] == "MagicBall" || objName[(int)packet->projectile_type] == "MageSkill")
 			projectileObj->SetRenderLayer(RENDER_LAYER::Transparent);
 
 		if (objName[(int)packet->projectile_type] == "Arrow") {
@@ -517,6 +517,11 @@ void ServerManager::Using_Packet(char* packet_ptr)
 				trailObj->SetParent(projectileObj);
 			}
 
+		}
+		if(objName[(int)packet->projectile_type] == "UltimateArrow") {
+			if (auto trailObj = CGameObject::CreateTrailObject(true, "UltimateArrowTrail", 0.1, 0.25f, 0.5f)) {
+				trailObj->SetParent(projectileObj);
+			}
 		}
 		if (packet->user_friendly)
 			projectileObj->SetObjectType(OBJECT_TYPE::PLAYER_PROJECTILE);

@@ -363,7 +363,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		}
 		else if (S_GRASS_VINE == p->skill_enum) {
 			BoundingBox box(pos, Vec3(4.46f, 1.2f, 4.46f)/2.f);
-			box.Center.y += 0.3f; 
+			box.Center.y += 0.3f;
 			for (auto& mon : Monsters[ServerNumber]) {
 				if (mon.second.IsUnavailable()) continue;
 				mon.second.LocalTransform();
@@ -416,6 +416,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 		{
 		case S_PLAYER_CLASS::FIGHTER: {
 			player._target->TakeDamage(P_ULTIMAGE_DAMAGE, true); // 전사 궁극기: 타겟 몬스터에게 50의 피해
+			SendHPPacket(S_OBJECT_TYPE::S_ENEMY, player._target->_id, player._target->_hp, 0);
 			break;
 		}
 		case S_PLAYER_CLASS::ARCHER: {
@@ -424,7 +425,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			proj._pos = player._pos;
 			proj._pos.y += 2.5f;
 
-			Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 1.f, 0.f };
+			Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 0.6f, 0.f };
 			Vec3 direction = target_pos - proj._pos;
 
 			direction.Normalize();
@@ -436,19 +437,21 @@ void GameManager::Process_packet(int c_id, char* packet)
 			break;
 		}
 		case S_PLAYER_CLASS::MAGE: {
+			
 			cout << "Mage CS_ULTIMATE_SKILL\n";
 
 			const int num_projectiles = 5;
-			const float radius = 1.0f; // 오각형 반지름
-			const float height_offset = 1.f;
+			const float radius = 1.5f; // 오각형 반지름
+			const float height_offset = 2.5f;
 
-			// 플레이어 위치 기준으로 시작
-			Vec3 center = player._pos;
+			Vec3 look = { sin(player._look_dir.y * degToRad), 0.0f, cos(player._look_dir.y * degToRad) };
+			look.Normalize();
+			Vec3 center = player._pos - look * 1.5f;
 			center.y += height_offset;
 
 			// 플레이어의 바라보는 방향에 수직인 벡터 계산 (오각형을 회전시키기 위해)
 			Vec3 up{ 0.f, 1.f, 0.f };
-			Vec3 right = up.Cross(player._look_dir);
+			Vec3 right = up.Cross(look);
 			right.Normalize();
 
 			// 오각형 꼭짓점 각도
@@ -466,14 +469,17 @@ void GameManager::Process_packet(int c_id, char* packet)
 				Vec3 offset = right * local_x + up * local_y;
 				Vec3 spawn_pos = center + offset;
 
+
 				// 투사체 방향: 오각형 중심(플레이어 앞쪽)으로 날아가게
-				Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 1.f, 0.f };
+				Vec3 target_pos = player._target->_pos + Vec3{ 0.f, 0.0f, 0.f };
 				Vec3 direction = target_pos - spawn_pos;
 				direction.Normalize();
 
 				Projectile proj{ 1, S_PROJECTILE_TYPE::ULTIMATE_MAGIC_BALL };
 				proj._pos = spawn_pos;
 				proj._velocity = direction / 3.f;
+				proj._user_frinedly = true; 
+				proj._damage = 10;
 
 				Projectiles[ServerNumber].insert({ Projectile_cnt[ServerNumber], proj });
 				SendAddProjectilePacket(proj, Projectile_cnt[ServerNumber]);
@@ -587,7 +593,7 @@ void GameManager::Process_packet(int c_id, char* packet)
 			cout << "Archer CS_ATTACK\n";
 			Projectile proj{ 1, S_PROJECTILE_TYPE::ARROW };
 			proj._pos = player._pos;
-			proj._pos.y += 0.3f;
+			proj._pos.y += 0.5f;
 
 			if (player._target == nullptr) { // 타겟 몬스터가 제거된 경우
 				direction.x = sin(player._look_dir.y * degToRad); // 1.0
@@ -660,14 +666,6 @@ void GameManager::Process_packet(int c_id, char* packet)
 				if (cl.second._state != ST_INGAME) continue;
 				cl.second.send_add_player_packet(&clients[ServerNumber][c_id]);
 				//cout << "클라 " << c_id << "의 정보 " << cl.first << "에게 전송 완료" << endl;
-			}
-			// 다른 클라이언트 정보 -> 지금 login한 클라이언트에게 전송
-			for (auto& cl : clients[ServerNumber]) {
-				if (cl.second._state != ST_INGAME) continue;
-				if (cl.first == c_id) continue;
-				if (cl.second._player._class == S_PLAYER_CLASS::end) continue; // 클래스가 선택되지 않은 클라이언트는 제외
-				clients[ServerNumber][c_id].send_add_player_packet(&cl.second);
-				//cout << "클라 " << cl.first << "의 정보 " << c_id << "에게 전송 완료" << endl;
 			}
 
 			if (IsAllClassSelected()) { // 모든 플레이어가 클래스 선택을 완료한 경우
@@ -841,7 +839,7 @@ void GameManager::Update()
 			auto& skill_state = MonsterState::BossSkillState::GetInstance();
 			if (monster.currentState == &skill_state) {
 				if (skill_state.GetSendSkill()) {
-					Vec3 pos = monster._target->_pos;
+					Vec3 pos = monster._attack_pos;
 					for (auto& cl : clients[ServerNumber]) {
 						for (auto& hitid : skill_state.hit_client_id) {
 							SendHPPacket((S_OBJECT_TYPE)S_PLAYER, hitid, clients[ServerNumber][hitid]._player._hp, clients[ServerNumber][hitid]._player._barrier);
@@ -1159,6 +1157,7 @@ void GameManager::InitializeWave()
 void GameManager::InitializeMonster(S_ENEMY_TYPE type, Vec3 position)
 {
 	Monster ms{ type };
+	ms._id = Monster_cnt[ServerNumber];
 	ms._pos = position;
 	ms.LocalTransform();
 	for (auto& cl : clients[ServerNumber]) {

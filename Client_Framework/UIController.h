@@ -43,7 +43,6 @@ public:
 	void OnClickResumeButton();
 	void OnClickExitButton();
 
-	void BindPlayerToUI(const std::shared_ptr<CGameObject>& player, const std::string& name);
 
 };
 

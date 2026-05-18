@@ -64,7 +64,7 @@ float4 PS_Forward(VS_OUTPUT input) : SV_Target
     float depth = saturate((linearSceneDepth - linearFragmentDepth) / 0.2);
     
     
-    color = color * texColor;
+    color = color * texColor * ForwardColor;
     color.a *= alpha;
     //color.rgb = GammaDecoding(color.rgb);
     return color;

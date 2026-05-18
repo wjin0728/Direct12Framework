@@ -29,6 +29,9 @@ constexpr int M_SMALL_DAMAGE = 50;
 constexpr int M_BIG_DAMAGE = 100;
 constexpr int M_BOSS_DAMAGE = 200;
 
+constexpr int M_FIRE_EXPLOSION_DAMAGE = 150;
+constexpr int M_GRASS_VINE_DAMAGE = 50;
+
 // Packet ID
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;

@@ -123,6 +123,7 @@ void CPlayerStateMachine::OnEnterState(UINT8 state)
 	case PLAYER_STATE::DEATH:
 		mIsHit = false;
 		mIsDead = true;
+		owner->TriggerEvent("OnDeath", { });
 		break;
 	case PLAYER_STATE::JUMP:
 		break;
@@ -308,6 +309,21 @@ void CArcherState::OnExitState(UINT8 state)
 void CArcherState::CreateParticleEvent()
 {
 	CPlayerStateMachine::CreateParticleEvent();
+
+	std::weak_ptr<CParticleAttach> particle = owner->GetComponentFromHierarchy<CParticleAttach>();
+
+	auto func0 = [particle](float time) {
+		if (particle.expired()) {
+			return;
+		}
+		auto arrowParticle = particle.lock();
+		if (arrowParticle) {
+			arrowParticle->Play();
+		}
+		};
+
+	auto controller = mAnimationController.lock();
+	controller->AddAnimationEvent("Ultimate", "Ultimate", func0);
 }
 
 void CWarriorState::Awake()
@@ -451,6 +467,21 @@ void CWarriorState::CreateParticleEvent()
 			trailRenderer->mActive = true;
 			trailRenderer->ResetTrail();
 			trailRenderer->SetDuration(0.2f);
+			trailRenderer->SetWidth(0.7f);
+			trailRenderer->SetColor(Vec4(1.f, 1.f, 1.f, 1.f));
+		}
+		};
+	auto funcU = [trail](float time) {
+		if (trail.expired()) {
+			return;
+		}
+		auto trailRenderer = trail.lock();
+		if (trailRenderer) {
+			trailRenderer->mActive = true;
+			trailRenderer->ResetTrail();
+			trailRenderer->SetDuration(0.3f);
+			trailRenderer->SetWidth(1.5f);
+			trailRenderer->SetColor(Vec4(1.f, 0.5f, 0.f, 1.f));
 		}
 		};
 	auto func1 = [trail](float time) {
@@ -467,7 +498,9 @@ void CWarriorState::CreateParticleEvent()
 	controller->AddAnimationEvent("Attack", "AttackEnd", func1);
 	controller->AddAnimationEvent("RunAttack", "AttackStart", func0);
 	controller->AddAnimationEvent("RunAttack", "AttackEnd", func1);
-	controller->AddAnimationEvent("Ultimate", "AttackStart", func0);
+
+
+	controller->AddAnimationEvent("Ultimate", "AttackStart", funcU);
 	controller->AddAnimationEvent("Ultimate", "AttackEnd", func1);
 
 	if (mTrail.lock()) {

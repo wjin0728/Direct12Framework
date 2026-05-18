@@ -81,7 +81,7 @@ void CBattleScene::Update()
 		}
 	}*/
 	if (INPUT.IsKeyDown(KEY_TYPE::F4)) {
-		INSTANCE(ServerManager).send_hp_packet(10);
+		INSTANCE(ServerManager).send_hp_packet(100);
 	}
 	//if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
 	//	auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
@@ -169,8 +169,7 @@ void CBattle2Scene::Update()
 		}
 	}*/
 	if (INPUT.IsKeyDown(KEY_TYPE::F4)) {
-		auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
-		INSTANCE(ServerManager).send_hp_packet(10);
+		INSTANCE(ServerManager).send_hp_packet(100);
 	}
 	//if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
 	//	auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
@@ -263,7 +262,7 @@ void CBattle3Scene::Update()
 		}
 	}*/
 	if (INPUT.IsKeyDown(KEY_TYPE::F4)) {
-		INSTANCE(ServerManager).send_hp_packet(10);
+		INSTANCE(ServerManager).send_hp_packet(100);
 	}
 	//if (INPUT.IsKeyDown(KEY_TYPE::F3)) {
 	//	auto& monsters = GetObjectsWithType(OBJECT_TYPE::ENEMY);
